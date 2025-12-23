@@ -65,7 +65,7 @@ npm run dev
 3. Проверьте тарифы: `/pricing`
 4. Личный кабинет: `/dashboard`
 
-**Подробнее:** см. `PHASE_1_COMPLETE.md`
+**Подробнее:** см. [`docs/completed/PHASE_1_COMPLETE.md`](docs/completed/PHASE_1_COMPLETE.md)
 
 ### Сборка для продакшена
 
@@ -85,15 +85,30 @@ npm run lint
 ```
 .
 ├── app/                  # App Router (страницы, layouts)
-│   ├── globals.css      # Глобальные стили + CSS переменные
-│   ├── layout.tsx       # Root layout
-│   └── page.tsx         # Главная страница
+│   ├── admin/           # Админ-панель
+│   ├── auth/            # Аутентификация
+│   ├── dashboard/       # Личный кабинет
+│   ├── free-content/    # Бесплатные материалы
+│   ├── workouts/        # Тренировки
+│   └── ...
 ├── components/          # React компоненты
-│   └── ui/             # Shadcn/UI компоненты
-├── lib/                # Утилиты
-│   └── utils.ts        # cn() для классов
-├── public/             # Статические файлы
-└── components.json     # Конфигурация Shadcn/UI
+│   ├── ui/              # Shadcn/UI компоненты
+│   └── navbar.tsx       # Навигация
+├── lib/                 # Утилиты и логика
+│   ├── actions/         # Server Actions
+│   ├── supabase/        # Supabase клиенты
+│   └── access-control.ts # Gatekeeper логика
+├── types/               # TypeScript типы
+│   ├── database.ts      # Типы БД
+│   └── supabase.ts      # Сгенерированные типы
+├── docs/                # 📚 Вся документация
+│   ├── setup/           # Инструкции по установке
+│   ├── guides/          # Гайды и руководства
+│   └── completed/       # Завершенные этапы
+├── database/            # 🗄️ SQL миграции
+│   └── migrations/      # Все SQL скрипты
+├── public/              # Статические файлы
+└── middleware.ts        # Auth middleware
 ```
 
 ## 🎨 Добавление компонентов Shadcn/UI
@@ -153,7 +168,12 @@ Supabase уже полностью интегрирован в проект:
    npx supabase gen types typescript --project-id yxzrenwkkntnhmdimhln > types/supabase.ts
    ```
 
-📚 Подробнее: смотрите `SUPABASE_SETUP.md`
+📚 **Документация:** Вся документация находится в папке [`docs/`](docs/)
+
+- 🚀 [Быстрый старт](docs/setup/START_HERE.md)
+- 🗄️ [Настройка Supabase](docs/setup/SUPABASE_SETUP.md)
+- 📖 [Гайды и инструкции](docs/guides/)
+- 🗃️ [SQL миграции](database/migrations/)
 
 ## 📄 Лицензия
 
