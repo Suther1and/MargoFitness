@@ -5,10 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Crown, Dumbbell, Package, Calendar, TrendingUp, Settings } from "lucide-react"
+import { Crown, Dumbbell, Package, Calendar, TrendingUp, Settings, Edit, Mail, Phone } from "lucide-react"
 import { getDaysUntilExpiration, isSubscriptionActive, getTierDisplayName } from "@/lib/access-control"
 import { Suspense } from "react"
 import PaymentSuccessAlert from "./payment-success-alert"
+import { UserAvatar } from "@/components/user-avatar"
+import { ProfileEditDialogWrapper } from "./profile-edit-wrapper"
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile()
@@ -29,22 +31,56 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto space-y-8 py-10">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        {profile.avatar_url && (
-          <img 
-            src={profile.avatar_url} 
-            alt={profile.full_name || profile.email || 'User avatar'} 
-            className="size-16 rounded-full ring-2 ring-primary/10"
-          />
-        )}
-        <div className="space-y-2 flex-1">
-          <h1 className="text-3xl font-bold tracking-tight">Личный кабинет</h1>
-          <p className="text-muted-foreground">
-            Добро пожаловать, {profile.full_name || profile.email}!
-          </p>
-        </div>
-      </div>
+      {/* Header - Профиль */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-6">
+            <UserAvatar
+              avatarUrl={profile.avatar_url}
+              fullName={profile.full_name}
+              email={profile.email}
+              size="xl"
+            />
+            
+            <div className="flex-1 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {profile.full_name || 'Пользователь'}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Добро пожаловать в личный кабинет!
+                  </p>
+                </div>
+                
+                <ProfileEditDialogWrapper profile={profile} />
+              </div>
+
+              <div className="space-y-2">
+                {profile.email && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail className="size-4" />
+                    <span>{profile.email}</span>
+                  </div>
+                )}
+                
+                {profile.phone && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Phone className="size-4" />
+                    <span>{profile.phone}</span>
+                  </div>
+                )}
+
+                {!profile.phone && !profile.email && (
+                  <p className="text-sm text-muted-foreground">
+                    Добавьте контактную информацию
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Уведомление об успешной оплате */}
       <Suspense fallback={null}>

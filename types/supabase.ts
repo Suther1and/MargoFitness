@@ -15,6 +15,8 @@ export interface Database {
           email: string | null
           full_name: string | null
           avatar_url: string | null
+          phone: string | null
+          profile_completed_at: string | null
           role: 'user' | 'admin'
           subscription_status: 'active' | 'inactive' | 'canceled'
           subscription_tier: Database['public']['Enums']['subscription_tier']
@@ -29,6 +31,8 @@ export interface Database {
           email?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
+          profile_completed_at?: string | null
           role?: 'user' | 'admin'
           subscription_status?: 'active' | 'inactive' | 'canceled'
           subscription_tier?: Database['public']['Enums']['subscription_tier']
@@ -43,6 +47,8 @@ export interface Database {
           email?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
+          profile_completed_at?: string | null
           role?: 'user' | 'admin'
           subscription_status?: 'active' | 'inactive' | 'canceled'
           subscription_tier?: Database['public']['Enums']['subscription_tier']
