@@ -30,6 +30,14 @@ NEXT_PUBLIC_YOOKASSA_RETURN_URL=http://localhost:3000/payment/success
 YOOKASSA_WEBHOOK_SECRET=any_random_string_here
 
 # ============================================
+# Cron Job Secret (для автопродления подписок)
+# ============================================
+
+# Секретный ключ для защиты cron endpoint (генерируйте случайную строку)
+# Можно сгенерировать командой: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+CRON_SECRET=your_random_secret_key_here
+
+# ============================================
 # Cron Jobs - ДОБАВЬТЕ ЭТУ НОВУЮ
 # ============================================
 
