@@ -51,6 +51,20 @@ export async function getCurrentProfile(): Promise<Profile | null> {
           .single()
 
         if (createError) {
+          // Если получили ошибку дублирования ключа (23505), 
+          // значит профиль уже создан триггером - просто получаем его
+          if (createError.code === '23505') {
+            console.log('Profile already exists (created by trigger), fetching...')
+            
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single()
+            
+            return existingProfile
+          }
+          
           console.error('Error creating profile:', createError.code, createError.message, createError.details)
           return null
         }
