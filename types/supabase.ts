@@ -22,6 +22,13 @@ export interface Database {
           subscription_tier: Database['public']['Enums']['subscription_tier']
           subscription_expires_at: string | null
           payment_method_info: Json | null
+          // Новые поля для ЮKassa
+          payment_method_id: string | null
+          auto_renew_enabled: boolean
+          subscription_duration_months: number
+          next_billing_date: string | null
+          failed_payment_attempts: number
+          last_payment_date: string | null
           stats: Json
           created_at: string
           updated_at: string
@@ -38,6 +45,13 @@ export interface Database {
           subscription_tier?: Database['public']['Enums']['subscription_tier']
           subscription_expires_at?: string | null
           payment_method_info?: Json | null
+          // Новые поля для ЮKassa
+          payment_method_id?: string | null
+          auto_renew_enabled?: boolean
+          subscription_duration_months?: number
+          next_billing_date?: string | null
+          failed_payment_attempts?: number
+          last_payment_date?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -54,6 +68,13 @@ export interface Database {
           subscription_tier?: Database['public']['Enums']['subscription_tier']
           subscription_expires_at?: string | null
           payment_method_info?: Json | null
+          // Новые поля для ЮKassa
+          payment_method_id?: string | null
+          auto_renew_enabled?: boolean
+          subscription_duration_months?: number
+          next_billing_date?: string | null
+          failed_payment_attempts?: number
+          last_payment_date?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -68,6 +89,8 @@ export interface Database {
           description: string | null
           price: number
           tier_level: number | null
+          duration_months: number
+          discount_percentage: number
           is_active: boolean
           metadata: Json
           created_at: string
@@ -80,6 +103,8 @@ export interface Database {
           description?: string | null
           price: number
           tier_level?: number | null
+          duration_months?: number
+          discount_percentage?: number
           is_active?: boolean
           metadata?: Json
           created_at?: string
@@ -92,6 +117,8 @@ export interface Database {
           description?: string | null
           price?: number
           tier_level?: number | null
+          duration_months?: number
+          discount_percentage?: number
           is_active?: boolean
           metadata?: Json
           created_at?: string
@@ -306,6 +333,67 @@ export interface Database {
             foreignKeyName: "user_workout_completions_workout_session_id_fkey"
             columns: ["workout_session_id"]
             referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      payment_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          product_id: string | null
+          yookassa_payment_id: string
+          amount: number
+          currency: string
+          status: 'pending' | 'succeeded' | 'canceled' | 'failed'
+          payment_type: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_method_id: string | null
+          error_message: string | null
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          product_id?: string | null
+          yookassa_payment_id: string
+          amount: number
+          currency?: string
+          status: 'pending' | 'succeeded' | 'canceled' | 'failed'
+          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_method_id?: string | null
+          error_message?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          product_id?: string | null
+          yookassa_payment_id?: string
+          amount?: number
+          currency?: string
+          status?: 'pending' | 'succeeded' | 'canceled' | 'failed'
+          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_method_id?: string | null
+          error_message?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_product_id_fkey"
+            columns: ["product_id"]
+            referencedRelation: "products"
             referencedColumns: ["id"]
           }
         ]
