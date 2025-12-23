@@ -1,0 +1,130 @@
+import Link from "next/link"
+import { getCurrentProfile } from "@/lib/actions/profile"
+import { Button } from "@/components/ui/button"
+import { Dumbbell, Menu, X } from "lucide-react"
+
+export default async function Navbar() {
+  const profile = await getCurrentProfile()
+
+  return (
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+          <Dumbbell className="size-6 text-primary" />
+          <span>MargoFitness</span>
+        </Link>
+
+        {/* Navigation */}
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
+            Главная
+          </Link>
+          <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
+            Тарифы
+          </Link>
+
+          {profile ? (
+            <>
+              {/* Для авторизованных */}
+              <Link href="/free-content" className="text-sm font-medium hover:text-primary transition-colors">
+                Бесплатное
+              </Link>
+              
+              {profile.subscription_tier !== 'free' && (
+                <Link href="/workouts" className="text-sm font-medium hover:text-primary transition-colors">
+                  Тренировки
+                </Link>
+              )}
+              
+              <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
+                Кабинет
+              </Link>
+
+              {profile.role === 'admin' && (
+                <Link href="/admin" className="text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors">
+                  Админка
+                </Link>
+              )}
+
+              <Link href="/auth/logout">
+                <Button variant="ghost" size="sm">
+                  Выход
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              {/* Для неавторизованных */}
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm">
+                  Вход
+                </Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button size="sm">
+                  Регистрация
+                </Button>
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <div className="md:hidden">
+          <details className="dropdown">
+            <summary className="btn btn-ghost">
+              <Menu className="size-6" />
+            </summary>
+            <div className="absolute right-0 mt-2 w-48 rounded-md border bg-background shadow-lg">
+              <div className="flex flex-col p-2 gap-1">
+                <Link href="/" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                  Главная
+                </Link>
+                <Link href="/pricing" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                  Тарифы
+                </Link>
+
+                {profile ? (
+                  <>
+                    <Link href="/free-content" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Бесплатное
+                    </Link>
+                    {profile.subscription_tier !== 'free' && (
+                      <Link href="/workouts" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                        Тренировки
+                      </Link>
+                    )}
+                    <Link href="/dashboard" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Кабинет
+                    </Link>
+                    {profile.role === 'admin' && (
+                      <Link href="/admin" className="px-3 py-2 text-sm text-amber-600 hover:bg-muted rounded">
+                        Админка
+                      </Link>
+                    )}
+                    <div className="border-t my-1"></div>
+                    <Link href="/auth/logout" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Выход
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <div className="border-t my-1"></div>
+                    <Link href="/auth/login" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Вход
+                    </Link>
+                    <Link href="/auth/signup" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Регистрация
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
