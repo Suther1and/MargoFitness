@@ -26,6 +26,7 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
   const [message, setMessage] = useState('')
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [showTransactions, setShowTransactions] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   // Загрузить транзакции
   const loadTransactions = async () => {
@@ -75,6 +76,37 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
       setAutoRenew(!enabled)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Полностью отменить подписку (для тестирования)
+  const handleCancelSubscription = async () => {
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/payments/cancel-full', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setMessage(`✅ ${data.message}`)
+        // Перезагрузить страницу через 2 секунды
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+      } else {
+        setMessage(`❌ ${data.error || 'Не удалось отменить подписку'}`)
+      }
+    } catch (error) {
+      console.error('Error canceling subscription:', error)
+      setMessage('❌ Ошибка при отмене подписки')
+    } finally {
+      setLoading(false)
+      setShowCancelConfirm(false)
     }
   }
 
@@ -235,14 +267,54 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
         </Card>
       )}
 
-      {/* Информация */}
+      {/* Информация и отмена */}
       {hasActiveSubscription && (
         <Card className="border-dashed">
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-4">
             <p className="text-sm text-muted-foreground">
               💡 Вы можете отменить подписку в любое время. Доступ сохранится до конца оплаченного периода
               {subscriptionExpires && ` (до ${subscriptionExpires})`}.
             </p>
+
+            {/* Кнопка полной отмены (только для тестирования) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="border-t pt-4">
+                {!showCancelConfirm ? (
+                  <Button
+                    variant="outline"
+                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => setShowCancelConfirm(true)}
+                    disabled={loading}
+                  >
+                    🧪 [DEV] Полностью отменить подписку
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-red-600">
+                      Вы уверены? Это действие сбросит все данные подписки.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={handleCancelSubscription}
+                        disabled={loading}
+                      >
+                        Да, отменить
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setShowCancelConfirm(false)}
+                        disabled={loading}
+                      >
+                        Отмена
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

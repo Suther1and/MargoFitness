@@ -1,6 +1,7 @@
 import { getAllUsers, getUsersStats } from '@/lib/actions/admin-users'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditUserDialog } from './edit-user-dialog'
+import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
@@ -221,7 +222,14 @@ export default async function AdminUsersPage({
                         : '—'}
                     </td>
                     <td className="p-2 text-right">
-                      <EditUserDialog user={user} />
+                      <div className="flex items-center justify-end gap-2">
+                        <CancelSubscriptionButton 
+                          userId={user.id}
+                          userEmail={user.email}
+                          hasActiveSubscription={user.subscription_status === 'active'}
+                        />
+                        <EditUserDialog user={user} />
+                      </div>
                     </td>
                   </tr>
                 ))}

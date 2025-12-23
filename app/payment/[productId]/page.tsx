@@ -8,19 +8,22 @@ import { Button } from "@/components/ui/button"
 import { MockPaymentWidget } from "./mock-payment-widget"
 
 interface PaymentPageProps {
-  params: {
+  params: Promise<{
     productId: string
-  }
+  }>
 }
 
 export default async function PaymentPage({ params }: PaymentPageProps) {
+  // Unwrap params Promise (Next.js 15+)
+  const { productId } = await params
+  
   const profile = await getCurrentProfile()
   
   if (!profile) {
     redirect('/auth/login?redirect=/pricing')
   }
 
-  const product = await getProductById(params.productId)
+  const product = await getProductById(productId)
 
   if (!product) {
     redirect('/pricing')

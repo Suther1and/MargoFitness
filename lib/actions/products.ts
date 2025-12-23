@@ -65,6 +65,40 @@ export async function getSubscriptionsByDuration(durationMonths: number): Promis
     return []
   }
 
+  // Fallback: если продуктов с duration_months нет, вернуть старые продукты (duration = 1)
+  if (!products || products.length === 0) {
+    console.warn(`No products found for duration ${durationMonths}, falling back to tier products`)
+    
+    // Получить базовые тарифы и "подделать" duration
+    const { data: tierProducts } = await supabase
+      .from('products')
+      .select('*')
+      .eq('type', 'subscription_tier')
+      .eq('is_active', true)
+      .is('duration_months', null) // Старые продукты без duration_months
+      .order('tier_level', { ascending: true })
+    
+    if (tierProducts && tierProducts.length > 0) {
+      // Рассчитать цены с учетом периода и скидок
+      return tierProducts.map(product => {
+        const discount = 
+          durationMonths === 3 ? 5 :
+          durationMonths === 6 ? 10 :
+          durationMonths === 12 ? 15 : 0
+        
+        const basePrice = product.price
+        const totalPrice = Math.round(basePrice * durationMonths * (1 - discount / 100))
+        
+        return {
+          ...product,
+          duration_months: durationMonths,
+          discount_percentage: discount,
+          price: totalPrice
+        }
+      })
+    }
+  }
+
   return products || []
 }
 
@@ -93,6 +127,8 @@ export async function getOneTimePacks(): Promise<Product[]> {
  * Получить продукт по ID
  */
 export async function getProductById(productId: string): Promise<Product | null> {
+  console.log('[getProductById] Fetching product with ID:', productId)
+  
   const supabase = await createClient()
 
   const { data: product, error } = await supabase
@@ -102,10 +138,17 @@ export async function getProductById(productId: string): Promise<Product | null>
     .single()
 
   if (error) {
-    console.error('Error fetching product:', error)
+    console.error('[getProductById] Error fetching product:', {
+      productId,
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    })
     return null
   }
 
+  console.log('[getProductById] Product found:', product?.name)
   return product
 }
 
