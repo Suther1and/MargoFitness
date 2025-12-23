@@ -47,6 +47,16 @@ export default async function Navbar() {
                 </Link>
               )}
 
+              {profile.avatar_url && (
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <img 
+                    src={profile.avatar_url} 
+                    alt={profile.full_name || profile.email || 'Avatar'} 
+                    className="size-8 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
+                  />
+                </Link>
+              )}
+
               <Link href="/auth/logout">
                 <Button variant="ghost" size="sm">
                   Выход

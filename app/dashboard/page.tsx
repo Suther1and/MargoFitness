@@ -30,11 +30,20 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto space-y-8 py-10">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Личный кабинет</h1>
-        <p className="text-muted-foreground">
-          Добро пожаловать, {profile.email}!
-        </p>
+      <div className="flex items-start gap-4">
+        {profile.avatar_url && (
+          <img 
+            src={profile.avatar_url} 
+            alt={profile.full_name || profile.email || 'User avatar'} 
+            className="size-16 rounded-full ring-2 ring-primary/10"
+          />
+        )}
+        <div className="space-y-2 flex-1">
+          <h1 className="text-3xl font-bold tracking-tight">Личный кабинет</h1>
+          <p className="text-muted-foreground">
+            Добро пожаловать, {profile.full_name || profile.email}!
+          </p>
+        </div>
       </div>
 
       {/* Уведомление об успешной оплате */}
@@ -251,6 +260,8 @@ export default async function DashboardPage() {
         <CardContent className="space-y-2 text-xs font-mono">
           <p>User ID: {profile.id}</p>
           <p>Email: {profile.email}</p>
+          <p>Full Name: {profile.full_name || 'N/A'}</p>
+          <p>Avatar: {profile.avatar_url ? '✅ Есть' : '❌ Нет'}</p>
           <p>Role: {profile.role}</p>
           <p>Subscription Status: {profile.subscription_status}</p>
           <p>Subscription Tier: {profile.subscription_tier}</p>

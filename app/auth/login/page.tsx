@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Dumbbell } from "lucide-react"
+import { OAuthButtons } from "@/components/oauth-buttons"
 
 function LoginForm() {
   const [email, setEmail] = useState("")
@@ -92,6 +93,28 @@ function LoginForm() {
   )
 }
 
+function OAuthSection() {
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/dashboard'
+  
+  return (
+    <div className="mt-6">
+      <OAuthButtons redirectTo={redirect} />
+    </div>
+  )
+}
+
+function LoginFormWithOAuth() {
+  return (
+    <>
+      <LoginForm />
+      <Suspense fallback={<div className="mt-6 text-center text-sm text-muted-foreground">Загрузка...</div>}>
+        <OAuthSection />
+      </Suspense>
+    </>
+  )
+}
+
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20 p-6">
@@ -114,7 +137,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div>Загрузка...</div>}>
-              <LoginForm />
+              <LoginFormWithOAuth />
             </Suspense>
           </CardContent>
         </Card>

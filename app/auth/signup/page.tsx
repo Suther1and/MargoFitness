@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Dumbbell } from "lucide-react"
+import { OAuthButtons } from "@/components/oauth-buttons"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
@@ -140,6 +141,13 @@ export default function SignupPage() {
                   </Link>
                 </div>
               </form>
+            )}
+
+            {/* OAuth кнопки */}
+            {!success && (
+              <div className="mt-6">
+                <OAuthButtons redirectTo="/dashboard" />
+              </div>
             )}
           </CardContent>
         </Card>
