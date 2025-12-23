@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Crown, Dumbbell, Package, Calendar, TrendingUp, Settings, Edit, Mail, Phone } from "lucide-react"
+import { Crown, Dumbbell, Package, Calendar, TrendingUp, Settings, Mail, Phone } from "lucide-react"
 import { getDaysUntilExpiration, isSubscriptionActive, getTierDisplayName } from "@/lib/access-control"
 import { Suspense } from "react"
 import PaymentSuccessAlert from "./payment-success-alert"
 import { UserAvatar } from "@/components/user-avatar"
 import { ProfileEditDialogWrapper } from "./profile-edit-wrapper"
+import { SubscriptionManager } from "./subscription-manager"
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile()
@@ -194,43 +195,8 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Подписка */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="size-5" />
-            Управление подпиской
-          </CardTitle>
-          <CardDescription>
-            Информация о вашей текущей подписке
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <p className="font-medium">{getTierDisplayName(profile.subscription_tier)}</p>
-              <p className="text-sm text-muted-foreground">
-                {profile.subscription_status === 'active' 
-                  ? `Активна до ${profile.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString('ru-RU') : '—'}`
-                  : 'Подписка неактивна'}
-              </p>
-            </div>
-            <Link href="/pricing">
-              <Button variant="outline">
-                {profile.subscription_tier === 'free' ? 'Оформить подписку' : 'Изменить план'}
-              </Button>
-            </Link>
-          </div>
-
-          {profile.subscription_status === 'active' && (
-            <div className="rounded-lg bg-muted p-4 text-sm">
-              <p className="text-muted-foreground">
-                💡 Вы можете отменить подписку в любое время. Доступ сохранится до конца оплаченного периода.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Управление подпиской */}
+      <SubscriptionManager profile={profile} />
 
       {/* Мои покупки */}
       {purchases.length > 0 && (
@@ -289,21 +255,24 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Информация для тестирования */}
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-sm">Информация для разработки</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-xs font-mono">
-          <p>User ID: {profile.id}</p>
-          <p>Email: {profile.email}</p>
-          <p>Full Name: {profile.full_name || 'N/A'}</p>
-          <p>Avatar: {profile.avatar_url ? '✅ Есть' : '❌ Нет'}</p>
-          <p>Role: {profile.role}</p>
-          <p>Subscription Status: {profile.subscription_status}</p>
-          <p>Subscription Tier: {profile.subscription_tier}</p>
-          <p>Expires: {profile.subscription_expires_at || 'N/A'}</p>
-        </CardContent>
-      </Card>
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-sm">Информация для разработки</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-xs font-mono">
+            <p>User ID: {profile.id}</p>
+            <p>Email: {profile.email}</p>
+            <p>Role: {profile.role}</p>
+            <p>Subscription Status: {profile.subscription_status}</p>
+            <p>Subscription Tier: {profile.subscription_tier}</p>
+            <p>Expires: {profile.subscription_expires_at || 'N/A'}</p>
+            <p>Auto Renew: {profile.auto_renew_enabled ? 'Yes' : 'No'}</p>
+            <p>Payment Method: {profile.payment_method_id ? '✅ Saved' : '❌ None'}</p>
+            <p>Last Payment: {profile.last_payment_date || 'N/A'}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

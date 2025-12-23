@@ -25,6 +25,7 @@ export async function getActiveProducts(): Promise<Product[]> {
 
 /**
  * Получить подписки (3 тира)
+ * @deprecated Используйте getSubscriptionsByDuration
  */
 export async function getSubscriptionTiers(): Promise<Product[]> {
   const supabase = await createClient()
@@ -38,6 +39,29 @@ export async function getSubscriptionTiers(): Promise<Product[]> {
 
   if (error) {
     console.error('Error fetching subscription tiers:', error)
+    return []
+  }
+
+  return products || []
+}
+
+/**
+ * Получить подписки по длительности (Basic, Pro, Elite для выбранного периода)
+ * @param durationMonths - Длительность в месяцах (1, 3, 6, 12)
+ */
+export async function getSubscriptionsByDuration(durationMonths: number): Promise<Product[]> {
+  const supabase = await createClient()
+
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('type', 'subscription_tier')
+    .eq('is_active', true)
+    .eq('duration_months', durationMonths)
+    .order('tier_level', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching subscriptions by duration:', error)
     return []
   }
 

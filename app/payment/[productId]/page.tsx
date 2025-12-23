@@ -1,11 +1,11 @@
+import { getProductById } from "@/lib/actions/products"
 import { getCurrentProfile } from "@/lib/actions/profile"
-import { redirect, notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/server"
-import { CheckCircle, Shield, CreditCard } from "lucide-react"
-import PaymentButton from "./payment-button"
+import { Check, Crown, Zap, Sparkles, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { MockPaymentWidget } from "./mock-payment-widget"
 
 interface PaymentPageProps {
   params: {
@@ -14,182 +14,135 @@ interface PaymentPageProps {
 }
 
 export default async function PaymentPage({ params }: PaymentPageProps) {
-  const { productId } = await params
   const profile = await getCurrentProfile()
-
+  
   if (!profile) {
     redirect('/auth/login?redirect=/pricing')
   }
 
-  // Получить информацию о продукте
-  const supabase = await createClient()
-  const { data: product, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', productId)
-    .eq('is_active', true)
-    .single()
+  const product = await getProductById(params.productId)
 
-  if (error || !product) {
-    notFound()
+  if (!product) {
+    redirect('/pricing')
   }
 
-  // Только для подписок (пока)
-  if (product.type !== 'subscription_tier') {
-    return (
-      <div className="container mx-auto py-10">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              Оплата one-time паков будет добавлена позже
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  // Рассчитать детали
+  const duration = product.duration_months || 1
+  const pricePerMonth = Math.round(product.price / duration)
+  const hasDiscount = (product.discount_percentage || 0) > 0
+  const originalPrice = hasDiscount 
+    ? Math.round(product.price / (1 - (product.discount_percentage || 0) / 100))
+    : product.price
+  const savings = originalPrice - product.price
+
+  const tierIcons: Record<number, any> = {
+    1: Zap,
+    2: Crown,
+    3: Sparkles
   }
+  const Icon = tierIcons[product.tier_level || 1] || Zap
 
   return (
-    <div className="container mx-auto max-w-2xl space-y-8 py-10">
+    <div className="container mx-auto max-w-4xl space-y-8 py-10">
+      {/* Кнопка назад */}
+      <Link href="/pricing">
+        <Button variant="ghost" className="gap-2">
+          <ArrowLeft className="size-4" />
+          Назад к тарифам
+        </Button>
+      </Link>
+
       {/* Заголовок */}
-      <div className="text-center space-y-2">
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Оформление подписки</h1>
         <p className="text-muted-foreground">
-          Вы выбрали подписку <strong>{product.name}</strong>
+          Вы выбрали тариф {product.name}
         </p>
       </div>
 
-      {/* Детали подписки */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Детали подписки</CardTitle>
-          <CardDescription>
-            Что входит в выбранный тариф
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between border-b pb-4">
-            <div>
-              <p className="font-medium">{product.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {product.description}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold">{product.price} ₽</p>
-              <p className="text-sm text-muted-foreground">в месяц</p>
-            </div>
-          </div>
-
-          {/* Преимущества */}
-          <div className="space-y-3 pt-2">
-            {getFeaturesList(product.tier_level || 1).map((feature, idx) => (
-              <div key={idx} className="flex items-start gap-3">
-                <CheckCircle className="size-5 shrink-0 text-green-600 mt-0.5" />
-                <span className="text-sm">{feature}</span>
+      <div className="grid gap-8 md:grid-cols-2">
+        {/* Левая колонка - Детали продукта */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+                <Icon className="size-6 text-primary" />
               </div>
-            ))}
-          </div>
-
-          {/* Информация об оплате */}
-          <div className="rounded-lg bg-muted p-4 space-y-2 text-sm">
-            <p className="flex items-center gap-2">
-              <Shield className="size-4" />
-              <strong>Безопасная оплата</strong>
-            </p>
-            <p className="text-muted-foreground">
-              • Подписка активируется мгновенно
-            </p>
-            <p className="text-muted-foreground">
-              • Доступ на 30 дней с момента оплаты
-            </p>
-            <p className="text-muted-foreground">
-              • Можно отменить в любой момент
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Форма оплаты */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="size-5" />
-            Оплата
-          </CardTitle>
-          <CardDescription>
-            Это демо-версия. Реальные платежи не производятся.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Мок-форма */}
-          <div className="space-y-4 rounded-lg border-2 border-dashed p-6">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                💳 Имитация платёжной формы
-              </p>
-              <p className="text-xs text-muted-foreground">
-                В продакшене здесь будет интеграция с CloudPayments/YooMoney/T-Pay
-              </p>
-            </div>
-            
-            <div className="space-y-3 opacity-50 pointer-events-none">
               <div>
-                <label className="text-sm font-medium">Номер карты</label>
-                <input 
-                  type="text" 
-                  className="w-full rounded-md border p-2 mt-1" 
-                  placeholder="1234 5678 9012 3456"
-                  disabled
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium">Срок</label>
-                  <input 
-                    type="text" 
-                    className="w-full rounded-md border p-2 mt-1" 
-                    placeholder="MM/YY"
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">CVV</label>
-                  <input 
-                    type="text" 
-                    className="w-full rounded-md border p-2 mt-1" 
-                    placeholder="123"
-                    disabled
-                  />
-                </div>
+                <CardTitle className="text-2xl">{product.name}</CardTitle>
+                <CardDescription>{product.description}</CardDescription>
               </div>
             </div>
-          </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Цена */}
+            <div className="space-y-3">
+              {hasDiscount && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xl line-through text-muted-foreground">
+                    {originalPrice} ₽
+                  </span>
+                  <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">
+                    -{product.discount_percentage}%
+                  </span>
+                </div>
+              )}
+              
+              <div>
+                <span className="text-4xl font-bold">{product.price} ₽</span>
+                {duration > 1 && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {pricePerMonth} ₽/месяц
+                  </p>
+                )}
+              </div>
 
-          {/* Кнопки */}
-          <div className="space-y-3">
-            <PaymentButton 
-              productId={productId}
-              productName={product.name}
-              amount={product.price}
-            />
-            
-            <Link href="/pricing" className="block">
-              <Button variant="outline" className="w-full">
-                Отмена
-              </Button>
-            </Link>
-          </div>
+              {savings > 0 && (
+                <div className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950 px-3 py-1 text-sm font-medium text-green-700 dark:text-green-300">
+                  💰 Экономия {savings} ₽
+                </div>
+              )}
+            </div>
 
-          {/* Предупреждение */}
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm dark:bg-amber-950/20 dark:border-amber-900">
-            <p className="text-amber-900 dark:text-amber-100">
-              <strong>⚠️ Демо-режим</strong>
-            </p>
-            <p className="text-amber-700 dark:text-amber-300 mt-1">
-              При нажатии "Оплатить" подписка активируется без реальной оплаты. 
-              В продакшене здесь будет интеграция с платёжной системой.
-            </p>
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-3">Что входит:</h3>
+              <div className="space-y-2">
+                {getFeaturesList(product.tier_level || 1).map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Check className="size-4 text-green-600 flex-shrink-0" />
+                    <span className="text-sm">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t pt-4 space-y-2 text-sm text-muted-foreground">
+              <p>• Период подписки: {duration} {duration === 1 ? 'месяц' : duration < 5 ? 'месяца' : 'месяцев'}</p>
+              <p>• Автоматическое продление (можно отключить)</p>
+              <p>• Отмена в любое время</p>
+              <p>• Безопасные платежи через ЮKassa</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Правая колонка - Виджет оплаты */}
+        <MockPaymentWidget 
+          product={product}
+          profile={profile}
+        />
+      </div>
+
+      {/* Безопасность */}
+      <Card className="border-dashed">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">🔒</div>
+            <div className="space-y-1">
+              <p className="font-medium">Безопасные платежи</p>
+              <p className="text-sm text-muted-foreground">
+                Все платежи обрабатываются через защищенное соединение. Мы не храним данные вашей карты.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -200,28 +153,26 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
 function getFeaturesList(tier: number): string[] {
   const features: Record<number, string[]> = {
     1: [
-      '2 тренировки в неделю',
+      'Базовая библиотека тренировок',
       'HD качество видео',
       'Трекинг прогресса',
-      'Мобильное приложение',
-      'Поддержка по email'
+      'Мобильное приложение'
     ],
     2: [
-      '3 тренировки в неделю (всё из Basic + дополнительная)',
+      'Всё из Basic',
       'Продвинутые техники',
       'Персональные рекомендации',
       'Программы питания',
       'Приоритетная поддержка'
     ],
     3: [
-      '3 тренировки в неделю + эксклюзивный контент',
+      'Всё из Pro',
+      'Эксклюзивные тренировки',
       'Персональные консультации',
       'Индивидуальные программы',
       'VIP поддержка 24/7',
-      'Закрытое комьюнити',
-      'Ранний доступ к новинкам'
+      'Закрытое комьюнити'
     ]
   }
   return features[tier] || []
 }
-
