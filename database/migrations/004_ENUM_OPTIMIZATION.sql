@@ -21,10 +21,21 @@ CREATE TYPE subscription_status_enum AS ENUM ('active', 'inactive', 'canceled');
 
 
 -- ============================================
--- ШАГ 2: Миграция колонки role
+-- ШАГ 2: Удаление RLS политик, зависящих от role
 -- ============================================
 
--- Сначала добавляем временную колонку с ENUM типом
+-- Временно удаляем политики, которые проверяют role
+DROP POLICY IF EXISTS "Admins full access content_weeks" ON content_weeks;
+DROP POLICY IF EXISTS "Admins full access workout_sessions" ON workout_sessions;
+DROP POLICY IF EXISTS "Admins full access exercises" ON exercises;
+DROP POLICY IF EXISTS "Admins have full access to free content" ON free_content;
+
+
+-- ============================================
+-- ШАГ 3: Миграция колонки role
+-- ============================================
+
+-- Добавляем временную колонку с ENUM типом
 ALTER TABLE profiles 
 ADD COLUMN role_new user_role;
 
@@ -32,7 +43,7 @@ ADD COLUMN role_new user_role;
 UPDATE profiles 
 SET role_new = role::user_role;
 
--- Удаляем старую колонку
+-- Удаляем старую колонку (теперь можно, т.к. политики удалены)
 ALTER TABLE profiles 
 DROP COLUMN role;
 
@@ -47,7 +58,7 @@ ALTER COLUMN role SET NOT NULL;
 
 
 -- ============================================
--- ШАГ 3: Миграция колонки subscription_status
+-- ШАГ 4: Миграция колонки subscription_status
 -- ============================================
 
 -- Добавляем временную колонку
@@ -73,7 +84,92 @@ ALTER COLUMN subscription_status SET NOT NULL;
 
 
 -- ============================================
--- ШАГ 4: Добавляем комментарии к столбцам
+-- ШАГ 5: Пересоздание RLS политик с новым типом
+-- ============================================
+
+-- Пересоздаем политики для админов на content_weeks
+CREATE POLICY "Admins full access content_weeks"
+  ON content_weeks
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  );
+
+-- Пересоздаем политики для workout_sessions
+CREATE POLICY "Admins full access workout_sessions"
+  ON workout_sessions
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  );
+
+-- Пересоздаем политики для exercises
+CREATE POLICY "Admins full access exercises"
+  ON exercises
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  );
+
+-- Пересоздаем политики для free_content
+CREATE POLICY "Admins have full access to free content"
+  ON free_content
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::user_role
+    )
+  );
+
+
+-- ============================================
+-- ШАГ 6: Добавляем комментарии к столбцам
 -- ============================================
 
 -- Комментарии помогают Supabase Table Editor показывать подсказки
@@ -133,7 +229,7 @@ COMMENT ON COLUMN free_content.order_index IS
 
 
 -- ============================================
--- ШАГ 5: Обновление триггера для автосоздания профиля
+-- ШАГ 7: Обновление триггера для автосоздания профиля
 -- ============================================
 
 -- Обновляем функцию handle_new_user() для использования новых ENUM типов
