@@ -194,6 +194,7 @@ export function ProfileEditDialog({
     <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
       <DialogContent 
         className="sm:max-w-[500px]"
+        showCloseButton={canClose}
         onPointerDownOutside={(e) => {
           if (!canClose) e.preventDefault()
         }}

@@ -49,15 +49,21 @@ export async function updateUserProfile(data: UpdateProfileData) {
 
       // Проверяем уникальность email (исключая технические @telegram.local)
       if (!data.email.includes('@telegram.local')) {
-        const { data: existingProfiles, error: checkError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', data.email)
-          .neq('id', user.id)
+        const { data: emailExists, error: checkError } = await supabase
+          .rpc('check_email_exists', {
+            email_to_check: data.email,
+            current_user_id: user.id
+          })
 
         if (checkError) {
           console.error('Error checking email uniqueness:', checkError)
-        } else if (existingProfiles && existingProfiles.length > 0) {
+          return {
+            success: false,
+            error: 'Ошибка при проверке email'
+          }
+        }
+
+        if (emailExists) {
           return {
             success: false,
             error: 'Этот email уже используется другим аккаунтом'

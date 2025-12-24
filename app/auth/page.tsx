@@ -59,9 +59,9 @@ function AuthForm() {
         })
 
         if (signUpError) {
-          // Если пользователь уже существует, показываем понятное сообщение
+          // Если пользователь уже существует - это значит неверный пароль
           if (signUpError.message.includes('already registered')) {
-            setError('Пользователь с таким email уже зарегистрирован. Проверьте правильность пароля.')
+            setError('Неверный пароль')
           } else {
             setError(signUpError.message)
           }
@@ -76,11 +76,7 @@ function AuthForm() {
       }
 
       // Другая ошибка - показываем понятное сообщение
-      if (signInError.message.includes('Invalid')) {
-        setError('Неверный email или пароль')
-      } else {
-        setError(signInError.message)
-      }
+      setError('Неверный email или пароль')
       setLoading(false)
       return
     }
