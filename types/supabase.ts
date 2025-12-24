@@ -29,6 +29,9 @@ export interface Database {
           next_billing_date: string | null
           failed_payment_attempts: number
           last_payment_date: string | null
+          // Telegram авторизация
+          telegram_id: string | null
+          telegram_username: string | null
           stats: Json
           created_at: string
           updated_at: string
@@ -52,6 +55,9 @@ export interface Database {
           next_billing_date?: string | null
           failed_payment_attempts?: number
           last_payment_date?: string | null
+          // Telegram авторизация
+          telegram_id?: string | null
+          telegram_username?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -75,6 +81,9 @@ export interface Database {
           next_billing_date?: string | null
           failed_payment_attempts?: number
           last_payment_date?: string | null
+          // Telegram авторизация
+          telegram_id?: string | null
+          telegram_username?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -394,6 +403,40 @@ export interface Database {
             foreignKeyName: "payment_transactions_product_id_fkey"
             columns: ["product_id"]
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      auth_exchange_codes: {
+        Row: {
+          id: string
+          code: string
+          user_id: string
+          expires_at: string
+          used: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          user_id: string
+          expires_at: string
+          used?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          user_id?: string
+          expires_at?: string
+          used?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_exchange_codes_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "auth.users"
             referencedColumns: ["id"]
           }
         ]

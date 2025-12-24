@@ -1,0 +1,4 @@
+TELEGRAM_BOT_TOKEN=8230397943:AAE52-2sLAio3Nes5nT1ocHk8wnyGFlJmV0w
+NEXT_PUBLIC_TELEGRAM_BOT_NAME=margofitness_auth_bot
+NEXT_PUBLIC_SITE_URL=https://margofitness.pro
+

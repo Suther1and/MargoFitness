@@ -29,7 +29,7 @@
 ### ✅ Что готово (Фаза 1)
 
 - **База данных:** 4 таблицы (profiles, products, user_purchases, workouts)
-- **Аутентификация:** Email регистрация/вход через Supabase
+- **Аутентификация:** Email, Google OAuth, Telegram авторизация
 - **Логика доступа:** Gatekeeper для контроля контента
 - **Страницы:** Landing, Workouts, Pricing, Dashboard, Auth
 - **Server Actions:** 15+ функций для работы с БД

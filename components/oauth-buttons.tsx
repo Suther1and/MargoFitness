@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
+import { TelegramLoginWidget } from "@/components/telegram-login-widget"
 
 interface OAuthButtonsProps {
   redirectTo?: string
@@ -10,7 +11,11 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
+  const [showTelegramWidget, setShowTelegramWidget] = useState(false)
   const supabase = createClient()
+
+  // Получаем имя бота из переменных окружения
+  const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
 
   const handleGoogleLogin = async () => {
     try {
@@ -33,6 +38,14 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
       alert("Ошибка входа через Google. Попробуйте снова.")
       setLoadingProvider(null)
     }
+  }
+
+  const handleTelegramClick = () => {
+    if (!telegramBotName) {
+      alert("Telegram авторизация не настроена. Обратитесь к администратору.")
+      return
+    }
+    setShowTelegramWidget(true)
   }
 
   const handleComingSoon = (provider: string) => {
@@ -91,17 +104,39 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - заглушка */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={() => handleComingSoon("Telegram")}
-        disabled={loadingProvider !== null}
-      >
-        <TelegramIcon />
-        <span className="ml-2">Telegram</span>
-      </Button>
+      {/* Telegram - официальный Login Widget */}
+      {!showTelegramWidget ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleTelegramClick}
+          disabled={loadingProvider !== null}
+        >
+          <TelegramIcon />
+          <span className="ml-2">Telegram</span>
+        </Button>
+      ) : (
+        <div className="rounded-lg border border-muted bg-muted/20 p-4">
+          <div className="mb-2 text-center text-sm text-muted-foreground">
+            Нажмите кнопку ниже для входа через Telegram
+          </div>
+          <TelegramLoginWidget
+            botName={telegramBotName}
+            redirectTo={redirectTo}
+            buttonSize="large"
+            requestAccess={true}
+            usePic={true}
+            lang="ru"
+          />
+          <button
+            onClick={() => setShowTelegramWidget(false)}
+            className="mt-2 w-full text-center text-xs text-muted-foreground hover:text-foreground"
+          >
+            Отмена
+          </button>
+        </div>
+      )}
     </div>
   )
 }

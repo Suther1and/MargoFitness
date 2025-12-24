@@ -1,0 +1,166 @@
+"use client"
+
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+interface TelegramLoginWidgetProps {
+  botName: string
+  redirectTo?: string
+  onAuth?: (user: TelegramUser) => void
+  buttonSize?: 'large' | 'medium' | 'small'
+  cornerRadius?: number
+  requestAccess?: boolean
+  usePic?: boolean
+  lang?: string
+}
+
+interface TelegramUser {
+  id: number
+  first_name: string
+  last_name?: string
+  username?: string
+  photo_url?: string
+  auth_date: number
+  hash: string
+}
+
+// Глобальная функция для обработки callback от Telegram
+declare global {
+  interface Window {
+    onTelegramAuth?: (user: TelegramUser) => void
+  }
+}
+
+export function TelegramLoginWidget({
+  botName,
+  redirectTo = '/dashboard',
+  onAuth,
+  buttonSize = 'large',
+  cornerRadius,
+  requestAccess = true,
+  usePic = true,
+  lang = 'ru'
+}: TelegramLoginWidgetProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Проверяем, что botName задан
+    if (!botName) {
+      console.error('[Telegram Widget] Bot name not provided')
+      setError('Telegram bot не настроен')
+      return
+    }
+
+    // Создаем глобальную функцию для callback
+    window.onTelegramAuth = async (user: TelegramUser) => {
+      console.log('[Telegram Widget] Auth callback received:', user.username)
+      setLoading(true)
+      setError(null)
+
+      try {
+        // Вызываем пользовательский обработчик, если есть
+        if (onAuth) {
+          await onAuth(user)
+          return
+        }
+
+        // Отправляем данные на сервер для создания сессии
+        const response = await fetch('/api/auth/telegram', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(user),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Ошибка авторизации')
+        }
+
+        if (data.success && data.exchangeCode) {
+          // Обмениваем код на сессию
+          const exchangeResponse = await fetch('/api/auth/telegram/exchange', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ exchangeCode: data.exchangeCode }),
+          })
+
+          const exchangeData = await exchangeResponse.json()
+
+          if (!exchangeResponse.ok) {
+            throw new Error(exchangeData.error || 'Ошибка создания сессии')
+          }
+
+          // Используем action_link для создания сессии
+          if (exchangeData.actionLink) {
+            window.location.href = exchangeData.actionLink
+          } else {
+            // Если нет action_link, редиректим вручную
+            router.push(redirectTo)
+            router.refresh()
+          }
+        } else {
+          throw new Error('Не получен код обмена')
+        }
+      } catch (err) {
+        console.error('[Telegram Widget] Auth error:', err)
+        setError(err instanceof Error ? err.message : 'Ошибка авторизации')
+        setLoading(false)
+      }
+    }
+
+    // Загружаем скрипт Telegram Widget
+    const script = document.createElement('script')
+    script.src = 'https://telegram.org/js/telegram-widget.js?22'
+    script.async = true
+    script.setAttribute('data-telegram-login', botName)
+    script.setAttribute('data-size', buttonSize)
+    if (cornerRadius !== undefined) {
+      script.setAttribute('data-radius', cornerRadius.toString())
+    }
+    script.setAttribute('data-request-access', requestAccess ? 'write' : 'read')
+    script.setAttribute('data-userpic', usePic.toString())
+    script.setAttribute('data-lang', lang)
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)')
+
+    // Очищаем контейнер и добавляем скрипт
+    if (containerRef.current) {
+      containerRef.current.innerHTML = ''
+      containerRef.current.appendChild(script)
+    }
+
+    // Cleanup
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = ''
+      }
+      delete window.onTelegramAuth
+    }
+  }, [botName, redirectTo, onAuth, buttonSize, cornerRadius, requestAccess, usePic, lang, router])
+
+  if (error) {
+    return (
+      <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        {error}
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center rounded-lg border border-muted bg-muted/50 p-3">
+        <div className="text-sm text-muted-foreground">Авторизация...</div>
+      </div>
+    )
+  }
+
+  return <div ref={containerRef} className="flex justify-center" />
+}
+
