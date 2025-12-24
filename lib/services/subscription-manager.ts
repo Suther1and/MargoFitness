@@ -241,11 +241,22 @@ export async function processSuccessfulPayment(params: {
 }): Promise<ProcessPaymentResult> {
   const { userId, productId, paymentMethodId, customExpiryDays } = params
   
-  const supabase = await createClient()
+  // Используем service client для обхода RLS (вызывается из webhook)
+  const { createClient: createServiceClient } = await import('@supabase/supabase-js')
+  const supabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
   
   // Получить продукт
-  const product = await getProductById(productId)
-  if (!product) {
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', productId)
+    .single()
+    
+  if (productError || !product) {
+    console.error('[ProcessPayment] Product not found:', productId, productError)
     return { success: false, error: 'Product not found' }
   }
   
@@ -267,6 +278,8 @@ export async function processSuccessfulPayment(params: {
   }
   
   // Обновить профиль
+  console.log(`[ProcessPayment] Updating profile for user ${userId}, tier: ${tier}, expires: ${expiresAt.toISOString()}`)
+  
   const { error } = await supabase
     .from('profiles')
     .update({
@@ -284,10 +297,11 @@ export async function processSuccessfulPayment(params: {
     .eq('id', userId)
   
   if (error) {
-    console.error('Error updating profile after payment:', error)
+    console.error('[ProcessPayment] Error updating profile:', error)
     return { success: false, error: 'Failed to update subscription' }
   }
   
+  console.log(`[ProcessPayment] Successfully updated profile for user ${userId}`)
   return { success: true, subscriptionUpdated: true }
 }
 
