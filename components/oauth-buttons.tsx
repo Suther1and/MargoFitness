@@ -11,32 +11,18 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
-  const [telegramWidgetReady, setTelegramWidgetReady] = useState(false)
+  const [showTelegramWidget, setShowTelegramWidget] = useState(false)
   const supabase = createClient()
 
   // Получаем имя бота из переменных окружения
   const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
 
   const handleTelegramClick = () => {
-    if (!telegramBotName) return
-    
-    setLoadingProvider("telegram")
-    
-    // Получаем bot_id из переменной окружения (первая часть токена до :)
-    // Или используем имя бота для формирования URL
-    const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID || ''
-    
-    if (botId) {
-      // Прямая ссылка на Telegram OAuth
-      const callbackUrl = `${window.location.origin}/api/auth/telegram/callback`
-      const telegramAuthUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&request_access=write&return_to=${encodeURIComponent(callbackUrl)}`
-      
-      // Открываем в том же окне
-      window.location.href = telegramAuthUrl
-    } else {
-      alert('Telegram bot ID не настроен')
-      setLoadingProvider(null)
+    if (!telegramBotName) {
+      alert("Telegram авторизация не настроена")
+      return
     }
+    setShowTelegramWidget(true)
   }
 
   const handleGoogleLogin = async () => {
@@ -119,19 +105,38 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - кастомная кнопка с прямой ссылкой */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={handleTelegramClick}
-        disabled={loadingProvider !== null || !telegramBotName}
-      >
-        <TelegramIcon />
-        <span className="ml-2">
-          {loadingProvider === "telegram" ? "Открытие Telegram..." : "Telegram"}
-        </span>
-      </Button>
+      {/* Telegram - кастомная кнопка + виджет */}
+      {!showTelegramWidget ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleTelegramClick}
+          disabled={loadingProvider !== null}
+        >
+          <TelegramIcon />
+          <span className="ml-2">Telegram</span>
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          <div className="flex justify-center rounded-lg border border-muted bg-muted/20 p-3">
+            <TelegramLoginWidget
+              botName={telegramBotName}
+              redirectTo={redirectTo}
+              buttonSize="large"
+              requestAccess={false}
+              usePic={false}
+              lang="ru"
+            />
+          </div>
+          <button
+            onClick={() => setShowTelegramWidget(false)}
+            className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+          >
+            Отмена
+          </button>
+        </div>
+      )}
     </div>
   )
 }

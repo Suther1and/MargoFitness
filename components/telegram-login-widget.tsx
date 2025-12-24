@@ -125,13 +125,8 @@ export function TelegramLoginWidget({
     script.setAttribute('data-userpic', usePic.toString())
     script.setAttribute('data-lang', lang)
     
-    // Режим редиректа или колбэка
-    if (useRedirect) {
-      const callbackUrl = `${window.location.origin}/api/auth/telegram/callback`
-      script.setAttribute('data-auth-url', callbackUrl)
-    } else {
-      script.setAttribute('data-onauth', 'onTelegramAuth(user)')
-    }
+    // Используем callback режим (не редирект)
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)')
 
     // Очищаем контейнер и добавляем скрипт
     if (containerRef.current) {
