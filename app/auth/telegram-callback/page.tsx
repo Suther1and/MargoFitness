@@ -13,6 +13,13 @@ function TelegramCallbackContent() {
 
   useEffect(() => {
     const handleAuth = async () => {
+      // Логируем все параметры из URL
+      const allParams: Record<string, string> = {}
+      searchParams.forEach((value, key) => {
+        allParams[key] = value
+      })
+      console.log('[Telegram Callback] URL params:', allParams)
+
       // Получаем данные от Telegram из URL
       const telegramData = {
         id: parseInt(searchParams.get('id') || '0'),
@@ -24,13 +31,17 @@ function TelegramCallbackContent() {
         hash: searchParams.get('hash') || ''
       }
 
+      console.log('[Telegram Callback] Parsed data:', telegramData)
+
       if (!telegramData.id || !telegramData.hash) {
+        console.error('[Telegram Callback] Missing id or hash')
         setError('Неверные данные от Telegram')
         return
       }
 
       try {
         // Отправляем на наш API
+        console.log('[Telegram Callback] Sending to API:', telegramData)
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
           headers: {
@@ -40,8 +51,10 @@ function TelegramCallbackContent() {
         })
 
         const data = await response.json()
+        console.log('[Telegram Callback] API response:', data)
 
         if (!response.ok || !data.success || !data.session) {
+          console.error('[Telegram Callback] API error:', data.error)
           throw new Error(data.error || 'Ошибка авторизации')
         }
 
