@@ -126,17 +126,22 @@ export async function POST(request: Request) {
       // Новый пользователь - создаем аккаунт
       console.log('[Telegram Auth] Creating new user')
       
-      // Создаем пользователя в Supabase Auth
-      // Используем admin API для создания пользователя без пароля
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Создаем пользователя через обычный signUp (не требует admin прав)
+      // Генерируем случайный пароль (пользователь его не узнает, всегда входит через Telegram)
+      const randomPassword = crypto.randomBytes(32).toString('hex')
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: telegramEmail,
-        email_confirm: true, // Автоматически подтверждаем email
-        user_metadata: {
-          full_name: fullName,
-          avatar_url: telegramData.photo_url,
-          telegram_id: telegramData.id.toString(),
-          telegram_username: telegramData.username,
-          provider: 'telegram'
+        password: randomPassword,
+        options: {
+          data: {
+            full_name: fullName,
+            avatar_url: telegramData.photo_url,
+            telegram_id: telegramData.id.toString(),
+            telegram_username: telegramData.username,
+            provider: 'telegram'
+          },
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
         }
       })
 
