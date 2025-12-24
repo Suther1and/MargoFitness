@@ -17,13 +17,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   // Получаем имя бота из переменных окружения
   const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
 
-  const handleTelegramClick = () => {
-    if (!telegramBotName) {
-      alert("Telegram авторизация не настроена")
-      return
-    }
-    setShowTelegramWidget(true)
-  }
 
   const handleGoogleLogin = async () => {
     try {
@@ -105,21 +98,22 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - кастомная кнопка + виджет */}
-      {!showTelegramWidget ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleTelegramClick}
-          disabled={loadingProvider !== null}
-        >
-          <TelegramIcon />
-          <span className="ml-2">Telegram</span>
-        </Button>
-      ) : (
-        <div className="space-y-2">
-          <div className="flex justify-center rounded-lg border border-muted bg-muted/20 p-3">
+      {/* Telegram - кастомная кнопка с наложенным виджетом */}
+      {telegramBotName ? (
+        <div className="relative">
+          {/* Визуальная кнопка */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full pointer-events-none"
+            disabled={loadingProvider !== null}
+          >
+            <TelegramIcon />
+            <span className="ml-2">Telegram</span>
+          </Button>
+          
+          {/* Невидимый виджет поверх кнопки */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-0">
             <TelegramLoginWidget
               botName={telegramBotName}
               redirectTo={redirectTo}
@@ -129,13 +123,17 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
               lang="ru"
             />
           </div>
-          <button
-            onClick={() => setShowTelegramWidget(false)}
-            className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
-          >
-            Отмена
-          </button>
         </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled
+        >
+          <TelegramIcon />
+          <span className="ml-2">Telegram (не настроен)</span>
+        </Button>
       )}
     </div>
   )
