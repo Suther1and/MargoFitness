@@ -32,10 +32,7 @@ export function ProfileEditDialog({
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   
-  // Проверяем, является ли это Telegram аккаунтом
   const isTelegramAccount = !!profile.telegram_id
-  
-  // Проверяем есть ли настоящий email (не технический)
   const hasTelegramEmail = profile.email?.includes('@telegram.local')
   const hasRealEmail = !hasTelegramEmail
 
@@ -47,12 +44,9 @@ export function ProfileEditDialog({
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Форматирование телефона
   const formatPhoneNumber = (value: string) => {
-    // Удаляем все нецифровые символы
     const cleaned = value.replace(/\D/g, '')
     
-    // Применяем маску +7 (999) 999-99-99
     if (cleaned.length === 0) return ''
     if (cleaned.length <= 1) return `+${cleaned}`
     if (cleaned.length <= 4) return `+${cleaned.slice(0, 1)} (${cleaned.slice(1)}`
@@ -69,13 +63,11 @@ export function ProfileEditDialog({
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Проверка типа файла
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         setErrors({ ...errors, avatar: 'Неподдерживаемый формат. Используйте JPG, PNG или WEBP' })
         return
       }
       
-      // Проверка размера (5MB)
       if (file.size > 5 * 1024 * 1024) {
         setErrors({ ...errors, avatar: 'Файл слишком большой. Максимум 5MB' })
         return
@@ -84,7 +76,6 @@ export function ProfileEditDialog({
       setSelectedFile(file)
       setErrors({ ...errors, avatar: '' })
       
-      // Создаем preview
       const reader = new FileReader()
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string)
@@ -132,7 +123,6 @@ export function ProfileEditDialog({
     setLoading(true)
     setErrors({})
 
-    // Валидация для Telegram пользователей при первом входе
     if (isTelegramAccount && isFirstTime && !formData.email.trim()) {
       setErrors({ email: 'Email обязателен для Telegram аккаунтов' })
       setLoading(false)
@@ -140,7 +130,6 @@ export function ProfileEditDialog({
     }
 
     try {
-      // Если есть выбранный файл, сначала загружаем его
       if (selectedFile) {
         setUploadingAvatar(true)
         const avatarFormData = new FormData()
@@ -159,7 +148,6 @@ export function ProfileEditDialog({
         setSelectedFile(null)
       }
 
-      // Обновляем остальные данные профиля
       const result = await updateUserProfile({
         full_name: formData.full_name || undefined,
         email: formData.email.trim() || undefined,
@@ -182,12 +170,10 @@ export function ProfileEditDialog({
   }
 
   const handleSkip = () => {
-    // Даже при пропуске отмечаем профиль как завершенный
     updateUserProfile({})
     onOpenChange(false)
   }
 
-  // Для Telegram пользователей при первом входе - запрещаем закрытие диалога
   const canClose = !(isTelegramAccount && isFirstTime && hasTelegramEmail)
 
   return (

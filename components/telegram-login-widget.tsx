@@ -12,8 +12,8 @@ interface TelegramLoginWidgetProps {
   requestAccess?: boolean
   usePic?: boolean
   lang?: string
-  useRedirect?: boolean // Новый параметр для режима редиректа
-  onLoadingChange?: (loading: boolean) => void // Callback для изменения состояния загрузки
+  useRedirect?: boolean
+  onLoadingChange?: (loading: boolean) => void
 }
 
 interface TelegramUser {
@@ -26,7 +26,6 @@ interface TelegramUser {
   hash: string
 }
 
-// Глобальная функция для обработки callback от Telegram
 declare global {
   interface Window {
     onTelegramAuth?: (user: TelegramUser) => void
@@ -50,33 +49,28 @@ export function TelegramLoginWidget({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Уведомляем родителя об изменении состояния загрузки
   useEffect(() => {
     onLoadingChange?.(loading)
   }, [loading, onLoadingChange])
 
   useEffect(() => {
-    // Проверяем, что botName задан
     if (!botName) {
       console.error('[Telegram Widget] Bot name not provided')
       setError('Telegram bot не настроен')
       return
     }
 
-    // Создаем глобальную функцию для callback
     window.onTelegramAuth = async (user: TelegramUser) => {
       console.log('[Telegram Widget] Auth callback received:', user.username)
       setLoading(true)
       setError(null)
 
       try {
-        // Вызываем пользовательский обработчик, если есть
         if (onAuth) {
           await onAuth(user)
           return
         }
 
-        // Отправляем данные на сервер для создания сессии
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
           headers: {
@@ -92,7 +86,6 @@ export function TelegramLoginWidget({
         }
 
         if (data.success && data.session) {
-          // Устанавливаем сессию в Supabase
           const { createClient } = await import('@/lib/supabase/client')
           const supabase = createClient()
           
@@ -105,8 +98,6 @@ export function TelegramLoginWidget({
             throw new Error('Ошибка установки сессии')
           }
 
-          // Если это новый пользователь - попап для заполнения email откроется автоматически в dashboard
-          // Если существующий - просто редирект
           router.push(redirectTo)
           router.refresh()
         } else {
@@ -119,7 +110,6 @@ export function TelegramLoginWidget({
       }
     }
 
-    // Загружаем скрипт Telegram Widget
     const script = document.createElement('script')
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
     script.async = true
@@ -131,17 +121,13 @@ export function TelegramLoginWidget({
     script.setAttribute('data-request-access', requestAccess ? 'write' : 'read')
     script.setAttribute('data-userpic', usePic.toString())
     script.setAttribute('data-lang', lang)
-    
-    // Используем callback режим (не редирект)
     script.setAttribute('data-onauth', 'onTelegramAuth(user)')
 
-    // Очищаем контейнер и добавляем скрипт
     if (containerRef.current) {
       containerRef.current.innerHTML = ''
       containerRef.current.appendChild(script)
     }
 
-    // Cleanup
     return () => {
       if (containerRef.current) {
         containerRef.current.innerHTML = ''

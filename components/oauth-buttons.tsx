@@ -13,10 +13,7 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
   const [telegramLoading, setTelegramLoading] = useState(false)
   const supabase = createClient()
-
-  // Получаем имя бота из переменных окружения
   const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
-
 
   const handleGoogleLogin = async () => {
     try {
@@ -45,7 +42,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const handleYandexLogin = async () => {
     try {
       setLoadingProvider("yandex")
-      // Редиректим на endpoint инициации OAuth
       window.location.href = `/api/auth/yandex/init?redirect=${redirectTo}`
     } catch (error) {
       console.error("Yandex OAuth error:", error)
@@ -60,7 +56,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
 
   return (
     <div className="space-y-3">
-      {/* Разделитель */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -72,7 +67,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         </div>
       </div>
 
-      {/* Google OAuth - работает */}
       <Button
         type="button"
         variant="outline"
@@ -86,7 +80,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         </span>
       </Button>
 
-      {/* Yandex OAuth - работает */}
       <Button
         type="button"
         variant="outline"
@@ -100,7 +93,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         </span>
       </Button>
 
-      {/* VK - заглушка */}
       <Button
         type="button"
         variant="outline"
@@ -112,10 +104,8 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - кастомная кнопка с виджетом */}
       {telegramBotName ? (
         <div className="relative">
-          {/* Визуальная кнопка */}
           <Button
             type="button"
             variant="outline"
@@ -128,7 +118,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
             </span>
           </Button>
           
-          {/* Невидимый виджет поверх кнопки */}
           <div className="absolute inset-0 opacity-0">
             <TelegramLoginWidget
               botName={telegramBotName}
@@ -156,7 +145,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   )
 }
 
-// SVG иконки для провайдеров
 function GoogleIcon() {
   return (
     <svg className="size-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

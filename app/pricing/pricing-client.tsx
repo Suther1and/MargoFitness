@@ -25,7 +25,6 @@ export function PricingClient({ profile }: PricingClientProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Загрузить продукты для выбранного периода
   const loadProducts = async (duration: Duration) => {
     setLoading(true)
     try {
@@ -39,31 +38,26 @@ export function PricingClient({ profile }: PricingClientProps) {
     }
   }
 
-  // Загрузить продукты при монтировании
   useEffect(() => {
     loadProducts(selectedDuration)
   }, [selectedDuration])
 
-  // Обработчик смены периода
   const handleDurationChange = (duration: Duration) => {
     setSelectedDuration(duration)
     loadProducts(duration)
   }
 
-  // Вычислить оригинальную цену (без скидки)
   const calculateOriginalPrice = (product: Product): number => {
     const discount = product.discount_percentage || 0
     if (discount === 0) return product.price
     return Math.round(product.price / (1 - discount / 100))
   }
 
-  // Вычислить экономию
   const calculateSavings = (product: Product): number => {
     const originalPrice = calculateOriginalPrice(product)
     return originalPrice - product.price
   }
 
-  // Вычислить цену за месяц
   const getPricePerMonth = (product: Product): number => {
     const duration = product.duration_months || 1
     return Math.round(product.price / duration)
@@ -77,7 +71,6 @@ export function PricingClient({ profile }: PricingClientProps) {
 
   return (
     <div className="space-y-8">
-      {/* Переключатель периода */}
       <div className="flex justify-center">
         <div className="inline-flex items-center gap-2 rounded-lg bg-muted p-1">
           {DURATIONS.map((duration) => (
@@ -101,7 +94,6 @@ export function PricingClient({ profile }: PricingClientProps) {
         </div>
       </div>
 
-      {/* Карточки тарифов */}
       <div className="grid gap-8 md:grid-cols-3">
         {loading ? (
           <div className="col-span-3 text-center py-12">
@@ -114,28 +106,19 @@ export function PricingClient({ profile }: PricingClientProps) {
         ) : (
           products.map((product) => {
             const Icon = tierIcons[product.tier_level || 1] || Zap
-            
-            // Определяем уровень текущего тарифа
             const currentTierLevel = profile?.subscription_tier === 'basic' ? 1 :
                                     profile?.subscription_tier === 'pro' ? 2 :
                                     profile?.subscription_tier === 'elite' ? 3 : 0
-            
             const productTierLevel = product.tier_level || 1
-            
             const isCurrentTier = profile?.subscription_tier === (
               product.tier_level === 1 ? 'basic' :
               product.tier_level === 2 ? 'pro' :
               product.tier_level === 3 ? 'elite' : 'free'
             )
-            
-            // Проверяем: является ли этот тариф ниже текущего
             const isLowerTier = profile?.subscription_status === 'active' && 
                                productTierLevel <= currentTierLevel
-            
-            // Проверяем: является ли этот тариф апгрейдом
             const isUpgrade = profile?.subscription_status === 'active' && 
                              productTierLevel > currentTierLevel
-            
             const originalPrice = calculateOriginalPrice(product)
             const savings = calculateSavings(product)
             const pricePerMonth = getPricePerMonth(product)

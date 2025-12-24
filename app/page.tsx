@@ -6,7 +6,6 @@ import { Dumbbell, Calendar, Trophy, Star, Crown, Heart, TrendingUp, Users, Shie
 export default async function Home() {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <section className="relative py-20 px-4 sm:py-32 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-6xl text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-primary/10 text-primary text-sm font-medium">
@@ -54,7 +53,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
@@ -128,7 +126,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Pricing Preview Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
@@ -201,7 +198,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">

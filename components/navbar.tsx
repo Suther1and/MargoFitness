@@ -9,13 +9,11 @@ export default async function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
           <Dumbbell className="size-6 text-primary" />
           <span>MargoFitness</span>
         </Link>
 
-        {/* Navigation */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
             Главная
@@ -26,7 +24,6 @@ export default async function Navbar() {
 
           {profile ? (
             <>
-              {/* Для авторизованных */}
               <Link href="/free-content" className="text-sm font-medium hover:text-primary transition-colors">
                 Бесплатное
               </Link>
@@ -65,7 +62,6 @@ export default async function Navbar() {
             </>
           ) : (
             <>
-              {/* Для неавторизованных */}
               <Link href="/auth">
                 <Button size="sm">
                   Вход / Регистрация
@@ -75,7 +71,6 @@ export default async function Navbar() {
           )}
         </div>
 
-        {/* Mobile menu button */}
         <div className="md:hidden">
           <details className="dropdown">
             <summary className="btn btn-ghost">

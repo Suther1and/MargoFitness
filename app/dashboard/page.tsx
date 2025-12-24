@@ -32,7 +32,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto space-y-8 py-10">
-      {/* Header - Профиль */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-start gap-6">
@@ -83,12 +82,10 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Уведомление об успешной оплате */}
       <Suspense fallback={null}>
         <PaymentSuccessAlert />
       </Suspense>
 
-      {/* Админ-панель */}
       {profile.role === 'admin' && (
         <Card className="border-2 border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
           <CardHeader>
@@ -110,7 +107,6 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Статистика */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -167,7 +163,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Текущая неделя */}
       {weekData && (
         <Card>
           <CardHeader>
@@ -195,10 +190,8 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Управление подпиской */}
       <SubscriptionManager profile={profile} />
 
-      {/* Мои покупки */}
       {purchases.length > 0 && (
         <Card>
           <CardHeader>
@@ -228,7 +221,6 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Быстрые действия */}
       <Card>
         <CardHeader>
           <CardTitle>Быстрые действия</CardTitle>
@@ -253,26 +245,6 @@ export default async function DashboardPage() {
           </Link>
         </CardContent>
       </Card>
-
-      {/* Информация для тестирования */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle className="text-sm">Информация для разработки</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-xs font-mono">
-            <p>User ID: {profile.id}</p>
-            <p>Email: {profile.email}</p>
-            <p>Role: {profile.role}</p>
-            <p>Subscription Status: {profile.subscription_status}</p>
-            <p>Subscription Tier: {profile.subscription_tier}</p>
-            <p>Expires: {profile.subscription_expires_at || 'N/A'}</p>
-            <p>Auto Renew: {profile.auto_renew_enabled ? 'Yes' : 'No'}</p>
-            <p>Payment Method: {profile.payment_method_id ? '✅ Saved' : '❌ None'}</p>
-            <p>Last Payment: {profile.last_payment_date || 'N/A'}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

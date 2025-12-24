@@ -33,22 +33,18 @@ function AuthForm() {
 
     const supabase = createClient()
 
-    // Автоматический режим: сначала пробуем войти
     if (mode === 'auto') {
-      // Пытаемся войти
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (!signInError) {
-        // Успешный вход
         router.push(redirect)
         router.refresh()
         return
       }
 
-      // Если пользователь не найден - пробуем зарегистрировать
       if (signInError.message.includes('Invalid login credentials')) {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
@@ -59,7 +55,6 @@ function AuthForm() {
         })
 
         if (signUpError) {
-          // Если пользователь уже существует - это значит неверный пароль
           if (signUpError.message.includes('already registered')) {
             setError('Неверный пароль')
           } else {
@@ -69,19 +64,16 @@ function AuthForm() {
           return
         }
 
-        // Успешная регистрация - входим
         router.push(redirect)
         router.refresh()
         return
       }
 
-      // Другая ошибка - показываем понятное сообщение
       setError('Неверный email или пароль')
       setLoading(false)
       return
     }
 
-    // Явный режим входа
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -99,7 +91,6 @@ function AuthForm() {
       return
     }
 
-    // Явный режим регистрации
     if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({
         email,
@@ -199,7 +190,6 @@ export default function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20 p-6">
       <div className="w-full max-w-md space-y-6">
-        {/* Logo */}
         <div className="flex justify-center">
           <Link href="/" className="flex items-center gap-2">
             <Dumbbell className="size-8 text-primary" />
@@ -207,7 +197,6 @@ export default function AuthPage() {
           </Link>
         </div>
 
-        {/* Auth Card */}
         <Card>
           <CardHeader>
             <CardTitle>Вход или регистрация</CardTitle>
@@ -222,7 +211,6 @@ export default function AuthPage() {
           </CardContent>
         </Card>
 
-        {/* Информация */}
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-sm">Как это работает?</CardTitle>

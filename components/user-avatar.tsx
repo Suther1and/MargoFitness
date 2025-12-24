@@ -11,12 +11,6 @@ interface UserAvatarProps {
   className?: string
 }
 
-/**
- * Компонент аватара пользователя с заглушкой
- * - Показывает фото если есть
- * - Показывает инициалы если есть имя
- * - Показывает иконку если нет данных
- */
 export function UserAvatar({ 
   avatarUrl, 
   fullName, 
@@ -24,7 +18,6 @@ export function UserAvatar({
   size = 'md',
   className 
 }: UserAvatarProps) {
-  // Определяем размеры
   const sizeClasses = {
     sm: 'size-8 text-xs',
     md: 'size-12 text-sm',
@@ -32,7 +25,6 @@ export function UserAvatar({
     xl: 'size-24 text-xl',
   }
 
-  // Получаем инициалы из имени или email
   const getInitials = () => {
     if (fullName) {
       const parts = fullName.trim().split(' ')
@@ -47,7 +39,6 @@ export function UserAvatar({
     return null
   }
 
-  // Генерируем цвет на основе имени/email
   const getBackgroundColor = () => {
     const colors = [
       'bg-red-500',
@@ -84,14 +75,12 @@ export function UserAvatar({
       )}
     >
       {avatarUrl ? (
-        // Показываем фото
         <img
           src={avatarUrl}
           alt={fullName || email || 'User avatar'}
           className="size-full object-cover"
         />
       ) : initials ? (
-        // Показываем инициалы
         <div
           className={cn(
             'flex size-full items-center justify-center font-semibold text-white',
@@ -101,7 +90,6 @@ export function UserAvatar({
           {initials}
         </div>
       ) : (
-        // Показываем иконку
         <div className="flex size-full items-center justify-center bg-muted">
           <User className="size-1/2 text-muted-foreground" />
         </div>

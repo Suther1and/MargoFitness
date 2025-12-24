@@ -24,20 +24,16 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Обновление сессии пользователя
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Публичные маршруты (доступны всем)
   const publicRoutes = ['/', '/pricing', '/auth/login', '/auth/signup', '/auth/callback']
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route)
 
-  // Защищенные маршруты (требуют авторизации)
   const protectedRoutes = ['/dashboard', '/workouts', '/free-content', '/admin', '/payment']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
-  // Редирект на логин для защищенных маршрутов
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
@@ -50,13 +46,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Применяем middleware ко всем маршрутам кроме:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - публичных файлов (public folder)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
