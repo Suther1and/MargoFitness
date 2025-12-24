@@ -36,9 +36,9 @@ export async function updateUserProfile(data: UpdateProfileData) {
     const isTelegramAccount = !!profile?.telegram_id
     const hasTelegramEmail = profile?.email?.includes('@telegram.local')
 
-    // Валидация: если пользователь вводит email для Telegram аккаунта, проверяем формат
-    if (isTelegramAccount && hasTelegramEmail && data.email) {
-      // Простая валидация email
+    // Валидация email для всех пользователей
+    if (data.email) {
+      // Простая валидация формата email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(data.email)) {
         return {
@@ -47,18 +47,20 @@ export async function updateUserProfile(data: UpdateProfileData) {
         }
       }
 
-      // Проверяем что email не занят другим пользователем
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', data.email)
-        .neq('id', user.id)
-        .single()
+      // Проверяем уникальность email (исключая технические @telegram.local)
+      if (!data.email.includes('@telegram.local')) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', data.email)
+          .neq('id', user.id)
+          .single()
 
-      if (existingProfile) {
-        return {
-          success: false,
-          error: 'Этот email уже используется'
+        if (existingProfile) {
+          return {
+            success: false,
+            error: 'Этот email уже используется другим аккаунтом'
+          }
         }
       }
     }

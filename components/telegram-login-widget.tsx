@@ -151,14 +151,19 @@ export function TelegramLoginWidget({
     )
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center rounded-lg border border-muted bg-muted/50 p-3">
-        <div className="text-sm text-muted-foreground">Авторизация...</div>
-      </div>
-    )
-  }
-
-  return <div ref={containerRef} className="flex justify-center" />
+  return (
+    <div className="relative">
+      <div ref={containerRef} className="flex justify-center" />
+      
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-lg border border-muted bg-background p-3 shadow-lg">
+            <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="text-sm font-medium">Авторизация...</span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 

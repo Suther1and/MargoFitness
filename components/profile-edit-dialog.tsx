@@ -303,14 +303,14 @@ export function ProfileEditDialog({
               <Input
                 id="email"
                 type="email"
-                placeholder="email@example.com"
+                placeholder={hasTelegramEmail ? "Введите ваш email" : "email@example.com"}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required={isTelegramAccount && isFirstTime}
               />
-              {isTelegramAccount && isFirstTime && (
+              {isTelegramAccount && isFirstTime && hasTelegramEmail && (
                 <p className="text-xs text-muted-foreground">
-                  Укажите ваш email - он нужен для входа и уведомлений
+                  Укажите ваш реальный email - он нужен для уведомлений и связи
                 </p>
               )}
               {errors.email && (

@@ -134,12 +134,11 @@ export async function POST(request: Request) {
       })
       userId = existingProfile.id
       
-      // Обновляем данные профиля
+      // Обновляем данные профиля (без photo_url, используем цветные аватарки)
       await supabase
         .from('profiles')
         .update({
           full_name: fullName || existingProfile.email?.split('@')[0],
-          avatar_url: telegramData.photo_url || null,
           telegram_username: telegramData.username || null,
         })
         .eq('id', userId)
@@ -202,14 +201,13 @@ export async function POST(request: Request) {
       
       userId = existingAuthData.user.id
 
-      // Обновляем профиль, добавляя telegram_id
+      // Обновляем профиль, добавляя telegram_id (без photo_url)
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           telegram_id: telegramData.id.toString(),
           telegram_username: telegramData.username || null,
           full_name: fullName || null,
-          avatar_url: telegramData.photo_url || null,
         })
         .eq('id', userId)
 
@@ -243,7 +241,6 @@ export async function POST(request: Request) {
       options: {
         data: {
           full_name: fullName,
-          avatar_url: telegramData.photo_url,
           telegram_id: telegramData.id.toString(),
           telegram_username: telegramData.username,
           provider: 'telegram'
@@ -263,14 +260,13 @@ export async function POST(request: Request) {
     userId = authData.user.id
     console.log('[Telegram Auth] User created:', userId)
 
-    // Создаем профиль
+    // Создаем профиль (без avatar_url - используем цветные аватарки)
     const { error: createProfileError } = await supabase
       .from('profiles')
       .insert({
         id: userId,
         email: telegramEmail,
         full_name: fullName,
-        avatar_url: telegramData.photo_url || null,
         telegram_id: telegramData.id.toString(),
         telegram_username: telegramData.username || null,
         role: 'user',
