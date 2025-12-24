@@ -105,14 +105,16 @@ export async function POST(request: Request) {
       .update(`${botToken}:${telegramData.id}`)
       .digest('hex')
 
-    // Проверяем, существует ли уже пользователь с таким Telegram ID
+    // ============================================
+    // ШАГ 1: Проверяем существование по telegram_id
+    // ============================================
     const { data: existingProfile, error: profileError } = await supabase
       .from('profiles')
       .select('id, email, telegram_id')
       .eq('telegram_id', telegramData.id.toString())
       .single()
 
-    console.log('[Telegram Auth] Profile lookup:', { 
+    console.log('[Telegram Auth] Profile lookup by telegram_id:', { 
       found: !!existingProfile, 
       error: profileError?.message,
       telegram_id: telegramData.id.toString()
@@ -123,9 +125,9 @@ export async function POST(request: Request) {
 
     if (existingProfile) {
       // ============================================
-      // СУЩЕСТВУЮЩИЙ ПОЛЬЗОВАТЕЛЬ - ПРОСТО ВХОДИМ
+      // СЛУЧАЙ 1: Пользователь найден по telegram_id
       // ============================================
-      console.log('[Telegram Auth] Existing user found:', { 
+      console.log('[Telegram Auth] Existing user found by telegram_id:', { 
         id: existingProfile.id, 
         email: existingProfile.email,
         telegram_id: existingProfile.telegram_id
@@ -142,15 +144,13 @@ export async function POST(request: Request) {
         })
         .eq('id', userId)
 
-      // Сразу создаем сессию
-      // ВАЖНО: всегда используем telegramEmail для входа (в auth.users email не меняется)
+      // Входим с детерминированным паролем
       console.log('[Telegram Auth] Attempting signIn with:', { 
-        email: telegramEmail,
-        profileEmail: existingProfile.email
+        email: telegramEmail
       })
       
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: telegramEmail,  // Используем telegram_*@telegram.local для входа
+        email: telegramEmail,
         password: deterministicPassword
       })
 
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
           code: signInError?.status
         })
         return NextResponse.json(
-          { error: 'Failed to sign in' },
+          { error: 'Не удалось войти в систему' },
           { status: 500 }
         )
       }
@@ -178,99 +178,151 @@ export async function POST(request: Request) {
         },
         user: signInData.user
       })
-    } else {
+    }
+
+    // ============================================
+    // ШАГ 2: Проверяем существование в auth.users по email
+    // ============================================
+    console.log('[Telegram Auth] User not found by telegram_id, checking auth.users by email')
+    
+    // Пытаемся войти - если пользователь существует, вход будет успешным
+    const { data: existingAuthData, error: existingAuthError } = await supabase.auth.signInWithPassword({
+      email: telegramEmail,
+      password: deterministicPassword
+    })
+
+    if (existingAuthData?.user && existingAuthData?.session) {
       // ============================================
-      // НОВЫЙ ПОЛЬЗОВАТЕЛЬ - РЕГИСТРАЦИЯ
+      // СЛУЧАЙ 2: Пользователь существует в auth.users, но telegram_id не заполнен
       // ============================================
-      console.log('[Telegram Auth] New user, creating account')
-      
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: telegramEmail,
-        password: deterministicPassword,
-        options: {
-          data: {
-            full_name: fullName,
-            avatar_url: telegramData.photo_url,
-            telegram_id: telegramData.id.toString(),
-            telegram_username: telegramData.username,
-            provider: 'telegram'
-          },
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
-        }
+      console.log('[Telegram Auth] User found in auth.users without telegram_id:', {
+        id: existingAuthData.user.id,
+        email: telegramEmail
       })
+      
+      userId = existingAuthData.user.id
 
-      if (authError || !authData.user) {
-        console.error('[Telegram Auth] Failed to create user:', authError)
-        return NextResponse.json(
-          { error: 'Failed to create user account' },
-          { status: 500 }
-        )
-      }
-
-      userId = authData.user.id
-      console.log('[Telegram Auth] User created:', userId)
-
-      // Создаем профиль
-      const { error: profileError } = await supabase
+      // Обновляем профиль, добавляя telegram_id
+      const { error: updateError } = await supabase
         .from('profiles')
-        .insert({
-          id: userId,
-          email: telegramEmail,
-          full_name: fullName,
-          avatar_url: telegramData.photo_url || null,
+        .update({
           telegram_id: telegramData.id.toString(),
           telegram_username: telegramData.username || null,
-          role: 'user',
-          subscription_status: 'inactive',
-          subscription_tier: 'free'
+          full_name: fullName || null,
+          avatar_url: telegramData.photo_url || null,
         })
+        .eq('id', userId)
 
-      if (profileError) {
-        console.error('[Telegram Auth] Failed to create profile:', profileError)
-        // Продолжаем выполнение, профиль может создаться через trigger
+      if (updateError) {
+        console.error('[Telegram Auth] Failed to update profile with telegram_id:', updateError)
+      } else {
+        console.log('[Telegram Auth] Profile updated with telegram_id')
       }
 
-      // Отправляем приветственное письмо (если настроен email)
-      if (fullName) {
-        sendWelcomeEmail({
-          to: telegramEmail,
-          userName: fullName
-        }).catch(err => {
-          console.error('[Telegram Auth] Failed to send welcome email:', err)
-        })
-      }
-
-      // Ждем немного, чтобы auth.users обновился
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Создаем сессию для нового пользователя
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: telegramEmail,
-        password: deterministicPassword
-      })
-
-      if (signInError || !signInData.session) {
-        console.error('[Telegram Auth] Failed to create session for new user:', signInError)
-        return NextResponse.json(
-          { error: 'Failed to create session' },
-          { status: 500 }
-        )
-      }
-
-      console.log('[Telegram Auth] New user session created successfully')
-
-      // Возвращаем токены сессии + флаг что это новый пользователь
+      // Возвращаем существующую сессию
       return NextResponse.json({
         success: true,
-        isNewUser: true,
+        isNewUser: false,
         session: {
-          access_token: signInData.session.access_token,
-          refresh_token: signInData.session.refresh_token,
-          expires_at: signInData.session.expires_at
+          access_token: existingAuthData.session.access_token,
+          refresh_token: existingAuthData.session.refresh_token,
+          expires_at: existingAuthData.session.expires_at
         },
-        user: signInData.user
+        user: existingAuthData.user
       })
     }
+
+    // ============================================
+    // СЛУЧАЙ 3: Новый пользователь - создаем аккаунт
+    // ============================================
+    console.log('[Telegram Auth] New user, creating account')
+    
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: telegramEmail,
+      password: deterministicPassword,
+      options: {
+        data: {
+          full_name: fullName,
+          avatar_url: telegramData.photo_url,
+          telegram_id: telegramData.id.toString(),
+          telegram_username: telegramData.username,
+          provider: 'telegram'
+        },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
+      }
+    })
+
+    if (authError || !authData.user) {
+      console.error('[Telegram Auth] Failed to create user:', authError)
+      return NextResponse.json(
+        { error: 'Не удалось создать аккаунт пользователя' },
+        { status: 500 }
+      )
+    }
+
+    userId = authData.user.id
+    console.log('[Telegram Auth] User created:', userId)
+
+    // Создаем профиль
+    const { error: createProfileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email: telegramEmail,
+        full_name: fullName,
+        avatar_url: telegramData.photo_url || null,
+        telegram_id: telegramData.id.toString(),
+        telegram_username: telegramData.username || null,
+        role: 'user',
+        subscription_status: 'inactive',
+        subscription_tier: 'free'
+      })
+
+    if (createProfileError) {
+      console.error('[Telegram Auth] Failed to create profile:', createProfileError)
+      // Продолжаем выполнение, профиль может создаться через trigger
+    }
+
+    // Отправляем приветственное письмо (если настроен email)
+    if (fullName) {
+      sendWelcomeEmail({
+        to: telegramEmail,
+        userName: fullName
+      }).catch(err => {
+        console.error('[Telegram Auth] Failed to send welcome email:', err)
+      })
+    }
+
+    // Ждем немного, чтобы auth.users обновился
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Создаем сессию для нового пользователя
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: telegramEmail,
+      password: deterministicPassword
+    })
+
+    if (signInError || !signInData.session) {
+      console.error('[Telegram Auth] Failed to create session for new user:', signInError)
+      return NextResponse.json(
+        { error: 'Не удалось создать сессию' },
+        { status: 500 }
+      )
+    }
+
+    console.log('[Telegram Auth] New user session created successfully')
+
+    // Возвращаем токены сессии + флаг что это новый пользователь
+    return NextResponse.json({
+      success: true,
+      isNewUser: true,
+      session: {
+        access_token: signInData.session.access_token,
+        refresh_token: signInData.session.refresh_token,
+        expires_at: signInData.session.expires_at
+      },
+      user: signInData.user
+    })
 
   } catch (error) {
     console.error('[Telegram Auth] Unexpected error:', error)
