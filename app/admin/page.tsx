@@ -3,7 +3,7 @@ import { getAllWeeks } from "@/lib/actions/content"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar, Plus, FileText, BookOpen, Users } from "lucide-react"
+import { Calendar, Plus, FileText, BookOpen, Users, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminPage() {
@@ -27,6 +27,12 @@ export default async function AdminPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href="/admin/analytics">
+            <Button variant="outline">
+              <TrendingUp className="mr-2 size-4" />
+              Аналитика
+            </Button>
+          </Link>
           <Link href="/admin/users">
             <Button variant="outline">
               <Users className="mr-2 size-4" />

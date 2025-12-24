@@ -35,10 +35,22 @@ export function MockPaymentWidget({ product, profile }: MockPaymentWidgetProps) 
         })
       })
 
-      const createData = await createResponse.json()
+      if (!createResponse.ok) {
+        const errorText = await createResponse.text()
+        console.error('Create payment failed:', errorText)
+        throw new Error('Не удалось создать платеж. Проверьте консоль для деталей.')
+      }
 
-      if (!createData.paymentId) {
-        throw new Error(createData.error || 'Не удалось создать платеж')
+      let createData
+      try {
+        createData = await createResponse.json()
+      } catch (parseError) {
+        console.error('Failed to parse create response:', parseError)
+        throw new Error('Ошибка парсинга ответа от сервера')
+      }
+
+      if (!createData.success || !createData.paymentId) {
+        throw new Error(createData.error || createData.details || 'Не удалось создать платеж')
       }
 
       // Имитация задержки (как будто пользователь вводит данные карты)
@@ -65,11 +77,26 @@ export function MockPaymentWidget({ product, profile }: MockPaymentWidgetProps) 
 
       const webhookResponse = await fetch('/api/payments/webhook', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-yookassa-signature': 'mock_signature' // Для mock режима
+        },
         body: JSON.stringify(webhookData)
       })
 
-      const webhookResult = await webhookResponse.json()
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text()
+        console.error('Webhook failed:', errorText)
+        throw new Error('Ошибка обработки платежа на сервере')
+      }
+
+      let webhookResult
+      try {
+        webhookResult = await webhookResponse.json()
+      } catch (parseError) {
+        console.error('Failed to parse webhook response:', parseError)
+        throw new Error('Ошибка парсинга ответа webhook')
+      }
 
       if (!webhookResult.success) {
         throw new Error(webhookResult.error || 'Ошибка обработки платежа')

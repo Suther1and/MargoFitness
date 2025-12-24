@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch"
 import { Crown, CreditCard, History, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/types/database"
+import { UpgradeDialog } from './upgrade-dialog'
 
 interface Transaction {
   id: string
@@ -150,6 +151,21 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
               </Button>
             </Link>
           </div>
+
+          {/* Апгрейд подписки */}
+          {hasActiveSubscription && profile.subscription_tier !== 'elite' && (
+            <div className="rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 p-4">
+              <div className="space-y-3">
+                <div>
+                  <p className="font-medium text-sm">🚀 Хотите больше возможностей?</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Повысьте тариф и получите бонусные дни за остаток текущей подписки
+                  </p>
+                </div>
+                <UpgradeDialog profile={profile} />
+              </div>
+            </div>
+          )}
 
           {/* Автопродление */}
           {hasActiveSubscription && (

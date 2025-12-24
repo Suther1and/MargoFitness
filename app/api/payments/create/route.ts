@@ -64,10 +64,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Проверка: нельзя купить подписку если уже есть активная
+    // Проверка: нельзя купить подписку если уже есть активная того же или более высокого уровня
     if (product.type === 'subscription_tier' && profile.subscription_status === 'active') {
+      const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : 
+                                profile.subscription_tier === 'pro' ? 2 : 
+                                profile.subscription_tier === 'elite' ? 3 : 0
+      const newTierLevel = product.tier_level || 1
+      
+      // Если новый уровень такой же или ниже - запрещаем
+      if (newTierLevel <= currentTierLevel) {
+        return NextResponse.json(
+          { 
+            error: 'Нельзя купить подписку того же или более низкого уровня',
+            details: `У вас уже активна подписка ${profile.subscription_tier.toUpperCase()}. Используйте апгрейд для повышения тарифа.`,
+            currentTier: profile.subscription_tier,
+            suggestUpgrade: true
+          },
+          { status: 400 }
+        )
+      }
+      
+      // Если новый уровень выше - предлагаем использовать апгрейд
       return NextResponse.json(
-        { error: 'You already have an active subscription. Use upgrade instead.' },
+        { 
+          error: 'Используйте апгрейд для повышения тарифа',
+          details: 'У вас уже есть активная подписка. При апгрейде оставшиеся дни конвертируются в бонус!',
+          suggestUpgrade: true,
+          upgradeAvailable: true
+        },
         { status: 400 }
       )
     }

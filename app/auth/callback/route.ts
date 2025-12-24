@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { sendWelcomeEmail } from '@/lib/services/email'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -62,6 +63,14 @@ export async function GET(request: Request) {
           // Продолжаем редирект, профиль будет создан при первом запросе
         } else {
           console.log('[Callback] Profile created successfully:', newProfile)
+          
+          // Отправка приветственного письма (не блокирует выполнение)
+          sendWelcomeEmail({
+            to: sessionData.user.email!,
+            userName: fullName || undefined
+          }).catch(err => {
+            console.error('[Callback] Failed to send welcome email:', err)
+          })
         }
       }
     } catch (error) {

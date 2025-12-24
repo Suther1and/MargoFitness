@@ -17,6 +17,7 @@ import {
   processSuccessfulPayment,
   getProductById
 } from '@/lib/services/subscription-manager'
+import { sendSubscriptionUpgradeEmail } from '@/lib/services/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -180,6 +181,18 @@ export async function POST(request: NextRequest) {
             productId: newProduct.id,
             paymentMethodId: profile.payment_method_id,
             customExpiryDays: conversion.totalDays
+          })
+
+          // Отправка email уведомления об апгрейде
+          sendSubscriptionUpgradeEmail({
+            to: profile.email!,
+            userName: profile.full_name || undefined,
+            oldPlan: conversion.details.oldTierName,
+            newPlan: conversion.details.newTierName,
+            bonusDays: conversion.convertedDays,
+            totalDays: conversion.totalDays
+          }).catch(err => {
+            console.error('[Upgrade] Failed to send upgrade email:', err)
           })
 
           return NextResponse.json({

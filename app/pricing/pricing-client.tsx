@@ -114,11 +114,28 @@ export function PricingClient({ profile }: PricingClientProps) {
         ) : (
           products.map((product) => {
             const Icon = tierIcons[product.tier_level || 1] || Zap
+            
+            // Определяем уровень текущего тарифа
+            const currentTierLevel = profile?.subscription_tier === 'basic' ? 1 :
+                                    profile?.subscription_tier === 'pro' ? 2 :
+                                    profile?.subscription_tier === 'elite' ? 3 : 0
+            
+            const productTierLevel = product.tier_level || 1
+            
             const isCurrentTier = profile?.subscription_tier === (
               product.tier_level === 1 ? 'basic' :
               product.tier_level === 2 ? 'pro' :
               product.tier_level === 3 ? 'elite' : 'free'
             )
+            
+            // Проверяем: является ли этот тариф ниже текущего
+            const isLowerTier = profile?.subscription_status === 'active' && 
+                               productTierLevel <= currentTierLevel
+            
+            // Проверяем: является ли этот тариф апгрейдом
+            const isUpgrade = profile?.subscription_status === 'active' && 
+                             productTierLevel > currentTierLevel
+            
             const originalPrice = calculateOriginalPrice(product)
             const savings = calculateSavings(product)
             const pricePerMonth = getPricePerMonth(product)
@@ -198,6 +215,25 @@ export function PricingClient({ profile }: PricingClientProps) {
                       >
                         Текущий тариф
                       </Button>
+                    ) : isLowerTier ? (
+                      <div className="space-y-2">
+                        <Button 
+                          className="w-full" 
+                          variant="outline"
+                          disabled
+                        >
+                          Недоступен
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground">
+                          У вас активна подписка выше уровнем
+                        </p>
+                      </div>
+                    ) : isUpgrade ? (
+                      <Link href="/dashboard">
+                        <Button className="w-full" variant="default">
+                          Апгрейд в Dashboard
+                        </Button>
+                      </Link>
                     ) : (
                       <Link href={`/payment/${product.id}`}>
                         <Button className="w-full">

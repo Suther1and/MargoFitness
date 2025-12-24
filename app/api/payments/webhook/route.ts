@@ -9,7 +9,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { verifyWebhookSignature } from '@/lib/services/yookassa'
-import { processSuccessfulPayment } from '@/lib/services/subscription-manager'
+import { processSuccessfulPayment, getProductById } from '@/lib/services/subscription-manager'
+import { sendPaymentSuccessEmail } from '@/lib/services/email'
 import type { Database } from '@/types/supabase'
 
 export async function POST(request: NextRequest) {
@@ -27,8 +28,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Парсинг JSON
-    const webhookData = JSON.parse(body)
+    // Парсинг JSON с обработкой ошибок
+    let webhookData
+    try {
+      webhookData = JSON.parse(body)
+    } catch (parseError) {
+      console.error('Failed to parse webhook body:', parseError)
+      console.error('Body content:', body)
+      return NextResponse.json(
+        { error: 'Invalid JSON in webhook body' },
+        { status: 400 }
+      )
+    }
     const { event, object: payment } = webhookData
 
     console.log(`[Webhook] Received event: ${event}, payment: ${payment.id}`)
@@ -85,6 +96,28 @@ export async function POST(request: NextRequest) {
         }
 
         console.log(`[Webhook] Successfully processed payment for user ${transaction.user_id}`)
+        
+        // Отправка email уведомления об успешной оплате
+        const product = await getProductById(transaction.product_id!)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email, full_name, subscription_expires_at')
+          .eq('id', transaction.user_id)
+          .single()
+        
+        if (product && profile) {
+          sendPaymentSuccessEmail({
+            to: profile.email!,
+            userName: profile.full_name || undefined,
+            planName: product.name,
+            amount: Number(transaction.amount),
+            duration: product.duration_months,
+            expiresAt: profile.subscription_expires_at!
+          }).catch(err => {
+            console.error('[Webhook] Failed to send payment success email:', err)
+          })
+        }
+        
         break
       }
 
