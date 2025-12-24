@@ -255,7 +255,6 @@ export async function registerReferral(
       .insert({
         referrer_id: referrerId,
         referred_id: newUserId,
-        referral_code: referralCode,
         status: 'registered',
       })
 

@@ -41,12 +41,10 @@ CREATE TABLE IF NOT EXISTS user_bonuses (
   
   -- Баланс шагов
   balance INTEGER NOT NULL DEFAULT 0 CHECK (balance >= 0),
-  total_earned INTEGER NOT NULL DEFAULT 0,
-  total_spent INTEGER NOT NULL DEFAULT 0,
   
   -- Уровень кешбека (1=Bronze 3%, 2=Silver 5%, 3=Gold 7%, 4=Platinum 10%)
   cashback_level INTEGER NOT NULL DEFAULT 1 CHECK (cashback_level BETWEEN 1 AND 4),
-  lifetime_spent NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (lifetime_spent >= 0),
+  total_spent_for_cashback NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (total_spent_for_cashback >= 0),
   
   -- Уровень реферальной программы (1=3%, 2=5%, 3=7%, 4=10%)
   referral_level INTEGER NOT NULL DEFAULT 1 CHECK (referral_level BETWEEN 1 AND 4),
@@ -65,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_user_bonuses_referral_level ON user_bonuses(refer
 -- Комментарии
 COMMENT ON TABLE user_bonuses IS 'Бонусные счета пользователей с уровнями кешбека и реферальной программы';
 COMMENT ON COLUMN user_bonuses.balance IS 'Текущий баланс шагов';
-COMMENT ON COLUMN user_bonuses.lifetime_spent IS 'Фактически оплачено за все время (для расчета уровня кешбека)';
+COMMENT ON COLUMN user_bonuses.total_spent_for_cashback IS 'Фактически оплачено за все время (для расчета уровня кешбека)';
 COMMENT ON COLUMN user_bonuses.total_referral_earnings IS 'Сумма покупок всех рефералов (для уровня реф. программы)';
 
 -- ============================================
@@ -133,12 +131,8 @@ CREATE TABLE IF NOT EXISTS referrals (
   referrer_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   referred_id UUID NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
   
-  -- Через какой код
-  referral_code TEXT NOT NULL,
-  
   -- Статус
   status referral_status NOT NULL DEFAULT 'registered',
-  first_purchase_bonus_given BOOLEAN NOT NULL DEFAULT false,
   
   -- Временные метки
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

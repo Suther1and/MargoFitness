@@ -1,7 +1,7 @@
 'use client'
 
 import { UserBonus, CashbackLevel, calculateLevelProgress } from '@/types/database'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
 interface BonusCardProps {
@@ -12,49 +12,48 @@ interface BonusCardProps {
 
 export function BonusCard({ account, levelData, progress }: BonusCardProps) {
   return (
-    <Card className={`overflow-hidden border-0 bg-gradient-to-br ${levelData.color} text-white`}>
-      <CardContent className="p-8">
-        {/* Уровень и иконка */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <div className="text-sm opacity-90 mb-1">Ваш уровень</div>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <span>{levelData.icon}</span>
-              <span>{levelData.name}</span>
+    <Card className={`overflow-hidden border-0 bg-gradient-to-br ${levelData.color} text-white shadow-lg`}>
+      <div className="p-6 space-y-6">
+        {/* Хедер с логотипом */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-white/20 p-2 rounded-full">
+              <span className="text-2xl">{levelData.icon}</span>
+            </div>
+            <div>
+              <div className="text-xs opacity-80">Уровень</div>
+              <div className="font-bold text-lg">{levelData.name}</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm opacity-90 mb-1">Кешбек</div>
-            <div className="text-3xl font-bold">{levelData.percent}%</div>
+            <div className="text-xs opacity-80">Кешбек</div>
+            <div className="text-2xl font-bold">{levelData.percent}%</div>
           </div>
         </div>
 
-        {/* Баланс */}
-        <div className="mb-6">
-          <div className="text-sm opacity-90 mb-2">Баланс шагов</div>
-          <div className="text-4xl font-bold">{account.balance.toLocaleString('ru-RU')} 👟</div>
+        {/* Баланс - крупно по центру */}
+        <div className="py-4">
+          <div className="text-sm opacity-80 mb-1">Баланс</div>
+          <div className="text-5xl font-bold tracking-tight">
+            {account.balance.toLocaleString('ru-RU')} <span className="text-3xl">👟</span>
+          </div>
         </div>
 
-        {/* Прогресс до следующего уровня */}
-        {progress.nextLevel !== null && (
-          <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span>До следующего уровня</span>
+        {/* Прогресс */}
+        {progress.nextLevel !== null ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="opacity-90">До {levelData.level === 1 ? 'Silver' : levelData.level === 2 ? 'Gold' : 'Platinum'}</span>
               <span className="font-semibold">{progress.remaining.toLocaleString('ru-RU')} ₽</span>
             </div>
-            <Progress value={progress.progress} className="h-2 bg-white/30" />
-            <div className="text-xs opacity-75 mt-2">
-              {progress.progress}% до уровня {progress.nextLevel}
-            </div>
+            <Progress value={progress.progress} className="h-2 bg-white/20" />
+          </div>
+        ) : (
+          <div className="text-center py-2 text-sm opacity-90">
+            🎉 Максимальный уровень!
           </div>
         )}
-
-        {progress.nextLevel === null && (
-          <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm text-center">
-            <div className="text-sm font-semibold">🎉 Максимальный уровень достигнут!</div>
-          </div>
-        )}
-      </CardContent>
+      </div>
     </Card>
   )
 }
