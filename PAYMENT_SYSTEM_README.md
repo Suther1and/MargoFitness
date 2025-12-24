@@ -3,7 +3,10 @@
 ## 🎉 Что реализовано
 
 Полнофункциональная платежная система с поддержкой:
-- ✅ Интеграция с ЮKassa (Яндекс.Касса)
+- ✅ Интеграция с ЮKassa (Яндекс.Касса) - **тестовые ключи настроены**
+- ✅ **Embedded виджет** - оплата прямо на сайте
+- ✅ **Redirect вариант** - перенаправление на ЮКассу
+- ✅ **Проверка webhook подписи** (HMAC-SHA256)
 - ✅ Рекуррентные платежи (автопродление)
 - ✅ 3 уровня подписки (Basic, Pro, Elite)
 - ✅ 4 периода подписки (1, 3, 6, 12 месяцев)
@@ -62,7 +65,10 @@ app/
 │   ├── page.tsx             # Страница выбора тарифа (server)
 │   └── pricing-client.tsx   # Клиентский компонент с периодами
 ├── payment/[productId]/
-│   ├── page.tsx             # Страница оплаты
+│   ├── page.tsx             # Страница оплаты (обновлена)
+│   ├── payment-widget-switcher.tsx  # NEW: Переключатель виджетов
+│   ├── yookassa-widget.tsx  # NEW: Embedded виджет ЮКассы
+│   ├── redirect-payment.tsx # NEW: Redirect вариант
 │   └── mock-payment-widget.tsx  # Mock виджет оплаты
 ├── dashboard/
 │   ├── page.tsx             # Личный кабинет
@@ -207,11 +213,11 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 
-# ЮKassa (mock значения для dev)
-YOOKASSA_SHOP_ID=mock_shop_id
-YOOKASSA_SECRET_KEY=mock_secret_key
-NEXT_PUBLIC_YOOKASSA_RETURN_URL=http://localhost:3000/payment/success
-YOOKASSA_WEBHOOK_SECRET=mock_webhook_secret
+# ЮKassa (тестовый магазин)
+YOOKASSA_SHOP_ID=1236230
+YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI
+NEXT_PUBLIC_YOOKASSA_RETURN_URL=http://localhost:3000/dashboard?payment=success
+YOOKASSA_WEBHOOK_SECRET=your_webhook_secret_from_yookassa
 
 # Cron Job
 CRON_SECRET=dev_secret_key_12345
@@ -294,18 +300,15 @@ npm install @radix-ui/react-switch @radix-ui/react-checkbox
 
 ### Важно в production:
 
-1. **Включить проверку подписи webhook:**
-   ```typescript
-   // В app/api/payments/webhook/route.ts раскомментировать:
-   const signature = request.headers.get('X-Yookassa-Signature')
-   if (!verifyWebhookSignature(...)) {
-     return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
-   }
-   ```
+1. **✅ Проверка подписи webhook уже реализована:**
+   - Функция `verifyWebhookSignature()` использует HMAC-SHA256
+   - Автоматически проверяет подпись в production режиме
+   - Защита от timing attacks
 
-2. **Убрать mock режим:**
-   - Удалить `mock_` значения из env
-   - Использовать реальные ключи ЮKassa
+2. **Переход на боевые ключи:**
+   - Заменить тестовые ключи (с `test_` префиксом) на боевые
+   - Обновить `YOOKASSA_SHOP_ID` и `YOOKASSA_SECRET_KEY`
+   - Обновить webhook URL в личном кабинете ЮКассы
 
 3. **Настроить мониторинг:**
    - Vercel Analytics
@@ -315,6 +318,17 @@ npm install @radix-ui/react-switch @radix-ui/react-checkbox
 ---
 
 ## ✅ Недавно добавлено (Декабрь 2024)
+
+### ⚡ Полная интеграция ЮКассы (24.12.2024)
+- ✅ **Embedded виджет** - оплата прямо на странице сайта
+- ✅ **Redirect вариант** - перенаправление на страницу ЮКассы
+- ✅ **Переключатель виджетов** - выбор способа оплаты
+- ✅ **Проверка webhook подписи** (HMAC-SHA256)
+- ✅ **Тестовые ключи** настроены и готовы к работе
+- ✅ Поддержка `confirmationType` в API
+- ✅ Документация для Vercel деплоя
+
+**Документация:** См. `YOOKASSA_INTEGRATION_COMPLETE.md` и `VERCEL_YOOKASSA_SETUP.md`
 
 ### Email уведомления
 - ✅ Интеграция с Resend для отправки email

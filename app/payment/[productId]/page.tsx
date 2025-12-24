@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Crown, Zap, Sparkles, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { MockPaymentWidget } from "./mock-payment-widget"
+import { Suspense } from "react"
+import { PaymentWidgetSwitcher } from "./payment-widget-switcher"
 
 interface PaymentPageProps {
   params: Promise<{
@@ -129,10 +130,12 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
         </Card>
 
         {/* Правая колонка - Виджет оплаты */}
-        <MockPaymentWidget 
-          product={product}
-          profile={profile}
-        />
+        <Suspense fallback={<Card><CardContent className="pt-6">Загрузка...</CardContent></Card>}>
+          <PaymentWidgetSwitcher 
+            product={product}
+            profile={profile}
+          />
+        </Suspense>
       </div>
 
       {/* Безопасность */}

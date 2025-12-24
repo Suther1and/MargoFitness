@@ -4,10 +4,12 @@
  * Поддерживает:
  * - Создание платежей с сохранением карты
  * - Рекуррентные платежи
+ * - Проверка webhook подписи (HMAC-SHA256)
  * - Mock-режим для разработки без реальных ключей
  */
 
 import { YooCheckout, ICreatePayment, Payment } from '@a2seven/yoo-checkout'
+import { createHmac } from 'crypto'
 
 // Проверка что это mock-режим
 const isMockMode = 
@@ -36,6 +38,7 @@ export interface CreatePaymentParams {
   amount: number
   description: string
   savePaymentMethod?: boolean
+  confirmationType?: 'embedded' | 'redirect'
   metadata?: Record<string, any>
 }
 
@@ -78,6 +81,7 @@ function generateMockPaymentId(): string {
 
 function createMockPayment(params: CreatePaymentParams): PaymentResult {
   const paymentId = generateMockPaymentId()
+  const confirmationType = params.confirmationType || 'embedded'
   
   return {
     id: paymentId,
@@ -87,10 +91,15 @@ function createMockPayment(params: CreatePaymentParams): PaymentResult {
       value: params.amount.toFixed(2),
       currency: 'RUB'
     },
-    confirmation: {
-      type: 'embedded',
-      confirmation_token: `mock_token_${paymentId}`
-    },
+    confirmation: confirmationType === 'embedded' 
+      ? {
+          type: 'embedded',
+          confirmation_token: `mock_token_${paymentId}`
+        }
+      : {
+          type: 'redirect',
+          confirmation_url: `https://yoomoney.ru/checkout/payments/v2/contract?orderId=${paymentId}`
+        },
     metadata: params.metadata || {},
     created_at: new Date().toISOString()
   }
@@ -136,14 +145,21 @@ export async function createPayment(
 
   // Реальный запрос к ЮKassa
   try {
+    const confirmationType = params.confirmationType || 'embedded'
+    
     const paymentData: ICreatePayment = {
       amount: {
         value: params.amount.toFixed(2),
         currency: 'RUB'
       },
-      confirmation: {
-        type: 'embedded' // Виджет на нашей странице
-      },
+      confirmation: confirmationType === 'embedded'
+        ? {
+            type: 'embedded' // Виджет на нашей странице
+          }
+        : {
+            type: 'redirect', // Перенаправление на страницу ЮКассы
+            return_url: process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`
+          },
       capture: true, // Автоматическое подтверждение
       description: params.description,
       metadata: params.metadata
@@ -246,6 +262,9 @@ export async function cancelPayment(paymentId: string): Promise<boolean> {
 /**
  * Проверка webhook подписи от ЮKassa
  * Важно для безопасности - проверяем что запрос действительно от ЮKassa
+ * 
+ * ЮКасса отправляет подпись в заголовке X-Yookassa-Signature
+ * Подпись - это HMAC-SHA256 хеш от тела запроса с использованием webhook secret
  */
 export function verifyWebhookSignature(
   requestBody: string,
@@ -257,16 +276,40 @@ export function verifyWebhookSignature(
     return true
   }
 
-  // TODO: Реализовать проверку подписи когда будут реальные ключи
-  // Документация: https://yookassa.ru/developers/using-api/webhooks
-  
+  // Проверка наличия подписи и секрета
   if (!signature || !process.env.YOOKASSA_WEBHOOK_SECRET) {
+    console.error('[YooKassa] Missing signature or webhook secret')
     return false
   }
 
-  // Здесь должна быть реальная проверка HMAC подписи
-  // Пока возвращаем true для разработки
-  return true
+  try {
+    // Создаем HMAC-SHA256 хеш от тела запроса
+    const hmac = createHmac('sha256', process.env.YOOKASSA_WEBHOOK_SECRET)
+    hmac.update(requestBody)
+    const calculatedSignature = hmac.digest('hex')
+
+    // Сравниваем подписи (защита от timing attacks)
+    const signatureBuffer = Buffer.from(signature, 'hex')
+    const calculatedBuffer = Buffer.from(calculatedSignature, 'hex')
+
+    if (signatureBuffer.length !== calculatedBuffer.length) {
+      console.error('[YooKassa] Signature length mismatch')
+      return false
+    }
+
+    // Используем crypto.timingSafeEqual для защиты от timing attacks
+    const { timingSafeEqual } = require('crypto')
+    const isValid = timingSafeEqual(signatureBuffer, calculatedBuffer)
+
+    if (!isValid) {
+      console.error('[YooKassa] Invalid webhook signature')
+    }
+
+    return isValid
+  } catch (error) {
+    console.error('[YooKassa] Error verifying webhook signature:', error)
+    return false
+  }
 }
 
 /**

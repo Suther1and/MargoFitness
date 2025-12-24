@@ -42,10 +42,22 @@ YANDEX_CLIENT_ID=your_client_id_here
 YANDEX_CLIENT_SECRET=your_client_secret_here
 
 # ============================================
-# YooKassa Payment Gateway (опционально)
+# YooKassa Payment Gateway
 # ============================================
-YOOKASSA_SHOP_ID=your_shop_id
-YOOKASSA_SECRET_KEY=your_secret_key
+# Shop ID из личного кабинета ЮКассы
+YOOKASSA_SHOP_ID=1236230
+
+# Секретный ключ для API (СЕКРЕТНЫЙ - только на сервере)
+YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI
+
+# Секрет для проверки подписи webhook (генерируется в личном кабинете)
+YOOKASSA_WEBHOOK_SECRET=your_webhook_secret
+
+# URL для возврата после оплаты (redirect mode)
+NEXT_PUBLIC_YOOKASSA_RETURN_URL=http://localhost:3000/dashboard
+
+# Секрет для защиты cron endpoint
+CRON_SECRET=your_random_secret_key
 
 # ============================================
 # Email Service (опционально)
@@ -89,6 +101,18 @@ NODE_ENV=development
   - Запустите: `ngrok http 3000`
   - Скопируйте URL: `https://abc123.ngrok.io`
 
+### 4. ЮКасса
+1. Откройте [Личный кабинет ЮКасса](https://yookassa.ru/)
+2. В разделе **Настройки → Интеграция**:
+   - Скопируйте **shopId** → `YOOKASSA_SHOP_ID`
+   - Скопируйте **Секретный ключ** → `YOOKASSA_SECRET_KEY`
+3. В разделе **Уведомления (webhook)**:
+   - Настройте URL: `https://your-domain.com/api/payments/webhook`
+   - Получите **Секрет для подписи** → `YOOKASSA_WEBHOOK_SECRET`
+4. Для тестирования используйте тестовый магазин:
+   - shopId: `1236230`
+   - secret: `test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI`
+
 ---
 
 ## ⚠️ Важные замечания
@@ -96,7 +120,10 @@ NODE_ENV=development
 ### Секретные переменные (БЕЗ `NEXT_PUBLIC_`)
 - `TELEGRAM_BOT_TOKEN` - **НЕ ПУБЛИКУЙТЕ!**
 - `YOOKASSA_SECRET_KEY` - **НЕ ПУБЛИКУЙТЕ!**
+- `YOOKASSA_WEBHOOK_SECRET` - **НЕ ПУБЛИКУЙТЕ!**
+- `CRON_SECRET` - **НЕ ПУБЛИКУЙТЕ!**
 - `SMTP_PASSWORD` - **НЕ ПУБЛИКУЙТЕ!**
+- `SUPABASE_SERVICE_ROLE_KEY` - **НЕ ПУБЛИКУЙТЕ!**
 
 Эти переменные доступны **только на сервере** (API routes, Server Components).
 

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Получить параметры из запроса
     const body = await request.json()
-    const { productId, savePaymentMethod } = body
+    const { productId, savePaymentMethod, confirmationType = 'embedded' } = body
 
     if (!productId) {
       return NextResponse.json(
@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
       amount: product.price,
       description: `Оплата: ${product.name}`,
       savePaymentMethod: savePaymentMethod || (product.type === 'subscription_tier'),
+      confirmationType: confirmationType as 'embedded' | 'redirect',
       metadata: {
         userId: user.id,
         productId: product.id,
@@ -137,11 +138,13 @@ export async function POST(request: NextRequest) {
       // Не критично, продолжаем
     }
 
-    // Вернуть confirmation_token для виджета
+    // Вернуть данные для подтверждения (token для embedded или url для redirect)
     return NextResponse.json({
       success: true,
       paymentId: payment.id,
       confirmationToken: payment.confirmation?.confirmation_token,
+      confirmationUrl: payment.confirmation?.confirmation_url,
+      confirmationType: payment.confirmation?.type,
       amount: payment.amount.value,
       currency: payment.amount.currency
     })
