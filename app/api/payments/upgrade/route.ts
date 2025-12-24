@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
         currency: 'RUB',
         status: 'pending',
         payment_type: 'upgrade',
-        metadata: { conversion }
+        metadata: { conversion } as any
       })
 
     return NextResponse.json({

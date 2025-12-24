@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           productName: product.name,
           productType: product.type
-        }
+        } as any
       })
 
     if (transactionError) {
