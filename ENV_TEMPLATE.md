@@ -33,6 +33,15 @@ NEXT_PUBLIC_TELEGRAM_BOT_ID=1234567890
 NEXT_PUBLIC_TELEGRAM_BOT_NAME=margofitness_auth_bot
 
 # ============================================
+# Yandex ID OAuth Configuration
+# ============================================
+# Yandex OAuth Client ID (публичный)
+YANDEX_CLIENT_ID=your_client_id_here
+
+# Yandex OAuth Client Secret (СЕКРЕТНЫЙ - только на сервере)
+YANDEX_CLIENT_SECRET=your_client_secret_here
+
+# ============================================
 # YooKassa Payment Gateway (опционально)
 # ============================================
 YOOKASSA_SHOP_ID=your_shop_id

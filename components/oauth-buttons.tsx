@@ -42,6 +42,18 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   }
 
 
+  const handleYandexLogin = async () => {
+    try {
+      setLoadingProvider("yandex")
+      // Редиректим на endpoint инициации OAuth
+      window.location.href = `/api/auth/yandex/init?redirect=${redirectTo}`
+    } catch (error) {
+      console.error("Yandex OAuth error:", error)
+      alert("Ошибка входа через Yandex. Попробуйте снова.")
+      setLoadingProvider(null)
+    }
+  }
+
   const handleComingSoon = (provider: string) => {
     alert(`Вход через ${provider} скоро будет доступен! 🚀`)
   }
@@ -74,16 +86,18 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         </span>
       </Button>
 
-      {/* Yandex - заглушка */}
+      {/* Yandex OAuth - работает */}
       <Button
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => handleComingSoon("Yandex")}
+        onClick={handleYandexLogin}
         disabled={loadingProvider !== null}
       >
         <YandexIcon />
-        <span className="ml-2">Yandex</span>
+        <span className="ml-2">
+          {loadingProvider === "yandex" ? "Вход..." : "Yandex"}
+        </span>
       </Button>
 
       {/* VK - заглушка */}

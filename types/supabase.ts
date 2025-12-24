@@ -32,6 +32,8 @@ export interface Database {
           // Telegram авторизация
           telegram_id: string | null
           telegram_username: string | null
+          // Yandex авторизация
+          yandex_id: string | null
           stats: Json
           created_at: string
           updated_at: string
@@ -58,6 +60,8 @@ export interface Database {
           // Telegram авторизация
           telegram_id?: string | null
           telegram_username?: string | null
+          // Yandex авторизация
+          yandex_id?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -84,6 +88,8 @@ export interface Database {
           // Telegram авторизация
           telegram_id?: string | null
           telegram_username?: string | null
+          // Yandex авторизация
+          yandex_id?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string

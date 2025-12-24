@@ -17,28 +17,51 @@
 
 ## Шаг 3: Добавьте переменные окружения
 
-В настройках проекта добавьте:
+В настройках проекта (**Settings → Environment Variables**) добавьте:
 
-### Обязательные переменные:
+### 🔴 Обязательные переменные:
 
-```
-TELEGRAM_BOT_TOKEN=8230397943:AAE52-2sLAio3Nes5nT1ocHk8wnyGFlJmV0w
-NEXT_PUBLIC_TELEGRAM_BOT_NAME=margofitness_auth_bot
-NEXT_PUBLIC_SITE_URL=https://margofitness.pro
-```
-
-### Supabase (скопируйте из вашего .env.local):
-
+#### Supabase (скопируйте из вашего .env.local):
 ```
 NEXT_PUBLIC_SUPABASE_URL=ваш_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=ваш_ключ
 ```
 
-### YooKassa (если есть):
+#### Site URL:
+```
+NEXT_PUBLIC_SITE_URL=https://margofitness.pro
+```
+⚠️ **Важно:** Укажите ваш реальный домен!
 
+### 🟡 OAuth провайдеры:
+
+#### Telegram Auth:
+```
+TELEGRAM_BOT_TOKEN=8230397943:AAE52-2sLAio3Nes5nT1ocHk8wnyGFlJmV0w
+NEXT_PUBLIC_TELEGRAM_BOT_NAME=margofitness_auth_bot
+```
+
+#### Yandex ID OAuth (НОВОЕ):
+```
+YANDEX_CLIENT_ID=81370b983cd64ba79bc49dc8d9b215e1
+YANDEX_CLIENT_SECRET=ee66c653113e4ceab2fa7f64d4ceff87
+```
+
+### 🟢 Опциональные:
+
+#### YooKassa (платежи):
 ```
 YOOKASSA_SHOP_ID=ваш_id
 YOOKASSA_SECRET_KEY=ваш_ключ
+```
+
+#### Email (SMTP):
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM=noreply@margofitness.pro
 ```
 
 ---
@@ -77,12 +100,49 @@ YOOKASSA_SECRET_KEY=ваш_ключ
 
 ---
 
-## Шаг 7: Проверьте
+## Шаг 7: Обновите Redirect URI в OAuth приложениях
+
+### Yandex OAuth:
+1. Откройте [OAuth.Yandex](https://oauth.yandex.ru/)
+2. Выберите ваше приложение
+3. В **Redirect URI** добавьте:
+   ```
+   https://margofitness.pro/api/auth/yandex/callback
+   ```
+4. Сохраните
+
+### Telegram Bot (если используете):
+Убедитесь, что бот настроен корректно через @BotFather
+
+---
+
+## Шаг 8: Примените миграцию базы данных
+
+⚠️ **Важно:** Не забудьте применить новую миграцию для Yandex!
+
+1. Откройте [Supabase Dashboard](https://app.supabase.com)
+2. Перейдите в **SQL Editor**
+3. Выполните:
+   ```sql
+   ALTER TABLE profiles 
+   ADD COLUMN IF NOT EXISTS yandex_id TEXT UNIQUE;
+   
+   CREATE INDEX IF NOT EXISTS idx_profiles_yandex_id 
+   ON profiles(yandex_id);
+   ```
+4. Нажмите **Run**
+
+---
+
+## Шаг 9: Проверьте работу
 
 1. Откройте: https://margofitness.pro
-2. Перейдите: https://margofitness.pro/auth/login
-3. Кликните **"Telegram"**
-4. Тестируйте авторизацию ✅
+2. Перейдите: https://margofitness.pro/auth
+3. Протестируйте все методы авторизации:
+   - ✅ **Email/Password** - встроенная авторизация
+   - ✅ **Google** - OAuth через Supabase
+   - ✅ **Yandex** - OAuth через кастомную интеграцию (НОВОЕ!)
+   - ✅ **Telegram** - виджет авторизации
 
 ---
 
