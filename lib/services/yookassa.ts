@@ -276,7 +276,17 @@ export function verifyWebhookSignature(
     return true
   }
 
-  // Проверка наличия подписи и секрета
+  // Проверяем если это тестовый режим (ключ начинается с test_)
+  const isTestMode = process.env.YOOKASSA_SECRET_KEY?.startsWith('test_')
+  
+  // В тестовом режиме ЮКасса может не выдавать webhook secret
+  // Пропускаем проверку подписи для тестового режима
+  if (isTestMode && !process.env.YOOKASSA_WEBHOOK_SECRET) {
+    console.log('[YooKassa Test] Skipping webhook signature verification (test mode without secret)')
+    return true
+  }
+
+  // Проверка наличия подписи и секрета для production
   if (!signature || !process.env.YOOKASSA_WEBHOOK_SECRET) {
     console.error('[YooKassa] Missing signature or webhook secret')
     return false
