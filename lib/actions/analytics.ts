@@ -252,7 +252,6 @@ export async function getSubscriptionStats(): Promise<{
       // По статусам
       if (profile.subscription_status === 'active') stats.byStatus.active++
       else if (profile.subscription_status === 'canceled') stats.byStatus.canceled++
-      else if (profile.subscription_status === 'expired') stats.byStatus.expired++
       else stats.byStatus.inactive++
     })
     
