@@ -5,11 +5,15 @@ import {
   getRegistrationStats,
   getRecentTransactions 
 } from "@/lib/actions/analytics"
+import { getAdminBonusStats } from "@/lib/actions/bonuses"
+import { getAdminReferralStats } from "@/lib/actions/referrals"
+import { getPromoCodeStats } from "@/lib/actions/promo-codes"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown } from "lucide-react"
+import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, Gift, UserPlus, Tag } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { CASHBACK_LEVELS } from "@/types/database"
 
 export const dynamic = 'force-dynamic'
 
@@ -22,17 +26,31 @@ export default async function AnalyticsPage() {
   }
 
   // Загрузить все данные параллельно
-  const [revenueResult, subscriptionsResult, registrationsResult, transactionsResult] = await Promise.all([
+  const [
+    revenueResult, 
+    subscriptionsResult, 
+    registrationsResult, 
+    transactionsResult,
+    bonusStatsResult,
+    referralStatsResult,
+    promoStatsResult
+  ] = await Promise.all([
     getRevenueByPeriod(),
     getSubscriptionStats(),
     getRegistrationStats(),
-    getRecentTransactions(10)
+    getRecentTransactions(10),
+    getAdminBonusStats(),
+    getAdminReferralStats(),
+    getPromoCodeStats()
   ])
 
   const revenue = revenueResult.data
   const subscriptions = subscriptionsResult.data
   const registrations = registrationsResult.data
   const transactions = transactionsResult.data || []
+  const bonusStats = bonusStatsResult.data
+  const referralStats = referralStatsResult.data
+  const promoStats = promoStatsResult.data
 
   return (
     <div className="container mx-auto space-y-8 py-10">
@@ -293,6 +311,171 @@ export default async function AnalyticsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Бонусная программа */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-bold">👟 Бонусная программа</h2>
+          <p className="text-muted-foreground">Статистика по шагам и реферальной системе</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          {/* Выдано шагов */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Всего выдано</CardTitle>
+              <Gift className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {bonusStats?.totalBonusesIssued.toLocaleString('ru-RU')} 👟
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Общее начисление
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Потрачено шагов */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Потрачено</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {bonusStats?.totalBonusesSpent.toLocaleString('ru-RU')} 👟
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                На оплаты
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* В обращении */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">В обращении</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {bonusStats?.totalBonusesInCirculation.toLocaleString('ru-RU')} 👟
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Средний: {bonusStats?.averageBalance || 0}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Рефералы */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Рефералы</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {referralStats?.totalReferrals || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Активных: {referralStats?.activeReferrals || 0}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Детальная статистика */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Распределение по уровням */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Пользователи по уровням</CardTitle>
+              <CardDescription>Распределение кешбека</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {CASHBACK_LEVELS.map((level) => (
+                <div key={level.level} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <span>{level.icon}</span>
+                      <span className="font-medium">{level.name} ({level.percent}%)</span>
+                    </span>
+                    <span className="font-semibold">
+                      {bonusStats?.usersByLevel[level.level] || 0}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full bg-gradient-to-r ${level.color} transition-all`}
+                      style={{ 
+                        width: `${bonusStats ? 
+                          ((bonusStats.usersByLevel[level.level] || 0) / 
+                          Object.values(bonusStats.usersByLevel).reduce((a, b) => a + b, 0)) * 100 
+                          : 0}%` 
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Реферальная статистика */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Реферальная программа</CardTitle>
+              <CardDescription>Приглашения и заработок</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-lg border">
+                <UserPlus className="w-8 h-8 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{referralStats?.totalReferrals || 0}</p>
+                  <p className="text-sm text-muted-foreground">Всего рефералов</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-4 rounded-lg border">
+                <Gift className="w-8 h-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">
+                    {referralStats?.totalBonusesPaid.toLocaleString('ru-RU')} 👟
+                  </p>
+                  <p className="text-sm text-muted-foreground">Выплачено реферерам</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Промокоды */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Промокоды</CardTitle>
+              <CardDescription>
+                <Link href="/admin/promo-codes" className="text-primary hover:underline">
+                  Управление →
+                </Link>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-lg border">
+                <Tag className="w-8 h-8 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{promoStats?.totalPromoCodes || 0}</p>
+                  <p className="text-sm text-muted-foreground">Всего промокодов</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-4 rounded-lg border">
+                <Activity className="w-8 h-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{promoStats?.totalUsage || 0}</p>
+                  <p className="text-sm text-muted-foreground">Использований</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Последние транзакции */}
       <Card>

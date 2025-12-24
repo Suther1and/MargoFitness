@@ -1,11 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { sendWelcomeEmail } from '@/lib/services/email'
+import { registerReferral } from '@/lib/actions/referrals'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
+  const refCode = requestUrl.searchParams.get('ref') // Реферальный код
   const origin = requestUrl.origin
 
   console.log('[Callback] Received callback with code:', code ? 'YES' : 'NO')
@@ -63,6 +65,17 @@ export async function GET(request: Request) {
           // Продолжаем редирект, профиль будет создан при первом запросе
         } else {
           console.log('[Callback] Profile created successfully:', newProfile)
+          
+          // Регистрация реферала (если есть код)
+          if (refCode) {
+            console.log('[Callback] Processing referral code:', refCode)
+            const referralResult = await registerReferral(refCode, sessionData.user.id)
+            if (referralResult.success) {
+              console.log('[Callback] Referral registered successfully')
+            } else {
+              console.error('[Callback] Referral registration failed:', referralResult.error)
+            }
+          }
           
           // Отправка приветственного письма (не блокирует выполнение)
           sendWelcomeEmail({

@@ -13,6 +13,11 @@ import { processSuccessfulPayment, getProductById } from '@/lib/services/subscri
 import { sendPaymentSuccessEmail } from '@/lib/services/email'
 import type { Database } from '@/types/supabase'
 
+// Импорт бонусной системы
+import { awardCashback } from '@/lib/actions/bonuses'
+import { handleReferralPurchase } from '@/lib/actions/referrals'
+import { incrementPromoUsage } from '@/lib/actions/promo-codes'
+
 export async function POST(request: NextRequest) {
   try {
     // Получить тело запроса
@@ -98,6 +103,59 @@ export async function POST(request: NextRequest) {
         }
 
         console.log(`[Webhook] Successfully processed payment for user ${transaction.user_id}`)
+
+        // ============================================
+        // БОНУСНАЯ СИСТЕМА: Начисление кешбека и реферальных бонусов
+        // ============================================
+        
+        try {
+          // Получаем фактически оплаченную сумму из метаданных
+          const metadata = transaction.metadata as any
+          const actualPaidAmount = metadata?.actual_paid_amount || Number(transaction.amount)
+          
+          console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}`)
+          
+          // 1. Начислить кешбек пользователю
+          const cashbackResult = await awardCashback({
+            userId: transaction.user_id,
+            paidAmount: actualPaidAmount,
+            paymentId: payment.id,
+          })
+          
+          if (cashbackResult.success) {
+            console.log(`[Webhook] Cashback awarded: ${cashbackResult.cashbackAmount} шагов`)
+            
+            if (cashbackResult.newLevel && cashbackResult.newLevel > 1) {
+              console.log(`[Webhook] User leveled up to level ${cashbackResult.newLevel}!`)
+            }
+          } else {
+            console.error('[Webhook] Failed to award cashback:', cashbackResult.error)
+          }
+          
+          // 2. Обработать реферальную программу
+          const referralResult = await handleReferralPurchase(
+            transaction.user_id,
+            actualPaidAmount
+          )
+          
+          if (referralResult.success && referralResult.bonusAwarded) {
+            console.log(`[Webhook] Referral bonus awarded: ${referralResult.bonusAwarded} шагов`)
+            
+            if (referralResult.isFirstPurchase) {
+              console.log('[Webhook] First referral purchase bonus included!')
+            }
+          }
+          
+          // 3. Увеличить счетчик использований промокода (если был)
+          if (metadata?.promo_code_id) {
+            await incrementPromoUsage(metadata.promo_code_id)
+            console.log(`[Webhook] Promo code usage incremented: ${metadata.promo_code_id}`)
+          }
+          
+        } catch (bonusError) {
+          // Не прерываем обработку платежа, если бонусы не начислились
+          console.error('[Webhook] Error processing bonuses:', bonusError)
+        }
         
         // Отправка email уведомления об успешной оплате
         const product = await getProductById(transaction.product_id!)

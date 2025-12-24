@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Dumbbell } from "lucide-react"
 import { OAuthButtons } from "@/components/oauth-buttons"
+import { validateReferralCode } from "@/lib/actions/referrals"
 
 function AuthForm() {
   const [email, setEmail] = useState("")
@@ -16,9 +17,28 @@ function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [mode, setMode] = useState<'auto' | 'login' | 'signup'>('auto')
+  const [referralInfo, setReferralInfo] = useState<{ userName: string | null } | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/dashboard'
+  const refCode = searchParams.get('ref')
+
+  // Проверяем реферальный код при загрузке
+  useEffect(() => {
+    if (refCode) {
+      validateReferralCode(refCode).then((result) => {
+        if (result.success && result.data) {
+          setReferralInfo({ userName: result.data.userName })
+          // Показываем toast
+          const toast = document.createElement('div')
+          toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in slide-in-from-bottom'
+          toast.innerHTML = `🎁 ${result.data.userName ? `${result.data.userName} пригласил вас!` : 'Вы приглашены!'} Получите 250 шагов при регистрации`
+          document.body.appendChild(toast)
+          setTimeout(() => toast.remove(), 5000)
+        }
+      })
+    }
+  }, [refCode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,7 +116,7 @@ function AuthForm() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}${refCode ? `&ref=${refCode}` : ''}`,
         }
       })
 

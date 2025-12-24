@@ -38,6 +38,10 @@ export default async function Navbar() {
                 Кабинет
               </Link>
 
+              <Link href="/dashboard/bonuses" className="text-sm font-medium hover:text-primary transition-colors">
+                👟 Бонусы
+              </Link>
+
               {profile.role === 'admin' && (
                 <Link href="/admin" className="text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors">
                   Админка

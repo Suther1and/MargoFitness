@@ -1,0 +1,458 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { 
+  UserBonus, 
+  BonusTransaction, 
+  BonusTransactionInsert,
+  calculateCashbackLevel,
+  getCashbackLevelData,
+  calculateLevelProgress,
+  BONUS_CONSTANTS,
+  CASHBACK_LEVELS
+} from '@/types/database'
+import { revalidatePath } from 'next/cache'
+
+// ============================================
+// Получение данных
+// ============================================
+
+/**
+ * Получить бонусный счет пользователя
+ */
+export async function getUserBonusAccount(userId: string): Promise<{
+  success: boolean
+  data?: UserBonus
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('user_bonuses')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  if (error) {
+    console.error('Error fetching bonus account:', error)
+    return { success: false, error: 'Не удалось получить бонусный счет' }
+  }
+
+  return { success: true, data }
+}
+
+/**
+ * Получить текущий бонусный счет авторизованного пользователя
+ */
+export async function getCurrentUserBonusAccount(): Promise<{
+  success: boolean
+  data?: UserBonus
+  error?: string
+}> {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Необходимо авторизоваться' }
+  }
+
+  return getUserBonusAccount(user.id)
+}
+
+/**
+ * Получить историю бонусных транзакций
+ */
+export async function getBonusTransactions(
+  userId: string,
+  limit: number = 50
+): Promise<{
+  success: boolean
+  data?: BonusTransaction[]
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('bonus_transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching bonus transactions:', error)
+    return { success: false, error: 'Не удалось получить историю' }
+  }
+
+  return { success: true, data }
+}
+
+/**
+ * Получить статистику для UI
+ */
+export async function getBonusStats(userId: string): Promise<{
+  success: boolean
+  data?: {
+    account: UserBonus
+    levelData: ReturnType<typeof getCashbackLevelData>
+    progress: ReturnType<typeof calculateLevelProgress>
+    recentTransactions: BonusTransaction[]
+  }
+  error?: string
+}> {
+  const accountResult = await getUserBonusAccount(userId)
+  if (!accountResult.success || !accountResult.data) {
+    return { success: false, error: accountResult.error }
+  }
+
+  const account = accountResult.data
+  const levelData = getCashbackLevelData(account.cashback_level)
+  const progress = calculateLevelProgress(account.lifetime_spent, false)
+
+  const transactionsResult = await getBonusTransactions(userId, 10)
+  const recentTransactions = transactionsResult.data || []
+
+  return {
+    success: true,
+    data: {
+      account,
+      levelData,
+      progress,
+      recentTransactions,
+    },
+  }
+}
+
+// ============================================
+// Операции с бонусами
+// ============================================
+
+/**
+ * Начислить или списать шаги (с транзакцией БД)
+ */
+export async function addBonusTransaction(params: {
+  userId: string
+  amount: number // положительное = начисление, отрицательное = списание
+  type: BonusTransactionInsert['type']
+  description: string
+  relatedPaymentId?: string
+  relatedUserId?: string
+  metadata?: Record<string, any>
+}): Promise<{
+  success: boolean
+  newBalance?: number
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    // Получаем текущий счет
+    const { data: account, error: accountError } = await supabase
+      .from('user_bonuses')
+      .select('*')
+      .eq('user_id', params.userId)
+      .single()
+
+    if (accountError || !account) {
+      throw new Error('Бонусный счет не найден')
+    }
+
+    // Проверяем достаточность средств при списании
+    if (params.amount < 0 && account.balance + params.amount < 0) {
+      return { success: false, error: 'Недостаточно шагов на счете' }
+    }
+
+    // Рассчитываем новый баланс
+    const newBalance = account.balance + params.amount
+    const newTotalEarned = params.amount > 0 ? account.total_earned + params.amount : account.total_earned
+    const newTotalSpent = params.amount < 0 ? account.total_spent + Math.abs(params.amount) : account.total_spent
+
+    // Создаем транзакцию
+    const { error: txError } = await supabase
+      .from('bonus_transactions')
+      .insert({
+        user_id: params.userId,
+        amount: params.amount,
+        type: params.type,
+        description: params.description,
+        related_payment_id: params.relatedPaymentId,
+        related_user_id: params.relatedUserId,
+        metadata: params.metadata || {},
+      })
+
+    if (txError) {
+      throw txError
+    }
+
+    // Обновляем счет
+    const { error: updateError } = await supabase
+      .from('user_bonuses')
+      .update({
+        balance: newBalance,
+        total_earned: newTotalEarned,
+        total_spent: newTotalSpent,
+      })
+      .eq('user_id', params.userId)
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return { success: true, newBalance }
+  } catch (error) {
+    console.error('Error in addBonusTransaction:', error)
+    return { success: false, error: 'Ошибка при обработке бонусной операции' }
+  }
+}
+
+/**
+ * Начислить кешбек с покупки
+ */
+export async function awardCashback(params: {
+  userId: string
+  paidAmount: number // фактически оплаченная сумма
+  paymentId: string
+}): Promise<{
+  success: boolean
+  cashbackAmount?: number
+  newLevel?: number
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    // Получаем счет
+    const { data: account, error: accountError } = await supabase
+      .from('user_bonuses')
+      .select('*')
+      .eq('user_id', params.userId)
+      .single()
+
+    if (accountError || !account) {
+      throw new Error('Бонусный счет не найден')
+    }
+
+    // Рассчитываем кешбек (целое число)
+    const levelData = getCashbackLevelData(account.cashback_level)
+    const cashbackAmount = Math.floor(params.paidAmount * (levelData.percent / 100))
+
+    // Начисляем кешбек
+    const txResult = await addBonusTransaction({
+      userId: params.userId,
+      amount: cashbackAmount,
+      type: 'cashback',
+      description: `Кешбек ${levelData.percent}% с покупки`,
+      relatedPaymentId: params.paymentId,
+      metadata: {
+        paid_amount: params.paidAmount,
+        cashback_percent: levelData.percent,
+        level: levelData.name,
+      },
+    })
+
+    if (!txResult.success) {
+      throw new Error(txResult.error)
+    }
+
+    // Обновляем lifetime_spent и проверяем уровень
+    const newLifetimeSpent = account.lifetime_spent + params.paidAmount
+    const newLevel = calculateCashbackLevel(newLifetimeSpent)
+
+    const { error: updateError } = await supabase
+      .from('user_bonuses')
+      .update({
+        lifetime_spent: newLifetimeSpent,
+        cashback_level: newLevel,
+      })
+      .eq('user_id', params.userId)
+
+    if (updateError) {
+      throw updateError
+    }
+
+    revalidatePath('/dashboard/bonuses')
+
+    return {
+      success: true,
+      cashbackAmount,
+      newLevel,
+    }
+  } catch (error) {
+    console.error('Error awarding cashback:', error)
+    return { success: false, error: 'Ошибка при начислении кешбека' }
+  }
+}
+
+/**
+ * Списать шаги при оплате
+ */
+export async function spendBonusesOnPayment(params: {
+  userId: string
+  amount: number
+  paymentId: string
+}): Promise<{
+  success: boolean
+  error?: string
+}> {
+  if (params.amount <= 0) {
+    return { success: false, error: 'Сумма должна быть положительной' }
+  }
+
+  const result = await addBonusTransaction({
+    userId: params.userId,
+    amount: -params.amount, // отрицательное значение
+    type: 'spent',
+    description: `Оплата подписки (${params.amount} шагов)`,
+    relatedPaymentId: params.paymentId,
+  })
+
+  if (result.success) {
+    revalidatePath('/dashboard/bonuses')
+  }
+
+  return result
+}
+
+/**
+ * Рассчитать максимальное количество шагов для использования
+ */
+export async function calculateMaxBonusUsage(
+  priceAfterDiscounts: number,
+  userId: string
+): Promise<{
+  success: boolean
+  maxAmount?: number
+  availableBalance?: number
+  error?: string
+}> {
+  const accountResult = await getUserBonusAccount(userId)
+  if (!accountResult.success || !accountResult.data) {
+    return { success: false, error: accountResult.error }
+  }
+
+  const maxAllowed = Math.floor(priceAfterDiscounts * (BONUS_CONSTANTS.MAX_BONUS_USAGE_PERCENT / 100))
+  const maxAmount = Math.min(maxAllowed, accountResult.data.balance)
+
+  return {
+    success: true,
+    maxAmount,
+    availableBalance: accountResult.data.balance,
+  }
+}
+
+// ============================================
+// Админские функции
+// ============================================
+
+/**
+ * Ручная корректировка баланса (только для админов)
+ */
+export async function adminAdjustBonus(params: {
+  userId: string
+  amount: number
+  reason: string
+}): Promise<{
+  success: boolean
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // Проверяем права админа
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Необходимо авторизоваться' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') {
+    return { success: false, error: 'Недостаточно прав' }
+  }
+
+  // Выполняем корректировку
+  const result = await addBonusTransaction({
+    userId: params.userId,
+    amount: params.amount,
+    type: 'admin_adjustment',
+    description: `Корректировка админом: ${params.reason}`,
+    relatedUserId: user.id,
+  })
+
+  if (result.success) {
+    revalidatePath('/admin/analytics')
+    revalidatePath('/dashboard/bonuses')
+  }
+
+  return result
+}
+
+/**
+ * Получить общую статистику по бонусной системе (для админки)
+ */
+export async function getAdminBonusStats(): Promise<{
+  success: boolean
+  data?: {
+    totalBonusesIssued: number
+    totalBonusesSpent: number
+    totalBonusesInCirculation: number
+    averageBalance: number
+    usersByLevel: Record<number, number>
+  }
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // Проверяем права админа
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Необходимо авторизоваться' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') {
+    return { success: false, error: 'Недостаточно прав' }
+  }
+
+  try {
+    // Получаем все счета
+    const { data: accounts, error } = await supabase
+      .from('user_bonuses')
+      .select('balance, total_earned, total_spent, cashback_level')
+
+    if (error) throw error
+
+    const totalBonusesIssued = accounts?.reduce((sum, acc) => sum + acc.total_earned, 0) || 0
+    const totalBonusesSpent = accounts?.reduce((sum, acc) => sum + acc.total_spent, 0) || 0
+    const totalBonusesInCirculation = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0
+    const averageBalance = accounts?.length ? Math.floor(totalBonusesInCirculation / accounts.length) : 0
+
+    const usersByLevel: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
+    accounts?.forEach(acc => {
+      usersByLevel[acc.cashback_level] = (usersByLevel[acc.cashback_level] || 0) + 1
+    })
+
+    return {
+      success: true,
+      data: {
+        totalBonusesIssued,
+        totalBonusesSpent,
+        totalBonusesInCirculation,
+        averageBalance,
+        usersByLevel,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching admin bonus stats:', error)
+    return { success: false, error: 'Ошибка при получении статистики' }
+  }
+}
+
