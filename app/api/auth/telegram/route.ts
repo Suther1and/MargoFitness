@@ -97,6 +97,13 @@ export async function POST(request: Request) {
     const fullName = [telegramData.first_name, telegramData.last_name]
       .filter(Boolean)
       .join(' ')
+    
+    // Создаем детерминированный пароль на основе bot token и telegram id
+    // Это позволит нам всегда входить с одним и тем же паролем
+    const deterministicPassword = crypto
+      .createHash('sha256')
+      .update(`${botToken}:${telegramData.id}`)
+      .digest('hex')
 
     // Проверяем, существует ли уже пользователь с таким Telegram ID
     const { data: existingProfile } = await supabase
@@ -126,13 +133,9 @@ export async function POST(request: Request) {
       // Новый пользователь - создаем аккаунт
       console.log('[Telegram Auth] Creating new user')
       
-      // Создаем пользователя через обычный signUp (не требует admin прав)
-      // Генерируем случайный пароль (пользователь его не узнает, всегда входит через Telegram)
-      const randomPassword = crypto.randomBytes(32).toString('hex')
-      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: telegramEmail,
-        password: randomPassword,
+        password: deterministicPassword,
         options: {
           data: {
             full_name: fullName,
@@ -229,31 +232,33 @@ export async function POST(request: Request) {
       }
     }
 
-    // Создаем JWT токен для авторизации
-    // Генерируем одноразовый код для обмена на сессию
-    const exchangeCode = crypto.randomBytes(32).toString('hex')
+    // Создаем сессию через signInWithPassword
+    console.log('[Telegram Auth] Creating session for user:', userId)
     
-    // Сохраняем код в базу данных с временем жизни 5 минут
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
-    
-    // Используем таблицу для хранения одноразовых кодов
-    // (эту таблицу нужно будет создать в миграции)
-    await supabase
-      .from('auth_exchange_codes')
-      .insert({
-        code: exchangeCode,
-        user_id: userId,
-        expires_at: expiresAt.toISOString(),
-        used: false
-      })
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: telegramEmail,
+      password: deterministicPassword
+    })
 
-    console.log('[Telegram Auth] Success, returning exchange code')
+    if (signInError || !signInData.session) {
+      console.error('[Telegram Auth] Failed to create session:', signInError)
+      return NextResponse.json(
+        { error: 'Failed to create session' },
+        { status: 500 }
+      )
+    }
 
-    // Возвращаем код для обмена
+    console.log('[Telegram Auth] Session created successfully')
+
+    // Возвращаем токены сессии
     return NextResponse.json({
       success: true,
-      exchangeCode,
-      userId
+      session: {
+        access_token: signInData.session.access_token,
+        refresh_token: signInData.session.refresh_token,
+        expires_at: signInData.session.expires_at
+      },
+      user: signInData.user
     })
 
   } catch (error) {

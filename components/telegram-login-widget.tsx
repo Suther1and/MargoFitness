@@ -82,32 +82,25 @@ export function TelegramLoginWidget({
           throw new Error(data.error || 'Ошибка авторизации')
         }
 
-        if (data.success && data.exchangeCode) {
-          // Обмениваем код на сессию
-          const exchangeResponse = await fetch('/api/auth/telegram/exchange', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ exchangeCode: data.exchangeCode }),
+        if (data.success && data.session) {
+          // Устанавливаем сессию в Supabase
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token
           })
 
-          const exchangeData = await exchangeResponse.json()
-
-          if (!exchangeResponse.ok) {
-            throw new Error(exchangeData.error || 'Ошибка создания сессии')
+          if (sessionError) {
+            throw new Error('Ошибка установки сессии')
           }
 
-          // Используем action_link для создания сессии
-          if (exchangeData.actionLink) {
-            window.location.href = exchangeData.actionLink
-          } else {
-            // Если нет action_link, редиректим вручную
-            router.push(redirectTo)
-            router.refresh()
-          }
+          // Редиректим на dashboard
+          router.push(redirectTo)
+          router.refresh()
         } else {
-          throw new Error('Не получен код обмена')
+          throw new Error('Не получена сессия')
         }
       } catch (err) {
         console.error('[Telegram Widget] Auth error:', err)
