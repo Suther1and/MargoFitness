@@ -96,7 +96,8 @@ export function TelegramLoginWidget({
             throw new Error('Ошибка установки сессии')
           }
 
-          // Редиректим на dashboard
+          // Если это новый пользователь - попап для заполнения email откроется автоматически в dashboard
+          // Если существующий - просто редирект
           router.push(redirectTo)
           router.refresh()
         } else {

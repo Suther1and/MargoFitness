@@ -26,13 +26,51 @@ export async function updateUserProfile(data: UpdateProfileData) {
       }
     }
 
+    // Проверяем, является ли это Telegram аккаунтом
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email, telegram_id')
+      .eq('id', user.id)
+      .single()
+
+    const isTelegramAccount = !!profile?.telegram_id
+    const hasTelegramEmail = profile?.email?.includes('@telegram.local')
+
+    // Валидация: если пользователь вводит email для Telegram аккаунта, проверяем формат
+    if (isTelegramAccount && hasTelegramEmail && data.email) {
+      // Простая валидация email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(data.email)) {
+        return {
+          success: false,
+          error: 'Неверный формат email'
+        }
+      }
+
+      // Проверяем что email не занят другим пользователем
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', data.email)
+        .neq('id', user.id)
+        .single()
+
+      if (existingProfile) {
+        return {
+          success: false,
+          error: 'Этот email уже используется'
+        }
+      }
+    }
+
     // Обновляем профиль
+    // Для Telegram аккаунтов: обновляем email ТОЛЬКО в profiles (в auth.users остается telegram_*@telegram.local для входа)
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
         full_name: data.full_name,
         phone: data.phone,
-        email: data.email,
+        email: data.email,  // Обновляем в profiles для отображения
         profile_completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
