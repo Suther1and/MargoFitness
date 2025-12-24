@@ -26,6 +26,9 @@ NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 # Bot Token от @BotFather (СЕКРЕТНЫЙ - только на сервере)
 TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 
+# Bot ID (первая часть токена до двоеточия - публичный)
+NEXT_PUBLIC_TELEGRAM_BOT_ID=1234567890
+
 # Username бота (публичный - используется на клиенте)
 NEXT_PUBLIC_TELEGRAM_BOT_NAME=margofitness_auth_bot
 

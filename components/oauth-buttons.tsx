@@ -18,16 +18,25 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
 
   const handleTelegramClick = () => {
+    if (!telegramBotName) return
+    
     setLoadingProvider("telegram")
-    // Ищем iframe виджета и кликаем на него
-    setTimeout(() => {
-      const iframe = document.querySelector('iframe[src*="telegram.org"]') as HTMLIFrameElement
-      if (iframe) {
-        iframe.click()
-        // Сбросим loading через 2 секунды если что-то пошло не так
-        setTimeout(() => setLoadingProvider(null), 2000)
-      }
-    }, 100)
+    
+    // Получаем bot_id из переменной окружения (первая часть токена до :)
+    // Или используем имя бота для формирования URL
+    const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID || ''
+    
+    if (botId) {
+      // Прямая ссылка на Telegram OAuth
+      const callbackUrl = `${window.location.origin}/api/auth/telegram/callback`
+      const telegramAuthUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&request_access=write&return_to=${encodeURIComponent(callbackUrl)}`
+      
+      // Открываем в том же окне
+      window.location.href = telegramAuthUrl
+    } else {
+      alert('Telegram bot ID не настроен')
+      setLoadingProvider(null)
+    }
   }
 
   const handleGoogleLogin = async () => {
@@ -110,7 +119,7 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - кастомная кнопка + скрытый виджет */}
+      {/* Telegram - кастомная кнопка с прямой ссылкой */}
       <Button
         type="button"
         variant="outline"
@@ -123,21 +132,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
           {loadingProvider === "telegram" ? "Открытие Telegram..." : "Telegram"}
         </span>
       </Button>
-      
-      {/* Скрытый виджет Telegram */}
-      {telegramBotName && (
-        <div className="hidden">
-          <TelegramLoginWidget
-            botName={telegramBotName}
-            redirectTo={redirectTo}
-            buttonSize="large"
-            requestAccess={false}
-            usePic={false}
-            lang="ru"
-            useRedirect={true}
-          />
-        </div>
-      )}
     </div>
   )
 }
