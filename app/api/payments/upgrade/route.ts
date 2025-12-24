@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
               status: 'succeeded',
               payment_type: 'upgrade',
               payment_method_id: profile.payment_method_id,
-              metadata: { conversion }
+              metadata: { conversion } as any
             })
 
           // Обработать платеж с кастомным количеством дней
