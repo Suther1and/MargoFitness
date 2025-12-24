@@ -37,7 +37,7 @@ export default async function BonusesPage() {
 
   const bonusStats = bonusStatsResult.data
   const referralStats = referralStatsResult.data
-  const referralLink = referralLinkResult.data?.link
+  const referralLink = referralLinkResult.link
 
   return (
     <div className="container mx-auto p-6 space-y-8">
