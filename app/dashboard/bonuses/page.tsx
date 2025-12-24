@@ -49,33 +49,41 @@ export default async function BonusesPage() {
         </p>
       </div>
 
-      {/* Бонусная карточка */}
-      <BonusCard
-        account={bonusStats.account}
-        levelData={bonusStats.levelData}
-        progress={bonusStats.progress}
-      />
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Левая колонка */}
+        <div className="space-y-8">
+          {/* Бонусная карточка */}
+          <BonusCard
+            account={bonusStats.account}
+            levelData={bonusStats.levelData}
+            progress={bonusStats.progress}
+          />
 
-      {/* Реферальная программа */}
-      {referralLink && referralStats && (
-        <ReferralSection
-          referralLink={referralLink}
-          stats={referralStats}
-        />
-      )}
+          {/* Информация */}
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="font-semibold mb-3">ℹ️ Как использовать шаги</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>• Оплачивайте до 30% стоимости подписки шагами</li>
+              <li>• 1 шаг = 1 рубль</li>
+              <li>• Шаги не сгорают</li>
+              <li>• Кешбек начисляется от фактически оплаченной суммы</li>
+            </ul>
+          </div>
+        </div>
 
-      {/* История операций */}
-      <BonusHistory transactions={bonusStats.recentTransactions} userId={profile.id} />
+        {/* Правая колонка */}
+        <div className="space-y-8">
+          {/* Реферальная программа */}
+          {referralLink && referralStats && (
+            <ReferralSection
+              referralLink={referralLink}
+              stats={referralStats}
+            />
+          )}
 
-      {/* Информация */}
-      <div className="rounded-lg border bg-card p-6">
-        <h3 className="font-semibold mb-3">ℹ️ Как использовать шаги</h3>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>• Оплачивайте до 30% стоимости подписки шагами</li>
-          <li>• 1 шаг = 1 рубль</li>
-          <li>• Шаги не сгорают</li>
-          <li>• Кешбек начисляется от фактически оплаченной суммы</li>
-        </ul>
+          {/* История операций */}
+          <BonusHistory transactions={bonusStats.recentTransactions} userId={profile.id} />
+        </div>
       </div>
     </div>
   )

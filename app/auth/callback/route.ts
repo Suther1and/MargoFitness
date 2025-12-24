@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { registerReferral } from '@/lib/actions/referrals'
+import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -35,6 +36,14 @@ export async function GET(request: Request) {
 
       console.log('[Callback] Profile check:', profile ? 'EXISTS' : 'NOT FOUND', profileError?.code)
 
+      // Если профиль существует, убедимся что есть бонусный аккаунт
+      if (profile) {
+        const bonusResult = await ensureBonusAccountExists(sessionData.user.id)
+        if (!bonusResult.success) {
+          console.error('[Callback] Failed to ensure bonus account:', bonusResult.error)
+        }
+      }
+
       // Если профиля нет, создаем его вручную
       if (profileError?.code === 'PGRST116' || !profile) {
         console.log('[Callback] Creating profile for user:', sessionData.user.id)
@@ -65,6 +74,14 @@ export async function GET(request: Request) {
           // Продолжаем редирект, профиль будет создан при первом запросе
         } else {
           console.log('[Callback] Profile created successfully:', newProfile)
+          
+          // ВАЖНО: Создаем бонусный аккаунт (на случай если триггер не сработал)
+          const bonusResult = await ensureBonusAccountExists(sessionData.user.id)
+          if (bonusResult.success) {
+            console.log('[Callback] Bonus account ensured, created:', bonusResult.created)
+          } else {
+            console.error('[Callback] Failed to ensure bonus account:', bonusResult.error)
+          }
           
           // Регистрация реферала (если есть код)
           if (refCode) {

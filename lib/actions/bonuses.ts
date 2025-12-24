@@ -60,6 +60,104 @@ export async function getCurrentUserBonusAccount(): Promise<{
 }
 
 /**
+ * Создать бонусный аккаунт для пользователя (если не существует)
+ */
+export async function ensureBonusAccountExists(userId: string): Promise<{
+  success: boolean
+  created: boolean
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // Проверяем существует ли уже
+  const { data: existing } = await supabase
+    .from('user_bonuses')
+    .select('id')
+    .eq('user_id', userId)
+    .single()
+
+  if (existing) {
+    return { success: true, created: false }
+  }
+
+  try {
+    // Вызываем функцию создания аккаунта
+    const { error } = await supabase.rpc('create_bonus_account_for_user' as any, {
+      p_user_id: userId
+    })
+
+    if (error) {
+      console.error('[ensureBonusAccountExists] RPC error:', error)
+      // Если RPC не работает, создаем вручную
+      return await createBonusAccountManually(userId)
+    }
+
+    return { success: true, created: true }
+  } catch (error) {
+    console.error('[ensureBonusAccountExists] Error:', error)
+    return { success: false, created: false, error: 'Не удалось создать бонусный аккаунт' }
+  }
+}
+
+/**
+ * Создать бонусный аккаунт вручную (fallback)
+ */
+async function createBonusAccountManually(userId: string): Promise<{
+  success: boolean
+  created: boolean
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    // Генерируем реферальный код
+    const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+
+    // Создаем бонусный счет
+    const { error: bonusError } = await supabase
+      .from('user_bonuses')
+      .insert({
+        user_id: userId,
+        balance: 250,
+        cashback_level: 1,
+        total_spent_for_cashback: 0,
+        referral_level: 1,
+        total_referral_earnings: 0,
+      })
+
+    if (bonusError) throw bonusError
+
+    // Создаем реферальный код
+    const { error: refCodeError } = await supabase
+      .from('referral_codes')
+      .insert({
+        user_id: userId,
+        code: referralCode,
+      })
+
+    if (refCodeError) throw refCodeError
+
+    // Создаем транзакцию приветственного бонуса
+    const { error: txError } = await supabase
+      .from('bonus_transactions')
+      .insert({
+        user_id: userId,
+        amount: 250,
+        type: 'welcome',
+        description: 'Приветственный бонус',
+      })
+
+    if (txError) throw txError
+
+    console.log('[createBonusAccountManually] Successfully created for user:', userId)
+    return { success: true, created: true }
+  } catch (error) {
+    console.error('[createBonusAccountManually] Error:', error)
+    return { success: false, created: false, error: 'Не удалось создать аккаунт вручную' }
+  }
+}
+
+/**
  * Получить историю бонусных транзакций
  */
 export async function getBonusTransactions(
