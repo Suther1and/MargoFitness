@@ -225,7 +225,7 @@ export default async function AdminUsersPage({
                       <div className="flex items-center justify-end gap-2">
                         <CancelSubscriptionButton 
                           userId={user.id}
-                          userEmail={user.email}
+                          userEmail={user.email || ''}
                           hasActiveSubscription={user.subscription_status === 'active'}
                         />
                         <EditUserDialog user={user} />
