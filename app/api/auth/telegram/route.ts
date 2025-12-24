@@ -145,45 +145,87 @@ export async function POST(request: Request) {
         }
       })
 
-      if (authError || !authData.user) {
+      // Если пользователь уже существует в auth.users (но не в profiles)
+      if (authError?.message?.includes('already registered') || authError?.code === 'user_already_exists') {
+        console.log('[Telegram Auth] User exists in auth.users but not in profiles, fetching user')
+        
+        // Ищем пользователя в auth.users через email
+        const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+        
+        if (listError) {
+          console.error('[Telegram Auth] Failed to list users:', listError)
+          return NextResponse.json(
+            { error: 'Failed to create user account' },
+            { status: 500 }
+          )
+        }
+        
+        const existingUser = users?.find(u => u.email === telegramEmail)
+        
+        if (existingUser) {
+          userId = existingUser.id
+          console.log('[Telegram Auth] Found existing user, restoring profile:', userId)
+          
+          // Восстанавливаем профиль
+          await supabase
+            .from('profiles')
+            .upsert({
+              id: userId,
+              email: telegramEmail,
+              full_name: fullName,
+              avatar_url: telegramData.photo_url || null,
+              telegram_id: telegramData.id.toString(),
+              telegram_username: telegramData.username || null,
+              role: 'user',
+              subscription_status: 'inactive',
+              subscription_tier: 'free'
+            })
+        } else {
+          console.error('[Telegram Auth] User exists but not found in list')
+          return NextResponse.json(
+            { error: 'Failed to create user account' },
+            { status: 500 }
+          )
+        }
+      } else if (authError || !authData.user) {
         console.error('[Telegram Auth] Failed to create user:', authError)
         return NextResponse.json(
           { error: 'Failed to create user account' },
           { status: 500 }
         )
-      }
+      } else {
+        userId = authData.user.id
+        console.log('[Telegram Auth] User created:', userId)
 
-      userId = authData.user.id
-      console.log('[Telegram Auth] User created:', userId)
+        // Создаем профиль
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            email: telegramEmail,
+            full_name: fullName,
+            avatar_url: telegramData.photo_url || null,
+            telegram_id: telegramData.id.toString(),
+            telegram_username: telegramData.username || null,
+            role: 'user',
+            subscription_status: 'inactive',
+            subscription_tier: 'free'
+          })
 
-      // Создаем профиль
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email: telegramEmail,
-          full_name: fullName,
-          avatar_url: telegramData.photo_url || null,
-          telegram_id: telegramData.id.toString(),
-          telegram_username: telegramData.username || null,
-          role: 'user',
-          subscription_status: 'inactive',
-          subscription_tier: 'free'
-        })
+        if (profileError) {
+          console.error('[Telegram Auth] Failed to create profile:', profileError)
+          // Продолжаем выполнение, профиль может создаться через trigger
+        }
 
-      if (profileError) {
-        console.error('[Telegram Auth] Failed to create profile:', profileError)
-        // Продолжаем выполнение, профиль может создаться через trigger
-      }
-
-      // Отправляем приветственное письмо (если настроен email)
-      if (fullName) {
-        sendWelcomeEmail({
-          to: telegramEmail,
-          userName: fullName
-        }).catch(err => {
-          console.error('[Telegram Auth] Failed to send welcome email:', err)
-        })
+        // Отправляем приветственное письмо (если настроен email)
+        if (fullName) {
+          sendWelcomeEmail({
+            to: telegramEmail,
+            userName: fullName
+          }).catch(err => {
+            console.error('[Telegram Auth] Failed to send welcome email:', err)
+          })
+        }
       }
     }
 
