@@ -26,8 +26,8 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
     setLoading(false)
   }
 
-  const getTypeLabel = (type: BonusTransaction['type']) => {
-    const labels = {
+  const getTypeLabel = (type: BonusTransaction['type']): string => {
+    const labels: Record<string, string> = {
       welcome: 'Приветственный бонус',
       cashback: 'Кешбек',
       referral_bonus: 'Реферальный бонус',
@@ -38,7 +38,7 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
     return labels[type] || type
   }
 
-  const getTypeColor = (type: BonusTransaction['type']) => {
+  const getTypeColor = (type: BonusTransaction['type']): string => {
     if (type === 'spent') return 'text-red-600 dark:text-red-400'
     return 'text-green-600 dark:text-green-400'
   }

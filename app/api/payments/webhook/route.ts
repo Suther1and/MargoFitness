@@ -213,10 +213,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Отключаем проверку body size для webhook
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
-
