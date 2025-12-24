@@ -18,7 +18,9 @@ interface PaymentPageClientProps {
 export function PaymentPageClient({ product, profile, Icon, pricePerMonth }: PaymentPageClientProps) {
   const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
 
-  const benefits = product.metadata?.benefits as string[] || [
+  // Безопасное извлечение benefits из metadata
+  const metadata = product.metadata as { benefits?: string[] } | null
+  const benefits = metadata?.benefits || [
     "Доступ ко всем тренировкам",
     "Персональная программа",
     "Техподдержка 24/7"
