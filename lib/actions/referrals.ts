@@ -123,14 +123,14 @@ export async function getUserReferrals(userId: string): Promise<{
     (referrals || []).map(async (ref) => {
       const { data: bonusAccount } = await supabase
         .from('user_bonuses')
-        .select('lifetime_spent')
+        .select('total_spent_for_cashback')
         .eq('user_id', ref.referred_id)
         .single()
 
       return {
         ...ref,
         referred_name: (ref.referred as any)?.full_name || null,
-        total_spent: bonusAccount?.lifetime_spent || 0,
+        total_spent: bonusAccount?.total_spent_for_cashback || 0,
       }
     })
   )
@@ -338,8 +338,8 @@ export async function handleReferralPurchase(
 
     let firstPurchaseBonus = 0
 
-    // Если это первая покупка реферала
-    if (isFirstPurchase && !referral.first_purchase_bonus_given) {
+    // Если это первая покупка реферала (проверяем по статусу)
+    if (isFirstPurchase && referral.status !== 'first_purchase_made') {
       // Начисляем разовый бонус 500
       await addBonusTransaction({
         userId: referral.referrer_id,
@@ -356,7 +356,6 @@ export async function handleReferralPurchase(
         .from('referrals')
         .update({
           status: 'first_purchase_made',
-          first_purchase_bonus_given: true,
           first_purchase_at: new Date().toISOString(),
         })
         .eq('id', referral.id)

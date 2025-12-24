@@ -107,7 +107,7 @@ export async function getBonusStats(userId: string): Promise<{
 
   const account = accountResult.data
   const levelData = getCashbackLevelData(account.cashback_level)
-  const progress = calculateLevelProgress(account.lifetime_spent, false)
+  const progress = calculateLevelProgress(account.total_spent_for_cashback, false)
 
   const transactionsResult = await getBonusTransactions(userId, 10)
   const recentTransactions = transactionsResult.data || []
@@ -164,8 +164,6 @@ export async function addBonusTransaction(params: {
 
     // Рассчитываем новый баланс
     const newBalance = account.balance + params.amount
-    const newTotalEarned = params.amount > 0 ? account.total_earned + params.amount : account.total_earned
-    const newTotalSpent = params.amount < 0 ? account.total_spent + Math.abs(params.amount) : account.total_spent
 
     // Создаем транзакцию
     const { error: txError } = await supabase
@@ -189,8 +187,6 @@ export async function addBonusTransaction(params: {
       .from('user_bonuses')
       .update({
         balance: newBalance,
-        total_earned: newTotalEarned,
-        total_spent: newTotalSpent,
       })
       .eq('user_id', params.userId)
 
@@ -254,14 +250,14 @@ export async function awardCashback(params: {
       throw new Error(txResult.error)
     }
 
-    // Обновляем lifetime_spent и проверяем уровень
-    const newLifetimeSpent = account.lifetime_spent + params.paidAmount
-    const newLevel = calculateCashbackLevel(newLifetimeSpent)
+    // Обновляем total_spent_for_cashback и проверяем уровень
+    const newTotalSpent = account.total_spent_for_cashback + params.paidAmount
+    const newLevel = calculateCashbackLevel(newTotalSpent)
 
     const { error: updateError } = await supabase
       .from('user_bonuses')
       .update({
-        lifetime_spent: newLifetimeSpent,
+        total_spent_for_cashback: newTotalSpent,
         cashback_level: newLevel,
       })
       .eq('user_id', params.userId)
@@ -426,12 +422,17 @@ export async function getAdminBonusStats(): Promise<{
     // Получаем все счета
     const { data: accounts, error } = await supabase
       .from('user_bonuses')
-      .select('balance, total_earned, total_spent, cashback_level')
+      .select('balance, cashback_level')
 
     if (error) throw error
 
-    const totalBonusesIssued = accounts?.reduce((sum, acc) => sum + acc.total_earned, 0) || 0
-    const totalBonusesSpent = accounts?.reduce((sum, acc) => sum + acc.total_spent, 0) || 0
+    // Считаем статистику по транзакциям
+    const { data: transactions } = await supabase
+      .from('bonus_transactions')
+      .select('amount')
+
+    const totalBonusesIssued = transactions?.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0) || 0
+    const totalBonusesSpent = transactions?.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
     const totalBonusesInCirculation = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0
     const averageBalance = accounts?.length ? Math.floor(totalBonusesInCirculation / accounts.length) : 0
 

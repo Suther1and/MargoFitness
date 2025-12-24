@@ -23,7 +23,7 @@ export function CreatePromoDialog() {
   const [error, setError] = useState('')
 
   const [code, setCode] = useState('')
-  const [discountType, setDiscountType] = useState<'percent' | 'fixed_amount'>('percent')
+  const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage')
   const [discountValue, setDiscountValue] = useState('')
   const [usageLimit, setUsageLimit] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
@@ -91,16 +91,16 @@ export function CreatePromoDialog() {
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={discountType === 'percent' ? 'default' : 'outline'}
-                onClick={() => setDiscountType('percent')}
+                variant={discountType === 'percentage' ? 'default' : 'outline'}
+                onClick={() => setDiscountType('percentage')}
                 className="flex-1"
               >
                 Процент
               </Button>
               <Button
                 type="button"
-                variant={discountType === 'fixed_amount' ? 'default' : 'outline'}
-                onClick={() => setDiscountType('fixed_amount')}
+                variant={discountType === 'fixed' ? 'default' : 'outline'}
+                onClick={() => setDiscountType('fixed')}
                 className="flex-1"
               >
                 Фиксированная сумма
@@ -111,17 +111,17 @@ export function CreatePromoDialog() {
           {/* Значение скидки */}
           <div className="space-y-2">
             <Label htmlFor="value">
-              {discountType === 'percent' ? 'Процент скидки *' : 'Сумма скидки (₽) *'}
+              {discountType === 'percentage' ? 'Процент скидки *' : 'Сумма скидки (₽) *'}
             </Label>
             <Input
               id="value"
               type="number"
               value={discountValue}
               onChange={(e) => setDiscountValue(e.target.value)}
-              placeholder={discountType === 'percent' ? '10' : '500'}
+              placeholder={discountType === 'percentage' ? '10' : '500'}
               required
               min="0"
-              max={discountType === 'percent' ? '100' : undefined}
+              max={discountType === 'percentage' ? '100' : undefined}
             />
           </div>
 

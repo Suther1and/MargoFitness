@@ -95,14 +95,8 @@ export function PaymentPageClient({ product, profile, Icon, pricePerMonth }: Pay
         {/* Виджет оплаты */}
         {calculation && (
           <PaymentWidgetSwitcher 
-            productId={product.id}
-            amount={calculation.finalPrice}
-            metadata={{
-              promo_code_id: calculation.promoCode ? undefined : undefined, // TODO: передавать ID промокода
-              promo_code: calculation.promoCode,
-              bonus_used: calculation.bonusToUse,
-              actual_paid_amount: calculation.finalPrice,
-            }}
+            product={product}
+            profile={profile}
           />
         )}
       </div>

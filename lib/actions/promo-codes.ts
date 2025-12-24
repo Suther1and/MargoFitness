@@ -45,9 +45,8 @@ export async function validatePromoCode(
     }
 
     // Проверяем применимость к продукту
-    if (productId && promo.applicable_products) {
-      const applicableProducts = promo.applicable_products as string[]
-      if (!applicableProducts.includes(productId)) {
+    if (productId && promo.applicable_to && promo.applicable_to.length > 0) {
+      if (!promo.applicable_to.includes(productId)) {
         return { success: false, error: 'Промокод не применим к этому продукту' }
       }
     }
@@ -69,26 +68,18 @@ export async function incrementPromoUsage(promoId: string): Promise<{
   const supabase = await createClient()
 
   try {
-    const { error } = await supabase.rpc('increment', {
-      table_name: 'promo_codes',
-      row_id: promoId,
-      column_name: 'usage_count',
-    })
+    // Получаем текущий счетчик и инкрементируем
+    const { data: promo } = await supabase
+      .from('promo_codes')
+      .select('usage_count')
+      .eq('id', promoId)
+      .single()
 
-    // Если RPC не работает, используем обычный UPDATE
-    if (error) {
-      const { data: promo } = await supabase
+    if (promo) {
+      await supabase
         .from('promo_codes')
-        .select('usage_count')
+        .update({ usage_count: promo.usage_count + 1 })
         .eq('id', promoId)
-        .single()
-
-      if (promo) {
-        await supabase
-          .from('promo_codes')
-          .update({ usage_count: promo.usage_count + 1 })
-          .eq('id', promoId)
-      }
     }
 
     return { success: true }
@@ -119,7 +110,7 @@ export async function calculatePromoDiscount(
   const promo = validationResult.data
   let discount = 0
 
-  if (promo.discount_type === 'percent') {
+  if (promo.discount_type === 'percentage') {
     discount = Math.floor(basePrice * (promo.discount_value / 100))
   } else {
     discount = Math.min(promo.discount_value, basePrice)
@@ -141,7 +132,7 @@ export async function calculatePromoDiscount(
  */
 export async function createPromoCode(data: {
   code: string
-  discountType: 'percent' | 'fixed_amount'
+  discountType: 'percentage' | 'fixed'
   discountValue: number
   applicableProducts?: string[] | null
   usageLimit?: number | null
@@ -188,11 +179,10 @@ export async function createPromoCode(data: {
         code: data.code.toUpperCase(),
         discount_type: data.discountType,
         discount_value: data.discountValue,
-        applicable_products: data.applicableProducts || null,
+        applicable_to: data.applicableProducts || [],
         usage_limit: data.usageLimit || null,
         expires_at: data.expiresAt || null,
         is_active: true,
-        created_by: user.id,
       })
       .select()
       .single()

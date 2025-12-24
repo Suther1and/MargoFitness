@@ -34,6 +34,14 @@ export interface Database {
           telegram_username: string | null
           // Yandex авторизация
           yandex_id: string | null
+          // Бонусная система
+          bonus_balance: number
+          cashback_level: number
+          total_spent_for_cashback: number
+          referral_link: string | null
+          referral_level: number
+          total_referral_earnings: number
+          referred_by_id: string | null
           stats: Json
           created_at: string
           updated_at: string
@@ -62,6 +70,14 @@ export interface Database {
           telegram_username?: string | null
           // Yandex авторизация
           yandex_id?: string | null
+          // Бонусная система
+          bonus_balance?: number
+          cashback_level?: number
+          total_spent_for_cashback?: number
+          referral_link?: string | null
+          referral_level?: number
+          total_referral_earnings?: number
+          referred_by_id?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -90,6 +106,14 @@ export interface Database {
           telegram_username?: string | null
           // Yandex авторизация
           yandex_id?: string | null
+          // Бонусная система
+          bonus_balance?: number
+          cashback_level?: number
+          total_spent_for_cashback?: number
+          referral_link?: string | null
+          referral_level?: number
+          total_referral_earnings?: number
+          referred_by_id?: string | null
           stats?: Json
           created_at?: string
           updated_at?: string
@@ -483,6 +507,162 @@ export interface Database {
         }
         Relationships: []
       }
+      user_bonuses: {
+        Row: {
+          id: string
+          user_id: string
+          balance: number
+          cashback_level: number
+          total_spent_for_cashback: number
+          referral_level: number
+          total_referral_earnings: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          balance?: number
+          cashback_level?: number
+          total_spent_for_cashback?: number
+          referral_level?: number
+          total_referral_earnings?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          balance?: number
+          cashback_level?: number
+          total_spent_for_cashback?: number
+          referral_level?: number
+          total_referral_earnings?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bonus_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          type: Database['public']['Enums']['bonus_transaction_type']
+          description: string | null
+          related_transaction_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount: number
+          type: Database['public']['Enums']['bonus_transaction_type']
+          description?: string | null
+          related_transaction_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount?: number
+          type?: Database['public']['Enums']['bonus_transaction_type']
+          description?: string | null
+          related_transaction_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          id: string
+          referrer_id: string
+          referred_id: string
+          status: Database['public']['Enums']['referral_status']
+          created_at: string
+          first_purchase_at: string | null
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          referred_id: string
+          status?: Database['public']['Enums']['referral_status']
+          created_at?: string
+          first_purchase_at?: string | null
+        }
+        Update: {
+          id?: string
+          referrer_id?: string
+          referred_id?: string
+          status?: Database['public']['Enums']['referral_status']
+          created_at?: string
+          first_purchase_at?: string | null
+        }
+        Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          id: string
+          user_id: string
+          code: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          code: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          code?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          id: string
+          code: string
+          discount_type: Database['public']['Enums']['promo_discount_type']
+          discount_value: number
+          applicable_to: string[]
+          usage_limit: number | null
+          usage_count: number
+          expires_at: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          discount_type: Database['public']['Enums']['promo_discount_type']
+          discount_value: number
+          applicable_to?: string[]
+          usage_limit?: number | null
+          usage_count?: number
+          expires_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          discount_type?: Database['public']['Enums']['promo_discount_type']
+          discount_value?: number
+          applicable_to?: string[]
+          usage_limit?: number | null
+          usage_count?: number
+          expires_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -498,6 +678,9 @@ export interface Database {
     }
     Enums: {
       subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
+      bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment'
+      referral_status: 'registered' | 'first_purchase_made'
+      promo_discount_type: 'percentage' | 'fixed'
     }
     CompositeTypes: {
       [_ in never]: never

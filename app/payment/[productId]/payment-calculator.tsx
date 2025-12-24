@@ -107,7 +107,7 @@ export function PaymentCalculator({
               <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
                 <span>
                   Промокод {calculation.promoCode} 
-                  ({calculation.promoDiscountType === 'percent' 
+                  ({calculation.promoDiscountType === 'percentage' 
                     ? `${calculation.promoDiscountValue}%` 
                     : `${calculation.promoDiscountValue}₽`
                   })
