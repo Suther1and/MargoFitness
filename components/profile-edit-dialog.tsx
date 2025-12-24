@@ -32,9 +32,19 @@ export function ProfileEditDialog({
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   
+  // Проверяем, является ли это Telegram аккаунтом
+  const isTelegramAccount = profile.email?.includes('@telegram.local')
+  
+  // Формируем отображаемый email для Telegram пользователей
+  const displayEmail = isTelegramAccount && profile.telegram_username
+    ? `@${profile.telegram_username} (Telegram)`
+    : isTelegramAccount
+    ? 'Telegram аккаунт'
+    : profile.email || ''
+
   const [formData, setFormData] = useState({
     full_name: profile.full_name || '',
-    email: profile.email || '',
+    email: isTelegramAccount ? displayEmail : (profile.email || ''),
     phone: profile.phone || '',
   })
 
@@ -148,7 +158,7 @@ export function ProfileEditDialog({
       // Обновляем остальные данные профиля
       const result = await updateUserProfile({
         full_name: formData.full_name || undefined,
-        email: formData.email || undefined,
+        email: isTelegramAccount ? undefined : (formData.email || undefined),
         phone: formData.phone || undefined,
       })
 
@@ -286,11 +296,18 @@ export function ProfileEditDialog({
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
+                type={isTelegramAccount ? "text" : "email"}
                 placeholder="email@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={isTelegramAccount}
+                className={isTelegramAccount ? "bg-muted cursor-not-allowed" : ""}
               />
+              {isTelegramAccount && (
+                <p className="text-xs text-muted-foreground">
+                  Email нельзя изменить для Telegram аккаунтов
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
