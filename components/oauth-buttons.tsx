@@ -11,7 +11,7 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
-  const [showTelegramWidget, setShowTelegramWidget] = useState(false)
+  const [telegramLoading, setTelegramLoading] = useState(false)
   const supabase = createClient()
 
   // Получаем имя бота из переменных окружения
@@ -98,31 +98,18 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - кастомная кнопка с наложенным виджетом */}
+      {/* Telegram - виджет с индикацией загрузки */}
       {telegramBotName ? (
         <div className="relative">
-          {/* Визуальная кнопка */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full pointer-events-none"
-            disabled={loadingProvider !== null}
-          >
-            <TelegramIcon />
-            <span className="ml-2">Telegram</span>
-          </Button>
-          
-          {/* Невидимый виджет поверх кнопки */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-0">
-            <TelegramLoginWidget
-              botName={telegramBotName}
-              redirectTo={redirectTo}
-              buttonSize="large"
-              requestAccess={false}
-              usePic={false}
-              lang="ru"
-            />
-          </div>
+          <TelegramLoginWidget
+            botName={telegramBotName}
+            redirectTo={redirectTo}
+            buttonSize="large"
+            requestAccess={false}
+            usePic={false}
+            lang="ru"
+            onLoadingChange={setTelegramLoading}
+          />
         </div>
       ) : (
         <Button

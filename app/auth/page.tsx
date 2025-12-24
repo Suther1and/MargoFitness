@@ -48,8 +48,8 @@ function AuthForm() {
         return
       }
 
-      // Если пользователь не найден или неверный пароль - пробуем зарегистрировать
-      if (signInError.message.includes('Invalid') || signInError.message.includes('credentials')) {
+      // Если пользователь не найден - пробуем зарегистрировать
+      if (signInError.message.includes('Invalid login credentials')) {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -59,7 +59,12 @@ function AuthForm() {
         })
 
         if (signUpError) {
-          setError(signUpError.message)
+          // Если пользователь уже существует, показываем понятное сообщение
+          if (signUpError.message.includes('already registered')) {
+            setError('Пользователь с таким email уже зарегистрирован. Проверьте правильность пароля.')
+          } else {
+            setError(signUpError.message)
+          }
           setLoading(false)
           return
         }
@@ -70,8 +75,12 @@ function AuthForm() {
         return
       }
 
-      // Другая ошибка
-      setError(signInError.message)
+      // Другая ошибка - показываем понятное сообщение
+      if (signInError.message.includes('Invalid')) {
+        setError('Неверный email или пароль')
+      } else {
+        setError(signInError.message)
+      }
       setLoading(false)
       return
     }

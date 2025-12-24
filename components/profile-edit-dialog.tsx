@@ -187,9 +187,20 @@ export function ProfileEditDialog({
     onOpenChange(false)
   }
 
+  // Для Telegram пользователей при первом входе - запрещаем закрытие диалога
+  const canClose = !(isTelegramAccount && isFirstTime && hasTelegramEmail)
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
+      <DialogContent 
+        className="sm:max-w-[500px]"
+        onPointerDownOutside={(e) => {
+          if (!canClose) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (!canClose) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {isFirstTime ? 'Добро пожаловать!' : 'Редактировать профиль'}
@@ -352,7 +363,7 @@ export function ProfileEditDialog({
             <Button
               type="submit"
               disabled={loading || uploadingAvatar}
-              className="flex-1"
+              className={isFirstTime && !isTelegramAccount ? "flex-1" : "w-full"}
             >
               {loading ? (
                 <>
@@ -364,6 +375,12 @@ export function ProfileEditDialog({
               )}
             </Button>
           </div>
+          
+          {isTelegramAccount && isFirstTime && hasTelegramEmail && (
+            <p className="text-xs text-center text-muted-foreground">
+              Пожалуйста, укажите email для продолжения
+            </p>
+          )}
         </form>
       </DialogContent>
     </Dialog>

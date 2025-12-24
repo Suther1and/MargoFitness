@@ -13,6 +13,7 @@ interface TelegramLoginWidgetProps {
   usePic?: boolean
   lang?: string
   useRedirect?: boolean // Новый параметр для режима редиректа
+  onLoadingChange?: (loading: boolean) => void // Callback для изменения состояния загрузки
 }
 
 interface TelegramUser {
@@ -41,12 +42,18 @@ export function TelegramLoginWidget({
   requestAccess = true,
   usePic = true,
   lang = 'ru',
-  useRedirect = false
+  useRedirect = false,
+  onLoadingChange
 }: TelegramLoginWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Уведомляем родителя об изменении состояния загрузки
+  useEffect(() => {
+    onLoadingChange?.(loading)
+  }, [loading, onLoadingChange])
 
   useEffect(() => {
     // Проверяем, что botName задан

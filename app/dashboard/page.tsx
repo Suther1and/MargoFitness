@@ -58,7 +58,7 @@ export default async function DashboardPage() {
               </div>
 
               <div className="space-y-2">
-                {profile.email && (
+                {profile.email && !profile.email.includes('@telegram.local') && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="size-4" />
                     <span>{profile.email}</span>
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                   </div>
                 )}
 
-                {!profile.phone && !profile.email && (
+                {!profile.phone && (!profile.email || profile.email.includes('@telegram.local')) && (
                   <p className="text-sm text-muted-foreground">
                     Добавьте контактную информацию
                   </p>
