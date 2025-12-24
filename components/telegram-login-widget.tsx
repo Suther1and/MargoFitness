@@ -12,6 +12,7 @@ interface TelegramLoginWidgetProps {
   requestAccess?: boolean
   usePic?: boolean
   lang?: string
+  useRedirect?: boolean // Новый параметр для режима редиректа
 }
 
 interface TelegramUser {
@@ -39,7 +40,8 @@ export function TelegramLoginWidget({
   cornerRadius,
   requestAccess = true,
   usePic = true,
-  lang = 'ru'
+  lang = 'ru',
+  useRedirect = false
 }: TelegramLoginWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -122,7 +124,14 @@ export function TelegramLoginWidget({
     script.setAttribute('data-request-access', requestAccess ? 'write' : 'read')
     script.setAttribute('data-userpic', usePic.toString())
     script.setAttribute('data-lang', lang)
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)')
+    
+    // Режим редиректа или колбэка
+    if (useRedirect) {
+      const callbackUrl = `${window.location.origin}/api/auth/telegram/callback`
+      script.setAttribute('data-auth-url', callbackUrl)
+    } else {
+      script.setAttribute('data-onauth', 'onTelegramAuth(user)')
+    }
 
     // Очищаем контейнер и добавляем скрипт
     if (containerRef.current) {

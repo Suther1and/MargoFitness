@@ -11,7 +11,6 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
-  const [showTelegramWidget, setShowTelegramWidget] = useState(false)
   const supabase = createClient()
 
   // Получаем имя бота из переменных окружения
@@ -40,13 +39,6 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
     }
   }
 
-  const handleTelegramClick = () => {
-    if (!telegramBotName) {
-      alert("Telegram авторизация не настроена. Обратитесь к администратору.")
-      return
-    }
-    setShowTelegramWidget(true)
-  }
 
   const handleComingSoon = (provider: string) => {
     alert(`Вход через ${provider} скоро будет доступен! 🚀`)
@@ -105,37 +97,28 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
       </Button>
 
       {/* Telegram - официальный Login Widget */}
-      {!showTelegramWidget ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleTelegramClick}
-          disabled={loadingProvider !== null}
-        >
-          <TelegramIcon />
-          <span className="ml-2">Telegram</span>
-        </Button>
-      ) : (
-        <div className="rounded-lg border border-muted bg-muted/20 p-4">
-          <div className="mb-2 text-center text-sm text-muted-foreground">
-            Нажмите кнопку ниже для входа через Telegram
-          </div>
+      {telegramBotName ? (
+        <div className="flex w-full justify-center">
           <TelegramLoginWidget
             botName={telegramBotName}
             redirectTo={redirectTo}
             buttonSize="large"
             requestAccess={true}
-            usePic={true}
+            usePic={false}
             lang="ru"
+            useRedirect={true}
           />
-          <button
-            onClick={() => setShowTelegramWidget(false)}
-            className="mt-2 w-full text-center text-xs text-muted-foreground hover:text-foreground"
-          >
-            Отмена
-          </button>
         </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled
+        >
+          <TelegramIcon />
+          <span className="ml-2">Telegram (не настроен)</span>
+        </Button>
       )}
     </div>
   )
