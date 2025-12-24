@@ -93,7 +93,7 @@ function getWelcomeEmailHTML(userName?: string): string {
       </ul>
       
       <p style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="button">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">
           Перейти в личный кабинет
         </a>
       </p>
@@ -179,7 +179,7 @@ function getPaymentSuccessEmailHTML(params: Omit<PaymentSuccessEmailParams, 'to'
       </ul>
       
       <p style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="button">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">
           Начать тренировки
         </a>
       </p>
@@ -238,7 +238,7 @@ function getSubscriptionUpgradeEmailHTML(params: Omit<SubscriptionUpgradeEmailPa
       <p>Мы конвертировали оставшиеся дни твоей предыдущей подписки в дополнительные дни новой. Теперь у тебя ещё больше возможностей!</p>
       
       <p style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="button">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">
           Открыть личный кабинет
         </a>
       </p>
@@ -319,7 +319,7 @@ function getSubscriptionChangeEmailHTML(params: Omit<SubscriptionChangeEmailPara
       ${params.details ? `<p>${params.details}</p>` : ''}
       
       <p style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="button">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" class="button">
           Открыть личный кабинет
         </a>
       </p>

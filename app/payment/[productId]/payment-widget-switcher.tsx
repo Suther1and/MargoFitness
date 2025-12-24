@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { YooKassaWidget } from './yookassa-widget'
 import { RedirectPayment } from './redirect-payment'
-import { MockPaymentWidget } from './mock-payment-widget'
-import { CreditCard, ExternalLink, TestTube } from 'lucide-react'
+import { CreditCard, ExternalLink } from 'lucide-react'
 import type { Product, Profile } from "@/types/database"
 
 interface PaymentWidgetSwitcherProps {
@@ -15,26 +14,22 @@ interface PaymentWidgetSwitcherProps {
   profile: Profile
 }
 
-type PaymentMode = 'embedded' | 'redirect' | 'mock'
+type PaymentMode = 'embedded' | 'redirect'
 
 export function PaymentWidgetSwitcher({ product, profile }: PaymentWidgetSwitcherProps) {
   const searchParams = useSearchParams()
   const modeParam = searchParams.get('mode') as PaymentMode | null
   
-  // Определяем режим: из URL параметра или дефолтный (embedded для production, mock для dev)
-  const defaultMode: PaymentMode = process.env.NODE_ENV === 'development' ? 'mock' : 'embedded'
-  const [mode, setMode] = useState<PaymentMode>(modeParam || defaultMode)
+  const [mode, setMode] = useState<PaymentMode>(modeParam || 'embedded')
 
-  // Обновляем mode при изменении URL параметра
   useEffect(() => {
-    if (modeParam && (modeParam === 'embedded' || modeParam === 'redirect' || modeParam === 'mock')) {
+    if (modeParam && (modeParam === 'embedded' || modeParam === 'redirect')) {
       setMode(modeParam)
     }
   }, [modeParam])
 
   return (
     <div className="space-y-4">
-      {/* Переключатель режимов */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Способ оплаты</CardTitle>
@@ -64,25 +59,10 @@ export function PaymentWidgetSwitcher({ product, profile }: PaymentWidgetSwitche
                 <div className="text-xs opacity-80">Перенаправление на ЮКасса</div>
               </div>
             </Button>
-
-            {process.env.NODE_ENV === 'development' && (
-              <Button
-                variant={mode === 'mock' ? 'default' : 'outline'}
-                className="justify-start"
-                onClick={() => setMode('mock')}
-              >
-                <TestTube className="mr-2 size-4" />
-                <div className="text-left flex-1">
-                  <div className="font-medium">Mock (Тест)</div>
-                  <div className="text-xs opacity-80">Без реальной оплаты</div>
-                </div>
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Рендер соответствующего виджета */}
       {mode === 'embedded' && (
         <YooKassaWidget product={product} profile={profile} />
       )}
@@ -90,11 +70,6 @@ export function PaymentWidgetSwitcher({ product, profile }: PaymentWidgetSwitche
       {mode === 'redirect' && (
         <RedirectPayment product={product} profile={profile} />
       )}
-      
-      {mode === 'mock' && (
-        <MockPaymentWidget product={product} profile={profile} />
-      )}
     </div>
   )
 }
-
