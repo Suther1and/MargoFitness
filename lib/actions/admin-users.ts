@@ -38,13 +38,13 @@ export async function getAllUsers(filters?: {
 
     // Применяем фильтры
     if (filters?.role && filters.role !== 'all') {
-      query = query.eq('role', filters.role)
+      query = query.eq('role', filters.role as 'user' | 'admin')
     }
     if (filters?.tier && filters.tier !== 'all') {
-      query = query.eq('subscription_tier', filters.tier)
+      query = query.eq('subscription_tier', filters.tier as any)
     }
     if (filters?.status && filters.status !== 'all') {
-      query = query.eq('subscription_status', filters.status)
+      query = query.eq('subscription_status', filters.status as any)
     }
     if (filters?.search) {
       query = query.ilike('email', `%${filters.search}%`)
