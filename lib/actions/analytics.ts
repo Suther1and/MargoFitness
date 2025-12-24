@@ -367,7 +367,7 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
     
     // Получить информацию о пользователях и продуктах
     const userIds = [...new Set(transactions?.map(t => t.user_id) || [])]
-    const productIds = [...new Set(transactions?.map(t => t.product_id).filter(Boolean) || [])]
+    const productIds = [...new Set(transactions?.map(t => t.product_id).filter((id): id is string => id !== null) || [])]
     
     const { data: users } = await supabase
       .from('profiles')

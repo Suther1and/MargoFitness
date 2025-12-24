@@ -7,7 +7,7 @@
  * - Mock-режим для разработки без реальных ключей
  */
 
-import { YooCheckout, ICreatePayment, IPayment } from '@a2seven/yoo-checkout'
+import { YooCheckout, ICreatePayment, Payment } from '@a2seven/yoo-checkout'
 
 // Проверка что это mock-режим
 const isMockMode = 

@@ -399,7 +399,7 @@ export async function downgradeToFree(userId: string): Promise<boolean> {
     .from('profiles')
     .update({
       subscription_tier: 'free',
-      subscription_status: 'expired',
+      subscription_status: 'inactive',
       subscription_expires_at: new Date().toISOString(),
       auto_renew_enabled: false,
       failed_payment_attempts: 0,
