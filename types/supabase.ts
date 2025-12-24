@@ -482,7 +482,13 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_email_exists: {
+        Args: {
+          email_to_check: string
+          current_user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
