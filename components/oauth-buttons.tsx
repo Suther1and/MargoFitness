@@ -11,10 +11,24 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
+  const [telegramWidgetReady, setTelegramWidgetReady] = useState(false)
   const supabase = createClient()
 
   // Получаем имя бота из переменных окружения
   const telegramBotName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || ''
+
+  const handleTelegramClick = () => {
+    setLoadingProvider("telegram")
+    // Ищем iframe виджета и кликаем на него
+    setTimeout(() => {
+      const iframe = document.querySelector('iframe[src*="telegram.org"]') as HTMLIFrameElement
+      if (iframe) {
+        iframe.click()
+        // Сбросим loading через 2 секунды если что-то пошло не так
+        setTimeout(() => setLoadingProvider(null), 2000)
+      }
+    }, 100)
+  }
 
   const handleGoogleLogin = async () => {
     try {
@@ -96,29 +110,33 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
         <span className="ml-2">ВКонтакте</span>
       </Button>
 
-      {/* Telegram - официальный Login Widget */}
-      {telegramBotName ? (
-        <div className="flex w-full justify-center">
+      {/* Telegram - кастомная кнопка + скрытый виджет */}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={handleTelegramClick}
+        disabled={loadingProvider !== null || !telegramBotName}
+      >
+        <TelegramIcon />
+        <span className="ml-2">
+          {loadingProvider === "telegram" ? "Открытие Telegram..." : "Telegram"}
+        </span>
+      </Button>
+      
+      {/* Скрытый виджет Telegram */}
+      {telegramBotName && (
+        <div className="hidden">
           <TelegramLoginWidget
             botName={telegramBotName}
             redirectTo={redirectTo}
             buttonSize="large"
-            requestAccess={true}
+            requestAccess={false}
             usePic={false}
             lang="ru"
             useRedirect={true}
           />
         </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          disabled
-        >
-          <TelegramIcon />
-          <span className="ml-2">Telegram (не настроен)</span>
-        </Button>
       )}
     </div>
   )
