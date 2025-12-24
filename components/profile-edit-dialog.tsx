@@ -32,25 +32,16 @@ export function ProfileEditDialog({
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   
-  // Проверяем, является ли это Telegram аккаунтом (по наличию telegram_id)
+  // Проверяем, является ли это Telegram аккаунтом
   const isTelegramAccount = !!profile.telegram_id
   
-  // Telegram аккаунт БЕЗ настоящего email (можно указать email при первом попапе)
+  // Проверяем есть ли настоящий email (не технический)
   const hasTelegramEmail = profile.email?.includes('@telegram.local')
-  const canEditEmail = isTelegramAccount && hasTelegramEmail && isFirstTime
-  
-  // Формируем отображаемый email
-  let displayEmail = profile.email || ''
-  if (isTelegramAccount && hasTelegramEmail) {
-    // Показываем Telegram username вместо технического email
-    displayEmail = profile.telegram_username 
-      ? `@${profile.telegram_username} (Telegram)` 
-      : 'Telegram аккаунт'
-  }
+  const hasRealEmail = !hasTelegramEmail
 
   const [formData, setFormData] = useState({
     full_name: profile.full_name || '',
-    email: canEditEmail ? '' : displayEmail,
+    email: hasRealEmail ? profile.email || '' : '',
     phone: profile.phone || '',
   })
 
@@ -141,6 +132,13 @@ export function ProfileEditDialog({
     setLoading(true)
     setErrors({})
 
+    // Валидация для Telegram пользователей при первом входе
+    if (isTelegramAccount && isFirstTime && !formData.email.trim()) {
+      setErrors({ email: 'Email обязателен для Telegram аккаунтов' })
+      setLoading(false)
+      return
+    }
+
     try {
       // Если есть выбранный файл, сначала загружаем его
       if (selectedFile) {
@@ -162,15 +160,9 @@ export function ProfileEditDialog({
       }
 
       // Обновляем остальные данные профиля
-      // Для Telegram: если canEditEmail = true и пользователь ввел email - обновляем
-      // Если canEditEmail = false - не трогаем email
       const result = await updateUserProfile({
         full_name: formData.full_name || undefined,
-        email: canEditEmail 
-          ? (formData.email.trim() || undefined)  // Обновляем только если ввели
-          : (!canEditEmail && !isTelegramAccount)
-          ? (formData.email || undefined)  // Обычные пользователи могут менять
-          : undefined,  // Telegram с настоящим email - не трогаем
+        email: formData.email.trim() || undefined,
         phone: formData.phone || undefined,
       })
 
@@ -306,26 +298,23 @@ export function ProfileEditDialog({
 
             <div className="space-y-2">
               <Label htmlFor="email">
-                Email {canEditEmail && <span className="text-muted-foreground">(опционально)</span>}
+                Email {isTelegramAccount && isFirstTime && <span className="text-destructive">*</span>}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder={canEditEmail ? "Укажите ваш email (необязательно)" : "email@example.com"}
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                disabled={!canEditEmail && isTelegramAccount}
-                className={!canEditEmail && isTelegramAccount ? "bg-muted cursor-not-allowed" : ""}
+                required={isTelegramAccount && isFirstTime}
               />
-              {canEditEmail && (
+              {isTelegramAccount && isFirstTime && (
                 <p className="text-xs text-muted-foreground">
-                  Вы вошли через Telegram. Можете указать настоящий email для уведомлений (или оставить пустым)
+                  Укажите ваш email - он нужен для входа и уведомлений
                 </p>
               )}
-              {!canEditEmail && isTelegramAccount && (
-                <p className="text-xs text-muted-foreground">
-                  Email нельзя изменить для Telegram аккаунтов
-                </p>
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
               )}
             </div>
 
@@ -348,7 +337,7 @@ export function ProfileEditDialog({
 
           {/* Кнопки */}
           <div className="flex gap-3">
-            {isFirstTime && (
+            {isFirstTime && !isTelegramAccount && (
               <Button
                 type="button"
                 variant="ghost"

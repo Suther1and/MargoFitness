@@ -106,11 +106,17 @@ export async function POST(request: Request) {
       .digest('hex')
 
     // Проверяем, существует ли уже пользователь с таким Telegram ID
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, email, telegram_id')
       .eq('telegram_id', telegramData.id.toString())
       .single()
+
+    console.log('[Telegram Auth] Profile lookup:', { 
+      found: !!existingProfile, 
+      error: profileError?.message,
+      telegram_id: telegramData.id.toString()
+    })
 
     let userId: string
     let isNewUser = false
@@ -119,7 +125,11 @@ export async function POST(request: Request) {
       // ============================================
       // СУЩЕСТВУЮЩИЙ ПОЛЬЗОВАТЕЛЬ - ПРОСТО ВХОДИМ
       // ============================================
-      console.log('[Telegram Auth] Existing user found, signing in:', existingProfile.id)
+      console.log('[Telegram Auth] Existing user found:', { 
+        id: existingProfile.id, 
+        email: existingProfile.email,
+        telegram_id: existingProfile.telegram_id
+      })
       userId = existingProfile.id
       
       // Обновляем данные профиля
@@ -133,13 +143,22 @@ export async function POST(request: Request) {
         .eq('id', userId)
 
       // Сразу создаем сессию
+      // ВАЖНО: всегда используем telegramEmail для входа (в auth.users email не меняется)
+      console.log('[Telegram Auth] Attempting signIn with:', { 
+        email: telegramEmail,
+        profileEmail: existingProfile.email
+      })
+      
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: existingProfile.email!,
+        email: telegramEmail,  // Используем telegram_*@telegram.local для входа
         password: deterministicPassword
       })
 
       if (signInError || !signInData.session) {
-        console.error('[Telegram Auth] Failed to sign in:', signInError)
+        console.error('[Telegram Auth] Failed to sign in:', { 
+          error: signInError?.message,
+          code: signInError?.status
+        })
         return NextResponse.json(
           { error: 'Failed to sign in' },
           { status: 500 }
