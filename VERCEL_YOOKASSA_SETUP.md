@@ -11,8 +11,8 @@
 
 ```bash
 # ЮКасса
-YOOKASSA_SHOP_ID=1236230
-YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI
+YOOKASSA_SHOP_ID=1236232
+YOOKASSA_SECRET_KEY=test_TVB8TaaAmH5opZrt-O4xicPqgoIYnUSCTIWtIG5kR4E
 YOOKASSA_WEBHOOK_SECRET=your_webhook_secret_from_yookassa
 
 # Supabase

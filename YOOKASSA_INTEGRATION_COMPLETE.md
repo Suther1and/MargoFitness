@@ -14,8 +14,8 @@
 - `.env.local` - добавлены переменные для ЮКассы
 
 **Ключи:**
-- `YOOKASSA_SHOP_ID=1236230`
-- `YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI`
+- `YOOKASSA_SHOP_ID=1236232`
+- `YOOKASSA_SECRET_KEY=test_TVB8TaaAmH5opZrt-O4xicPqgoIYnUSCTIWtIG5kR4E`
 - `YOOKASSA_WEBHOOK_SECRET` - нужно получить из личного кабинета
 - `NEXT_PUBLIC_YOOKASSA_RETURN_URL` - для redirect mode
 
@@ -143,8 +143,8 @@ docs/
 1. **Добавьте переменные в `.env.local`:**
 
 ```env
-YOOKASSA_SHOP_ID=1236230
-YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI
+YOOKASSA_SHOP_ID=1236232
+YOOKASSA_SECRET_KEY=test_TVB8TaaAmH5opZrt-O4xicPqgoIYnUSCTIWtIG5kR4E
 YOOKASSA_WEBHOOK_SECRET=your_webhook_secret
 NEXT_PUBLIC_YOOKASSA_RETURN_URL=http://localhost:3000/dashboard?payment=success
 ```

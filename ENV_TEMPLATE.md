@@ -45,10 +45,10 @@ YANDEX_CLIENT_SECRET=your_client_secret_here
 # YooKassa Payment Gateway
 # ============================================
 # Shop ID из личного кабинета ЮКассы
-YOOKASSA_SHOP_ID=1236230
+YOOKASSA_SHOP_ID=1236232
 
 # Секретный ключ для API (СЕКРЕТНЫЙ - только на сервере)
-YOOKASSA_SECRET_KEY=test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI
+YOOKASSA_SECRET_KEY=test_TVB8TaaAmH5opZrt-O4xicPqgoIYnUSCTIWtIG5kR4E
 
 # Секрет для проверки подписи webhook (генерируется в личном кабинете)
 YOOKASSA_WEBHOOK_SECRET=your_webhook_secret
@@ -110,8 +110,8 @@ NODE_ENV=development
    - Настройте URL: `https://your-domain.com/api/payments/webhook`
    - Получите **Секрет для подписи** → `YOOKASSA_WEBHOOK_SECRET`
 4. Для тестирования используйте тестовый магазин:
-   - shopId: `1236230`
-   - secret: `test_pnngxre8uPdfUg_-sROlvkoRUD6S_RC5AZ5wCURZPlI`
+   - shopId: `1236232`
+   - secret: `test_TVB8TaaAmH5opZrt-O4xicPqgoIYnUSCTIWtIG5kR4E`
 
 ---
 
