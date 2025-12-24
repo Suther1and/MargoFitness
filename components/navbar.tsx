@@ -66,14 +66,9 @@ export default async function Navbar() {
           ) : (
             <>
               {/* Для неавторизованных */}
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
-                  Вход
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
+              <Link href="/auth">
                 <Button size="sm">
-                  Регистрация
+                  Вход / Регистрация
                 </Button>
               </Link>
             </>
@@ -121,11 +116,8 @@ export default async function Navbar() {
                 ) : (
                   <>
                     <div className="border-t my-1"></div>
-                    <Link href="/auth/login" className="px-3 py-2 text-sm hover:bg-muted rounded">
-                      Вход
-                    </Link>
-                    <Link href="/auth/signup" className="px-3 py-2 text-sm hover:bg-muted rounded">
-                      Регистрация
+                    <Link href="/auth" className="px-3 py-2 text-sm hover:bg-muted rounded">
+                      Вход / Регистрация
                     </Link>
                   </>
                 )}
