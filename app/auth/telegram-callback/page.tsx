@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 
-export default function TelegramCallbackPage() {
+function TelegramCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
@@ -101,6 +101,26 @@ export default function TelegramCallbackPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function TelegramCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Авторизация через Telegram</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center gap-3">
+            <Loader2 className="size-5 animate-spin" />
+            <span>Загрузка...</span>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <TelegramCallbackContent />
+    </Suspense>
   )
 }
 
