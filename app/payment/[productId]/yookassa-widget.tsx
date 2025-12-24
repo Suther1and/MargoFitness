@@ -124,7 +124,8 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
     if (params.get('payment') === 'success') {
       setSuccess(true)
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/dashboard?payment=success')
+        router.refresh() // Обновить данные с сервера
       }, 2000)
     }
   }, [router])

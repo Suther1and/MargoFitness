@@ -108,6 +108,7 @@ export function MockPaymentWidget({ product, profile }: MockPaymentWidgetProps) 
       // Перенаправить на dashboard через 2 секунды
       setTimeout(() => {
         router.push('/dashboard?payment=success')
+        router.refresh() // Обновить данные с сервера
       }, 2000)
 
     } catch (err: any) {
