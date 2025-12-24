@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
     const { event, object: payment } = webhookData
 
     console.log(`[Webhook] Received event: ${event}, payment: ${payment.id}`)
+    console.log('[Webhook] Full payment object:', JSON.stringify(payment, null, 2))
+    console.log('[Webhook] Payment method:', payment.payment_method)
 
     // Создать Supabase клиент с service role (обходим RLS)
     const supabase = createServiceClient<Database>(

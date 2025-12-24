@@ -292,9 +292,41 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
               {subscriptionExpires && ` (до ${subscriptionExpires})`}.
             </p>
 
-            {/* Кнопка полной отмены (только для тестирования) */}
+            {/* Кнопки для тестирования (только development) */}
             {process.env.NODE_ENV === 'development' && (
-              <div className="border-t pt-4">
+              <div className="border-t pt-4 space-y-3">
+                {/* Кнопка для теста сохранения карты */}
+                {!hasPaymentMethod && hasActiveSubscription && (
+                  <Button
+                    variant="outline"
+                    className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={async () => {
+                      setLoading(true)
+                      try {
+                        const response = await fetch('/api/debug/save-test-card', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' }
+                        })
+                        const data = await response.json()
+                        if (data.success) {
+                          setMessage('✅ Тестовая карта сохранена')
+                          setTimeout(() => window.location.reload(), 1000)
+                        } else {
+                          setMessage('❌ ' + data.error)
+                        }
+                      } catch (error) {
+                        setMessage('❌ Ошибка')
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading}
+                  >
+                    🧪 [DEV] Сохранить тестовую карту
+                  </Button>
+                )}
+                
+                {/* Кнопка полной отмены */}
                 {!showCancelConfirm ? (
                   <Button
                     variant="outline"
