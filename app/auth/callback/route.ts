@@ -11,7 +11,15 @@ export async function GET(request: Request) {
   const refCode = requestUrl.searchParams.get('ref') // Реферальный код
   const origin = requestUrl.origin
 
-  console.log('[Callback] Received callback with code:', code ? 'YES' : 'NO')
+  console.log('='.repeat(80))
+  console.log('[Callback] START - Full URL:', requestUrl.toString())
+  console.log('[Callback] Params:', {
+    code: code ? 'YES' : 'NO',
+    redirect,
+    refCode: refCode || 'NONE',
+    origin
+  })
+  console.log('='.repeat(80))
 
   if (code) {
     try {
@@ -107,10 +115,12 @@ export async function GET(request: Request) {
       console.error('[Callback] Unexpected error:', error)
       return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
     }
+  } else {
+    console.log('[Callback] No code provided, redirecting directly')
   }
 
   // Редирект на указанную страницу или dashboard после успешной авторизации
-  console.log('[Callback] Redirecting to:', redirect)
+  console.log('[Callback] Final redirect to:', redirect)
   return NextResponse.redirect(`${origin}${redirect}`)
 }
 
