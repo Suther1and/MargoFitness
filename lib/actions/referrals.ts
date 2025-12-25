@@ -474,7 +474,8 @@ export async function getReferralLink(userId: string): Promise<{
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const link = `${baseUrl}/auth/signup?ref=${codeResult.data.code}`
+  // Используем /auth вместо /auth/signup (signup редиректит и теряет параметры)
+  const link = `${baseUrl}/auth?ref=${codeResult.data.code}`
 
   return {
     success: true,
