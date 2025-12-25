@@ -2,17 +2,26 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { BONUS_CONSTANTS } from '@/types/database'
 
-// Используем service role для backend операций
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+// Используем service role для backend операций (если доступен)
+const getAdminClient = () => {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!serviceRoleKey) {
+    console.error('[Process Referral] SUPABASE_SERVICE_ROLE_KEY not found!')
+    return null
   }
-)
+  
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+}
 
 export async function POST(request: Request) {
   try {
@@ -27,8 +36,18 @@ export async function POST(request: Request) {
       )
     }
 
+    const supabaseAdmin = getAdminClient()
+    
+    if (!supabaseAdmin) {
+      console.error('[Process Referral] Cannot create admin client - SERVICE_ROLE_KEY missing')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
     // Даем время на создание профиля триггером
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     // Проверяем бонусный аккаунт
     const { data: bonusAccount } = await supabaseAdmin
