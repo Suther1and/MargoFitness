@@ -20,6 +20,10 @@ function TelegramCallbackContent() {
       })
       console.log('[Telegram Callback] URL params:', allParams)
 
+      // Получаем реферальный код из localStorage
+      const refCode = localStorage.getItem('telegram_ref_code')
+      console.log('[Telegram Callback] Retrieved ref code from localStorage:', refCode || 'NONE')
+
       // Получаем данные от Telegram из URL
       const telegramData = {
         id: parseInt(searchParams.get('id') || '0'),
@@ -28,7 +32,8 @@ function TelegramCallbackContent() {
         username: searchParams.get('username') || undefined,
         photo_url: searchParams.get('photo_url') || undefined,
         auth_date: parseInt(searchParams.get('auth_date') || '0'),
-        hash: searchParams.get('hash') || ''
+        hash: searchParams.get('hash') || '',
+        ref_code: refCode || undefined
       }
 
       console.log('[Telegram Callback] Parsed data:', telegramData)
@@ -68,6 +73,9 @@ function TelegramCallbackContent() {
         if (sessionError) {
           throw new Error('Ошибка установки сессии')
         }
+
+        // Очищаем реферальный код из localStorage
+        localStorage.removeItem('telegram_ref_code')
 
         // Редирект на dashboard
         router.push('/dashboard')
