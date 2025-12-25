@@ -133,8 +133,8 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
         <CardContent className="space-y-6">
           {/* Текущий тариф */}
           <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <p className="font-medium">
+            <div className="flex-1">
+              <p className="font-medium text-lg">
                 {profile.subscription_tier === 'basic' ? 'Basic' :
                  profile.subscription_tier === 'pro' ? 'Pro' :
                  profile.subscription_tier === 'elite' ? 'Elite' : 'Free'}
@@ -145,29 +145,16 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
                   : 'Подписка неактивна'}
               </p>
             </div>
-            {!hasActiveSubscription && (
+            {hasActiveSubscription ? (
+              <SubscriptionActionsDialog profile={profile} />
+            ) : (
               <Link href="/pricing">
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                   Оформить подписку
                 </Button>
               </Link>
             )}
           </div>
-
-          {/* Продление и апгрейд подписки */}
-          {hasActiveSubscription && (
-            <div className="rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 p-4">
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium text-sm">⚡ Управление подпиской</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Продлите текущий тариф или повысьте уровень с бонусными днями
-                  </p>
-                </div>
-                <SubscriptionActionsDialog profile={profile} />
-              </div>
-            </div>
-          )}
 
           {/* Автопродление */}
           {hasActiveSubscription && (

@@ -73,14 +73,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверка: нельзя купить подписку если уже есть активная того же или более высокого уровня
-    // ИСКЛЮЧЕНИЕ: если это продление (renewal) текущего тарифа - разрешаем
-    if (product.type === 'subscription_tier' && profile.subscription_status === 'active' && action !== 'renewal') {
+    // ИСКЛЮЧЕНИЕ: если это продление (renewal) или апгрейд (upgrade) - разрешаем
+    if (product.type === 'subscription_tier' && profile.subscription_status === 'active' && action !== 'renewal' && action !== 'upgrade') {
       const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : 
                                 profile.subscription_tier === 'pro' ? 2 : 
                                 profile.subscription_tier === 'elite' ? 3 : 0
       const newTierLevel = product.tier_level || 1
       
-      // Если новый уровень такой же или ниже - запрещаем (кроме renewal)
+      // Если новый уровень такой же или ниже - запрещаем
       if (newTierLevel <= currentTierLevel) {
         return NextResponse.json(
           { 
