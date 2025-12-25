@@ -18,3 +18,4 @@ CREATE POLICY "Active products viewable by everyone"
 COMMENT ON POLICY "Active products viewable by everyone" ON products IS 
   'Активные продукты доступны для просмотра всем пользователям (включая неавторизованных)';
 
+

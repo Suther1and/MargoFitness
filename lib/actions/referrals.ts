@@ -225,16 +225,21 @@ export async function registerReferral(
   const supabase = await createClient()
 
   try {
+    console.log('[registerReferral] Starting registration with code:', referralCode, 'for user:', newUserId)
+
     // Проверяем код
     const validationResult = await validateReferralCode(referralCode)
     if (!validationResult.success || !validationResult.data) {
+      console.error('[registerReferral] Invalid referral code')
       return { success: false, error: 'Неверный реферальный код' }
     }
 
     const referrerId = validationResult.data.userId
+    console.log('[registerReferral] Valid code, referrer:', referrerId)
 
     // Проверяем, что пользователь не пытается использовать свой код
     if (referrerId === newUserId) {
+      console.error('[registerReferral] User trying to use own code')
       return { success: false, error: 'Нельзя использовать свой реферальный код' }
     }
 
@@ -246,9 +251,12 @@ export async function registerReferral(
       .single()
 
     if (existing) {
+      console.error('[registerReferral] User already registered with referral')
       return { success: false, error: 'Вы уже зарегистрированы по реферальной ссылке' }
     }
 
+    console.log('[registerReferral] Creating referral record')
+    
     // Создаем связь
     const { error: insertError } = await supabase
       .from('referrals')
@@ -262,14 +270,22 @@ export async function registerReferral(
       throw insertError
     }
 
+    console.log('[registerReferral] Referral record created, adding bonus')
+
     // Начисляем бонус приглашенному
-    await addBonusTransaction({
+    const bonusResult = await addBonusTransaction({
       userId: newUserId,
       amount: BONUS_CONSTANTS.REFERRED_USER_BONUS,
-      type: 'welcome',
+      type: 'referral_bonus',
       description: `Бонус за регистрацию по приглашению`,
       relatedUserId: referrerId,
     })
+
+    if (!bonusResult.success) {
+      console.error('[registerReferral] Failed to add bonus:', bonusResult.error)
+    } else {
+      console.log('[registerReferral] Bonus added successfully')
+    }
 
     return {
       success: true,

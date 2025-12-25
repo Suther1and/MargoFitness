@@ -38,13 +38,6 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
     : product.price
   const savings = originalPrice - product.price
 
-  const tierIcons: Record<number, any> = {
-    1: Zap,
-    2: Crown,
-    3: Sparkles
-  }
-  const Icon = tierIcons[product.tier_level || 1] || Zap
-
   return (
     <div className="container mx-auto max-w-4xl space-y-8 py-10">
       {/* Кнопка назад */}
@@ -67,7 +60,7 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
       <PaymentPageClient
         product={product}
         profile={profile}
-        Icon={Icon}
+        tierLevel={product.tier_level || 1}
         pricePerMonth={pricePerMonth}
       />
 

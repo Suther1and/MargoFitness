@@ -70,7 +70,7 @@ function AuthForm() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}${refCode ? `&ref=${refCode}` : ''}`,
           }
         })
 

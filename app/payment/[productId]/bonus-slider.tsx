@@ -144,3 +144,4 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: Bonu
   )
 }
 
+

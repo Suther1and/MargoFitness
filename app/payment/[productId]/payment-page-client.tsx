@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check } from "lucide-react"
+import { Check, Zap, Crown, Sparkles } from "lucide-react"
 import { PaymentCalculator } from './payment-calculator'
 import { PaymentWidgetSwitcher } from './payment-widget-switcher'
 import type { Product, Profile } from '@/types/database'
@@ -11,11 +11,18 @@ import type { PriceCalculation } from '@/lib/services/price-calculator'
 interface PaymentPageClientProps {
   product: Product
   profile: Profile
-  Icon: any
+  tierLevel: number
   pricePerMonth: number
 }
 
-export function PaymentPageClient({ product, profile, Icon, pricePerMonth }: PaymentPageClientProps) {
+export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }: PaymentPageClientProps) {
+  // Выбираем иконку в зависимости от уровня
+  const tierIcons = {
+    1: Zap,
+    2: Crown,
+    3: Sparkles
+  }
+  const Icon = tierIcons[tierLevel as keyof typeof tierIcons] || Zap
   const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
 
   // Безопасное извлечение benefits из metadata
