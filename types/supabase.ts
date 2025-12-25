@@ -385,7 +385,7 @@ export interface Database {
           amount: number
           currency: string
           status: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_type: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
           payment_method_id: string | null
           error_message: string | null
           metadata: Json
@@ -400,7 +400,7 @@ export interface Database {
           amount: number
           currency?: string
           status: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
           payment_method_id?: string | null
           error_message?: string | null
           metadata?: Json
@@ -415,7 +415,7 @@ export interface Database {
           amount?: number
           currency?: string
           status?: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | null
+          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
           payment_method_id?: string | null
           error_message?: string | null
           metadata?: Json
