@@ -114,15 +114,19 @@ export async function POST(request: NextRequest) {
           const bonusUsed = metadata?.bonusUsed || 0
           const actualPaidAmount = Number(transaction.amount)
           
+          console.log(`[Webhook] Processing bonuses - metadata:`, JSON.stringify(metadata, null, 2))
           console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}, bonusUsed: ${bonusUsed}`)
           
           // 1. Списать использованные бонусы (если были)
           if (bonusUsed > 0) {
-            const spendResult = await spendBonusesOnPayment({
-              userId: transaction.user_id,
-              amount: bonusUsed,
-              paymentId: payment.id,
-            })
+            const spendResult = await spendBonusesOnPayment(
+              {
+                userId: transaction.user_id,
+                amount: bonusUsed,
+                paymentId: payment.id,
+              },
+              supabase // Передаем admin client для обхода RLS
+            )
             
             if (spendResult.success) {
               console.log(`[Webhook] Bonuses spent: ${bonusUsed} шагов`)

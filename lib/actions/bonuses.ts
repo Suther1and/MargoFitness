@@ -383,12 +383,16 @@ export async function awardCashback(
 
 /**
  * Списать шаги при оплате
+ * ВАЖНО: Должна вызываться с service role client (например из webhook)
  */
-export async function spendBonusesOnPayment(params: {
-  userId: string
-  amount: number
-  paymentId: string
-}): Promise<{
+export async function spendBonusesOnPayment(
+  params: {
+    userId: string
+    amount: number
+    paymentId: string
+  },
+  supabaseClient?: any // Опциональный admin client для вызова из webhook
+): Promise<{
   success: boolean
   error?: string
 }> {
@@ -396,19 +400,61 @@ export async function spendBonusesOnPayment(params: {
     return { success: false, error: 'Сумма должна быть положительной' }
   }
 
-  const result = await addBonusTransaction({
-    userId: params.userId,
-    amount: -params.amount, // отрицательное значение
-    type: 'spent',
-    description: `Оплата подписки (${params.amount} шагов)`,
-    relatedPaymentId: params.paymentId,
-  })
+  const supabase = supabaseClient || await createClient()
 
-  if (result.success) {
+  try {
+    // Получаем текущий счет
+    const { data: account, error: accountError } = await supabase
+      .from('user_bonuses')
+      .select('*')
+      .eq('user_id', params.userId)
+      .single()
+
+    if (accountError || !account) {
+      throw new Error('Бонусный счет не найден')
+    }
+
+    // Проверяем достаточность средств
+    if (account.balance < params.amount) {
+      return { success: false, error: 'Недостаточно шагов на счете' }
+    }
+
+    // Рассчитываем новый баланс
+    const newBalance = account.balance - params.amount
+
+    // Создаем транзакцию списания
+    const { error: txError } = await supabase
+      .from('bonus_transactions')
+      .insert({
+        user_id: params.userId,
+        amount: -params.amount,
+        type: 'spent',
+        description: `Оплата подписки (${params.amount} шагов)`,
+        related_payment_id: params.paymentId,
+        metadata: {},
+      })
+
+    if (txError) {
+      throw txError
+    }
+
+    // Обновляем баланс
+    const { error: updateError } = await supabase
+      .from('user_bonuses')
+      .update({ balance: newBalance })
+      .eq('user_id', params.userId)
+
+    if (updateError) {
+      throw updateError
+    }
+
     revalidatePath('/dashboard/bonuses')
-  }
 
-  return result
+    return { success: true }
+  } catch (error) {
+    console.error('Error in spendBonusesOnPayment:', error)
+    return { success: false, error: 'Ошибка при списании бонусов' }
+  }
 }
 
 /**
