@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import * as React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Zap, Crown, Sparkles } from "lucide-react"
 import { PaymentWidgetSwitcher } from './payment-widget-switcher'
@@ -12,10 +13,13 @@ interface PaymentPageClientProps {
   profile: Profile
   tierLevel: number
   pricePerMonth: number
+  action?: 'renewal' | 'upgrade'
 }
 
-export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }: PaymentPageClientProps) {
+export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth, action }: PaymentPageClientProps) {
   const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
+  const [upgradeInfo, setUpgradeInfo] = useState<any>(null)
+  const [loadingUpgradeInfo, setLoadingUpgradeInfo] = useState(false)
   
   // Выбираем иконку в зависимости от уровня
   const tierIcons = {
@@ -37,6 +41,27 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
     "Персональная программа",
     "Техподдержка 24/7"
   ]
+
+  // Загрузить информацию об апгрейде при монтировании
+  React.useEffect(() => {
+    if (action === 'upgrade') {
+      const loadUpgradeInfo = async () => {
+        setLoadingUpgradeInfo(true)
+        try {
+          const response = await fetch(`/api/payments/calculate-upgrade?newProductId=${product.id}`)
+          const data = await response.json()
+          if (data.success) {
+            setUpgradeInfo(data)
+          }
+        } catch (error) {
+          console.error('Error loading upgrade info:', error)
+        } finally {
+          setLoadingUpgradeInfo(false)
+        }
+      }
+      loadUpgradeInfo()
+    }
+  }, [action, product.id])
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -83,14 +108,30 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
             </div>
           </div>
 
-          {/* Детали подписки */}
+          {/* Детали подписки или апгрейда */}
           <div className="rounded-lg bg-muted p-4 space-y-2 text-sm">
-            <div className="font-semibold">ℹ️ Детали подписки</div>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• Подписка активируется сразу после оплаты</li>
-              <li>• Вы получите доступ ко всем материалам</li>
-              <li>• Можно отменить в любое время</li>
-            </ul>
+            <div className="font-semibold">
+              {action === 'renewal' ? '🔄 Продление' : action === 'upgrade' ? '🚀 Апгрейд' : 'ℹ️ Детали подписки'}
+            </div>
+            {action === 'renewal' ? (
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Время добавится к текущей подписке</li>
+                <li>• Ваш тариф останется прежним</li>
+                <li>• Оплата проходит сразу</li>
+              </ul>
+            ) : action === 'upgrade' && upgradeInfo ? (
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Базовый период: <strong>{upgradeInfo.conversion.baseDays} дней</strong></li>
+                <li>• Бонусные дни: <strong>+{upgradeInfo.conversion.convertedDays} дней</strong></li>
+                <li className="text-primary font-semibold">• Всего: <strong>{upgradeInfo.conversion.totalDays} дней</strong></li>
+              </ul>
+            ) : (
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Подписка активируется сразу после оплаты</li>
+                <li>• Вы получите доступ ко всем материалам</li>
+                <li>• Можно отменить в любое время</li>
+              </ul>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -101,6 +142,7 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
           product={product}
           profile={profile}
           onCalculationChange={setCalculation}
+          action={action}
         />
       </div>
     </div>

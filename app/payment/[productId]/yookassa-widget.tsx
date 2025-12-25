@@ -16,6 +16,7 @@ interface YooKassaWidgetProps {
   product: Product
   profile: Profile
   onCalculationChange?: (calculation: PriceCalculation | null) => void
+  action?: 'renewal' | 'upgrade'
 }
 
 declare global {
@@ -24,7 +25,7 @@ declare global {
   }
 }
 
-export function YooKassaWidget({ product, profile, onCalculationChange }: YooKassaWidgetProps) {
+export function YooKassaWidget({ product, profile, onCalculationChange, action }: YooKassaWidgetProps) {
   const router = useRouter()
   const [saveCard, setSaveCard] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -136,6 +137,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange }: YooKas
           savePaymentMethod: saveCard,
           promoCode: appliedPromo?.code,
           bonusToUse: bonusToUse,
+          action: action || 'purchase',
         })
       })
 

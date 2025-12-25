@@ -15,9 +15,10 @@ interface RedirectPaymentProps {
   product: Product
   profile: Profile
   onCalculationChange?: (calculation: PriceCalculation | null) => void
+  action?: 'renewal' | 'upgrade'
 }
 
-export function RedirectPayment({ product, profile, onCalculationChange }: RedirectPaymentProps) {
+export function RedirectPayment({ product, profile, onCalculationChange, action }: RedirectPaymentProps) {
   const [saveCard, setSaveCard] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -76,6 +77,7 @@ export function RedirectPayment({ product, profile, onCalculationChange }: Redir
           confirmationType: 'redirect',
           promoCode: appliedPromo?.code,
           bonusToUse: bonusToUse,
+          action: action || 'purchase',
         })
       })
 

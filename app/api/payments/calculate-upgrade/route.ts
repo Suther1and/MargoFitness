@@ -1,26 +1,22 @@
 /**
- * API Route: Апгрейд подписки
- * POST /api/payments/upgrade
+ * API Route: Расчет конвертации при апгрейде
+ * GET /api/payments/calculate-upgrade?newProductId=xxx
  * 
- * Обрабатывает апгрейд подписки с конвертацией оставшихся дней
+ * Возвращает информацию о конвертации дней БЕЗ создания платежа
+ * Используется для отображения информации пользователю перед оплатой
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
-import { createPayment, createRecurrentPayment } from '@/lib/services/yookassa'
-import type { Database } from '@/types/supabase'
 import { 
   calculateUpgradeConversion, 
   getRemainingDays, 
   canUpgrade,
-  processSuccessfulPayment,
   getProductById,
   getActualSubscriptionPrice
 } from '@/lib/services/subscription-manager'
-import { sendSubscriptionUpgradeEmail } from '@/lib/services/email'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Получить текущего пользователя
     const supabase = await createClient()
@@ -34,8 +30,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Получить параметры
-    const body = await request.json()
-    const { newProductId } = body
+    const searchParams = request.nextUrl.searchParams
+    const newProductId = searchParams.get('newProductId')
 
     if (!newProductId) {
       return NextResponse.json(
@@ -66,26 +62,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Получить текущий продукт
-    const currentProduct = await getProductById(profile.subscription_tier)
-    if (!currentProduct) {
-      // Найти по tier_level и duration
-      const { data: currentProd } = await supabase
-        .from('products')
-        .select('*')
-        .eq('type', 'subscription_tier')
-        .eq('tier_level', profile.subscription_tier === 'basic' ? 1 : profile.subscription_tier === 'pro' ? 2 : 3)
-        .eq('duration_months', profile.subscription_duration_months)
-        .single()
-      
-      if (!currentProd) {
-        return NextResponse.json(
-          { error: 'Current subscription product not found' },
-          { status: 404 }
-        )
-      }
-    }
-
     // Получить новый продукт
     const newProduct = await getProductById(newProductId)
     if (!newProduct || newProduct.type !== 'subscription_tier') {
@@ -96,7 +72,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверка: это должен быть апгрейд (не даунгрейд)
-    const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : profile.subscription_tier === 'pro' ? 2 : profile.subscription_tier === 'elite' ? 3 : 0
+    const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : 
+                             profile.subscription_tier === 'pro' ? 2 : 
+                             profile.subscription_tier === 'elite' ? 3 : 0
     const newTierLevel = newProduct.tier_level || 1
 
     if (!canUpgrade(currentTierLevel, newTierLevel)) {
@@ -116,7 +94,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Получить ФАКТИЧЕСКИ оплаченную цену текущего продукта (защита от манипуляций с промокодами)
+    // Получить ФАКТИЧЕСКИ оплаченную цену текущего продукта (защита от манипуляций)
     const actualPrice = await getActualSubscriptionPrice({
       userId: user.id,
       tierLevel: currentTierLevel,
@@ -127,7 +105,7 @@ export async function POST(request: NextRequest) {
     let currentPrice = actualPrice
     
     if (!currentPrice) {
-      console.log('[Upgrade] No actual price found, using product price as fallback')
+      console.log('[CalculateUpgrade] No actual price found, using product price as fallback')
       const { data: currentProductData } = await supabase
         .from('products')
         .select('price')
@@ -139,7 +117,7 @@ export async function POST(request: NextRequest) {
       currentPrice = currentProductData?.price || 0
     }
     
-    console.log(`[Upgrade] Using price for conversion: ${currentPrice}₽ (actual: ${!!actualPrice})`)
+    console.log(`[CalculateUpgrade] Using price for conversion: ${currentPrice}₽ (actual: ${!!actualPrice})`)
 
     // Рассчитать конвертацию дней
     const conversion = calculateUpgradeConversion({
@@ -152,24 +130,23 @@ export async function POST(request: NextRequest) {
       newPrice: newProduct.price
     })
 
-    console.log('[Upgrade] Conversion calculated:', conversion)
+    console.log('[CalculateUpgrade] Conversion calculated:', conversion)
 
-    // DEPRECATED: Этот API больше не создает платежи
-    // Используйте /api/payments/calculate-upgrade для получения информации о конвертации
-    // и /payment/[productId]?action=upgrade для оплаты
-    
     return NextResponse.json({
       success: true,
       conversion,
       currentPrice,
       newPrice: newProduct.price,
-      message: `Для апгрейда перейдите на страницу оплаты: /payment/${newProduct.id}?action=upgrade`
+      currentTier: profile.subscription_tier,
+      newTier: newProduct.tier_level === 1 ? 'basic' : 
+               newProduct.tier_level === 2 ? 'pro' : 'elite',
+      productName: newProduct.name
     })
 
   } catch (error) {
-    console.error('Error in upgrade API:', error)
+    console.error('Error in calculate-upgrade API:', error)
     return NextResponse.json(
-      { error: 'Failed to process upgrade', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to calculate upgrade', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

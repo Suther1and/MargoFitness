@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
       savePaymentMethod, 
       confirmationType = 'embedded',
       promoCode,
-      bonusToUse
+      bonusToUse,
+      action = 'purchase' // 'renewal' | 'upgrade' | 'purchase'
     } = body
 
     if (!productId) {
@@ -72,18 +73,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверка: нельзя купить подписку если уже есть активная того же или более высокого уровня
-    if (product.type === 'subscription_tier' && profile.subscription_status === 'active') {
+    // ИСКЛЮЧЕНИЕ: если это продление (renewal) текущего тарифа - разрешаем
+    if (product.type === 'subscription_tier' && profile.subscription_status === 'active' && action !== 'renewal') {
       const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : 
                                 profile.subscription_tier === 'pro' ? 2 : 
                                 profile.subscription_tier === 'elite' ? 3 : 0
       const newTierLevel = product.tier_level || 1
       
-      // Если новый уровень такой же или ниже - запрещаем
+      // Если новый уровень такой же или ниже - запрещаем (кроме renewal)
       if (newTierLevel <= currentTierLevel) {
         return NextResponse.json(
           { 
             error: 'Нельзя купить подписку того же или более низкого уровня',
-            details: `У вас уже активна подписка ${profile.subscription_tier.toUpperCase()}. Используйте апгрейд для повышения тарифа.`,
+            details: `У вас уже активна подписка ${profile.subscription_tier.toUpperCase()}. Используйте продление для текущего тарифа или апгрейд для повышения.`,
             currentTier: profile.subscription_tier,
             suggestUpgrade: true
           },
@@ -153,6 +155,16 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     
+    // Определить payment_type на основе action
+    let paymentType: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' = 'initial'
+    if (action === 'renewal') {
+      paymentType = 'renewal'
+    } else if (action === 'upgrade') {
+      paymentType = 'upgrade'
+    } else if (product.type === 'one_time_pack') {
+      paymentType = 'one_time'
+    }
+    
     const { error: transactionError } = await supabaseAdmin
       .from('payment_transactions')
       .insert({
@@ -162,8 +174,9 @@ export async function POST(request: NextRequest) {
         amount: calculation.finalPrice,
         currency: 'RUB',
         status: 'pending',
-        payment_type: 'initial',
+        payment_type: paymentType,
         metadata: {
+          action, // NEW: добавляем action в metadata
           productName: product.name,
           productType: product.type,
           originalPrice: product.price,

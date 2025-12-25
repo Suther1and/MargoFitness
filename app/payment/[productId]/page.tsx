@@ -11,11 +11,15 @@ interface PaymentPageProps {
   params: Promise<{
     productId: string
   }>
+  searchParams: Promise<{
+    action?: string
+  }>
 }
 
-export default async function PaymentPage({ params }: PaymentPageProps) {
+export default async function PaymentPage({ params, searchParams }: PaymentPageProps) {
   // Unwrap params Promise (Next.js 15+)
   const { productId } = await params
+  const { action } = await searchParams
   
   const profile = await getCurrentProfile()
   
@@ -38,21 +42,29 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
     : product.price
   const savings = originalPrice - product.price
 
+  // Определить тип действия
+  const isRenewal = action === 'renewal'
+  const isUpgrade = action === 'upgrade'
+
   return (
     <div className="container mx-auto max-w-4xl space-y-8 py-10">
       {/* Кнопка назад */}
-      <Link href="/pricing">
+      <Link href="/dashboard">
         <Button variant="ghost" className="gap-2">
           <ArrowLeft className="size-4" />
-          Назад к тарифам
+          Назад в личный кабинет
         </Button>
       </Link>
 
       {/* Заголовок */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Оформление подписки</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {isRenewal ? 'Продление подписки' : isUpgrade ? 'Апгрейд подписки' : 'Оформление подписки'}
+        </h1>
         <p className="text-muted-foreground">
-          Вы выбрали тариф {product.name}
+          {isRenewal ? `Продление тарифа ${product.name}` : 
+           isUpgrade ? `Повышение до тарифа ${product.name}` :
+           `Вы выбрали тариф ${product.name}`}
         </p>
       </div>
 
@@ -62,6 +74,7 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
         profile={profile}
         tierLevel={product.tier_level || 1}
         pricePerMonth={pricePerMonth}
+        action={action as 'renewal' | 'upgrade' | undefined}
       />
 
       {/* Безопасность */}

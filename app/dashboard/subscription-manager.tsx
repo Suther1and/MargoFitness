@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch"
 import { Crown, CreditCard, History, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/types/database"
-import { UpgradeDialog } from './upgrade-dialog'
+import { SubscriptionActionsDialog } from './subscription-actions-dialog'
 
 interface Transaction {
   id: string
@@ -145,24 +145,26 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
                   : 'Подписка неактивна'}
               </p>
             </div>
-            <Link href="/pricing">
-              <Button variant="outline">
-                {profile.subscription_tier === 'free' ? 'Оформить подписку' : 'Изменить план'}
-              </Button>
-            </Link>
+            {!hasActiveSubscription && (
+              <Link href="/pricing">
+                <Button variant="outline">
+                  Оформить подписку
+                </Button>
+              </Link>
+            )}
           </div>
 
-          {/* Апгрейд подписки */}
-          {hasActiveSubscription && profile.subscription_tier !== 'elite' && (
+          {/* Продление и апгрейд подписки */}
+          {hasActiveSubscription && (
             <div className="rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 p-4">
               <div className="space-y-3">
                 <div>
-                  <p className="font-medium text-sm">🚀 Хотите больше возможностей?</p>
+                  <p className="font-medium text-sm">⚡ Управление подпиской</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Повысьте тариф и получите бонусные дни за остаток текущей подписки
+                    Продлите текущий тариф или повысьте уровень с бонусными днями
                   </p>
                 </div>
-                <UpgradeDialog profile={profile} />
+                <SubscriptionActionsDialog profile={profile} />
               </div>
             </div>
           )}

@@ -155,6 +155,49 @@ export async function getProductById(productId: string): Promise<Product | null>
 // ============================================
 
 /**
+ * Получить фактически оплаченную сумму за текущую подписку пользователя
+ * Используется для честной конвертации при апгрейде (защита от манипуляций с промокодами)
+ * 
+ * @param params - параметры для поиска транзакции
+ * @returns фактически оплаченная сумма или null если не найдена
+ */
+export async function getActualSubscriptionPrice(params: {
+  userId: string
+  tierLevel: number
+  durationMonths: number
+}): Promise<number | null> {
+  const { userId, tierLevel, durationMonths } = params
+  
+  // Используем service client для доступа к транзакциям
+  const { createClient: createServiceClient } = await import('@supabase/supabase-js')
+  const supabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  
+  // Находим последнюю успешную транзакцию подписки с нужным tier_level
+  const { data: transaction, error } = await supabase
+    .from('payment_transactions')
+    .select('amount, metadata, product_id, products!inner(tier_level, duration_months, type)')
+    .eq('user_id', userId)
+    .eq('status', 'succeeded')
+    .eq('products.type', 'subscription_tier')
+    .eq('products.tier_level', tierLevel)
+    .eq('products.duration_months', durationMonths)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+  
+  if (error || !transaction) {
+    console.log(`[getActualSubscriptionPrice] No transaction found for user ${userId}, tier ${tierLevel}, duration ${durationMonths}`)
+    return null
+  }
+  
+  console.log(`[getActualSubscriptionPrice] Found actual paid amount: ${transaction.amount}₽ for user ${userId}`)
+  return Number(transaction.amount)
+}
+
+/**
  * Рассчитать конвертацию дней при апгрейде подписки
  * 
  * Логика:
@@ -238,8 +281,9 @@ export async function processSuccessfulPayment(params: {
   productId: string
   paymentMethodId?: string
   customExpiryDays?: number // Для апгрейда с конвертацией
+  isRenewal?: boolean // Для продления текущей подписки
 }): Promise<ProcessPaymentResult> {
-  const { userId, productId, paymentMethodId, customExpiryDays } = params
+  const { userId, productId, paymentMethodId, customExpiryDays, isRenewal } = params
   
   // Используем service client для обхода RLS (вызывается из webhook)
   const { createClient: createServiceClient } = await import('@supabase/supabase-js')
@@ -267,7 +311,34 @@ export async function processSuccessfulPayment(params: {
   let expiresAt: Date
   let nextBillingDate: Date
   
-  if (customExpiryDays) {
+  if (isRenewal) {
+    // ПРОДЛЕНИЕ: добавляем время к текущей подписке
+    console.log(`[ProcessPayment] Processing RENEWAL for user ${userId}`)
+    
+    // Получить текущую дату окончания подписки
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('subscription_expires_at, subscription_tier')
+      .eq('id', userId)
+      .single()
+    
+    if (currentProfile?.subscription_expires_at) {
+      const currentExpiry = new Date(currentProfile.subscription_expires_at)
+      const now = new Date()
+      
+      // Если подписка еще активна - добавляем к текущей дате окончания
+      // Если истекла - добавляем от текущего момента
+      const baseDate = currentExpiry > now ? currentExpiry : now
+      expiresAt = addMonths(baseDate, product.duration_months)
+      
+      console.log(`[ProcessPayment] Renewal: base date ${baseDate.toISOString()}, adding ${product.duration_months} months, new expiry: ${expiresAt.toISOString()}`)
+    } else {
+      // Нет текущей подписки - добавляем от сейчас
+      expiresAt = addMonths(new Date(), product.duration_months)
+    }
+    
+    nextBillingDate = expiresAt
+  } else if (customExpiryDays) {
     // Для апгрейда - используем кастомное количество дней
     expiresAt = addDays(new Date(), customExpiryDays)
     nextBillingDate = expiresAt
@@ -278,22 +349,28 @@ export async function processSuccessfulPayment(params: {
   }
   
   // Обновить профиль
-  console.log(`[ProcessPayment] Updating profile for user ${userId}, tier: ${tier}, expires: ${expiresAt.toISOString()}`)
+  console.log(`[ProcessPayment] Updating profile for user ${userId}, tier: ${tier}, expires: ${expiresAt.toISOString()}, isRenewal: ${isRenewal}`)
+  
+  const updateData: any = {
+    subscription_status: 'active',
+    subscription_duration_months: product.duration_months,
+    subscription_expires_at: expiresAt.toISOString(),
+    next_billing_date: nextBillingDate.toISOString(),
+    payment_method_id: paymentMethodId || null,
+    auto_renew_enabled: !!paymentMethodId, // Включаем автопродление если есть карта
+    failed_payment_attempts: 0,
+    last_payment_date: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+  
+  // При продлении НЕ меняем tier (только если это не апгрейд)
+  if (!isRenewal) {
+    updateData.subscription_tier = tier
+  }
   
   const { error } = await supabase
     .from('profiles')
-    .update({
-      subscription_tier: tier,
-      subscription_status: 'active',
-      subscription_duration_months: product.duration_months,
-      subscription_expires_at: expiresAt.toISOString(),
-      next_billing_date: nextBillingDate.toISOString(),
-      payment_method_id: paymentMethodId || null,
-      auto_renew_enabled: !!paymentMethodId, // Включаем автопродление если есть карта
-      failed_payment_attempts: 0,
-      last_payment_date: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
+    .update(updateData)
     .eq('id', userId)
   
   if (error) {

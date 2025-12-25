@@ -14,11 +14,12 @@ interface PaymentWidgetSwitcherProps {
   product: Product
   profile: Profile
   onCalculationChange?: (calculation: PriceCalculation | null) => void
+  action?: 'renewal' | 'upgrade'
 }
 
 type PaymentMode = 'embedded' | 'redirect'
 
-export function PaymentWidgetSwitcher({ product, profile, onCalculationChange }: PaymentWidgetSwitcherProps) {
+export function PaymentWidgetSwitcher({ product, profile, onCalculationChange, action }: PaymentWidgetSwitcherProps) {
   const searchParams = useSearchParams()
   const modeParam = searchParams.get('mode') as PaymentMode | null
   
@@ -70,6 +71,7 @@ export function PaymentWidgetSwitcher({ product, profile, onCalculationChange }:
           product={product} 
           profile={profile}
           onCalculationChange={onCalculationChange}
+          action={action}
         />
       )}
       
@@ -78,6 +80,7 @@ export function PaymentWidgetSwitcher({ product, profile, onCalculationChange }:
           product={product} 
           profile={profile}
           onCalculationChange={onCalculationChange}
+          action={action}
         />
       )}
     </div>
