@@ -38,9 +38,12 @@ interface TelegramAuthData {
 }
 
 function verifyTelegramAuth(data: TelegramAuthData, botToken: string): boolean {
-  const { hash, ...dataWithoutHash } = data
+  const { hash, ref_code, ...dataWithoutHash } = data
   
+  // Только поля от Telegram участвуют в проверке подписи
+  // ref_code - наше кастомное поле, не должно участвовать
   const dataCheckString = Object.keys(dataWithoutHash)
+    .filter(key => dataWithoutHash[key as keyof typeof dataWithoutHash] !== undefined)
     .sort()
     .map(key => `${key}=${dataWithoutHash[key as keyof typeof dataWithoutHash]}`)
     .join('\n')
