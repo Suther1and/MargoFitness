@@ -99,6 +99,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
       const checkout = new window.YooMoneyCheckoutWidget({
         confirmation_token: confirmationToken,
         return_url: `${window.location.origin}/dashboard?payment=success`,
+        locale: 'ru',
         error_callback: (error: any) => {
           console.error('[YooKassa] Widget error:', error)
           setError('Произошла ошибка при обработке платежа')
