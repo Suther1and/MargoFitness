@@ -3,7 +3,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from './profile'
 import { revalidatePath } from 'next/cache'
-import type { Profile, ProfileUpdate } from '@/types/database'
+import type { Profile, ProfileUpdate, UserBonus } from '@/types/database'
+
+// Тип для пользователя с бонусной информацией
+type ProfileWithBonuses = Profile & {
+  user_bonuses?: UserBonus[] | null
+  bonus_balance?: number
+  cashback_level?: number
+  total_spent_for_cashback?: number
+}
 
 /**
  * Проверка прав администратора
@@ -26,7 +34,7 @@ export async function getAllUsers(filters?: {
   tier?: string
   status?: string
   search?: string
-}): Promise<{ success: boolean; users?: any[]; error?: string }> {
+}): Promise<{ success: boolean; users?: ProfileWithBonuses[]; error?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
@@ -65,12 +73,15 @@ export async function getAllUsers(filters?: {
     }
 
     // Приводим данные к плоскому формату
-    const usersWithBonuses = data?.map(user => ({
-      ...user,
-      bonus_balance: user.user_bonuses?.[0]?.balance || 0,
-      cashback_level: user.user_bonuses?.[0]?.cashback_level || 1,
-      total_spent_for_cashback: user.user_bonuses?.[0]?.total_spent_for_cashback || 0,
-    })) || []
+    const usersWithBonuses: ProfileWithBonuses[] = (data as any[])?.map((user: any) => {
+      const bonuses = Array.isArray(user.user_bonuses) ? user.user_bonuses[0] : null
+      return {
+        ...user,
+        bonus_balance: bonuses?.balance ?? 0,
+        cashback_level: bonuses?.cashback_level ?? 1,
+        total_spent_for_cashback: bonuses?.total_spent_for_cashback ?? 0,
+      }
+    }) || []
 
     return { success: true, users: usersWithBonuses }
   } catch (error: any) {
