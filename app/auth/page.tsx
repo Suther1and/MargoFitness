@@ -187,10 +187,11 @@ function AuthForm() {
 function OAuthSection() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/dashboard'
+  const refCode = searchParams.get('ref')
   
   return (
     <div className="mt-6">
-      <OAuthButtons redirectTo={redirect} />
+      <OAuthButtons redirectTo={redirect} referralCode={refCode} />
     </div>
   )
 }

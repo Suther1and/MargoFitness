@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { sendWelcomeEmail } from '@/lib/services/email'
+import { registerReferral } from '@/lib/actions/referrals'
+import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
 
 // Интерфейсы для ответов Yandex API
 interface YandexTokenResponse {
@@ -65,16 +67,20 @@ export async function GET(request: Request) {
       )
     }
 
-    // Декодируем state для получения redirect URL
+    // Декодируем state для получения redirect URL и реферального кода
     let redirectTo = '/dashboard'
+    let refCode: string | null = null
     if (state) {
       try {
         const stateData = JSON.parse(Buffer.from(state, 'base64url').toString())
         redirectTo = stateData.redirect || '/dashboard'
+        refCode = stateData.ref || null
       } catch (e) {
         console.warn('[Yandex Callback] Failed to decode state:', e)
       }
     }
+    
+    console.log('[Yandex Callback] State decoded:', { redirectTo, refCode: refCode || 'NONE' })
 
     // ============================================
     // ШАГ 1: Обмен code на access_token
@@ -192,6 +198,9 @@ export async function GET(request: Request) {
       })
       userId = existingProfile.id
       
+      // Убедимся что бонусный аккаунт существует
+      await ensureBonusAccountExists(userId)
+      
       // Обновляем данные профиля
       await supabase
         .from('profiles')
@@ -256,6 +265,9 @@ export async function GET(request: Request) {
       console.log('[Yandex Callback] User found in auth.users without yandex_id')
       
       userId = existingAuthData.user.id
+
+      // Убедимся что бонусный аккаунт существует
+      await ensureBonusAccountExists(userId)
 
       // Обновляем профиль, добавляя yandex_id
       await supabase
@@ -336,6 +348,27 @@ export async function GET(request: Request) {
     if (createProfileError) {
       console.error('[Yandex Callback] Failed to create profile:', createProfileError)
       // Продолжаем выполнение, профиль может создаться через trigger
+    } else {
+      console.log('[Yandex Callback] Profile created successfully')
+      
+      // Убедимся что бонусный аккаунт создан
+      const bonusResult = await ensureBonusAccountExists(userId)
+      if (bonusResult.success) {
+        console.log('[Yandex Callback] Bonus account ensured, created:', bonusResult.created)
+      } else {
+        console.error('[Yandex Callback] Failed to ensure bonus account:', bonusResult.error)
+      }
+      
+      // Регистрация реферала (если есть код)
+      if (refCode) {
+        console.log('[Yandex Callback] Processing referral code:', refCode)
+        const referralResult = await registerReferral(refCode, userId)
+        if (referralResult.success) {
+          console.log('[Yandex Callback] Referral registered successfully')
+        } else {
+          console.error('[Yandex Callback] Referral registration failed:', referralResult.error)
+        }
+      }
     }
 
     // Отправляем приветственное письмо (если настроен реальный email)

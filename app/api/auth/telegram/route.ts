@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { sendWelcomeEmail } from '@/lib/services/email'
+import { registerReferral } from '@/lib/actions/referrals'
+import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
 
 interface TelegramAuthData {
   id: number
@@ -11,6 +13,7 @@ interface TelegramAuthData {
   photo_url?: string
   auth_date: number
   hash: string
+  ref_code?: string // Реферальный код
 }
 
 function verifyTelegramAuth(data: TelegramAuthData, botToken: string): boolean {
@@ -37,6 +40,13 @@ function verifyTelegramAuth(data: TelegramAuthData, botToken: string): boolean {
 export async function POST(request: Request) {
   try {
     const telegramData: TelegramAuthData = await request.json()
+
+    console.log('[Telegram Auth] Request received:', {
+      id: telegramData.id,
+      username: telegramData.username,
+      hasRefCode: !!telegramData.ref_code,
+      refCode: telegramData.ref_code || 'NONE'
+    })
 
     if (!telegramData.id || !telegramData.hash || !telegramData.auth_date) {
       return NextResponse.json(
@@ -94,6 +104,9 @@ export async function POST(request: Request) {
     if (existingProfile) {
       userId = existingProfile.id
       
+      // Убедимся что бонусный аккаунт существует
+      await ensureBonusAccountExists(userId)
+      
       await supabase
         .from('profiles')
         .update({
@@ -134,6 +147,9 @@ export async function POST(request: Request) {
 
     if (existingAuthData?.user && existingAuthData?.session) {
       userId = existingAuthData.user.id
+
+      // Убедимся что бонусный аккаунт существует
+      await ensureBonusAccountExists(userId)
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -199,6 +215,27 @@ export async function POST(request: Request) {
 
     if (createProfileError) {
       console.error('Failed to create Telegram profile:', createProfileError)
+    } else {
+      console.log('[Telegram Auth] Profile created successfully')
+      
+      // Убедимся что бонусный аккаунт создан
+      const bonusResult = await ensureBonusAccountExists(userId)
+      if (bonusResult.success) {
+        console.log('[Telegram Auth] Bonus account ensured, created:', bonusResult.created)
+      } else {
+        console.error('[Telegram Auth] Failed to ensure bonus account:', bonusResult.error)
+      }
+      
+      // Регистрация реферала (если есть код)
+      if (telegramData.ref_code) {
+        console.log('[Telegram Auth] Processing referral code:', telegramData.ref_code)
+        const referralResult = await registerReferral(telegramData.ref_code, userId)
+        if (referralResult.success) {
+          console.log('[Telegram Auth] Referral registered successfully')
+        } else {
+          console.error('[Telegram Auth] Referral registration failed:', referralResult.error)
+        }
+      }
     }
 
     if (fullName) {

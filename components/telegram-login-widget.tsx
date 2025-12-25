@@ -52,6 +52,22 @@ export function TelegramLoginWidget({
   useEffect(() => {
     onLoadingChange?.(loading)
   }, [loading, onLoadingChange])
+  
+  // Сохраняем реферальный код из redirectTo в localStorage перед авторизацией
+  useEffect(() => {
+    if (redirectTo) {
+      try {
+        const url = new URL(redirectTo, window.location.origin)
+        const refCode = url.searchParams.get('ref')
+        if (refCode) {
+          localStorage.setItem('telegram_ref_code', refCode)
+          console.log('[Telegram Widget] Stored ref code:', refCode)
+        }
+      } catch (e) {
+        // redirectTo может быть просто путем без параметров
+      }
+    }
+  }, [redirectTo])
 
   useEffect(() => {
     if (!botName) {
@@ -71,12 +87,18 @@ export function TelegramLoginWidget({
           return
         }
 
+        // Получаем реферальный код из localStorage
+        const refCode = localStorage.getItem('telegram_ref_code')
+        
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(user),
+          body: JSON.stringify({
+            ...user,
+            ref_code: refCode || undefined
+          }),
         })
 
         const data = await response.json()
@@ -98,7 +120,12 @@ export function TelegramLoginWidget({
             throw new Error('Ошибка установки сессии')
           }
 
-          router.push(redirectTo)
+          // Очищаем реферальный код из localStorage
+          localStorage.removeItem('telegram_ref_code')
+
+          // Извлекаем базовый путь без параметров ref
+          const redirectPath = redirectTo.split('?')[0]
+          router.push(redirectPath)
           router.refresh()
         } else {
           throw new Error('Не получена сессия')

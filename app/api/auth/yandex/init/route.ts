@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const redirectTo = searchParams.get('redirect') || '/dashboard'
+    const refCode = searchParams.get('ref') // Реферальный код
 
     // Получаем credentials из environment variables
     const clientId = process.env.YANDEX_CLIENT_ID
@@ -23,10 +24,14 @@ export async function GET(request: Request) {
     }
 
     // Генерируем state для защиты от CSRF
-    // State включает redirect URL и случайный токен
+    // State включает redirect URL, реферальный код и случайный токен
     const randomToken = randomBytes(16).toString('hex')
     const state = Buffer.from(
-      JSON.stringify({ redirect: redirectTo, token: randomToken })
+      JSON.stringify({ 
+        redirect: redirectTo, 
+        ref: refCode || null,
+        token: randomToken 
+      })
     ).toString('base64url')
 
     // Формируем URL для Yandex OAuth
@@ -43,7 +48,8 @@ export async function GET(request: Request) {
     console.log('[Yandex Init] Redirecting to Yandex OAuth:', {
       clientId: clientId.substring(0, 8) + '...',
       redirectUri,
-      redirectTo
+      redirectTo,
+      refCode: refCode || 'NONE'
     })
 
     // Редиректим пользователя на Yandex

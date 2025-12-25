@@ -7,9 +7,10 @@ import { TelegramLoginWidget } from "@/components/telegram-login-widget"
 
 interface OAuthButtonsProps {
   redirectTo?: string
+  referralCode?: string | null
 }
 
-export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
+export function OAuthButtons({ redirectTo = "/dashboard", referralCode }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
   const [telegramLoading, setTelegramLoading] = useState(false)
   const supabase = createClient()
@@ -19,10 +20,13 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
     try {
       setLoadingProvider("google")
       
+      // Формируем URL с реферальным кодом
+      const callbackUrl = `${window.location.origin}/auth/callback?redirect=${redirectTo}${referralCode ? `&ref=${referralCode}` : ''}`
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${redirectTo}`,
+          redirectTo: callbackUrl,
         },
       })
 
@@ -42,7 +46,8 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
   const handleYandexLogin = async () => {
     try {
       setLoadingProvider("yandex")
-      window.location.href = `/api/auth/yandex/init?redirect=${redirectTo}`
+      const yandexUrl = `/api/auth/yandex/init?redirect=${redirectTo}${referralCode ? `&ref=${referralCode}` : ''}`
+      window.location.href = yandexUrl
     } catch (error) {
       console.error("Yandex OAuth error:", error)
       alert("Ошибка входа через Yandex. Попробуйте снова.")
@@ -121,7 +126,7 @@ export function OAuthButtons({ redirectTo = "/dashboard" }: OAuthButtonsProps) {
           <div className="absolute inset-0 opacity-0">
             <TelegramLoginWidget
               botName={telegramBotName}
-              redirectTo={redirectTo}
+              redirectTo={`${redirectTo}${referralCode ? `?ref=${referralCode}` : ''}`}
               buttonSize="large"
               requestAccess={false}
               usePic={false}
