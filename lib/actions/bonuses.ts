@@ -334,31 +334,40 @@ export async function awardCashback(
     const levelData = getCashbackLevelData(account.cashback_level)
     const cashbackAmount = Math.floor(params.paidAmount * (levelData.percent / 100))
 
-    // Начисляем кешбек
-    const txResult = await addBonusTransaction({
-      userId: params.userId,
-      amount: cashbackAmount,
-      type: 'cashback',
-      description: `Кешбек ${levelData.percent}% с покупки`,
-      relatedPaymentId: params.paymentId,
-      metadata: {
-        paid_amount: params.paidAmount,
-        cashback_percent: levelData.percent,
-        level: levelData.name,
-      },
-    })
-
-    if (!txResult.success) {
-      throw new Error(txResult.error)
+    if (cashbackAmount === 0) {
+      console.log('[awardCashback] Cashback amount is 0, skipping')
+      return { success: true, cashbackAmount: 0 }
     }
 
-    // Обновляем total_spent_for_cashback и проверяем уровень
+    // Создаем транзакцию кешбека напрямую через admin client
+    const { error: txError } = await supabase
+      .from('bonus_transactions')
+      .insert({
+        user_id: params.userId,
+        amount: cashbackAmount,
+        type: 'cashback',
+        description: `Кешбек ${levelData.percent}% с покупки`,
+        related_payment_id: params.paymentId,
+        metadata: {
+          paid_amount: params.paidAmount,
+          cashback_percent: levelData.percent,
+          level: levelData.name,
+        },
+      })
+
+    if (txError) {
+      throw txError
+    }
+
+    // Обновляем баланс и статистику
     const newTotalSpent = account.total_spent_for_cashback + params.paidAmount
     const newLevel = calculateCashbackLevel(newTotalSpent)
+    const newBalance = account.balance + cashbackAmount
 
     const { error: updateError } = await supabase
       .from('user_bonuses')
       .update({
+        balance: newBalance,
         total_spent_for_cashback: newTotalSpent,
         cashback_level: newLevel,
       })
@@ -369,6 +378,8 @@ export async function awardCashback(
     }
 
     revalidatePath('/dashboard/bonuses')
+
+    console.log(`[awardCashback] Success: ${cashbackAmount} шагов начислено`)
 
     return {
       success: true,

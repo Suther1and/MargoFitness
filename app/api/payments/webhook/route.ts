@@ -136,6 +136,7 @@ export async function POST(request: NextRequest) {
           }
           
           // 2. Начислить кешбек пользователю (от фактически оплаченной суммы)
+          console.log(`[Webhook] Awarding cashback for user ${transaction.user_id}, amount: ${actualPaidAmount}`)
           const cashbackResult = await awardCashback(
             {
               userId: transaction.user_id,
@@ -146,13 +147,13 @@ export async function POST(request: NextRequest) {
           )
           
           if (cashbackResult.success) {
-            console.log(`[Webhook] Cashback awarded: ${cashbackResult.cashbackAmount} шагов`)
+            console.log(`[Webhook] ✅ Cashback awarded: ${cashbackResult.cashbackAmount} шагов`)
             
             if (cashbackResult.newLevel && cashbackResult.newLevel > 1) {
-              console.log(`[Webhook] User leveled up to level ${cashbackResult.newLevel}!`)
+              console.log(`[Webhook] 🎉 User leveled up to level ${cashbackResult.newLevel}!`)
             }
           } else {
-            console.error('[Webhook] Failed to award cashback:', cashbackResult.error)
+            console.error('[Webhook] ❌ Failed to award cashback:', cashbackResult.error)
           }
           
           // 3. Обработать реферальную программу (передаем service client)
