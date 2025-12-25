@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ExternalLink, Loader2, AlertCircle } from "lucide-react"
-import type { Product, Profile } from "@/types/database"
+import { PromoInput } from './promo-input'
+import { BonusSlider } from './bonus-slider'
+import { calculateFinalPrice } from '@/lib/services/price-calculator'
+import type { Product, Profile, PromoCode } from "@/types/database"
+import type { PriceCalculation } from '@/lib/services/price-calculator'
 
 interface RedirectPaymentProps {
   product: Product
@@ -16,8 +20,43 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
   const [saveCard, setSaveCard] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
+  
+  // Расчет цены
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null)
+  const [bonusToUse, setBonusToUse] = useState(0)
+  const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
+  const [loadingCalc, setLoadingCalc] = useState(true)
+
+  // Расчет цены при изменении промокода или бонусов
+  useEffect(() => {
+    recalculate()
+  }, [appliedPromo, bonusToUse])
+
+  const recalculate = async () => {
+    setLoadingCalc(true)
+
+    const result = await calculateFinalPrice({
+      productId: product.id,
+      userId: profile.id,
+      promoCode: appliedPromo?.code,
+      bonusToUse,
+    })
+
+    if (result.success && result.data) {
+      setCalculation(result.data)
+    } else {
+      setCalculation(null)
+    }
+
+    setLoadingCalc(false)
+  }
 
   const handlePayment = async () => {
+    if (!calculation) {
+      setError('Ошибка расчета суммы')
+      return
+    }
+
     setProcessing(true)
     setError('')
 
@@ -31,7 +70,9 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
         body: JSON.stringify({
           productId: product.id,
           savePaymentMethod: saveCard,
-          confirmationType: 'redirect' // Указываем тип подтверждения
+          confirmationType: 'redirect',
+          promoCode: appliedPromo?.code,
+          bonusToUse: bonusToUse,
         })
       })
 
@@ -58,6 +99,26 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
     }
   }
 
+  if (loadingCalc && !calculation) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!calculation) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          Ошибка расчета стоимости
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -67,17 +128,109 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Промокод */}
+        <PromoInput
+          productId={product.id}
+          onPromoApplied={setAppliedPromo}
+        />
+
+        {/* Бонусный слайдер */}
+        {calculation && (
+          <BonusSlider
+            userId={profile.id}
+            priceAfterDiscounts={calculation.priceAfterDiscounts}
+            onBonusChange={setBonusToUse}
+          />
+        )}
+
+        {/* Детальный расчет */}
+        <div className="space-y-3 pt-4 border-t">
+          {/* Базовая цена */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Базовая цена</span>
+            <span className="line-through text-muted-foreground">
+              {calculation.basePrice.toLocaleString('ru-RU')} ₽
+            </span>
+          </div>
+
+          {/* Скидка за срок */}
+          {calculation.durationDiscountAmount > 0 && (
+            <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+              <span>Скидка за срок ({calculation.durationDiscountPercent}%)</span>
+              <span>-{calculation.durationDiscountAmount.toLocaleString('ru-RU')} ₽</span>
+            </div>
+          )}
+
+          {/* Промокод */}
+          {calculation.promoDiscountAmount > 0 && (
+            <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+              <span>
+                Промокод {calculation.promoCode} 
+                ({calculation.promoDiscountType === 'percentage' 
+                  ? `${calculation.promoDiscountValue}%` 
+                  : `${calculation.promoDiscountValue}₽`
+                })
+              </span>
+              <span>-{calculation.promoDiscountAmount.toLocaleString('ru-RU')} ₽</span>
+            </div>
+          )}
+
+          {/* Шаги */}
+          {calculation.bonusToUse > 0 && (
+            <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+              <span>Использовано шагов 👟</span>
+              <span>-{calculation.bonusToUse.toLocaleString('ru-RU')} ₽</span>
+            </div>
+          )}
+
+          <div className="border-t pt-3" />
+
+          {/* Итого к оплате */}
+          <div className="flex items-center justify-between text-lg font-bold">
+            <span>К оплате</span>
+            <span className="text-2xl text-primary">
+              {calculation.finalPrice.toLocaleString('ru-RU')} ₽
+            </span>
+          </div>
+
+          {/* Экономия */}
+          {calculation.totalSavings > 0 && (
+            <div className="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center">
+              <div className="text-sm font-medium text-green-800 dark:text-green-300">
+                🎉 Вы экономите {calculation.totalSavings.toLocaleString('ru-RU')} ₽
+              </div>
+            </div>
+          )}
+
+          {/* Кешбек */}
+          {calculation.cashbackAmount > 0 && (
+            <div className="rounded-lg bg-primary/10 p-3">
+              <div className="text-sm">
+                <span className="text-muted-foreground">Вы получите кешбек:</span>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="font-semibold">
+                    {calculation.cashbackAmount.toLocaleString('ru-RU')} 👟 
+                    <span className="text-muted-foreground ml-1">
+                      ({calculation.cashbackPercent}%)
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Чекбокс сохранения карты */}
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start space-x-3 pt-4">
           <Checkbox 
-            id="save-card" 
+            id="save-card-redirect" 
             checked={saveCard}
             onCheckedChange={(checked) => setSaveCard(checked as boolean)}
             disabled={processing}
           />
           <div className="space-y-1">
             <label
-              htmlFor="save-card"
+              htmlFor="save-card-redirect"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
               Сохранить карту для автопродления
@@ -85,24 +238,6 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
             <p className="text-xs text-muted-foreground">
               Рекомендуется для автоматического продления подписки
             </p>
-          </div>
-        </div>
-
-        {/* Итого */}
-        <div className="rounded-lg bg-muted p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Подписка:</span>
-            <span className="font-medium">{product.name}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Период:</span>
-            <span className="font-medium">
-              {product.duration_months} {product.duration_months === 1 ? 'месяц' : product.duration_months! < 5 ? 'месяца' : 'месяцев'}
-            </span>
-          </div>
-          <div className="border-t pt-2 flex justify-between">
-            <span className="font-semibold">Итого:</span>
-            <span className="text-xl font-bold">{product.price} ₽</span>
           </div>
         </div>
 
@@ -132,7 +267,7 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
           className="w-full"
           size="lg"
           onClick={handlePayment}
-          disabled={processing}
+          disabled={processing || loadingCalc}
         >
           {processing ? (
             <>
@@ -142,7 +277,7 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
           ) : (
             <>
               <ExternalLink className="mr-2 size-4" />
-              Перейти к оплате {product.price} ₽
+              Перейти к оплате {calculation.finalPrice.toLocaleString('ru-RU')} ₽
             </>
           )}
         </Button>

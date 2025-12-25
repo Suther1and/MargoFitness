@@ -14,7 +14,7 @@ import { sendPaymentSuccessEmail } from '@/lib/services/email'
 import type { Database } from '@/types/supabase'
 
 // Импорт бонусной системы
-import { awardCashback } from '@/lib/actions/bonuses'
+import { awardCashback, spendBonusesOnPayment } from '@/lib/actions/bonuses'
 import { handleReferralPurchase } from '@/lib/actions/referrals'
 import { incrementPromoUsage } from '@/lib/actions/promo-codes'
 
@@ -109,13 +109,29 @@ export async function POST(request: NextRequest) {
         // ============================================
         
         try {
-          // Получаем фактически оплаченную сумму из метаданных
+          // Получаем информацию из метаданных
           const metadata = transaction.metadata as any
-          const actualPaidAmount = metadata?.actual_paid_amount || Number(transaction.amount)
+          const bonusUsed = metadata?.bonusUsed || 0
+          const actualPaidAmount = Number(transaction.amount)
           
-          console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}`)
+          console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}, bonusUsed: ${bonusUsed}`)
           
-          // 1. Начислить кешбек пользователю (передаем service client)
+          // 1. Списать использованные бонусы (если были)
+          if (bonusUsed > 0) {
+            const spendResult = await spendBonusesOnPayment({
+              userId: transaction.user_id,
+              amount: bonusUsed,
+              paymentId: payment.id,
+            })
+            
+            if (spendResult.success) {
+              console.log(`[Webhook] Bonuses spent: ${bonusUsed} шагов`)
+            } else {
+              console.error('[Webhook] Failed to spend bonuses:', spendResult.error)
+            }
+          }
+          
+          // 2. Начислить кешбек пользователю (от фактически оплаченной суммы)
           const cashbackResult = await awardCashback(
             {
               userId: transaction.user_id,
@@ -135,7 +151,7 @@ export async function POST(request: NextRequest) {
             console.error('[Webhook] Failed to award cashback:', cashbackResult.error)
           }
           
-          // 2. Обработать реферальную программу (передаем service client)
+          // 3. Обработать реферальную программу (передаем service client)
           const referralResult = await handleReferralPurchase(
             transaction.user_id,
             actualPaidAmount,
@@ -152,7 +168,7 @@ export async function POST(request: NextRequest) {
             console.error('[Webhook] Failed to process referral:', referralResult.error)
           }
           
-          // 3. Увеличить счетчик использований промокода (если был)
+          // 4. Увеличить счетчик использований промокода (если был)
           if (metadata?.promo_code_id) {
             await incrementPromoUsage(metadata.promo_code_id)
             console.log(`[Webhook] Promo code usage incremented: ${metadata.promo_code_id}`)

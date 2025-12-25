@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { createPayment } from '@/lib/services/yookassa'
+import { calculateFinalPrice } from '@/lib/services/price-calculator'
 import type { Database } from '@/types/supabase'
 
 export async function POST(request: NextRequest) {
@@ -26,7 +27,13 @@ export async function POST(request: NextRequest) {
 
     // Получить параметры из запроса
     const body = await request.json()
-    const { productId, savePaymentMethod, confirmationType = 'embedded' } = body
+    const { 
+      productId, 
+      savePaymentMethod, 
+      confirmationType = 'embedded',
+      promoCode,
+      bonusToUse
+    } = body
 
     if (!productId) {
       return NextResponse.json(
@@ -96,9 +103,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Создать платеж через ЮKassa
+    // Рассчитать финальную цену с учетом промокода и бонусов
+    const priceCalculation = await calculateFinalPrice({
+      productId: product.id,
+      userId: user.id,
+      promoCode,
+      bonusToUse
+    })
+
+    if (!priceCalculation.success || !priceCalculation.data) {
+      return NextResponse.json(
+        { error: 'Ошибка расчета цены', details: priceCalculation.error },
+        { status: 400 }
+      )
+    }
+
+    const calculation = priceCalculation.data
+
+    // Проверка минимальной суммы
+    if (calculation.finalPrice < 1) {
+      return NextResponse.json(
+        { error: 'Минимальная сумма платежа - 1 рубль' },
+        { status: 400 }
+      )
+    }
+
+    // Создать платеж через ЮKassa на финальную сумму
     const payment = await createPayment({
-      amount: product.price,
+      amount: calculation.finalPrice,
       description: `Оплата: ${product.name}`,
       savePaymentMethod: savePaymentMethod || (product.type === 'subscription_tier'),
       confirmationType: confirmationType as 'embedded' | 'redirect',
@@ -107,7 +139,11 @@ export async function POST(request: NextRequest) {
         productId: product.id,
         productType: product.type,
         tierLevel: product.tier_level,
-        durationMonths: product.duration_months
+        durationMonths: product.duration_months,
+        promoCode: promoCode || null,
+        bonusUsed: bonusToUse || 0,
+        originalPrice: product.price,
+        finalPrice: calculation.finalPrice
       }
     })
 
@@ -123,13 +159,18 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         product_id: productId,
         yookassa_payment_id: payment.id,
-        amount: product.price,
+        amount: calculation.finalPrice,
         currency: 'RUB',
         status: 'pending',
         payment_type: 'initial',
         metadata: {
           productName: product.name,
-          productType: product.type
+          productType: product.type,
+          originalPrice: product.price,
+          promoCode: promoCode || null,
+          bonusUsed: bonusToUse || 0,
+          promoDiscount: calculation.promoDiscountAmount,
+          bonusDiscount: calculation.bonusToUse
         } as any
       })
 

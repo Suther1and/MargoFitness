@@ -1,12 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Zap, Crown, Sparkles } from "lucide-react"
-import { PaymentCalculator } from './payment-calculator'
 import { PaymentWidgetSwitcher } from './payment-widget-switcher'
 import type { Product, Profile } from '@/types/database'
-import type { PriceCalculation } from '@/lib/services/price-calculator'
 
 interface PaymentPageClientProps {
   product: Product
@@ -23,7 +20,6 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
     3: Sparkles
   }
   const Icon = tierIcons[tierLevel as keyof typeof tierIcons] || Zap
-  const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
 
   // Безопасное извлечение benefits из metadata
   const metadata = product.metadata as { benefits?: string[] } | null
@@ -90,22 +86,12 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
         </CardContent>
       </Card>
 
-      {/* Правая колонка - Калькулятор и оплата */}
-      <div className="space-y-6">
-        <PaymentCalculator
-          productId={product.id}
-          userId={profile.id}
-          basePrice={product.price}
-          onCalculationChange={setCalculation}
+      {/* Правая колонка - Виджет оплаты */}
+      <div>
+        <PaymentWidgetSwitcher 
+          product={product}
+          profile={profile}
         />
-
-        {/* Виджет оплаты */}
-        {calculation && (
-          <PaymentWidgetSwitcher 
-            product={product}
-            profile={profile}
-          />
-        )}
       </div>
     </div>
   )

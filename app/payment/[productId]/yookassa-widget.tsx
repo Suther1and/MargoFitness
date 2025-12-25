@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreditCard, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import { useRouter } from 'next/navigation'
-import type { Product, Profile } from "@/types/database"
+import { PromoInput } from './promo-input'
+import { BonusSlider } from './bonus-slider'
+import { calculateFinalPrice } from '@/lib/services/price-calculator'
+import type { Product, Profile, PromoCode } from "@/types/database"
+import type { PriceCalculation } from '@/lib/services/price-calculator'
 
 interface YooKassaWidgetProps {
   product: Product
@@ -27,6 +31,36 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
   const [error, setError] = useState('')
   const [widgetReady, setWidgetReady] = useState(false)
   const [confirmationToken, setConfirmationToken] = useState<string | null>(null)
+  
+  // Расчет цены
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null)
+  const [bonusToUse, setBonusToUse] = useState(0)
+  const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
+  const [loadingCalc, setLoadingCalc] = useState(true)
+
+  // Расчет цены при изменении промокода или бонусов
+  useEffect(() => {
+    recalculate()
+  }, [appliedPromo, bonusToUse])
+
+  const recalculate = async () => {
+    setLoadingCalc(true)
+
+    const result = await calculateFinalPrice({
+      productId: product.id,
+      userId: profile.id,
+      promoCode: appliedPromo?.code,
+      bonusToUse,
+    })
+
+    if (result.success && result.data) {
+      setCalculation(result.data)
+    } else {
+      setCalculation(null)
+    }
+
+    setLoadingCalc(false)
+  }
 
   // Загрузка скрипта виджета ЮКассы
   useEffect(() => {
@@ -80,6 +114,11 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
   }, [confirmationToken, widgetReady])
 
   const handlePayment = async () => {
+    if (!calculation) {
+      setError('Ошибка расчета суммы')
+      return
+    }
+
     setProcessing(true)
     setError('')
 
@@ -91,7 +130,9 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: product.id,
-          savePaymentMethod: saveCard
+          savePaymentMethod: saveCard,
+          promoCode: appliedPromo?.code,
+          bonusToUse: bonusToUse,
         })
       })
 
@@ -152,6 +193,26 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
     )
   }
 
+  if (loadingCalc && !calculation) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!calculation) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          Ошибка расчета стоимости
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -163,8 +224,100 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
       <CardContent className="space-y-6">
         {!confirmationToken ? (
           <>
+            {/* Промокод */}
+            <PromoInput
+              productId={product.id}
+              onPromoApplied={setAppliedPromo}
+            />
+
+            {/* Бонусный слайдер */}
+            {calculation && (
+              <BonusSlider
+                userId={profile.id}
+                priceAfterDiscounts={calculation.priceAfterDiscounts}
+                onBonusChange={setBonusToUse}
+              />
+            )}
+
+            {/* Детальный расчет */}
+            <div className="space-y-3 pt-4 border-t">
+              {/* Базовая цена */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Базовая цена</span>
+                <span className="line-through text-muted-foreground">
+                  {calculation.basePrice.toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+
+              {/* Скидка за срок */}
+              {calculation.durationDiscountAmount > 0 && (
+                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                  <span>Скидка за срок ({calculation.durationDiscountPercent}%)</span>
+                  <span>-{calculation.durationDiscountAmount.toLocaleString('ru-RU')} ₽</span>
+                </div>
+              )}
+
+              {/* Промокод */}
+              {calculation.promoDiscountAmount > 0 && (
+                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                  <span>
+                    Промокод {calculation.promoCode} 
+                    ({calculation.promoDiscountType === 'percentage' 
+                      ? `${calculation.promoDiscountValue}%` 
+                      : `${calculation.promoDiscountValue}₽`
+                    })
+                  </span>
+                  <span>-{calculation.promoDiscountAmount.toLocaleString('ru-RU')} ₽</span>
+                </div>
+              )}
+
+              {/* Шаги */}
+              {calculation.bonusToUse > 0 && (
+                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                  <span>Использовано шагов 👟</span>
+                  <span>-{calculation.bonusToUse.toLocaleString('ru-RU')} ₽</span>
+                </div>
+              )}
+
+              <div className="border-t pt-3" />
+
+              {/* Итого к оплате */}
+              <div className="flex items-center justify-between text-lg font-bold">
+                <span>К оплате</span>
+                <span className="text-2xl text-primary">
+                  {calculation.finalPrice.toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+
+              {/* Экономия */}
+              {calculation.totalSavings > 0 && (
+                <div className="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center">
+                  <div className="text-sm font-medium text-green-800 dark:text-green-300">
+                    🎉 Вы экономите {calculation.totalSavings.toLocaleString('ru-RU')} ₽
+                  </div>
+                </div>
+              )}
+
+              {/* Кешбек */}
+              {calculation.cashbackAmount > 0 && (
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Вы получите кешбек:</span>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="font-semibold">
+                        {calculation.cashbackAmount.toLocaleString('ru-RU')} 👟 
+                        <span className="text-muted-foreground ml-1">
+                          ({calculation.cashbackPercent}%)
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Чекбокс сохранения карты */}
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start space-x-3 pt-4">
               <Checkbox 
                 id="save-card" 
                 checked={saveCard}
@@ -184,24 +337,6 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
               </div>
             </div>
 
-            {/* Итого */}
-            <div className="rounded-lg bg-muted p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Подписка:</span>
-                <span className="font-medium">{product.name}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Период:</span>
-                <span className="font-medium">
-                  {product.duration_months} {product.duration_months === 1 ? 'месяц' : product.duration_months! < 5 ? 'месяца' : 'месяцев'}
-                </span>
-              </div>
-              <div className="border-t pt-2 flex justify-between">
-                <span className="font-semibold">Итого:</span>
-                <span className="text-xl font-bold">{product.price} ₽</span>
-              </div>
-            </div>
-
             {/* Сообщение об ошибке */}
             {error && (
               <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 p-3 text-sm text-red-800 dark:text-red-300 flex items-start gap-2">
@@ -215,7 +350,7 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
               className="w-full"
               size="lg"
               onClick={handlePayment}
-              disabled={processing || !widgetReady}
+              disabled={processing || !widgetReady || loadingCalc}
             >
               {processing ? (
                 <>
@@ -230,7 +365,7 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
               ) : (
                 <>
                   <CreditCard className="mr-2 size-4" />
-                  Перейти к оплате {product.price} ₽
+                  Перейти к оплате {calculation.finalPrice.toLocaleString('ru-RU')} ₽
                 </>
               )}
             </Button>
