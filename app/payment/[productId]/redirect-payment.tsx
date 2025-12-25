@@ -149,7 +149,7 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
           {/* Базовая цена */}
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Базовая цена</span>
-            <span className="line-through text-muted-foreground">
+            <span className="text-muted-foreground">
               {calculation.basePrice.toLocaleString('ru-RU')} ₽
             </span>
           </div>

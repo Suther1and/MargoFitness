@@ -51,21 +51,16 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, curren
     <div className="flex items-center justify-between py-3">
       <div className="flex-1">
         <div className="text-sm font-medium">
-          Использовать шаги 👟
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Доступно: {availableBalance.toLocaleString('ru-RU')}, будет списано: {maxBonus.toLocaleString('ru-RU')} (30% от суммы)
+          Использовать шаги 👟 
+          <span className="text-muted-foreground font-normal ml-2">
+            (доступно: {availableBalance.toLocaleString('ru-RU')})
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-primary">
-          {useBonuses ? `-${maxBonus.toLocaleString('ru-RU')} ₽` : ''}
-        </span>
-        <Switch
-          checked={useBonuses}
-          onCheckedChange={handleToggle}
-        />
-      </div>
+      <Switch
+        checked={useBonuses}
+        onCheckedChange={handleToggle}
+      />
     </div>
   )
 }
