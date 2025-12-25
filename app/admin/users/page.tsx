@@ -1,10 +1,10 @@
 import { getAllUsers, getUsersStats } from '@/lib/actions/admin-users'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { EditUserDialog } from './edit-user-dialog'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
+import { UserTableRow } from './user-table-row'
 
 export const dynamic = 'force-dynamic'
 
@@ -179,76 +179,15 @@ export default async function AdminUsersPage({
                   <th className="text-left p-2">Роль</th>
                   <th className="text-left p-2">Тариф</th>
                   <th className="text-left p-2">Статус</th>
+                  <th className="text-left p-2">Истекает</th>
                   <th className="text-left p-2">Бонусы</th>
                   <th className="text-left p-2">Уровень</th>
-                  <th className="text-left p-2">Истекает</th>
                   <th className="text-right p-2">Действия</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">{user.email}</td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {user.role === 'admin' ? 'Админ' : 'Пользователь'}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded text-xs uppercase ${
-                        user.subscription_tier === 'elite' ? 'bg-yellow-100 text-yellow-800' :
-                        user.subscription_tier === 'pro' ? 'bg-blue-100 text-blue-800' :
-                        user.subscription_tier === 'basic' ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {user.subscription_tier}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        user.subscription_status === 'active' ? 'bg-green-100 text-green-800' :
-                        user.subscription_status === 'canceled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {user.subscription_status === 'active' ? 'Активна' :
-                         user.subscription_status === 'canceled' ? 'Отменена' : 'Неактивна'}
-                      </span>
-                    </td>
-                    <td className="p-2 text-sm font-medium">
-                      {user.bonus_balance || 0} шагов
-                    </td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        user.cashback_level === 4 ? 'bg-purple-100 text-purple-800' :
-                        user.cashback_level === 3 ? 'bg-yellow-100 text-yellow-800' :
-                        user.cashback_level === 2 ? 'bg-gray-200 text-gray-800' :
-                        'bg-amber-100 text-amber-800'
-                      }`}>
-                        {user.cashback_level === 4 ? '💎 Platinum' :
-                         user.cashback_level === 3 ? '🥇 Gold' :
-                         user.cashback_level === 2 ? '🥈 Silver' : '🥉 Bronze'}
-                      </span>
-                    </td>
-                    <td className="p-2 text-sm text-gray-600">
-                      {user.subscription_expires_at 
-                        ? new Date(user.subscription_expires_at).toLocaleDateString('ru-RU')
-                        : '—'}
-                    </td>
-                    <td className="p-2 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <CancelSubscriptionButton 
-                          userId={user.id}
-                          userEmail={user.email || ''}
-                          hasActiveSubscription={user.subscription_status === 'active'}
-                        />
-                        <EditUserDialog user={user} />
-                      </div>
-                    </td>
-                  </tr>
+                  <UserTableRow key={user.id} user={user} />
                 ))}
               </tbody>
             </table>
