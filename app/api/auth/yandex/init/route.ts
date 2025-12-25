@@ -40,8 +40,11 @@ export async function GET(request: Request) {
     yandexAuthUrl.searchParams.set('client_id', clientId)
     yandexAuthUrl.searchParams.set('redirect_uri', redirectUri)
     yandexAuthUrl.searchParams.set('state', state)
-    // Запрашиваем необходимые права доступа
-    yandexAuthUrl.searchParams.set('scope', 'login:email login:info login:avatar')
+    // Для Яндекс ID используем пустой scope или только разрешенные в настройках приложения
+    // Базовая информация о пользователе доступна по умолчанию
+    // Если нужны дополнительные права, настройте их в консоли Яндекс ID
+    // и раскомментируйте нужные scope (например: 'login:email login:info')
+    // yandexAuthUrl.searchParams.set('scope', '')
     // Опционально: принудительное согласие (force_confirm=yes)
     // yandexAuthUrl.searchParams.set('force_confirm', 'yes')
 

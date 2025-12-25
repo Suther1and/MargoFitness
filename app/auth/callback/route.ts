@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
-  let refCode = requestUrl.searchParams.get('ref') // Реферальный код
+  let refCode = requestUrl.searchParams.get('ref') // Реферальный код из URL
   const origin = requestUrl.origin
 
   console.log('='.repeat(80))
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   console.log('[Callback] Params:', {
     code: code ? 'YES' : 'NO',
     redirect,
-    refCode: refCode || 'NONE',
+    refCode: refCode || 'NONE (will check localStorage)',
     origin
   })
   console.log('='.repeat(80))

@@ -20,8 +20,14 @@ export function OAuthButtons({ redirectTo = "/dashboard", referralCode }: OAuthB
     try {
       setLoadingProvider("google")
       
-      // Формируем URL с реферальным кодом
-      const callbackUrl = `${window.location.origin}/auth/callback?redirect=${redirectTo}${referralCode ? `&ref=${referralCode}` : ''}`
+      // Сохраняем реферальный код в localStorage перед OAuth redirect
+      if (referralCode) {
+        localStorage.setItem('pending_referral_code', referralCode)
+      }
+      
+      // Используем NEXT_PUBLIC_SITE_URL для правильного production redirect
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+      const callbackUrl = `${siteUrl}/auth/callback?redirect=${redirectTo}${referralCode ? `&ref=${referralCode}` : ''}`
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
