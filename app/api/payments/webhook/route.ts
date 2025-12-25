@@ -132,10 +132,11 @@ export async function POST(request: NextRequest) {
             console.error('[Webhook] Failed to award cashback:', cashbackResult.error)
           }
           
-          // 2. Обработать реферальную программу
+          // 2. Обработать реферальную программу (передаем service client)
           const referralResult = await handleReferralPurchase(
             transaction.user_id,
-            actualPaidAmount
+            actualPaidAmount,
+            supabase // Передаем admin client для обхода RLS
           )
           
           if (referralResult.success && referralResult.bonusAwarded) {
@@ -144,6 +145,8 @@ export async function POST(request: NextRequest) {
             if (referralResult.isFirstPurchase) {
               console.log('[Webhook] First referral purchase bonus included!')
             }
+          } else if (!referralResult.success) {
+            console.error('[Webhook] Failed to process referral:', referralResult.error)
           }
           
           // 3. Увеличить счетчик использований промокода (если был)
