@@ -39,47 +39,56 @@ export async function getAllUsers(filters?: {
     await checkAdmin()
     const supabase = await createClient()
 
-    let query = supabase
+    // Сначала получаем профили
+    let profileQuery = supabase
       .from('profiles')
-      .select(`
-        *,
-        user_bonuses (
-          balance,
-          cashback_level,
-          total_spent_for_cashback
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
 
     // Применяем фильтры
     if (filters?.role && filters.role !== 'all') {
-      query = query.eq('role', filters.role as 'user' | 'admin')
+      profileQuery = profileQuery.eq('role', filters.role as 'user' | 'admin')
     }
     if (filters?.tier && filters.tier !== 'all') {
-      query = query.eq('subscription_tier', filters.tier as any)
+      profileQuery = profileQuery.eq('subscription_tier', filters.tier as any)
     }
     if (filters?.status && filters.status !== 'all') {
-      query = query.eq('subscription_status', filters.status as any)
+      profileQuery = profileQuery.eq('subscription_status', filters.status as any)
     }
     if (filters?.search) {
-      query = query.ilike('email', `%${filters.search}%`)
+      profileQuery = profileQuery.ilike('email', `%${filters.search}%`)
     }
 
-    const { data, error } = await query
+    const { data: profiles, error: profileError } = await profileQuery
 
-    if (error) {
-      console.error('Error fetching users:', error)
-      return { success: false, error: error.message }
+    if (profileError) {
+      console.error('Error fetching users:', profileError)
+      return { success: false, error: profileError.message }
     }
 
-    // Приводим данные к плоскому формату
-    const usersWithBonuses: ProfileWithBonuses[] = (data as any[])?.map((user: any) => {
-      const bonuses = Array.isArray(user.user_bonuses) ? user.user_bonuses[0] : null
+    // Получаем все бонусные счета одним запросом
+    const { data: bonuses, error: bonusError } = await supabase
+      .from('user_bonuses')
+      .select('user_id, balance, cashback_level, total_spent_for_cashback')
+
+    if (bonusError) {
+      console.error('Error fetching bonuses:', bonusError)
+      // Не прерываем выполнение, просто логируем
+    }
+
+    // Создаем Map для быстрого доступа
+    const bonusMap = new Map(
+      bonuses?.map(b => [b.user_id, b]) || []
+    )
+
+    // Объединяем данные
+    const usersWithBonuses: ProfileWithBonuses[] = profiles?.map((user: any) => {
+      const userBonuses = bonusMap.get(user.id)
       return {
         ...user,
-        bonus_balance: bonuses?.balance ?? 0,
-        cashback_level: bonuses?.cashback_level ?? 1,
-        total_spent_for_cashback: bonuses?.total_spent_for_cashback ?? 0,
+        bonus_balance: userBonuses?.balance ?? 0,
+        cashback_level: userBonuses?.cashback_level ?? 1,
+        total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
       }
     }) || []
 
