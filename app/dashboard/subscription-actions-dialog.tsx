@@ -13,10 +13,10 @@ interface SubscriptionActionsDialogProps {
 }
 
 const DURATIONS = [
-  { months: 1, label: '1 мес' },
-  { months: 3, label: '3 мес' },
-  { months: 6, label: '6 мес' },
-  { months: 12, label: '12 мес' },
+  { months: 1, label: '1 мес', discount: 0 },
+  { months: 3, label: '3 мес', discount: 5 },
+  { months: 6, label: '6 мес', discount: 10 },
+  { months: 12, label: '12 мес', discount: 15 },
 ]
 
 export function SubscriptionActionsDialog({ profile }: SubscriptionActionsDialogProps) {
@@ -216,13 +216,20 @@ export function SubscriptionActionsDialog({ profile }: SubscriptionActionsDialog
                   <button
                     key={duration.months}
                     onClick={() => setSelectedDuration(duration.months)}
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-3 rounded-lg border-2 transition-all relative ${
                       selectedDuration === duration.months
                         ? 'border-primary bg-primary/5 font-semibold'
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    {duration.label}
+                    <div className="text-center">
+                      <div>{duration.label}</div>
+                      {duration.discount > 0 && (
+                        <div className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                          −{duration.discount}%
+                        </div>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
