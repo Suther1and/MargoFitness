@@ -12,6 +12,7 @@ import PaymentSuccessAlert from "./payment-success-alert"
 import { UserAvatar } from "@/components/user-avatar"
 import { ProfileEditDialogWrapper } from "./profile-edit-wrapper"
 import { SubscriptionManager } from "./subscription-manager"
+import { ReferralProcessor } from "@/components/referral-processor"
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile()
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto space-y-8 py-10">
+      <ReferralProcessor />
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-start gap-6">

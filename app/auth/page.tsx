@@ -66,7 +66,12 @@ function AuthForm() {
       }
 
       if (signInError.message.includes('Invalid login credentials')) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        // Сохраняем ref код в localStorage для обработки после редиректа
+        if (refCode) {
+          localStorage.setItem('pending_referral_code', refCode)
+        }
+
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -78,6 +83,7 @@ function AuthForm() {
         })
 
         if (signUpError) {
+          localStorage.removeItem('pending_referral_code')
           if (signUpError.message.includes('already registered')) {
             setError('Неверный пароль')
           } else {
@@ -85,22 +91,6 @@ function AuthForm() {
           }
           setLoading(false)
           return
-        }
-
-        // Если есть ref код, обрабатываем его сразу
-        if (refCode && signUpData.user) {
-          try {
-            await fetch('/api/auth/process-referral', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                userId: signUpData.user.id, 
-                refCode 
-              })
-            })
-          } catch (err) {
-            console.error('Failed to process referral:', err)
-          }
         }
 
         router.push(redirect)
@@ -131,7 +121,12 @@ function AuthForm() {
     }
 
     if (mode === 'signup') {
-      const { data: signUpData, error } = await supabase.auth.signUp({
+      // Сохраняем ref код в localStorage для обработки после редиректа
+      if (refCode) {
+        localStorage.setItem('pending_referral_code', refCode)
+      }
+
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -143,25 +138,10 @@ function AuthForm() {
       })
 
       if (error) {
+        localStorage.removeItem('pending_referral_code')
         setError(error.message)
         setLoading(false)
         return
-      }
-
-      // Если есть ref код, обрабатываем его сразу
-      if (refCode && signUpData.user) {
-        try {
-          await fetch('/api/auth/process-referral', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              userId: signUpData.user.id, 
-              refCode 
-            })
-          })
-        } catch (err) {
-          console.error('Failed to process referral:', err)
-        }
       }
 
       router.push(redirect)
