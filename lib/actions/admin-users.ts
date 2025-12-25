@@ -126,7 +126,7 @@ export async function updateUserProfile(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await checkAdmin()
+    const adminProfile = await checkAdmin()
     const supabase = await createClient()
 
     // Обновляем профиль
@@ -147,6 +147,50 @@ export async function updateUserProfile(
 
     // Обновляем бонусы, если указаны
     if (data.bonus_balance !== undefined || data.cashback_level !== undefined) {
+      // Если меняется баланс, создаем транзакцию
+      if (data.bonus_balance !== undefined) {
+        // Получаем текущий баланс
+        const { data: currentBonus, error: fetchError } = await supabase
+          .from('user_bonuses')
+          .select('balance')
+          .eq('user_id', userId)
+          .single()
+
+        if (fetchError) {
+          console.error('Error fetching current bonus:', fetchError)
+          return { success: false, error: fetchError.message }
+        }
+
+        const oldBalance = currentBonus?.balance || 0
+        const difference = data.bonus_balance - oldBalance
+
+        // Создаем транзакцию только если есть изменение
+        if (difference !== 0) {
+          const { error: txError } = await supabase
+            .from('bonus_transactions')
+            .insert({
+              user_id: userId,
+              amount: difference,
+              type: 'admin_adjustment',
+              description: difference > 0 
+                ? `Начисление администратором (+${difference} шагов)` 
+                : `Списание администратором (${difference} шагов)`,
+              related_user_id: adminProfile.id,
+              metadata: {
+                admin_email: adminProfile.email,
+                old_balance: oldBalance,
+                new_balance: data.bonus_balance,
+              },
+            })
+
+          if (txError) {
+            console.error('Error creating bonus transaction:', txError)
+            return { success: false, error: txError.message }
+          }
+        }
+      }
+
+      // Обновляем бонусный счет
       const updateData: any = {}
       if (data.bonus_balance !== undefined) updateData.balance = data.bonus_balance
       if (data.cashback_level !== undefined) updateData.cashback_level = data.cashback_level
@@ -164,6 +208,7 @@ export async function updateUserProfile(
 
     revalidatePath('/admin/users')
     revalidatePath('/admin')
+    revalidatePath('/dashboard/bonuses')
 
     return { success: true }
   } catch (error: any) {
