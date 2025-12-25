@@ -46,15 +46,23 @@ export async function POST(request: Request) {
       )
     }
 
-    // Даем время на создание профиля триггером
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Даем время на создание профиля триггером (увеличено)
+    console.log('[Process Referral] Waiting for DB triggers...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    console.log('[Process Referral] Starting validation')
 
     // Проверяем бонусный аккаунт
-    const { data: bonusAccount } = await supabaseAdmin
+    const { data: bonusAccount, error: bonusCheckError } = await supabaseAdmin
       .from('user_bonuses')
-      .select('id')
+      .select('id, balance')
       .eq('user_id', userId)
       .single()
+
+    console.log('[Process Referral] Bonus account check:', { 
+      found: !!bonusAccount, 
+      balance: bonusAccount?.balance,
+      error: bonusCheckError?.message 
+    })
 
     if (!bonusAccount) {
       console.log('[Process Referral] Creating bonus account manually')
@@ -89,8 +97,15 @@ export async function POST(request: Request) {
       .eq('code', refCode)
       .single()
 
+    console.log('[Process Referral] Ref code validation:', {
+      code: refCode,
+      found: !!refCodeData,
+      referrerId: refCodeData?.user_id,
+      error: refError?.message
+    })
+
     if (refError || !refCodeData) {
-      console.error('[Process Referral] Invalid referral code')
+      console.error('[Process Referral] Invalid referral code:', refError?.message)
       return NextResponse.json({ error: 'Invalid referral code' }, { status: 400 })
     }
 
@@ -103,11 +118,16 @@ export async function POST(request: Request) {
     }
 
     // Проверяем что реферал еще не зарегистрирован
-    const { data: existing } = await supabaseAdmin
+    const { data: existing, error: existingCheckError } = await supabaseAdmin
       .from('referrals')
       .select('id')
       .eq('referred_id', userId)
       .single()
+
+    console.log('[Process Referral] Existing check:', {
+      alreadyRegistered: !!existing,
+      error: existingCheckError?.message
+    })
 
     if (existing) {
       console.error('[Process Referral] User already registered with referral')
@@ -115,6 +135,11 @@ export async function POST(request: Request) {
     }
 
     // Создаем связь
+    console.log('[Process Referral] Creating referral link:', {
+      referrer_id: referrerId,
+      referred_id: userId
+    })
+
     const { error: insertError } = await supabaseAdmin
       .from('referrals')
       .insert({
@@ -124,10 +149,15 @@ export async function POST(request: Request) {
       })
 
     if (insertError) {
+      console.error('[Process Referral] Failed to insert referral:', insertError)
       throw insertError
     }
 
+    console.log('[Process Referral] Referral link created successfully')
+
     // Начисляем бонус приглашенному
+    console.log('[Process Referral] Adding bonus transaction:', BONUS_CONSTANTS.REFERRED_USER_BONUS)
+
     const { error: txError } = await supabaseAdmin
       .from('bonus_transactions')
       .insert({
@@ -139,24 +169,42 @@ export async function POST(request: Request) {
       })
 
     if (txError) {
-      console.error('[Process Referral] Failed to add bonus:', txError)
+      console.error('[Process Referral] Failed to add bonus transaction:', txError)
+    } else {
+      console.log('[Process Referral] Bonus transaction created')
     }
 
     // Обновляем баланс
-    const { data: currentBalance } = await supabaseAdmin
+    const { data: currentBalance, error: balanceError } = await supabaseAdmin
       .from('user_bonuses')
       .select('balance')
       .eq('user_id', userId)
       .single()
 
+    console.log('[Process Referral] Current balance:', {
+      balance: currentBalance?.balance,
+      error: balanceError?.message
+    })
+
     if (currentBalance) {
-      await supabaseAdmin
+      const newBalance = currentBalance.balance + BONUS_CONSTANTS.REFERRED_USER_BONUS
+      
+      const { error: updateError } = await supabaseAdmin
         .from('user_bonuses')
-        .update({ balance: currentBalance.balance + BONUS_CONSTANTS.REFERRED_USER_BONUS })
+        .update({ balance: newBalance })
         .eq('user_id', userId)
+
+      if (updateError) {
+        console.error('[Process Referral] Failed to update balance:', updateError)
+      } else {
+        console.log('[Process Referral] Balance updated:', {
+          oldBalance: currentBalance.balance,
+          newBalance: newBalance
+        })
+      }
     }
 
-    console.log('[Process Referral] Success for user:', userId)
+    console.log('[Process Referral] ✅ SUCCESS for user:', userId)
     return NextResponse.json({ success: true })
 
   } catch (error) {

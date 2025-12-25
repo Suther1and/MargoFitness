@@ -233,8 +233,10 @@ export async function POST(request: Request) {
       // Продолжаем - профиль может создаться через триггер
     }
     
-    // Даем время триггеру создать бонусный аккаунт и реферальный код
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Даем время триггеру создать бонусный аккаунт и реферальный код (увеличено)
+    console.log('[Telegram Auth] Waiting for DB triggers...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    console.log('[Telegram Auth] Starting referral processing')
     
     const supabaseAdmin = getAdminClient()
     
