@@ -38,8 +38,9 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
     return labels[type] || type
   }
 
-  const getTypeColor = (type: BonusTransaction['type']): string => {
-    if (type === 'spent') return 'text-red-600 dark:text-red-400'
+  const getTypeColor = (type: BonusTransaction['type'], amount: number): string => {
+    // Цвет зависит от знака суммы, а не только от типа
+    if (amount < 0) return 'text-red-600 dark:text-red-400'
     return 'text-green-600 dark:text-green-400'
   }
 
@@ -75,7 +76,7 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
                     })}
                   </div>
                 </div>
-                <div className={`text-lg font-bold ${getTypeColor(tx.type)}`}>
+                <div className={`text-lg font-bold ${getTypeColor(tx.type, tx.amount)}`}>
                   {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('ru-RU')} 👟
                 </div>
               </div>
