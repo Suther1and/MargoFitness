@@ -301,18 +301,22 @@ export async function addBonusTransaction(params: {
 
 /**
  * Начислить кешбек с покупки
+ * ВАЖНО: Должна вызываться с service role client (например из webhook)
  */
-export async function awardCashback(params: {
-  userId: string
-  paidAmount: number // фактически оплаченная сумма
-  paymentId: string
-}): Promise<{
+export async function awardCashback(
+  params: {
+    userId: string
+    paidAmount: number // фактически оплаченная сумма
+    paymentId: string
+  },
+  supabaseClient?: any // Опциональный admin client для вызова из webhook
+): Promise<{
   success: boolean
   cashbackAmount?: number
   newLevel?: number
   error?: string
 }> {
-  const supabase = await createClient()
+  const supabase = supabaseClient || await createClient()
 
   try {
     // Получаем счет

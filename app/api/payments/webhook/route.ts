@@ -115,12 +115,15 @@ export async function POST(request: NextRequest) {
           
           console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}`)
           
-          // 1. Начислить кешбек пользователю
-          const cashbackResult = await awardCashback({
-            userId: transaction.user_id,
-            paidAmount: actualPaidAmount,
-            paymentId: payment.id,
-          })
+          // 1. Начислить кешбек пользователю (передаем service client)
+          const cashbackResult = await awardCashback(
+            {
+              userId: transaction.user_id,
+              paidAmount: actualPaidAmount,
+              paymentId: payment.id,
+            },
+            supabase // Передаем admin client для обхода RLS
+          )
           
           if (cashbackResult.success) {
             console.log(`[Webhook] Cashback awarded: ${cashbackResult.cashbackAmount} шагов`)
