@@ -372,6 +372,19 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
           </>
         ) : (
           <>
+            {/* Кнопка назад */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmationToken(null)
+                setProcessing(false)
+                setError('')
+              }}
+              className="w-full"
+            >
+              ← Изменить параметры оплаты
+            </Button>
+
             {/* Контейнер для виджета ЮКассы */}
             <div id="payment-form" className="min-h-[400px]"></div>
             

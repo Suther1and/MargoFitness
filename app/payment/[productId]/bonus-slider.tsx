@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
 
 interface BonusSliderProps {
@@ -13,7 +13,7 @@ interface BonusSliderProps {
 export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: BonusSliderProps) {
   const [maxBonus, setMaxBonus] = useState(0)
   const [availableBalance, setAvailableBalance] = useState(0)
-  const [bonusToUse, setBonusToUse] = useState(0)
+  const [useBonuses, setUseBonuses] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -32,10 +32,9 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: Bonu
     setLoading(false)
   }
 
-  const handleSliderChange = (values: number[]) => {
-    const amount = values[0]
-    setBonusToUse(amount)
-    onBonusChange(amount)
+  const handleToggle = (checked: boolean) => {
+    setUseBonuses(checked)
+    onBonusChange(checked ? maxBonus : 0)
   }
 
   if (loading || availableBalance === 0 || maxBonus === 0) {
@@ -43,26 +42,23 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: Bonu
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">
-          Использовать шаги (доступно: {availableBalance.toLocaleString('ru-RU')} 👟)
-        </span>
-        <span className="font-medium">
-          {bonusToUse > 0 ? `-${bonusToUse.toLocaleString('ru-RU')} ₽` : '0 ₽'}
-        </span>
+    <div className="flex items-center justify-between py-3">
+      <div className="flex-1">
+        <div className="text-sm font-medium">
+          Использовать шаги 👟
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Доступно: {availableBalance.toLocaleString('ru-RU')}, будет списано: {maxBonus.toLocaleString('ru-RU')} (30% от суммы)
+        </div>
       </div>
-      
-      <Slider
-        value={[bonusToUse]}
-        onValueChange={handleSliderChange}
-        max={maxBonus}
-        step={10}
-        className="w-full"
-      />
-      
-      <div className="text-xs text-muted-foreground text-center">
-        Можно использовать до {maxBonus.toLocaleString('ru-RU')} шагов (30% от суммы)
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-primary">
+          {useBonuses ? `-${maxBonus.toLocaleString('ru-RU')} ₽` : ''}
+        </span>
+        <Switch
+          checked={useBonuses}
+          onCheckedChange={handleToggle}
+        />
       </div>
     </div>
   )
