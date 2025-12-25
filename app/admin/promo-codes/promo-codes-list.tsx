@@ -76,7 +76,7 @@ export function PromoCodesList({ promoCodes: initialPromoCodes }: PromoCodesList
                   </div>
 
                   <div className="text-sm text-muted-foreground">
-                    {promo.discount_type === 'percentage'
+                    {promo.discount_type === 'percent'
                       ? `${promo.discount_value}% скидка`
                       : `${promo.discount_value}₽ скидка`
                     }

@@ -627,7 +627,7 @@ export interface Database {
           code: string
           discount_type: Database['public']['Enums']['promo_discount_type']
           discount_value: number
-          applicable_to: string[]
+          applicable_products: string[] | null
           usage_limit: number | null
           usage_count: number
           expires_at: string | null
@@ -640,7 +640,7 @@ export interface Database {
           code: string
           discount_type: Database['public']['Enums']['promo_discount_type']
           discount_value: number
-          applicable_to?: string[]
+          applicable_products?: string[] | null
           usage_limit?: number | null
           usage_count?: number
           expires_at?: string | null
@@ -653,7 +653,7 @@ export interface Database {
           code?: string
           discount_type?: Database['public']['Enums']['promo_discount_type']
           discount_value?: number
-          applicable_to?: string[]
+          applicable_products?: string[] | null
           usage_limit?: number | null
           usage_count?: number
           expires_at?: string | null
@@ -680,7 +680,7 @@ export interface Database {
       subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
       bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment'
       referral_status: 'registered' | 'first_purchase_made'
-      promo_discount_type: 'percentage' | 'fixed'
+      promo_discount_type: 'percent' | 'fixed_amount'
     }
     CompositeTypes: {
       [_ in never]: never

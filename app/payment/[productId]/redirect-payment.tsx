@@ -170,7 +170,7 @@ export function RedirectPayment({ product, profile, onCalculationChange }: Redir
             <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
               <span>
                 Промокод {calculation.promoCode} 
-                ({calculation.promoDiscountType === 'percentage' 
+                ({calculation.promoDiscountType === 'percent' 
                   ? `${calculation.promoDiscountValue}%` 
                   : `${calculation.promoDiscountValue}₽`
                 })

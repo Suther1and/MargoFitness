@@ -91,7 +91,7 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
           <Check className="size-4 flex-shrink-0" />
           <span>
             Промокод <strong>{appliedPromo.code}</strong> применен: 
-            {appliedPromo.discount_type === 'percentage' 
+            {appliedPromo.discount_type === 'percent' 
               ? ` ${appliedPromo.discount_value}% скидка`
               : ` ${appliedPromo.discount_value}₽ скидка`
             }

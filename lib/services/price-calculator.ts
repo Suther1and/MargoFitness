@@ -18,7 +18,7 @@ export interface PriceCalculation {
   durationDiscountAmount: number // Сумма скидки за срок
   
   promoCode?: string
-  promoDiscountType?: 'percentage' | 'fixed'
+  promoDiscountType?: 'percent' | 'fixed_amount'
   promoDiscountValue?: number
   promoDiscountAmount: number // Сумма скидки по промокоду
   

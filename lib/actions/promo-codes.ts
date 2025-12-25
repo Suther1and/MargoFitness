@@ -45,8 +45,8 @@ export async function validatePromoCode(
     }
 
     // Проверяем применимость к продукту
-    if (productId && promo.applicable_to && promo.applicable_to.length > 0) {
-      if (!promo.applicable_to.includes(productId)) {
+    if (productId && promo.applicable_products && promo.applicable_products.length > 0) {
+      if (!promo.applicable_products.includes(productId)) {
         return { success: false, error: 'Промокод не применим к этому продукту' }
       }
     }
@@ -110,7 +110,7 @@ export async function calculatePromoDiscount(
   const promo = validationResult.data
   let discount = 0
 
-  if (promo.discount_type === 'percentage') {
+  if (promo.discount_type === 'percent') {
     discount = Math.floor(basePrice * (promo.discount_value / 100))
   } else {
     discount = Math.min(promo.discount_value, basePrice)
@@ -132,7 +132,7 @@ export async function calculatePromoDiscount(
  */
 export async function createPromoCode(data: {
   code: string
-  discountType: 'percentage' | 'fixed'
+  discountType: 'percent' | 'fixed_amount'
   discountValue: number
   applicableProducts?: string[] | null
   usageLimit?: number | null
@@ -179,7 +179,7 @@ export async function createPromoCode(data: {
         code: data.code.toUpperCase(),
         discount_type: data.discountType,
         discount_value: data.discountValue,
-        applicable_to: data.applicableProducts || [],
+        applicable_products: data.applicableProducts || null,
         usage_limit: data.usageLimit || null,
         expires_at: data.expiresAt || null,
         is_active: true,
