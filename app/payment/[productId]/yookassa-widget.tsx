@@ -244,7 +244,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange }: YooKas
             )}
 
             {/* Детальный расчет */}
-            <div className="space-y-3 pt-4 border-t">
+            <div className="space-y-2 pt-3 border-t">
               {/* Базовая цена */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Базовая цена</span>

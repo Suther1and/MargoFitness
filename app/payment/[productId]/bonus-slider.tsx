@@ -64,11 +64,11 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, curren
   }
 
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-2">
       <div className="flex-1">
-        <div className="text-sm font-medium">
+        <div className="text-sm text-muted-foreground">
           Использовать шаги 👟 
-          <span className="text-muted-foreground font-normal ml-2">
+          <span className="ml-2">
             (доступно: {availableBalance.toLocaleString('ru-RU')})
           </span>
         </div>

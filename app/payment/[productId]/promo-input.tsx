@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Check, X, Tag, ChevronDown } from 'lucide-react'
+import { Check, X, Tag } from 'lucide-react'
 import { validatePromoCode } from '@/lib/actions/promo-codes'
 import type { PromoCode } from '@/types/database'
 
@@ -49,18 +49,17 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
   }
 
   return (
-    <div className="min-h-[52px]">
+    <div className="py-2">
       {!isExpanded && !appliedPromo ? (
         <button
           onClick={() => setIsExpanded(true)}
-          className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors py-3"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <Tag className="size-4" />
-          <span className="font-medium">У меня есть промокод</span>
-          <ChevronDown className="size-4" />
+          <span>У меня есть промокод</span>
         </button>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
@@ -69,7 +68,7 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
                 placeholder="Введите промокод"
                 disabled={loading}
                 readOnly={!!appliedPromo}
-                className={`font-mono ${appliedPromo ? 'bg-muted' : ''}`}
+                className={`font-mono text-sm ${appliedPromo ? 'bg-muted' : ''}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !appliedPromo) {
                     handleApply()
@@ -86,18 +85,20 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
             {appliedPromo ? (
               <Button
                 onClick={handleRemove}
-                variant="outline"
-                size="icon"
-                className="flex-shrink-0"
+                variant="ghost"
+                size="sm"
+                className="flex-shrink-0 h-9"
               >
-                <X className="size-4" />
+                <X className="size-4 mr-1" />
+                Отменить
               </Button>
             ) : (
               <>
                 <Button
                   onClick={handleApply}
                   disabled={!code.trim() || loading}
-                  className="flex-shrink-0"
+                  size="sm"
+                  className="flex-shrink-0 h-9"
                 >
                   {loading ? 'Проверка...' : 'Применить'}
                 </Button>
@@ -109,7 +110,7 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
                   }}
                   variant="ghost"
                   size="icon"
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 h-9 w-9"
                 >
                   <X className="size-4" />
                 </Button>
@@ -118,8 +119,8 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-800 dark:text-red-300">
-              <X className="size-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 rounded-md bg-red-50 dark:bg-red-950 p-2 text-xs text-red-800 dark:text-red-300">
+              <X className="size-3 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
