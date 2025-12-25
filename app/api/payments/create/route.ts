@@ -165,6 +165,52 @@ export async function POST(request: NextRequest) {
       paymentType = 'one_time'
     }
     
+    // Рассчитать конвертацию для апгрейда
+    let upgradeConversion = null
+    if (action === 'upgrade' && profile.subscription_status === 'active') {
+      const { 
+        getRemainingDays, 
+        calculateUpgradeConversion, 
+        getActualSubscriptionPrice 
+      } = await import('@/lib/services/subscription-manager')
+      
+      const currentTierLevel = profile.subscription_tier === 'basic' ? 1 :
+                               profile.subscription_tier === 'pro' ? 2 :
+                               profile.subscription_tier === 'elite' ? 3 : 0
+      const newTierLevel = product.tier_level || 1
+      const remainingDays = getRemainingDays(profile.subscription_expires_at)
+      
+      // Получить фактическую стоимость текущей подписки
+      const actualPrice = await getActualSubscriptionPrice({
+        userId: user.id,
+        tierLevel: currentTierLevel,
+        durationMonths: profile.subscription_duration_months
+      })
+      
+      // Fallback на цену из products
+      const { data: currentProductData } = await supabaseAdmin
+        .from('products')
+        .select('price')
+        .eq('type', 'subscription_tier')
+        .eq('tier_level', currentTierLevel)
+        .eq('duration_months', profile.subscription_duration_months)
+        .single()
+      
+      const currentPrice = actualPrice || currentProductData?.price || 0
+      
+      upgradeConversion = calculateUpgradeConversion({
+        currentTierLevel,
+        currentDurationMonths: profile.subscription_duration_months,
+        currentPrice,
+        remainingDays,
+        newTierLevel,
+        newDurationMonths: product.duration_months,
+        newPrice: product.price
+      })
+      
+      console.log('[Create Payment] Upgrade conversion calculated:', upgradeConversion)
+    }
+    
     const { error: transactionError } = await supabaseAdmin
       .from('payment_transactions')
       .insert({
@@ -176,14 +222,15 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         payment_type: paymentType,
         metadata: {
-          action, // NEW: добавляем action в metadata
+          action,
           productName: product.name,
           productType: product.type,
           originalPrice: product.price,
           promoCode: promoCode || null,
           bonusUsed: bonusToUse || 0,
           promoDiscount: calculation.promoDiscountAmount,
-          bonusDiscount: calculation.bonusToUse
+          bonusDiscount: calculation.bonusToUse,
+          ...(upgradeConversion ? { conversion: upgradeConversion } : {})
         } as any
       })
 

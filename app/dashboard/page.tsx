@@ -13,6 +13,7 @@ import { UserAvatar } from "@/components/user-avatar"
 import { ProfileEditDialogWrapper } from "./profile-edit-wrapper"
 import { SubscriptionManager } from "./subscription-manager"
 import { ReferralProcessor } from "@/components/referral-processor"
+import { SubscriptionActionsDialog } from "./subscription-actions-dialog"
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile()
@@ -116,12 +117,25 @@ export default async function DashboardPage() {
             <Crown className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{getTierDisplayName(profile.subscription_tier)}</div>
-            <p className="text-xs text-muted-foreground">
-              {subscriptionActive 
-                ? `Активна ${daysLeft ? `(${daysLeft} дн.)` : ''}` 
-                : 'Неактивна'}
-            </p>
+            <div className="space-y-3">
+              <div>
+                <div className="text-2xl font-bold">{getTierDisplayName(profile.subscription_tier)}</div>
+                <p className="text-xs text-muted-foreground">
+                  {subscriptionActive 
+                    ? `Активна ${daysLeft ? `(${daysLeft} дн.)` : ''}` 
+                    : 'Неактивна'}
+                </p>
+              </div>
+              {subscriptionActive ? (
+                <SubscriptionActionsDialog profile={profile} />
+              ) : (
+                <Link href="/pricing" className="block">
+                  <Button size="sm" variant="outline" className="w-full">
+                    Оформить
+                  </Button>
+                </Link>
+              )}
+            </div>
           </CardContent>
         </Card>
 

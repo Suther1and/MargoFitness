@@ -7,7 +7,6 @@ import { Switch } from "@/components/ui/switch"
 import { Crown, CreditCard, History, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/types/database"
-import { SubscriptionActionsDialog } from './subscription-actions-dialog'
 
 interface Transaction {
   id: string
@@ -133,8 +132,8 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
         <CardContent className="space-y-6">
           {/* Текущий тариф */}
           <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="flex-1">
-              <p className="font-medium text-lg">
+            <div>
+              <p className="font-medium">
                 {profile.subscription_tier === 'basic' ? 'Basic' :
                  profile.subscription_tier === 'pro' ? 'Pro' :
                  profile.subscription_tier === 'elite' ? 'Elite' : 'Free'}
@@ -145,11 +144,9 @@ export function SubscriptionManager({ profile }: SubscriptionManagerProps) {
                   : 'Подписка неактивна'}
               </p>
             </div>
-            {hasActiveSubscription ? (
-              <SubscriptionActionsDialog profile={profile} />
-            ) : (
+            {!hasActiveSubscription && (
               <Link href="/pricing">
-                <Button variant="outline" size="sm">
+                <Button variant="outline">
                   Оформить подписку
                 </Button>
               </Link>

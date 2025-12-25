@@ -243,25 +243,28 @@ export function SubscriptionActionsDialog({ profile }: SubscriptionActionsDialog
                     </span>
                   </div>
                   
-                  {action === 'upgrade' && upgradeInfo && !loadingUpgradeInfo && (
-                    <div className="pt-2 mt-2 border-t space-y-1">
-                      <p className="text-sm font-medium text-primary">🎁 Бонус при апгрейде:</p>
-                      <p className="text-xs text-muted-foreground">
-                        • Базовый период: {upgradeInfo.conversion.baseDays} дней
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        • Бонусные дни: +{upgradeInfo.conversion.convertedDays} дней
-                      </p>
-                      <p className="text-sm font-semibold">
-                        = Всего {upgradeInfo.conversion.totalDays} дней подписки
-                      </p>
-                    </div>
-                  )}
-                  
-                  {action === 'upgrade' && loadingUpgradeInfo && (
-                    <div className="flex items-center gap-2 pt-2">
-                      <Loader2 className="size-4 animate-spin" />
-                      <span className="text-sm text-muted-foreground">Расчет бонуса...</span>
+                  {/* Фиксированное место для информации об апгрейде - всегда показываем блок */}
+                  {action === 'upgrade' && (
+                    <div className="pt-2 mt-2 border-t space-y-1 min-h-[100px]">
+                      {loadingUpgradeInfo ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="size-4 animate-spin" />
+                          <span className="text-sm text-muted-foreground">Расчет бонуса...</span>
+                        </div>
+                      ) : upgradeInfo ? (
+                        <>
+                          <p className="text-sm font-medium text-primary">🎁 Бонус при апгрейде:</p>
+                          <p className="text-xs text-muted-foreground">
+                            • Базовый период: {upgradeInfo.conversion.baseDays} дней
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            • Бонусные дни: +{upgradeInfo.conversion.convertedDays} дней
+                          </p>
+                          <p className="text-sm font-semibold">
+                            = Всего {upgradeInfo.conversion.totalDays} дней подписки
+                          </p>
+                        </>
+                      ) : null}
                     </div>
                   )}
                 </div>
