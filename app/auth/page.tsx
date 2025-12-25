@@ -23,10 +23,21 @@ function AuthForm() {
   const redirect = searchParams.get('redirect') || '/dashboard'
   const refCode = searchParams.get('ref')
 
+  // Debug: логируем URL параметры
+  useEffect(() => {
+    console.log('[Auth] URL params:', {
+      redirect,
+      refCode: refCode || 'NOT_FOUND',
+      fullURL: window.location.href
+    })
+  }, [redirect, refCode])
+
   // Проверяем реферальный код при загрузке
   useEffect(() => {
     if (refCode) {
+      console.log('[Auth] Validating referral code:', refCode)
       validateReferralCode(refCode).then((result) => {
+        console.log('[Auth] Validation result:', result)
         if (result.success && result.data) {
           setReferralInfo({ userName: result.data.userName })
           // Показываем toast
@@ -37,6 +48,8 @@ function AuthForm() {
           setTimeout(() => toast.remove(), 5000)
         }
       })
+    } else {
+      console.log('[Auth] No referral code in URL')
     }
   }, [refCode])
 
@@ -68,7 +81,11 @@ function AuthForm() {
       if (signInError.message.includes('Invalid login credentials')) {
         // Сохраняем ref код в localStorage для обработки после редиректа
         if (refCode) {
+          console.log('[Auth] Saving referral code to localStorage:', refCode)
           localStorage.setItem('pending_referral_code', refCode)
+          console.log('[Auth] Saved. Verify:', localStorage.getItem('pending_referral_code'))
+        } else {
+          console.log('[Auth] No referral code to save')
         }
 
         const { error: signUpError } = await supabase.auth.signUp({
@@ -123,7 +140,11 @@ function AuthForm() {
     if (mode === 'signup') {
       // Сохраняем ref код в localStorage для обработки после редиректа
       if (refCode) {
+        console.log('[Auth] Saving referral code to localStorage:', refCode)
         localStorage.setItem('pending_referral_code', refCode)
+        console.log('[Auth] Saved. Verify:', localStorage.getItem('pending_referral_code'))
+      } else {
+        console.log('[Auth] No referral code to save')
       }
 
       const { error } = await supabase.auth.signUp({

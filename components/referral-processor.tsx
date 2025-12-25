@@ -5,15 +5,27 @@ import { useEffect } from 'react'
 export function ReferralProcessor() {
   useEffect(() => {
     const processReferral = async () => {
+      console.log('[Referral Processor] Component mounted')
+      
       const refCode = localStorage.getItem('pending_referral_code')
       
-      if (!refCode) return
+      console.log('[Referral Processor] Checking localStorage:', { 
+        refCode: refCode || 'NOT_FOUND',
+        allKeys: Object.keys(localStorage)
+      })
+      
+      if (!refCode) {
+        console.log('[Referral Processor] No pending referral code found')
+        return
+      }
 
-      console.log('[Referral Processor] Found pending referral code:', refCode)
+      console.log('[Referral Processor] ✅ Found pending referral code:', refCode)
       
       try {
         // Ждем чтобы сессия точно установилась
+        console.log('[Referral Processor] Waiting 2 seconds for session...')
         await new Promise(resolve => setTimeout(resolve, 2000))
+        console.log('[Referral Processor] Sending request to API...')
 
         const response = await fetch('/api/auth/process-referral-client', {
           method: 'POST',
@@ -21,7 +33,10 @@ export function ReferralProcessor() {
           body: JSON.stringify({ refCode })
         })
 
+        console.log('[Referral Processor] API response status:', response.status)
+
         const data = await response.json()
+        console.log('[Referral Processor] API response data:', data)
 
         if (data.success) {
           console.log('[Referral Processor] ✅ Referral processed successfully')
