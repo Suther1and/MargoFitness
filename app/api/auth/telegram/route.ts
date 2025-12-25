@@ -2,8 +2,20 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { sendWelcomeEmail } from '@/lib/services/email'
-import { registerReferral } from '@/lib/actions/referrals'
-import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { BONUS_CONSTANTS } from '@/types/database'
+
+// Admin client для backend операций
+const supabaseAdmin = createAdminClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 interface TelegramAuthData {
   id: number
@@ -104,9 +116,6 @@ export async function POST(request: Request) {
     if (existingProfile) {
       userId = existingProfile.id
       
-      // Убедимся что бонусный аккаунт существует
-      await ensureBonusAccountExists(userId)
-      
       await supabase
         .from('profiles')
         .update({
@@ -147,9 +156,6 @@ export async function POST(request: Request) {
 
     if (existingAuthData?.user && existingAuthData?.session) {
       userId = existingAuthData.user.id
-
-      // Убедимся что бонусный аккаунт существует
-      await ensureBonusAccountExists(userId)
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -219,26 +225,86 @@ export async function POST(request: Request) {
     }
     
     // Даем время триггеру создать бонусный аккаунт
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
-    console.log('[Telegram Auth] Ensuring bonus account for new user')
+    console.log('[Telegram Auth] Processing new user setup with admin client')
     
-    // Убедимся что бонусный аккаунт создан
-    const bonusResult = await ensureBonusAccountExists(userId)
-    if (bonusResult.success) {
-      console.log('[Telegram Auth] Bonus account ensured, created:', bonusResult.created)
-    } else {
-      console.error('[Telegram Auth] Failed to ensure bonus account:', bonusResult.error)
+    // Проверяем бонусный аккаунт через admin client
+    const { data: bonusAccount } = await supabaseAdmin
+      .from('user_bonuses')
+      .select('id, balance')
+      .eq('user_id', userId)
+      .single()
+
+    if (!bonusAccount) {
+      console.log('[Telegram Auth] Creating bonus account')
+      const refCodeGen = Math.random().toString(36).substring(2, 10).toUpperCase()
+      
+      await supabaseAdmin.from('user_bonuses').insert({
+        user_id: userId,
+        balance: 250,
+      })
+
+      await supabaseAdmin.from('referral_codes').insert({
+        user_id: userId,
+        code: refCodeGen,
+      })
+
+      await supabaseAdmin.from('bonus_transactions').insert({
+        user_id: userId,
+        amount: 250,
+        type: 'welcome',
+        description: 'Приветственный бонус',
+      })
     }
     
-    // Регистрация реферала (если есть код)
+    // Регистрация реферала через admin client
     if (telegramData.ref_code) {
       console.log('[Telegram Auth] Processing referral code:', telegramData.ref_code)
-      const referralResult = await registerReferral(telegramData.ref_code, userId)
-      if (referralResult.success) {
-        console.log('[Telegram Auth] Referral registered successfully')
-      } else {
-        console.error('[Telegram Auth] Referral registration failed:', referralResult.error)
+      
+      const { data: refCodeData } = await supabaseAdmin
+        .from('referral_codes')
+        .select('user_id')
+        .eq('code', telegramData.ref_code)
+        .single()
+
+      if (refCodeData && refCodeData.user_id !== userId) {
+        const { data: existing } = await supabaseAdmin
+          .from('referrals')
+          .select('id')
+          .eq('referred_id', userId)
+          .single()
+
+        if (!existing) {
+          await supabaseAdmin.from('referrals').insert({
+            referrer_id: refCodeData.user_id,
+            referred_id: userId,
+            status: 'registered',
+          })
+
+          await supabaseAdmin.from('bonus_transactions').insert({
+            user_id: userId,
+            amount: BONUS_CONSTANTS.REFERRED_USER_BONUS,
+            type: 'referral_bonus',
+            description: 'Бонус за регистрацию по приглашению',
+            related_user_id: refCodeData.user_id,
+          })
+
+          const { data: currentBalance } = await supabaseAdmin
+            .from('user_bonuses')
+            .select('balance')
+            .eq('user_id', userId)
+            .single()
+
+          if (currentBalance) {
+            await supabaseAdmin
+              .from('user_bonuses')
+              .update({ balance: currentBalance.balance + BONUS_CONSTANTS.REFERRED_USER_BONUS })
+              .eq('user_id', userId)
+          }
+
+          console.log('[Telegram Auth] Referral processed successfully')
+        }
       }
     }
 

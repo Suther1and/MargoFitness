@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server'
-import { registerReferral } from '@/lib/actions/referrals'
-import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
+import { createClient } from '@supabase/supabase-js'
+import { BONUS_CONSTANTS } from '@/types/database'
+
+// Используем service role для backend операций
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function POST(request: Request) {
   try {
@@ -15,28 +27,119 @@ export async function POST(request: Request) {
       )
     }
 
-    // Убедимся что бонусный аккаунт существует
-    const bonusResult = await ensureBonusAccountExists(userId)
-    if (!bonusResult.success) {
-      console.error('[Process Referral] Failed to ensure bonus account:', bonusResult.error)
-    }
-
     // Даем время на создание профиля триггером
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // Регистрируем реферала
-    const result = await registerReferral(refCode, userId)
+    // Проверяем бонусный аккаунт
+    const { data: bonusAccount } = await supabaseAdmin
+      .from('user_bonuses')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
 
-    if (result.success) {
-      console.log('[Process Referral] Success for user:', userId)
-      return NextResponse.json({ success: true })
-    } else {
-      console.error('[Process Referral] Failed:', result.error)
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      )
+    if (!bonusAccount) {
+      console.log('[Process Referral] Creating bonus account manually')
+      const refCodeGen = Math.random().toString(36).substring(2, 10).toUpperCase()
+      
+      await supabaseAdmin.from('user_bonuses').insert({
+        user_id: userId,
+        balance: 250,
+        cashback_level: 1,
+        total_spent_for_cashback: 0,
+        referral_level: 1,
+        total_referral_earnings: 0,
+      })
+
+      await supabaseAdmin.from('referral_codes').insert({
+        user_id: userId,
+        code: refCodeGen,
+      })
+
+      await supabaseAdmin.from('bonus_transactions').insert({
+        user_id: userId,
+        amount: 250,
+        type: 'welcome',
+        description: 'Приветственный бонус',
+      })
     }
+
+    // Валидируем реферальный код
+    const { data: refCodeData, error: refError } = await supabaseAdmin
+      .from('referral_codes')
+      .select('user_id')
+      .eq('code', refCode)
+      .single()
+
+    if (refError || !refCodeData) {
+      console.error('[Process Referral] Invalid referral code')
+      return NextResponse.json({ error: 'Invalid referral code' }, { status: 400 })
+    }
+
+    const referrerId = refCodeData.user_id
+
+    // Нельзя использовать свой код
+    if (referrerId === userId) {
+      console.error('[Process Referral] User trying to use own code')
+      return NextResponse.json({ error: 'Cannot use own code' }, { status: 400 })
+    }
+
+    // Проверяем что реферал еще не зарегистрирован
+    const { data: existing } = await supabaseAdmin
+      .from('referrals')
+      .select('id')
+      .eq('referred_id', userId)
+      .single()
+
+    if (existing) {
+      console.error('[Process Referral] User already registered with referral')
+      return NextResponse.json({ error: 'Already registered' }, { status: 400 })
+    }
+
+    // Создаем связь
+    const { error: insertError } = await supabaseAdmin
+      .from('referrals')
+      .insert({
+        referrer_id: referrerId,
+        referred_id: userId,
+        status: 'registered',
+      })
+
+    if (insertError) {
+      throw insertError
+    }
+
+    // Начисляем бонус приглашенному
+    const { error: txError } = await supabaseAdmin
+      .from('bonus_transactions')
+      .insert({
+        user_id: userId,
+        amount: BONUS_CONSTANTS.REFERRED_USER_BONUS,
+        type: 'referral_bonus',
+        description: 'Бонус за регистрацию по приглашению',
+        related_user_id: referrerId,
+      })
+
+    if (txError) {
+      console.error('[Process Referral] Failed to add bonus:', txError)
+    }
+
+    // Обновляем баланс
+    const { data: currentBalance } = await supabaseAdmin
+      .from('user_bonuses')
+      .select('balance')
+      .eq('user_id', userId)
+      .single()
+
+    if (currentBalance) {
+      await supabaseAdmin
+        .from('user_bonuses')
+        .update({ balance: currentBalance.balance + BONUS_CONSTANTS.REFERRED_USER_BONUS })
+        .eq('user_id', userId)
+    }
+
+    console.log('[Process Referral] Success for user:', userId)
+    return NextResponse.json({ success: true })
+
   } catch (error) {
     console.error('[Process Referral] Unexpected error:', error)
     return NextResponse.json(
