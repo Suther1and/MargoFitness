@@ -17,6 +17,11 @@
 - ✅ Упрощена логика публичных маршрутов
 - ✅ Все маршруты `/auth/*` теперь доступны без авторизации
 
+### 3. Исправлена проверка подписи в `app/api/auth/telegram/route.ts`
+- ✅ Поле `ref_code` исключено из проверки подписи Telegram
+- ✅ Только оригинальные поля от Telegram участвуют в валидации
+- ✅ Исправлена ошибка 401 "Invalid authentication data"
+
 ## Результат
 
 Теперь авторизация через Telegram работает в обоих режимах:
@@ -48,11 +53,12 @@ git push origin main
 
 ## Измененные файлы
 
-1. `app/auth/telegram-callback/page.tsx` - основное исправление
-2. `middleware.ts` - улучшение маршрутизации
-3. `TELEGRAM_AUTH_FIX.md` - документация проблемы
-4. `TELEGRAM_AUTH_TEST.md` - инструкция по тестированию
-5. `TELEGRAM_AUTH_FIX_SUMMARY.md` - это резюме
+1. `app/auth/telegram-callback/page.tsx` - чтение ref_code из localStorage
+2. `app/api/auth/telegram/route.ts` - исключение ref_code из проверки подписи (критично!)
+3. `middleware.ts` - улучшение маршрутизации
+4. `TELEGRAM_AUTH_FIX.md` - документация проблемы
+5. `TELEGRAM_AUTH_TEST.md` - инструкция по тестированию
+6. `TELEGRAM_AUTH_FIX_SUMMARY.md` - это резюме
 
 ## Тестирование
 
