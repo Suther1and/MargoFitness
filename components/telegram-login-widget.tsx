@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 interface TelegramLoginWidgetProps {
   botName: string
   redirectTo?: string
+  referralCode?: string | null
   onAuth?: (user: TelegramUser) => void
   buttonSize?: 'large' | 'medium' | 'small'
   cornerRadius?: number
@@ -35,6 +36,7 @@ declare global {
 export function TelegramLoginWidget({
   botName,
   redirectTo = '/dashboard',
+  referralCode,
   onAuth,
   buttonSize = 'large',
   cornerRadius,
@@ -53,21 +55,15 @@ export function TelegramLoginWidget({
     onLoadingChange?.(loading)
   }, [loading, onLoadingChange])
   
-  // Сохраняем реферальный код из redirectTo в localStorage перед авторизацией
+  // Сохраняем реферальный код в localStorage перед авторизацией
   useEffect(() => {
-    if (redirectTo) {
-      try {
-        const url = new URL(redirectTo, window.location.origin)
-        const refCode = url.searchParams.get('ref')
-        if (refCode) {
-          localStorage.setItem('telegram_ref_code', refCode)
-          console.log('[Telegram Widget] Stored ref code:', refCode)
-        }
-      } catch (e) {
-        // redirectTo может быть просто путем без параметров
-      }
+    if (referralCode) {
+      localStorage.setItem('telegram_ref_code', referralCode)
+      console.log('[Telegram Widget] Stored ref code:', referralCode)
+    } else {
+      localStorage.removeItem('telegram_ref_code')
     }
-  }, [redirectTo])
+  }, [referralCode])
 
   useEffect(() => {
     if (!botName) {
@@ -89,6 +85,7 @@ export function TelegramLoginWidget({
 
         // Получаем реферальный код из localStorage
         const refCode = localStorage.getItem('telegram_ref_code')
+        console.log('[Telegram Widget] Retrieved ref code from localStorage:', refCode || 'NONE')
         
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
@@ -123,9 +120,7 @@ export function TelegramLoginWidget({
           // Очищаем реферальный код из localStorage
           localStorage.removeItem('telegram_ref_code')
 
-          // Извлекаем базовый путь без параметров ref
-          const redirectPath = redirectTo.split('?')[0]
-          router.push(redirectPath)
+          router.push(redirectTo)
           router.refresh()
         } else {
           throw new Error('Не получена сессия')

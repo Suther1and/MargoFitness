@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
-  const refCode = requestUrl.searchParams.get('ref') // Реферальный код
+  let refCode = requestUrl.searchParams.get('ref') // Реферальный код
   const origin = requestUrl.origin
 
   console.log('='.repeat(80))
@@ -34,6 +34,12 @@ export async function GET(request: Request) {
       }
 
       console.log('[Callback] Session created for user:', sessionData.user?.id, sessionData.user?.email)
+
+      // Если ref кода нет в URL, проверяем metadata
+      if (!refCode && sessionData.user.user_metadata?.ref_code) {
+        refCode = sessionData.user.user_metadata.ref_code
+        console.log('[Callback] Retrieved ref code from metadata:', refCode)
+      }
 
       // Проверяем, существует ли профиль
       const { data: profile, error: profileError } = await supabase

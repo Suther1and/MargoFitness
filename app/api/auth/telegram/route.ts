@@ -215,26 +215,30 @@ export async function POST(request: Request) {
 
     if (createProfileError) {
       console.error('Failed to create Telegram profile:', createProfileError)
+      // Продолжаем - профиль может создаться через триггер
+    }
+    
+    // Даем время триггеру создать бонусный аккаунт
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    console.log('[Telegram Auth] Ensuring bonus account for new user')
+    
+    // Убедимся что бонусный аккаунт создан
+    const bonusResult = await ensureBonusAccountExists(userId)
+    if (bonusResult.success) {
+      console.log('[Telegram Auth] Bonus account ensured, created:', bonusResult.created)
     } else {
-      console.log('[Telegram Auth] Profile created successfully')
-      
-      // Убедимся что бонусный аккаунт создан
-      const bonusResult = await ensureBonusAccountExists(userId)
-      if (bonusResult.success) {
-        console.log('[Telegram Auth] Bonus account ensured, created:', bonusResult.created)
+      console.error('[Telegram Auth] Failed to ensure bonus account:', bonusResult.error)
+    }
+    
+    // Регистрация реферала (если есть код)
+    if (telegramData.ref_code) {
+      console.log('[Telegram Auth] Processing referral code:', telegramData.ref_code)
+      const referralResult = await registerReferral(telegramData.ref_code, userId)
+      if (referralResult.success) {
+        console.log('[Telegram Auth] Referral registered successfully')
       } else {
-        console.error('[Telegram Auth] Failed to ensure bonus account:', bonusResult.error)
-      }
-      
-      // Регистрация реферала (если есть код)
-      if (telegramData.ref_code) {
-        console.log('[Telegram Auth] Processing referral code:', telegramData.ref_code)
-        const referralResult = await registerReferral(telegramData.ref_code, userId)
-        if (referralResult.success) {
-          console.log('[Telegram Auth] Referral registered successfully')
-        } else {
-          console.error('[Telegram Auth] Referral registration failed:', referralResult.error)
-        }
+        console.error('[Telegram Auth] Referral registration failed:', referralResult.error)
       }
     }
 

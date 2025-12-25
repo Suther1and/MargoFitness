@@ -66,11 +66,14 @@ function AuthForm() {
       }
 
       if (signInError.message.includes('Invalid login credentials')) {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}${refCode ? `&ref=${refCode}` : ''}`,
+            data: {
+              ref_code: refCode || null
+            }
           }
         })
 
@@ -82,6 +85,22 @@ function AuthForm() {
           }
           setLoading(false)
           return
+        }
+
+        // Если есть ref код, обрабатываем его сразу
+        if (refCode && signUpData.user) {
+          try {
+            await fetch('/api/auth/process-referral', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                userId: signUpData.user.id, 
+                refCode 
+              })
+            })
+          } catch (err) {
+            console.error('Failed to process referral:', err)
+          }
         }
 
         router.push(redirect)
@@ -112,11 +131,14 @@ function AuthForm() {
     }
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}${refCode ? `&ref=${refCode}` : ''}`,
+          data: {
+            ref_code: refCode || null
+          }
         }
       })
 
@@ -124,6 +146,22 @@ function AuthForm() {
         setError(error.message)
         setLoading(false)
         return
+      }
+
+      // Если есть ref код, обрабатываем его сразу
+      if (refCode && signUpData.user) {
+        try {
+          await fetch('/api/auth/process-referral', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              userId: signUpData.user.id, 
+              refCode 
+            })
+          })
+        } catch (err) {
+          console.error('Failed to process referral:', err)
+        }
       }
 
       router.push(redirect)

@@ -126,7 +126,8 @@ export function OAuthButtons({ redirectTo = "/dashboard", referralCode }: OAuthB
           <div className="absolute inset-0 opacity-0">
             <TelegramLoginWidget
               botName={telegramBotName}
-              redirectTo={`${redirectTo}${referralCode ? `?ref=${referralCode}` : ''}`}
+              redirectTo={redirectTo}
+              referralCode={referralCode}
               buttonSize="large"
               requestAccess={false}
               usePic={false}
