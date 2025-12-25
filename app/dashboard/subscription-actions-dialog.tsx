@@ -216,19 +216,19 @@ export function SubscriptionActionsDialog({ profile }: SubscriptionActionsDialog
                   <button
                     key={duration.months}
                     onClick={() => setSelectedDuration(duration.months)}
-                    className={`p-3 rounded-lg border-2 transition-all relative ${
+                    className={`p-3 rounded-lg border-2 transition-all relative min-h-[60px] flex items-end ${
                       selectedDuration === duration.months
                         ? 'border-primary bg-primary/5 font-semibold'
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    <div className="text-center">
-                      <div>{duration.label}</div>
-                      {duration.discount > 0 && (
-                        <div className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
-                          −{duration.discount}%
-                        </div>
-                      )}
+                    {duration.discount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-md">
+                        −{duration.discount}%
+                      </div>
+                    )}
+                    <div className="text-left text-sm">
+                      {duration.label}
                     </div>
                   </button>
                 ))}
