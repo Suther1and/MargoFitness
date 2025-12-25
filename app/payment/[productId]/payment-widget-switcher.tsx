@@ -8,15 +8,17 @@ import { YooKassaWidget } from './yookassa-widget'
 import { RedirectPayment } from './redirect-payment'
 import { CreditCard, ExternalLink } from 'lucide-react'
 import type { Product, Profile } from "@/types/database"
+import type { PriceCalculation } from '@/lib/services/price-calculator'
 
 interface PaymentWidgetSwitcherProps {
   product: Product
   profile: Profile
+  onCalculationChange?: (calculation: PriceCalculation | null) => void
 }
 
 type PaymentMode = 'embedded' | 'redirect'
 
-export function PaymentWidgetSwitcher({ product, profile }: PaymentWidgetSwitcherProps) {
+export function PaymentWidgetSwitcher({ product, profile, onCalculationChange }: PaymentWidgetSwitcherProps) {
   const searchParams = useSearchParams()
   const modeParam = searchParams.get('mode') as PaymentMode | null
   
@@ -64,11 +66,19 @@ export function PaymentWidgetSwitcher({ product, profile }: PaymentWidgetSwitche
       </Card>
 
       {mode === 'embedded' && (
-        <YooKassaWidget product={product} profile={profile} />
+        <YooKassaWidget 
+          product={product} 
+          profile={profile}
+          onCalculationChange={onCalculationChange}
+        />
       )}
       
       {mode === 'redirect' && (
-        <RedirectPayment product={product} profile={profile} />
+        <RedirectPayment 
+          product={product} 
+          profile={profile}
+          onCalculationChange={onCalculationChange}
+        />
       )}
     </div>
   )

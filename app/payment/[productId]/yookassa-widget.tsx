@@ -15,6 +15,7 @@ import type { PriceCalculation } from '@/lib/services/price-calculator'
 interface YooKassaWidgetProps {
   product: Product
   profile: Profile
+  onCalculationChange?: (calculation: PriceCalculation | null) => void
 }
 
 declare global {
@@ -23,7 +24,7 @@ declare global {
   }
 }
 
-export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
+export function YooKassaWidget({ product, profile, onCalculationChange }: YooKassaWidgetProps) {
   const router = useRouter()
   const [saveCard, setSaveCard] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -55,8 +56,10 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
 
     if (result.success && result.data) {
       setCalculation(result.data)
+      onCalculationChange?.(result.data)
     } else {
       setCalculation(null)
+      onCalculationChange?.(null)
     }
 
     setLoadingCalc(false)

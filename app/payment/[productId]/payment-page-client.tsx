@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Zap, Crown, Sparkles } from "lucide-react"
 import { PaymentWidgetSwitcher } from './payment-widget-switcher'
 import type { Product, Profile } from '@/types/database'
+import type { PriceCalculation } from '@/lib/services/price-calculator'
 
 interface PaymentPageClientProps {
   product: Product
@@ -13,6 +15,8 @@ interface PaymentPageClientProps {
 }
 
 export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }: PaymentPageClientProps) {
+  const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
+  
   // Выбираем иконку в зависимости от уровня
   const tierIcons = {
     1: Zap,
@@ -20,6 +24,11 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
     3: Sparkles
   }
   const Icon = tierIcons[tierLevel as keyof typeof tierIcons] || Zap
+  
+  // Вычисляем финальную цену в месяц с учетом всех скидок
+  const finalPricePerMonth = calculation 
+    ? Math.round(calculation.finalPrice / (product.duration_months || 1))
+    : pricePerMonth
 
   // Безопасное извлечение benefits из metadata
   const metadata = product.metadata as { benefits?: string[] } | null
@@ -53,7 +62,7 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
                  product.duration_months < 5 ? 'месяца' : 'месяцев'}
               </div>
               <div className="text-4xl font-bold text-primary mb-2">
-                {pricePerMonth.toLocaleString('ru-RU')} ₽
+                {finalPricePerMonth.toLocaleString('ru-RU')} ₽
               </div>
               <div className="text-sm text-muted-foreground">
                 в месяц
@@ -91,6 +100,7 @@ export function PaymentPageClient({ product, profile, tierLevel, pricePerMonth }
         <PaymentWidgetSwitcher 
           product={product}
           profile={profile}
+          onCalculationChange={setCalculation}
         />
       </div>
     </div>

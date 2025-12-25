@@ -14,9 +14,10 @@ import type { PriceCalculation } from '@/lib/services/price-calculator'
 interface RedirectPaymentProps {
   product: Product
   profile: Profile
+  onCalculationChange?: (calculation: PriceCalculation | null) => void
 }
 
-export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
+export function RedirectPayment({ product, profile, onCalculationChange }: RedirectPaymentProps) {
   const [saveCard, setSaveCard] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -44,8 +45,10 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
 
     if (result.success && result.data) {
       setCalculation(result.data)
+      onCalculationChange?.(result.data)
     } else {
       setCalculation(null)
+      onCalculationChange?.(null)
     }
 
     setLoadingCalc(false)
