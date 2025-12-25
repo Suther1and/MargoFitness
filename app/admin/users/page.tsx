@@ -13,6 +13,7 @@ interface SearchParams {
   tier?: string
   status?: string
   search?: string
+  cashback_level?: string
 }
 
 export default async function AdminUsersPage({
@@ -31,6 +32,7 @@ export default async function AdminUsersPage({
     tier: params.tier || 'all',
     status: params.status || 'all',
     search: params.search || '',
+    cashback_level: params.cashback_level || 'all',
   }
 
   const [usersResult, statsResult] = await Promise.all([
@@ -39,6 +41,7 @@ export default async function AdminUsersPage({
       tier: filters.tier !== 'all' ? filters.tier : undefined,
       status: filters.status !== 'all' ? filters.status : undefined,
       search: filters.search || undefined,
+      cashback_level: filters.cashback_level !== 'all' ? filters.cashback_level : undefined,
     }),
     getUsersStats(),
   ])
@@ -147,6 +150,18 @@ export default async function AdminUsersPage({
               <option value="canceled">Отменена</option>
             </select>
 
+            <select
+              name="cashback_level"
+              defaultValue={filters.cashback_level}
+              className="px-3 py-2 border rounded-md"
+            >
+              <option value="all">Все уровни</option>
+              <option value="1">🥉 Bronze</option>
+              <option value="2">🥈 Silver</option>
+              <option value="3">🥇 Gold</option>
+              <option value="4">💎 Platinum</option>
+            </select>
+
             <button 
               type="submit"
               className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
@@ -176,12 +191,12 @@ export default async function AdminUsersPage({
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-2">Email</th>
-                  <th className="text-left p-2">Роль</th>
                   <th className="text-left p-2">Тариф</th>
                   <th className="text-left p-2">Статус</th>
                   <th className="text-left p-2">Истекает</th>
                   <th className="text-left p-2">Бонусы</th>
                   <th className="text-left p-2">Уровень</th>
+                  <th className="text-left p-2">Роль</th>
                   <th className="text-right p-2">Действия</th>
                 </tr>
               </thead>

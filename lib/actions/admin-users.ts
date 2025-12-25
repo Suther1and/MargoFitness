@@ -34,6 +34,7 @@ export async function getAllUsers(filters?: {
   tier?: string
   status?: string
   search?: string
+  cashback_level?: string
 }): Promise<{ success: boolean; users?: ProfileWithBonuses[]; error?: string }> {
   try {
     await checkAdmin()
@@ -66,10 +67,16 @@ export async function getAllUsers(filters?: {
       return { success: false, error: profileError.message }
     }
 
-    // Получаем все бонусные счета одним запросом
-    const { data: bonuses, error: bonusError } = await supabase
+    // Получаем все бонусные счета с фильтром по уровню кешбека
+    let bonusQuery = supabase
       .from('user_bonuses')
       .select('user_id, balance, cashback_level, total_spent_for_cashback')
+
+    if (filters?.cashback_level && filters.cashback_level !== 'all') {
+      bonusQuery = bonusQuery.eq('cashback_level', parseInt(filters.cashback_level))
+    }
+
+    const { data: bonuses, error: bonusError } = await bonusQuery
 
     if (bonusError) {
       console.error('Error fetching bonuses:', bonusError)
@@ -82,7 +89,7 @@ export async function getAllUsers(filters?: {
     )
 
     // Объединяем данные
-    const usersWithBonuses: ProfileWithBonuses[] = profiles?.map((user: any) => {
+    let usersWithBonuses: ProfileWithBonuses[] = profiles?.map((user: any) => {
       const userBonuses = bonusMap.get(user.id)
       return {
         ...user,
@@ -91,6 +98,12 @@ export async function getAllUsers(filters?: {
         total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
       }
     }) || []
+
+    // Если есть фильтр по уровню кешбека, фильтруем пользователей у которых нет бонусного счета
+    if (filters?.cashback_level && filters.cashback_level !== 'all') {
+      const targetLevel = parseInt(filters.cashback_level)
+      usersWithBonuses = usersWithBonuses.filter(user => user.cashback_level === targetLevel)
+    }
 
     return { success: true, users: usersWithBonuses }
   } catch (error: any) {

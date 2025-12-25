@@ -78,15 +78,6 @@ export function UserTableRow({ user }: UserTableRowProps) {
       
       <td className="p-2">
         <InlineSelect
-          value={user.role}
-          options={roleOptions}
-          onSave={(value) => handleUpdate('role', value)}
-          displayClassName={roleDisplayClass}
-        />
-      </td>
-      
-      <td className="p-2">
-        <InlineSelect
           value={user.subscription_tier}
           options={tierOptions}
           onSave={(value) => handleUpdate('subscription_tier', value)}
@@ -125,6 +116,15 @@ export function UserTableRow({ user }: UserTableRowProps) {
           options={levelOptions}
           onSave={(value) => handleUpdate('cashback_level', parseInt(value))}
           displayClassName={levelDisplayClass}
+        />
+      </td>
+      
+      <td className="p-2">
+        <InlineSelect
+          value={user.role}
+          options={roleOptions}
+          onSave={(value) => handleUpdate('role', value)}
+          displayClassName={roleDisplayClass}
         />
       </td>
       
