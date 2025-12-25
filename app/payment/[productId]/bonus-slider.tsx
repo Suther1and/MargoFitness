@@ -8,9 +8,10 @@ interface BonusSliderProps {
   userId: string
   priceAfterDiscounts: number
   onBonusChange: (amount: number) => void
+  currentBonusAmount?: number
 }
 
-export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: BonusSliderProps) {
+export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, currentBonusAmount = 0 }: BonusSliderProps) {
   const [maxBonus, setMaxBonus] = useState(0)
   const [availableBalance, setAvailableBalance] = useState(0)
   const [useBonuses, setUseBonuses] = useState(false)
@@ -19,6 +20,11 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange }: Bonu
   useEffect(() => {
     loadBonusData()
   }, [priceAfterDiscounts])
+
+  // Синхронизируем внутреннее состояние с внешним
+  useEffect(() => {
+    setUseBonuses(currentBonusAmount > 0)
+  }, [currentBonusAmount])
 
   const loadBonusData = async () => {
     setLoading(true)

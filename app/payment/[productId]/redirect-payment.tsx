@@ -140,6 +140,7 @@ export function RedirectPayment({ product, profile }: RedirectPaymentProps) {
             userId={profile.id}
             priceAfterDiscounts={calculation.priceAfterDiscounts}
             onBonusChange={setBonusToUse}
+            currentBonusAmount={bonusToUse}
           />
         )}
 

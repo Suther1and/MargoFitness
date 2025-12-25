@@ -236,6 +236,7 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
                 userId={profile.id}
                 priceAfterDiscounts={calculation.priceAfterDiscounts}
                 onBonusChange={setBonusToUse}
+                currentBonusAmount={bonusToUse}
               />
             )}
 
@@ -379,6 +380,7 @@ export function YooKassaWidget({ product, profile }: YooKassaWidgetProps) {
                 setConfirmationToken(null)
                 setProcessing(false)
                 setError('')
+                setBonusToUse(0)
               }}
               className="w-full"
             >
