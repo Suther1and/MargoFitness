@@ -36,6 +36,8 @@ export function EditUserDialog({ user, trigger }: EditUserDialogProps) {
   const [tier, setTier] = useState<'free' | 'basic' | 'pro' | 'elite'>(user.subscription_tier)
   const [status, setStatus] = useState<'active' | 'inactive' | 'canceled'>(user.subscription_status)
   const [expiresAt, setExpiresAt] = useState(user.subscription_expires_at || '')
+  const [bonusBalance, setBonusBalance] = useState<number>((user as any).bonus_balance || 0)
+  const [cashbackLevel, setCashbackLevel] = useState<number>((user as any).cashback_level || 1)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,6 +49,8 @@ export function EditUserDialog({ user, trigger }: EditUserDialogProps) {
       subscription_tier: tier,
       subscription_status: status,
       subscription_expires_at: expiresAt || null,
+      bonus_balance: bonusBalance,
+      cashback_level: cashbackLevel,
     })
 
     if (result.success) {
@@ -139,6 +143,49 @@ export function EditUserDialog({ user, trigger }: EditUserDialogProps) {
               value={expiresAt ? new Date(expiresAt).toISOString().slice(0, 16) : ''}
               onChange={(e) => setExpiresAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
             />
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-medium mb-3">Бонусная система</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <Label>Баланс шагов</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={bonusBalance}
+                  onChange={(e) => setBonusBalance(Number(e.target.value))}
+                />
+              </div>
+
+              <div>
+                <Label>Уровень кешбека</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      {cashbackLevel === 4 ? '💎 Platinum (10%)' :
+                       cashbackLevel === 3 ? '🥇 Gold (7%)' :
+                       cashbackLevel === 2 ? '🥈 Silver (5%)' : '🥉 Bronze (3%)'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    <DropdownMenuItem onClick={() => setCashbackLevel(1)}>
+                      🥉 Bronze (3%)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCashbackLevel(2)}>
+                      🥈 Silver (5%)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCashbackLevel(3)}>
+                      🥇 Gold (7%)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCashbackLevel(4)}>
+                      💎 Platinum (10%)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
 
           {error && (

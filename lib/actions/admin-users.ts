@@ -26,14 +26,21 @@ export async function getAllUsers(filters?: {
   tier?: string
   status?: string
   search?: string
-}): Promise<{ success: boolean; users?: Profile[]; error?: string }> {
+}): Promise<{ success: boolean; users?: any[]; error?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
 
     let query = supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        *,
+        user_bonuses (
+          balance,
+          cashback_level,
+          total_spent_for_cashback
+        )
+      `)
       .order('created_at', { ascending: false })
 
     // Применяем фильтры
@@ -57,7 +64,15 @@ export async function getAllUsers(filters?: {
       return { success: false, error: error.message }
     }
 
-    return { success: true, users: data || [] }
+    // Приводим данные к плоскому формату
+    const usersWithBonuses = data?.map(user => ({
+      ...user,
+      bonus_balance: user.user_bonuses?.[0]?.balance || 0,
+      cashback_level: user.user_bonuses?.[0]?.cashback_level || 1,
+      total_spent_for_cashback: user.user_bonuses?.[0]?.total_spent_for_cashback || 0,
+    })) || []
+
+    return { success: true, users: usersWithBonuses }
   } catch (error: any) {
     return { success: false, error: error.message }
   }
@@ -73,20 +88,45 @@ export async function updateUserProfile(
     subscription_tier?: 'free' | 'basic' | 'pro' | 'elite'
     subscription_status?: 'active' | 'inactive' | 'canceled'
     subscription_expires_at?: string | null
+    bonus_balance?: number
+    cashback_level?: number
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
 
-    const { error } = await supabase
+    // Обновляем профиль
+    const { error: profileError } = await supabase
       .from('profiles')
-      .update(data)
+      .update({
+        role: data.role,
+        subscription_tier: data.subscription_tier,
+        subscription_status: data.subscription_status,
+        subscription_expires_at: data.subscription_expires_at,
+      })
       .eq('id', userId)
 
-    if (error) {
-      console.error('Error updating user:', error)
-      return { success: false, error: error.message }
+    if (profileError) {
+      console.error('Error updating user profile:', profileError)
+      return { success: false, error: profileError.message }
+    }
+
+    // Обновляем бонусы, если указаны
+    if (data.bonus_balance !== undefined || data.cashback_level !== undefined) {
+      const updateData: any = {}
+      if (data.bonus_balance !== undefined) updateData.balance = data.bonus_balance
+      if (data.cashback_level !== undefined) updateData.cashback_level = data.cashback_level
+
+      const { error: bonusError } = await supabase
+        .from('user_bonuses')
+        .update(updateData)
+        .eq('user_id', userId)
+
+      if (bonusError) {
+        console.error('Error updating user bonuses:', bonusError)
+        return { success: false, error: bonusError.message }
+      }
     }
 
     revalidatePath('/admin/users')
