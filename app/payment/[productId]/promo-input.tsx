@@ -54,18 +54,26 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
       </div>
 
       <div className="flex gap-2">
-        <Input
-          value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
-          placeholder="Введите промокод"
-          disabled={!!appliedPromo || loading}
-          className="font-mono"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleApply()
-            }
-          }}
-        />
+        <div className="relative flex-1">
+          <Input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="Введите промокод"
+            disabled={loading}
+            readOnly={!!appliedPromo}
+            className={`font-mono ${appliedPromo ? 'bg-muted' : ''}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !appliedPromo) {
+                handleApply()
+              }
+            }}
+          />
+          {appliedPromo && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Check className="size-4 text-green-600 dark:text-green-400" />
+            </div>
+          )}
+        </div>
         {appliedPromo ? (
           <Button
             onClick={handleRemove}
@@ -85,19 +93,6 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
           </Button>
         )}
       </div>
-
-      {appliedPromo && (
-        <div className="flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-950 p-3 text-sm text-green-800 dark:text-green-300">
-          <Check className="size-4 flex-shrink-0" />
-          <span>
-            Промокод <strong>{appliedPromo.code}</strong> применен: 
-            {appliedPromo.discount_type === 'percent' 
-              ? ` ${appliedPromo.discount_value}% скидка`
-              : ` ${appliedPromo.discount_value}₽ скидка`
-            }
-          </span>
-        </div>
-      )}
 
       {error && (
         <div className="flex items-center gap-2 rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-800 dark:text-red-300">

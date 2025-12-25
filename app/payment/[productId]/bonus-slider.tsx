@@ -12,26 +12,38 @@ interface BonusSliderProps {
 }
 
 export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, currentBonusAmount = 0 }: BonusSliderProps) {
-  const [maxBonus, setMaxBonus] = useState(0)
   const [availableBalance, setAvailableBalance] = useState(0)
   const [useBonuses, setUseBonuses] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Рассчитываем maxBonus на лету без перезагрузки
+  const maxBonus = Math.min(
+    Math.floor(priceAfterDiscounts * 0.3), // 30% от суммы
+    availableBalance
+  )
+
+  // Загружаем баланс только один раз
   useEffect(() => {
     loadBonusData()
-  }, [priceAfterDiscounts])
+  }, [userId])
 
   // Синхронизируем внутреннее состояние с внешним
   useEffect(() => {
     setUseBonuses(currentBonusAmount > 0)
   }, [currentBonusAmount])
 
+  // Обновляем бонусы при изменении цены, если toggle включен
+  useEffect(() => {
+    if (useBonuses && maxBonus !== currentBonusAmount) {
+      onBonusChange(maxBonus)
+    }
+  }, [priceAfterDiscounts])
+
   const loadBonusData = async () => {
     setLoading(true)
     const result = await calculateMaxBonusUsage(priceAfterDiscounts, userId)
     
     if (result.success) {
-      setMaxBonus(result.maxAmount || 0)
       setAvailableBalance(result.availableBalance || 0)
     }
     
@@ -43,7 +55,11 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, curren
     onBonusChange(checked ? maxBonus : 0)
   }
 
-  if (loading || availableBalance === 0 || maxBonus === 0) {
+  if (loading || availableBalance === 0) {
+    return null
+  }
+
+  if (maxBonus === 0) {
     return null
   }
 
