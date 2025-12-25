@@ -116,21 +116,21 @@ export default async function DashboardPage() {
             <CardTitle className="text-sm font-medium">Подписка</CardTitle>
             <Crown className="size-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <div className="text-2xl font-bold">{getTierDisplayName(profile.subscription_tier)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {subscriptionActive 
-                    ? `Активна ${daysLeft ? `(${daysLeft} дн.)` : ''}` 
-                    : 'Неактивна'}
-                </p>
-              </div>
+          <CardContent className="flex flex-col justify-between min-h-[100px]">
+            <div>
+              <div className="text-2xl font-bold">{getTierDisplayName(profile.subscription_tier)}</div>
+              <p className="text-xs text-muted-foreground">
+                {subscriptionActive 
+                  ? `Активна ${daysLeft ? `(${daysLeft} дн.)` : ''}` 
+                  : 'Неактивна'}
+              </p>
+            </div>
+            <div className="flex justify-end mt-3">
               {subscriptionActive ? (
                 <SubscriptionActionsDialog profile={profile} />
               ) : (
-                <Link href="/pricing" className="block">
-                  <Button size="sm" variant="outline" className="w-full">
+                <Link href="/pricing">
+                  <Button size="sm" variant="outline">
                     Оформить
                   </Button>
                 </Link>
