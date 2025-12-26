@@ -223,6 +223,21 @@ export function getReferralLevelData(level: number): ReferralLevel {
   return REFERRAL_LEVELS.find(l => l.level === level) || REFERRAL_LEVELS[0]
 }
 
+/** Получить визуальные данные уровня реферальной программы */
+export function getReferralLevelVisuals(level: number): {
+  icon: string
+  name: string
+  color: string
+} {
+  const visuals = [
+    { level: 1, icon: '🥉', name: 'Bronze', color: 'from-amber-700 to-amber-900' },
+    { level: 2, icon: '🥈', name: 'Silver', color: 'from-gray-400 to-gray-600' },
+    { level: 3, icon: '🥇', name: 'Gold', color: 'from-yellow-400 to-yellow-600' },
+    { level: 4, icon: '💎', name: 'Platinum', color: 'from-purple-500 to-indigo-600' },
+  ]
+  return visuals.find(v => v.level === level) || visuals[0]
+}
+
 /** Расчет прогресса до следующего уровня */
 export function calculateLevelProgress(currentAmount: number, isReferral: boolean = false): {
   currentLevel: number

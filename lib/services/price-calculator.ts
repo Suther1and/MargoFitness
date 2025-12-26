@@ -129,15 +129,10 @@ export async function calculateFinalPrice(params: {
         .single()
       
       if (bonusAccount) {
-        // Получаем процент по уровню
-        const levels = [
-          { level: 1, percent: 3 },
-          { level: 2, percent: 5 },
-          { level: 3, percent: 7 },
-          { level: 4, percent: 10 },
-        ]
-        const levelData = levels.find(l => l.level === bonusAccount.cashback_level)
-        cashbackPercent = levelData?.percent || 3
+        // Используем getCashbackLevelData из types/database.ts
+        const { getCashbackLevelData } = await import('@/types/database')
+        const levelData = getCashbackLevelData(bonusAccount.cashback_level)
+        cashbackPercent = levelData.percent
       }
       
       cashbackAmount = Math.floor(finalPrice * (cashbackPercent / 100))
