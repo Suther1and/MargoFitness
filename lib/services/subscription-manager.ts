@@ -220,6 +220,7 @@ export function calculateUpgradeConversion(params: {
   newTierLevel: number
   newDurationMonths: number
   newPrice: number
+  newBaseMonthlyPrice: number // Базовая цена 1 месяца нового тарифа (без скидки за срок)
 }): UpgradeConversionResult {
   const {
     currentTierLevel,
@@ -228,7 +229,8 @@ export function calculateUpgradeConversion(params: {
     remainingDays,
     newTierLevel,
     newDurationMonths,
-    newPrice
+    newPrice,
+    newBaseMonthlyPrice
   } = params
 
   // Стоимость дня текущей подписки
@@ -238,15 +240,15 @@ export function calculateUpgradeConversion(params: {
   // Остаток стоимости текущей подписки
   const remainderValue = remainingDays * currentDayPrice
   
-  // Стоимость дня новой подписки
-  const newTotalDays = newDurationMonths * 30
-  const newDayPrice = newPrice / newTotalDays
+  // ИСПРАВЛЕНИЕ: Используем базовую месячную цену для расчета стоимости дня
+  // Это гарантирует, что бонусные дни не зависят от срока новой подписки
+  const newDayPrice = newBaseMonthlyPrice / 30
   
   // Конвертированные дни
   const convertedDays = Math.floor(remainderValue / newDayPrice)
   
   // Базовые дни новой подписки
-  const baseDays = newTotalDays
+  const baseDays = newDurationMonths * 30
   
   // Всего дней
   const totalDays = baseDays + convertedDays

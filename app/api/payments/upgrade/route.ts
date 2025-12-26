@@ -141,6 +141,17 @@ export async function POST(request: NextRequest) {
     
     console.log(`[Upgrade] Using price for conversion: ${currentPrice}₽ (actual: ${!!actualPrice})`)
 
+    // Получить базовую месячную цену нового тарифа (1 месяц без скидки)
+    const { data: newBaseProduct } = await supabase
+      .from('products')
+      .select('price')
+      .eq('type', 'subscription_tier')
+      .eq('tier_level', newTierLevel)
+      .eq('duration_months', 1)
+      .single()
+    
+    const newBaseMonthlyPrice = newBaseProduct?.price || newProduct.price
+
     // Рассчитать конвертацию дней
     const conversion = calculateUpgradeConversion({
       currentTierLevel,
@@ -149,7 +160,8 @@ export async function POST(request: NextRequest) {
       remainingDays,
       newTierLevel,
       newDurationMonths: newProduct.duration_months,
-      newPrice: newProduct.price
+      newPrice: newProduct.price,
+      newBaseMonthlyPrice
     })
 
     console.log('[Upgrade] Conversion calculated:', conversion)
