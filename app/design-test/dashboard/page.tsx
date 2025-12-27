@@ -197,22 +197,27 @@ export default function DashboardDesignPage() {
       cardsRef.current.forEach((card, index) => {
         if (!card) return
         
+        // Always remove hidden class first
+        card.classList.remove('card-hidden')
+        
         if (isMobile) {
           // Mobile: Simple fade in without slide animation
+          // Force reflow to ensure class removal is applied
+          void card.offsetHeight
+          
           card.style.opacity = '0'
           card.style.visibility = 'visible'
           card.style.transform = 'translateY(0)'
           
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             card.style.transition = 'opacity 0.4s ease'
             card.style.opacity = '1'
             if (index === 3) {
               card.style.animation = 'gradientShift 10s ease infinite'
             }
-          }, 50)
+          })
         } else {
           // Desktop: Slide animation
-          card.classList.remove('card-hidden')
           card.classList.add('card-animate-desktop')
           
           const handleEnd = () => {
@@ -233,19 +238,24 @@ export default function DashboardDesignPage() {
       const profile = isXL ? profileDesktopRef.current : profileMobileRef.current
       if (!profile) return
       
+      // Always remove hidden class first
       profile.classList.remove('profile-hidden')
       
-      if (isMobile) {
+      if (isMobile && !isXL) {
         // Mobile: Simple fade in
+        // Force reflow to ensure class removal is applied
+        void profile.offsetHeight
+        
         profile.style.opacity = '0'
         profile.style.visibility = 'visible'
         profile.style.transform = 'scale(1)'
-        setTimeout(() => {
+        
+        requestAnimationFrame(() => {
           profile.style.transition = 'opacity 0.4s ease'
           profile.style.opacity = '1'
-        }, 50)
+        })
       } else {
-        // Desktop: Scale animation
+        // Desktop/XL: Scale animation
         profile.classList.add('profile-animate')
         const handleEnd = () => {
           profile.classList.remove('profile-animate')
@@ -258,10 +268,11 @@ export default function DashboardDesignPage() {
     }
     
     // Execute animations
+    const delay = isMobile ? 50 : 300
     setTimeout(() => {
       animateCards()
       setTimeout(animateProfile, isMobile ? 100 : 400)
-    }, isDesktop ? 300 : 50)
+    }, delay)
   }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
