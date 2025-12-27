@@ -481,7 +481,7 @@ export default function DashboardDesignPage() {
           animation: ringRipple 2s ease-out infinite !important;
         }
         
-        /* Mobile optimizations - disable heavy effects */
+        /* Mobile optimizations - reduce heavy effects */
         @media (max-width: 1023px) {
           html, body {
             max-width: 100vw;
@@ -493,15 +493,14 @@ export default function DashboardDesignPage() {
             box-sizing: border-box;
           }
           
-          /* Disable blur effects on mobile to reduce GPU load */
-          .blur-3xl, [class*="blur-"] {
-            filter: none !important;
-            backdrop-filter: none !important;
+          /* Reduce blur intensity on mobile (not disable completely) */
+          .blur-3xl {
+            filter: blur(40px) !important;
           }
           
           /* Simplify shadows on mobile */
           [class*="shadow-2xl"], [class*="shadow-xl"] {
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
           }
           
           /* Disable complex animations on mobile */
@@ -509,10 +508,9 @@ export default function DashboardDesignPage() {
             animation: none !important;
           }
           
-          /* Simplify backdrop blur */
+          /* Keep backdrop blur but reduce intensity */
           .backdrop-blur-xl, .backdrop-blur {
-            backdrop-filter: none !important;
-            background-color: rgba(10, 10, 15, 0.95) !important;
+            backdrop-filter: blur(8px) !important;
           }
         }
         
