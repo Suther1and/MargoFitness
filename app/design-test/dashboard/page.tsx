@@ -687,12 +687,12 @@ export default function DashboardDesignPage() {
                   </button>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0 space-y-2.5">
+                  <div className="flex-1 min-w-0 space-y-3">
                     <div>
                       <h3 className="text-xl md:text-2xl font-semibold text-white font-oswald uppercase tracking-tight truncate">
                         Маргарита Иванова
                       </h3>
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-2.5 py-1 text-xs text-purple-200 ring-1 ring-purple-400/30 mt-1.5">
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-2.5 py-1 text-xs text-purple-200 ring-1 ring-purple-400/30 mt-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                           <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
@@ -705,7 +705,7 @@ export default function DashboardDesignPage() {
                       </div>
                     </div>
                     
-                    <div className="space-y-1.5">
+                    <div className="space-y-0.5">
                       {/* Phone */}
                       <button className="flex items-center gap-2 text-xs text-white/60 w-full rounded-lg py-1.5 px-2 transition-all hover:bg-white/[0.04] active:scale-95" style={{ touchAction: 'manipulation' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-300 flex-shrink-0">
