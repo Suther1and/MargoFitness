@@ -239,19 +239,13 @@ export default function DashboardDesignPage() {
       navRef.current.style.opacity = '1'
     }
     
-    // Animate cards with stagger - quick fade in, then slide
+    // Animate cards with stagger - use fadeInSlideBottom which includes opacity
     cardsRef.current.forEach((card, index) => {
       if (card) {
         setTimeout(() => {
-          // Quick fade in first to establish color
-          card.style.transition = 'opacity 0.1s ease-out'
-          card.style.opacity = '1'
-          
-          // Then slide animation after fade completes
-          setTimeout(() => {
-            card.style.transition = ''
-            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
-          }, 100)
+          // First card (subscription) slower animation
+          const duration = index === 0 ? '1s' : '0.8s'
+          card.style.animation = `fadeInSlideBottom ${duration} cubic-bezier(0.4, 0, 0.2, 1) forwards`
         }, 200 + index * 150)
       }
     })
@@ -613,7 +607,7 @@ export default function DashboardDesignPage() {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto xl:min-w-[42rem]">
-                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms' }}>
+                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms', animationDuration: '1s' }}>
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -725,7 +719,7 @@ export default function DashboardDesignPage() {
               </div>
 
               {/* Mobile User Profile Card */}
-              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms' }}>
+              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms', animationDuration: '1s' }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
