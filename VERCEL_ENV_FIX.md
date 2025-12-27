@@ -60,3 +60,4 @@ console.log(process.env.NEXT_PUBLIC_SITE_URL)
 
 **Telegram:** Если был настроен и работал - должен продолжить работать после редеплоя.
 
+

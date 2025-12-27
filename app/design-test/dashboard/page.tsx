@@ -3,9 +3,24 @@
 import { Inter, Oswald, Space_Grotesk } from 'next/font/google'
 import { useEffect, useRef, useState } from 'react'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' })
+const inter = Inter({ 
+  subsets: ['latin'], 
+  variable: '--font-inter', 
+  display: 'swap',
+  fallback: ['system-ui', 'arial']
+})
+const oswald = Oswald({ 
+  subsets: ['latin'], 
+  variable: '--font-oswald', 
+  display: 'swap',
+  fallback: ['Impact', 'system-ui']
+})
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ['latin'], 
+  variable: '--font-space', 
+  display: 'swap',
+  fallback: ['system-ui', 'arial']
+})
 
 export default function DashboardDesignPage() {
   const progressRef = useRef<HTMLDivElement>(null)
@@ -16,6 +31,8 @@ export default function DashboardDesignPage() {
   const [isVisible, setIsVisible] = useState(false)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
   const navRef = useRef<HTMLElement>(null)
+  const profileDesktopRef = useRef<HTMLElement>(null)
+  const profileMobileRef = useRef<HTMLElement>(null)
   
   const tooltips = {
     subscription: {
@@ -42,27 +59,6 @@ export default function DashboardDesignPage() {
       title: 'Дневник здоровья',
       description: 'Отслеживай воду, шаги, вес, калории и другие важные показатели'
     }
-  }
-  
-  // 3D Tilt effect handler
-  const handleCardTilt = (e: React.MouseEvent<HTMLElement>) => {
-    const card = e.currentTarget
-    const rect = card.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
-    const rotateX = ((y - centerY) / centerY) * -5
-    const rotateY = ((x - centerX) / centerX) * 5
-    
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`
-    card.style.transition = 'none'
-  }
-  
-  const resetCardTilt = (e: React.MouseEvent<HTMLElement>) => {
-    const card = e.currentTarget
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)'
-    card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
   }
   
   // Magnetic button effect
@@ -113,159 +109,139 @@ export default function DashboardDesignPage() {
     setTimeout(() => ripple.remove(), 600)
   }
   
+  // Unified animation logic for progress bars and counters
   useEffect(() => {
-    const ANIMATION_DURATION = 2000 // Fixed 2 seconds for all animations
-    const ANIMATION_DELAY = 300 // Delay before starting
+    const isDesktop = window.innerWidth >= 1024
+    const ANIMATION_DURATION = isDesktop ? 2000 : 1500 // Faster on mobile
+    const ANIMATION_START_DELAY = 900 // Delay after cards appear
     
-    // Animate progress bar - trigger immediately for desktop, use observer for scrolled content
-    const animateProgressBar = () => {
-      if (progressRef.current && progressRef.current.style.width === '0%') {
-        setTimeout(() => {
-          if (progressRef.current) {
-            progressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
-            progressRef.current.style.width = '83%'
-          }
-        }, ANIMATION_DELAY + 600) // Delay to sync with card animation
-      }
-    }
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateProgressBar()
-        }
-      })
-    }, { threshold: 0.01 })
-
-    if (progressRef.current?.parentElement) {
-      observer.observe(progressRef.current.parentElement)
+    // Helper function to animate a number using requestAnimationFrame
+    const animateNumber = (
+      element: HTMLElement | null,
+      targetValue: number,
+      startDelay: number,
+      formatter?: (n: number) => string
+    ) => {
+      if (!element) return
       
-      // Check if already in viewport (for desktop)
-      const rect = progressRef.current.parentElement.getBoundingClientRect()
-      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
-      if (isInViewport) {
-        animateProgressBar()
-      }
-    }
-
-    // Animate workout count
-    const animateWorkoutCount = () => {
-      if (countRef.current && countRef.current.textContent === '0') {
-        setTimeout(() => {
-          let count = 0
-          const target = 5
-          const increment = target / (ANIMATION_DURATION / 16)
+      const format = formatter || ((n: number) => Math.floor(n).toString())
+      element.textContent = '0'
+      
+      setTimeout(() => {
+        const startTime = performance.now()
+        const startValue = 0
+        
+        const updateNumber = (currentTime: number) => {
+          const elapsed = currentTime - startTime
+          const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
           
-          const timer = setInterval(() => {
-            count += increment
-            if (count >= target) {
-              count = target
-              clearInterval(timer)
-            }
-            if (countRef.current) {
-              countRef.current.textContent = Math.floor(count).toString()
-            }
-          }, 16)
-        }, ANIMATION_DELAY + 600)
-      }
-    }
-    
-    const countObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateWorkoutCount()
-        }
-      })
-    }, { threshold: 0.3 })
-
-    if (countRef.current) {
-      countObserver.observe(countRef.current)
-      
-      // Check if already in viewport (for desktop)
-      const rect = countRef.current.getBoundingClientRect()
-      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
-      if (isInViewport) {
-        animateWorkoutCount()
-      }
-    }
-
-    // Animate bonus count
-    const animateBonusCount = () => {
-      if (bonusCountRef.current && bonusCountRef.current.textContent === '0') {
-        setTimeout(() => {
-          let count = 0
-          const target = 1250
-          const increment = target / (ANIMATION_DURATION / 16)
+          // Ease-out quadratic function for smooth deceleration
+          const easeProgress = 1 - Math.pow(1 - progress, 2)
+          const currentValue = startValue + (targetValue - startValue) * easeProgress
           
-          const timer = setInterval(() => {
-            count += increment
-            if (count >= target) {
-              count = target
-              clearInterval(timer)
-            }
-            if (bonusCountRef.current) {
-              bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
-            }
-          }, 16)
-        }, ANIMATION_DELAY + 600)
-      }
-    }
-    
-    const bonusObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateBonusCount()
-        }
-      })
-    }, { threshold: 0.3 })
-
-    if (bonusCountRef.current) {
-      bonusObserver.observe(bonusCountRef.current)
-      
-      // Check if already in viewport (for desktop)
-      const rect = bonusCountRef.current.getBoundingClientRect()
-      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
-      if (isInViewport) {
-        animateBonusCount()
-      }
-    }
-
-    // Animate bonus progress bar
-    const animateBonusProgressBar = () => {
-      if (bonusProgressRef.current && bonusProgressRef.current.style.width === '0%') {
-        setTimeout(() => {
-          if (bonusProgressRef.current) {
-            bonusProgressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
-            bonusProgressRef.current.style.width = '62%'
+          if (element) {
+            element.textContent = format(currentValue)
           }
-        }, ANIMATION_DELAY + 600)
-      }
+          
+          if (progress < 1) {
+            requestAnimationFrame(updateNumber)
+          } else if (element) {
+            element.textContent = format(targetValue)
+          }
+        }
+        
+        requestAnimationFrame(updateNumber)
+      }, startDelay)
     }
     
-    const bonusProgressObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateBonusProgressBar()
-        }
-      })
-    }, { threshold: 0.01 })
-
-    if (bonusProgressRef.current?.parentElement) {
-      bonusProgressObserver.observe(bonusProgressRef.current.parentElement)
+    // Helper function to animate progress bar using CSS transition
+    const animateProgressBar = (
+      element: HTMLElement | null,
+      targetPercent: number,
+      startDelay: number
+    ) => {
+      if (!element) return
       
-      // Check if already in viewport (for desktop)
-      const rect = bonusProgressRef.current.parentElement.getBoundingClientRect()
-      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
-      if (isInViewport) {
-        animateBonusProgressBar()
-      }
+      element.style.width = '0%'
+      element.style.transition = 'none'
+      
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          element.style.transition = `width ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+          element.style.width = `${targetPercent}%`
+        })
+      }, startDelay)
     }
-
+    
+    // Check if element is in viewport
+    const isInViewport = (element: HTMLElement | null) => {
+      if (!element) return false
+      const rect = element.getBoundingClientRect()
+      return rect.top < window.innerHeight && rect.bottom > 0
+    }
+    
+    // Start animations when elements are in viewport
+    const startDelay = ANIMATION_START_DELAY
+    
+    // Track if animations have been triggered
+    let workoutAnimated = false
+    let bonusAnimated = false
+    
+    // Set up intersection observers for both mobile and desktop
+    const workoutObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !workoutAnimated && countRef.current?.textContent === '0') {
+            workoutAnimated = true
+            animateProgressBar(progressRef.current, 83, 0)
+            animateNumber(countRef.current, 5, 0)
+            workoutObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+    
+    const bonusObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !bonusAnimated && bonusCountRef.current?.textContent === '0') {
+            bonusAnimated = true
+            animateProgressBar(bonusProgressRef.current, 62, 0)
+            animateNumber(bonusCountRef.current, 1250, 0, (n) => Math.floor(n).toLocaleString('ru-RU'))
+            bonusObserver.disconnect()
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+    
+    // Start observers
+    if (countRef.current) workoutObserver.observe(countRef.current)
+    if (bonusCountRef.current) bonusObserver.observe(bonusCountRef.current)
+    
+    // For desktop, also check immediately if elements are already in viewport
+    if (isDesktop) {
+      setTimeout(() => {
+        if (isInViewport(progressRef.current) && !workoutAnimated) {
+          workoutAnimated = true
+          animateProgressBar(progressRef.current, 83, 0)
+          animateNumber(countRef.current, 5, 0)
+          workoutObserver.disconnect()
+        }
+        
+        if (isInViewport(bonusProgressRef.current) && !bonusAnimated) {
+          bonusAnimated = true
+          animateProgressBar(bonusProgressRef.current, 62, 0)
+          animateNumber(bonusCountRef.current, 1250, 0, (n) => Math.floor(n).toLocaleString('ru-RU'))
+          bonusObserver.disconnect()
+        }
+      }, startDelay)
+    }
+    
     return () => {
-      observer.disconnect()
-      countObserver.disconnect()
+      workoutObserver.disconnect()
       bonusObserver.disconnect()
-      bonusProgressObserver.disconnect()
     }
   }, [])
 
@@ -287,44 +263,111 @@ export default function DashboardDesignPage() {
     
     // Check if desktop
     const isDesktop = window.innerWidth >= 1024 // lg breakpoint
+    const DESKTOP_DELAY = isDesktop ? 50 : 0 // Minimal delay for desktop to ensure initial render
     
     // Animate navigation
-    if (navRef.current) {
-      navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-      navRef.current.style.opacity = '1'
-    }
+    setTimeout(() => {
+      if (navRef.current) {
+        navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+        navRef.current.style.opacity = '1'
+      }
+    }, DESKTOP_DELAY)
     
     // Animate cards - different behavior for mobile vs desktop
     cardsRef.current.forEach((card, index) => {
       if (card) {
         if (isDesktop) {
           // Desktop: all visible cards appear simultaneously with slower, bouncy animation
-          // Ensure cards start from offset position
-          card.style.transform = 'translateY(50px)'
+          setTimeout(() => {
+            card.classList.remove('card-hidden')
+            card.classList.add('card-animate-desktop')
+            
+            // Remove animation class after it completes
+            const handleAnimationEnd = () => {
+              card.classList.remove('card-animate-desktop')
+              card.style.removeProperty('transform')
+              card.style.visibility = 'visible'
+              card.style.willChange = 'auto'
+              
+              // Restore permanent animations (like gradientShift for card 4)
+              if (index === 3) {
+                card.style.animation = 'gradientShift 10s ease infinite'
+              }
+              card.removeEventListener('animationend', handleAnimationEnd)
+            }
+            card.addEventListener('animationend', handleAnimationEnd)
+          }, 300 + DESKTOP_DELAY) // Single delay for all cards
+        } else {
+          // Mobile: instant appearance, no animation
+          card.classList.remove('card-hidden')
+          card.style.removeProperty('transform')
+          card.style.visibility = 'visible'
+          card.style.willChange = 'auto'
           card.style.opacity = '1'
           
-          setTimeout(() => {
-            card.style.animation = `slideInFromBottom 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`
-          }, 400) // Single delay for all cards
-        } else {
-          // Mobile: staggered animation
-          setTimeout(() => {
-            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
-          }, 200 + index * 150)
+          // Restore permanent animations (like gradientShift for card 4)
+          if (index === 3) {
+            card.style.animation = 'gradientShift 10s ease infinite'
+          }
         }
       }
     })
+    
+    // Animate profile cards
+    const isXL = window.innerWidth >= 1280 // xl breakpoint
+    
+    if (isXL && profileDesktopRef.current) {
+      const profile = profileDesktopRef.current
+      profile.style.transition = 'none'
+      
+      setTimeout(() => {
+        profile.classList.remove('profile-hidden')
+        profile.classList.add('profile-animate')
+        
+        const handleAnimationEnd = () => {
+          profile.classList.remove('profile-animate')
+          profile.style.opacity = '1'
+          profile.style.transform = 'scale(1)'
+          profile.style.visibility = 'visible'
+          profile.style.willChange = 'auto'
+          profile.style.transition = 'all 0.3s ease'
+          profile.removeEventListener('animationend', handleAnimationEnd)
+        }
+        profile.addEventListener('animationend', handleAnimationEnd)
+      }, 500 + DESKTOP_DELAY)
+    }
+    
+    if (!isXL && profileMobileRef.current) {
+      const profile = profileMobileRef.current
+      profile.style.transition = 'none'
+      
+      setTimeout(() => {
+        profile.classList.remove('profile-hidden')
+        profile.classList.add('profile-animate')
+        
+        const handleAnimationEnd = () => {
+          profile.classList.remove('profile-animate')
+          profile.style.opacity = '1'
+          profile.style.transform = 'scale(1)'
+          profile.style.visibility = 'visible'
+          profile.style.willChange = 'auto'
+          profile.style.transition = 'all 0.3s ease'
+          profile.removeEventListener('animationend', handleAnimationEnd)
+        }
+        profile.addEventListener('animationend', handleAnimationEnd)
+      }, 250)
+    }
   }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
     <button
-      className="tooltip-trigger w-5 h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/20 hover:scale-110 active:scale-95"
+      className="tooltip-trigger w-7 h-7 md:w-5 md:h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/20 hover:scale-110 active:scale-95"
       onClick={(e) => {
         e.stopPropagation()
         setActiveTooltip(activeTooltip === tooltipKey ? null : tooltipKey)
       }}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/60">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 md:w-3 md:h-3 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <path d="M12 17h.01"></path>
@@ -338,14 +381,14 @@ export default function DashboardDesignPage() {
     
     return (
       <div 
-        className="tooltip-popup absolute top-full left-0 mt-2 z-50 w-72 rounded-2xl bg-[#0a0a0f] ring-1 ring-white/20 p-4 shadow-2xl backdrop-blur-xl"
+        className="tooltip-popup absolute top-full left-0 mt-2 z-50 w-72 rounded-2xl bg-[#1a1a24] ring-1 ring-white/20 p-4 shadow-2xl backdrop-blur-xl"
         style={{
           animation: 'tooltipIn 0.2s ease-out forwards'
         }}
       >
-        <div className="absolute -top-2 left-6 w-4 h-4 bg-[#0a0a0f] ring-1 ring-white/20 rotate-45" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+        <div className="absolute -top-2 left-6 w-4 h-4 bg-[#1a1a24] ring-1 ring-white/20 rotate-45" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
         <h4 className="text-sm font-semibold text-white mb-2">{tooltip.title}</h4>
-        <p className="text-xs text-white/70 leading-relaxed">{tooltip.description}</p>
+        <p className="text-xs text-white/80 leading-relaxed">{tooltip.description}</p>
       </div>
     )
   }
@@ -387,7 +430,8 @@ export default function DashboardDesignPage() {
         }
         
         .animate-shimmer {
-          animation: shimmer 2.5s infinite;
+          animation: shimmer 2.5s infinite !important;
+          will-change: transform, opacity;
         }
         
         /* Enhanced tooltip animation */
@@ -416,12 +460,57 @@ export default function DashboardDesignPage() {
         }
         
         @keyframes slideInFromBottom {
-          from {
+          0% {
             transform: translate3d(0, 50px, 0);
           }
-          to {
+          100% {
             transform: translate3d(0, 0, 0);
           }
+        }
+        
+        /* Card initial state - hide before JS loads */
+        .card-hidden {
+          opacity: 1 !important;
+          transform: translate3d(0, 50px, 0) !important;
+          visibility: hidden !important;
+          will-change: transform;
+          transition: none !important;
+        }
+        
+        /* Force stable rendering for decorative blurred elements */
+        .blur-3xl {
+          transform: translateZ(0);
+          will-change: transform;
+        }
+        
+        .card-animate-desktop {
+          animation: slideInFromBottom 1s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+          visibility: visible !important;
+          will-change: transform;
+          transition: none !important;
+        }
+        
+        .card-animate-mobile {
+          animation: slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+          visibility: visible !important;
+          will-change: transform;
+          transition: none !important;
+        }
+        
+        /* Profile card animation */
+        .profile-hidden {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          transform: scale(0.9) !important;
+          will-change: transform, opacity;
+          transition: none !important;
+        }
+        
+        .profile-animate {
+          animation: scaleIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+          visibility: visible !important;
+          will-change: transform, opacity;
+          transition: none !important;
         }
         
         @keyframes fadeInSlideBottom {
@@ -472,24 +561,24 @@ export default function DashboardDesignPage() {
           0%, 100% {
             opacity: 1;
             transform: scale(1);
-            box-shadow: 0 0 0 0 currentColor;
+            box-shadow: 0 0 1.5px 0.75px rgba(74, 222, 128, 0.45);
           }
           50% {
-            opacity: 0.8;
-            transform: scale(1.1);
-            box-shadow: 0 0 6px 1.5px currentColor;
+            opacity: 0.75;
+            transform: scale(1.4);
+            box-shadow: 0 0 9px 3px rgba(74, 222, 128, 0.675);
           }
         }
         
         /* Ring ripple effect */
         @keyframes ringRipple {
           0% {
-            opacity: 1;
+            opacity: 0.8;
             transform: scale(1);
           }
           100% {
             opacity: 0;
-            transform: scale(1.5);
+            transform: scale(2.5);
           }
         }
         
@@ -560,6 +649,31 @@ export default function DashboardDesignPage() {
           }
         }
         
+        /* Prevent text selection and context menu on interactive elements */
+        button, .cursor-pointer {
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
+        }
+        
+        /* Ensure smooth transitions on mobile */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Force hardware acceleration for smoother animations */
+        button {
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          perspective: 1000px;
+        }
+        
+        
         /* Utility animation classes */
         .animate-fade-in {
           animation: fadeIn var(--duration-slow) var(--ease-smooth) forwards;
@@ -578,11 +692,23 @@ export default function DashboardDesignPage() {
         }
         
         .animate-float {
-          animation: float 3s ease-in-out infinite;
+          animation: float 3s ease-in-out infinite !important;
+          will-change: transform;
         }
         
         .animate-pulse-glow {
-          animation: pulseGlow 2s ease-in-out infinite;
+          animation: pulseGlow 2s ease-in-out infinite !important;
+          will-change: transform, opacity, box-shadow;
+        }
+        
+        /* Ensure badge dot animations work */
+        span.animate-pulse-glow {
+          display: block !important;
+        }
+        
+        .animate-ring-ripple {
+          animation: ringRipple 2s ease-out infinite !important;
+          will-change: transform, opacity;
         }
         
         .animate-sparkle {
@@ -610,13 +736,16 @@ export default function DashboardDesignPage() {
         }
       `}</style>
 
-      <div className={`min-h-screen antialiased flex flex-col items-center justify-center text-neutral-900 font-inter bg-gradient-to-br from-slate-900 via-zinc-900 to-neutral-900 p-0 xl:pt-8 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden selection:bg-orange-500 selection:text-white ${inter.variable} ${oswald.variable} ${spaceGrotesk.variable}`}>
+      <div 
+        className={`min-h-screen antialiased flex flex-col items-center justify-center text-neutral-900 font-inter p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden selection:bg-orange-500 selection:text-white ${inter.variable} ${oswald.variable} ${spaceGrotesk.variable}`}
+        style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}
+      >
         <main className="relative w-full xl:max-w-[96rem] bg-[#0a0a0f] xl:rounded-[3rem] overflow-x-hidden overflow-y-auto min-h-screen xl:min-h-[calc(100vh-4rem)]">
           {/* Background effects */}
           <div className="absolute inset-0 pointer-events-none z-0">
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-orange-500/10 blur-[120px] rounded-full animate-[blobMove_20s_ease-in-out_infinite]" />
-            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-purple-500/10 blur-[120px] rounded-full animate-[blobMove_25s_ease-in-out_infinite_reverse]" />
+            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] blur-[120px] rounded-full" style={{ background: 'rgba(249, 115, 22, 0.1)' }} />
+            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] blur-[120px] rounded-full" style={{ background: 'rgba(168, 85, 247, 0.1)' }} />
           </div>
           
           <div className="relative w-full z-10">
@@ -672,14 +801,14 @@ export default function DashboardDesignPage() {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto xl:min-w-[42rem]">
-                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '250ms', animationDuration: '1s' }}>
+                    <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:hover:ring-white/20 md:hover:shadow-xl">
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
                       <div className="relative z-10 flex items-center gap-5">
                         {/* Avatar */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] [transition:all_0.3s_ease] group-hover:scale-105 group-hover:rotate-3 group-hover:shadow-2xl group-hover:shadow-orange-500/30">
+                          <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px]">
                             <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
                               <img 
                                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=Margo" 
@@ -688,12 +817,14 @@ export default function DashboardDesignPage() {
                               />
                             </div>
                           </div>
-                          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-[#0a0a0f]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                              <path d="m9 11 3 3L22 4"></path>
+                          <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center cursor-pointer transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                              <path d="M3 3v5h5"></path>
+                              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                              <path d="M16 16h5v5"></path>
                             </svg>
-                          </div>
+                          </button>
                         </div>
 
                         {/* Info */}
@@ -750,11 +881,11 @@ export default function DashboardDesignPage() {
                         {/* Stats & Actions */}
                         <div className="flex flex-col gap-3 flex-shrink-0">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg cursor-pointer">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
                               <p className="text-xl font-bold text-white font-oswald leading-none">23</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">дней</p>
                             </div>
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg cursor-pointer">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
                               <p className="text-xl font-bold text-white font-oswald leading-none">47</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">занятий</p>
                             </div>
@@ -762,14 +893,14 @@ export default function DashboardDesignPage() {
                           
                           <div className="flex gap-2">
                             <button 
-                              className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 [transition:all_0.3s_ease] hover:from-orange-600 hover:to-orange-700 hover:scale-110 hover:shadow-xl hover:shadow-orange-500/40 relative overflow-hidden group/btn"
+                              className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 transition-all hover:from-orange-600 hover:to-orange-700 hover:shadow-xl hover:shadow-orange-500/40 relative overflow-hidden group/btn active:scale-95"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                 <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                 <path d="m15 5 4 4"></path>
                               </svg>
                             </button>
-                            <button className="flex-1 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/15 hover:scale-110 group/settings">
+                            <button className="flex-1 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ring-1 ring-white/10 transition-all hover:bg-white/10 hover:ring-white/15 group/settings active:scale-95">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 [transition:transform_0.5s_ease] group-hover/settings:rotate-90">
                                 <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
@@ -784,7 +915,7 @@ export default function DashboardDesignPage() {
               </div>
 
               {/* Mobile User Profile Card */}
-              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '250ms', animationDuration: '1s' }}>
+              <section ref={profileMobileRef} className="profile-hidden xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 md:hover:ring-white/20 md:hover:shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -800,12 +931,14 @@ export default function DashboardDesignPage() {
                         />
                       </div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-[#0a0a0f]">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <path d="m9 11 3 3L22 4"></path>
+                    <button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center cursor-pointer transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                        <path d="M16 16h5v5"></path>
                       </svg>
-                    </div>
+                    </button>
                   </div>
 
                   {/* Info */}
@@ -835,7 +968,7 @@ export default function DashboardDesignPage() {
 
                   {/* Edit Button */}
                   <button 
-                    className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 [transition:all_0.3s_ease] hover:bg-orange-500/20 hover:ring-orange-400/50 hover:scale-110 hover:shadow-lg hover:shadow-orange-500/30 relative overflow-hidden group/btn"
+                    className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 transition-all hover:bg-orange-500/20 hover:ring-orange-400/50 hover:shadow-lg hover:shadow-orange-500/30 relative overflow-hidden group/btn active:scale-95"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
@@ -851,10 +984,7 @@ export default function DashboardDesignPage() {
                 {/* Card 1: Подписка */}
                 <section 
                   ref={(el) => { cardsRef.current[0] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-orange-500/10"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(50px)' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-orange-500/10"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
@@ -876,7 +1006,7 @@ export default function DashboardDesignPage() {
                     </div>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
                       <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
-                        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
+                        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ring-ripple"></span>
                       </span>
                       Active
                     </span>
@@ -906,7 +1036,7 @@ export default function DashboardDesignPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3">
+                    <button className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 cursor-pointer transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 group/card active:scale-95">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
@@ -917,21 +1047,19 @@ export default function DashboardDesignPage() {
                               <path d="M16 16h5v5"></path>
                             </svg>
                           </div>
-                          <div>
+                          <div className="text-left">
                             <p className="text-sm font-medium text-white">Продлить подписку</p>
                             <p className="text-xs text-white/60">Выбери новый тариф</p>
                           </div>
                         </div>
-                        <button 
-                          className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-orange-500/30 relative overflow-hidden group/btn"
-                        >
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-orange-500/30 relative overflow-hidden group/btn pointer-events-none">
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
                           <span className="relative">Открыть</span>
-                        </button>
+                        </div>
                       </div>
-                    </div>
+                    </button>
                     
-                    <div className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3">
+                    <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 group/card active:scale-95">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
@@ -940,19 +1068,17 @@ export default function DashboardDesignPage() {
                               <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                           </div>
-                          <div>
+                          <div className="text-left">
                             <p className="text-sm font-medium text-white">Настройки тарифа</p>
                             <p className="text-xs text-white/60">Авто-продление и другое</p>
                           </div>
                         </div>
-                        <button 
-                          className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-white/15 hover:scale-102 relative overflow-hidden group/btn"
-                        >
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                        <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 group-hover/card:scale-102 relative overflow-hidden group/btn pointer-events-none">
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
                           <span className="relative">Открыть</span>
-                        </button>
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
                 </section>
@@ -960,10 +1086,7 @@ export default function DashboardDesignPage() {
                 {/* Card 2: Тренировки за неделю */}
                 <section 
                   ref={(el) => { cardsRef.current[1] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-purple-500/10"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(50px)' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-purple-500/10"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
@@ -998,7 +1121,7 @@ export default function DashboardDesignPage() {
                           <span>Недельный прогресс</span>
                           <span>83%</span>
                         </div>
-                        <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden relative">
+                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden relative">
                           <div 
                             ref={progressRef}
                             className="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600"
@@ -1013,7 +1136,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
                       
-                      <div className="rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 ring-1 ring-purple-400/30 p-3">
+                      <button className="w-full rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 ring-1 ring-purple-400/30 p-3 cursor-pointer transition-all hover:from-purple-500/15 hover:to-indigo-500/15 hover:ring-purple-400/40 group/card active:scale-95">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -1027,19 +1150,17 @@ export default function DashboardDesignPage() {
                                 <path d="m14 21 7-7"></path>
                               </svg>
                             </div>
-                            <div>
+                            <div className="text-left">
                               <p className="text-sm font-medium text-white">Программа недели</p>
                               <p className="text-xs text-white/60">6 тренировок доступно</p>
                             </div>
                           </div>
-                          <button 
-                            className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-purple-500/30 relative overflow-hidden group/btn"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <div className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-purple-500/30 relative overflow-hidden group/btn pointer-events-none">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
                             <span className="relative">Открыть</span>
-                          </button>
+                          </div>
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </section>
@@ -1047,10 +1168,7 @@ export default function DashboardDesignPage() {
                 {/* Card 3: Дневник здоровья */}
                 <section 
                   ref={(el) => { cardsRef.current[2] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-emerald-500/10"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(50px)' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-emerald-500/10"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
@@ -1069,7 +1187,7 @@ export default function DashboardDesignPage() {
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
                       {/* Вес */}
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
@@ -1082,12 +1200,12 @@ export default function DashboardDesignPage() {
                         </div>
                         <div className="flex items-baseline gap-2">
                           <p className="text-2xl font-bold text-white font-oswald">65.3<span className="text-sm text-white/60 ml-1">кг</span></p>
-                          <span className="text-xs font-medium text-emerald-400">-2.7</span>
+                          <span className="text-xs font-bold text-emerald-400">-2.7</span>
                         </div>
-                      </div>
+                      </button>
 
                       {/* Шаги */}
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
@@ -1100,10 +1218,10 @@ export default function DashboardDesignPage() {
                           <span className="text-xs text-white/60">Шаги</span>
                         </div>
                         <p className="text-2xl font-bold text-white font-oswald">8 547</p>
-                      </div>
+                      </button>
 
                       {/* Вода */}
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
@@ -1113,10 +1231,10 @@ export default function DashboardDesignPage() {
                           <span className="text-xs text-white/60">Вода</span>
                         </div>
                         <p className="text-2xl font-bold text-white font-oswald">1.8<span className="text-sm text-white/60 ml-1">л</span></p>
-                      </div>
+                      </button>
 
                       {/* Калории */}
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-rose-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
@@ -1126,34 +1244,26 @@ export default function DashboardDesignPage() {
                           <span className="text-xs text-white/60">Калории</span>
                         </div>
                         <p className="text-2xl font-bold text-white font-oswald">1 450</p>
-                      </div>
+                      </button>
                     </div>
 
                     <div className="flex gap-2">
-                      <div className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
-                                <path d="M12 5v14"></path>
-                                <path d="M5 12h14"></path>
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-white">Добавить запись</p>
-                              <p className="text-xs text-white/60">Обнови показатели</p>
-                            </div>
+                      <button className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3 cursor-pointer transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
+                              <path d="M12 5v14"></path>
+                              <path d="M5 12h14"></path>
+                            </svg>
                           </div>
-                          <button 
-                            className="hidden md:flex rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 relative overflow-hidden group/btn"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
-                            <span className="relative">Открыть</span>
-                          </button>
+                          <div>
+                            <p className="text-sm font-medium text-white">Добавить запись</p>
+                            <p className="text-xs text-white/60">Обнови показатели</p>
+                          </div>
                         </div>
-                      </div>
+                      </button>
                       
-                      <button className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all">
+                      <button className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <line x1="18" y1="20" x2="18" y2="10"></line>
                           <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -1167,10 +1277,8 @@ export default function DashboardDesignPage() {
                 {/* Card 4: Бонусная система */}
                 <section 
                   ref={(el) => { cardsRef.current[3] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-amber-400/60 hover:shadow-2xl hover:shadow-amber-500/20"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)', backgroundSize: '200% 200%', animation: 'gradientShift 10s ease infinite' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col md:hover:ring-amber-400/60 md:hover:shadow-2xl md:hover:shadow-amber-500/20"
+                  style={{ backgroundSize: '200% 200%' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
@@ -1186,7 +1294,7 @@ export default function DashboardDesignPage() {
                         <InfoButton tooltipKey="bonuses" />
                         <Tooltip tooltipKey="bonuses" />
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium animate-float relative overflow-hidden">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium relative overflow-hidden">
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent animate-shimmer"></span>
                         <span className="relative">Gold 🥇</span>
                       </span>
@@ -1215,47 +1323,37 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3">
+                      <button className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95">
                         <div className="flex flex-col items-center justify-center text-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
+                          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
                               <circle cx="12" cy="12" r="10"></circle>
                               <path d="M12 16v-4"></path>
                               <path d="M12 8h.01"></path>
                             </svg>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-white">Использовать</p>
-                            <p className="text-[0.65rem] text-white/60 mt-0.5">Оплата шагами</p>
+                            <p className="text-sm font-medium text-white">Использовать</p>
+                            <p className="text-xs text-white/60 mt-0.5">Оплата шагами</p>
                           </div>
-                          <button className="rounded-lg bg-white/10 px-3 py-1 text-[0.65rem] text-white/80 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-white/15 hover:scale-105 relative overflow-hidden group/btn">
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
-                            <span className="relative">Открыть</span>
-                          </button>
                         </div>
-                      </div>
+                      </button>
                       
-                      <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 ring-1 ring-amber-400/30 p-3">
+                      <button className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 ring-1 ring-amber-400/30 p-3 cursor-pointer transition-all hover:from-amber-500/15 hover:to-orange-500/15 hover:ring-amber-400/40 active:scale-95">
                         <div className="flex flex-col items-center justify-center text-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
+                          <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
                               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                               <polyline points="16 6 12 2 8 6"></polyline>
                               <line x1="12" y1="2" x2="12" y2="15"></line>
                             </svg>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-white">Пригласить</p>
-                            <p className="text-[0.65rem] text-white/70 mt-0.5">+500 шагов</p>
+                            <p className="text-sm font-medium text-white">Пригласить</p>
+                            <p className="text-xs text-white/70 mt-0.5">+500 шагов</p>
                           </div>
-                          <button 
-                            className="rounded-lg bg-amber-500/20 px-3 py-1 text-[0.65rem] text-amber-100 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-amber-500/30 relative overflow-hidden group/btn"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
-                            <span className="relative">Поделиться</span>
-                          </button>
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </section>
@@ -1263,10 +1361,7 @@ export default function DashboardDesignPage() {
                 {/* Card 5: Полезные материалы */}
                 <section 
                   ref={(el) => { cardsRef.current[4] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-rose-500/10"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(50px)' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-rose-500/10"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
@@ -1285,14 +1380,14 @@ export default function DashboardDesignPage() {
                       </div>
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
                         <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
-                          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
+                          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ring-ripple"></span>
                         </span>
                         Premium
                       </span>
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-102 hover:shadow-lg cursor-pointer">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400/20 to-pink-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
@@ -1306,7 +1401,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-102 hover:shadow-lg cursor-pointer">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-cyan-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
@@ -1332,7 +1427,7 @@ export default function DashboardDesignPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-gradient-to-r from-rose-500/10 to-pink-500/10 ring-1 ring-rose-400/30 p-3">
+                    <button className="rounded-xl bg-gradient-to-r from-rose-500/10 to-pink-500/10 ring-1 ring-rose-400/30 p-3 cursor-pointer transition-all hover:from-rose-500/15 hover:to-pink-500/15 hover:ring-rose-400/40 group/card text-left active:scale-95">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
@@ -1345,24 +1440,21 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Гайды и видео-уроки</p>
                           </div>
                         </div>
-                        <button 
-                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-rose-500/30 relative overflow-hidden group/btn"
+                        <div 
+                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-rose-500/30 relative overflow-hidden group/btn pointer-events-none"
                         >
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
                           <span className="relative">Смотреть</span>
-                        </button>
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </section>
 
                 {/* Card 6: Интенсивы */}
                 <section 
                   ref={(el) => { cardsRef.current[5] = el }}
-                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-teal-500/10"
-                  onMouseMove={handleCardTilt}
-                  onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(50px)' }}
+                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-teal-500/10"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
@@ -1382,7 +1474,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30 cursor-pointer aspect-square flex flex-col items-center justify-center text-center [transition:all_0.3s_ease] hover:ring-teal-400/50 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20">
+                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30 cursor-pointer aspect-square flex flex-col items-center justify-center text-center transition-all hover:ring-teal-400/50 hover:shadow-lg hover:shadow-teal-500/20 active:scale-95">
                         <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-300">
                             <path d="m6.5 6.5 11 11"></path>
@@ -1398,7 +1490,7 @@ export default function DashboardDesignPage() {
                         <span className="text-xs text-teal-200 font-medium">Куплен</span>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer aspect-square flex flex-col items-center justify-center text-center [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer aspect-square flex flex-col items-center justify-center text-center transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg active:scale-95">
                         <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                             <path d="M12 5v14"></path>
@@ -1411,7 +1503,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 ring-1 ring-teal-400/30 p-3">
+                      <button className="w-full rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 ring-1 ring-teal-400/30 p-3 cursor-pointer transition-all hover:from-teal-500/15 hover:to-cyan-500/15 hover:ring-teal-400/40 group/card active:scale-95">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center">
@@ -1421,21 +1513,19 @@ export default function DashboardDesignPage() {
                                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                               </svg>
                             </div>
-                            <div>
+                            <div className="text-left">
                               <p className="text-sm font-medium text-white">Каталог интенсивов</p>
                               <p className="text-xs text-white/60">Специализированные тренировки</p>
                             </div>
                           </div>
-                          <button 
-                            className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-teal-500/30 relative overflow-hidden group/btn"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <div className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-teal-500/30 relative overflow-hidden group/btn pointer-events-none">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
                             <span className="relative">Открыть</span>
-                          </button>
+                          </div>
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3">
+                      <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 group/card active:scale-95">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
@@ -1444,16 +1534,16 @@ export default function DashboardDesignPage() {
                                 <rect width="20" height="14" x="2" y="6" rx="2"></rect>
                               </svg>
                             </div>
-                            <div>
+                            <div className="text-left">
                               <p className="text-sm font-medium text-white">Мои интенсивы</p>
                               <p className="text-xs text-white/60">Купленные программы</p>
                             </div>
                           </div>
-                          <button className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/15 transition-all whitespace-nowrap">
+                          <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 pointer-events-none">
                             Открыть
-                          </button>
+                          </div>
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </section>
@@ -1475,7 +1565,7 @@ export default function DashboardDesignPage() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 transition-all hover:bg-white/[0.08] hover:ring-white/20 hover:shadow-xl active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-blue-500/10 ring-1 ring-blue-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-blue-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -1487,7 +1577,7 @@ export default function DashboardDesignPage() {
                     <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Написать нам</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 transition-all hover:bg-white/[0.08] hover:ring-white/20 hover:shadow-xl active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-amber-500/10 ring-1 ring-amber-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-amber-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -1496,7 +1586,7 @@ export default function DashboardDesignPage() {
                     <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Оставить отзыв</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 transition-all hover:bg-white/[0.08] hover:ring-white/20 hover:shadow-xl active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-rose-500/10 ring-1 ring-rose-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-rose-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
@@ -1505,7 +1595,7 @@ export default function DashboardDesignPage() {
                     <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Донат</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 transition-all hover:bg-white/[0.08] hover:ring-white/20 hover:shadow-xl active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-sky-500/10 ring-1 ring-sky-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-sky-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-sky-300">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>

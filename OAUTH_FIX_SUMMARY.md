@@ -241,3 +241,4 @@ https://YOUR_PROJECT.supabase.co/auth/v1/callback
 **Дата:** 25 декабря 2025  
 **Версия:** 1.0.0
 
+
