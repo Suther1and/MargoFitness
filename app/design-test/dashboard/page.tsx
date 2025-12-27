@@ -117,96 +117,148 @@ export default function DashboardDesignPage() {
     const ANIMATION_DURATION = 2000 // Fixed 2 seconds for all animations
     const ANIMATION_DELAY = 300 // Delay before starting
     
-    // Animate progress bar with IntersectionObserver for both mobile and desktop
+    // Animate progress bar - trigger immediately for desktop, use observer for scrolled content
+    const animateProgressBar = () => {
+      if (progressRef.current && progressRef.current.style.width === '0%') {
+        setTimeout(() => {
+          if (progressRef.current) {
+            progressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
+            progressRef.current.style.width = '83%'
+          }
+        }, ANIMATION_DELAY + 600) // Delay to sync with card animation
+      }
+    }
+    
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && progressRef.current && progressRef.current.style.width === '0%') {
-          setTimeout(() => {
-            if (progressRef.current) {
-              progressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
-              progressRef.current.style.width = '83%'
-            }
-          }, ANIMATION_DELAY)
+        if (entry.isIntersecting) {
+          animateProgressBar()
         }
       })
-    }, { threshold: 0.01 }) // Lower threshold for better desktop detection
+    }, { threshold: 0.01 })
 
     if (progressRef.current?.parentElement) {
       observer.observe(progressRef.current.parentElement)
+      
+      // Check if already in viewport (for desktop)
+      const rect = progressRef.current.parentElement.getBoundingClientRect()
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+      if (isInViewport) {
+        animateProgressBar()
+      }
     }
 
-    // Animate workout count with IntersectionObserver for both mobile and desktop
+    // Animate workout count
+    const animateWorkoutCount = () => {
+      if (countRef.current && countRef.current.textContent === '0') {
+        setTimeout(() => {
+          let count = 0
+          const target = 5
+          const increment = target / (ANIMATION_DURATION / 16)
+          
+          const timer = setInterval(() => {
+            count += increment
+            if (count >= target) {
+              count = target
+              clearInterval(timer)
+            }
+            if (countRef.current) {
+              countRef.current.textContent = Math.floor(count).toString()
+            }
+          }, 16)
+        }, ANIMATION_DELAY + 600)
+      }
+    }
+    
     const countObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && countRef.current && countRef.current.textContent === '0') {
-          setTimeout(() => {
-            let count = 0
-            const target = 5
-            const increment = target / (ANIMATION_DURATION / 16)
-            
-            const timer = setInterval(() => {
-              count += increment
-              if (count >= target) {
-                count = target
-                clearInterval(timer)
-              }
-              if (countRef.current) {
-                countRef.current.textContent = Math.floor(count).toString()
-              }
-            }, 16)
-          }, ANIMATION_DELAY)
+        if (entry.isIntersecting) {
+          animateWorkoutCount()
         }
       })
     }, { threshold: 0.3 })
 
     if (countRef.current) {
       countObserver.observe(countRef.current)
+      
+      // Check if already in viewport (for desktop)
+      const rect = countRef.current.getBoundingClientRect()
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+      if (isInViewport) {
+        animateWorkoutCount()
+      }
     }
 
-    // Animate bonus count with IntersectionObserver for both mobile and desktop
+    // Animate bonus count
+    const animateBonusCount = () => {
+      if (bonusCountRef.current && bonusCountRef.current.textContent === '0') {
+        setTimeout(() => {
+          let count = 0
+          const target = 1250
+          const increment = target / (ANIMATION_DURATION / 16)
+          
+          const timer = setInterval(() => {
+            count += increment
+            if (count >= target) {
+              count = target
+              clearInterval(timer)
+            }
+            if (bonusCountRef.current) {
+              bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
+            }
+          }, 16)
+        }, ANIMATION_DELAY + 600)
+      }
+    }
+    
     const bonusObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && bonusCountRef.current && bonusCountRef.current.textContent === '0') {
-          setTimeout(() => {
-            let count = 0
-            const target = 1250
-            const increment = target / (ANIMATION_DURATION / 16)
-            
-            const timer = setInterval(() => {
-              count += increment
-              if (count >= target) {
-                count = target
-                clearInterval(timer)
-              }
-              if (bonusCountRef.current) {
-                bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
-              }
-            }, 16)
-          }, ANIMATION_DELAY)
+        if (entry.isIntersecting) {
+          animateBonusCount()
         }
       })
     }, { threshold: 0.3 })
 
     if (bonusCountRef.current) {
       bonusObserver.observe(bonusCountRef.current)
+      
+      // Check if already in viewport (for desktop)
+      const rect = bonusCountRef.current.getBoundingClientRect()
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+      if (isInViewport) {
+        animateBonusCount()
+      }
     }
 
-    // Animate bonus progress bar with IntersectionObserver
+    // Animate bonus progress bar
+    const animateBonusProgressBar = () => {
+      if (bonusProgressRef.current && bonusProgressRef.current.style.width === '0%') {
+        setTimeout(() => {
+          if (bonusProgressRef.current) {
+            bonusProgressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
+            bonusProgressRef.current.style.width = '62%'
+          }
+        }, ANIMATION_DELAY + 600)
+      }
+    }
+    
     const bonusProgressObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && bonusProgressRef.current && bonusProgressRef.current.style.width === '0%') {
-          setTimeout(() => {
-            if (bonusProgressRef.current) {
-              bonusProgressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
-              bonusProgressRef.current.style.width = '62%'
-            }
-          }, ANIMATION_DELAY)
+        if (entry.isIntersecting) {
+          animateBonusProgressBar()
         }
       })
-    }, { threshold: 0.01 }) // Lower threshold for better desktop detection
+    }, { threshold: 0.01 })
 
     if (bonusProgressRef.current?.parentElement) {
       bonusProgressObserver.observe(bonusProgressRef.current.parentElement)
+      
+      // Check if already in viewport (for desktop)
+      const rect = bonusProgressRef.current.parentElement.getBoundingClientRect()
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+      if (isInViewport) {
+        animateBonusProgressBar()
+      }
     }
 
     return () => {
@@ -246,10 +298,14 @@ export default function DashboardDesignPage() {
     cardsRef.current.forEach((card, index) => {
       if (card) {
         if (isDesktop) {
-          // Desktop: all visible cards appear simultaneously with slower animation
+          // Desktop: all visible cards appear simultaneously with slower, bouncy animation
+          // Ensure cards start from offset position
+          card.style.transform = 'translateY(50px)'
+          card.style.opacity = '1'
+          
           setTimeout(() => {
             card.style.animation = `slideInFromBottom 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`
-          }, 300) // Single delay for all cards
+          }, 400) // Single delay for all cards
         } else {
           // Mobile: staggered animation
           setTimeout(() => {
