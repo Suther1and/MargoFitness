@@ -61,183 +61,93 @@ export default function DashboardDesignPage() {
     }
   }
   
-  // Magnetic button effect
-  const handleMagneticMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const button = e.currentTarget
-    const rect = button.getBoundingClientRect()
-    const x = e.clientX - rect.left - rect.width / 2
-    const y = e.clientY - rect.top - rect.height / 2
-    const distance = Math.sqrt(x * x + y * y)
-    const maxDistance = 50
-    
-    if (distance < maxDistance) {
-      const strength = (maxDistance - distance) / maxDistance
-      button.style.transform = `translate(${x * strength * 0.3}px, ${y * strength * 0.3}px) scale(1.05)`
-    }
-  }
-  
-  const resetMagnetic = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const button = e.currentTarget
-    button.style.transform = 'translate(0, 0) scale(1)'
-  }
-  
-  // Ripple effect for clicks
-  const createRipple = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const button = e.currentTarget
-    const ripple = document.createElement('span')
-    const rect = button.getBoundingClientRect()
-    const size = Math.max(rect.width, rect.height)
-    const x = e.clientX - rect.left - size / 2
-    const y = e.clientY - rect.top - size / 2
-    
-    ripple.style.cssText = `
-      position: absolute;
-      width: ${size}px;
-      height: ${size}px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      left: ${x}px;
-      top: ${y}px;
-      pointer-events: none;
-      animation: ripple 0.6s ease-out;
-    `
-    
-    button.style.position = 'relative'
-    button.style.overflow = 'hidden'
-    button.appendChild(ripple)
-    
-    setTimeout(() => ripple.remove(), 600)
-  }
-  
-  // Unified animation logic for progress bars and counters
+  // Optimized animation logic for progress bars and counters
   useEffect(() => {
-    const isDesktop = window.innerWidth >= 1024
-    const ANIMATION_DURATION = isDesktop ? 2000 : 1500 // Faster on mobile
-    const ANIMATION_START_DELAY = 900 // Delay after cards appear
-    
-    // Helper function to animate a number using requestAnimationFrame
-    const animateNumber = (
-      element: HTMLElement | null,
-      targetValue: number,
-      startDelay: number,
-      formatter?: (n: number) => string
-    ) => {
-      if (!element) return
-      
-      const format = formatter || ((n: number) => Math.floor(n).toString())
-      element.textContent = '0'
-      
-      setTimeout(() => {
-        const startTime = performance.now()
-        const startValue = 0
-        
-        const updateNumber = (currentTime: number) => {
-          const elapsed = currentTime - startTime
-          const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
-          
-          // Ease-out quadratic function for smooth deceleration
-          const easeProgress = 1 - Math.pow(1 - progress, 2)
-          const currentValue = startValue + (targetValue - startValue) * easeProgress
-          
-          if (element) {
-            element.textContent = format(currentValue)
-          }
-          
-          if (progress < 1) {
-            requestAnimationFrame(updateNumber)
-          } else if (element) {
-            element.textContent = format(targetValue)
-          }
-        }
-        
-        requestAnimationFrame(updateNumber)
-      }, startDelay)
-    }
-    
-    // Helper function to animate progress bar using CSS transition
-    const animateProgressBar = (
-      element: HTMLElement | null,
-      targetPercent: number,
-      startDelay: number
-    ) => {
-      if (!element) return
-      
-      element.style.width = '0%'
-      element.style.transition = 'none'
-      
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          element.style.transition = `width ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
-          element.style.width = `${targetPercent}%`
-        })
-      }, startDelay)
-    }
-    
-    // Check if element is in viewport
-    const isInViewport = (element: HTMLElement | null) => {
-      if (!element) return false
-      const rect = element.getBoundingClientRect()
-      return rect.top < window.innerHeight && rect.bottom > 0
-    }
-    
-    // Start animations when elements are in viewport
-    const startDelay = ANIMATION_START_DELAY
-    
-    // Track if animations have been triggered
+    const ANIMATION_DURATION = 1500
     let workoutAnimated = false
     let bonusAnimated = false
     
-    // Set up intersection observers for both mobile and desktop
+    // Unified animation function
+    const animateElements = (
+      progressBar: HTMLElement | null,
+      counter: HTMLElement | null,
+      targetPercent: number,
+      targetValue: number,
+      formatter?: (n: number) => string
+    ) => {
+      if (!progressBar || !counter) return
+      
+      const format = formatter || ((n: number) => Math.floor(n).toString())
+      const startTime = performance.now()
+      
+      // Set initial states
+      progressBar.style.width = '0%'
+      counter.textContent = '0'
+      
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
+        
+        // Smooth easing function
+        const easeProgress = progress < 0.5
+          ? 2 * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2
+        
+        // Update progress bar
+        progressBar.style.width = `${targetPercent * easeProgress}%`
+        
+        // Update counter
+        const currentValue = targetValue * easeProgress
+        counter.textContent = format(currentValue)
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          // Ensure final values
+          progressBar.style.width = `${targetPercent}%`
+          counter.textContent = format(targetValue)
+        }
+      }
+      
+      requestAnimationFrame(animate)
+    }
+    
+    // Set up intersection observers
     const workoutObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !workoutAnimated && countRef.current?.textContent === '0') {
+          if (entry.isIntersecting && !workoutAnimated) {
             workoutAnimated = true
-            animateProgressBar(progressRef.current, 83, 0)
-            animateNumber(countRef.current, 5, 0)
+            animateElements(progressRef.current, countRef.current, 83, 5)
             workoutObserver.disconnect()
           }
         })
       },
-      { threshold: 0.3 }
+      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
     )
     
     const bonusObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !bonusAnimated && bonusCountRef.current?.textContent === '0') {
+          if (entry.isIntersecting && !bonusAnimated) {
             bonusAnimated = true
-            animateProgressBar(bonusProgressRef.current, 62, 0)
-            animateNumber(bonusCountRef.current, 1250, 0, (n) => Math.floor(n).toLocaleString('ru-RU'))
+            animateElements(
+              bonusProgressRef.current,
+              bonusCountRef.current,
+              62,
+              1250,
+              (n) => Math.floor(n).toLocaleString('ru-RU')
+            )
             bonusObserver.disconnect()
           }
         })
       },
-      { threshold: 0.3 }
+      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
     )
     
-    // Start observers
-    if (countRef.current) workoutObserver.observe(countRef.current)
-    if (bonusCountRef.current) bonusObserver.observe(bonusCountRef.current)
-    
-    // For desktop, also check immediately if elements are already in viewport
-    if (isDesktop) {
-      setTimeout(() => {
-        if (isInViewport(progressRef.current) && !workoutAnimated) {
-          workoutAnimated = true
-          animateProgressBar(progressRef.current, 83, 0)
-          animateNumber(countRef.current, 5, 0)
-          workoutObserver.disconnect()
-        }
-        
-        if (isInViewport(bonusProgressRef.current) && !bonusAnimated) {
-          bonusAnimated = true
-          animateProgressBar(bonusProgressRef.current, 62, 0)
-          animateNumber(bonusCountRef.current, 1250, 0, (n) => Math.floor(n).toLocaleString('ru-RU'))
-          bonusObserver.disconnect()
-        }
-      }, startDelay)
-    }
+    // Start observing
+    if (progressRef.current) workoutObserver.observe(progressRef.current)
+    if (bonusProgressRef.current) bonusObserver.observe(bonusProgressRef.current)
     
     return () => {
       workoutObserver.disconnect()
@@ -257,106 +167,71 @@ export default function DashboardDesignPage() {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
   
-  // Staggered reveal animation on mount
+  // Optimized page entrance animations
   useEffect(() => {
     setIsVisible(true)
-    
-    // Check if desktop
-    const isDesktop = window.innerWidth >= 1024 // lg breakpoint
-    const DESKTOP_DELAY = isDesktop ? 50 : 0 // Minimal delay for desktop to ensure initial render
+    const isDesktop = window.innerWidth >= 1024
+    const isXL = window.innerWidth >= 1280
     
     // Animate navigation
-    setTimeout(() => {
+    const animateNav = () => {
       if (navRef.current) {
         navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
         navRef.current.style.opacity = '1'
       }
-    }, DESKTOP_DELAY)
+    }
     
-    // Animate cards - different behavior for mobile vs desktop
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
+    // Animate cards
+    const animateCards = () => {
+      cardsRef.current.forEach((card, index) => {
+        if (!card) return
+        
+        card.classList.remove('card-hidden')
+        
         if (isDesktop) {
-          // Desktop: all visible cards appear simultaneously with slower, bouncy animation
-          setTimeout(() => {
-            card.classList.remove('card-hidden')
-            card.classList.add('card-animate-desktop')
-            
-            // Remove animation class after it completes
-            const handleAnimationEnd = () => {
-              card.classList.remove('card-animate-desktop')
-              card.style.removeProperty('transform')
-              card.style.visibility = 'visible'
-              card.style.willChange = 'auto'
-              
-              // Restore permanent animations (like gradientShift for card 4)
-              if (index === 3) {
-                card.style.animation = 'gradientShift 10s ease infinite'
-              }
-              card.removeEventListener('animationend', handleAnimationEnd)
-            }
-            card.addEventListener('animationend', handleAnimationEnd)
-          }, 300 + DESKTOP_DELAY) // Single delay for all cards
-        } else {
-          // Mobile: instant appearance, no animation
-          card.classList.remove('card-hidden')
-          card.style.removeProperty('transform')
-          card.style.visibility = 'visible'
-          card.style.willChange = 'auto'
-          card.style.opacity = '1'
-          
-          // Restore permanent animations (like gradientShift for card 4)
-          if (index === 3) {
-            card.style.animation = 'gradientShift 10s ease infinite'
+          card.classList.add('card-animate-desktop')
+          const handleEnd = () => {
+            card.classList.remove('card-animate-desktop')
+            card.style.visibility = 'visible'
+            card.style.willChange = 'auto'
+            if (index === 3) card.style.animation = 'gradientShift 10s ease infinite'
+            card.removeEventListener('animationend', handleEnd)
           }
+          card.addEventListener('animationend', handleEnd)
+        } else {
+          card.style.visibility = 'visible'
+          card.style.opacity = '1'
+          card.style.transform = 'none'
+          card.style.willChange = 'auto'
+          if (index === 3) card.style.animation = 'gradientShift 10s ease infinite'
         }
+      })
+    }
+    
+    // Animate profile
+    const animateProfile = () => {
+      const profile = isXL ? profileDesktopRef.current : profileMobileRef.current
+      if (!profile) return
+      
+      profile.classList.remove('profile-hidden')
+      profile.classList.add('profile-animate')
+      
+      const handleEnd = () => {
+        profile.classList.remove('profile-animate')
+        profile.style.opacity = '1'
+        profile.style.visibility = 'visible'
+        profile.style.willChange = 'auto'
+        profile.removeEventListener('animationend', handleEnd)
       }
+      profile.addEventListener('animationend', handleEnd)
+    }
+    
+    // Execute animations with minimal delays
+    requestAnimationFrame(() => {
+      animateNav()
+      setTimeout(animateCards, isDesktop ? 300 : 0)
+      setTimeout(animateProfile, isDesktop ? 500 : 250)
     })
-    
-    // Animate profile cards
-    const isXL = window.innerWidth >= 1280 // xl breakpoint
-    
-    if (isXL && profileDesktopRef.current) {
-      const profile = profileDesktopRef.current
-      profile.style.transition = 'none'
-      
-      setTimeout(() => {
-        profile.classList.remove('profile-hidden')
-        profile.classList.add('profile-animate')
-        
-        const handleAnimationEnd = () => {
-          profile.classList.remove('profile-animate')
-          profile.style.opacity = '1'
-          profile.style.transform = 'scale(1)'
-          profile.style.visibility = 'visible'
-          profile.style.willChange = 'auto'
-          profile.style.transition = 'all 0.3s ease'
-          profile.removeEventListener('animationend', handleAnimationEnd)
-        }
-        profile.addEventListener('animationend', handleAnimationEnd)
-      }, 500 + DESKTOP_DELAY)
-    }
-    
-    if (!isXL && profileMobileRef.current) {
-      const profile = profileMobileRef.current
-      profile.style.transition = 'none'
-      
-      setTimeout(() => {
-        profile.classList.remove('profile-hidden')
-        profile.classList.add('profile-animate')
-        
-        const handleAnimationEnd = () => {
-          profile.classList.remove('profile-animate')
-          profile.style.opacity = '1'
-          profile.style.transform = 'scale(1)'
-          profile.style.visibility = 'visible'
-          profile.style.willChange = 'auto'
-          profile.style.transition = 'all 0.3s ease'
-          profile.removeEventListener('animationend', handleAnimationEnd)
-        }
-        profile.addEventListener('animationend', handleAnimationEnd)
-      }, 250)
-    }
   }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
@@ -404,16 +279,6 @@ export default function DashboardDesignPage() {
         ::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; overflow-x: hidden; }
         
-        /* CSS Variables for animations */
-        :root {
-          --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-          --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-          --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-          --duration-fast: 300ms;
-          --duration-normal: 500ms;
-          --duration-slow: 800ms;
-        }
-        
         /* Optimized shimmer with GPU acceleration */
         @keyframes shimmer {
           0% {
@@ -431,70 +296,40 @@ export default function DashboardDesignPage() {
         
         .animate-shimmer {
           animation: shimmer 2.5s infinite !important;
-          will-change: transform, opacity;
         }
         
-        /* Enhanced tooltip animation */
+        /* Tooltip animation */
         @keyframes tooltipIn {
           0% {
             opacity: 0;
-            transform: translate3d(0, -8px, 0) scale(0.95);
-          }
-          60% {
-            transform: translate3d(0, 2px, 0) scale(1.02);
+            transform: translateY(-8px) scale(0.95);
           }
           100% {
             opacity: 1;
-            transform: translate3d(0, 0, 0) scale(1);
+            transform: translateY(0) scale(1);
           }
         }
         
-        /* Fade in animations */
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
+        /* Slide in from bottom */
         @keyframes slideInFromBottom {
-          0% {
+          from {
             transform: translate3d(0, 50px, 0);
           }
-          100% {
+          to {
             transform: translate3d(0, 0, 0);
           }
         }
         
-        /* Card initial state - hide before JS loads */
+        /* Card initial state */
         .card-hidden {
           opacity: 1 !important;
           transform: translate3d(0, 50px, 0) !important;
           visibility: hidden !important;
-          will-change: transform;
-          transition: none !important;
-        }
-        
-        /* Force stable rendering for decorative blurred elements */
-        .blur-3xl {
-          transform: translateZ(0);
-          will-change: transform;
         }
         
         .card-animate-desktop {
           animation: slideInFromBottom 1s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
           visibility: visible !important;
-          will-change: transform;
-          transition: none !important;
-        }
-        
-        .card-animate-mobile {
-          animation: slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) both !important;
-          visibility: visible !important;
-          will-change: transform;
-          transition: none !important;
         }
         
         /* Profile card animation */
@@ -502,36 +337,21 @@ export default function DashboardDesignPage() {
           opacity: 0 !important;
           visibility: hidden !important;
           transform: scale(0.9) !important;
-          will-change: transform, opacity;
-          transition: none !important;
         }
         
         .profile-animate {
-          animation: scaleIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+          animation: scaleIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
           visibility: visible !important;
-          will-change: transform, opacity;
-          transition: none !important;
-        }
-        
-        @keyframes fadeInSlideBottom {
-          from {
-            opacity: 0;
-            transform: translate3d(0, 50px, 0);
-          }
-          to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
         }
         
         @keyframes slideInFromTop {
           from {
             opacity: 0;
-            transform: translate3d(0, -30px, 0);
+            transform: translateY(-30px);
           }
           to {
             opacity: 1;
-            transform: translate3d(0, 0, 0);
+            transform: translateY(0);
           }
         }
         
@@ -546,17 +366,7 @@ export default function DashboardDesignPage() {
           }
         }
         
-        /* Float animation for badges */
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-3px);
-          }
-        }
-        
-        /* Enhanced pulse with glow */
+        /* Pulse with glow */
         @keyframes pulseGlow {
           0%, 100% {
             opacity: 1;
@@ -602,123 +412,26 @@ export default function DashboardDesignPage() {
           }
         }
         
-        /* Glow pulse */
-        @keyframes glowPulse {
-          0%, 100% {
-            box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
-          }
-          50% {
-            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-          }
-        }
-        
-        /* Sparkle effect */
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1) rotate(0deg);
-          }
-          50% {
-            opacity: 0.7;
-            transform: scale(1.05) rotate(180deg);
-          }
-        }
-        
-        /* Ripple effect */
-        @keyframes ripple {
-          0% {
-            transform: scale(0);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(4);
-            opacity: 0;
-          }
-        }
-        
-        /* Blob movement */
-        @keyframes blobMove {
-          0%, 100% {
-            transform: translate(0, 0) scale(1) rotate(0deg);
-          }
-          33% {
-            transform: translate(30px, -30px) scale(1.1) rotate(120deg);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
-          }
-        }
-        
-        /* Prevent text selection and context menu on interactive elements */
+        /* Optimize touch interactions */
         button, .cursor-pointer {
           user-select: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          -webkit-touch-callout: none;
           -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
         }
         
-        /* Ensure smooth transitions on mobile */
+        /* Smooth rendering */
         * {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Force hardware acceleration for smoother animations */
-        button {
-          transform: translateZ(0);
-          backface-visibility: hidden;
-          perspective: 1000px;
-        }
-        
-        
-        /* Utility animation classes */
-        .animate-fade-in {
-          animation: fadeIn var(--duration-slow) var(--ease-smooth) forwards;
-        }
-        
-        .animate-slide-in-bottom {
-          animation: slideInFromBottom 0.8s var(--ease-smooth) forwards;
-        }
-        
-        .animate-slide-in-top {
-          animation: slideInFromTop 0.6s var(--ease-smooth) forwards;
-        }
-        
-        .animate-scale-in {
-          animation: scaleIn 0.6s var(--ease-bounce) forwards;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite !important;
-          will-change: transform;
-        }
-        
+        /* Animation utilities */
         .animate-pulse-glow {
           animation: pulseGlow 2s ease-in-out infinite !important;
-          will-change: transform, opacity, box-shadow;
-        }
-        
-        /* Ensure badge dot animations work */
-        span.animate-pulse-glow {
-          display: block !important;
         }
         
         .animate-ring-ripple {
           animation: ringRipple 2s ease-out infinite !important;
-          will-change: transform, opacity;
-        }
-        
-        .animate-sparkle {
-          animation: sparkle 2s ease-in-out infinite;
-        }
-        
-        /* Card tilt effect */
-        .card-3d {
-          transform-style: preserve-3d;
-          transition: transform var(--duration-normal) var(--ease-smooth);
         }
         
         /* Reduced motion support */
@@ -1052,8 +765,8 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Выбери новый тариф</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-orange-500/30 relative overflow-hidden group/btn pointer-events-none">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
+                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-orange-500/30 relative overflow-hidden">
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
                           <span className="relative">Открыть</span>
                         </div>
                       </div>
@@ -1073,8 +786,8 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Авто-продление и другое</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 group-hover/card:scale-102 relative overflow-hidden group/btn pointer-events-none">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
+                        <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 relative overflow-hidden">
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
                           <span className="relative">Открыть</span>
                         </div>
                       </div>
@@ -1124,7 +837,7 @@ export default function DashboardDesignPage() {
                         <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden relative">
                           <div 
                             ref={progressRef}
-                            className="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600"
+                            className="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600 transition-none"
                             style={{ width: '0%' }}
                           ></div>
                         </div>
@@ -1155,8 +868,8 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">6 тренировок доступно</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-purple-500/30 relative overflow-hidden group/btn pointer-events-none">
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <div className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-purple-500/30 relative overflow-hidden">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
                             <span className="relative">Открыть</span>
                           </div>
                         </div>
@@ -1315,7 +1028,7 @@ export default function DashboardDesignPage() {
                         <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
                           <div 
                             ref={bonusProgressRef}
-                            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500"
+                            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-none"
                             style={{ width: '0%' }}
                           ></div>
                         </div>
@@ -1440,10 +1153,8 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Гайды и видео-уроки</p>
                           </div>
                         </div>
-                        <div 
-                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-rose-500/30 relative overflow-hidden group/btn pointer-events-none"
-                        >
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
+                        <div className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-rose-500/30 relative overflow-hidden">
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
                           <span className="relative">Смотреть</span>
                         </div>
                       </div>
@@ -1518,8 +1229,8 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">Специализированные тренировки</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-teal-500/30 relative overflow-hidden group/btn pointer-events-none">
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <div className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-teal-500/30 relative overflow-hidden">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
                             <span className="relative">Открыть</span>
                           </div>
                         </div>
@@ -1539,7 +1250,7 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">Купленные программы</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 pointer-events-none">
+                          <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15">
                             Открыть
                           </div>
                         </div>
