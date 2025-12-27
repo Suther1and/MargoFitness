@@ -119,13 +119,6 @@ export default async function NavbarNew() {
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        body { 
-          background: linear-gradient(to bottom right, #18181b, #09090b, #18181b);
-          min-height: 100vh;
-        }
-      `}</style>
     </nav>
   )
 }
