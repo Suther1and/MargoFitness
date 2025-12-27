@@ -187,23 +187,24 @@ export default function DashboardDesignPage() {
     
     // Animate navigation
     if (navRef.current) {
-      navRef.current.style.animation = 'slideInFromTop 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+      navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+      navRef.current.style.opacity = '1'
     }
     
     // Animate cards with stagger
     cardsRef.current.forEach((card, index) => {
       if (card) {
-        card.style.opacity = '0'
         setTimeout(() => {
-          card.style.animation = `slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards`
-        }, 100 + index * 100)
+          card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          card.style.opacity = '1'
+        }, 200 + index * 150)
       }
     })
   }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
     <button
-      className="tooltip-trigger w-5 h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/20 hover:scale-110 hover:rotate-180 active:scale-95"
+      className="tooltip-trigger w-5 h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/20 hover:scale-110 active:scale-95"
       onClick={(e) => {
         e.stopPropagation()
         setActiveTooltip(activeTooltip === tooltipKey ? null : tooltipKey)
@@ -251,9 +252,9 @@ export default function DashboardDesignPage() {
           --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
           --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
           --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-          --duration-fast: 200ms;
-          --duration-normal: 300ms;
-          --duration-slow: 500ms;
+          --duration-fast: 300ms;
+          --duration-normal: 500ms;
+          --duration-slow: 800ms;
         }
         
         /* Optimized shimmer with GPU acceleration */
@@ -438,19 +439,19 @@ export default function DashboardDesignPage() {
         
         /* Utility animation classes */
         .animate-fade-in {
-          animation: fadeIn var(--duration-normal) var(--ease-smooth) forwards;
+          animation: fadeIn var(--duration-slow) var(--ease-smooth) forwards;
         }
         
         .animate-slide-in-bottom {
-          animation: slideInFromBottom var(--duration-slow) var(--ease-smooth) forwards;
+          animation: slideInFromBottom 0.8s var(--ease-smooth) forwards;
         }
         
         .animate-slide-in-top {
-          animation: slideInFromTop var(--duration-normal) var(--ease-smooth) forwards;
+          animation: slideInFromTop 0.6s var(--ease-smooth) forwards;
         }
         
         .animate-scale-in {
-          animation: scaleIn var(--duration-normal) var(--ease-bounce) forwards;
+          animation: scaleIn 0.6s var(--ease-bounce) forwards;
         }
         
         .animate-float {
@@ -638,10 +639,7 @@ export default function DashboardDesignPage() {
                           
                           <div className="flex gap-2">
                             <button 
-                              className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 [transition:all_0.3s_ease] hover:from-orange-600 hover:to-orange-700 hover:scale-110 hover:shadow-xl hover:shadow-orange-500/40"
-                              onMouseMove={handleMagneticMove}
-                              onMouseLeave={resetMagnetic}
-                              onClick={createRipple}
+                              className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 [transition:all_0.3s_ease] hover:from-orange-600 hover:to-orange-700 hover:scale-110 hover:shadow-xl hover:shadow-orange-500/40 relative overflow-hidden group/btn"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                 <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
@@ -714,8 +712,7 @@ export default function DashboardDesignPage() {
 
                   {/* Edit Button */}
                   <button 
-                    className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 [transition:all_0.3s_ease] hover:bg-orange-500/20 hover:ring-orange-400/50 hover:scale-110 hover:shadow-lg hover:shadow-orange-500/30"
-                    onClick={createRipple}
+                    className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 [transition:all_0.3s_ease] hover:bg-orange-500/20 hover:ring-orange-400/50 hover:scale-110 hover:shadow-lg hover:shadow-orange-500/30 relative overflow-hidden group/btn"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
@@ -754,7 +751,7 @@ export default function DashboardDesignPage() {
                       <InfoButton tooltipKey="subscription" />
                       <Tooltip tooltipKey="subscription" />
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-float hover:scale-105 [transition:transform_0.2s_ease]">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-float">
                       <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
                         <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
                       </span>
@@ -803,12 +800,10 @@ export default function DashboardDesignPage() {
                           </div>
                         </div>
                         <button 
-                          className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-orange-500/30 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
-                          onMouseMove={handleMagneticMove}
-                          onMouseLeave={resetMagnetic}
-                          onClick={createRipple}
+                          className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-orange-500/30 relative overflow-hidden group/btn"
                         >
-                          Открыть
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <span className="relative">Открыть</span>
                         </button>
                       </div>
                     </div>
@@ -915,12 +910,10 @@ export default function DashboardDesignPage() {
                             </div>
                           </div>
                           <button 
-                            className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-purple-500/30 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
-                            onMouseMove={handleMagneticMove}
-                            onMouseLeave={resetMagnetic}
-                            onClick={createRipple}
+                            className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-purple-500/30 relative overflow-hidden group/btn"
                           >
-                            Открыть
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                            <span className="relative">Открыть</span>
                           </button>
                         </div>
                       </div>
@@ -1029,12 +1022,10 @@ export default function DashboardDesignPage() {
                             </div>
                           </div>
                           <button 
-                            className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/30"
-                            onMouseMove={handleMagneticMove}
-                            onMouseLeave={resetMagnetic}
-                            onClick={createRipple}
+                            className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 relative overflow-hidden group/btn"
                           >
-                            Открыть
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                            <span className="relative">Открыть</span>
                           </button>
                         </div>
                       </div>
@@ -1072,7 +1063,7 @@ export default function DashboardDesignPage() {
                         <InfoButton tooltipKey="bonuses" />
                         <Tooltip tooltipKey="bonuses" />
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium animate-float hover:scale-105 [transition:transform_0.2s_ease] relative overflow-hidden">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium animate-float relative overflow-hidden">
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent animate-shimmer"></span>
                         <span className="relative">Gold 🥇</span>
                       </span>
@@ -1131,10 +1122,10 @@ export default function DashboardDesignPage() {
                             <p className="text-[0.65rem] text-white/70 mt-0.5">+500 шагов</p>
                           </div>
                           <button 
-                            className="rounded-lg bg-amber-500/20 px-3 py-1 text-[0.65rem] text-amber-100 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-amber-500/30 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/30"
-                            onClick={createRipple}
+                            className="rounded-lg bg-amber-500/20 px-3 py-1 text-[0.65rem] text-amber-100 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-amber-500/30 relative overflow-hidden group/btn"
                           >
-                            Поделиться
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                            <span className="relative">Поделиться</span>
                           </button>
                         </div>
                       </div>
@@ -1165,8 +1156,10 @@ export default function DashboardDesignPage() {
                         <InfoButton tooltipKey="materials" />
                         <Tooltip tooltipKey="materials" />
                       </div>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-sparkle hover:scale-105 [transition:transform_0.2s_ease]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
+                        <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
+                          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
+                        </span>
                         Premium
                       </span>
                     </div>
@@ -1226,12 +1219,10 @@ export default function DashboardDesignPage() {
                           </div>
                         </div>
                         <button 
-                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-rose-500/30 hover:scale-105 hover:shadow-lg hover:shadow-rose-500/30"
-                          onMouseMove={handleMagneticMove}
-                          onMouseLeave={resetMagnetic}
-                          onClick={createRipple}
+                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-rose-500/30 relative overflow-hidden group/btn"
                         >
-                          Смотреть
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <span className="relative">Смотреть</span>
                         </button>
                       </div>
                     </div>
@@ -1309,12 +1300,10 @@ export default function DashboardDesignPage() {
                             </div>
                           </div>
                           <button 
-                            className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-teal-500/30 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/30"
-                            onMouseMove={handleMagneticMove}
-                            onMouseLeave={resetMagnetic}
-                            onClick={createRipple}
+                            className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-teal-500/30 relative overflow-hidden group/btn"
                           >
-                            Открыть
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                            <span className="relative">Открыть</span>
                           </button>
                         </div>
                       </div>
@@ -1426,10 +1415,7 @@ export default function DashboardDesignPage() {
                   Поделись ссылкой и зарабатывай бонусы. Твои друзья тоже получат подарок!
                 </p>
                 <button 
-                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-8 py-4 rounded-xl font-bold shadow-xl shadow-orange-500/20 text-sm uppercase tracking-wider [transition:all_0.3s_ease] hover:bg-white/90 hover:scale-110 hover:shadow-2xl hover:shadow-orange-500/40 relative overflow-hidden group/cta"
-                  onMouseMove={handleMagneticMove}
-                  onMouseLeave={resetMagnetic}
-                  onClick={createRipple}
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-8 py-4 rounded-xl font-bold shadow-xl shadow-orange-500/20 text-sm uppercase tracking-wider [transition:all_0.3s_ease] hover:bg-white/90 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/40 relative overflow-hidden group/cta"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
