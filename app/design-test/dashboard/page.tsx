@@ -1,26 +1,50 @@
 'use client'
 
-import { Inter, Oswald, Space_Grotesk } from 'next/font/google'
-import { useEffect, useRef, useState } from 'react'
+import { Inter, Oswald } from 'next/font/google'
+import { useEffect, useRef, useState, useMemo, memo } from 'react'
 
 const inter = Inter({ 
   subsets: ['latin'], 
   variable: '--font-inter', 
   display: 'swap',
-  fallback: ['system-ui', 'arial']
+  fallback: ['system-ui', 'arial'],
+  preload: true
 })
 const oswald = Oswald({ 
   subsets: ['latin'], 
   variable: '--font-oswald', 
   display: 'swap',
-  fallback: ['Impact', 'system-ui']
+  fallback: ['Impact', 'system-ui'],
+  preload: true
 })
-const spaceGrotesk = Space_Grotesk({ 
-  subsets: ['latin'], 
-  variable: '--font-space', 
-  display: 'swap',
-  fallback: ['system-ui', 'arial']
-})
+
+// Tooltip data - moved outside component to prevent recreation
+const TOOLTIPS = {
+  subscription: {
+    title: 'Управление подпиской',
+    description: 'Продли подписку или измени тариф для максимальной отдачи'
+  },
+  stats: {
+    title: 'Тренировки',
+    description: 'Отслеживай свой прогресс и переходи к тренировкам текущей недели'
+  },
+  bonuses: {
+    title: 'Зарабатывай шаги',
+    description: 'Получай бонусы за покупки и приглашай друзей для новых наград'
+  },
+  materials: {
+    title: 'Обучающий контент',
+    description: 'Бесплатные гайды и премиум материалы для твоих тренировок'
+  },
+  intensives: {
+    title: 'Специальные программы',
+    description: 'Узконаправленные паки тренировок для достижения конкретных целей'
+  },
+  diary: {
+    title: 'Дневник здоровья',
+    description: 'Отслеживай воду, шаги, вес, калории и другие важные показатели'
+  }
+} as const
 
 export default function DashboardDesignPage() {
   const progressRef = useRef<HTMLDivElement>(null)
@@ -28,38 +52,10 @@ export default function DashboardDesignPage() {
   const countRef = useRef<HTMLSpanElement>(null)
   const bonusCountRef = useRef<HTMLSpanElement>(null)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
   const navRef = useRef<HTMLElement>(null)
   const profileDesktopRef = useRef<HTMLElement>(null)
   const profileMobileRef = useRef<HTMLElement>(null)
-  
-  const tooltips = {
-    subscription: {
-      title: 'Управление подпиской',
-      description: 'Продли подписку или измени тариф для максимальной отдачи'
-    },
-    stats: {
-      title: 'Тренировки',
-      description: 'Отслеживай свой прогресс и переходи к тренировкам текущей недели'
-    },
-    bonuses: {
-      title: 'Зарабатывай шаги',
-      description: 'Получай бонусы за покупки и приглашай друзей для новых наград'
-    },
-    materials: {
-      title: 'Обучающий контент',
-      description: 'Бесплатные гайды и премиум материалы для твоих тренировок'
-    },
-    intensives: {
-      title: 'Специальные программы',
-      description: 'Узконаправленные паки тренировок для достижения конкретных целей'
-    },
-    diary: {
-      title: 'Дневник здоровья',
-      description: 'Отслеживай воду, шаги, вес, калории и другие важные показатели'
-    }
-  }
   
   // Optimized animation logic for progress bars and counters
   useEffect(() => {
@@ -176,8 +172,7 @@ export default function DashboardDesignPage() {
 
   useEffect(() => {
     // Only add tooltip handler on desktop
-    const isMobile = window.innerWidth < 1024
-    if (isMobile) return
+    if (window.innerWidth < 1024) return
     
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -186,13 +181,12 @@ export default function DashboardDesignPage() {
       }
     }
     
-    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('click', handleClickOutside, { passive: true })
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
   
   // Optimized page entrance animations
   useEffect(() => {
-    setIsVisible(true)
     const isDesktop = window.innerWidth >= 1024
     const isMobile = window.innerWidth < 1024
     const isXL = window.innerWidth >= 1280
@@ -305,8 +299,8 @@ export default function DashboardDesignPage() {
     </button>
   )
 
-  const Tooltip = ({ tooltipKey }: { tooltipKey: string }) => {
-    const tooltip = tooltips[tooltipKey as keyof typeof tooltips]
+  const Tooltip = memo(({ tooltipKey }: { tooltipKey: string }) => {
+    const tooltip = TOOLTIPS[tooltipKey as keyof typeof TOOLTIPS]
     if (activeTooltip !== tooltipKey || !tooltip) return null
     
     return (
@@ -321,7 +315,7 @@ export default function DashboardDesignPage() {
         <p className="text-xs text-white/80 leading-relaxed">{tooltip.description}</p>
       </div>
     )
-  }
+  })
 
   return (
     <>
@@ -329,7 +323,6 @@ export default function DashboardDesignPage() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <style jsx global>{`
         .font-oswald { font-family: ${oswald.style.fontFamily}; }
-        .font-space { font-family: ${spaceGrotesk.style.fontFamily}; }
         .font-inter { font-family: ${inter.style.fontFamily}; }
         ::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; overflow-x: hidden; }
@@ -468,23 +461,17 @@ export default function DashboardDesignPage() {
         }
         
         /* Optimize touch interactions */
-        button, . {
+        button {
           user-select: none;
           -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
           touch-action: manipulation;
           cursor: pointer;
-        }
-        
-        button {
           position: relative;
           z-index: 1;
         }
         
         /* Smooth rendering */
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         
         /* Animation utilities */
         .animate-pulse-glow {
@@ -497,52 +484,19 @@ export default function DashboardDesignPage() {
         
         /* Mobile optimizations - aggressive performance boost */
         @media (max-width: 1023px) {
-          html, body {
-            max-width: 100vw;
-            overflow-x: hidden;
-          }
+          html, body { max-width: 100vw; overflow-x: hidden; }
+          * { max-width: 100%; box-sizing: border-box; transition-duration: 0.2s !important; }
           
-          * {
-            max-width: 100%;
-            box-sizing: border-box;
-          }
+          /* Disable GPU-heavy effects */
+          .absolute.rounded-full.blur-3xl { display: none !important; }
+          .backdrop-blur-xl, .backdrop-blur { backdrop-filter: blur(4px) !important; }
+          [class*="shadow-2xl"], [class*="shadow-xl"] { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important; }
           
-          /* Disable decorative background blur circles - major battery drain */
-          .absolute.rounded-full.blur-3xl {
-            display: none !important;
-          }
+          /* Disable all looping animations */
+          .animate-shimmer, .animate-pulse-glow, .animate-ring-ripple, [style*="gradientShift"] { animation: none !important; }
           
-          /* Reduce backdrop blur intensity */
-          .backdrop-blur-xl, .backdrop-blur {
-            backdrop-filter: blur(4px) !important;
-          }
-          
-          /* Simplify shadows */
-          [class*="shadow-2xl"], [class*="shadow-xl"] {
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important;
-          }
-          
-          /* Disable all looping animations - huge performance gain */
-          .animate-shimmer,
-          .animate-pulse-glow,
-          .animate-ring-ripple {
-            animation: none !important;
-          }
-          
-          /* Disable gradient shift animation on bonus card */
-          [style*="gradientShift"] {
-            animation: none !important;
-          }
-          
-          /* Simplify hover effects on mobile */
-          button:hover {
-            transform: none !important;
-          }
-          
-          /* Reduce transition complexity */
-          * {
-            transition-duration: 0.2s !important;
-          }
+          /* Simplify interactions */
+          button:hover { transform: none !important; }
         }
         
         /* Reduced motion support */
@@ -556,7 +510,7 @@ export default function DashboardDesignPage() {
       `}</style>
 
       <div 
-        className={`min-h-screen antialiased flex flex-col items-center justify-center text-neutral-900 font-inter p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden selection:bg-orange-500 selection:text-white ${inter.variable} ${oswald.variable} ${spaceGrotesk.variable}`}
+        className={`min-h-screen antialiased flex flex-col items-center justify-center text-neutral-900 font-inter p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden selection:bg-orange-500 selection:text-white ${inter.variable} ${oswald.variable}`}
         style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}
       >
         <main className="relative w-full xl:max-w-[96rem] bg-[#0a0a0f] xl:rounded-[3rem] overflow-x-hidden overflow-y-auto min-h-screen xl:min-h-[calc(100vh-4rem)]">
@@ -577,7 +531,7 @@ export default function DashboardDesignPage() {
                 </div>
                 <div className="flex flex-col">
                   <span className="uppercase leading-none text-lg md:text-xl font-semibold tracking-tight font-oswald text-white">MargoFitness</span>
-                  <span className="text-[0.6rem] uppercase text-white/50 tracking-widest font-space hidden md:block">Elite Performance</span>
+                  <span className="text-[0.6rem] uppercase text-white/50 tracking-widest font-oswald hidden md:block">Elite Performance</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
