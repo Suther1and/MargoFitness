@@ -578,12 +578,12 @@ export default function DashboardDesignPage() {
                   </div>
 
                   {/* Right side - Desktop User Profile */}
-                  <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto xl:min-w-[42rem]">
+                  <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto">
                     <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:hover:ring-white/20 md:hover:shadow-xl">
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-                      <div className="relative z-10 flex items-center gap-6">
+                      <div className="relative z-10 flex items-center gap-5">
                         {/* Avatar */}
                         <button className="relative flex-shrink-0 group/avatar" style={{ touchAction: 'manipulation' }}>
                           <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
@@ -605,9 +605,9 @@ export default function DashboardDesignPage() {
                         </button>
 
                         {/* Info */}
-                        <div className="flex-1 min-w-0 space-y-4">
+                        <div className="space-y-4">
                           <div>
-                            <h3 className="text-3xl font-semibold text-white font-oswald uppercase tracking-tight">
+                            <h3 className="text-3xl font-semibold text-white font-oswald uppercase tracking-tight whitespace-nowrap">
                               Маргарита Иванова
                             </h3>
                             <div className="flex items-center gap-2 mt-2">
@@ -623,31 +623,31 @@ export default function DashboardDesignPage() {
                                 <span className="font-medium">Pro Athlete</span>
                               </div>
                               <span className="text-xs text-white/50">•</span>
-                              <span className="text-sm text-white/60">Участник с января 2024</span>
+                              <span className="text-sm text-white/60 whitespace-nowrap">Участник с января 2024</span>
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-3">
-                            <button className="flex items-center gap-3 rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95 text-left" style={{ touchAction: 'manipulation' }}>
+                          <div className="flex gap-3">
+                            <button className="flex items-center gap-3 rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95 text-left min-w-0" style={{ touchAction: 'manipulation' }}>
                               <div className="w-10 h-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-400/20 flex items-center justify-center flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
                                   <rect width="20" height="16" x="2" y="4" rx="2"></rect>
                                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                                 </svg>
                               </div>
-                              <div className="flex-1 min-w-0 pointer-events-none">
+                              <div className="min-w-0 pointer-events-none">
                                 <p className="text-xs text-white/50 leading-tight">Email</p>
                                 <p className="text-sm text-white/90 truncate leading-tight mt-0.5">margo.fitness@gmail.com</p>
                               </div>
                             </button>
 
-                            <button className="flex items-center gap-3 rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95 text-left" style={{ touchAction: 'manipulation' }}>
+                            <button className="flex items-center gap-3 rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95 text-left flex-shrink-0" style={{ touchAction: 'manipulation' }}>
                               <div className="w-10 h-10 rounded-lg bg-green-500/10 ring-1 ring-green-400/20 flex items-center justify-center flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-300">
                                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                 </svg>
                               </div>
-                              <div className="flex-1 min-w-0 pointer-events-none">
+                              <div className="pointer-events-none whitespace-nowrap">
                                 <p className="text-xs text-white/50 leading-tight">Телефон</p>
                                 <p className="text-sm text-white/90 leading-tight mt-0.5">+7 (999) 123-45-67</p>
                               </div>
