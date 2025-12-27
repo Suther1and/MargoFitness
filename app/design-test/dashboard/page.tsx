@@ -239,19 +239,12 @@ export default function DashboardDesignPage() {
       navRef.current.style.opacity = '1'
     }
     
-    // Animate cards with stagger - quick fade first to establish color, then slide
+    // Animate cards with stagger - only slide animation (opacity already 1)
     cardsRef.current.forEach((card, index) => {
       if (card) {
         setTimeout(() => {
-          // Very quick fade to establish gradient colors (no position change)
-          card.style.transition = 'opacity 0.15s ease-out'
-          card.style.opacity = '1'
-          
-          // After fade completes, slide animation (no opacity change)
-          setTimeout(() => {
-            card.style.transition = ''
-            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
-          }, 150)
+          // Animate only transform (opacity stays 1, no color shift)
+          card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
         }, 200 + index * 150)
       }
     })
@@ -795,7 +788,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-orange-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0 }}
+                  style={{ opacity: 1, transform: 'translateY(30px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
@@ -904,7 +897,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-purple-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0 }}
+                  style={{ opacity: 1, transform: 'translateY(30px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
@@ -991,7 +984,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-emerald-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0 }}
+                  style={{ opacity: 1, transform: 'translateY(30px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
@@ -1111,7 +1104,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-amber-400/60 hover:shadow-2xl hover:shadow-amber-500/20"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0, backgroundSize: '200% 200%', animation: 'gradientShift 10s ease infinite' }}
+                  style={{ opacity: 1, transform: 'translateY(30px)', backgroundSize: '200% 200%', animation: 'gradientShift 10s ease infinite' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
@@ -1207,7 +1200,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-rose-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0 }}
+                  style={{ opacity: 1, transform: 'translateY(30px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
@@ -1303,7 +1296,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-teal-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 0 }}
+                  style={{ opacity: 1, transform: 'translateY(30px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
