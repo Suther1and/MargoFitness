@@ -9,6 +9,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space
 
 export default function DashboardDesignPage() {
   const progressRef = useRef<HTMLDivElement>(null)
+  const bonusProgressRef = useRef<HTMLDivElement>(null)
   const countRef = useRef<HTMLSpanElement>(null)
   const bonusCountRef = useRef<HTMLSpanElement>(null)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
@@ -113,15 +114,19 @@ export default function DashboardDesignPage() {
   }
   
   useEffect(() => {
+    const ANIMATION_DURATION = 2000 // Fixed 2 seconds for all animations
+    const ANIMATION_DELAY = 300 // Delay before starting
+    
     // Animate progress bar with IntersectionObserver for both mobile and desktop
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && progressRef.current) {
+        if (entry.isIntersecting && progressRef.current && progressRef.current.style.width === '0%') {
           setTimeout(() => {
             if (progressRef.current) {
+              progressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
               progressRef.current.style.width = '83%'
             }
-          }, 300)
+          }, ANIMATION_DELAY)
         }
       })
     }, { threshold: 0.1 })
@@ -133,22 +138,23 @@ export default function DashboardDesignPage() {
     // Animate workout count with IntersectionObserver for both mobile and desktop
     const countObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && countRef.current) {
-          let count = 0
-          const target = 5
-          const duration = 1500
-          const increment = target / (duration / 16)
-          
-          const timer = setInterval(() => {
-            count += increment
-            if (count >= target) {
-              count = target
-              clearInterval(timer)
-            }
-            if (countRef.current) {
-              countRef.current.textContent = Math.floor(count).toString()
-            }
-          }, 16)
+        if (entry.isIntersecting && countRef.current && countRef.current.textContent === '0') {
+          setTimeout(() => {
+            let count = 0
+            const target = 5
+            const increment = target / (ANIMATION_DURATION / 16)
+            
+            const timer = setInterval(() => {
+              count += increment
+              if (count >= target) {
+                count = target
+                clearInterval(timer)
+              }
+              if (countRef.current) {
+                countRef.current.textContent = Math.floor(count).toString()
+              }
+            }, 16)
+          }, ANIMATION_DELAY)
         }
       })
     }, { threshold: 0.3 })
@@ -160,22 +166,23 @@ export default function DashboardDesignPage() {
     // Animate bonus count with IntersectionObserver for both mobile and desktop
     const bonusObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && bonusCountRef.current) {
-          let count = 0
-          const target = 1250
-          const duration = 2000
-          const increment = target / (duration / 16)
-          
-          const timer = setInterval(() => {
-            count += increment
-            if (count >= target) {
-              count = target
-              clearInterval(timer)
-            }
-            if (bonusCountRef.current) {
-              bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
-            }
-          }, 16)
+        if (entry.isIntersecting && bonusCountRef.current && bonusCountRef.current.textContent === '0') {
+          setTimeout(() => {
+            let count = 0
+            const target = 1250
+            const increment = target / (ANIMATION_DURATION / 16)
+            
+            const timer = setInterval(() => {
+              count += increment
+              if (count >= target) {
+                count = target
+                clearInterval(timer)
+              }
+              if (bonusCountRef.current) {
+                bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
+              }
+            }, 16)
+          }, ANIMATION_DELAY)
         }
       })
     }, { threshold: 0.3 })
@@ -184,10 +191,29 @@ export default function DashboardDesignPage() {
       bonusObserver.observe(bonusCountRef.current)
     }
 
+    // Animate bonus progress bar with IntersectionObserver
+    const bonusProgressObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && bonusProgressRef.current && bonusProgressRef.current.style.width === '0%') {
+          setTimeout(() => {
+            if (bonusProgressRef.current) {
+              bonusProgressRef.current.style.transition = `width ${ANIMATION_DURATION}ms ease-out`
+              bonusProgressRef.current.style.width = '62%'
+            }
+          }, ANIMATION_DELAY)
+        }
+      })
+    }, { threshold: 0.1 })
+
+    if (bonusProgressRef.current?.parentElement) {
+      bonusProgressObserver.observe(bonusProgressRef.current.parentElement)
+    }
+
     return () => {
       observer.disconnect()
       countObserver.disconnect()
       bonusObserver.disconnect()
+      bonusProgressObserver.disconnect()
     }
   }, [])
 
@@ -213,12 +239,19 @@ export default function DashboardDesignPage() {
       navRef.current.style.opacity = '1'
     }
     
-    // Animate cards with stagger
+    // Animate cards with stagger - quick fade in, then slide
     cardsRef.current.forEach((card, index) => {
       if (card) {
         setTimeout(() => {
-          card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          // Quick fade in first to establish color
+          card.style.transition = 'opacity 0.1s ease-out'
           card.style.opacity = '1'
+          
+          // Then slide animation after fade completes
+          setTimeout(() => {
+            card.style.transition = ''
+            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          }, 100)
         }, 200 + index * 150)
       }
     })
@@ -324,6 +357,15 @@ export default function DashboardDesignPage() {
         }
         
         @keyframes slideInFromBottom {
+          from {
+            transform: translate3d(0, 30px, 0);
+          }
+          to {
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        
+        @keyframes fadeInSlideBottom {
           from {
             opacity: 0;
             transform: translate3d(0, 30px, 0);
@@ -900,7 +942,7 @@ export default function DashboardDesignPage() {
                         <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden relative">
                           <div 
                             ref={progressRef}
-                            className="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600 transition-all duration-1000 ease-out"
+                            className="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600"
                             style={{ width: '0%' }}
                           ></div>
                         </div>
@@ -1104,7 +1146,11 @@ export default function DashboardDesignPage() {
                           <span className="font-medium">750 шагов</span>
                         </div>
                         <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 w-[62%]"></div>
+                          <div 
+                            ref={bonusProgressRef}
+                            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500"
+                            style={{ width: '0%' }}
+                          ></div>
                         </div>
                       </div>
                     </div>
