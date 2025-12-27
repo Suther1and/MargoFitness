@@ -727,6 +727,13 @@ export default function DashboardDesignPage() {
                 </div>
               </section>
 
+              {/* Divider - Desktop only */}
+              <div className="hidden xl:flex items-center justify-center my-10">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
+                <div className="w-1.5 h-1.5 rounded-full bg-white/10 mx-8" />
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/5" />
+              </div>
+
               {/* Cards Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                 
