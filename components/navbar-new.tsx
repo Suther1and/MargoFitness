@@ -24,13 +24,13 @@ export default async function NavbarNew() {
   const profile = await getCurrentProfile()
 
   return (
-    <nav className="sticky top-0 z-50 px-4 md:px-4 xl:px-4 py-4">
-      <div className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
+    <div className="sticky top-0 z-50 px-4 md:px-4 xl:px-4 py-4">
+      <nav className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
         background: colors.navbarBg,
         border: `1px solid ${colors.cardBorder}`
       }}>
         <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-4">
-          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <Link href="/home-new" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             <div className="flex text-white rounded-lg md:rounded-xl w-8 h-8 md:w-10 md:h-10 items-center justify-center shadow-lg" style={{
               background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
               boxShadow: `0 4px 20px ${colors.primary}40`
@@ -52,10 +52,10 @@ export default async function NavbarNew() {
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
-            <Link href="/" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-80" style={{ color: colors.textPrimary }}>
+            <Link href="/home-new" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-80" style={{ color: colors.textPrimary }}>
               Главная
             </Link>
-            <Link href="/pricing" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
+            <Link href="/home-new#pricing" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
               Тарифы
             </Link>
             <Link href="/free-content" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
@@ -64,11 +64,8 @@ export default async function NavbarNew() {
             
             {profile && (
               <>
-                <Link href="/dashboard" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
+                <Link href="/dashboard-new" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
                   Кабинет
-                </Link>
-                <Link href="/dashboard/bonuses" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
-                  Бонусы
                 </Link>
                 {profile.role === 'admin' && (
                   <Link href="/admin" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: '#fbbf24' }}>
@@ -82,7 +79,7 @@ export default async function NavbarNew() {
           {profile ? (
             <div className="flex items-center gap-2">
               {profile.avatar_url && (
-                <Link href="/dashboard" className="flex items-center gap-2 hidden md:flex">
+                <Link href="/dashboard-new" className="flex items-center gap-2 hidden md:flex">
                   <img 
                     src={profile.avatar_url} 
                     alt={profile.full_name || profile.email || 'Avatar'} 
@@ -118,8 +115,8 @@ export default async function NavbarNew() {
             </Link>
           )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   )
 }
 

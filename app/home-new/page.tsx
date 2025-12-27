@@ -336,7 +336,7 @@ export default function HomeNewPage() {
               </section>
 
               {/* 4. PRICING */}
-              <section className="py-10 md:py-16 relative overflow-x-hidden md:overflow-visible">
+              <section id="pricing" className="py-10 md:py-16 relative overflow-x-hidden md:overflow-visible">
                 <div className="relative z-10 w-full mx-auto md:max-w-[90rem] md:px-8">
                   <div className="max-w-3xl text-center mb-10 mx-auto px-4 md:px-8">
                     <span className="text-sm font-medium uppercase tracking-widest font-montserrat" style={{ color: colors.primary }}>Прозрачное ценообразование</span>
