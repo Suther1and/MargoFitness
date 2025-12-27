@@ -94,10 +94,6 @@ export default function HomeNewPage() {
         .font-montserrat { font-family: ${montserrat.style.fontFamily}; }
         .font-roboto { font-family: ${roboto.style.fontFamily}; }
         .font-inter { font-family: ${inter.style.fontFamily}; }
-        ::-webkit-scrollbar { display: none; }
-        body { -ms-overflow-style: none; scrollbar-width: none; overflow-x: hidden; }
-        .scrolling-wrapper { -webkit-overflow-scrolling: touch; }
-        .scrolling-wrapper::-webkit-scrollbar { display: none; }
         
         @keyframes colorShift {
           0% { background-position: -200% center; }
@@ -114,112 +110,13 @@ export default function HomeNewPage() {
           scrollbar-width: none;
         }
         
-        /* Optimize touch interactions */
-        button {
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-          touch-action: manipulation;
-          cursor: pointer;
-          position: relative;
-        }
-        
-        /* Smooth rendering */
-        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        
-        @media (max-width: 767px) {
-          html, body { max-width: 100vw; overflow-x: hidden; }
-          * { max-width: 100%; box-sizing: border-box; transition-duration: 0.2s !important; }
-        }
-        
-        /* Mobile optimizations - aggressive performance boost */
+        /* Mobile optimizations */
         @media (max-width: 1023px) {
-          /* Disable GPU-heavy effects */
-          .absolute.rounded-full.blur-3xl { display: none !important; }
-          .backdrop-blur-xl, .backdrop-blur-2xl { backdrop-filter: blur(4px) !important; }
-          [class*="shadow-2xl"], [class*="shadow-xl"] { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important; }
-          
-          /* Disable looping animations */
           .animate-color-shift { animation: none !important; }
-          
-          /* Disable hover effects on touch devices */
-          @media (hover: none) {
-            button:hover { 
-              transform: none !important;
-              scale: none !important;
-            }
-          }
         }
       `}</style>
 
-      <div className={`min-h-screen antialiased flex flex-col items-center justify-center font-inter p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden ${inter.variable} ${oswald.variable} ${montserrat.variable} ${roboto.variable}`} style={{
-        background: colors.backgroundGradient,
-        color: colors.textPrimary
-      }}>
-        <main className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] overflow-x-hidden min-h-screen xl:min-h-[calc(100vh-4rem)]" style={{ background: colors.background }}>
-          {/* Background effects */}
-          <div className="absolute inset-0 pointer-events-none z-0">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] blur-[120px] rounded-full" style={{ background: colors.blurColor1 }} />
-            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] blur-[120px] rounded-full" style={{ background: colors.blurColor2 }} />
-          </div>
-          
-          {/* Navigation */}
-          <nav className="sticky top-0 z-50 px-4 md:px-4 xl:px-4 py-4">
-            <div className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
-              background: colors.navbarBg,
-              border: `1px solid ${colors.cardBorder}`
-            }}>
-              <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-4">
-                  <a href="#" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-                    <div className="flex text-white rounded-lg md:rounded-xl w-8 h-8 md:w-10 md:h-10 items-center justify-center shadow-lg" style={{
-                      background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                      boxShadow: `0 4px 20px ${colors.primary}40`
-                    }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m6.5 6.5 11 11"></path>
-                        <path d="m21 21-1-1"></path>
-                        <path d="m3 3 1 1"></path>
-                        <path d="m18 22 4-4"></path>
-                        <path d="m2 6 4-4"></path>
-                        <path d="m3 10 7-7"></path>
-                        <path d="m14 21 7-7"></path>
-                      </svg>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="uppercase leading-none text-base md:text-lg font-semibold tracking-tight font-oswald" style={{ color: colors.textPrimary }}>MargoFitness</span>
-                      <span className="text-[0.55rem] uppercase tracking-widest hidden sm:block" style={{ color: colors.textSecondary }}>Elite Performance</span>
-                    </div>
-                  </a>
-
-                  <div className="hidden lg:flex items-center gap-1">
-                    <a href="#" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-80" style={{ color: colors.textPrimary }}>Главная</a>
-                    <a href="#" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>Бесплатные материалы</a>
-                    <a href="#" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>Тарифы</a>
-                  </div>
-
-                  <button className="uppercase hover:opacity-80 transition-all flex text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 gap-2 items-center backdrop-blur flex-shrink-0 active:scale-95" style={{
-                    color: colors.textPrimary,
-                    border: `1px solid ${colors.cardBorder}`,
-                    background: `${colors.textPrimary}0D`,
-                    touchAction: 'manipulation'
-                  }}>
-                    <span className="hidden sm:inline pointer-events-none">Войти</span>
-                    <span className="sm:hidden pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="hidden sm:block pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14"></path>
-                      <path d="m12 5 7 7-7 7"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </nav>
-          
-          <div className="relative w-full z-10">
+      <div className={`relative w-full ${inter.variable} ${oswald.variable} ${montserrat.variable} ${roboto.variable}`}>
               
               {/* 1. HERO SECTION */}
               <section className="w-full mx-auto px-4 pt-4 pb-10 md:px-8 md:pt-6 md:pb-16 relative overflow-x-hidden md:max-w-[90rem]">
@@ -1003,9 +900,6 @@ export default function HomeNewPage() {
                     </div>
                   </div>
               </footer>
-          </div>
-        </main>
-        
       </div>
     </>
   )
