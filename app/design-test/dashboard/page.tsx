@@ -92,17 +92,16 @@ export default function DashboardDesignPage() {
       let lastFrameTime = startTime
       
       const animate = (currentTime: number) => {
-        // Throttle animation frames on mobile
-        if (currentTime - lastFrameTime < frameInterval) {
-          if (currentTime - startTime < ANIMATION_DURATION) {
-            requestAnimationFrame(animate)
-          }
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
+        
+        // Throttle animation frames on mobile (but always run final frame)
+        if (progress < 1 && currentTime - lastFrameTime < frameInterval) {
+          requestAnimationFrame(animate)
           return
         }
         
         lastFrameTime = currentTime
-        const elapsed = currentTime - startTime
-        const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
         
         // Smooth easing
         const easeProgress = progress < 0.5
@@ -114,12 +113,15 @@ export default function DashboardDesignPage() {
         
         if (progress < 1) {
           requestAnimationFrame(animate)
-        } else {
-          counter.textContent = format(targetValue)
         }
       }
       
       requestAnimationFrame(animate)
+      
+      // Always ensure final value is set after animation completes
+      setTimeout(() => {
+        if (counter) counter.textContent = format(targetValue)
+      }, ANIMATION_DURATION + 50)
     }
     
     // Set up intersection observers
