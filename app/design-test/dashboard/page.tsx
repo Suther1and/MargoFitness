@@ -113,7 +113,7 @@ export default function DashboardDesignPage() {
   }
   
   useEffect(() => {
-    // Animate progress bar
+    // Animate progress bar with IntersectionObserver for both mobile and desktop
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && progressRef.current) {
@@ -124,48 +124,70 @@ export default function DashboardDesignPage() {
           }, 300)
         }
       })
-    }, { threshold: 0.3 })
+    }, { threshold: 0.1 })
 
     if (progressRef.current?.parentElement) {
       observer.observe(progressRef.current.parentElement)
     }
 
-    // Animate workout count
+    // Animate workout count with IntersectionObserver for both mobile and desktop
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && countRef.current) {
+          let count = 0
+          const target = 5
+          const duration = 1500
+          const increment = target / (duration / 16)
+          
+          const timer = setInterval(() => {
+            count += increment
+            if (count >= target) {
+              count = target
+              clearInterval(timer)
+            }
+            if (countRef.current) {
+              countRef.current.textContent = Math.floor(count).toString()
+            }
+          }, 16)
+        }
+      })
+    }, { threshold: 0.3 })
+
     if (countRef.current) {
-      let count = 0
-      const target = 5
-      const duration = 1500
-      const increment = target / (duration / 16)
-      
-      const timer = setInterval(() => {
-        count += increment
-        if (count >= target) {
-          count = target
-          clearInterval(timer)
-        }
-        if (countRef.current) {
-          countRef.current.textContent = Math.floor(count).toString()
-        }
-      }, 16)
+      countObserver.observe(countRef.current)
     }
 
-    // Animate bonus count
+    // Animate bonus count with IntersectionObserver for both mobile and desktop
+    const bonusObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && bonusCountRef.current) {
+          let count = 0
+          const target = 1250
+          const duration = 2000
+          const increment = target / (duration / 16)
+          
+          const timer = setInterval(() => {
+            count += increment
+            if (count >= target) {
+              count = target
+              clearInterval(timer)
+            }
+            if (bonusCountRef.current) {
+              bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
+            }
+          }, 16)
+        }
+      })
+    }, { threshold: 0.3 })
+
     if (bonusCountRef.current) {
-      let count = 0
-      const target = 1250
-      const duration = 2000
-      const increment = target / (duration / 16)
-      
-      const timer = setInterval(() => {
-        count += increment
-        if (count >= target) {
-          count = target
-          clearInterval(timer)
-        }
-        if (bonusCountRef.current) {
-          bonusCountRef.current.textContent = Math.floor(count).toLocaleString('ru-RU')
-        }
-      }, 16)
+      bonusObserver.observe(bonusCountRef.current)
+    }
+
+    return () => {
+      observer.disconnect()
+      countObserver.disconnect()
+      bonusObserver.disconnect()
     }
   }, [])
 
