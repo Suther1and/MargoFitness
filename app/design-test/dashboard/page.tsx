@@ -12,6 +12,9 @@ export default function DashboardDesignPage() {
   const countRef = useRef<HTMLSpanElement>(null)
   const bonusCountRef = useRef<HTMLSpanElement>(null)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const cardsRef = useRef<(HTMLElement | null)[]>([])
+  const navRef = useRef<HTMLElement>(null)
   
   const tooltips = {
     subscription: {
@@ -38,6 +41,75 @@ export default function DashboardDesignPage() {
       title: 'Дневник здоровья',
       description: 'Отслеживай воду, шаги, вес, калории и другие важные показатели'
     }
+  }
+  
+  // 3D Tilt effect handler
+  const handleCardTilt = (e: React.MouseEvent<HTMLElement>) => {
+    const card = e.currentTarget
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    const rotateX = ((y - centerY) / centerY) * -5
+    const rotateY = ((x - centerX) / centerX) * 5
+    
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`
+    card.style.transition = 'none'
+  }
+  
+  const resetCardTilt = (e: React.MouseEvent<HTMLElement>) => {
+    const card = e.currentTarget
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)'
+    card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+  }
+  
+  // Magnetic button effect
+  const handleMagneticMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget
+    const rect = button.getBoundingClientRect()
+    const x = e.clientX - rect.left - rect.width / 2
+    const y = e.clientY - rect.top - rect.height / 2
+    const distance = Math.sqrt(x * x + y * y)
+    const maxDistance = 50
+    
+    if (distance < maxDistance) {
+      const strength = (maxDistance - distance) / maxDistance
+      button.style.transform = `translate(${x * strength * 0.3}px, ${y * strength * 0.3}px) scale(1.05)`
+    }
+  }
+  
+  const resetMagnetic = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget
+    button.style.transform = 'translate(0, 0) scale(1)'
+  }
+  
+  // Ripple effect for clicks
+  const createRipple = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget
+    const ripple = document.createElement('span')
+    const rect = button.getBoundingClientRect()
+    const size = Math.max(rect.width, rect.height)
+    const x = e.clientX - rect.left - size / 2
+    const y = e.clientY - rect.top - size / 2
+    
+    ripple.style.cssText = `
+      position: absolute;
+      width: ${size}px;
+      height: ${size}px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      left: ${x}px;
+      top: ${y}px;
+      pointer-events: none;
+      animation: ripple 0.6s ease-out;
+    `
+    
+    button.style.position = 'relative'
+    button.style.overflow = 'hidden'
+    button.appendChild(ripple)
+    
+    setTimeout(() => ripple.remove(), 600)
   }
   
   useEffect(() => {
@@ -108,10 +180,30 @@ export default function DashboardDesignPage() {
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
+  
+  // Staggered reveal animation on mount
+  useEffect(() => {
+    setIsVisible(true)
+    
+    // Animate navigation
+    if (navRef.current) {
+      navRef.current.style.animation = 'slideInFromTop 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+    }
+    
+    // Animate cards with stagger
+    cardsRef.current.forEach((card, index) => {
+      if (card) {
+        card.style.opacity = '0'
+        setTimeout(() => {
+          card.style.animation = `slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+        }, 100 + index * 100)
+      }
+    })
+  }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
     <button
-      className="tooltip-trigger w-5 h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center hover:bg-white/10 transition-all flex-shrink-0"
+      className="tooltip-trigger w-5 h-5 rounded-full bg-white/5 ring-1 ring-white/10 flex items-center justify-center flex-shrink-0 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/20 hover:scale-110 hover:rotate-180 active:scale-95"
       onClick={(e) => {
         e.stopPropagation()
         setActiveTooltip(activeTooltip === tooltipKey ? null : tooltipKey)
@@ -154,23 +246,237 @@ export default function DashboardDesignPage() {
         ::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; overflow-x: hidden; }
         
+        /* CSS Variables for animations */
+        :root {
+          --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+          --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+          --duration-fast: 200ms;
+          --duration-normal: 300ms;
+          --duration-slow: 500ms;
+        }
+        
+        /* Optimized shimmer with GPU acceleration */
         @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
+          0% {
+            transform: translate3d(-100%, 0, 0);
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(200%, 0, 0);
+            opacity: 0;
+          }
         }
         
         .animate-shimmer {
           animation: shimmer 2.5s infinite;
         }
         
+        /* Enhanced tooltip animation */
         @keyframes tooltipIn {
           0% {
             opacity: 0;
-            transform: translateY(-8px) scale(0.95);
+            transform: translate3d(0, -8px, 0) scale(0.95);
+          }
+          60% {
+            transform: translate3d(0, 2px, 0) scale(1.02);
           }
           100% {
             opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+        
+        /* Fade in animations */
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideInFromBottom {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 30px, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        
+        @keyframes slideInFromTop {
+          from {
+            opacity: 0;
+            transform: translate3d(0, -30px, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        /* Float animation for badges */
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-3px);
+          }
+        }
+        
+        /* Enhanced pulse with glow */
+        @keyframes pulseGlow {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 0 0 currentColor;
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.1);
+            box-shadow: 0 0 8px 2px currentColor;
+          }
+        }
+        
+        /* Ring ripple effect */
+        @keyframes ringRipple {
+          0% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.5);
+          }
+        }
+        
+        /* Gradient shift animation */
+        @keyframes gradientShift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        
+        /* Icon bounce */
+        @keyframes iconBounce {
+          0%, 100% {
             transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-4px) scale(1.1);
+          }
+        }
+        
+        /* Glow pulse */
+        @keyframes glowPulse {
+          0%, 100% {
+            box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+          }
+          50% {
+            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+          }
+        }
+        
+        /* Sparkle effect */
+        @keyframes sparkle {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+          }
+          50% {
+            opacity: 0.7;
+            transform: scale(1.05) rotate(180deg);
+          }
+        }
+        
+        /* Ripple effect */
+        @keyframes ripple {
+          0% {
+            transform: scale(0);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+        
+        /* Blob movement */
+        @keyframes blobMove {
+          0%, 100% {
+            transform: translate(0, 0) scale(1) rotate(0deg);
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.1) rotate(120deg);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
+          }
+        }
+        
+        /* Utility animation classes */
+        .animate-fade-in {
+          animation: fadeIn var(--duration-normal) var(--ease-smooth) forwards;
+        }
+        
+        .animate-slide-in-bottom {
+          animation: slideInFromBottom var(--duration-slow) var(--ease-smooth) forwards;
+        }
+        
+        .animate-slide-in-top {
+          animation: slideInFromTop var(--duration-normal) var(--ease-smooth) forwards;
+        }
+        
+        .animate-scale-in {
+          animation: scaleIn var(--duration-normal) var(--ease-bounce) forwards;
+        }
+        
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-pulse-glow {
+          animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        .animate-sparkle {
+          animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        /* Card tilt effect */
+        .card-3d {
+          transform-style: preserve-3d;
+          transition: transform var(--duration-normal) var(--ease-smooth);
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
           }
         }
         
@@ -185,14 +491,14 @@ export default function DashboardDesignPage() {
           {/* Background effects */}
           <div className="absolute inset-0 pointer-events-none z-0">
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-orange-500/10 blur-[120px] rounded-full" />
-            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-purple-500/10 blur-[120px] rounded-full" />
+            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-orange-500/10 blur-[120px] rounded-full animate-[blobMove_20s_ease-in-out_infinite]" />
+            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-purple-500/10 blur-[120px] rounded-full animate-[blobMove_25s_ease-in-out_infinite_reverse]" />
           </div>
           
           <div className="relative w-full z-10">
             
             {/* Navigation */}
-            <nav className="flex flex-wrap z-30 backdrop-blur-xl bg-white/[0.03] border border-white/10 p-4 md:px-8 md:py-5 relative gap-4 items-center justify-between rounded-none md:rounded-2xl mb-6 md:mb-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <nav ref={navRef} className="flex flex-wrap z-30 backdrop-blur-xl bg-white/[0.03] border border-white/10 p-4 md:px-8 md:py-5 relative gap-4 items-center justify-between rounded-none md:rounded-2xl mb-6 md:mb-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" style={{ opacity: 0 }}>
               <div className="flex items-center gap-3">
                 <div className="flex text-white bg-gradient-to-br from-orange-500 to-orange-600 w-10 h-10 rounded-xl items-center justify-center shadow-lg shadow-orange-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>
@@ -203,7 +509,10 @@ export default function DashboardDesignPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button className="uppercase hover:bg-white/10 transition-all flex text-xs font-semibold text-white/80 tracking-wider rounded-full py-2 px-5 gap-2 items-center border border-white/10">
+                <button 
+                  className="uppercase flex text-xs font-semibold text-white/80 tracking-wider rounded-full py-2 px-5 gap-2 items-center border border-white/10 [transition:background-color_0.3s_ease,border-color_0.3s_ease,transform_0.2s_ease] hover:bg-white/10 hover:border-white/20 hover:scale-105"
+                  style={{ position: 'relative', overflow: 'hidden' }}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="0.875rem" height="0.875rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   <span className="hidden sm:inline">Профиль</span>
                 </button>
@@ -239,14 +548,14 @@ export default function DashboardDesignPage() {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto xl:min-w-[42rem]">
-                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 hover:ring-white/20 transition-all">
+                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms' }}>
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
                       <div className="relative z-10 flex items-center gap-5">
                         {/* Avatar */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] group-hover:scale-105 transition-transform duration-300">
+                          <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] [transition:all_0.3s_ease] group-hover:scale-105 group-hover:rotate-3 group-hover:shadow-2xl group-hover:shadow-orange-500/30">
                             <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
                               <img 
                                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=Margo" 
@@ -317,25 +626,30 @@ export default function DashboardDesignPage() {
                         {/* Stats & Actions */}
                         <div className="flex flex-col gap-3 flex-shrink-0">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center hover:bg-white/[0.06] transition-colors min-w-[4.5rem]">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg cursor-pointer">
                               <p className="text-xl font-bold text-white font-oswald leading-none">23</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">дней</p>
                             </div>
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center hover:bg-white/[0.06] transition-colors min-w-[4.5rem]">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg cursor-pointer">
                               <p className="text-xl font-bold text-white font-oswald leading-none">47</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">занятий</p>
                             </div>
                           </div>
                           
                           <div className="flex gap-2">
-                            <button className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/20">
+                            <button 
+                              className="flex-1 w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 [transition:all_0.3s_ease] hover:from-orange-600 hover:to-orange-700 hover:scale-110 hover:shadow-xl hover:shadow-orange-500/40"
+                              onMouseMove={handleMagneticMove}
+                              onMouseLeave={resetMagnetic}
+                              onClick={createRipple}
+                            >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                 <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                 <path d="m15 5 4 4"></path>
                               </svg>
                             </button>
-                            <button className="flex-1 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ring-1 ring-white/10 hover:bg-white/10 transition-all">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                            <button className="flex-1 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/10 hover:ring-white/15 hover:scale-110 group/settings">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 [transition:transform_0.5s_ease] group-hover/settings:rotate-90">
                                 <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
                               </svg>
@@ -349,7 +663,7 @@ export default function DashboardDesignPage() {
               </div>
 
               {/* Mobile User Profile Card */}
-              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 hover:ring-white/20 transition-all mb-6 md:mb-8">
+              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms' }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -399,7 +713,10 @@ export default function DashboardDesignPage() {
                   </div>
 
                   {/* Edit Button */}
-                  <button className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 hover:bg-orange-500/20 transition-all">
+                  <button 
+                    className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center ring-1 ring-orange-400/30 [transition:all_0.3s_ease] hover:bg-orange-500/20 hover:ring-orange-400/50 hover:scale-110 hover:shadow-lg hover:shadow-orange-500/30"
+                    onClick={createRipple}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                       <path d="m15 5 4 4"></path>
@@ -412,7 +729,13 @@ export default function DashboardDesignPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                 
                 {/* Card 1: Подписка */}
-                <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 hover:ring-white/20 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[0] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-orange-500/10"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0 }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
 
@@ -431,8 +754,10 @@ export default function DashboardDesignPage() {
                       <InfoButton tooltipKey="subscription" />
                       <Tooltip tooltipKey="subscription" />
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-float hover:scale-105 [transition:transform_0.2s_ease]">
+                      <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
+                        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
+                      </span>
                       Active
                     </span>
                   </div>
@@ -477,7 +802,12 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Выбери новый тариф</p>
                           </div>
                         </div>
-                        <button className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 hover:bg-orange-500/30 transition-all whitespace-nowrap">
+                        <button 
+                          className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-orange-500/30 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
+                          onMouseMove={handleMagneticMove}
+                          onMouseLeave={resetMagnetic}
+                          onClick={createRipple}
+                        >
                           Открыть
                         </button>
                       </div>
@@ -497,8 +827,11 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Авто-продление и другое</p>
                           </div>
                         </div>
-                        <button className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/15 transition-all whitespace-nowrap">
-                          Открыть
+                        <button 
+                          className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-white/15 hover:scale-102 relative overflow-hidden group/btn"
+                        >
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                          <span className="relative">Открыть</span>
                         </button>
                       </div>
                     </div>
@@ -507,7 +840,13 @@ export default function DashboardDesignPage() {
                 </section>
 
                 {/* Card 2: Тренировки за неделю */}
-                <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 hover:ring-white/20 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[1] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-purple-500/10"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0 }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
@@ -575,7 +914,12 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">6 тренировок доступно</p>
                             </div>
                           </div>
-                          <button className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 hover:bg-purple-500/30 transition-all whitespace-nowrap">
+                          <button 
+                            className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-purple-500/30 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
+                            onMouseMove={handleMagneticMove}
+                            onMouseLeave={resetMagnetic}
+                            onClick={createRipple}
+                          >
                             Открыть
                           </button>
                         </div>
@@ -585,7 +929,13 @@ export default function DashboardDesignPage() {
                 </section>
 
                 {/* Card 3: Дневник здоровья */}
-                <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 hover:ring-white/20 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[2] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-emerald-500/10"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0 }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
@@ -678,7 +1028,12 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">Обнови показатели</p>
                             </div>
                           </div>
-                          <button className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 hover:bg-emerald-500/30 transition-all whitespace-nowrap">
+                          <button 
+                            className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/30"
+                            onMouseMove={handleMagneticMove}
+                            onMouseLeave={resetMagnetic}
+                            onClick={createRipple}
+                          >
                             Открыть
                           </button>
                         </div>
@@ -696,7 +1051,13 @@ export default function DashboardDesignPage() {
                 </section>
 
                 {/* Card 4: Бонусная система */}
-                <section className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 hover:ring-amber-400/50 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[3] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-amber-400/60 hover:shadow-2xl hover:shadow-amber-500/20"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0, backgroundSize: '200% 200%', animation: 'gradientShift 10s ease infinite' }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
 
@@ -711,8 +1072,9 @@ export default function DashboardDesignPage() {
                         <InfoButton tooltipKey="bonuses" />
                         <Tooltip tooltipKey="bonuses" />
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium">
-                        Gold 🥇
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium animate-float hover:scale-105 [transition:transform_0.2s_ease] relative overflow-hidden">
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent animate-shimmer"></span>
+                        <span className="relative">Gold 🥇</span>
                       </span>
                     </div>
 
@@ -748,8 +1110,9 @@ export default function DashboardDesignPage() {
                             <p className="text-xs font-medium text-white">Использовать</p>
                             <p className="text-[0.65rem] text-white/60 mt-0.5">Оплата шагами</p>
                           </div>
-                          <button className="rounded-lg bg-white/10 px-3 py-1 text-[0.65rem] text-white/80 hover:bg-white/15 transition-all whitespace-nowrap w-full">
-                            Открыть
+                          <button className="rounded-lg bg-white/10 px-3 py-1 text-[0.65rem] text-white/80 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-white/15 hover:scale-105 relative overflow-hidden group/btn">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
+                            <span className="relative">Открыть</span>
                           </button>
                         </div>
                       </div>
@@ -767,7 +1130,10 @@ export default function DashboardDesignPage() {
                             <p className="text-xs font-medium text-white">Пригласить</p>
                             <p className="text-[0.65rem] text-white/70 mt-0.5">+500 шагов</p>
                           </div>
-                          <button className="rounded-lg bg-amber-500/20 px-3 py-1 text-[0.65rem] text-amber-100 hover:bg-amber-500/30 transition-all whitespace-nowrap w-full">
+                          <button 
+                            className="rounded-lg bg-amber-500/20 px-3 py-1 text-[0.65rem] text-amber-100 whitespace-nowrap w-full [transition:all_0.3s_ease] hover:bg-amber-500/30 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/30"
+                            onClick={createRipple}
+                          >
                             Поделиться
                           </button>
                         </div>
@@ -777,7 +1143,13 @@ export default function DashboardDesignPage() {
                 </section>
 
                 {/* Card 5: Полезные материалы */}
-                <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 hover:ring-white/20 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[4] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-rose-500/10"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0 }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
 
@@ -793,14 +1165,14 @@ export default function DashboardDesignPage() {
                         <InfoButton tooltipKey="materials" />
                         <Tooltip tooltipKey="materials" />
                       </div>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-sparkle hover:scale-105 [transition:transform_0.2s_ease]">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                         Premium
                       </span>
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 hover:bg-white/[0.06] transition-colors">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-102 hover:shadow-lg cursor-pointer">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400/20 to-pink-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
@@ -814,7 +1186,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 hover:bg-white/[0.06] transition-colors">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-102 hover:shadow-lg cursor-pointer">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-cyan-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
@@ -853,7 +1225,12 @@ export default function DashboardDesignPage() {
                             <p className="text-xs text-white/60">Гайды и видео-уроки</p>
                           </div>
                         </div>
-                        <button className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/30 transition-all whitespace-nowrap">
+                        <button 
+                          className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-rose-500/30 hover:scale-105 hover:shadow-lg hover:shadow-rose-500/30"
+                          onMouseMove={handleMagneticMove}
+                          onMouseLeave={resetMagnetic}
+                          onClick={createRipple}
+                        >
                           Смотреть
                         </button>
                       </div>
@@ -862,7 +1239,13 @@ export default function DashboardDesignPage() {
                 </section>
 
                 {/* Card 6: Интенсивы */}
-                <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 hover:ring-white/20 transition-all flex flex-col">
+                <section 
+                  ref={(el) => { cardsRef.current[5] = el }}
+                  className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-teal-500/10"
+                  onMouseMove={handleCardTilt}
+                  onMouseLeave={resetCardTilt}
+                  style={{ opacity: 0 }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
 
@@ -881,7 +1264,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30 hover:ring-teal-400/50 transition-colors cursor-pointer aspect-square flex flex-col items-center justify-center text-center">
+                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30 cursor-pointer aspect-square flex flex-col items-center justify-center text-center [transition:all_0.3s_ease] hover:ring-teal-400/50 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20">
                         <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-300">
                             <path d="m6.5 6.5 11 11"></path>
@@ -897,7 +1280,7 @@ export default function DashboardDesignPage() {
                         <span className="text-xs text-teal-200 font-medium">Куплен</span>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 hover:bg-white/[0.06] transition-colors cursor-pointer aspect-square flex flex-col items-center justify-center text-center">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer aspect-square flex flex-col items-center justify-center text-center [transition:all_0.3s_ease] hover:bg-white/[0.06] hover:ring-white/15 hover:scale-105 hover:shadow-lg">
                         <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                             <path d="M12 5v14"></path>
@@ -925,7 +1308,12 @@ export default function DashboardDesignPage() {
                               <p className="text-xs text-white/60">Специализированные тренировки</p>
                             </div>
                           </div>
-                          <button className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 hover:bg-teal-500/30 transition-all whitespace-nowrap">
+                          <button 
+                            className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-teal-500/30 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/30"
+                            onMouseMove={handleMagneticMove}
+                            onMouseLeave={resetMagnetic}
+                            onClick={createRipple}
+                          >
                             Открыть
                           </button>
                         </div>
@@ -971,8 +1359,8 @@ export default function DashboardDesignPage() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.08] hover:ring-white/20 transition-all">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 ring-1 ring-blue-400/20 flex items-center justify-center group-hover/btn:bg-blue-500/20 transition-all">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 ring-1 ring-blue-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-blue-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         <path d="M8 10h.01"></path>
@@ -980,34 +1368,34 @@ export default function DashboardDesignPage() {
                         <path d="M16 10h.01"></path>
                       </svg>
                     </div>
-                    <span className="text-xs font-medium text-white/80 group-hover/btn:text-white transition-all">Написать нам</span>
+                    <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Написать нам</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.08] hover:ring-white/20 transition-all">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 ring-1 ring-amber-400/20 flex items-center justify-center group-hover/btn:bg-amber-500/20 transition-all">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 ring-1 ring-amber-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-amber-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
                     </div>
-                    <span className="text-xs font-medium text-white/80 group-hover/btn:text-white transition-all">Оставить отзыв</span>
+                    <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Оставить отзыв</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.08] hover:ring-white/20 transition-all">
-                    <div className="w-12 h-12 rounded-xl bg-rose-500/10 ring-1 ring-rose-400/20 flex items-center justify-center group-hover/btn:bg-rose-500/20 transition-all">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                    <div className="w-12 h-12 rounded-xl bg-rose-500/10 ring-1 ring-rose-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-rose-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                       </svg>
                     </div>
-                    <span className="text-xs font-medium text-white/80 group-hover/btn:text-white transition-all">Донат</span>
+                    <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Донат</span>
                   </button>
 
-                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.08] hover:ring-white/20 transition-all">
-                    <div className="w-12 h-12 rounded-xl bg-sky-500/10 ring-1 ring-sky-400/20 flex items-center justify-center group-hover/btn:bg-sky-500/20 transition-all">
+                  <button className="group/btn flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 [transition:all_0.3s_ease] hover:bg-white/[0.08] hover:ring-white/20 hover:scale-105 hover:shadow-xl">
+                    <div className="w-12 h-12 rounded-xl bg-sky-500/10 ring-1 ring-sky-400/20 flex items-center justify-center [transition:all_0.3s_ease] group-hover/btn:bg-sky-500/20 group-hover/btn:scale-110 group-hover/btn:animate-[iconBounce_0.6s_ease]">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-sky-300">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                       </svg>
                     </div>
-                    <span className="text-xs font-medium text-white/80 group-hover/btn:text-white transition-all">Сообщество</span>
+                    <span className="text-xs font-medium text-white/80 [transition:color_0.3s_ease] group-hover/btn:text-white">Сообщество</span>
                   </button>
                 </div>
               </div>
@@ -1037,7 +1425,12 @@ export default function DashboardDesignPage() {
                 <p className="text-white/70 text-base md:text-lg mb-6">
                   Поделись ссылкой и зарабатывай бонусы. Твои друзья тоже получат подарок!
                 </p>
-                <button className="inline-flex items-center gap-2 bg-white text-orange-600 px-8 py-4 rounded-xl font-bold hover:bg-white/90 transition-all shadow-xl shadow-orange-500/20 text-sm uppercase tracking-wider">
+                <button 
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-8 py-4 rounded-xl font-bold shadow-xl shadow-orange-500/20 text-sm uppercase tracking-wider [transition:all_0.3s_ease] hover:bg-white/90 hover:scale-110 hover:shadow-2xl hover:shadow-orange-500/40 relative overflow-hidden group/cta"
+                  onMouseMove={handleMagneticMove}
+                  onMouseLeave={resetMagnetic}
+                  onClick={createRipple}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                     <polyline points="16 6 12 2 8 6"></polyline>
