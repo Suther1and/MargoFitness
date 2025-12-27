@@ -687,7 +687,7 @@ export default function DashboardDesignPage() {
                   </button>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0 space-y-3">
+                  <div className="flex-1 min-w-0 space-y-3.5">
                     <div>
                       <h3 className="text-xl md:text-2xl font-semibold text-white font-oswald uppercase tracking-tight truncate">
                         Маргарита Иванова
