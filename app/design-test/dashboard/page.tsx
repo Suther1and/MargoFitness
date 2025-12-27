@@ -351,7 +351,7 @@ export default function DashboardDesignPage() {
         
         @keyframes slideInFromBottom {
           from {
-            transform: translate3d(0, 30px, 0);
+            transform: translate3d(0, 50px, 0);
           }
           to {
             transform: translate3d(0, 0, 0);
@@ -361,7 +361,7 @@ export default function DashboardDesignPage() {
         @keyframes fadeInSlideBottom {
           from {
             opacity: 0;
-            transform: translate3d(0, 30px, 0);
+            transform: translate3d(0, 50px, 0);
           }
           to {
             opacity: 1;
@@ -583,7 +583,7 @@ export default function DashboardDesignPage() {
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
                   {/* Left side - Title */}
                   <div className="flex-1">
-                    <div className="flex justify-start mb-6 xl:mb-0 xl:absolute xl:top-[-3rem]">
+                    <div className="hidden xl:flex justify-start mb-6 xl:mb-0 xl:absolute xl:top-[-3rem]">
                       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
                           <line x1="12" y1="20" x2="12" y2="10"></line>
@@ -788,7 +788,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-orange-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)' }}
+                  style={{ opacity: 1, transform: 'translateY(50px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
@@ -897,7 +897,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-purple-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)' }}
+                  style={{ opacity: 1, transform: 'translateY(50px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
@@ -984,7 +984,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-emerald-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)' }}
+                  style={{ opacity: 1, transform: 'translateY(50px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
@@ -1079,7 +1079,7 @@ export default function DashboardDesignPage() {
                             </div>
                           </div>
                           <button 
-                            className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 relative overflow-hidden group/btn"
+                            className="hidden md:flex rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs text-emerald-200 whitespace-nowrap [transition:all_0.3s_ease] hover:bg-emerald-500/30 relative overflow-hidden group/btn"
                           >
                             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent -translate-x-full group-hover/btn:translate-x-full [transition:transform_0.8s_ease]"></span>
                             <span className="relative">Открыть</span>
@@ -1087,7 +1087,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
                       
-                      <button className="w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all">
+                      <button className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <line x1="18" y1="20" x2="18" y2="10"></line>
                           <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -1200,7 +1200,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-rose-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)' }}
+                  style={{ opacity: 1, transform: 'translateY(50px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
@@ -1296,7 +1296,7 @@ export default function DashboardDesignPage() {
                   className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col card-3d [transition:transform_0.3s_ease,box-shadow_0.3s_ease,border-color_0.3s_ease] hover:ring-white/25 hover:shadow-2xl hover:shadow-teal-500/10"
                   onMouseMove={handleCardTilt}
                   onMouseLeave={resetCardTilt}
-                  style={{ opacity: 1, transform: 'translateY(30px)' }}
+                  style={{ opacity: 1, transform: 'translateY(50px)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
