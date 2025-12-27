@@ -64,7 +64,7 @@ export default function DashboardDesignPage() {
   // Optimized animation logic for progress bars and counters
   useEffect(() => {
     const isMobile = window.innerWidth < 1024
-    const ANIMATION_DURATION = 1500
+    const ANIMATION_DURATION = isMobile ? 1000 : 1500 // Faster on mobile
     let workoutAnimated = false
     let bonusAnimated = false
     
@@ -90,9 +90,21 @@ export default function DashboardDesignPage() {
         progressBar.style.width = `${targetPercent}%`
       }, 50)
       
-      // Animate counter with JS
+      // Animate counter with JS - use fewer frames on mobile
       const startTime = performance.now()
+      const frameInterval = isMobile ? 32 : 16 // ~30fps on mobile, ~60fps on desktop
+      let lastFrameTime = startTime
+      
       const animate = (currentTime: number) => {
+        // Throttle animation frames on mobile
+        if (currentTime - lastFrameTime < frameInterval) {
+          if (currentTime - startTime < ANIMATION_DURATION) {
+            requestAnimationFrame(animate)
+          }
+          return
+        }
+        
+        lastFrameTime = currentTime
         const elapsed = currentTime - startTime
         const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
         
@@ -116,7 +128,7 @@ export default function DashboardDesignPage() {
     
     // Set up intersection observers
     const observerOptions = {
-      threshold: isMobile ? 0.1 : 0.2,
+      threshold: isMobile ? 0.05 : 0.2,
       rootMargin: '0px 0px -20px 0px'
     }
     
@@ -163,6 +175,10 @@ export default function DashboardDesignPage() {
   }, [])
 
   useEffect(() => {
+    // Only add tooltip handler on desktop
+    const isMobile = window.innerWidth < 1024
+    if (isMobile) return
+    
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (!target.closest('.tooltip-trigger') && !target.closest('.tooltip-popup')) {
@@ -212,9 +228,7 @@ export default function DashboardDesignPage() {
           requestAnimationFrame(() => {
             card.style.transition = 'opacity 0.4s ease'
             card.style.opacity = '1'
-            if (index === 3) {
-              card.style.animation = 'gradientShift 10s ease infinite'
-            }
+            // Don't add gradientShift on mobile - battery drain
           })
         } else {
           // Desktop: Slide animation
@@ -481,7 +495,7 @@ export default function DashboardDesignPage() {
           animation: ringRipple 2s ease-out infinite !important;
         }
         
-        /* Mobile optimizations - reduce heavy effects */
+        /* Mobile optimizations - aggressive performance boost */
         @media (max-width: 1023px) {
           html, body {
             max-width: 100vw;
@@ -493,24 +507,41 @@ export default function DashboardDesignPage() {
             box-sizing: border-box;
           }
           
-          /* Reduce blur intensity on mobile (not disable completely) */
-          .blur-3xl {
-            filter: blur(40px) !important;
+          /* Disable decorative background blur circles - major battery drain */
+          .absolute.rounded-full.blur-3xl {
+            display: none !important;
           }
           
-          /* Simplify shadows on mobile */
+          /* Reduce backdrop blur intensity */
+          .backdrop-blur-xl, .backdrop-blur {
+            backdrop-filter: blur(4px) !important;
+          }
+          
+          /* Simplify shadows */
           [class*="shadow-2xl"], [class*="shadow-xl"] {
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important;
           }
           
-          /* Disable complex animations on mobile */
-          .animate-shimmer {
+          /* Disable all looping animations - huge performance gain */
+          .animate-shimmer,
+          .animate-pulse-glow,
+          .animate-ring-ripple {
             animation: none !important;
           }
           
-          /* Keep backdrop blur but reduce intensity */
-          .backdrop-blur-xl, .backdrop-blur {
-            backdrop-filter: blur(8px) !important;
+          /* Disable gradient shift animation on bonus card */
+          [style*="gradientShift"] {
+            animation: none !important;
+          }
+          
+          /* Simplify hover effects on mobile */
+          button:hover {
+            transform: none !important;
+          }
+          
+          /* Reduce transition complexity */
+          * {
+            transition-duration: 0.2s !important;
           }
         }
         
