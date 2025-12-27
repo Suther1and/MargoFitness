@@ -63,11 +63,12 @@ export default function DashboardDesignPage() {
   
   // Optimized animation logic for progress bars and counters
   useEffect(() => {
+    const isMobile = window.innerWidth < 1024
     const ANIMATION_DURATION = 1500
     let workoutAnimated = false
     let bonusAnimated = false
     
-    // Unified animation function
+    // Unified animation function - uses CSS for progress, JS for counter
     const animateElements = (
       progressBar: HTMLElement | null,
       counter: HTMLElement | null,
@@ -78,33 +79,34 @@ export default function DashboardDesignPage() {
       if (!progressBar || !counter) return
       
       const format = formatter || ((n: number) => Math.floor(n).toString())
-      const startTime = performance.now()
       
       // Set initial states
       progressBar.style.width = '0%'
       counter.textContent = '0'
       
+      // Use CSS transition for progress bar (smoother on mobile)
+      setTimeout(() => {
+        progressBar.style.transition = `width ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+        progressBar.style.width = `${targetPercent}%`
+      }, 50)
+      
+      // Animate counter with JS
+      const startTime = performance.now()
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime
         const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
         
-        // Smooth easing function
+        // Smooth easing
         const easeProgress = progress < 0.5
           ? 2 * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 2) / 2
         
-        // Update progress bar
-        progressBar.style.width = `${targetPercent * easeProgress}%`
-        
-        // Update counter
         const currentValue = targetValue * easeProgress
         counter.textContent = format(currentValue)
         
         if (progress < 1) {
           requestAnimationFrame(animate)
         } else {
-          // Ensure final values
-          progressBar.style.width = `${targetPercent}%`
           counter.textContent = format(targetValue)
         }
       }
@@ -113,6 +115,11 @@ export default function DashboardDesignPage() {
     }
     
     // Set up intersection observers
+    const observerOptions = {
+      threshold: isMobile ? 0.1 : 0.2,
+      rootMargin: '0px 0px -20px 0px'
+    }
+    
     const workoutObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -123,7 +130,7 @@ export default function DashboardDesignPage() {
           }
         })
       },
-      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
+      observerOptions
     )
     
     const bonusObserver = new IntersectionObserver(
@@ -142,7 +149,7 @@ export default function DashboardDesignPage() {
           }
         })
       },
-      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
+      observerOptions
     )
     
     // Start observing
@@ -171,14 +178,18 @@ export default function DashboardDesignPage() {
   useEffect(() => {
     setIsVisible(true)
     const isDesktop = window.innerWidth >= 1024
+    const isMobile = window.innerWidth < 1024
     const isXL = window.innerWidth >= 1280
     
     // Animate navigation
-    const animateNav = () => {
-      if (navRef.current) {
-        navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-        navRef.current.style.opacity = '1'
-      }
+    if (navRef.current) {
+      navRef.current.style.opacity = '0'
+      setTimeout(() => {
+        if (navRef.current) {
+          navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+          navRef.current.style.opacity = '1'
+        }
+      }, 50)
     }
     
     // Animate cards
@@ -186,24 +197,33 @@ export default function DashboardDesignPage() {
       cardsRef.current.forEach((card, index) => {
         if (!card) return
         
-        card.classList.remove('card-hidden')
-        
-        if (isDesktop) {
+        if (isMobile) {
+          // Mobile: Simple fade in without slide animation
+          card.style.opacity = '0'
+          card.style.visibility = 'visible'
+          card.style.transform = 'translateY(0)'
+          
+          setTimeout(() => {
+            card.style.transition = 'opacity 0.4s ease'
+            card.style.opacity = '1'
+            if (index === 3) {
+              card.style.animation = 'gradientShift 10s ease infinite'
+            }
+          }, 50)
+        } else {
+          // Desktop: Slide animation
+          card.classList.remove('card-hidden')
           card.classList.add('card-animate-desktop')
+          
           const handleEnd = () => {
             card.classList.remove('card-animate-desktop')
             card.style.visibility = 'visible'
-            card.style.willChange = 'auto'
-            if (index === 3) card.style.animation = 'gradientShift 10s ease infinite'
+            if (index === 3) {
+              card.style.animation = 'gradientShift 10s ease infinite'
+            }
             card.removeEventListener('animationend', handleEnd)
           }
           card.addEventListener('animationend', handleEnd)
-        } else {
-          card.style.visibility = 'visible'
-          card.style.opacity = '1'
-          card.style.transform = 'none'
-          card.style.willChange = 'auto'
-          if (index === 3) card.style.animation = 'gradientShift 10s ease infinite'
         }
       })
     }
@@ -214,24 +234,34 @@ export default function DashboardDesignPage() {
       if (!profile) return
       
       profile.classList.remove('profile-hidden')
-      profile.classList.add('profile-animate')
       
-      const handleEnd = () => {
-        profile.classList.remove('profile-animate')
-        profile.style.opacity = '1'
+      if (isMobile) {
+        // Mobile: Simple fade in
+        profile.style.opacity = '0'
         profile.style.visibility = 'visible'
-        profile.style.willChange = 'auto'
-        profile.removeEventListener('animationend', handleEnd)
+        profile.style.transform = 'scale(1)'
+        setTimeout(() => {
+          profile.style.transition = 'opacity 0.4s ease'
+          profile.style.opacity = '1'
+        }, 50)
+      } else {
+        // Desktop: Scale animation
+        profile.classList.add('profile-animate')
+        const handleEnd = () => {
+          profile.classList.remove('profile-animate')
+          profile.style.opacity = '1'
+          profile.style.visibility = 'visible'
+          profile.removeEventListener('animationend', handleEnd)
+        }
+        profile.addEventListener('animationend', handleEnd)
       }
-      profile.addEventListener('animationend', handleEnd)
     }
     
-    // Execute animations with minimal delays
-    requestAnimationFrame(() => {
-      animateNav()
-      setTimeout(animateCards, isDesktop ? 300 : 0)
-      setTimeout(animateProfile, isDesktop ? 500 : 250)
-    })
+    // Execute animations
+    setTimeout(() => {
+      animateCards()
+      setTimeout(animateProfile, isMobile ? 100 : 400)
+    }, isDesktop ? 300 : 50)
   }, [])
 
   const InfoButton = ({ tooltipKey }: { tooltipKey: string }) => (
@@ -413,10 +443,16 @@ export default function DashboardDesignPage() {
         }
         
         /* Optimize touch interactions */
-        button, .cursor-pointer {
+        button, . {
           user-select: none;
-          -webkit-tap-highlight-color: transparent;
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
           touch-action: manipulation;
+          cursor: pointer;
+        }
+        
+        button {
+          position: relative;
+          z-index: 1;
         }
         
         /* Smooth rendering */
@@ -434,6 +470,41 @@ export default function DashboardDesignPage() {
           animation: ringRipple 2s ease-out infinite !important;
         }
         
+        /* Mobile optimizations - disable heavy effects */
+        @media (max-width: 1023px) {
+          html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+          }
+          
+          * {
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          
+          /* Disable blur effects on mobile to reduce GPU load */
+          .blur-3xl, [class*="blur-"] {
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
+          
+          /* Simplify shadows on mobile */
+          [class*="shadow-2xl"], [class*="shadow-xl"] {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+          }
+          
+          /* Disable complex animations on mobile */
+          .animate-shimmer {
+            animation: none !important;
+          }
+          
+          /* Simplify backdrop blur */
+          .backdrop-blur-xl, .backdrop-blur {
+            backdrop-filter: none !important;
+            background-color: rgba(10, 10, 15, 0.95) !important;
+          }
+        }
+        
         /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
@@ -441,11 +512,6 @@ export default function DashboardDesignPage() {
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
           }
-        }
-        
-        @media (max-width: 767px) {
-          html, body { max-width: 100vw; overflow-x: hidden; }
-          * { max-width: 100%; box-sizing: border-box; }
         }
       `}</style>
 
@@ -530,7 +596,7 @@ export default function DashboardDesignPage() {
                               />
                             </div>
                           </div>
-                          <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center cursor-pointer transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
+                          <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center  transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
                               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                               <path d="M3 3v5h5"></path>
@@ -594,11 +660,11 @@ export default function DashboardDesignPage() {
                         {/* Stats & Actions */}
                         <div className="flex flex-col gap-3 flex-shrink-0">
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg  active:scale-95">
                               <p className="text-xl font-bold text-white font-oswald leading-none">23</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">дней</p>
                             </div>
-                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
+                            <div className="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-3 text-center min-w-[4.5rem] transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg  active:scale-95">
                               <p className="text-xl font-bold text-white font-oswald leading-none">47</p>
                               <p className="text-[0.65rem] text-white/60 mt-1 leading-tight">занятий</p>
                             </div>
@@ -644,7 +710,7 @@ export default function DashboardDesignPage() {
                         />
                       </div>
                     </div>
-                    <button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center cursor-pointer transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
+                    <button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-black/60 ring-1 ring-white/10 flex items-center justify-center  transition-all hover:bg-black/70 hover:ring-white/15 active:scale-95">
                       <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
                         <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                         <path d="M3 3v5h5"></path>
@@ -749,10 +815,10 @@ export default function DashboardDesignPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <button className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 cursor-pointer transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 group/card active:scale-95">
-                      <div className="flex items-center justify-between">
+                    <button className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                      <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
                               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                               <path d="M3 3v5h5"></path>
@@ -760,35 +826,33 @@ export default function DashboardDesignPage() {
                               <path d="M16 16h5v5"></path>
                             </svg>
                           </div>
-                          <div className="text-left">
+                          <div className="text-left flex-1">
                             <p className="text-sm font-medium text-white">Продлить подписку</p>
                             <p className="text-xs text-white/60">Выбери новый тариф</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-orange-500/30 relative overflow-hidden">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
-                          <span className="relative">Открыть</span>
+                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap flex-shrink-0">
+                          Открыть
                         </div>
                       </div>
                     </button>
                     
-                    <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 group/card active:scale-95">
-                      <div className="flex items-center justify-between">
+                    <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                      <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
                               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                               <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                           </div>
-                          <div className="text-left">
+                          <div className="text-left flex-1">
                             <p className="text-sm font-medium text-white">Настройки тарифа</p>
                             <p className="text-xs text-white/60">Авто-продление и другое</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15 relative overflow-hidden">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
-                          <span className="relative">Открыть</span>
+                        <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap flex-shrink-0">
+                          Открыть
                         </div>
                       </div>
                     </button>
@@ -849,10 +913,10 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
                       
-                      <button className="w-full rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 ring-1 ring-purple-400/30 p-3 cursor-pointer transition-all hover:from-purple-500/15 hover:to-indigo-500/15 hover:ring-purple-400/40 group/card active:scale-95">
-                        <div className="flex items-center justify-between">
+                      <button className="w-full rounded-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 ring-1 ring-purple-400/30 p-3 transition-all hover:from-purple-500/15 hover:to-indigo-500/15 hover:ring-purple-400/40 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                        <div className="flex items-center justify-between pointer-events-none">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                                 <path d="m6.5 6.5 11 11"></path>
                                 <path d="m21 21-1-1"></path>
@@ -863,14 +927,13 @@ export default function DashboardDesignPage() {
                                 <path d="m14 21 7-7"></path>
                               </svg>
                             </div>
-                            <div className="text-left">
+                            <div className="text-left flex-1">
                               <p className="text-sm font-medium text-white">Программа недели</p>
                               <p className="text-xs text-white/60">6 тренировок доступно</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-purple-500/30 relative overflow-hidden">
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
-                            <span className="relative">Открыть</span>
+                          <div className="rounded-lg bg-purple-500/20 px-3 py-1.5 text-xs text-purple-200 whitespace-nowrap flex-shrink-0">
+                            Открыть
                           </div>
                         </div>
                       </button>
@@ -900,7 +963,7 @@ export default function DashboardDesignPage() {
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
                       {/* Вес */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
@@ -918,7 +981,7 @@ export default function DashboardDesignPage() {
                       </button>
 
                       {/* Шаги */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
@@ -934,7 +997,7 @@ export default function DashboardDesignPage() {
                       </button>
 
                       {/* Вода */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
@@ -947,7 +1010,7 @@ export default function DashboardDesignPage() {
                       </button>
 
                       {/* Калории */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
+                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-rose-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
@@ -961,7 +1024,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <button className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3 cursor-pointer transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95">
+                      <button className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3  transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
@@ -1036,7 +1099,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <button className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95">
+                      <button className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3  transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95">
                         <div className="flex flex-col items-center justify-center text-center gap-2">
                           <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
@@ -1052,7 +1115,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </button>
                       
-                      <button className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 ring-1 ring-amber-400/30 p-3 cursor-pointer transition-all hover:from-amber-500/15 hover:to-orange-500/15 hover:ring-amber-400/40 active:scale-95">
+                      <button className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 ring-1 ring-amber-400/30 p-3  transition-all hover:from-amber-500/15 hover:to-orange-500/15 hover:ring-amber-400/40 active:scale-95">
                         <div className="flex flex-col items-center justify-center text-center gap-2">
                           <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
@@ -1100,7 +1163,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg  active:scale-95">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400/20 to-pink-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
@@ -1114,7 +1177,7 @@ export default function DashboardDesignPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg cursor-pointer active:scale-95">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg  active:scale-95">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-cyan-400/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
@@ -1140,22 +1203,21 @@ export default function DashboardDesignPage() {
                       </div>
                     </div>
 
-                    <button className="rounded-xl bg-gradient-to-r from-rose-500/10 to-pink-500/10 ring-1 ring-rose-400/30 p-3 cursor-pointer transition-all hover:from-rose-500/15 hover:to-pink-500/15 hover:ring-rose-400/40 group/card text-left active:scale-95">
-                      <div className="flex items-center justify-between">
+                    <button className="rounded-xl bg-gradient-to-r from-rose-500/10 to-pink-500/10 ring-1 ring-rose-400/30 p-3 transition-all hover:from-rose-500/15 hover:to-pink-500/15 hover:ring-rose-400/40 text-left active:scale-95" style={{ touchAction: 'manipulation' }}>
+                      <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
                               <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <p className="text-sm font-medium text-white">Обучающий контент</p>
                             <p className="text-xs text-white/60">Гайды и видео-уроки</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-rose-500/30 relative overflow-hidden">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
-                          <span className="relative">Смотреть</span>
+                        <div className="rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs text-rose-200 whitespace-nowrap flex-shrink-0">
+                          Смотреть
                         </div>
                       </div>
                     </button>
@@ -1185,7 +1247,7 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30 cursor-pointer aspect-square flex flex-col items-center justify-center text-center transition-all hover:ring-teal-400/50 hover:shadow-lg hover:shadow-teal-500/20 active:scale-95">
+                      <div className="rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 p-3 ring-1 ring-teal-400/30  aspect-square flex flex-col items-center justify-center text-center transition-all hover:ring-teal-400/50 hover:shadow-lg hover:shadow-teal-500/20 active:scale-95">
                         <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-300">
                             <path d="m6.5 6.5 11 11"></path>
@@ -1201,7 +1263,7 @@ export default function DashboardDesignPage() {
                         <span className="text-xs text-teal-200 font-medium">Куплен</span>
                       </div>
 
-                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 cursor-pointer aspect-square flex flex-col items-center justify-center text-center transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg active:scale-95">
+                      <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  aspect-square flex flex-col items-center justify-center text-center transition-all hover:bg-white/[0.06] hover:ring-white/15 hover:shadow-lg active:scale-95">
                         <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                             <path d="M12 5v14"></path>
@@ -1214,43 +1276,42 @@ export default function DashboardDesignPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <button className="w-full rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 ring-1 ring-teal-400/30 p-3 cursor-pointer transition-all hover:from-teal-500/15 hover:to-cyan-500/15 hover:ring-teal-400/40 group/card active:scale-95">
-                        <div className="flex items-center justify-between">
+                      <button className="w-full rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 ring-1 ring-teal-400/30 p-3 transition-all hover:from-teal-500/15 hover:to-cyan-500/15 hover:ring-teal-400/40 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                        <div className="flex items-center justify-between pointer-events-none">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0">
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-300">
                                 <circle cx="8" cy="21" r="1"></circle>
                                 <circle cx="19" cy="21" r="1"></circle>
                                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                               </svg>
                             </div>
-                            <div className="text-left">
+                            <div className="text-left flex-1">
                               <p className="text-sm font-medium text-white">Каталог интенсивов</p>
                               <p className="text-xs text-white/60">Специализированные тренировки</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-teal-500/30 relative overflow-hidden">
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/20 to-transparent -translate-x-full group-hover/card:translate-x-full [transition:transform_0.8s_ease] pointer-events-none"></span>
-                            <span className="relative">Открыть</span>
+                          <div className="rounded-lg bg-teal-500/20 px-3 py-1.5 text-xs text-teal-200 whitespace-nowrap flex-shrink-0">
+                            Открыть
                           </div>
                         </div>
                       </button>
 
-                      <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 cursor-pointer transition-all hover:bg-white/[0.06] hover:ring-white/15 group/card active:scale-95">
-                        <div className="flex items-center justify-between">
+                      <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                        <div className="flex items-center justify-between pointer-events-none">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
                                 <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                                 <rect width="20" height="14" x="2" y="6" rx="2"></rect>
                               </svg>
                             </div>
-                            <div className="text-left">
+                            <div className="text-left flex-1">
                               <p className="text-sm font-medium text-white">Мои интенсивы</p>
                               <p className="text-xs text-white/60">Купленные программы</p>
                             </div>
                           </div>
-                          <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap [transition:all_0.3s_ease] group-hover/card:bg-white/15">
+                          <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap flex-shrink-0">
                             Открыть
                           </div>
                         </div>
