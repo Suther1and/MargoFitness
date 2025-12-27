@@ -239,13 +239,19 @@ export default function DashboardDesignPage() {
       navRef.current.style.opacity = '1'
     }
     
-    // Animate cards with stagger - use fadeInSlideBottom which includes opacity
+    // Animate cards with stagger - quick fade first to establish color, then slide
     cardsRef.current.forEach((card, index) => {
       if (card) {
         setTimeout(() => {
-          // First card (subscription) slower animation
-          const duration = index === 0 ? '1s' : '0.8s'
-          card.style.animation = `fadeInSlideBottom ${duration} cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          // Very quick fade to establish gradient colors (no position change)
+          card.style.transition = 'opacity 0.15s ease-out'
+          card.style.opacity = '1'
+          
+          // After fade completes, slide animation (no opacity change)
+          setTimeout(() => {
+            card.style.transition = ''
+            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          }, 150)
         }, 200 + index * 150)
       }
     })
@@ -412,7 +418,7 @@ export default function DashboardDesignPage() {
           50% {
             opacity: 0.8;
             transform: scale(1.1);
-            box-shadow: 0 0 8px 2px currentColor;
+            box-shadow: 0 0 6px 1.5px currentColor;
           }
         }
         
@@ -809,7 +815,7 @@ export default function DashboardDesignPage() {
                       <InfoButton tooltipKey="subscription" />
                       <Tooltip tooltipKey="subscription" />
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30 animate-float">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
                       <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
                         <span className="absolute inset-0 rounded-full bg-emerald-400 animate-[ringRipple_2s_ease-out_infinite]"></span>
                       </span>
