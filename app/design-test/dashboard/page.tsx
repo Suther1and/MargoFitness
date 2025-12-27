@@ -129,7 +129,7 @@ export default function DashboardDesignPage() {
           }, ANIMATION_DELAY)
         }
       })
-    }, { threshold: 0.1 })
+    }, { threshold: 0.01 }) // Lower threshold for better desktop detection
 
     if (progressRef.current?.parentElement) {
       observer.observe(progressRef.current.parentElement)
@@ -203,7 +203,7 @@ export default function DashboardDesignPage() {
           }, ANIMATION_DELAY)
         }
       })
-    }, { threshold: 0.1 })
+    }, { threshold: 0.01 }) // Lower threshold for better desktop detection
 
     if (bonusProgressRef.current?.parentElement) {
       bonusProgressObserver.observe(bonusProgressRef.current.parentElement)
@@ -233,19 +233,29 @@ export default function DashboardDesignPage() {
   useEffect(() => {
     setIsVisible(true)
     
+    // Check if desktop
+    const isDesktop = window.innerWidth >= 1024 // lg breakpoint
+    
     // Animate navigation
     if (navRef.current) {
       navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
       navRef.current.style.opacity = '1'
     }
     
-    // Animate cards with stagger - only slide animation (opacity already 1)
+    // Animate cards - different behavior for mobile vs desktop
     cardsRef.current.forEach((card, index) => {
       if (card) {
-        setTimeout(() => {
-          // Animate only transform (opacity stays 1, no color shift)
-          card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
-        }, 200 + index * 150)
+        if (isDesktop) {
+          // Desktop: all visible cards appear simultaneously with slower animation
+          setTimeout(() => {
+            card.style.animation = `slideInFromBottom 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`
+          }, 300) // Single delay for all cards
+        } else {
+          // Mobile: staggered animation
+          setTimeout(() => {
+            card.style.animation = `slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          }, 200 + index * 150)
+        }
       }
     })
   }, [])
@@ -598,7 +608,7 @@ export default function DashboardDesignPage() {
                       <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white font-oswald uppercase">
                         Личный кабинет
                       </h1>
-                      <p className="mt-4 max-w-2xl text-base md:text-lg text-white/70">
+                      <p className="hidden md:block mt-4 max-w-2xl text-base md:text-lg text-white/70">
                         Отслеживай свой прогресс и управляй подпиской
                       </p>
                     </div>
@@ -606,7 +616,7 @@ export default function DashboardDesignPage() {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto xl:min-w-[42rem]">
-                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms', animationDuration: '1s' }}>
+                    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '250ms', animationDuration: '1s' }}>
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -718,7 +728,7 @@ export default function DashboardDesignPage() {
               </div>
 
               {/* Mobile User Profile Card */}
-              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '150ms', animationDuration: '1s' }}>
+              <section className="xl:hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 mb-6 md:mb-8 [transition:all_0.3s_ease] hover:ring-white/20 hover:shadow-xl opacity-0 animate-scale-in" style={{ animationDelay: '250ms', animationDuration: '1s' }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
