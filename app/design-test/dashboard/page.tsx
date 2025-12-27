@@ -78,49 +78,49 @@ export default function DashboardDesignPage() {
       
       // Set initial states
       progressBar.style.width = '0%'
+      progressBar.style.transition = 'none' // Disable CSS transition, use JS
       counter.textContent = '0'
       
-      // Start both animations simultaneously with small delay for reflow
-      requestAnimationFrame(() => {
-        // Use CSS transition for progress bar (smoother on mobile)
-        progressBar.style.transition = `width ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
-        progressBar.style.width = `${targetPercent}%`
+      // Animate both progress bar and counter with JS for perfect sync
+      const startTime = performance.now()
+      const frameInterval = isMobile ? 32 : 16 // ~30fps on mobile, ~60fps on desktop
+      let lastFrameTime = startTime
+      
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
         
-        // Animate counter with JS - use fewer frames on mobile
-        const startTime = performance.now()
-        const frameInterval = isMobile ? 32 : 16 // ~30fps on mobile, ~60fps on desktop
-        let lastFrameTime = startTime
-        
-        const animate = (currentTime: number) => {
-          const elapsed = currentTime - startTime
-          const progress = Math.min(elapsed / ANIMATION_DURATION, 1)
-          
-          // Throttle animation frames on mobile (but always run final frame)
-          if (progress < 1 && currentTime - lastFrameTime < frameInterval) {
-            requestAnimationFrame(animate)
-            return
-          }
-          
-          lastFrameTime = currentTime
-          
-          // Smooth easing
-          const easeProgress = progress < 0.5
-            ? 2 * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 2) / 2
-          
-          const currentValue = targetValue * easeProgress
-          counter.textContent = format(currentValue)
-          
-          if (progress < 1) {
-            requestAnimationFrame(animate)
-          } else {
-            // Ensure final value is set when animation completes
-            counter.textContent = format(targetValue)
-          }
+        // Throttle animation frames on mobile (but always run final frame)
+        if (progress < 1 && currentTime - lastFrameTime < frameInterval) {
+          requestAnimationFrame(animate)
+          return
         }
         
-        requestAnimationFrame(animate)
-      })
+        lastFrameTime = currentTime
+        
+        // Smooth easing - same function for both animations
+        const easeProgress = progress < 0.5
+          ? 2 * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2
+        
+        // Update progress bar (JS animation instead of CSS)
+        const currentPercent = targetPercent * easeProgress
+        progressBar.style.width = `${currentPercent}%`
+        
+        // Update counter
+        const currentValue = targetValue * easeProgress
+        counter.textContent = format(currentValue)
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          // Ensure final values are set when animation completes
+          progressBar.style.width = `${targetPercent}%`
+          counter.textContent = format(targetValue)
+        }
+      }
+      
+      requestAnimationFrame(animate)
     }
     
     // Set up intersection observers
