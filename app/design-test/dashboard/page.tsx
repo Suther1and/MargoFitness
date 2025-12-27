@@ -962,10 +962,7 @@ export default function DashboardDesignPage() {
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
-                              <ellipse cx="12" cy="5" rx="1" ry="3"></ellipse>
-                              <path d="M2 20v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"></path>
-                              <path d="M6 13.5V18"></path>
-                              <path d="M18 13.5V18"></path>
+                              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                             </svg>
                           </div>
                           <span className="text-xs text-white/60">Шаги</span>
