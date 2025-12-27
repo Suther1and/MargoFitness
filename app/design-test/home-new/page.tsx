@@ -35,7 +35,7 @@ function HomeContent() {
   const accentClass = currentFont.accentClass           // Акценты (метки, кнопки)
   
   // Используем только вариант 'b' (Overlay Glass)
-  const heroVariant = 'b'
+  const heroVariant: 'a' | 'b' | 'c' | 'd' = 'b'
   const priceProRef = useRef<HTMLSpanElement>(null)
   const priceEliteRef = useRef<HTMLSpanElement>(null)
   const periodRefs = useRef<HTMLSpanElement[]>([])
