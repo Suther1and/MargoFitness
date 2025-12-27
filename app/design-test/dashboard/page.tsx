@@ -665,10 +665,10 @@ export default function DashboardDesignPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-                <div className="relative z-10 flex items-start gap-4">
+                <div className="relative z-10 flex items-center gap-5">
                   {/* Avatar - clickable for editing */}
                   <button className="relative flex-shrink-0 group/avatar" style={{ touchAction: 'manipulation' }}>
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
+                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
                       <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
                         <img 
                           src="https://api.dicebear.com/7.x/avataaars/svg?seed=Margo" 
@@ -679,7 +679,7 @@ export default function DashboardDesignPage() {
                     </div>
                     {/* Edit overlay on active/hover */}
                     <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 group-active/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                         <path d="m15 5 4 4"></path>
                       </svg>
@@ -687,7 +687,7 @@ export default function DashboardDesignPage() {
                   </button>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0 space-y-3">
+                  <div className="flex-1 min-w-0 space-y-2.5">
                     <div>
                       <h3 className="text-xl md:text-2xl font-semibold text-white font-oswald uppercase tracking-tight truncate">
                         Маргарита Иванова
@@ -705,13 +705,24 @@ export default function DashboardDesignPage() {
                       </div>
                     </div>
                     
-                    <button className="flex items-center gap-2 text-xs text-white/60 w-full rounded-lg p-2 transition-all hover:bg-white/[0.04] active:scale-95" style={{ touchAction: 'manipulation' }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 flex-shrink-0">
-                        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                      </svg>
-                      <span className="truncate pointer-events-none">margo.fitness@gmail.com</span>
-                    </button>
+                    <div className="space-y-1.5">
+                      {/* Phone */}
+                      <button className="flex items-center gap-2 text-xs text-white/60 w-full rounded-lg py-1.5 px-2 transition-all hover:bg-white/[0.04] active:scale-95" style={{ touchAction: 'manipulation' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-300 flex-shrink-0">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <span className="pointer-events-none">+7 (999) 123-45-67</span>
+                      </button>
+                      
+                      {/* Email */}
+                      <button className="flex items-center gap-2 text-xs text-white/60 w-full rounded-lg py-1.5 px-2 transition-all hover:bg-white/[0.04] active:scale-95" style={{ touchAction: 'manipulation' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 flex-shrink-0">
+                          <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                        </svg>
+                        <span className="truncate pointer-events-none">margo.fitness@gmail.com</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </section>
