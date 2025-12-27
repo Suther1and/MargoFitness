@@ -84,7 +84,7 @@ export default function DashboardDesignPage() {
       setTimeout(() => {
         progressBar.style.transition = `width ${ANIMATION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
         progressBar.style.width = `${targetPercent}%`
-      }, 50)
+      }, 200)
       
       // Animate counter with JS - use fewer frames on mobile
       const startTime = performance.now()
@@ -465,7 +465,7 @@ export default function DashboardDesignPage() {
         /* Optimize touch interactions */
         button {
           user-select: none;
-          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+          -webkit-tap-highlight-color: transparent;
           touch-action: manipulation;
           cursor: pointer;
           position: relative;
@@ -497,8 +497,12 @@ export default function DashboardDesignPage() {
           /* Disable all looping animations */
           .animate-shimmer, .animate-pulse-glow, .animate-ring-ripple, [style*="gradientShift"] { animation: none !important; }
           
-          /* Simplify interactions */
-          button:hover { transform: none !important; }
+          /* Disable hover effects on mobile - better performance and UX */
+          @media (hover: none) {
+            button:hover { 
+              transform: none !important;
+            }
+          }
         }
         
         /* Reduced motion support */
