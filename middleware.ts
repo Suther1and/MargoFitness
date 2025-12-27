@@ -5,6 +5,9 @@ export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
+  
+  // Добавляем pathname в headers для использования в компонентах
+  supabaseResponse.headers.set('x-pathname', request.nextUrl.pathname)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,7 +33,8 @@ export async function middleware(request: NextRequest) {
 
   const publicRoutes = ['/', '/pricing']
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route) || 
-                        request.nextUrl.pathname.startsWith('/auth')
+                        request.nextUrl.pathname.startsWith('/auth') ||
+                        request.nextUrl.pathname.startsWith('/design-test')
 
   const protectedRoutes = ['/dashboard', '/workouts', '/free-content', '/admin', '/payment']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))

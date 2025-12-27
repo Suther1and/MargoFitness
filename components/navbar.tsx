@@ -2,8 +2,17 @@ import Link from "next/link"
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, Menu, X } from "lucide-react"
+import { headers } from "next/headers"
 
 export default async function Navbar() {
+  const headersList = await headers()
+  const pathname = headersList.get("x-pathname") || ""
+  
+  // Скрываем навигацию на тестовых страницах дизайна
+  if (pathname.startsWith("/design-test")) {
+    return null
+  }
+
   const profile = await getCurrentProfile()
 
   return (
