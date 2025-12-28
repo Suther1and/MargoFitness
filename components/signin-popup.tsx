@@ -175,7 +175,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
         <DialogTitle className="sr-only">Вход в MargoFitness</DialogTitle>
         
           {/* Card - Dashboard style glassmorphism */}
-          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/75 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/80 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
             {/* Close button inside card - 3px from edges */}
             <button
               onClick={onClose}
