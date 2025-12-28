@@ -25,7 +25,7 @@ export default async function NavbarNew() {
   const profile = await getCurrentProfile()
 
   return (
-    <div className="sticky top-0 z-50 px-4 py-4">
+    <div className="sticky top-0 z-50 px-4 py-4" style={{ background: '#19191C' }}>
       <nav className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
         background: colors.navbarBg,
         border: `1px solid ${colors.cardBorder}`
