@@ -16,54 +16,23 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl p-0 border-0 bg-transparent overflow-visible">
+      <DialogContent className="max-w-sm p-0 border-0 bg-transparent overflow-visible" showCloseButton={false}>
         <DialogTitle className="sr-only">Вход в MargoFitness</DialogTitle>
-        <div className="w-full max-w-5xl mt-8 mr-auto mb-8 ml-auto relative">
-          {/* Outer circuit-style nodes with motivational words */}
-          <div className="pointer-events-none hidden md:block absolute top-0 right-0 bottom-0 left-0 z-0">
-            {/* Left upper node */}
-            <div className="absolute left-4 top-1/4 flex items-center gap-2">
-              <div className="h-px flex-1 bg-white/10 translate-x-2"></div>
-              <div className="relative h-9 px-4 rounded-xl bg-white/[0.06] ring-1 ring-white/20 flex items-center justify-center backdrop-blur">
-                <span className="text-xs font-medium text-orange-400">Сила</span>
-                <span className="absolute -left-1 h-1 w-1 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.65)] animate-pulse"></span>
-              </div>
-              <div className="h-px w-12 bg-white/10"></div>
-            </div>
-
-            {/* Left bottom node */}
-            <div className="absolute left-10 bottom-10 flex items-center gap-2">
-              <div className="h-px flex-1 bg-white/10 translate-x-2"></div>
-              <div className="relative h-9 px-4 rounded-xl bg-white/[0.06] ring-1 ring-white/20 flex items-center justify-center backdrop-blur">
-                <span className="text-xs font-medium text-orange-400">Энергия</span>
-                <span className="absolute -left-1 h-1 w-1 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.65)] animate-pulse"></span>
-              </div>
-              <div className="h-px w-16 bg-white/10"></div>
-            </div>
-
-            {/* Right upper node */}
-            <div className="absolute right-4 top-1/5 flex items-center gap-2">
-              <div className="h-px w-16 bg-white/10"></div>
-              <div className="relative h-9 px-4 rounded-xl bg-white/[0.06] ring-1 ring-white/20 flex items-center justify-center backdrop-blur">
-                <span className="text-xs font-medium text-orange-400">Результат</span>
-                <span className="absolute -right-1 h-1 w-1 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.65)] animate-pulse"></span>
-              </div>
-              <div className="h-px flex-1 bg-white/10 -translate-x-2"></div>
-            </div>
-
-            {/* Right bottom node */}
-            <div className="absolute right-8 bottom-16 flex items-center gap-2">
-              <div className="h-px w-10 bg-white/10"></div>
-              <div className="relative h-9 px-4 rounded-xl bg-white/[0.06] ring-1 ring-white/20 flex items-center justify-center backdrop-blur">
-                <span className="text-xs font-medium text-orange-400">Победа</span>
-                <span className="absolute -right-1 h-1 w-1 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.65)] animate-pulse"></span>
-              </div>
-              <div className="h-px flex-1 bg-white/10 -translate-x-2"></div>
-            </div>
-          </div>
-
+        
           {/* Card - Dashboard style glassmorphism */}
-          <div className="relative max-w-md mr-auto ml-auto pt-6 pr-6 pb-6 pl-6 sm:pt-8 sm:pr-8 sm:pb-8 sm:pl-8 z-10 overflow-hidden rounded-3xl bg-[#1a1a24]/95 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 pt-6 pr-6 pb-6 pl-6 sm:pt-8 sm:pr-8 sm:pb-8 sm:pl-8 overflow-hidden rounded-3xl bg-[#1a1a24]/95 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+            {/* Close button inside card - 3px from edges */}
+            <button
+              onClick={onClose}
+              className="absolute top-[3px] right-[3px] z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+              <span className="sr-only">Закрыть</span>
+            </button>
+
             {/* Background effects like dashboard */}
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/15 via-transparent to-transparent pointer-events-none" />
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/15 blur-3xl pointer-events-none" />
@@ -186,7 +155,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   <button type="button" className="flex items-center justify-center rounded-xl bg-blue-500/15 ring-1 ring-blue-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-500/25 hover:ring-blue-400/40 active:scale-95 backdrop-blur">
                     <span className="sr-only">Telegram</span>
                     <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
-                      <path d="M48 1.7004L40.4074 46.0017C40.4074 46.0017 39.345 49.0733 36.4267 47.6002L18.9084 32.0543L18.8272 32.0085C21.1935 29.5494 39.5429 10.4546 40.3449 9.58905C41.5863 8.24856 40.8156 7.45053 39.3742 8.46313L12.2698 28.3849L1.81298 24.3128C1.81298 24.3128 0.167387 23.6353 0.00907665 22.1622C-0.151317 20.6867 1.86714 19.8887 1.86714 19.8887L44.4963 0.533499C44.4963 0.533499 48 -1.2482 48 1.7004V1.7004Z" fill="#60A5FA"/>
+                      <path d="M48 1.7004L40.4074 46.0017C40.4074 46.0017 39.345 49.0733 36.4267 47.6002L18.9084 32.0543L18.8272 32.0085C21.1935 29.5494 39.5429 10.4546 40.3449 9.58905C41.5863 8.24856 40.8156 7.45053 39.3742 8.46313L12.2698 28.3849L1.81298 24.3128C1.81298 24.3128 0.167387 23.6353 0.00907665 22.1622C-0.151317 20.6867 1.86714 19.8887 1.86714 19.8887L44.4963 0.533499C44.4963 0.533499 48 -1.2482 48 1.7004V1.7004Z" fill="#93C5FD"/>
                     </svg>
                   </button>
 
@@ -194,7 +163,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   <button type="button" className="flex items-center justify-center rounded-xl bg-red-500/15 ring-1 ring-red-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-red-500/25 hover:ring-red-400/40 active:scale-95 backdrop-blur">
                     <span className="sr-only">Yandex</span>
                     <svg className="w-5 h-5" viewBox="0 0 73 73" fill="none" style={{ transform: 'scale(1.15)' }}>
-                      <path d="M43.1721 16.4533H38.9343C31.1651 16.4533 27.0844 20.3516 27.0844 26.1205C27.0844 32.6694 29.9096 35.7098 35.7169 39.6081L40.5036 42.8045L26.6921 63.3083H16.4115L28.8108 44.9873C21.6694 39.9196 17.667 35.0083 17.667 26.6663C17.667 16.2197 24.9654 9.12499 38.8558 9.12499H52.6677V63.3083H43.1721V16.4533Z" fill="#F87171"/>
+                      <path d="M43.1721 16.4533H38.9343C31.1651 16.4533 27.0844 20.3516 27.0844 26.1205C27.0844 32.6694 29.9096 35.7098 35.7169 39.6081L40.5036 42.8045L26.6921 63.3083H16.4115L28.8108 44.9873C21.6694 39.9196 17.667 35.0083 17.667 26.6663C17.667 16.2197 24.9654 9.12499 38.8558 9.12499H52.6677V63.3083H43.1721V16.4533Z" fill="#FCA5A5"/>
                     </svg>
                   </button>
 
@@ -202,12 +171,12 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   <button type="button" className="flex items-center justify-center rounded-xl bg-blue-600/15 ring-1 ring-blue-500/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-600/25 hover:ring-blue-500/40 active:scale-95 backdrop-blur">
                     <span className="sr-only">ВКонтакте</span>
                     <svg className="w-5 h-5" viewBox="0 0 57 36" fill="none">
-                      <path d="M31.0456 36C11.5709 36 0.462836 22.4865 0 0H9.75515C10.0756 16.5045 17.2673 23.4955 22.9638 24.9369V0H32.1493V14.2342C37.7745 13.6216 43.6846 7.13513 45.6783 0H54.8638C54.1125 3.70048 52.6149 7.20425 50.4647 10.2921C48.3145 13.38 45.5578 15.9856 42.3673 17.9459C45.9287 19.7371 49.0744 22.2724 51.5967 25.3845C54.119 28.4965 55.9606 32.1146 57 36H46.8888C45.9558 32.6253 44.0594 29.6044 41.4374 27.3158C38.8154 25.0273 35.5844 23.573 32.1493 23.1351V36H31.0456Z" fill="#60A5FA"/>
+                      <path d="M31.0456 36C11.5709 36 0.462836 22.4865 0 0H9.75515C10.0756 16.5045 17.2673 23.4955 22.9638 24.9369V0H32.1493V14.2342C37.7745 13.6216 43.6846 7.13513 45.6783 0H54.8638C54.1125 3.70048 52.6149 7.20425 50.4647 10.2921C48.3145 13.38 45.5578 15.9856 42.3673 17.9459C45.9287 19.7371 49.0744 22.2724 51.5967 25.3845C54.119 28.4965 55.9606 32.1146 57 36H46.8888C45.9558 32.6253 44.0594 29.6044 41.4374 27.3158C38.8154 25.0273 35.5844 23.573 32.1493 23.1351V36H31.0456Z" fill="#93C5FD"/>
                     </svg>
                   </button>
 
-                  {/* Google */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/30 px-2 py-3 text-xs font-medium transition-all hover:bg-white/25 hover:ring-white/40 active:scale-95 backdrop-blur">
+                  {/* Google - оригинальные цвета */}
+                  <button type="button" className="flex items-center justify-center rounded-xl bg-white/[0.08] ring-1 ring-white/20 px-2 py-3 text-xs font-medium transition-all hover:bg-white/[0.12] hover:ring-white/30 active:scale-95 backdrop-blur">
                     <span className="sr-only">Google</span>
                     <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
                       <path fillRule="evenodd" clipRule="evenodd" d="M48 24.5456C48 22.8438 47.8442 21.2074 47.5547 19.6365H24.4898V28.9201H37.6697C37.102 31.9202 35.3766 34.462 32.7829 36.1638V42.1856H40.6976C45.3284 38.0074 48 31.8547 48 24.5456Z" fill="#4285F4"/>
@@ -232,7 +201,6 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
               </form>
             </div>
           </div>
-        </div>
       </DialogContent>
     </Dialog>
   )

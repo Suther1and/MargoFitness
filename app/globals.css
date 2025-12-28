@@ -132,6 +132,36 @@
   body::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Webkit browsers (Chrome, Safari, Yandex) - transparent background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: white !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+    caret-color: white !important;
+    color: white !important;
+  }
+  
+  /* Firefox autofill - matching input background color */
+  input:-moz-autofill,
+  input:-moz-autofill-preview {
+    filter: none !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    background-image: none !important;
+    color: white !important;
+    box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.04) inset !important;
+  }
+  
+  /* Additional Firefox hack */
+  input:autofill {
+    background-color: transparent !important;
+    background-clip: text !important;
+  }
   .font-oswald {
     font-family: var(--font-oswald);
   }
