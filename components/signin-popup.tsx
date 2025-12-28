@@ -13,6 +13,25 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
+  // Блокируем скролл страницы при открытии модального окна
+  useEffect(() => {
+    if (isOpen) {
+      // Сохраняем текущую позицию скролла
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      
+      return () => {
+        // Восстанавливаем позицию при закрытии
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [isOpen])
+
   // Гарантированное срабатывание анимации на мобильных через MutationObserver
   useEffect(() => {
     if (!isOpen) return
