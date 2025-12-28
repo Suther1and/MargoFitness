@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { OAuthButtons } from "@/components/oauth-buttons"
 
 interface SignInPopupProps {
   isOpen: boolean
@@ -14,17 +13,119 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
+  // Force reflow для гарантированного срабатывания анимации на мобильных
+  useEffect(() => {
+    if (!isOpen) return
+    
+    const content = document.querySelector('[data-slot="dialog-content"]')
+    if (content) {
+      // Принудительный reflow для применения анимации
+      void content.offsetHeight
+    }
+  }, [isOpen])
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm p-0 border-0 bg-transparent overflow-visible" showCloseButton={false}>
+    <>
+      <style jsx global>{`
+        /* Плавный рендеринг шрифтов */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Оптимизация всех кнопок для touch-устройств */
+        button {
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
+          cursor: pointer;
+        }
+        
+        @keyframes popupScaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes popupScaleOut {
+          from {
+            opacity: 1;
+            transform: scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+        }
+        
+        /* Desktop: bounce эффект */
+        [data-slot="dialog-content"][data-state="open"] {
+          animation: popupScaleIn 0.35s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+        }
+        
+        [data-slot="dialog-content"][data-state="closed"] {
+          animation: popupScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+        }
+        
+        /* Mobile: упрощенная анимация без bounce */
+        @media (max-width: 1023px) {
+          [data-slot="dialog-content"][data-state="open"] {
+            animation: popupScaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+          }
+          
+          [data-slot="dialog-content"][data-state="closed"] {
+            animation: popupScaleOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+          }
+          
+          /* Отключаем декоративные blur круги на мобильных (очень тяжело для GPU) */
+          .absolute.rounded-full.blur-3xl {
+            display: none !important;
+          }
+          
+          /* Упрощаем backdrop-blur */
+          .backdrop-blur-xl,
+          .backdrop-blur {
+            backdrop-filter: blur(4px) !important;
+          }
+          
+          /* Упрощаем тени */
+          .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important;
+          }
+          
+          /* Ускоряем все transitions */
+          * {
+            transition-duration: 0.2s !important;
+          }
+          
+          /* Отключаем hover эффекты на touch устройствах */
+          @media (hover: none) {
+            button:hover {
+              transform: none !important;
+            }
+          }
+        }
+      `}</style>
+      
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent 
+          className="max-w-sm p-0 border-0 bg-transparent overflow-visible"
+          showCloseButton={false}
+        >
         <DialogTitle className="sr-only">Вход в MargoFitness</DialogTitle>
         
           {/* Card - Dashboard style glassmorphism */}
-          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 pt-6 pr-6 pb-6 pl-6 sm:pt-8 sm:pr-8 sm:pb-8 sm:pl-8 overflow-hidden rounded-3xl bg-[#1a1a24]/95 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/95 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
             {/* Close button inside card - 3px from edges */}
             <button
               onClick={onClose}
               className="absolute top-[3px] right-[3px] z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95"
+              style={{ willChange: 'transform, opacity' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80">
                 <path d="M18 6 6 18"></path>
@@ -85,7 +186,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                       placeholder="твоя@почта.ru" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="ml-3 flex-1 bg-transparent text-sm font-normal text-white placeholder:text-white/40 focus:outline-none font-roboto"
+                      className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none font-roboto"
                     />
                   </div>
                 </div>
@@ -110,12 +211,13 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                       placeholder="Введите пароль" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="ml-3 flex-1 bg-transparent text-sm font-normal text-white placeholder:text-white/40 focus:outline-none font-roboto"
+                      className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none font-roboto"
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="ml-3 mr-[7px] w-[33px] h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition flex-shrink-0 -my-1"
+                      style={{ willChange: 'background-color, color' }}
                       aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
                     >
                       {showPassword ? (
@@ -137,7 +239,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 <button 
                   type="submit" 
                   className="w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 ring-1 ring-orange-400/50 px-4 py-2.5 transition-all hover:from-orange-500/30 hover:to-orange-600/30 hover:ring-orange-400/60 active:scale-95 mt-6"
-                  style={{ touchAction: 'manipulation' }}
+                  style={{ touchAction: 'manipulation', willChange: 'transform' }}
                 >
                   <div className="flex items-center justify-between pointer-events-none">
                     <div className="text-left">
@@ -163,7 +265,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 {/* Social buttons - Dashboard glassmorphism style */}
                 <div className="grid grid-cols-4 gap-2">
                   {/* Telegram */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-500/15 ring-1 ring-blue-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-500/25 hover:ring-blue-400/40 active:scale-95 backdrop-blur">
+                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-500/15 ring-1 ring-blue-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-500/25 hover:ring-blue-400/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
                     <span className="sr-only">Telegram</span>
                     <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
                       <path d="M48 1.7004L40.4074 46.0017C40.4074 46.0017 39.345 49.0733 36.4267 47.6002L18.9084 32.0543L18.8272 32.0085C21.1935 29.5494 39.5429 10.4546 40.3449 9.58905C41.5863 8.24856 40.8156 7.45053 39.3742 8.46313L12.2698 28.3849L1.81298 24.3128C1.81298 24.3128 0.167387 23.6353 0.00907665 22.1622C-0.151317 20.6867 1.86714 19.8887 1.86714 19.8887L44.4963 0.533499C44.4963 0.533499 48 -1.2482 48 1.7004V1.7004Z" fill="#93C5FD"/>
@@ -171,7 +273,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   </button>
 
                   {/* Yandex */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-red-500/15 ring-1 ring-red-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-red-500/25 hover:ring-red-400/40 active:scale-95 backdrop-blur">
+                  <button type="button" className="flex items-center justify-center rounded-xl bg-red-500/15 ring-1 ring-red-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-red-500/25 hover:ring-red-400/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
                     <span className="sr-only">Yandex</span>
                     <svg className="w-5 h-5" viewBox="0 0 73 73" fill="none" style={{ transform: 'scale(1.15)' }}>
                       <path d="M43.1721 16.4533H38.9343C31.1651 16.4533 27.0844 20.3516 27.0844 26.1205C27.0844 32.6694 29.9096 35.7098 35.7169 39.6081L40.5036 42.8045L26.6921 63.3083H16.4115L28.8108 44.9873C21.6694 39.9196 17.667 35.0083 17.667 26.6663C17.667 16.2197 24.9654 9.12499 38.8558 9.12499H52.6677V63.3083H43.1721V16.4533Z" fill="#FCA5A5"/>
@@ -179,7 +281,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   </button>
 
                   {/* VK */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-600/15 ring-1 ring-blue-500/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-600/25 hover:ring-blue-500/40 active:scale-95 backdrop-blur">
+                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-600/15 ring-1 ring-blue-500/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-600/25 hover:ring-blue-500/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
                     <span className="sr-only">ВКонтакте</span>
                     <svg className="w-5 h-5" viewBox="0 0 57 36" fill="none">
                       <path d="M31.0456 36C11.5709 36 0.462836 22.4865 0 0H9.75515C10.0756 16.5045 17.2673 23.4955 22.9638 24.9369V0H32.1493V14.2342C37.7745 13.6216 43.6846 7.13513 45.6783 0H54.8638C54.1125 3.70048 52.6149 7.20425 50.4647 10.2921C48.3145 13.38 45.5578 15.9856 42.3673 17.9459C45.9287 19.7371 49.0744 22.2724 51.5967 25.3845C54.119 28.4965 55.9606 32.1146 57 36H46.8888C45.9558 32.6253 44.0594 29.6044 41.4374 27.3158C38.8154 25.0273 35.5844 23.573 32.1493 23.1351V36H31.0456Z" fill="#93C5FD"/>
@@ -187,7 +289,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   </button>
 
                   {/* Google - оригинальные цвета */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-white/[0.08] ring-1 ring-white/20 px-2 py-3 text-xs font-medium transition-all hover:bg-white/[0.12] hover:ring-white/30 active:scale-95 backdrop-blur">
+                  <button type="button" className="flex items-center justify-center rounded-xl bg-white/[0.08] ring-1 ring-white/20 px-2 py-3 text-xs font-medium transition-all hover:bg-white/[0.12] hover:ring-white/30 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
                     <span className="sr-only">Google</span>
                     <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
                       <path fillRule="evenodd" clipRule="evenodd" d="M48 24.5456C48 22.8438 47.8442 21.2074 47.5547 19.6365H24.4898V28.9201H37.6697C37.102 31.9202 35.3766 34.462 32.7829 36.1638V42.1856H40.6976C45.3284 38.0074 48 31.8547 48 24.5456Z" fill="#4285F4"/>
@@ -212,8 +314,9 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
               </form>
             </div>
           </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
