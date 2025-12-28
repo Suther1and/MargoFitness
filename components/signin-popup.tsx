@@ -58,22 +58,22 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
               </div>
 
               {/* Heading */}
-              <div className="text-center mb-6">
+              <div className="text-center mb-8">
                 <h1 className="text-2xl leading-tight tracking-tight font-semibold text-white font-montserrat">
                   Вход в MargoFitness
                 </h1>
                 <p className="mt-2 text-sm font-normal text-white/70 font-montserrat">
-                  Войдите или создайте новый аккаунт
+                  Начни свою трансформацию
                 </p>
               </div>
 
               {/* Form */}
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="mt-2 space-y-5" onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-2">
                   <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-white/60 font-roboto">
                     Email
                   </label>
-                  <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-2.5 text-sm text-white transition-all focus-within:ring-orange-500/50 focus-within:ring-2">
+                  <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-orange-500/50 focus-within:ring-2">
                     <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" viewBox="0 0 24 24" className="h-4 w-4 text-white/40">
                       <path fill="currentColor" d="M22 5a3 3 0 1 1-6 0a3 3 0 0 1 6 0"></path>
                       <path fill="currentColor" d="M15.612 2.038C14.59 2 13.399 2 12 2C7.286 2 4.929 2 3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12c0-1.399 0-2.59-.038-3.612a4.5 4.5 0 0 1-6.35-6.35" opacity=".5"></path>
@@ -82,7 +82,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                     <input 
                       id="email" 
                       type="email" 
-                      placeholder="your@email.com" 
+                      placeholder="твоя@почта.ru" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="ml-3 flex-1 bg-transparent text-sm font-normal text-white placeholder:text-white/40 focus:outline-none font-roboto"
@@ -96,10 +96,10 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                       Пароль
                     </label>
                     <a href="#" className="text-xs font-medium text-white/60 hover:text-orange-400 transition font-roboto">
-                      Забыли?
+                      Забыли пароль?
                     </a>
                   </div>
-                  <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-2.5 text-sm text-white transition-all focus-within:ring-orange-500/50 focus-within:ring-2">
+                  <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 pl-3 pr-2 py-2.5 text-sm text-white transition-all focus-within:ring-orange-500/50 focus-within:ring-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" className="text-white/40" fill="currentColor">
                       <path d="M2 16c0-2.828 0-4.243.879-5.121C3.757 10 5.172 10 8 10h8c2.828 0 4.243 0 5.121.879C22 11.757 22 13.172 22 16s0 4.243-.879 5.121C20.243 22 18.828 22 16 22H8c-2.828 0-4.243 0-5.121-.879C2 20.243 2 18.828 2 16" opacity=".5"/>
                       <path d="M6.75 8a5.25 5.25 0 0 1 10.5 0v2.004c.567.005 1.064.018 1.5.05V8a6.75 6.75 0 0 0-13.5 0v2.055a24 24 0 0 1 1.5-.051z"/>
@@ -115,9 +115,20 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="ml-2 rounded-lg px-2 py-1 text-[11px] font-medium text-white/60 hover:bg-white/10 hover:text-white transition font-roboto"
+                      className="ml-3 mr-1.5 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition flex-shrink-0 -my-1"
+                      aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
                     >
-                      {showPassword ? 'Скрыть' : 'Показать'}
+                      {showPassword ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -125,7 +136,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 {/* Primary button - Dashboard style */}
                 <button 
                   type="submit" 
-                  className="w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 ring-1 ring-orange-400/50 px-4 py-2.5 transition-all hover:from-orange-500/30 hover:to-orange-600/30 hover:ring-orange-400/60 active:scale-95"
+                  className="w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 ring-1 ring-orange-400/50 px-4 py-2.5 transition-all hover:from-orange-500/30 hover:to-orange-600/30 hover:ring-orange-400/60 active:scale-95 mt-6"
                   style={{ touchAction: 'manipulation' }}
                 >
                   <div className="flex items-center justify-between pointer-events-none">
