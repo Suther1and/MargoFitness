@@ -13,14 +13,41 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  // Force reflow для гарантированного срабатывания анимации на мобильных
+  // Гарантированное срабатывание анимации на мобильных через MutationObserver
   useEffect(() => {
     if (!isOpen) return
     
-    const content = document.querySelector('[data-slot="dialog-content"]')
-    if (content) {
-      // Принудительный reflow для применения анимации
-      void content.offsetHeight
+    // Для мобильных используем более агрессивный подход
+    const isMobile = window.innerWidth < 1024
+    
+    if (isMobile) {
+      // Ждем появления dialog-content в DOM
+      const observer = new MutationObserver(() => {
+        const content = document.querySelector('[data-slot="dialog-content"]') as HTMLElement
+        if (content) {
+          // Принудительно перезапускаем анимацию
+          content.style.animation = 'none'
+          void content.offsetHeight // Force reflow
+          content.style.animation = ''
+          observer.disconnect()
+        }
+      })
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      })
+      
+      // Очистка через 2 секунды если не сработало
+      setTimeout(() => observer.disconnect(), 2000)
+      
+      return () => observer.disconnect()
+    } else {
+      // На десктопе используем простой force reflow
+      const content = document.querySelector('[data-slot="dialog-content"]')
+      if (content) {
+        void content.offsetHeight
+      }
     }
   }, [isOpen])
 
@@ -66,20 +93,24 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
         /* Desktop: bounce эффект */
         [data-slot="dialog-content"][data-state="open"] {
           animation: popupScaleIn 0.35s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+          animation-fill-mode: both !important;
         }
         
         [data-slot="dialog-content"][data-state="closed"] {
           animation: popupScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+          animation-fill-mode: both !important;
         }
         
-        /* Mobile: упрощенная анимация без bounce */
+        /* Mobile: более заметная и медленная анимация для отладки */
         @media (max-width: 1023px) {
           [data-slot="dialog-content"][data-state="open"] {
-            animation: popupScaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            animation: popupScaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            animation-fill-mode: both !important;
           }
           
           [data-slot="dialog-content"][data-state="closed"] {
-            animation: popupScaleOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+            animation: popupScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+            animation-fill-mode: both !important;
           }
           
           /* Отключаем декоративные blur круги на мобильных (очень тяжело для GPU) */
