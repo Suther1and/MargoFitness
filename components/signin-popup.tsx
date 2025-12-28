@@ -79,6 +79,17 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
           }
         }
         
+        @keyframes popupScaleInMobile {
+          from {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
         @keyframes popupScaleOut {
           from {
             opacity: 1;
@@ -90,9 +101,9 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
           }
         }
         
-        /* Desktop: bounce эффект */
+        /* Desktop: bounce эффект (медленнее) */
         [data-slot="dialog-content"][data-state="open"] {
-          animation: popupScaleIn 0.35s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+          animation: popupScaleIn 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
           animation-fill-mode: both !important;
         }
         
@@ -101,15 +112,15 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
           animation-fill-mode: both !important;
         }
         
-        /* Mobile: более заметная и медленная анимация для отладки */
+        /* Mobile: плавная анимация с bounce эффектом (scale от 0.7) */
         @media (max-width: 1023px) {
           [data-slot="dialog-content"][data-state="open"] {
-            animation: popupScaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            animation: popupScaleInMobile 0.8s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
             animation-fill-mode: both !important;
           }
           
           [data-slot="dialog-content"][data-state="closed"] {
-            animation: popupScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+            animation: popupScaleOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards !important;
             animation-fill-mode: both !important;
           }
           
@@ -332,13 +343,13 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 </div>
 
                 {/* Subtext */}
-                <p className="pt-2 text-xs leading-relaxed text-white/50 text-center font-roboto">
+                <p className="pt-2 text-xs leading-[1.5] text-white/50 text-center font-roboto">
                   Продолжая, вы соглашаетесь с{' '}
-                  <a href="#" className="font-medium text-white/70 hover:text-orange-400 transition">
+                  <a href="#" className="font-medium text-white/70 hover:text-orange-400 transition whitespace-nowrap">
                     Условиями
                   </a>
                   {' '}и{' '}
-                  <a href="#" className="font-medium text-white/70 hover:text-orange-400 transition">
+                  <a href="#" className="font-medium text-white/70 hover:text-orange-400 transition whitespace-nowrap">
                     Политикой
                   </a>
                 </p>
