@@ -16,17 +16,25 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   // Блокируем скролл страницы при открытии модального окна
   useEffect(() => {
     if (isOpen) {
+      // Вычисляем ширину scrollbar
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      
       // Сохраняем текущую позицию скролла
       const scrollY = window.scrollY
+      
+      // Применяем стили для блокировки скролла без прыжка
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollY}px`
       document.body.style.width = '100%'
+      document.body.style.paddingRight = `${scrollbarWidth}px`
       
       return () => {
-        // Восстанавливаем позицию при закрытии
+        // Восстанавливаем стили
+        const scrollY = parseInt(document.body.style.top || '0') * -1
         document.body.style.position = ''
         document.body.style.top = ''
         document.body.style.width = ''
+        document.body.style.paddingRight = ''
         window.scrollTo(0, scrollY)
       }
     }
@@ -181,7 +189,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
         <DialogTitle className="sr-only">Вход в MargoFitness</DialogTitle>
         
           {/* Card - Dashboard style glassmorphism */}
-          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/95 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/85 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
             {/* Close button inside card - 3px from edges */}
             <button
               onClick={onClose}
