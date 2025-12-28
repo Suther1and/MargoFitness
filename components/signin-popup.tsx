@@ -16,34 +16,12 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   // Блокируем скролл страницы при открытии модального окна
   useEffect(() => {
     if (isOpen) {
-      // Вычисляем ширину scrollbar ДО блокировки
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      const scrollY = window.scrollY
-      
-      // Блокируем скролл через overflow вместо position fixed
       document.documentElement.style.overflow = 'hidden'
       document.body.style.overflow = 'hidden'
-      document.body.style.paddingRight = `${scrollbarWidth}px`
-      
-      // Компенсируем для fixed элементов (например navbar)
-      const fixedElements = document.querySelectorAll('[class*="sticky"], [class*="fixed"]')
-      fixedElements.forEach((el) => {
-        if (el instanceof HTMLElement) {
-          el.style.paddingRight = `${scrollbarWidth}px`
-        }
-      })
       
       return () => {
-        // Восстанавливаем всё
         document.documentElement.style.overflow = ''
         document.body.style.overflow = ''
-        document.body.style.paddingRight = ''
-        
-        fixedElements.forEach((el) => {
-          if (el instanceof HTMLElement) {
-            el.style.paddingRight = ''
-          }
-        })
       }
     }
   }, [isOpen])
