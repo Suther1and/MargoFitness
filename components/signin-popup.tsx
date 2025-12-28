@@ -44,7 +44,7 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
       return () => observer.disconnect()
     } else {
       // На десктопе используем простой force reflow
-      const content = document.querySelector('[data-slot="dialog-content"]')
+      const content = document.querySelector('[data-slot="dialog-content"]') as HTMLElement | null
       if (content) {
         void content.offsetHeight
       }
