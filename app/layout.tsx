@@ -44,7 +44,7 @@ export default function RootLayout({
           color: '#FFFFFF'
         }}
       >
-        <div className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}>
+        <div className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" style={{ background: '#19191C' }}>
           <NavbarNew />
           <main className="relative w-full overflow-x-hidden">
             <div className="absolute inset-0 pointer-events-none z-0">
