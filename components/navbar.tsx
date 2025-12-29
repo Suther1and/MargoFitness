@@ -26,6 +26,7 @@ interface NavbarProps {
 
 export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
@@ -84,6 +85,14 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
     }
   }, [mobileMenuOpen])
 
+  const handleCloseMobileMenu = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setMobileMenuOpen(false)
+      setIsClosing(false)
+    }, 250) // Длительность анимации закрытия
+  }
+
   const navLinks = [
     { href: '/home-new', label: 'Главная' },
     { href: '/workouts', label: 'Тренировки' },
@@ -126,6 +135,17 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
         }
 
+        @keyframes mobileMenuSlideOut {
+          from {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(100%) scale(0.95);
+          }
+        }
+
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -136,13 +156,21 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         }
 
         [data-mobile-menu] {
-          animation: slideInFromRight 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+          animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+        }
+
+        [data-mobile-menu].closing {
+          animation: mobileMenuSlideOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
         }
 
         @media (max-width: 1023px) {
           [data-mobile-menu] {
-            animation: mobileMenuSlideScale 0.8s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+            animation: mobileMenuSlideScale 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
             animation-fill-mode: both !important;
+          }
+          
+          [data-mobile-menu].closing {
+            animation: mobileMenuSlideOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards !important;
           }
         }
 
@@ -241,7 +269,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       {/* Mobile: только бургер */}
       <div className="lg:hidden fixed top-4 right-4 z-50">
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
           className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
           style={{
             background: colors.navbarBg,
@@ -265,13 +293,13 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           {/* Backdrop */}
           <div
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={handleCloseMobileMenu}
           />
 
           {/* Mobile Menu Panel */}
           <div
             data-mobile-menu
-            className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 lg:hidden"
+            className={`fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 lg:hidden ${isClosing ? 'closing' : ''}`}
             style={{
               background: '#0C0C11',
               borderLeft: `1px solid ${colors.cardBorder}`,
@@ -290,7 +318,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                   Меню
                 </span>
                 <button
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={handleCloseMobileMenu}
                   className="p-2 rounded-lg transition-all active:scale-95"
                   style={{
                     background: colors.cardBg,

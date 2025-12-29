@@ -507,13 +507,6 @@ export default function DashboardDesignPage() {
         style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}
       >
         <main className="relative w-full xl:max-w-[96rem] bg-[#0a0a0f] xl:rounded-[3rem] overflow-x-hidden overflow-y-auto min-h-screen xl:min-h-[calc(100vh-4rem)]">
-          {/* Background effects */}
-          <div className="absolute inset-0 pointer-events-none z-0">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-[30rem] h-[30rem] blur-[120px] rounded-full" style={{ background: 'rgba(249, 115, 22, 0.1)' }} />
-            <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] blur-[120px] rounded-full" style={{ background: 'rgba(168, 85, 247, 0.1)' }} />
-          </div>
-          
           <div className="relative w-full z-10">
             <div className="px-4 md:px-8 pb-12">
               {/* Header */}
