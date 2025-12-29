@@ -868,7 +868,7 @@ export default function HomeNewPage() {
                       ].map((feature, idx) => (
                         <div 
                           key={idx} 
-                          className={`rounded-2xl p-4 transition-all flex flex-col gap-2 md:gap-3 relative overflow-hidden md:hover:ring-white/15 md:hover:shadow-lg ${feature.clickable ? 'cursor-pointer' : ''}`}
+                          className={`rounded-2xl p-4 transition-all flex flex-col gap-2 md:gap-3 relative overflow-hidden md:hover:ring-white/15 md:hover:shadow-lg select-none ${feature.clickable ? 'cursor-pointer' : ''}`}
                           style={{
                             background: colors.cardBg,
                             border: `1px solid ${colors.cardBorder}`
