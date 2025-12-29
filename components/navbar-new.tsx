@@ -4,14 +4,17 @@ import { headers } from "next/headers"
 import { AuthButton } from "./auth-button"
 
 const colors = {
-  background: '#0a0a0f',
+  containerBg: '#0F0E14',
   primary: '#f97316',
   secondary: '#ea580c',
   textPrimary: '#FFFFFF',
   textSecondary: 'rgba(255, 255, 255, 0.7)',
   navbarBg: 'rgba(255, 255, 255, 0.08)',
   cardBorder: 'rgba(255, 255, 255, 0.1)',
+  adminLink: '#fbbf24',
 }
+
+const navLinkClass = "px-4 py-2 text-sm font-medium transition-all hover:opacity-80"
 
 export default async function NavbarNew() {
   const headersList = await headers()
@@ -25,7 +28,7 @@ export default async function NavbarNew() {
   const profile = await getCurrentProfile()
 
   return (
-    <div className="sticky top-0 z-50 px-4 py-4">
+    <div className="sticky top-0 z-50 px-4 py-4" style={{ background: colors.containerBg }}>
       <nav className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
         background: colors.navbarBg,
         border: `1px solid ${colors.cardBorder}`
@@ -53,23 +56,23 @@ export default async function NavbarNew() {
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
-            <Link href="/home-new" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-80" style={{ color: colors.textPrimary }}>
+            <Link href="/home-new" className={navLinkClass} style={{ color: colors.textPrimary }}>
               Главная
             </Link>
-            <Link href="/home-new#pricing" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
+            <Link href="/home-new#pricing" className={navLinkClass} style={{ color: colors.textSecondary }}>
               Тарифы
             </Link>
-            <Link href="/free-content" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
+            <Link href="/free-content" className={navLinkClass} style={{ color: colors.textSecondary }}>
               Бесплатное
             </Link>
             
             {profile && (
               <>
-                <Link href="/dashboard-new" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: colors.textSecondary }}>
+                <Link href="/dashboard-new" className={navLinkClass} style={{ color: colors.textSecondary }}>
                   Кабинет
                 </Link>
                 {profile.role === 'admin' && (
-                  <Link href="/admin" className="px-4 py-2 text-sm font-medium transition-all hover:opacity-100" style={{ color: '#fbbf24' }}>
+                  <Link href="/admin" className={navLinkClass} style={{ color: colors.adminLink }}>
                     Админка
                   </Link>
                 )}
@@ -80,7 +83,7 @@ export default async function NavbarNew() {
           {profile ? (
             <div className="flex items-center gap-2">
               {profile.avatar_url && (
-                <Link href="/dashboard-new" className="flex items-center gap-2 hidden md:flex">
+                <Link href="/dashboard-new" className="hidden md:flex items-center gap-2">
                   <img 
                     src={profile.avatar_url} 
                     alt={profile.full_name || profile.email || 'Avatar'} 
@@ -88,7 +91,7 @@ export default async function NavbarNew() {
                   />
                 </Link>
               )}
-              <Link href="/auth/logout" className="uppercase hover:opacity-80 transition-all flex text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 gap-2 items-center backdrop-blur flex-shrink-0 active:scale-95" style={{
+              <Link href="/auth/logout" className="flex items-center gap-2 uppercase text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 backdrop-blur flex-shrink-0 transition-all hover:opacity-80 active:scale-95" style={{
                 color: colors.textPrimary,
                 border: `1px solid ${colors.cardBorder}`,
                 background: `${colors.textPrimary}0D`,

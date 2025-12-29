@@ -20,7 +20,7 @@ const pricingData = {
 
 // Фиксированная цветовая схема
 const colors = {
-  background: '#0a0a0f',
+  background: '#0C0C11',
   backgroundGradient: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)',
   primary: '#f97316',
   primaryLight: '#fb923c',
@@ -176,7 +176,7 @@ export default function HomeNewPage() {
                     </div>
 
                     <div className="lg:col-span-6 relative z-10 w-full">
-                      <div className="absolute top-10 -right-10 w-[20rem] h-[20rem] md:w-[30rem] md:h-[30rem] blur-[5rem] rounded-full pointer-events-none" style={{ background: colors.blurColor1 }}></div>
+                      <div className="absolute bottom-10 -left-10 w-[20rem] h-[20rem] md:w-[30rem] md:h-[30rem] blur-[5rem] rounded-full pointer-events-none" style={{ background: colors.blurColor1 }}></div>
                       <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[30rem] lg:h-[40rem] w-full" style={{ border: `1px solid ${colors.cardBorder}` }}>
                         <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" alt="Training" className="w-full h-full object-cover" />
                         <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}CC, transparent)` }}></div>
