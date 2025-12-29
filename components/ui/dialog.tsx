@@ -9,9 +9,16 @@ import { cn } from "@/lib/utils"
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  const [blurElement, setBlurElement] = React.useState<HTMLDivElement | null>(null)
+  const blurRef = React.useRef<HTMLDivElement | null>(null)
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   
   React.useEffect(() => {
+    // Очистка предыдущего timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    
     if (props.open) {
       // Создаем blur overlay
       const blur = document.createElement('div')
@@ -26,41 +33,51 @@ function Dialog({
       `
       blur.setAttribute('data-dialog-blur-overlay', '')
       
-      // Закрываем при клике на blur (но НЕ на контент dialog)
-      blur.addEventListener('click', (e) => {
+      // Закрываем при клике на blur
+      const handleClick = (e: MouseEvent) => {
         if (e.target === blur && props.onOpenChange) {
           props.onOpenChange(false)
         }
-      })
+      }
+      blur.addEventListener('click', handleClick)
       
       document.body.appendChild(blur)
+      blurRef.current = blur
       
       // Анимация появления
       requestAnimationFrame(() => {
-        blur.style.backdropFilter = 'blur(8px)'
-        ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
-        blur.style.background = 'rgba(0, 0, 0, 0.3)'
+        if (blur.parentElement) {
+          blur.style.backdropFilter = 'blur(8px)'
+          ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
+          blur.style.background = 'rgba(0, 0, 0, 0.3)'
+        }
       })
-      
-      setBlurElement(blur)
-    } else if (blurElement) {
+    } else if (blurRef.current) {
       // Анимация исчезновения
-      blurElement.style.backdropFilter = 'blur(0px)'
-      ;(blurElement.style as any).webkitBackdropFilter = 'blur(0px)'
-      blurElement.style.background = 'rgba(0, 0, 0, 0)'
+      const blur = blurRef.current
+      blur.style.backdropFilter = 'blur(0px)'
+      ;(blur.style as any).webkitBackdropFilter = 'blur(0px)'
+      blur.style.background = 'rgba(0, 0, 0, 0)'
       
       // Удаляем после завершения анимации
-      setTimeout(() => {
-        if (document.body.contains(blurElement)) {
-          document.body.removeChild(blurElement)
+      timeoutRef.current = setTimeout(() => {
+        if (blur && document.body.contains(blur)) {
+          document.body.removeChild(blur)
         }
-        setBlurElement(null)
+        blurRef.current = null
+        timeoutRef.current = null
       }, 200)
     }
     
+    // Cleanup
     return () => {
-      if (blurElement && document.body.contains(blurElement)) {
-        document.body.removeChild(blurElement)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      if (blurRef.current && document.body.contains(blurRef.current)) {
+        document.body.removeChild(blurRef.current)
+        blurRef.current = null
       }
     }
   }, [props.open, props.onOpenChange])
