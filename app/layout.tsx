@@ -43,27 +43,34 @@ export default async function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <body
-        className={`${oswald.variable} ${montserrat.variable} ${roboto.variable} ${inter.variable} font-inter antialiased min-h-screen flex flex-col items-center justify-center p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden`}
+        className={`${oswald.variable} ${montserrat.variable} ${roboto.variable} ${inter.variable} font-inter antialiased min-h-screen overflow-x-hidden`}
         suppressHydrationWarning
         style={{
           background: 'linear-gradient(to bottom right, #1f1f23, #0f0f13, #1f1f23)',
-          color: '#FFFFFF'
+          color: '#FFFFFF',
+          padding: '0',
+          margin: '0'
         }}
       >
-        <div 
-          className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" 
-          style={{ 
-            background: pathname.startsWith('/dashboard') 
-              ? 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)'
-              : '#0C0C11'
-          }}
-        >
-          <Navbar profile={profile} pathname={pathname} />
-          <main className="relative w-full overflow-hidden rounded-b-[3rem]">
-            <div className="relative z-10">
-              {children}
-            </div>
-          </main>
+        <div className="flex flex-col items-center w-full p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4">
+          <div 
+            className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem]" 
+            style={{ 
+              background: pathname.startsWith('/dashboard') 
+                ? 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)'
+                : '#0C0C11',
+              minHeight: '100vh'
+            }}
+          >
+            <Navbar profile={profile} pathname={pathname} />
+            {/* Spacer for fixed navbar */}
+            <div className="hidden lg:block h-20"></div>
+            <main className="relative w-full rounded-b-[3rem]">
+              <div className="relative z-10">
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
       </body>
     </html>

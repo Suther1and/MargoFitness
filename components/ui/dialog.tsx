@@ -13,22 +13,49 @@ function Dialog({
   
   React.useEffect(() => {
     if (props.open) {
-      // Создаем blur overlay поверх контента
+      // Создаем blur overlay
       const blur = document.createElement('div')
       blur.style.cssText = `
         position: fixed;
         inset: 0;
-        z-index: 49;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        background: rgba(0, 0, 0, 0.3);
-        pointer-events: none;
+        z-index: 48;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        background: rgba(0, 0, 0, 0);
+        transition: backdrop-filter 0.2s ease-in-out, background 0.2s ease-in-out;
       `
+      blur.setAttribute('data-dialog-blur-overlay', '')
+      
+      // Закрываем при клике на blur (но НЕ на контент dialog)
+      blur.addEventListener('click', (e) => {
+        if (e.target === blur && props.onOpenChange) {
+          props.onOpenChange(false)
+        }
+      })
+      
       document.body.appendChild(blur)
+      
+      // Анимация появления
+      requestAnimationFrame(() => {
+        blur.style.backdropFilter = 'blur(8px)'
+        blur.style.webkitBackdropFilter = 'blur(8px)'
+        blur.style.background = 'rgba(0, 0, 0, 0.3)'
+      })
+      
       setBlurElement(blur)
     } else if (blurElement) {
-      document.body.removeChild(blurElement)
-      setBlurElement(null)
+      // Анимация исчезновения
+      blurElement.style.backdropFilter = 'blur(0px)'
+      blurElement.style.webkitBackdropFilter = 'blur(0px)'
+      blurElement.style.background = 'rgba(0, 0, 0, 0)'
+      
+      // Удаляем после завершения анимации
+      setTimeout(() => {
+        if (document.body.contains(blurElement)) {
+          document.body.removeChild(blurElement)
+        }
+        setBlurElement(null)
+      }, 200)
     }
     
     return () => {
@@ -36,7 +63,7 @@ function Dialog({
         document.body.removeChild(blurElement)
       }
     }
-  }, [props.open])
+  }, [props.open, props.onOpenChange])
   
   return <DialogPrimitive.Root data-slot="dialog" modal={false} {...props} />
 }
@@ -67,7 +94,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-transparent pointer-events-none",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[49] bg-transparent",
         className
       )}
       {...props}
@@ -85,7 +112,7 @@ function DialogContent({
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay className="backdrop-blur-sm" />
+      <DialogOverlay className="backdrop-blur-sm z-[45]" />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

@@ -27,11 +27,22 @@ interface NavbarProps {
 export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
     return null
   }
+
+  // Отслеживание скролла для sticky эффекта
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Закрываем мобильное меню при изменении размера окна
   useEffect(() => {
@@ -173,7 +184,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       `}</style>
 
       {/* Desktop Navbar - Full */}
-      <div className="hidden lg:flex sticky top-0 z-50 px-4 py-4">
+      <div className="hidden lg:flex fixed top-0 left-0 right-0 z-50 px-4 py-4 max-w-[96rem] mx-auto xl:px-8">
         <nav className="backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full" style={{
           background: colors.navbarBg,
           border: `1px solid ${colors.cardBorder}`
