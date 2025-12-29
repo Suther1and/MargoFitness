@@ -306,7 +306,7 @@ export default function HomeNewPage() {
                           document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })
                         }
                       }}
-                      className="snap-center min-w-[85vw] md:min-w-0 rounded-3xl p-5 md:p-6 transition-all relative overflow-hidden min-h-[18rem] group md:hover:ring-white/20 md:hover:shadow-xl cursor-pointer active:scale-[0.98]" 
+                      className="snap-center min-w-[85vw] md:min-w-0 rounded-3xl p-5 md:p-6 transition-all relative overflow-hidden min-h-[18rem] group md:hover:ring-white/20 md:hover:shadow-xl cursor-pointer active:scale-[0.98] select-none" 
                       style={{
                         background: colors.cardBg,
                         border: `1px solid ${colors.cardBorder}`,
