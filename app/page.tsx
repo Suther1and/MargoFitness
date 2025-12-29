@@ -4,6 +4,7 @@ import { Inter, Oswald, Montserrat, Roboto } from 'next/font/google'
 import { useState, useRef } from 'react'
 import { SiTelegram, SiVk, SiInstagram, SiTiktok } from 'react-icons/si'
 import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
+import { SignInPopup } from '@/components/signin-popup'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
@@ -39,6 +40,7 @@ const colors = {
 export default function HomeNewPage() {
   const [selectedDuration, setSelectedDuration] = useState<Period>(30)
   const [certificateOpen, setCertificateOpen] = useState(false)
+  const [signInOpen, setSignInOpen] = useState(false)
   const priceStarterRef = useRef<HTMLSpanElement>(null)
   const priceProRef = useRef<HTMLSpanElement>(null)
   const priceEliteRef = useRef<HTMLSpanElement>(null)
@@ -129,8 +131,8 @@ export default function HomeNewPage() {
                       <div className="flex gap-4 items-center">
                         <div className="h-px w-8 md:w-12" style={{ background: colors.secondary }}></div>
                         <span className="uppercase text-xs md:text-sm font-medium tracking-widest font-montserrat" style={{ color: colors.primary }}>Онлайн-тренировки для дома</span>
-                      </div>
-
+          </div>
+          
                       <h1 className="text-5xl md:text-7xl lg:text-9xl leading-[0.95] uppercase font-medium tracking-tight font-oswald" style={{ color: colors.textPrimary }}>
                         Преврати <br />
                         <span className="animate-color-shift" style={{
@@ -147,8 +149,8 @@ export default function HomeNewPage() {
                           backgroundClip: 'text',
                           WebkitTextFillColor: 'transparent'
                         } as React.CSSProperties}>в цель.</span>
-                      </h1>
-
+          </h1>
+          
                       <p className="text-base md:text-lg max-w-lg font-roboto leading-relaxed" style={{ color: colors.textSecondary }}>
                         Твой фитнес — твои правила. Достигай результатов легко в удобном формате с тренировками от профессионального тренера: продвинутый личный кабинет, дневник здоровья, бонусы и многое другое на нашей платформе.
                       </p>
@@ -233,7 +235,7 @@ export default function HomeNewPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+          </div>
 
                 {/* Mobile Hero - Overlay Glass */}
                 <div className="md:hidden relative h-[85vh] mx-auto -mt-4 overflow-hidden max-w-full">
@@ -255,7 +257,7 @@ export default function HomeNewPage() {
                         <span className="uppercase text-xs font-medium tracking-widest" style={{ color: colors.primary }}>
                           Тренировки для дома
                         </span>
-                      </div>
+            </div>
                       <h1 className="text-4xl leading-[0.9] uppercase font-medium tracking-tight font-oswald mb-4" style={{ color: colors.textPrimary }}>
                         Преврати <br />
                         <span style={{ color: colors.primary }}>мечту в цель</span>
@@ -272,12 +274,12 @@ export default function HomeNewPage() {
                             <polyline points="10 17 15 12 10 7"></polyline>
                             <line x1="15" y1="12" x2="3" y2="12"></line>
                           </svg>
-                        </div>
+            </div>
                       </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
+            </div>
+          </div>
+        </div>
+      </section>
 
               {/* 2. HOW IT WORKS */}
               <section className="py-10 md:py-16 overflow-x-hidden">
@@ -285,20 +287,30 @@ export default function HomeNewPage() {
                 <div className="mb-8 md:mb-12 max-w-2xl">
                   <span className="text-xs font-semibold uppercase tracking-widest mb-2 block font-montserrat" style={{ color: colors.primary }}>Как это работает</span>
                   <h2 className="text-4xl md:text-5xl font-medium tracking-tight font-montserrat uppercase" style={{ color: colors.textPrimary }}>Путь к результату</h2>
-                </div>
+          </div>
 
                 </div>
                 <div className="flex overflow-x-auto snap-x snap-mandatory -mx-4 px-4 gap-4 pb-8 md:grid md:grid-cols-4 md:gap-6 md:pb-0 md:mx-0 md:px-8 scrolling-wrapper">
                   {[
-                    { num: '01', title: 'Регистрация', desc: 'Создай аккаунт и получи доступ к бесплатным материалам', color: 'orange-500' },
-                    { num: '02', title: 'Выбор плана', desc: 'Выбери подходящую подписку в зависимости от твоих целей', color: 'purple-500' },
-                    { num: '03', title: 'Тренировки', desc: 'Открой доступ к видео-тренировкам из личного кабинета', color: 'blue-500' },
-                    { num: '04', title: 'Результат', desc: 'Выполняй новые тренировки каждую неделю и достигай результата', color: 'emerald-500' }
+                    { num: '01', title: 'Регистрация', desc: 'Создай аккаунт и получи доступ к бесплатным материалам и личному кабинету', color: 'orange-500', action: 'signup' },
+                    { num: '02', title: 'Выбор плана', desc: 'Выбери подходящую подписку в зависимости от твоих целей и начни тренироваться', color: 'purple-500', action: 'pricing' },
+                    { num: '03', title: 'Тренировки', desc: 'Открой доступ к видео-тренировкам из личного кабинета', color: 'blue-500', action: 'signup' },
+                    { num: '04', title: 'Результат', desc: 'Выполняй новые тренировки каждую неделю и достигай результата', color: 'emerald-500', action: 'signup' }
                   ].map((step, idx) => (
-                    <div key={step.num} className="snap-center min-w-[85vw] md:min-w-0 rounded-3xl p-5 md:p-6 transition-all relative overflow-hidden min-h-[18rem] group md:hover:ring-white/20 md:hover:shadow-xl" style={{
-                      background: colors.cardBg,
-                      border: `1px solid ${colors.cardBorder}`,
-                    }}>
+                    <div 
+                      key={step.num} 
+                      onClick={() => {
+                        if (step.action === 'signup') {
+                          setSignInOpen(true)
+                        } else if (step.action === 'pricing') {
+                          document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })
+                        }
+                      }}
+                      className="snap-center min-w-[85vw] md:min-w-0 rounded-3xl p-5 md:p-6 transition-all relative overflow-hidden min-h-[18rem] group md:hover:ring-white/20 md:hover:shadow-xl cursor-pointer active:scale-[0.98]" 
+                      style={{
+                        background: colors.cardBg,
+                        border: `1px solid ${colors.cardBorder}`,
+                      }}>
                       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" style={{
                         background: `linear-gradient(to bottom right, ${
                           idx === 0 ? 'rgba(249, 115, 22, 0.1)' :
@@ -410,9 +422,9 @@ export default function HomeNewPage() {
                       ))}
                     </div>
                   </div>
-                </div>
-                </div>
-              </section>
+          </div>
+        </div>
+      </section>
 
               {/* 4. PRICING */}
               <section id="pricing" className="py-10 md:py-16 relative overflow-x-hidden md:overflow-visible">
@@ -444,7 +456,7 @@ export default function HomeNewPage() {
                         ))}
                       </div>
                     </div>
-                  </div>
+          </div>
 
                   <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 py-2 pb-8 md:grid md:grid-cols-3 md:gap-5 scrolling-wrapper md:items-center px-[7.5vw] md:px-0">
                     {/* Basic */}
@@ -493,7 +505,7 @@ export default function HomeNewPage() {
                             </svg>
                             <span>Telegram сообщество (доступ до 2000 участников)</span>
                           </li>
-                        </ul>
+                </ul>
                       </div>
 
                       {/* Кнопка снаружи */}
@@ -535,7 +547,7 @@ export default function HomeNewPage() {
                             <span className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
                             <span ref={(el) => { if (el) periodRefs.current[1] = el }} className="text-sm transition-all duration-300 ml-1" style={{ color: colors.textSecondary }}>{pricingData[30].suffix}</span>
                           </div>
-                        </div>
+              </div>
                         <ul className="space-y-3 text-sm font-roboto" style={{ color: colors.textSecondary }}>
                           <li className="flex gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0" style={{ color: colors.primaryLight }}>
@@ -564,7 +576,7 @@ export default function HomeNewPage() {
                             </svg>
                             <span>Доступ в Telegram сообщество навсегда</span>
                           </li>
-                        </ul>
+                </ul>
                       </div>
 
                       {/* Кнопка снаружи */}
@@ -631,8 +643,8 @@ export default function HomeNewPage() {
                             </svg>
                             <span>Прямая связь в Telegram</span>
                           </li>
-                        </ul>
-                      </div>
+                </ul>
+          </div>
 
                       {/* Кнопка снаружи */}
                       <button className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" style={{
@@ -645,9 +657,9 @@ export default function HomeNewPage() {
                         </div>
                       </button>
                     </div>
-                  </div>
-                </div>
-              </section>
+          </div>
+        </div>
+      </section>
 
               {/* 5. FEATURES SHOWCASE - iPhone Mockup Hidden on Mobile */}
               <section className="py-10 md:py-16 overflow-x-hidden relative">
@@ -842,7 +854,7 @@ export default function HomeNewPage() {
                       <span className="text-xs font-bold uppercase tracking-widest font-montserrat" style={{ color: colors.primary }}>Возможности платформы</span>
                       <h2 className="text-3xl md:text-4xl lg:text-5xl font-montserrat font-medium uppercase leading-tight" style={{ color: colors.textPrimary }}>
                         Всё для твоих<br className="hidden md:block" />результатов
-                      </h2>
+          </h2>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 md:gap-4 auto-rows-fr">
@@ -928,8 +940,8 @@ export default function HomeNewPage() {
                     </div>
                   </div>
                 </div>
-                </div>
-              </section>
+        </div>
+      </section>
 
               {/* 6. FOOTER */}
               <footer className="mt-auto overflow-x-hidden">
@@ -1024,11 +1036,15 @@ export default function HomeNewPage() {
                     </div>
                   </div>
               </footer>
-      </div>
+    </div>
       
       <TrainerCertificatePopup 
         open={certificateOpen} 
         onOpenChange={setCertificateOpen} 
+      />
+      <SignInPopup 
+        isOpen={signInOpen} 
+        onClose={() => setSignInOpen(false)} 
       />
     </>
   )
