@@ -90,7 +90,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
     setTimeout(() => {
       setMobileMenuOpen(false)
       setIsClosing(false)
-    }, 250) // Длительность анимации закрытия
+    }, 500) // Длительность анимации закрытия
   }
 
   const navLinks = [
@@ -142,7 +142,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
           to {
             opacity: 0;
-            transform: translateX(100%) scale(0.95);
+            transform: translateX(100%) scale(0.7);
           }
         }
 
@@ -160,7 +160,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         }
 
         [data-mobile-menu].closing {
-          animation: mobileMenuSlideOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+          animation: mobileMenuSlideOut 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
         }
 
         @media (max-width: 1023px) {
@@ -170,7 +170,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
           
           [data-mobile-menu].closing {
-            animation: mobileMenuSlideOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+            animation: mobileMenuSlideOut 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
           }
         }
 
