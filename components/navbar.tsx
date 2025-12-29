@@ -267,7 +267,9 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       </div>
 
       {/* Mobile: только бургер */}
-      <div className="lg:hidden fixed top-4 right-4 z-50">
+      <div 
+        className="lg:hidden fixed top-4 right-4 z-50"
+      >
         <button
           onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
           className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"

@@ -537,9 +537,9 @@ export default function DashboardDesignPage() {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto">
-                    <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:hover:ring-white/20 md:hover:shadow-xl">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+                <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:hover:ring-white/20 md:hover:shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
                       <div className="relative z-10 flex items-center gap-5">
                         {/* Avatar */}

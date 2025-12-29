@@ -50,7 +50,14 @@ export default async function RootLayout({
           color: '#FFFFFF'
         }}
       >
-        <div className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" style={{ background: '#0C0C11' }}>
+        <div 
+          className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" 
+          style={{ 
+            background: pathname.startsWith('/dashboard') 
+              ? 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)'
+              : '#0C0C11'
+          }}
+        >
           <Navbar profile={profile} pathname={pathname} />
           <main className="relative w-full overflow-hidden">
             <div className="relative z-10">
