@@ -133,6 +133,10 @@
     display: none;
   }
   
+  html {
+    overflow-x: hidden;
+  }
+  
   /* Webkit browsers (Chrome, Safari, Yandex) - transparent background */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,

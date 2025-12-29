@@ -45,18 +45,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Блокируем скролл когда открыто мобильное меню
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileMenuOpen])
+  // Скролл не блокируем - пользователь может скроллить под открытым меню
 
   // MutationObserver для гарантированного срабатывания анимации на мобильных
   useEffect(() => {

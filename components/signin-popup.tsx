@@ -13,19 +13,6 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  // Блокируем скролл страницы при открытии модального окна
-  useEffect(() => {
-    if (isOpen) {
-      document.documentElement.style.overflow = 'hidden'
-      document.body.style.overflow = 'hidden'
-      
-      return () => {
-        document.documentElement.style.overflow = ''
-        document.body.style.overflow = ''
-      }
-    }
-  }, [isOpen])
-
   // Гарантированное срабатывание анимации на мобильных через MutationObserver
   useEffect(() => {
     if (!isOpen) return
