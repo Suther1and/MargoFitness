@@ -94,9 +94,9 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   }
 
   const navLinks = [
-    { href: '/home-new', label: 'Главная' },
+    { href: '/', label: 'Главная' },
     { href: '/workouts', label: 'Тренировки' },
-    { href: '/home-new#pricing', label: 'Тарифы' },
+    { href: '/#pricing', label: 'Тарифы' },
     { href: '/free-content', label: 'Бесплатное' },
   ]
 
@@ -191,7 +191,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         }}>
           <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-4">
             {/* Logo */}
-            <Link href="/home-new" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
               <div className="flex text-white rounded-lg md:rounded-xl w-8 h-8 md:w-10 md:h-10 items-center justify-center shadow-lg" style={{
                 background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
                 boxShadow: `0 4px 20px ${colors.primary}40`

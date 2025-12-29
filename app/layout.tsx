@@ -59,7 +59,7 @@ export default async function RootLayout({
           }}
         >
           <Navbar profile={profile} pathname={pathname} />
-          <main className="relative w-full overflow-hidden">
+          <main className="relative w-full overflow-hidden rounded-b-[3rem]">
             <div className="relative z-10">
               {children}
             </div>
