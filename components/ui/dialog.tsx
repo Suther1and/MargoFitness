@@ -38,7 +38,7 @@ function Dialog({
       // Анимация появления
       requestAnimationFrame(() => {
         blur.style.backdropFilter = 'blur(8px)'
-        blur.style.webkitBackdropFilter = 'blur(8px)'
+        ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
         blur.style.background = 'rgba(0, 0, 0, 0.3)'
       })
       
@@ -46,7 +46,7 @@ function Dialog({
     } else if (blurElement) {
       // Анимация исчезновения
       blurElement.style.backdropFilter = 'blur(0px)'
-      blurElement.style.webkitBackdropFilter = 'blur(0px)'
+      ;(blurElement.style as any).webkitBackdropFilter = 'blur(0px)'
       blurElement.style.background = 'rgba(0, 0, 0, 0)'
       
       // Удаляем после завершения анимации
