@@ -292,8 +292,8 @@ export default function HomeNewPage() {
                   {[
                     { num: '01', title: 'Регистрация', desc: 'Создай аккаунт и получи доступ к бесплатным материалам', color: 'orange-500' },
                     { num: '02', title: 'Выбор плана', desc: 'Выбери подходящую подписку в зависимости от твоих целей', color: 'purple-500' },
-                    { num: '03', title: 'Тренировки', desc: 'Получи доступ к подробным видео-тренировкам из личного кабинета', color: 'blue-500' },
-                    { num: '04', title: 'Результат', desc: 'Получай новые программы каждую неделю и достигай целей', color: 'emerald-500' }
+                    { num: '03', title: 'Тренировки', desc: 'Открой доступ к видео-тренировкам из личного кабинета', color: 'blue-500' },
+                    { num: '04', title: 'Результат', desc: 'Выполняй новые тренировки каждую неделю и достигай результата', color: 'emerald-500' }
                   ].map((step, idx) => (
                     <div key={step.num} className="snap-center min-w-[85vw] md:min-w-0 rounded-3xl p-5 md:p-6 transition-all relative overflow-hidden min-h-[18rem] group md:hover:ring-white/20 md:hover:shadow-xl" style={{
                       background: colors.cardBg,
