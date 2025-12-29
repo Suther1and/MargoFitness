@@ -57,8 +57,36 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
     }
   }, [mobileMenuOpen])
 
+  // MutationObserver для гарантированного срабатывания анимации на мобильных
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    
+    const isMobile = window.innerWidth < 1024
+    
+    if (isMobile) {
+      const observer = new MutationObserver(() => {
+        const panel = document.querySelector('[data-mobile-menu]') as HTMLElement
+        if (panel) {
+          panel.style.animation = 'none'
+          void panel.offsetHeight // Force reflow
+          panel.style.animation = ''
+          observer.disconnect()
+        }
+      })
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      })
+      
+      setTimeout(() => observer.disconnect(), 2000)
+      return () => observer.disconnect()
+    }
+  }, [mobileMenuOpen])
+
   const navLinks = [
     { href: '/home-new', label: 'Главная' },
+    { href: '/workouts', label: 'Тренировки' },
     { href: '/home-new#pricing', label: 'Тарифы' },
     { href: '/free-content', label: 'Бесплатное' },
   ]
@@ -66,6 +94,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const userLinks = profile
     ? [
         { href: '/dashboard-new', label: 'Кабинет' },
+        { href: '/dashboard/bonuses', label: 'Бонусы' },
         ...(profile.role === 'admin'
           ? [{ href: '/admin', label: 'Админка', isAdmin: true }]
           : []),
@@ -86,6 +115,17 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
         }
 
+        @keyframes mobileMenuSlideScale {
+          from {
+            opacity: 0;
+            transform: translateX(100%) scale(0.7);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -95,8 +135,15 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
         }
 
-        .animate-slide-in-right {
-          animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        [data-mobile-menu] {
+          animation: slideInFromRight 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+        }
+
+        @media (max-width: 1023px) {
+          [data-mobile-menu] {
+            animation: mobileMenuSlideScale 0.8s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+            animation-fill-mode: both !important;
+          }
         }
 
         .animate-fade-in {
@@ -108,9 +155,9 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         }
       `}</style>
 
-      {/* Navbar - Pill Style */}
-      <div className="sticky top-0 z-50 px-4 py-4">
-        <nav className="backdrop-blur-xl rounded-full shadow-2xl shadow-black/30" style={{
+      {/* Desktop Navbar - Full */}
+      <div className="hidden lg:flex sticky top-0 z-50 px-4 py-4">
+        <nav className="backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full" style={{
           background: colors.navbarBg,
           border: `1px solid ${colors.cardBorder}`
         }}>
@@ -163,7 +210,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
             </div>
 
             {/* Desktop Auth/Profile */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="flex items-center gap-2">
               {profile ? (
                 <>
                   {profile.avatar_url && (
@@ -187,26 +234,29 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                 <AuthButton />
               )}
             </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg transition-all active:scale-95"
-              style={{
-                background: colors.cardBg,
-                border: `1px solid ${colors.cardBorder}`,
-                color: colors.textPrimary,
-              }}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
           </div>
         </nav>
+      </div>
+
+      {/* Mobile: только бургер */}
+      <div className="lg:hidden fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
+          style={{
+            background: colors.navbarBg,
+            border: `1px solid ${colors.cardBorder}`,
+            color: colors.textPrimary,
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+          }}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
+        </button>
       </div>
 
       {/* Mobile Menu Overlay */}
@@ -220,7 +270,8 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
           {/* Mobile Menu Panel */}
           <div
-            className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 animate-slide-in-right lg:hidden"
+            data-mobile-menu
+            className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 lg:hidden"
             style={{
               background: '#0C0C11',
               borderLeft: `1px solid ${colors.cardBorder}`,

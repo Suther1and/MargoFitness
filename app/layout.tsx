@@ -53,14 +53,6 @@ export default async function RootLayout({
         <div className="relative w-full xl:max-w-[96rem] min-h-screen xl:min-h-[calc(100vh-4rem)] xl:rounded-[3rem]" style={{ background: '#0C0C11' }}>
           <Navbar profile={profile} pathname={pathname} />
           <main className="relative w-full overflow-hidden">
-            {/* ВРЕМЕННО УБРАНО ДЛЯ ОТЛАДКИ
-            <div className="absolute inset-0 pointer-events-none z-0">
-              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-              <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] blur-[120px] rounded-full" style={{ background: 'rgba(249, 115, 22, 0.1)' }} />
-              <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] blur-[120px] rounded-full" style={{ background: 'rgba(168, 85, 247, 0.1)' }} />
-            </div>
-            */}
-            
             <div className="relative z-10">
               {children}
             </div>

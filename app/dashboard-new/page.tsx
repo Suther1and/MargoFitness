@@ -53,7 +53,6 @@ export default function DashboardDesignPage() {
   const bonusCountRef = useRef<HTMLSpanElement>(null)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
-  const navRef = useRef<HTMLElement>(null)
   const profileDesktopRef = useRef<HTMLElement>(null)
   const profileMobileRef = useRef<HTMLElement>(null)
   
@@ -191,17 +190,6 @@ export default function DashboardDesignPage() {
     const isDesktop = window.innerWidth >= 1024
     const isMobile = window.innerWidth < 1024
     const isXL = window.innerWidth >= 1280
-    
-    // Animate navigation
-    if (navRef.current) {
-      navRef.current.style.opacity = '0'
-      setTimeout(() => {
-        if (navRef.current) {
-          navRef.current.style.animation = 'slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-          navRef.current.style.opacity = '1'
-        }
-      }, 50)
-    }
     
     // Animate cards
     const animateCards = () => {
@@ -527,29 +515,6 @@ export default function DashboardDesignPage() {
           </div>
           
           <div className="relative w-full z-10">
-            
-            {/* Navigation */}
-            <nav ref={navRef} className="flex flex-wrap z-30 backdrop-blur-xl bg-white/[0.03] border border-white/10 p-4 md:px-8 md:py-5 relative gap-4 items-center justify-between rounded-none md:rounded-2xl mb-6 md:mb-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" style={{ opacity: 0 }}>
-              <div className="flex items-center gap-3">
-                <div className="flex text-white bg-gradient-to-br from-orange-500 to-orange-600 w-10 h-10 rounded-xl items-center justify-center shadow-lg shadow-orange-500/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="uppercase leading-none text-lg md:text-xl font-semibold tracking-tight font-oswald text-white">MargoFitness</span>
-                  <span className="text-[0.6rem] uppercase text-white/50 tracking-widest font-oswald hidden md:block">Elite Performance</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  className="uppercase flex text-xs font-semibold text-white/80 tracking-wider rounded-full py-2 px-5 gap-2 items-center border border-white/10 [transition:background-color_0.3s_ease,border-color_0.3s_ease,transform_0.2s_ease] hover:bg-white/10 hover:border-white/20 hover:scale-105"
-                  style={{ position: 'relative', overflow: 'hidden' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="0.875rem" height="0.875rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  <span className="hidden sm:inline">Профиль</span>
-                </button>
-              </div>
-            </nav>
-
             <div className="px-4 md:px-8 pb-12">
               {/* Header */}
               <div className="mb-8 md:mb-12">
