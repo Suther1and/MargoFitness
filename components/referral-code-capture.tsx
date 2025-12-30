@@ -45,7 +45,7 @@ export function ReferralCodeCapture() {
           toast.style.backdropFilter = 'blur(10px)'
           toast.style.border = '1px solid rgba(255, 255, 255, 0.2)'
           
-          const userName = result.data.userName || 'Кто-то'
+          const userName = result.data?.userName || 'Кто-то'
           
           // Разный текст для авторизованных и неавторизованных
           if (user) {
