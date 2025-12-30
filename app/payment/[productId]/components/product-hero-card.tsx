@@ -67,8 +67,8 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
     return `${months} месяцев`
   }
 
-  // Убираем срок из названия продукта (если он там есть)
-  const cleanProductName = product.name.replace(/\s*\d+\s*(месяц|месяца|месяцев)/gi, '').trim()
+  // Убираем срок из названия продукта (берем все до первой цифры)
+  const cleanProductName = product.name.split(/\s+\d+/)[0].trim()
 
   // Есть ли скидка (сравниваем finalPrice с базовой ценой за этот период)
   const hasDiscount = finalPrice < product.price
