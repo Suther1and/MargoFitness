@@ -56,6 +56,7 @@ const colors = {
 
 export default function HomeNewPage() {
   const [selectedDuration, setSelectedDuration] = useState<Period>(30)
+  const [previousDuration, setPreviousDuration] = useState<Period>(30)
   const [certificateOpen, setCertificateOpen] = useState(false)
   const [signInOpen, setSignInOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -199,8 +200,67 @@ export default function HomeNewPage() {
     }, 250)
   }
 
+  const animateOriginalPriceAppearance = (element: HTMLElement | null, value: string) => {
+    if (!element) return
+    
+    const container = element.parentElement
+    if (!container) return
+    
+    // Показываем контейнер и элемент
+    container.style.visibility = 'visible'
+    container.style.height = 'auto'
+    container.style.overflow = 'visible'
+    element.style.display = 'inline'
+    
+    // Устанавливаем начальное состояние элемента
+    element.innerText = value
+    element.style.opacity = '0'
+    element.style.filter = 'blur(8px)'
+    element.style.transform = 'translateY(-15px)'
+    
+    // Анимируем появление с задержкой для синхронизации с основной ценой
+    // 0.6s = 0.5s + 20%
+    setTimeout(() => {
+      element.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+      element.style.opacity = '1'
+      element.style.filter = 'blur(0px)'
+      element.style.transform = 'translateY(0)'
+    }, 250)
+  }
+
+  const hideOriginalPrice = (element: HTMLElement | null) => {
+    if (!element) return
+    
+    const container = element.parentElement
+    if (!container) return
+    
+    // Мгновенно скрываем
+    container.style.visibility = 'hidden'
+    container.style.height = '0'
+    element.style.opacity = '0'
+  }
+
   const handlePeriodChange = (period: Period) => {
+    const wasSingleMonth = previousDuration === 30
+    const isSingleMonth = period === 30
+    
+    // Если переходим на 30 дней, НЕМЕДЛЕННО скрываем перечеркнутые цены СИНХРОННО
+    if (isSingleMonth && !wasSingleMonth) {
+      // Скрываем все перечеркнутые цены напрямую через DOM
+      [priceBasicOriginalRef, priceProOriginalRef, priceEliteOriginalRef].forEach(ref => {
+        if (ref.current && ref.current.parentElement) {
+          const container = ref.current.parentElement
+          container.style.visibility = 'hidden'
+          container.style.height = '0'
+          container.style.overflow = 'hidden'
+          ref.current.style.opacity = '0'
+          ref.current.style.display = 'none'
+        }
+      })
+    }
+    
     setSelectedDuration(period)
+    setPreviousDuration(period)
     
     // Сначала обновляем pricing
     const months = DAYS_TO_MONTHS[period]
@@ -246,18 +306,36 @@ export default function HomeNewPage() {
     animateElement(currencyEliteRef.current)
     animateElement(periodEliteRef.current)
     
-    // Перечеркнутые цены обновляем БЕЗ анимации
+    // Обработка перечеркнутых цен
     if (period > 30) {
-      if (priceBasicOriginalRef.current) {
-        priceBasicOriginalRef.current.innerText = newPricing.basic.original.toLocaleString('ru-RU')
-      }
-      if (priceProOriginalRef.current) {
-        priceProOriginalRef.current.innerText = newPricing.pro.original.toLocaleString('ru-RU')
-      }
-      if (priceEliteOriginalRef.current) {
-        priceEliteOriginalRef.current.innerText = newPricing.elite.original.toLocaleString('ru-RU')
+      // Если переходим с 30 дней на другой период - анимируем появление
+      if (wasSingleMonth) {
+        animateOriginalPriceAppearance(
+          priceBasicOriginalRef.current,
+          newPricing.basic.original.toLocaleString('ru-RU')
+        )
+        animateOriginalPriceAppearance(
+          priceProOriginalRef.current,
+          newPricing.pro.original.toLocaleString('ru-RU')
+        )
+        animateOriginalPriceAppearance(
+          priceEliteOriginalRef.current,
+          newPricing.elite.original.toLocaleString('ru-RU')
+        )
+      } else {
+        // Если переходим между периодами с перечеркнутой ценой - просто меняем текст
+        if (priceBasicOriginalRef.current) {
+          priceBasicOriginalRef.current.innerText = newPricing.basic.original.toLocaleString('ru-RU')
+        }
+        if (priceProOriginalRef.current) {
+          priceProOriginalRef.current.innerText = newPricing.pro.original.toLocaleString('ru-RU')
+        }
+        if (priceEliteOriginalRef.current) {
+          priceEliteOriginalRef.current.innerText = newPricing.elite.original.toLocaleString('ru-RU')
+        }
       }
     }
+    // Скрытие перечеркнутых цен при переходе на 30 дней происходит в начале функции
   }
 
   return (
@@ -658,11 +736,9 @@ export default function HomeNewPage() {
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>Basic</h3>
                         <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Быстрый старт</p>
                         <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                          {selectedDuration > 30 && (
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span ref={priceBasicOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.basic.original.toLocaleString('ru-RU')}</span>
-                            </div>
-                          )}
+                          <div className="flex items-baseline gap-2 mb-1" style={{ visibility: selectedDuration > 30 ? 'visible' : 'hidden', height: selectedDuration > 30 ? 'auto' : '0' }}>
+                            <span ref={priceBasicOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.basic.original.toLocaleString('ru-RU')}</span>
+                          </div>
                           <div className="flex items-baseline gap-1">
                             <span ref={priceBasicRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.basic.current.toLocaleString('ru-RU')}</span>
                             <span ref={currencyBasicRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
@@ -736,11 +812,9 @@ export default function HomeNewPage() {
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>PRO</h3>
                         <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Оптимальное решение</p>
                         <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                          {selectedDuration > 30 && (
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span ref={priceProOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.pro.original.toLocaleString('ru-RU')}</span>
-                            </div>
-                          )}
+                          <div className="flex items-baseline gap-2 mb-1" style={{ visibility: selectedDuration > 30 ? 'visible' : 'hidden', height: selectedDuration > 30 ? 'auto' : '0' }}>
+                            <span ref={priceProOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.pro.original.toLocaleString('ru-RU')}</span>
+                          </div>
                           <div className="flex items-baseline gap-1">
                             <span ref={priceProRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.pro.current.toLocaleString('ru-RU')}</span>
                             <span ref={currencyProRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
@@ -809,11 +883,9 @@ export default function HomeNewPage() {
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>Elite</h3>
                         <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Индивидуальное ведение</p>
                         <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                          {selectedDuration > 30 && (
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span ref={priceEliteOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.elite.original.toLocaleString('ru-RU')}</span>
-                            </div>
-                          )}
+                          <div className="flex items-baseline gap-2 mb-1" style={{ visibility: selectedDuration > 30 ? 'visible' : 'hidden', height: selectedDuration > 30 ? 'auto' : '0' }}>
+                            <span ref={priceEliteOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.elite.original.toLocaleString('ru-RU')}</span>
+                          </div>
                           <div className="flex items-baseline gap-1">
                             <span ref={priceEliteRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.elite.current.toLocaleString('ru-RU')}</span>
                             <span ref={currencyEliteRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
