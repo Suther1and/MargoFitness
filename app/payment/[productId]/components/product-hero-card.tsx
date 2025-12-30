@@ -86,7 +86,7 @@ export function ProductHeroCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 pr-14"
+        className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 pr-20"
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
         
@@ -109,7 +109,7 @@ export function ProductHeroCard({
           </div>
 
           {/* Цена - компактно */}
-          <div className="text-right flex-shrink-0">
+          <div className="text-right flex-shrink-0 pl-2">
             <div className="text-2xl font-bold text-white font-oswald leading-none">
               {pricePerMonth.toLocaleString('ru-RU')}
             </div>
