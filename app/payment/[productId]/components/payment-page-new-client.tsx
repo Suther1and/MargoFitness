@@ -117,35 +117,10 @@ export function PaymentPageNewClient({
 
   return (
     <>
-      {/* Кнопка назад - Mobile (парящая) */}
-      <button 
-        onClick={() => router.back()}
-        className="lg:hidden fixed top-2 left-4 z-50 inline-flex items-center gap-2 rounded-xl bg-white/[0.08] ring-1 ring-white/10 px-3 py-2 text-sm text-white/80 transition-all hover:bg-white/[0.12] backdrop-blur-xl active:scale-95"
-        style={{ touchAction: 'manipulation' }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m12 19-7-7 7-7"></path>
-          <path d="M19 12H5"></path>
-        </svg>
-        <span className="font-medium">Назад</span>
-      </button>
-
       {/* Desktop: 2 колонки */}
       <div className="hidden lg:grid lg:grid-cols-[360px_1fr] lg:gap-8 w-full">
         {/* Левая колонка */}
         <div className="space-y-6 relative">
-          {/* Кнопка назад - Desktop (слева от карточки) */}
-          <button 
-            onClick={() => router.back()}
-            className="hidden lg:inline-flex absolute right-[calc(100%+24px)] top-0 items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-4 py-2.5 text-sm text-white/80 transition-all hover:bg-white/[0.08] hover:ring-white/20 active:scale-95 whitespace-nowrap"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 19-7-7 7-7"></path>
-              <path d="M19 12H5"></path>
-            </svg>
-            <span className="font-medium">Назад</span>
-          </button>
-
           <ProductHeroCard 
             product={product}
             pricePerMonth={displayPricePerMonth}

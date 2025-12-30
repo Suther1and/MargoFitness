@@ -91,6 +91,14 @@ export function ProductHeroCard({
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
         
         <div className="relative z-10 flex items-center gap-3">
+          {/* Цена - компактно */}
+          <div className="text-left flex-shrink-0 pr-2 border-r border-white/10">
+            <div className="text-2xl font-bold text-white font-oswald leading-none">
+              {pricePerMonth.toLocaleString('ru-RU')}
+            </div>
+            <div className="text-xs text-white/50">₽/мес</div>
+          </div>
+
           {/* Иконка - маленькая */}
           <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
             <div className="scale-75">
@@ -99,21 +107,13 @@ export function ProductHeroCard({
           </div>
 
           {/* Название и срок */}
-          <div className="flex-1">
-            <h2 className="text-base font-bold text-white font-oswald uppercase tracking-tight leading-tight">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold text-white font-oswald uppercase tracking-tight leading-tight truncate">
               {cleanProductName}
             </h2>
             <p className="text-xs text-white/50 mt-0.5">
               {getDurationText(product.duration_months || 1)}
             </p>
-          </div>
-
-          {/* Цена - компактно */}
-          <div className="text-right">
-            <div className="text-2xl font-bold text-white font-oswald leading-none">
-              {pricePerMonth.toLocaleString('ru-RU')}
-            </div>
-            <div className="text-xs text-white/50">₽/мес</div>
           </div>
         </div>
       </motion.div>

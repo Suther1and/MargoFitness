@@ -47,7 +47,7 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
           <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="container mx-auto max-w-7xl px-4 md:px-8 pt-16 lg:pt-12 pb-8 md:pb-12 relative z-10">
+        <div className="container mx-auto max-w-7xl px-4 md:px-8 pt-4 lg:pt-12 pb-8 md:pb-12 relative z-10">
           {/* Новый клиентский компонент с улучшенным дизайном */}
           <PaymentPageNewClient
             product={product}
