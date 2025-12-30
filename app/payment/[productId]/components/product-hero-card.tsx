@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import type { Product } from '@/types/database'
 
 interface ProductHeroCardProps {
@@ -45,13 +46,19 @@ const tierGradients = {
 }
 
 export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductHeroCardProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 1024)
+  }, [])
+
   const tierLevel = (product.tier_level || 1) as 1 | 2 | 3
   const Icon = tierIcons[tierLevel]
   const gradient = tierGradients[tierLevel]
 
-  // Извлекаем benefits из metadata
+  // Извлекаем benefits из metadata - только 3 для компактности
   const metadata = product.metadata as { benefits?: string[] } | null
-  const benefits = metadata?.benefits?.slice(0, 4) || []
+  const benefits = metadata?.benefits?.slice(0, 3) || []
 
   // Определяем текст длительности
   const getDurationText = (months: number) => {
@@ -63,142 +70,106 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
   // Есть ли скидка (сравниваем finalPrice с базовой ценой за этот период)
   const hasDiscount = finalPrice < product.price
 
+  // Условный wrapper - на мобильных без framer-motion
+  const Wrapper = isMobile ? 'div' : motion.div
+  const wrapperProps = isMobile ? {} : {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6"
+    <Wrapper
+      {...wrapperProps}
+      className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5"
     >
-      {/* Анимированный фоновый градиент */}
+      {/* Фоновый градиент */}
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
       
-      {/* Анимированные blur blobs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.15, 0.25, 0.15],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className={`absolute -right-24 -top-24 h-72 w-72 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
-      />
-      
-      <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.1, 0.2, 0.1],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1
-        }}
-        className={`absolute -left-16 -bottom-16 h-64 w-64 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
-      />
-
-      {/* Контент */}
-      <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-6 ring-1 ring-white/10 backdrop-blur relative z-10">
-        {/* Заголовок с иконкой */}
-        <div className="flex items-start gap-4 mb-6">
-          {/* Анимированная иконка */}
+      {/* Blur blobs - скрыты на мобильных */}
+      {!isMobile && (
+        <>
           <motion.div
             animate={{
-              scale: [1, 1.05, 1],
-              rotate: [0, 5, 0, -5, 0],
+              scale: [1, 1.2, 1],
+              opacity: [0.15, 0.25, 0.15],
             }}
             transition={{
-              duration: 3,
+              duration: 4,
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0 relative overflow-hidden"
-          >
-            {/* Pulse эффект */}
-            <motion.div
-              animate={{
-                scale: [1, 1.5],
-                opacity: [0.5, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeOut"
-              }}
-              className="absolute inset-0 rounded-2xl bg-white/20"
-            />
-            <div className="relative z-10">
-              {Icon}
-            </div>
-          </motion.div>
+            className={`absolute -right-24 -top-24 h-72 w-72 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
+          />
+          
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+            className={`absolute -left-16 -bottom-16 h-64 w-64 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
+          />
+        </>
+      )}
+
+      {/* Контент */}
+      <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 ring-1 ring-white/10 backdrop-blur relative z-10">
+        {/* Заголовок с иконкой */}
+        <div className="flex items-start gap-3 mb-4">
+          {/* Иконка - анимация только на desktop */}
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
+            {Icon}
+          </div>
 
           {/* Название и длительность */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white font-oswald uppercase tracking-tight leading-tight mb-1">
-              {product.name}
+            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-tight">
+              {product.name} · {getDurationText(product.duration_months || 1)}
             </h2>
-            <p className="text-sm text-white/60">
-              {getDurationText(product.duration_months || 1)}
-            </p>
           </div>
         </div>
 
         {/* Цена */}
-        <div className="mb-6">
+        <div className="mb-4">
           {hasDiscount && (
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-white/40 line-through font-oswald mb-1"
-            >
+            <div className="text-lg text-white/40 line-through font-oswald mb-1">
               {product.price.toLocaleString('ru-RU')} ₽
-            </motion.div>
+            </div>
           )}
           <div className="flex items-baseline gap-2">
-            <motion.span
-              key={finalPrice}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="text-5xl font-bold text-white font-oswald"
-            >
+            <span className="text-4xl font-bold text-white font-oswald transition-all duration-300">
               {finalPrice.toLocaleString('ru-RU')}
-            </motion.span>
-            <span className="text-2xl text-white/60 font-oswald">₽</span>
+            </span>
+            <span className="text-xl text-white/60 font-oswald">₽</span>
           </div>
-          <p className="text-sm text-white/50 mt-1">
-            {pricePerMonth.toLocaleString('ru-RU')} ₽/месяц
-          </p>
         </div>
 
         {/* Преимущества */}
         {benefits.length > 0 && (
-          <div className="space-y-2.5 pt-4 border-t border-white/10">
+          <div className="space-y-2 pt-3 border-t border-white/10">
             {benefits.map((benefit, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="flex items-start gap-2.5"
+                className="flex items-start gap-2"
               >
                 <div className="flex-shrink-0 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
-                <span className="text-sm text-white/80 leading-relaxed">{benefit}</span>
-              </motion.div>
+                <span className="text-xs text-white/80 leading-relaxed">{benefit}</span>
+              </div>
             ))}
           </div>
         )}
       </div>
-    </motion.div>
+    </Wrapper>
   )
 }
 

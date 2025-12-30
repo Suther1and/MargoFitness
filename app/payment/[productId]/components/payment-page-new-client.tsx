@@ -112,43 +112,80 @@ export function PaymentPageNewClient({
     : pricePerMonth
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
-      {/* Hero карточка продукта */}
-      <ProductHeroCard 
-        product={product}
-        pricePerMonth={displayPricePerMonth}
-        finalPrice={displayPrice}
-      />
+    <>
+      {/* Desktop: 2 колонки */}
+      <div className="hidden lg:grid lg:grid-cols-[360px_1fr] lg:gap-8 w-full">
+        {/* Левая колонка */}
+        <div className="space-y-6">
+          <ProductHeroCard 
+            product={product}
+            pricePerMonth={displayPricePerMonth}
+            finalPrice={displayPrice}
+          />
+          <TrustBadges />
+        </div>
 
-      {/* Оптимизация цены (промокод + бонусы) */}
-      <PriceOptimizer
-        productId={product.id}
-        userId={profile.id}
-        priceAfterDiscounts={calculation?.priceAfterDiscounts || product.price}
-        onPromoApplied={setAppliedPromo}
-        onBonusChange={setBonusToUse}
-        currentBonusAmount={bonusToUse}
-      />
+        {/* Правая колонка */}
+        <div className="space-y-6">
+          <PriceOptimizer
+            productId={product.id}
+            userId={profile.id}
+            priceAfterDiscounts={calculation?.priceAfterDiscounts || product.price}
+            onPromoApplied={setAppliedPromo}
+            onBonusChange={setBonusToUse}
+            currentBonusAmount={bonusToUse}
+          />
 
-      {/* Breakdown цены */}
-      <PriceBreakdown 
-        calculation={calculation}
-        loading={loadingCalc}
-      />
+          <PriceBreakdown 
+            calculation={calculation}
+            loading={loadingCalc}
+          />
 
-      {/* Элементы доверия */}
-      <TrustBadges />
+          <PaymentCTAButton
+            finalPrice={calculation?.finalPrice || product.price}
+            processing={processing}
+            disabled={loadingCalc || !calculation}
+            error={error}
+            onClick={handlePayment}
+            action={action}
+          />
+        </div>
+      </div>
 
-      {/* CTA кнопка оплаты */}
-      <PaymentCTAButton
-        finalPrice={calculation?.finalPrice || product.price}
-        processing={processing}
-        disabled={loadingCalc || !calculation}
-        error={error}
-        onClick={handlePayment}
-        action={action}
-      />
-    </div>
+      {/* Mobile: single column */}
+      <div className="lg:hidden w-full max-w-2xl mx-auto space-y-4">
+        <ProductHeroCard 
+          product={product}
+          pricePerMonth={displayPricePerMonth}
+          finalPrice={displayPrice}
+        />
+
+        <PriceOptimizer
+          productId={product.id}
+          userId={profile.id}
+          priceAfterDiscounts={calculation?.priceAfterDiscounts || product.price}
+          onPromoApplied={setAppliedPromo}
+          onBonusChange={setBonusToUse}
+          currentBonusAmount={bonusToUse}
+        />
+
+        <PriceBreakdown 
+          calculation={calculation}
+          loading={loadingCalc}
+        />
+
+        {/* Trust badges скрыты на мобильных - показываем текст под кнопкой */}
+
+        <PaymentCTAButton
+          finalPrice={calculation?.finalPrice || product.price}
+          processing={processing}
+          disabled={loadingCalc || !calculation}
+          error={error}
+          onClick={handlePayment}
+          action={action}
+        />
+      </div>
+    </>
   )
 }
 

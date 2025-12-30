@@ -30,6 +30,7 @@ export function PriceOptimizer({
   const [promoLoading, setPromoLoading] = useState(false)
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null)
   const [promoError, setPromoError] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
 
   // Бонусы state
   const [availableBalance, setAvailableBalance] = useState(0)
@@ -82,6 +83,12 @@ export function PriceOptimizer({
       setAppliedPromo(result.data)
       onPromoApplied(result.data)
       setPromoError('')
+      setShowSuccess(true)
+      
+      // Auto-hide через 2 секунды
+      setTimeout(() => {
+        setShowSuccess(false)
+      }, 2000)
     } else {
       setPromoError(result.error || 'Неверный промокод')
       setAppliedPromo(null)
@@ -97,6 +104,7 @@ export function PriceOptimizer({
     setPromoError('')
     onPromoApplied(null)
     setPromoExpanded(false)
+    setShowSuccess(false)
   }
 
   const handleBonusToggle = () => {
@@ -106,61 +114,36 @@ export function PriceOptimizer({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-3"
-    >
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {/* Промокод секция */}
       <div className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10">
         <AnimatePresence mode="wait">
           {!promoExpanded && !appliedPromo ? (
             // Компактный бейдж
-            <motion.button
-              key="compact"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <button
               onClick={() => setPromoExpanded(true)}
-              className="w-full p-4 flex items-center justify-between group hover:bg-white/[0.02] transition-colors"
+              className="w-full p-3.5 flex items-center justify-between group hover:bg-white/[0.02] transition-colors"
             >
-              <div className="flex items-center gap-2.5">
-                <Tag className="size-5 text-orange-400" />
-                <span className="text-sm font-medium text-white/80">Есть промокод?</span>
+              <div className="flex items-center gap-2">
+                <Tag className="size-4 text-orange-400" />
+                <span className="text-sm font-medium text-white/80">Промокод</span>
               </div>
-              <motion.div
-                animate={{ x: [0, 4, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/40">
-                  <path d="m9 18 6-6-6-6"></path>
-                </svg>
-              </motion.div>
-            </motion.button>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/40">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
           ) : (
             // Развернутая форма
-            <motion.div
-              key="expanded"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="p-4 space-y-3"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="size-4 text-orange-400" />
-                <span className="text-sm font-semibold text-white/80 uppercase tracking-wider">Промокод</span>
-              </div>
-
+            <div className="p-3.5 space-y-2.5">
               {/* Поле ввода */}
               <div className="relative">
                 <input
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="ВВЕДИТЕ КОД"
+                  placeholder="КОД"
                   disabled={promoLoading || !!appliedPromo}
                   readOnly={!!appliedPromo}
-                  className={`w-full bg-white/[0.06] text-white placeholder-white/40 outline-none font-mono text-sm px-4 py-3 rounded-xl ring-1 ${
+                  className={`w-full bg-white/[0.06] text-white placeholder-white/40 outline-none font-mono text-sm px-3 py-2.5 rounded-xl ring-1 ${
                     appliedPromo ? 'ring-green-500/50' : promoError ? 'ring-red-500/50' : 'ring-white/10'
                   } transition-all ${appliedPromo ? 'text-green-400' : ''}`}
                   onKeyDown={(e) => {
@@ -171,54 +154,37 @@ export function PriceOptimizer({
                   autoFocus={!appliedPromo}
                 />
                 {appliedPromo && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                  >
-                    <Check className="size-5 text-green-400" />
-                  </motion.div>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Check className="size-4 text-green-400" />
+                  </div>
                 )}
               </div>
 
-              {/* Success message */}
+              {/* Success message - auto-hide через 2 сек */}
               <AnimatePresence>
-                {appliedPromo && (
+                {showSuccess && appliedPromo && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2 text-xs text-green-400 bg-green-500/10 px-3 py-2 rounded-lg"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex items-center gap-2 text-xs text-green-400"
                   >
                     <Sparkles className="size-3" />
-                    <span>Промокод применен</span>
+                    <span>Применен</span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
               {/* Error message */}
-              <AnimatePresence>
-                {promoError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 px-3 py-2 rounded-lg"
-                  >
-                    <X className="size-3" />
-                    <span>{promoError}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {promoError && (
+                <div className="flex items-center gap-1.5 text-xs text-red-400">
+                  <X className="size-3" />
+                  <span>{promoError}</span>
+                </div>
+              )}
 
-              {/* Кнопки действий */}
-              <div className="flex items-center justify-between pt-2">
-                <button 
-                  onClick={handlePromoRemove}
-                  className="text-xs text-white/60 hover:text-white transition-colors"
-                >
-                  Отменить
-                </button>
+              {/* Кнопки действий inline */}
+              <div className="flex items-center justify-between">
                 {!appliedPromo && (
                   <button 
                     onClick={handlePromoApply}
@@ -228,77 +194,56 @@ export function PriceOptimizer({
                     {promoLoading ? (
                       <>
                         <Loader2 className="size-3 animate-spin" />
-                        <span>Проверка...</span>
+                        <span>...</span>
                       </>
                     ) : (
                       <span>Применить</span>
                     )}
                   </button>
                 )}
+                <button 
+                  onClick={handlePromoRemove}
+                  className="text-xs text-white/60 hover:text-white transition-colors ml-auto"
+                >
+                  Отменить
+                </button>
               </div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
 
       {/* Бонусы секция */}
       {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+        <button
           onClick={handleBonusToggle}
-          className={`w-full rounded-2xl p-4 transition-all relative overflow-hidden ${
+          className={`w-full rounded-2xl p-3.5 transition-all relative overflow-hidden ${
             useBonuses 
               ? 'bg-orange-500/15 ring-1 ring-orange-400/40' 
               : 'bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.06]'
           }`}
         >
-          {/* Анимированный фон при активации */}
-          <AnimatePresence>
-            {useBonuses && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 2, opacity: 0.1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                className="absolute inset-0 bg-orange-500 rounded-full blur-2xl"
-              />
-            )}
-          </AnimatePresence>
-
           <div className="relative z-10 flex items-center justify-between">
             <div className="text-left">
-              <div className="text-sm font-semibold text-white flex items-center gap-2 mb-1">
-                <span>Использовать шаги</span>
-                <motion.span
-                  animate={{ rotate: useBonuses ? [0, -10, 10, -10, 0] : 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-base"
-                >
-                  👟
-                </motion.span>
+              <div className="text-sm font-semibold text-white flex items-center gap-1.5">
+                <span>Шаги</span>
+                <span className="text-base">👟</span>
               </div>
               <div className="text-xs text-white/60">
-                Доступно: <span className="font-semibold">{availableBalance.toLocaleString('ru-RU')}</span> шагов
+                {availableBalance.toLocaleString('ru-RU')}
               </div>
             </div>
             <div className={`text-sm font-bold ${useBonuses ? 'text-orange-400' : 'text-white/40'}`}>
               {useBonuses ? (
-                <motion.span
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  className="flex items-center gap-1"
-                >
-                  <span>−{maxBonus.toLocaleString('ru-RU')} ₽</span>
-                </motion.span>
+                <span>−{maxBonus.toLocaleString('ru-RU')} ₽</span>
               ) : (
                 'Применить'
               )}
             </div>
           </div>
-        </motion.button>
+        </button>
       )}
-    </motion.div>
+    </div>
   )
 }
 

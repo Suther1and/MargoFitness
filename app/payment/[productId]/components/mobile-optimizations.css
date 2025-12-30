@@ -1,0 +1,28 @@
+/* Мобильные оптимизации для страницы оплаты */
+@media (max-width: 1023px) {
+  /* Упростить backdrop-blur */
+  .backdrop-blur-xl, .backdrop-blur {
+    backdrop-filter: blur(4px) !important;
+  }
+  
+  /* Скрыть blur blobs */
+  .blur-3xl {
+    display: none !important;
+  }
+  
+  /* Отключить зацикленные анимации */
+  [data-animate-loop] {
+    animation: none !important;
+  }
+  
+  /* Ускорить все transitions */
+  * {
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* Input без зума на iOS */
+input, textarea {
+  font-size: 16px !important;
+}
+

@@ -121,18 +121,21 @@ export function PaymentCTAButton({
         </div>
       </motion.button>
 
-      {/* Дополнительная информация под кнопкой */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="text-center text-xs text-white/40"
-      >
+      {/* Компактная надпись о безопасности на мобильных */}
+      <div className="lg:hidden flex items-center justify-center gap-2 text-xs text-white/50">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+        </svg>
+        <span>Безопасная оплата через ЮКасса</span>
+      </div>
+
+      {/* Дополнительная информация под кнопкой - только desktop */}
+      <p className="hidden lg:block text-center text-xs text-white/40">
         Нажимая кнопку, вы соглашаетесь с{' '}
         <a href="#" className="text-white/60 hover:text-orange-400 transition-colors underline">
           условиями использования
         </a>
-      </motion.p>
+      </p>
     </motion.div>
   )
 }

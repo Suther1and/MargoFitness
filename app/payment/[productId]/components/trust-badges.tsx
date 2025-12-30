@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Shield, CreditCard, Lock } from 'lucide-react'
 
 export function TrustBadges() {
+  // Компонент скрыт на мобильных через parent component
   const badges = [
     {
       icon: Shield,
