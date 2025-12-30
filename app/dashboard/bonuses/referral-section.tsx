@@ -9,6 +9,33 @@ interface ReferralSectionProps {
   stats: Awaited<ReturnType<typeof getReferralStats>>['data']
 }
 
+// Функция для получения цветов реферального уровня
+const getReferralLevelColors = (level: number) => {
+  const colors = {
+    1: { // Bronze
+      bgGradient: 'from-amber-900/40 to-orange-900/40',
+      ring: 'ring-amber-700/50',
+      progress: 'from-amber-500 to-orange-600',
+    },
+    2: { // Silver
+      bgGradient: 'from-slate-600/40 to-slate-700/40',
+      ring: 'ring-slate-500/50',
+      progress: 'from-slate-400 to-slate-500',
+    },
+    3: { // Gold
+      bgGradient: 'from-yellow-600/40 to-amber-700/40',
+      ring: 'ring-yellow-500/50',
+      progress: 'from-yellow-400 to-amber-500',
+    },
+    4: { // Platinum
+      bgGradient: 'from-cyan-700/40 to-blue-800/40',
+      ring: 'ring-cyan-500/50',
+      progress: 'from-cyan-400 to-blue-500',
+    },
+  }
+  return colors[level as keyof typeof colors] || colors[1]
+}
+
 export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
   const [copied, setCopied] = useState(false)
   const [canShare, setCanShare] = useState(false)
@@ -24,6 +51,7 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
 
   // Получаем визуальные данные текущего уровня
   const currentLevelVisuals = getReferralLevelVisuals(stats.referralLevel)
+  const colors = getReferralLevelColors(stats.referralLevel)
 
   const shareText = 'Присоединяйся ко мне в MargoFitness! Получи 250 шагов в подарок при регистрации 🎁'
 
@@ -85,7 +113,7 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
         </div>
 
         {/* Карточка текущего уровня - динамический цвет на основе уровня */}
-        <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${currentLevelVisuals.color.replace('from-', 'from-').replace('to-', 'to-').replace('via-', 'via-')} opacity-90 ring-1 ring-white/20 p-4`}>
+        <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${colors.bgGradient} ring-1 ${colors.ring} p-4`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-full">
@@ -111,7 +139,7 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
               </div>
               <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
                 <div 
-                  className="h-full rounded-full bg-gradient-to-r from-white/60 to-white transition-all duration-500"
+                  className={`h-full rounded-full bg-gradient-to-r ${colors.progress} transition-all duration-500`}
                   style={{ width: `${stats.progress.progress}%` }}
                 />
               </div>
