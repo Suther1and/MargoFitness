@@ -60,6 +60,13 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
   const metadata = product.metadata as { benefits?: string[] } | null
   const benefits = metadata?.benefits?.slice(0, 3) || []
 
+  // Определяем текст длительности
+  const getDurationText = (months: number) => {
+    if (months === 1) return '1 месяц'
+    if (months < 5) return `${months} месяца`
+    return `${months} месяцев`
+  }
+
   // Есть ли скидка (сравниваем finalPrice с базовой ценой за этот период)
   const hasDiscount = finalPrice < product.price
 
@@ -85,11 +92,14 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
             </div>
           </div>
 
-          {/* Название */}
+          {/* Название и срок */}
           <div className="flex-1">
             <h2 className="text-base font-bold text-white font-oswald uppercase tracking-tight leading-tight">
               {product.name}
             </h2>
+            <p className="text-xs text-white/50 mt-0.5">
+              {getDurationText(product.duration_months || 1)}
+            </p>
           </div>
 
           {/* Цена - компактно */}
@@ -150,9 +160,12 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
           </div>
 
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-tight">
+            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-tight mb-1">
               {product.name}
             </h2>
+            <p className="text-sm text-white/60">
+              {getDurationText(product.duration_months || 1)}
+            </p>
           </div>
         </div>
 
