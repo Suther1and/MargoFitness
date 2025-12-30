@@ -78,6 +78,40 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
     transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
   }
 
+  if (isMobile) {
+    // Mobile: ультракомпактный горизонтальный layout
+    return (
+      <div className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3">
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
+        
+        <div className="relative z-10 flex items-center gap-3">
+          {/* Иконка - маленькая */}
+          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
+            <div className="scale-75">
+              {Icon}
+            </div>
+          </div>
+
+          {/* Название с сроком */}
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-white font-oswald uppercase tracking-tight leading-tight">
+              {product.name} · {getDurationText(product.duration_months || 1)}
+            </h2>
+          </div>
+
+          {/* Цена - компактно */}
+          <div className="text-right">
+            <div className="text-2xl font-bold text-white font-oswald leading-none">
+              {pricePerMonth.toLocaleString('ru-RU')}
+            </div>
+            <div className="text-xs text-white/50">₽/мес</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Desktop: полная версия с преимуществами
   return (
     <Wrapper
       {...wrapperProps}
@@ -86,52 +120,49 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
       {/* Фоновый градиент */}
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
       
-      {/* Blur blobs - скрыты на мобильных */}
-      {!isMobile && (
-        <>
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.15, 0.25, 0.15],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className={`absolute -right-24 -top-24 h-72 w-72 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
-          />
-          
-          <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.1, 0.2, 0.1],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1
-            }}
-            className={`absolute -left-16 -bottom-16 h-64 w-64 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
-          />
-        </>
-      )}
+      {/* Blur blobs */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.15, 0.25, 0.15],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className={`absolute -right-24 -top-24 h-72 w-72 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
+      />
+      
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.1, 0.2, 0.1],
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1
+        }}
+        className={`absolute -left-16 -bottom-16 h-64 w-64 rounded-full ${gradient.blur} blur-3xl pointer-events-none`}
+      />
 
       {/* Контент */}
-      <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 ring-1 ring-white/10 backdrop-blur relative z-10">
-        {/* Заголовок с иконкой */}
+      <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-5 ring-1 ring-white/10 backdrop-blur relative z-10">
+        {/* Заголовок с иконкой и бейджем */}
         <div className="flex items-start gap-3 mb-4">
-          {/* Иконка - анимация только на desktop */}
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
             {Icon}
           </div>
 
-          {/* Название и длительность */}
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-tight">
-              {product.name} · {getDurationText(product.duration_months || 1)}
+            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-tight mb-1">
+              {product.name}
             </h2>
+            <p className="text-sm text-white/60">
+              {getDurationText(product.duration_months || 1)}
+            </p>
           </div>
         </div>
 
@@ -142,11 +173,14 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
               {product.price.toLocaleString('ru-RU')} ₽
             </div>
           )}
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 mb-1">
             <span className="text-4xl font-bold text-white font-oswald transition-all duration-300">
-              {finalPrice.toLocaleString('ru-RU')}
+              {pricePerMonth.toLocaleString('ru-RU')}
             </span>
-            <span className="text-xl text-white/60 font-oswald">₽</span>
+            <span className="text-xl text-white/60 font-oswald">₽/мес</span>
+          </div>
+          <div className="text-sm text-white/50">
+            {finalPrice.toLocaleString('ru-RU')} ₽ за весь период
           </div>
         </div>
 
