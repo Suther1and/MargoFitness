@@ -93,9 +93,9 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6">
+    <div className="relative rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6">
       {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent pointer-events-none overflow-hidden rounded-3xl" />
       <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 space-y-6">
@@ -133,10 +133,10 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
             {transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-3 hover:bg-white/[0.06] transition-all"
+                className="flex items-center gap-3 rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 hover:bg-white/[0.06] hover:ring-white/15 transition-all"
               >
                 {/* Иконка */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
                   {getTypeIcon(tx.type, tx.amount)}
                 </div>
 

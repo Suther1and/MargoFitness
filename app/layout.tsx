@@ -56,7 +56,7 @@ export default async function RootLayout({
         <ReferralCodeCapture />
         <div className="flex flex-col items-center w-full p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4">
           <div 
-            className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem]" 
+            className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] rounded-b-[3rem] overflow-hidden" 
             style={{ 
               background: pathname.startsWith('/dashboard') 
                 ? 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)'
@@ -67,10 +67,8 @@ export default async function RootLayout({
             <Navbar profile={profile} pathname={pathname} />
             {/* Spacer for fixed navbar */}
             <div className="hidden lg:block h-20"></div>
-            <main className="relative w-full rounded-b-[3rem]">
-              <div className="relative z-10">
-                {children}
-              </div>
+            <main className="relative w-full">
+              {children}
             </main>
           </div>
         </div>

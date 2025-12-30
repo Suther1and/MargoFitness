@@ -91,9 +91,9 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6">
+    <div className="relative rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6">
       {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent pointer-events-none overflow-hidden rounded-3xl" />
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 space-y-6">

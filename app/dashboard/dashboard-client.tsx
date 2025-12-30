@@ -546,13 +546,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
         }
       `}</style>
 
-      <div 
-        className={`min-h-screen antialiased flex flex-col items-center justify-center text-neutral-900 font-inter p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4 relative overflow-x-hidden selection:bg-orange-500 selection:text-white ${inter.variable} ${oswald.variable}`}
-        style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}
-      >
-        <main className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] rounded-b-[3rem] overflow-x-hidden overflow-y-auto min-h-screen xl:min-h-[calc(100vh-4rem)]">
-          <div className="relative w-full z-10">
-            <div className="px-4 md:px-8 pb-12">
+      <div className="relative w-full">
+        <div className="px-4 md:px-8 pb-12">
               {/* Header */}
               <div className="mb-8 md:mb-12">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
@@ -1485,8 +1480,6 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
               </section>
             </div>
           </div>
-        </main>
-      </div>
     </>
   )
 }
