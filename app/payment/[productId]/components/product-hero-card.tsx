@@ -110,10 +110,10 @@ export function ProductHeroCard({
 
           {/* Цена - компактно */}
           <div className="text-right flex-shrink-0 pl-2">
-            <div className="text-2xl font-bold text-white font-oswald leading-none">
+            <div className="text-2xl font-bold text-white font-oswald leading-none whitespace-nowrap">
               {pricePerMonth.toLocaleString('ru-RU')}
+              <span className="text-sm text-white/50 font-normal ml-1">₽/мес</span>
             </div>
-            <div className="text-xs text-white/50">₽/мес</div>
           </div>
         </div>
       </motion.div>
