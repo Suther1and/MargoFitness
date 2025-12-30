@@ -42,7 +42,7 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
 
   // Проверяем поддержку Web Share API
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
+    if (typeof window !== 'undefined' && typeof navigator.share === 'function') {
       setCanShare(true)
     }
   }, [])
