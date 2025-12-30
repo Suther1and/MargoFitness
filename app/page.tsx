@@ -7,6 +7,7 @@ import { SiTelegram, SiVk, SiInstagram, SiTiktok } from 'react-icons/si'
 import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
 import { SignInPopup } from '@/components/signin-popup'
 import { createClient } from '@/lib/supabase/client'
+import type { Product } from '@/types/database'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
@@ -15,11 +16,25 @@ const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'], varia
 
 type Period = 30 | 90 | 180 | 365
 
-const pricingData = {
-  30: { starter: 990, pro: 1990, elite: 2990, suffix: '/30 дней' },
-  90: { starter: 2690, pro: 5390, elite: 8090, suffix: '/90 дней' },
-  180: { starter: 4990, pro: 9990, elite: 14990, suffix: '/180 дней' },
-  365: { starter: 8990, pro: 17990, elite: 26990, suffix: '/365 дней' }
+interface PricingData {
+  basic: { original: number; current: number }
+  pro: { original: number; current: number }
+  elite: { original: number; current: number }
+}
+
+// Базовые цены за месяц (без скидки)
+const BASE_PRICES = {
+  basic: 3990,
+  pro: 4990,
+  elite: 9990,
+}
+
+// Маппинг дней к месяцам
+const DAYS_TO_MONTHS: Record<Period, number> = {
+  30: 1,
+  90: 3,
+  180: 6,
+  365: 12,
 }
 
 // Фиксированная цветовая схема
@@ -44,11 +59,92 @@ export default function HomeNewPage() {
   const [certificateOpen, setCertificateOpen] = useState(false)
   const [signInOpen, setSignInOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const priceStarterRef = useRef<HTMLSpanElement>(null)
+  const [products, setProducts] = useState<Product[]>([])
+  const [pricingData, setPricingData] = useState<PricingData>({
+    basic: { original: BASE_PRICES.basic, current: BASE_PRICES.basic },
+    pro: { original: BASE_PRICES.pro, current: BASE_PRICES.pro },
+    elite: { original: BASE_PRICES.elite, current: BASE_PRICES.elite },
+  })
+  const priceBasicRef = useRef<HTMLSpanElement>(null)
   const priceProRef = useRef<HTMLSpanElement>(null)
   const priceEliteRef = useRef<HTMLSpanElement>(null)
-  const periodRefs = useRef<HTMLSpanElement[]>([])
+  const priceBasicOriginalRef = useRef<HTMLSpanElement>(null)
+  const priceProOriginalRef = useRef<HTMLSpanElement>(null)
+  const priceEliteOriginalRef = useRef<HTMLSpanElement>(null)
+  
+  // Рефы для символов рубля и "/месяц"
+  const currencyBasicRef = useRef<HTMLSpanElement>(null)
+  const currencyProRef = useRef<HTMLSpanElement>(null)
+  const currencyEliteRef = useRef<HTMLSpanElement>(null)
+  const periodBasicRef = useRef<HTMLSpanElement>(null)
+  const periodProRef = useRef<HTMLSpanElement>(null)
+  const periodEliteRef = useRef<HTMLSpanElement>(null)
+  
   const router = useRouter()
+
+  // Загрузка продуктов
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products/by-duration?duration=all')
+        const data = await response.json()
+        setProducts(data)
+        
+        // Загружаем цены для дефолтного периода (30 дней = 1 месяц)
+        updatePricing(30, data)
+      } catch (error) {
+        console.error('Error loading products:', error)
+      }
+    }
+    
+    loadProducts()
+  }, [])
+
+  // Обновление цен при изменении периода
+  const updatePricing = (days: Period, allProducts: Product[]) => {
+    const months = DAYS_TO_MONTHS[days]
+    const productsForDuration = allProducts.filter(p => p.duration_months === months)
+    
+    const basicProduct = productsForDuration.find(p => p.tier_level === 1)
+    const proProduct = productsForDuration.find(p => p.tier_level === 2)
+    const eliteProduct = productsForDuration.find(p => p.tier_level === 3)
+    
+    const calculatePricePerMonth = (product?: Product, tierLevel?: number) => {
+      if (!product) {
+        const originalPricePerMonth = tierLevel === 1 ? BASE_PRICES.basic :
+                                       tierLevel === 2 ? BASE_PRICES.pro :
+                                       BASE_PRICES.elite
+        return { original: originalPricePerMonth, current: originalPricePerMonth }
+      }
+      const duration = product.duration_months || 1
+      const currentPricePerMonth = Math.round(product.price / duration)
+      const originalPricePerMonth = product.tier_level === 1 ? BASE_PRICES.basic :
+                                     product.tier_level === 2 ? BASE_PRICES.pro :
+                                     BASE_PRICES.elite
+      return { original: originalPricePerMonth, current: currentPricePerMonth }
+    }
+    
+    const newPricing = {
+      basic: calculatePricePerMonth(basicProduct, 1),
+      pro: calculatePricePerMonth(proProduct, 2),
+      elite: calculatePricePerMonth(eliteProduct, 3),
+    }
+    
+    setPricingData(newPricing)
+    
+    // Обновляем отображение сразу
+    setTimeout(() => {
+      if (priceBasicRef.current) priceBasicRef.current.innerText = newPricing.basic.current.toLocaleString('ru-RU')
+      if (priceProRef.current) priceProRef.current.innerText = newPricing.pro.current.toLocaleString('ru-RU')
+      if (priceEliteRef.current) priceEliteRef.current.innerText = newPricing.elite.current.toLocaleString('ru-RU')
+      
+      if (days > 30) {
+        if (priceBasicOriginalRef.current) priceBasicOriginalRef.current.innerText = newPricing.basic.original.toLocaleString('ru-RU')
+        if (priceProOriginalRef.current) priceProOriginalRef.current.innerText = newPricing.pro.original.toLocaleString('ru-RU')
+        if (priceEliteOriginalRef.current) priceEliteOriginalRef.current.innerText = newPricing.elite.original.toLocaleString('ru-RU')
+      }
+    }, 0)
+  }
 
   // Отправляем событие об изменении состояния попапа
   useEffect(() => {
@@ -84,7 +180,7 @@ export default function HomeNewPage() {
     }
   }
 
-  const animateValue = (element: HTMLElement | null, value: number) => {
+  const animateElement = (element: HTMLElement | null, newValue?: string) => {
     if (!element) return
     
     element.style.transition = 'all 0.2s ease-in'
@@ -93,38 +189,75 @@ export default function HomeNewPage() {
     element.style.transform = 'translateY(5px)'
     
     setTimeout(() => {
-      element.innerText = value.toString()
+      if (newValue !== undefined) {
+        element.innerText = newValue
+      }
       element.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
       element.style.opacity = '1'
       element.style.filter = 'blur(0px)'
       element.style.transform = 'translateY(0)'
-    }, 200)
+    }, 250)
   }
 
   const handlePeriodChange = (period: Period) => {
-    const data = pricingData[period]
-    
-    animateValue(priceStarterRef.current, data.starter)
-    animateValue(priceProRef.current, data.pro)
-    animateValue(priceEliteRef.current, data.elite)
-    
-    periodRefs.current.forEach(el => {
-      if (el) {
-        el.style.transition = 'all 0.2s ease-in'
-        el.style.opacity = '0'
-        el.style.filter = 'blur(4px)'
-        el.style.transform = 'translateY(5px)'
-        setTimeout(() => {
-          el.innerText = data.suffix
-          el.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-          el.style.opacity = '1'
-          el.style.filter = 'blur(0px)'
-          el.style.transform = 'translateY(0)'
-        }, 200)
-      }
-    })
-    
     setSelectedDuration(period)
+    
+    // Сначала обновляем pricing
+    const months = DAYS_TO_MONTHS[period]
+    const productsForDuration = products.filter(p => p.duration_months === months)
+    
+    const basicProduct = productsForDuration.find(p => p.tier_level === 1)
+    const proProduct = productsForDuration.find(p => p.tier_level === 2)
+    const eliteProduct = productsForDuration.find(p => p.tier_level === 3)
+    
+    const calculatePricePerMonth = (product?: Product, tierLevel?: number) => {
+      if (!product) {
+        const originalPricePerMonth = tierLevel === 1 ? BASE_PRICES.basic :
+                                       tierLevel === 2 ? BASE_PRICES.pro :
+                                       BASE_PRICES.elite
+        return { original: originalPricePerMonth, current: originalPricePerMonth }
+      }
+      const duration = product.duration_months || 1
+      const currentPricePerMonth = Math.round(product.price / duration)
+      const originalPricePerMonth = product.tier_level === 1 ? BASE_PRICES.basic :
+                                     product.tier_level === 2 ? BASE_PRICES.pro :
+                                     BASE_PRICES.elite
+      return { original: originalPricePerMonth, current: currentPricePerMonth }
+    }
+    
+    const newPricing = {
+      basic: calculatePricePerMonth(basicProduct, 1),
+      pro: calculatePricePerMonth(proProduct, 2),
+      elite: calculatePricePerMonth(eliteProduct, 3),
+    }
+    
+    setPricingData(newPricing)
+    
+    // Анимируем только основные цены, рубли и "/месяц"
+    animateElement(priceBasicRef.current, newPricing.basic.current.toLocaleString('ru-RU'))
+    animateElement(currencyBasicRef.current)
+    animateElement(periodBasicRef.current)
+    
+    animateElement(priceProRef.current, newPricing.pro.current.toLocaleString('ru-RU'))
+    animateElement(currencyProRef.current)
+    animateElement(periodProRef.current)
+    
+    animateElement(priceEliteRef.current, newPricing.elite.current.toLocaleString('ru-RU'))
+    animateElement(currencyEliteRef.current)
+    animateElement(periodEliteRef.current)
+    
+    // Перечеркнутые цены обновляем БЕЗ анимации
+    if (period > 30) {
+      if (priceBasicOriginalRef.current) {
+        priceBasicOriginalRef.current.innerText = newPricing.basic.original.toLocaleString('ru-RU')
+      }
+      if (priceProOriginalRef.current) {
+        priceProOriginalRef.current.innerText = newPricing.pro.original.toLocaleString('ru-RU')
+      }
+      if (priceEliteOriginalRef.current) {
+        priceEliteOriginalRef.current.innerText = newPricing.elite.original.toLocaleString('ru-RU')
+      }
+    }
   }
 
   return (
@@ -489,13 +622,18 @@ export default function HomeNewPage() {
                           <button 
                             key={days}
                             onClick={() => handlePeriodChange(days)}
-                            className={`px-3 md:px-5 py-2 md:py-2.5 rounded-xl font-semibold uppercase tracking-widest transition-all flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1 leading-tight`}
+                            className={`px-3 md:px-5 py-2 md:py-2.5 rounded-xl font-semibold uppercase tracking-widest transition-all flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1 leading-tight relative`}
                             style={{
                               background: selectedDuration === days ? `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})` : 'transparent',
                               color: selectedDuration === days ? '#FFFFFF' : colors.textSecondary,
                               boxShadow: selectedDuration === days ? `0 4px 16px ${colors.primary}4D` : 'none'
                             }}
                           >
+                            {days > 30 && (
+                              <span className="absolute -top-2 -right-2 rounded-full bg-green-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                -{days === 90 ? '5' : days === 180 ? '10' : '15'}%
+                              </span>
+                            )}
                             <span className="text-xs md:text-sm">{days}</span>
                             <span className="text-xs md:text-sm">дней</span>
                           </button>
@@ -518,12 +656,17 @@ export default function HomeNewPage() {
                         border: `1px solid ${colors.cardBorder}`
                       }}>
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>Basic</h3>
-                        <p className="text-sm mb-6 font-roboto" style={{ color: colors.textSecondary }}>Быстрый старт</p>
-                        <div className="mb-6">
+                        <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Быстрый старт</p>
+                        <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                          {selectedDuration > 30 && (
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span ref={priceBasicOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.basic.original.toLocaleString('ru-RU')}</span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-1">
-                            <span ref={priceStarterRef} className="text-5xl font-semibold font-oswald transition-all duration-300" style={{ color: colors.textPrimary }}>{pricingData[30].starter}</span>
-                            <span className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
-                            <span ref={(el) => { if (el) periodRefs.current[0] = el }} className="text-sm transition-all duration-300 ml-1" style={{ color: colors.textSecondary }}>{pricingData[30].suffix}</span>
+                            <span ref={priceBasicRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.basic.current.toLocaleString('ru-RU')}</span>
+                            <span ref={currencyBasicRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
+                            <span ref={periodBasicRef} className="text-sm ml-1" style={{ color: colors.textSecondary }}>/месяц</span>
                           </div>
                         </div>
                         <ul className="space-y-3 text-sm font-roboto" style={{ color: colors.textSecondary }}>
@@ -591,12 +734,17 @@ export default function HomeNewPage() {
                         border: `1px solid ${colors.primary}33`
                       }}>
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>PRO</h3>
-                        <p className="text-sm mb-6 font-roboto" style={{ color: colors.textSecondary }}>Оптимальное решение</p>
-                        <div className="mb-6">
+                        <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Оптимальное решение</p>
+                        <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                          {selectedDuration > 30 && (
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span ref={priceProOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.pro.original.toLocaleString('ru-RU')}</span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-1">
-                            <span ref={priceProRef} className="text-5xl font-semibold font-oswald transition-all duration-300" style={{ color: colors.textPrimary }}>{pricingData[30].pro}</span>
-                            <span className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
-                            <span ref={(el) => { if (el) periodRefs.current[1] = el }} className="text-sm transition-all duration-300 ml-1" style={{ color: colors.textSecondary }}>{pricingData[30].suffix}</span>
+                            <span ref={priceProRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.pro.current.toLocaleString('ru-RU')}</span>
+                            <span ref={currencyProRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
+                            <span ref={periodProRef} className="text-sm ml-1" style={{ color: colors.textSecondary }}>/месяц</span>
                           </div>
               </div>
                         <ul className="space-y-3 text-sm font-roboto" style={{ color: colors.textSecondary }}>
@@ -659,12 +807,17 @@ export default function HomeNewPage() {
                         border: `1px solid ${colors.cardBorder}`
                       }}>
                         <h3 className="text-xl font-medium tracking-widest font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>Elite</h3>
-                        <p className="text-sm mb-6 font-roboto" style={{ color: colors.textSecondary }}>Индивидуальное ведение</p>
-                        <div className="mb-6">
+                        <p className="text-sm mb-4 font-roboto" style={{ color: colors.textSecondary }}>Индивидуальное ведение</p>
+                        <div className="mb-6" style={{ minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                          {selectedDuration > 30 && (
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span ref={priceEliteOriginalRef} className="text-2xl font-semibold font-oswald line-through" style={{ color: colors.textSecondary }}>{pricingData.elite.original.toLocaleString('ru-RU')}</span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-1">
-                            <span ref={priceEliteRef} className="text-5xl font-semibold font-oswald transition-all duration-300" style={{ color: colors.textPrimary }}>{pricingData[30].elite}</span>
-                            <span className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
-                            <span ref={(el) => { if (el) periodRefs.current[2] = el }} className="text-sm transition-all duration-300 ml-1" style={{ color: colors.textSecondary }}>{pricingData[30].suffix}</span>
+                            <span ref={priceEliteRef} className="text-5xl font-semibold font-oswald" style={{ color: colors.textPrimary }}>{pricingData.elite.current.toLocaleString('ru-RU')}</span>
+                            <span ref={currencyEliteRef} className="text-lg" style={{ color: colors.textSecondary }}>₽</span>
+                            <span ref={periodEliteRef} className="text-sm ml-1" style={{ color: colors.textSecondary }}>/месяц</span>
                           </div>
                         </div>
                         <ul className="space-y-3 text-sm font-roboto" style={{ color: colors.textSecondary }}>

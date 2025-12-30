@@ -67,7 +67,12 @@ export async function calculateFinalPrice(params: {
     }
 
     // 2. Базовая цена (полная до скидок)
-    const basePrice = product.price / (1 - product.discount_percentage / 100)
+    // Используем фиксированные базовые цены за месяц для точности
+    const basePricePerMonth = product.tier_level === 1 ? 3990 :
+                              product.tier_level === 2 ? 4990 :
+                              product.tier_level === 3 ? 9990 : 0
+    const duration = product.duration_months || 1
+    const basePrice = basePricePerMonth * duration
     const durationDiscountAmount = basePrice - product.price
     
     // 3. Применяем промокод (если есть)
@@ -201,7 +206,12 @@ export async function calculateProductPrice(
       return { success: false, error: 'Продукт не найден' }
     }
 
-    const basePrice = Math.round(product.price / (1 - product.discount_percentage / 100))
+    // Используем фиксированные базовые цены за месяц
+    const basePricePerMonth = product.tier_level === 1 ? 3990 :
+                              product.tier_level === 2 ? 4990 :
+                              product.tier_level === 3 ? 9990 : 0
+    const duration = product.duration_months || 1
+    const basePrice = Math.round(basePricePerMonth * duration)
     let promoDiscount = 0
 
     if (promoCode) {

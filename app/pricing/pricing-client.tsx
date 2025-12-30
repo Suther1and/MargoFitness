@@ -47,20 +47,32 @@ export function PricingClient({ profile }: PricingClientProps) {
     loadProducts(duration)
   }
 
-  const calculateOriginalPrice = (product: Product): number => {
-    const discount = product.discount_percentage || 0
-    if (discount === 0) return product.price
-    return Math.round(product.price / (1 - discount / 100))
+  // Базовая цена за месяц (без скидки)
+  const getBasePricePerMonth = (product: Product): number => {
+    const tierBasePrices: Record<number, number> = {
+      1: 3990, // Basic
+      2: 4990, // Pro
+      3: 9990, // Elite
+    }
+    return tierBasePrices[product.tier_level || 1] || product.price
   }
 
-  const calculateSavings = (product: Product): number => {
-    const originalPrice = calculateOriginalPrice(product)
-    return originalPrice - product.price
-  }
-
+  // Текущая цена за месяц (со скидкой)
   const getPricePerMonth = (product: Product): number => {
     const duration = product.duration_months || 1
     return Math.round(product.price / duration)
+  }
+
+  // Экономия за месяц
+  const getSavingsPerMonth = (product: Product): number => {
+    const basePricePerMonth = getBasePricePerMonth(product)
+    const currentPricePerMonth = getPricePerMonth(product)
+    return basePricePerMonth - currentPricePerMonth
+  }
+
+  // Общая цена за весь период
+  const getTotalPrice = (product: Product): number => {
+    return product.price
   }
 
   const tierIcons: Record<number, any> = {
@@ -119,10 +131,14 @@ export function PricingClient({ profile }: PricingClientProps) {
                                productTierLevel <= currentTierLevel
             const isUpgrade = profile?.subscription_status === 'active' && 
                              productTierLevel > currentTierLevel
-            const originalPrice = calculateOriginalPrice(product)
-            const savings = calculateSavings(product)
+            
+            // Новые расчеты
+            const basePricePerMonth = getBasePricePerMonth(product)
             const pricePerMonth = getPricePerMonth(product)
+            const savingsPerMonth = getSavingsPerMonth(product)
+            const totalPrice = getTotalPrice(product)
             const hasDiscount = (product.discount_percentage || 0) > 0
+            const duration = product.duration_months || 1
 
             return (
               <Card 
@@ -154,26 +170,30 @@ export function PricingClient({ profile }: PricingClientProps) {
                     {hasDiscount && (
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-2xl font-bold line-through text-muted-foreground">
-                          {originalPrice} ₽
+                          {basePricePerMonth} ₽
                         </span>
                         <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">
-                          -{product.discount_percentage}%
+                          -{Math.round(product.discount_percentage || 0)}%
                         </span>
                       </div>
                     )}
                     
                     <div>
-                      <span className="text-4xl font-bold">{product.price} ₽</span>
-                      {(product.duration_months || 1) > 1 && (
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-4xl font-bold">{pricePerMonth} ₽</span>
+                        <span className="text-lg text-muted-foreground">/мес</span>
+                      </div>
+                      
+                      {duration > 1 && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          {pricePerMonth} ₽/месяц
+                          Итого {totalPrice} ₽ за {duration} {duration === 1 ? 'месяц' : duration < 5 ? 'месяца' : 'месяцев'}
                         </p>
                       )}
                     </div>
 
-                    {savings > 0 && (
+                    {savingsPerMonth > 0 && (
                       <div className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950 px-3 py-1 text-sm font-medium text-green-700 dark:text-green-300">
-                        💰 Экономия {savings} ₽
+                        💰 Экономия {savingsPerMonth} ₽/мес
                       </div>
                     )}
                   </div>
