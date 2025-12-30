@@ -79,19 +79,13 @@ export function ProductHeroCard({
   // Есть ли скидка (сравниваем finalPrice с базовой ценой за этот период)
   const hasDiscount = finalPrice < product.price
 
-  // Условный wrapper - всегда motion.div
-  const Wrapper = motion.div
-  const wrapperProps = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: "easeOut" }
-  }
-
   if (isMobile) {
     // Mobile: ультракомпактный горизонтальный layout
     return (
-      <Wrapper
-        {...wrapperProps}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3"
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
@@ -122,14 +116,16 @@ export function ProductHeroCard({
             <div className="text-xs text-white/50">₽/мес</div>
           </div>
         </div>
-      </Wrapper>
+      </motion.div>
     )
   }
 
   // Desktop: полная версия с преимуществами
   return (
-    <Wrapper
-      {...wrapperProps}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5"
     >
       {/* Фоновый градиент */}
