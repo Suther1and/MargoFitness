@@ -41,7 +41,7 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || "";
 
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning style={{ background: '#0C0C11' }}>
       <body
         className={`${oswald.variable} ${montserrat.variable} ${roboto.variable} ${inter.variable} font-inter antialiased min-h-screen overflow-x-hidden`}
         suppressHydrationWarning

@@ -26,6 +26,7 @@ export function TrainerCertificatePopup({ open, onOpenChange }: TrainerCertifica
           border: `1px solid ${colors.cardBorder}`,
           color: colors.textPrimary
         }}
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle 

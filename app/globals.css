@@ -128,6 +128,8 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
   }
   body::-webkit-scrollbar {
     display: none;
@@ -135,6 +137,8 @@
   
   html {
     overflow-x: hidden;
+    overscroll-behavior-x: none;
+    background: #0C0C11;
   }
   
   /* Webkit browsers (Chrome, Safari, Yandex) - transparent background */

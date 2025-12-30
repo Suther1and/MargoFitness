@@ -1,10 +1,12 @@
 'use client'
 
 import { Inter, Oswald, Montserrat, Roboto } from 'next/font/google'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { SiTelegram, SiVk, SiInstagram, SiTiktok } from 'react-icons/si'
 import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
 import { SignInPopup } from '@/components/signin-popup'
+import { createClient } from '@/lib/supabase/client'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
@@ -41,10 +43,46 @@ export default function HomeNewPage() {
   const [selectedDuration, setSelectedDuration] = useState<Period>(30)
   const [certificateOpen, setCertificateOpen] = useState(false)
   const [signInOpen, setSignInOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const priceStarterRef = useRef<HTMLSpanElement>(null)
   const priceProRef = useRef<HTMLSpanElement>(null)
   const priceEliteRef = useRef<HTMLSpanElement>(null)
   const periodRefs = useRef<HTMLSpanElement[]>([])
+  const router = useRouter()
+
+  // Отправляем событие об изменении состояния попапа
+  useEffect(() => {
+    const event = new CustomEvent('signInPopupStateChange', { detail: signInOpen })
+    window.dispatchEvent(event)
+  }, [signInOpen])
+
+  // Проверка статуса авторизации
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      setIsAuthenticated(!!session)
+    }
+    
+    checkAuth()
+
+    // Подписка на изменения статуса авторизации
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Обработчик действия "начать" - проверяет авторизацию
+  const handleStartAction = () => {
+    if (isAuthenticated) {
+      router.push('/dashboard-new')
+    } else {
+      setSignInOpen(true)
+    }
+  }
 
   const animateValue = (element: HTMLElement | null, value: number) => {
     if (!element) return
@@ -156,11 +194,15 @@ export default function HomeNewPage() {
                       </p>
 
                       <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                        <button className="rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 w-full md:w-auto" style={{
-                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                          boxShadow: `0 8px 24px ${colors.primary}4D`,
-                          touchAction: 'manipulation'
-                        }}>
+                        <button 
+                          onClick={handleStartAction}
+                          className="rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 w-full md:w-auto" 
+                          style={{
+                            background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                            boxShadow: `0 8px 24px ${colors.primary}4D`,
+                            touchAction: 'manipulation'
+                          }}
+                        >
                           <div className="flex items-center justify-center gap-2.5 px-6 py-4 pointer-events-none">
                             <span className="uppercase text-sm font-semibold tracking-widest leading-none">Начать бесплатно</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 text-white">
@@ -262,11 +304,15 @@ export default function HomeNewPage() {
                         Преврати <br />
                         <span style={{ color: colors.primary }}>мечту в цель</span>
                       </h1>
-                      <button className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95" style={{
-                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                        boxShadow: `0 8px 24px ${colors.primary}4D`,
-                        touchAction: 'manipulation'
-                      }}>
+                      <button 
+                        onClick={handleStartAction}
+                        className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95" 
+                        style={{
+                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                          boxShadow: `0 8px 24px ${colors.primary}4D`,
+                          touchAction: 'manipulation'
+                        }}
+                      >
                         <div className="flex items-center justify-center gap-2.5 px-6 py-4 pointer-events-none">
                           <span className="uppercase text-sm font-semibold tracking-widest leading-none">Начать бесплатно</span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 text-white">
@@ -301,7 +347,7 @@ export default function HomeNewPage() {
                       key={step.num} 
                       onClick={() => {
                         if (step.action === 'signup') {
-                          setSignInOpen(true)
+                          handleStartAction()
                         } else if (step.action === 'pricing') {
                           document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })
                         }
@@ -373,7 +419,7 @@ export default function HomeNewPage() {
                       <p>"Я помогаю людям достигать своих целей через персональные программы и системный подход. Каждая тренировка адаптирована под ваш уровень подготовки."</p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 md:gap-6 mt-6">
+                    <div className="grid grid-cols-3 gap-3 md:gap-6 mt-6 auto-rows-fr">
                       {[
                         { value: '15+', label: 'Лет опыта', color: 'orange', clickable: false, icon: null },
                         { value: '500+', label: 'Учеников', color: 'purple', clickable: false, icon: null },
@@ -381,7 +427,7 @@ export default function HomeNewPage() {
                       ].map((stat, idx) => (
                         <div 
                           key={stat.label} 
-                          className={`rounded-2xl p-4 text-center hover:shadow-lg transition-all relative overflow-hidden md:hover:ring-white/20 ${stat.clickable ? 'cursor-pointer' : ''}`}
+                          className={`rounded-2xl p-4 text-center hover:shadow-lg transition-all relative overflow-hidden md:hover:ring-white/20 flex flex-col ${stat.clickable ? 'cursor-pointer' : ''}`}
                           style={{
                             background: colors.cardBg,
                             border: `1px solid ${colors.cardBorder}`
@@ -396,13 +442,13 @@ export default function HomeNewPage() {
                             }, transparent)`
                           }} />
                           
-                          <div className="rounded-xl p-3 backdrop-blur relative z-10" style={{
+                          <div className="rounded-xl p-2 md:p-3 backdrop-blur relative z-10 flex flex-col flex-1 justify-center" style={{
                             background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03))',
                             border: `1px solid ${colors.cardBorder}`
                           }}>
                             {stat.icon === 'trophy' ? (
-                              <div className="flex items-center justify-center mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: colors.textPrimary }}>
+                              <div className="flex items-center justify-center mb-0.5 md:mb-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="md:w-10 md:h-10" style={{ color: colors.textPrimary }}>
                                   <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                                   <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                                   <path d="M4 22h16"></path>
@@ -412,9 +458,9 @@ export default function HomeNewPage() {
                                 </svg>
                               </div>
                             ) : (
-                              <div className="text-3xl md:text-4xl font-oswald font-medium" style={{ color: colors.textPrimary }}>{stat.value}</div>
+                              <div className="text-2xl md:text-4xl font-oswald font-medium" style={{ color: colors.textPrimary }}>{stat.value}</div>
                             )}
-                            <div className="text-[0.65rem] md:text-xs uppercase tracking-widest mt-1 font-montserrat" style={{ color: colors.textSecondary }}>
+                            <div className="text-[0.6rem] md:text-xs uppercase tracking-wide md:tracking-widest mt-0.5 md:mt-1 font-montserrat leading-tight" style={{ color: colors.textSecondary }}>
                               {stat.label}
                             </div>
                           </div>
@@ -503,17 +549,22 @@ export default function HomeNewPage() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0" style={{ color: colors.textPrimary }}>
                               <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            <span>Telegram сообщество (доступ до 2000 участников)</span>
+                            <span className="hidden md:inline">Telegram сообщество (доступ до 2000 участников)</span>
+                            <span className="md:hidden">Telegram сообщество (до 2000 участников)</span>
                           </li>
                 </ul>
                       </div>
 
                       {/* Кнопка снаружи */}
-                      <button className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" style={{
-                        background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
-                        border: `1px solid ${colors.cardBorder}`,
-                        touchAction: 'manipulation'
-                      }}>
+                      <button 
+                        onClick={handleStartAction}
+                        className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
+                        style={{
+                          background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
+                          border: `1px solid ${colors.cardBorder}`,
+                          touchAction: 'manipulation'
+                        }}
+                      >
                         <div className="flex items-center justify-center p-4 pointer-events-none">
                           <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>Выбрать тариф</span>
                         </div>
@@ -580,11 +631,15 @@ export default function HomeNewPage() {
                       </div>
 
                       {/* Кнопка снаружи */}
-                      <button className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto" style={{
-                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                        boxShadow: `0 8px 24px ${colors.primary}4D`,
-                        touchAction: 'manipulation'
-                      }}>
+                      <button 
+                        onClick={handleStartAction}
+                        className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto" 
+                        style={{
+                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                          boxShadow: `0 8px 24px ${colors.primary}4D`,
+                          touchAction: 'manipulation'
+                        }}
+                      >
                         <div className="flex items-center justify-center p-4 pointer-events-none">
                           <span className="uppercase text-sm font-semibold tracking-widest">Выбрать тариф</span>
                         </div>
@@ -647,11 +702,15 @@ export default function HomeNewPage() {
           </div>
 
                       {/* Кнопка снаружи */}
-                      <button className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" style={{
-                        background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
-                        border: `1px solid ${colors.cardBorder}`,
-                        touchAction: 'manipulation'
-                      }}>
+                      <button 
+                        onClick={handleStartAction}
+                        className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
+                        style={{
+                          background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
+                          border: `1px solid ${colors.cardBorder}`,
+                          touchAction: 'manipulation'
+                        }}
+                      >
                         <div className="flex items-center justify-center p-4 pointer-events-none">
                           <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>Выбрать тариф</span>
                         </div>
@@ -859,12 +918,12 @@ export default function HomeNewPage() {
 
                     <div className="grid grid-cols-2 gap-3 md:gap-4 auto-rows-fr">
                       {[
-                        { icon: 'calendar', color: '#f97316', blurColor: 'rgba(249, 115, 22, 0.1)', title: 'Еженедельно', desc: 'Новые программы каждый понедельник', clickable: false },
-                        { icon: 'telegram', color: '#a855f7', blurColor: 'rgba(168, 85, 247, 0.1)', title: 'Telegram сообщество', desc: 'Присоединяйся к комьюнити (доступ для всех до 1000 участников)', clickable: true },
-                        { icon: 'video', color: '#3b82f6', blurColor: 'rgba(59, 130, 246, 0.1)', title: 'Видео', desc: 'Подробные видео упражнений с инструкциями в личном кабинете', clickable: false },
-                        { icon: 'tag', color: '#10b981', blurColor: 'rgba(16, 185, 129, 0.1)', title: 'Бонусы', desc: 'Продвинутая бонусная и реферальная система', clickable: false },
-                        { icon: 'chart', color: '#ec4899', blurColor: 'rgba(236, 72, 153, 0.1)', title: 'Прогресс', desc: 'Доступ к продвинутому кабинету и Дневнику здоровья', clickable: false },
-                        { icon: 'home', color: '#6366f1', blurColor: 'rgba(99, 102, 241, 0.1)', title: 'Где угодно', desc: 'Тренируйся дома с минимумом оборудования', clickable: false }
+                        { icon: 'calendar', color: '#f97316', blurColor: 'rgba(249, 115, 22, 0.1)', title: 'Еженедельно', desc: 'Новые программы каждый понедельник', mobileDesc: null, clickable: false },
+                        { icon: 'telegram', color: '#a855f7', blurColor: 'rgba(168, 85, 247, 0.1)', title: 'Telegram сообщество', desc: 'Присоединяйся к комьюнити (доступ для всех до 1000 участников)', mobileDesc: 'Доступ для всех до 1000 участников', clickable: true },
+                        { icon: 'video', color: '#3b82f6', blurColor: 'rgba(59, 130, 246, 0.1)', title: 'Видео', desc: 'Подробные видео упражнений с инструкциями в личном кабинете', mobileDesc: 'Упражнения с правильной техникой в личном кабинете', clickable: false },
+                        { icon: 'tag', color: '#10b981', blurColor: 'rgba(16, 185, 129, 0.1)', title: 'Бонусы', desc: 'Продвинутая бонусная и реферальная система', mobileDesc: null, clickable: false },
+                        { icon: 'chart', color: '#ec4899', blurColor: 'rgba(236, 72, 153, 0.1)', title: 'Прогресс', desc: 'Доступ к продвинутому кабинету и Дневнику здоровья', mobileDesc: 'Платформа нового поколения', clickable: false },
+                        { icon: 'home', color: '#6366f1', blurColor: 'rgba(99, 102, 241, 0.1)', title: 'Где угодно', desc: 'Тренируйся дома с минимумом оборудования', mobileDesc: null, clickable: false }
                       ].map((feature, idx) => (
                         <div 
                           key={idx} 
@@ -882,7 +941,7 @@ export default function HomeNewPage() {
                             background: feature.blurColor
                           }} />
 
-                          <div className="rounded-xl p-3 backdrop-blur relative z-10 flex flex-col gap-2 md:gap-3" style={{
+                          <div className="rounded-xl p-3 backdrop-blur relative z-10 flex flex-col gap-2 md:gap-3 flex-1" style={{
                             background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03))',
                             border: `1px solid ${colors.cardBorder}`
                           }}>
@@ -932,7 +991,14 @@ export default function HomeNewPage() {
                             </div>
                             <div>
                               <h4 className="text-sm md:text-base font-bold font-montserrat uppercase mb-1" style={{ color: colors.textPrimary }}>{feature.title}</h4>
-                              <p className="text-xs md:text-sm font-roboto" style={{ color: colors.textSecondary }}>{feature.desc}</p>
+                              {feature.mobileDesc ? (
+                                <>
+                                  <p className="hidden md:block text-xs md:text-sm font-roboto" style={{ color: colors.textSecondary }}>{feature.desc}</p>
+                                  <p className="md:hidden text-xs font-roboto" style={{ color: colors.textSecondary }}>{feature.mobileDesc}</p>
+                                </>
+                              ) : (
+                                <p className="text-xs md:text-sm font-roboto" style={{ color: colors.textSecondary }}>{feature.desc}</p>
+                              )}
                             </div>
                           </div>
                         </div>

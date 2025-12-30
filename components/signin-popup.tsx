@@ -112,10 +112,10 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
           animation-fill-mode: both !important;
         }
         
-        /* Mobile: плавная анимация с bounce эффектом (scale от 0.7) */
+        /* Mobile: плавная анимация с bounce эффектом (scale от 0.5) */
         @media (max-width: 1023px) {
           [data-slot="dialog-content"][data-state="open"] {
-            animation: popupScaleInMobile 0.8s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
+            animation: popupScaleInMobile 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
             animation-fill-mode: both !important;
           }
           

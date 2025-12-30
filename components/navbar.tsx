@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { AuthButton } from './auth-button'
+import { SignInPopup } from './signin-popup'
 import { Menu, X } from 'lucide-react'
 
 const colors = {
@@ -27,7 +28,10 @@ interface NavbarProps {
 export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [isBackdropClosing, setIsBackdropClosing] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isSignInOpen, setIsSignInOpen] = useState(false)
+  const [isAnyPopupOpen, setIsAnyPopupOpen] = useState(false)
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
@@ -54,6 +58,17 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Слушаем события об открытии попапов со всех страниц
+  useEffect(() => {
+    const handlePopupStateChange = (e: Event) => {
+      const customEvent = e as CustomEvent<boolean>
+      setIsAnyPopupOpen(customEvent.detail)
+    }
+
+    window.addEventListener('signInPopupStateChange', handlePopupStateChange)
+    return () => window.removeEventListener('signInPopupStateChange', handlePopupStateChange)
   }, [])
 
   // Скролл не блокируем - пользователь может скроллить под открытым меню
@@ -87,10 +102,25 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
   const handleCloseMobileMenu = () => {
     setIsClosing(true)
+    setIsBackdropClosing(true)
     setTimeout(() => {
       setMobileMenuOpen(false)
       setIsClosing(false)
+      setIsBackdropClosing(false)
     }, 500) // Длительность анимации закрытия
+  }
+
+  const handleAuthClick = () => {
+    if (mobileMenuOpen) {
+      // Если шторка открыта, закрываем её и открываем попап с задержкой
+      handleCloseMobileMenu()
+      setTimeout(() => {
+        setIsSignInOpen(true)
+      }, 400)
+    } else {
+      // Если шторка закрыта, открываем попап сразу
+      setIsSignInOpen(true)
+    }
   }
 
   const navLinks = [
@@ -155,6 +185,15 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }
         }
 
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+          }
+          to {
+            opacity: 0;
+          }
+        }
+
         [data-mobile-menu] {
           animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
         }
@@ -176,6 +215,10 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
         .animate-fade-in {
           animation: fadeIn 0.2s ease forwards;
+        }
+
+        .animate-fade-out {
+          animation: fadeOut 0.3s ease forwards;
         }
 
         .hover-link:hover {
@@ -259,42 +302,47 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                   </Link>
                 </>
               ) : (
-                <AuthButton />
+                <AuthButton onAuthClick={() => setIsSignInOpen(true)} />
               )}
             </div>
           </div>
         </nav>
       </div>
 
+      {/* Sign In Popup - выше навигации, чтобы не размонтировался при закрытии */}
+      <SignInPopup isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+
       {/* Mobile: только бургер */}
-      <div 
-        className="lg:hidden fixed top-4 right-4 z-50"
-      >
-        <button
-          onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
-          className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
-          style={{
-            background: colors.navbarBg,
-            border: `1px solid ${colors.cardBorder}`,
-            color: colors.textPrimary,
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
-          }}
-          aria-label="Toggle menu"
+      {!isSignInOpen && !isAnyPopupOpen && (
+        <div 
+          className="lg:hidden fixed top-4 right-4 z-50"
         >
-          {mobileMenuOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
-        </button>
-      </div>
+          <button
+            onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
+            className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
+            style={{
+              background: colors.navbarBg,
+              border: `1px solid ${colors.cardBorder}`,
+              color: colors.textPrimary,
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+            }}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
+      {(mobileMenuOpen || isClosing) && (
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in lg:hidden"
+            className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden ${isBackdropClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
             onClick={handleCloseMobileMenu}
           />
 
@@ -391,13 +439,24 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                       border: `1px solid ${colors.primary}33`,
                     }}
                   >
-                    {profile.avatar_url && (
-                      <img
-                        src={profile.avatar_url}
-                        alt={profile.full_name || profile.email || 'Avatar'}
-                        className="size-10 rounded-full ring-2 ring-primary/30"
-                      />
-                    )}
+                    <div className="size-10 rounded-full flex items-center justify-center ring-2 ring-primary/30 overflow-hidden" style={{
+                      background: profile.avatar_url 
+                        ? 'transparent' 
+                        : `linear-gradient(to bottom right, ${colors.primary}33, ${colors.secondary}33)`
+                    }}>
+                      {profile.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt={profile.full_name || profile.email || 'Avatar'}
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: colors.primaryLight }}>
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      )}
+                    </div>
                     <div className="flex-1">
                       <div
                         className="text-sm font-semibold"
@@ -427,7 +486,50 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                     </svg>
                   </Link>
                 ) : (
-                  <AuthButton />
+                  <button
+                    onClick={handleAuthClick}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all active:scale-95"
+                    style={{
+                      background: `linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1))`,
+                      border: `1px solid rgba(59, 130, 246, 0.2)`,
+                    }}
+                  >
+                    <div className="size-10 rounded-full flex items-center justify-center ring-2 ring-blue-500/30" style={{
+                      background: `linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2))`
+                    }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#60a5fa' }}>
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div
+                        className="text-sm font-semibold"
+                        style={{ color: colors.textPrimary }}
+                      >
+                        Авторизация
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        Войдите в кабинет
+                      </div>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      style={{ color: '#60a5fa' }}
+                    >
+                      <path d="M5 12h14"></path>
+                      <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                  </button>
                 )}
               </div>
             </div>
