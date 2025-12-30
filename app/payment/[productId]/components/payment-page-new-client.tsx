@@ -111,6 +111,8 @@ export function PaymentPageNewClient({
     ? Math.round(calculation.finalPrice / (product.duration_months || 1))
     : pricePerMonth
 
+  const isDiscountApplied = !!appliedPromo || bonusToUse > 0
+
   return (
     <>
       {/* Desktop: 2 колонки */}
@@ -121,6 +123,7 @@ export function PaymentPageNewClient({
             product={product}
             pricePerMonth={displayPricePerMonth}
             finalPrice={displayPrice}
+            isDiscountApplied={isDiscountApplied}
           />
           <TrustBadges />
         </div>
@@ -158,23 +161,30 @@ export function PaymentPageNewClient({
           product={product}
           pricePerMonth={displayPricePerMonth}
           finalPrice={displayPrice}
+          isDiscountApplied={isDiscountApplied}
         />
 
-        <PriceOptimizer
-          productId={product.id}
-          userId={profile.id}
-          priceAfterDiscounts={calculation?.priceAfterDiscounts || product.price}
-          onPromoApplied={setAppliedPromo}
-          onBonusChange={setBonusToUse}
-          currentBonusAmount={bonusToUse}
-        />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <div className="h-px flex-1 bg-white/5" />
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Настройка цены</span>
+            <div className="h-px flex-1 bg-white/5" />
+          </div>
 
-        <PriceBreakdown 
-          calculation={calculation}
-          loading={loadingCalc}
-        />
+          <PriceOptimizer
+            productId={product.id}
+            userId={profile.id}
+            priceAfterDiscounts={calculation?.priceAfterDiscounts || product.price}
+            onPromoApplied={setAppliedPromo}
+            onBonusChange={setBonusToUse}
+            currentBonusAmount={bonusToUse}
+          />
 
-        {/* Trust badges скрыты на мобильных - показываем текст под кнопкой */}
+          <PriceBreakdown 
+            calculation={calculation}
+            loading={loadingCalc}
+          />
+        </div>
 
         <PaymentCTAButton
           finalPrice={calculation?.finalPrice || product.price}

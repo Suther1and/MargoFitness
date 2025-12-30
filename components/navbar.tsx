@@ -312,7 +312,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       {/* Mobile: только бургер */}
       {!isSignInOpen && !isAnyPopupOpen && (
         <div 
-          className="lg:hidden fixed top-4 right-4 z-50"
+          className="lg:hidden fixed top-[15px] right-4 z-50"
         >
           <button
             onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}

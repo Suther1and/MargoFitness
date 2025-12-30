@@ -41,6 +41,12 @@ function AnimatedNumber({ value, format = true }: { value: number; format?: bool
 }
 
 export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 1024)
+  }, [])
+
   // Не показываем skeleton - обновляем in-place
   if (!calculation) {
     return null
@@ -52,13 +58,16 @@ export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-6"
-      style={{ minHeight: '320px' }} // Фиксированная минимальная высота
+      className={`relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 ${isMobile ? 'p-4' : 'p-6'}`}
+      style={{ minHeight: isMobile ? 'auto' : '320px' }} // Фиксированная минимальная высота только на десктопе
     >
       {/* Фон для секции */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent pointer-events-none" />
       
-      <div className="rounded-xl bg-gradient-to-b from-white/5 to-white/[0.03] p-5 ring-1 ring-white/10 backdrop-blur relative z-10" style={{ minHeight: '280px' }}>
+      <div 
+        className={`rounded-xl bg-gradient-to-b from-white/5 to-white/[0.03] ring-1 ring-white/10 backdrop-blur relative z-10 ${isMobile ? 'p-4' : 'p-5'}`} 
+        style={{ minHeight: isMobile ? 'auto' : '280px' }}
+      >
         {/* Заголовок */}
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
@@ -131,21 +140,21 @@ export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
           <div className="border-t border-white/10 pt-3" />
 
           {/* Экономия и кешбек */}
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2 mt-4">
             {calculation.totalSavings > 0 && (
-              <div className="flex items-center gap-2 text-xs bg-green-500/10 px-3 py-2 rounded-lg text-green-400">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/10 ring-1 ring-green-500/30 text-green-400">
                 <Sparkles className="size-3" />
-                <span>
-                  Экономия: <span className="font-bold"><AnimatedNumber value={calculation.totalSavings} /> ₽</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  Экономия <AnimatedNumber value={calculation.totalSavings} /> ₽
                 </span>
               </div>
             )}
 
             {calculation.cashbackAmount > 0 && (
-              <div className="flex items-center gap-2 text-xs text-white/60">
-                <span className="text-base">🎁</span>
-                <span>
-                  +<AnimatedNumber value={calculation.cashbackAmount} format={false} /> 👟 кешбек ({calculation.cashbackPercent}%)
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/10 ring-1 ring-orange-500/30 text-orange-400">
+                <span className="text-xs">👟</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">
+                  +{calculation.cashbackAmount} кешбэк
                 </span>
               </div>
             )}

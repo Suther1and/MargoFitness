@@ -8,6 +8,7 @@ interface ProductHeroCardProps {
   product: Product
   pricePerMonth: number
   finalPrice: number
+  isDiscountApplied?: boolean
 }
 
 // Иконки для разных тарифов
@@ -45,7 +46,12 @@ const tierGradients = {
   3: { from: 'from-amber-500/15', to: 'to-amber-600/5', blur: 'bg-amber-500/15' }
 }
 
-export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductHeroCardProps) {
+export function ProductHeroCard({ 
+  product, 
+  pricePerMonth, 
+  finalPrice,
+  isDiscountApplied = false 
+}: ProductHeroCardProps) {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -174,7 +180,7 @@ export function ProductHeroCard({ product, pricePerMonth, finalPrice }: ProductH
 
         {/* Цена */}
         <div className="mb-4">
-          {hasDiscount && (
+          {hasDiscount && !isDiscountApplied && (
             <div className="text-lg text-white/40 line-through font-oswald mb-1">
               {product.price.toLocaleString('ru-RU')} ₽
             </div>
