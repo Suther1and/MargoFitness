@@ -246,12 +246,6 @@ export function PriceOptimizer({
               <span>{promoError}</span>
             </div>
           )}
-          {appliedPromo && (
-            <div className="flex items-center gap-1.5 text-xs text-green-400">
-              <Check className="size-3" />
-              <span>Промокод применен</span>
-            </div>
-          )}
         </div>
       </div>
 
