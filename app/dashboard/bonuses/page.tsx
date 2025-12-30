@@ -41,7 +41,7 @@ export default async function BonusesPage() {
     <BonusesClient
       bonusStats={bonusStats}
       referralStats={referralStats}
-      referralLink={referralLink}
+      referralLink={referralLink || null}
       userId={profile.id}
     />
   )
