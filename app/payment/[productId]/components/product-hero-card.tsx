@@ -209,7 +209,7 @@ export function ProductHeroCard({
           </div>
         )}
       </div>
-    </Wrapper>
+    </motion.div>
   )
 }
 
