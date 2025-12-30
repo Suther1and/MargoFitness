@@ -2,9 +2,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { getBonusStats } from '@/lib/actions/bonuses'
 import { getReferralStats, getReferralLink } from '@/lib/actions/referrals'
-import { BonusCard } from './bonus-card'
-import { ReferralSection } from './referral-section'
-import { BonusHistory } from './bonus-history'
+import { BonusesClient } from './bonuses-client'
 
 export const metadata = {
   title: 'Бонусы | MargoFitness',
@@ -27,8 +25,8 @@ export default async function BonusesPage() {
 
   if (!bonusStatsResult.success || !bonusStatsResult.data) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center text-red-600">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#18181b] via-[#09090b] to-[#18181b]">
+        <div className="text-center text-red-400">
           Ошибка загрузки данных: {bonusStatsResult.error}
         </div>
       </div>
@@ -40,52 +38,12 @@ export default async function BonusesPage() {
   const referralLink = referralLinkResult.link
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      {/* Заголовок */}
-      <div>
-        <h1 className="text-3xl font-bold">Бонусная программа 👟</h1>
-        <p className="text-muted-foreground mt-2">
-          Зарабатывайте шаги за покупки и приглашайте друзей
-        </p>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Левая колонка */}
-        <div className="space-y-8">
-          {/* Бонусная карточка */}
-          <BonusCard
-            account={bonusStats.account}
-            levelData={bonusStats.levelData}
-            progress={bonusStats.progress}
-          />
-
-          {/* Информация */}
-          <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-semibold mb-3">ℹ️ Как использовать шаги</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Оплачивайте до 30% стоимости подписки шагами</li>
-              <li>• 1 шаг = 1 рубль</li>
-              <li>• Шаги не сгорают</li>
-              <li>• Кешбек начисляется от фактически оплаченной суммы</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Правая колонка */}
-        <div className="space-y-8">
-          {/* Реферальная программа */}
-          {referralLink && referralStats && (
-            <ReferralSection
-              referralLink={referralLink}
-              stats={referralStats}
-            />
-          )}
-
-          {/* История операций */}
-          <BonusHistory transactions={bonusStats.recentTransactions} userId={profile.id} />
-        </div>
-      </div>
-    </div>
+    <BonusesClient
+      bonusStats={bonusStats}
+      referralStats={referralStats}
+      referralLink={referralLink}
+      userId={profile.id}
+    />
   )
 }
 

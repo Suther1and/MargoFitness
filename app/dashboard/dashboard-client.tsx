@@ -2,6 +2,7 @@
 
 import { Inter, Oswald } from 'next/font/google'
 import { useEffect, useRef, useState, memo } from 'react'
+import Link from 'next/link'
 import { ReferralProcessor } from '@/components/referral-processor'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { Profile } from '@/types/database'
@@ -1084,11 +1085,12 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                 </section>
 
                 {/* Card 4: Бонусная система */}
-                <section 
-                  ref={(el) => { cardsRef.current[3] = el }}
-                  className="card-hidden group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col md:hover:ring-amber-400/60 md:hover:shadow-2xl md:hover:shadow-amber-500/20"
-                  style={{ backgroundSize: '200% 200%' }}
-                >
+                <Link href="/dashboard/bonuses">
+                  <section 
+                    ref={(el) => { cardsRef.current[3] = el }}
+                    className="card-hidden group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col md:hover:ring-amber-400/60 md:hover:shadow-2xl md:hover:shadow-amber-500/20 cursor-pointer"
+                    style={{ backgroundSize: '200% 200%' }}
+                  >
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
 
@@ -1166,6 +1168,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                     </div>
                   </div>
                 </section>
+                </Link>
 
                 {/* Card 5: Полезные материалы */}
                 <section 
