@@ -1,13 +1,9 @@
 'use client'
 
 import { useState, useRef, ChangeEvent } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { UserAvatar } from '@/components/user-avatar'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { updateUserProfile, uploadUserAvatar, deleteUserAvatar } from '@/lib/actions/user-profile'
-import { Upload, X, Loader2, Camera } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Profile } from '@/types/database'
 
@@ -142,9 +138,6 @@ export function ProfileEditDialog({
           setLoading(false)
           return
         }
-        
-        setAvatarPreview(null)
-        setSelectedFile(null)
       }
 
       const result = await updateUserProfile({
@@ -154,7 +147,13 @@ export function ProfileEditDialog({
       })
 
       if (result.success) {
+        // Сначала обновляем страницу
         router.refresh()
+        // Ждем немного чтобы страница обновилась
+        await new Promise(resolve => setTimeout(resolve, 100))
+        // Потом закрываем диалог и очищаем превью
+        setAvatarPreview(null)
+        setSelectedFile(null)
         onOpenChange(false)
       } else {
         setErrors({ form: result.error || 'Ошибка при сохранении' })
@@ -176,200 +175,247 @@ export function ProfileEditDialog({
   const canClose = !(isTelegramAccount && isFirstTime && hasTelegramEmail)
 
   return (
-    <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
-      <DialogContent 
-        className="sm:max-w-[500px]"
-        showCloseButton={canClose}
-        onPointerDownOutside={(e) => {
-          if (!canClose) e.preventDefault()
-        }}
-        onEscapeKeyDown={(e) => {
-          if (!canClose) e.preventDefault()
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle>
+    <>
+      <style jsx global>{`
+        /* Плавный рендеринг шрифтов */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Force hide Dialog default close button */
+        [data-slot="dialog-close"] {
+          display: none !important;
+        }
+      `}</style>
+      
+      <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
+        <DialogContent 
+          className="max-w-sm p-0 border-0 bg-transparent overflow-visible"
+          showCloseButton={false}
+          onPointerDownOutside={(e) => {
+            if (!canClose) e.preventDefault()
+          }}
+          onEscapeKeyDown={(e) => {
+            if (!canClose) e.preventDefault()
+          }}
+        >
+          <DialogTitle className="sr-only">
             {isFirstTime ? 'Добро пожаловать!' : 'Редактировать профиль'}
           </DialogTitle>
-          <DialogDescription>
-            {isFirstTime 
-              ? 'Заполните информацию о себе. Все поля необязательны и могут быть заполнены позже.'
-              : 'Обновите информацию вашего профиля'
-            }
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Аватар */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <UserAvatar
-                avatarUrl={avatarPreview || profile.avatar_url}
-                fullName={formData.full_name}
-                email={formData.email}
-                size="xl"
-              />
-              
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingAvatar}
-                className="absolute bottom-0 right-0 rounded-full bg-primary p-2 text-primary-foreground shadow-lg hover:bg-primary/90 disabled:opacity-50"
-              >
-                {uploadingAvatar ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Camera className="size-4" />
-                )}
-              </button>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-
-            <div className="flex gap-2">
-              {selectedFile && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAvatarUpload}
-                  disabled={uploadingAvatar}
-                >
-                  {uploadingAvatar ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      Загрузка...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 size-4" />
-                      Загрузить фото
-                    </>
-                  )}
-                </Button>
-              )}
-              
-              {(profile.avatar_url || selectedFile) && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (selectedFile) {
-                      setSelectedFile(null)
-                      setAvatarPreview(null)
-                    } else {
-                      handleDeleteAvatar()
-                    }
-                  }}
-                  disabled={uploadingAvatar}
-                >
-                  <X className="mr-2 size-4" />
-                  Удалить
-                </Button>
-              )}
-            </div>
-
-            {errors.avatar && (
-              <p className="text-sm text-destructive">{errors.avatar}</p>
-            )}
-          </div>
-
-          {/* Форма */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Имя</Label>
-              <Input
-                id="full_name"
-                placeholder="Ваше имя"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">
-                Email {isTelegramAccount && isFirstTime && <span className="text-destructive">*</span>}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={hasTelegramEmail ? "Введите ваш email" : "email@example.com"}
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required={isTelegramAccount && isFirstTime}
-              />
-              {isTelegramAccount && isFirstTime && hasTelegramEmail && (
-                <p className="text-xs text-muted-foreground">
-                  Укажите ваш реальный email - он нужен для уведомлений и связи
-                </p>
-              )}
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Телефон</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+7 (999) 999-99-99"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                maxLength={18}
-              />
-            </div>
-          </div>
-
-          {errors.form && (
-            <p className="text-sm text-destructive">{errors.form}</p>
-          )}
-
-          {/* Кнопки */}
-          <div className="flex gap-3">
-            {isFirstTime && !isTelegramAccount && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleSkip}
-                disabled={loading}
-                className="flex-1"
-              >
-                Пропустить
-              </Button>
-            )}
-            
-            <Button
-              type="submit"
-              disabled={loading || uploadingAvatar}
-              className={isFirstTime && !isTelegramAccount ? "flex-1" : "w-full"}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Сохранение...
-                </>
-              ) : (
-                'Сохранить'
-              )}
-            </Button>
-          </div>
           
-          {isTelegramAccount && isFirstTime && hasTelegramEmail && (
-            <p className="text-xs text-center text-muted-foreground">
-              Пожалуйста, укажите email для продолжения
-            </p>
-          )}
-        </form>
-      </DialogContent>
-    </Dialog>
+          {/* Card - Dashboard style glassmorphism */}
+          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/80 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              tabIndex={-1}
+              style={{ position: 'absolute', top: '3px', right: '3px', zIndex: 20, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', willChange: 'transform, opacity', outline: 'none' }}
+              className="transition-all hover:opacity-70 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80 pointer-events-none">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+
+            {/* Background effects like dashboard */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl pointer-events-none" />
+            <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none" />
+
+            {/* Inner card with gradient - dashboard style */}
+            <div className="rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] p-6 ring-1 ring-white/10 backdrop-blur relative">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl leading-tight tracking-tight font-semibold text-white">
+                  {isFirstTime ? 'Добро пожаловать!' : 'Редактировать профиль'}
+                </h1>
+                <p className="mt-2 text-sm font-normal text-white/70">
+                  {isFirstTime 
+                    ? 'Заполните информацию о себе'
+                    : 'Обновите информацию вашего профиля'
+                  }
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Аватар */}
+                <div className="flex flex-col items-center gap-4 mb-6">
+                  <div className="relative group/avatar">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="relative"
+                    >
+                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 p-[2px] shadow-lg shadow-purple-500/20 transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-purple-400/50 active:scale-95">
+                        <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+                          {(avatarPreview || profile.avatar_url) ? (
+                            <img 
+                              src={avatarPreview || profile.avatar_url!} 
+                              alt="Avatar" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white text-3xl font-bold">
+                              {(formData.full_name || formData.email || 'U').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* Edit overlay on hover */}
+                      <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        {uploadingAvatar ? (
+                          <Loader2 className="size-5 animate-spin text-white" />
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                            <path d="m15 5 4 4"></path>
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+
+                  {errors.avatar && (
+                    <p className="text-xs text-red-400 mt-2">{errors.avatar}</p>
+                  )}
+                </div>
+
+                {/* Форма */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="full_name" className="block text-xs font-medium uppercase tracking-wider text-white/60">
+                      Имя
+                    </label>
+                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <input
+                        id="full_name"
+                        type="text"
+                        placeholder="Ваше имя"
+                        value={formData.full_name}
+                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-white/60">
+                      Email {isTelegramAccount && isFirstTime && <span className="text-red-400">*</span>}
+                    </label>
+                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
+                        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                      </svg>
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder={hasTelegramEmail ? "Введите ваш email" : "email@example.com"}
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required={isTelegramAccount && isFirstTime}
+                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
+                      />
+                    </div>
+                    {isTelegramAccount && isFirstTime && hasTelegramEmail && (
+                      <p className="text-xs text-white/50">
+                        Укажите ваш реальный email - он нужен для уведомлений и связи
+                      </p>
+                    )}
+                    {errors.email && (
+                      <p className="text-xs text-red-400">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-xs font-medium uppercase tracking-wider text-white/60">
+                      Телефон
+                    </label>
+                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                      <input
+                        id="phone"
+                        type="tel"
+                        placeholder="+7 (999) 999-99-99"
+                        value={formData.phone}
+                        onChange={handlePhoneChange}
+                        maxLength={18}
+                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {errors.form && (
+                  <div className="rounded-xl p-3" style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                  }}>
+                    <p className="text-xs text-red-400">{errors.form}</p>
+                  </div>
+                )}
+
+                {/* Кнопки */}
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    disabled={loading || uploadingAvatar}
+                    className="w-full rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-600/20 ring-1 ring-purple-400/50 px-4 py-2.5 transition-all hover:from-purple-500/30 hover:to-indigo-600/30 hover:ring-purple-400/60 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ touchAction: 'manipulation', willChange: 'transform' }}
+                  >
+                    <div className="flex items-center justify-between pointer-events-none">
+                      <div className="text-left flex-1">
+                        <p className="text-sm font-semibold text-white">
+                          {loading ? 'Сохранение...' : 'Сохранить'}
+                        </p>
+                      </div>
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center flex-shrink-0">
+                        {loading || uploadingAvatar ? (
+                          <svg className="animate-spin h-4 w-4 text-purple-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-200">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                
+                {isTelegramAccount && isFirstTime && hasTelegramEmail && (
+                  <p className="text-xs text-center text-white/50 mt-3">
+                    Пожалуйста, укажите email для продолжения
+                  </p>
+                )}
+              </form>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

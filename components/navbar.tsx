@@ -132,8 +132,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
   const userLinks = profile
     ? [
-        { href: '/dashboard-new', label: 'Кабинет' },
-        { href: '/dashboard/bonuses', label: 'Бонусы' },
+        { href: '/dashboard', label: 'Кабинет' },
         ...(profile.role === 'admin'
           ? [{ href: '/admin', label: 'Админка', isAdmin: true }]
           : []),
@@ -285,7 +284,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
               {profile ? (
                 <>
                   {profile.avatar_url && (
-                    <Link href="/dashboard-new" className="flex items-center gap-2">
+                    <Link href="/dashboard" className="flex items-center gap-2">
                       <img 
                         src={profile.avatar_url} 
                         alt={profile.full_name || profile.email || 'Avatar'} 
@@ -431,7 +430,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
               >
                 {profile ? (
                   <Link
-                    href="/dashboard-new"
+                    href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all active:scale-95"
                     style={{

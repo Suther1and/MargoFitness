@@ -175,7 +175,7 @@ export default function HomeNewPage() {
   // Обработчик действия "начать" - проверяет авторизацию
   const handleStartAction = () => {
     if (isAuthenticated) {
-      router.push('/dashboard-new')
+      router.push('/dashboard')
     } else {
       setSignInOpen(true)
     }
