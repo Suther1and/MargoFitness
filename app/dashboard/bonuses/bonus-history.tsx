@@ -36,16 +36,19 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
     }
     
     switch (type) {
-      case 'cashback':
+      case 'welcome':
+        // Рука - приветственный бонус
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
-            <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"></path>
-            <path d="M16 2v6"></path>
-            <path d="M13 5h6"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
+            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
+            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
           </svg>
         )
       case 'referral_bonus':
       case 'referral_first':
+        // Человек - бонусы от реферала
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
@@ -54,12 +57,23 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
         )
-      case 'welcome':
+      case 'cashback':
+        // Монетки - бонусы от покупки
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
-            <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"></path>
-            <path d="M16 2v6"></path>
-            <path d="M13 5h6"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
+            <circle cx="8" cy="8" r="6"></circle>
+            <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
+            <path d="M7 6h1v4"></path>
+            <path d="m16.71 13.88.7.71-2.82 2.82"></path>
+          </svg>
+        )
+      case 'admin_adjustment':
+        // Человечек с галочкой - изменение админом
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
           </svg>
         )
       default:
@@ -119,10 +133,10 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
             {transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="flex items-center gap-3 rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 hover:bg-white/[0.06] hover:ring-white/15 transition-all"
+                className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-3 hover:bg-white/[0.06] transition-all"
               >
                 {/* Иконка */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                   {getTypeIcon(tx.type, tx.amount)}
                 </div>
 
