@@ -67,7 +67,7 @@ export default async function PricingPage() {
                       Купить программу
                     </Button>
                   ) : (
-                    <Link href="/auth/signup">
+                    <Link href="/">
                       <Button className="w-full">
                         Зарегистрироваться
                       </Button>

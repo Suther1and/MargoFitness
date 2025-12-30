@@ -245,7 +245,7 @@ export function PricingClient({ profile }: PricingClientProps) {
                       </Link>
                     )
                   ) : (
-                    <Link href="/auth/signup">
+                    <Link href="/">
                       <Button className="w-full">
                         Начать
                       </Button>

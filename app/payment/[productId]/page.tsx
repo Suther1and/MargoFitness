@@ -24,7 +24,7 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   const profile = await getCurrentProfile()
   
   if (!profile) {
-    redirect('/auth/login?redirect=/pricing')
+    redirect('/')
   }
 
   const product = await getProductById(productId)

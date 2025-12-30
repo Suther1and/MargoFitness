@@ -1,17 +1,191 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { createClient } from "@/lib/supabase/client"
 
 interface SignInPopupProps {
   isOpen: boolean
   onClose: () => void
 }
 
+// Функция для получения реферального кода из localStorage с проверкой срока действия
+const getStoredReferralCode = (): string | null => {
+  if (typeof window === 'undefined') return null
+  
+  const code = localStorage.getItem('pending_referral_code')
+  const expiry = localStorage.getItem('referral_code_expiry')
+  
+  console.log('[getStoredReferralCode] Проверка:', { code, expiry, now: Date.now() })
+  
+  if (!code || !expiry) {
+    console.log('[getStoredReferralCode] Код или expiry не найдены')
+    return null
+  }
+  
+  // Проверяем срок действия
+  const expiryTime = parseInt(expiry)
+  const isExpired = Date.now() > expiryTime
+  
+  console.log('[getStoredReferralCode] Проверка срока:', {
+    expiryTime,
+    expiryDate: new Date(expiryTime).toISOString(),
+    isExpired
+  })
+  
+  if (isExpired) {
+    console.log('[getStoredReferralCode] Код истек, удаляем')
+    localStorage.removeItem('pending_referral_code')
+    localStorage.removeItem('referral_code_expiry')
+    return null
+  }
+  
+  console.log('[getStoredReferralCode] Возвращаем код:', code)
+  return code
+}
+
 export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
+  const router = useRouter()
+
+  // Обработчики OAuth
+  const handleGoogleLogin = async () => {
+    try {
+      setLoadingProvider("google")
+      const supabase = createClient()
+      const refCode = getStoredReferralCode()
+      
+      // Сохраняем реферальный код в localStorage перед OAuth redirect
+      if (refCode) {
+        localStorage.setItem('pending_referral_code', refCode)
+      }
+      
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+      const callbackUrl = `${siteUrl}/auth/callback`
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callbackUrl,
+        },
+      })
+
+      if (error) {
+        console.error("Google OAuth error:", error)
+        setError("Ошибка входа через Google")
+        setLoadingProvider(null)
+      }
+    } catch (error) {
+      console.error("Google OAuth error:", error)
+      setError("Ошибка входа через Google")
+      setLoadingProvider(null)
+    }
+  }
+
+  const handleYandexLogin = async () => {
+    try {
+      setLoadingProvider("yandex")
+      const refCode = getStoredReferralCode()
+      const yandexUrl = `/api/auth/yandex/init?redirect=/dashboard${refCode ? `&ref=${refCode}` : ''}`
+      window.location.href = yandexUrl
+    } catch (error) {
+      console.error("Yandex OAuth error:", error)
+      setError("Ошибка входа через Yandex")
+      setLoadingProvider(null)
+    }
+  }
+
+  const handleTelegramLogin = () => {
+    // Telegram виджет обрабатывается через TelegramLoginWidget
+    setLoadingProvider("telegram")
+  }
+
+  const handleVKLogin = () => {
+    alert("Вход через ВКонтакте скоро будет доступен! 🚀")
+  }
+
+  // Обработчик отправки формы с auto-режимом (вход или регистрация)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+
+    // Валидация
+    if (password.length < 6) {
+      setError("Пароль должен быть не менее 6 символов")
+      setLoading(false)
+      return
+    }
+
+    const supabase = createClient()
+    const refCode = getStoredReferralCode()
+    
+    console.log('[SignInPopup] Начало регистрации:', {
+      email,
+      refCode,
+      inLocalStorage: localStorage.getItem('pending_referral_code'),
+      expiry: localStorage.getItem('referral_code_expiry')
+    })
+
+    // Auto-режим: сначала пытаемся войти
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    // Если вход успешный
+    if (!signInError) {
+      router.push('/dashboard')
+      router.refresh()
+      onClose()
+      setLoading(false)
+      return
+    }
+
+    // Если ошибка "неверные данные" - пробуем зарегистрировать
+    if (signInError.message.includes('Invalid login credentials')) {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            ref_code: refCode || null
+          }
+        }
+      })
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) {
+          setError('Неверный пароль')
+        } else {
+          setError(signUpError.message)
+        }
+        setLoading(false)
+        return
+      }
+
+      // Успешная регистрация
+      console.log('[SignInPopup] Регистрация успешна, редирект на dashboard')
+      
+      // Важно: не удаляем код из localStorage - это сделает ReferralProcessor
+      router.push('/dashboard')
+      router.refresh()
+      onClose()
+      setLoading(false)
+      return
+    }
+
+    // Другие ошибки входа
+    setError('Неверный email или пароль')
+    setLoading(false)
+  }
 
   // Гарантированное срабатывание анимации на мобильных через MutationObserver
   useEffect(() => {
@@ -210,8 +384,18 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 </p>
               </div>
 
+              {/* Error message */}
+              {error && (
+                <div className="rounded-xl p-3 mb-4" style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                }}>
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
+              )}
+
               {/* Form */}
-              <form className="mt-2 space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="mt-2 space-y-5" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-white/60 font-roboto">
                     Email
@@ -280,19 +464,29 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 {/* Primary button - Dashboard style */}
                 <button 
                   type="submit" 
-                  className="w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 ring-1 ring-orange-400/50 px-4 py-2.5 transition-all hover:from-orange-500/30 hover:to-orange-600/30 hover:ring-orange-400/60 active:scale-95 mt-6"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 ring-1 ring-orange-400/50 px-4 py-2.5 transition-all hover:from-orange-500/30 hover:to-orange-600/30 hover:ring-orange-400/60 active:scale-95 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ touchAction: 'manipulation', willChange: 'transform' }}
                 >
                   <div className="flex items-center justify-between pointer-events-none">
                     <div className="text-left">
-                      <p className="text-sm font-semibold text-white font-montserrat">Продолжить</p>
+                      <p className="text-sm font-semibold text-white font-montserrat">
+                        {loading ? 'Загрузка...' : 'Продолжить'}
+                      </p>
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-orange-500/30 flex items-center justify-center flex-shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-200">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                        <polyline points="10 17 15 12 10 7"></polyline>
-                        <line x1="15" y1="12" x2="3" y2="12"></line>
-                      </svg>
+                      {loading ? (
+                        <svg className="animate-spin h-4 w-4 text-orange-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-200">
+                          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                          <polyline points="10 17 15 12 10 7"></polyline>
+                          <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -307,23 +501,55 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                 {/* Social buttons - Dashboard glassmorphism style */}
                 <div className="grid grid-cols-4 gap-2">
                   {/* Telegram */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-500/15 ring-1 ring-blue-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-500/25 hover:ring-blue-400/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
+                  <button 
+                    type="button" 
+                    onClick={handleTelegramLogin}
+                    disabled={loadingProvider !== null}
+                    className="flex items-center justify-center rounded-xl bg-blue-500/15 ring-1 ring-blue-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-500/25 hover:ring-blue-400/40 active:scale-95 backdrop-blur disabled:opacity-50" 
+                    style={{ willChange: 'transform' }}
+                  >
                     <span className="sr-only">Telegram</span>
-                    <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
-                      <path d="M48 1.7004L40.4074 46.0017C40.4074 46.0017 39.345 49.0733 36.4267 47.6002L18.9084 32.0543L18.8272 32.0085C21.1935 29.5494 39.5429 10.4546 40.3449 9.58905C41.5863 8.24856 40.8156 7.45053 39.3742 8.46313L12.2698 28.3849L1.81298 24.3128C1.81298 24.3128 0.167387 23.6353 0.00907665 22.1622C-0.151317 20.6867 1.86714 19.8887 1.86714 19.8887L44.4963 0.533499C44.4963 0.533499 48 -1.2482 48 1.7004V1.7004Z" fill="#93C5FD"/>
-                    </svg>
+                    {loadingProvider === 'telegram' ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#93C5FD" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="#93C5FD" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
+                        <path d="M48 1.7004L40.4074 46.0017C40.4074 46.0017 39.345 49.0733 36.4267 47.6002L18.9084 32.0543L18.8272 32.0085C21.1935 29.5494 39.5429 10.4546 40.3449 9.58905C41.5863 8.24856 40.8156 7.45053 39.3742 8.46313L12.2698 28.3849L1.81298 24.3128C1.81298 24.3128 0.167387 23.6353 0.00907665 22.1622C-0.151317 20.6867 1.86714 19.8887 1.86714 19.8887L44.4963 0.533499C44.4963 0.533499 48 -1.2482 48 1.7004V1.7004Z" fill="#93C5FD"/>
+                      </svg>
+                    )}
                   </button>
 
                   {/* Yandex */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-red-500/15 ring-1 ring-red-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-red-500/25 hover:ring-red-400/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
+                  <button 
+                    type="button" 
+                    onClick={handleYandexLogin}
+                    disabled={loadingProvider !== null}
+                    className="flex items-center justify-center rounded-xl bg-red-500/15 ring-1 ring-red-400/30 px-2 py-3 text-xs font-medium transition-all hover:bg-red-500/25 hover:ring-red-400/40 active:scale-95 backdrop-blur disabled:opacity-50" 
+                    style={{ willChange: 'transform' }}
+                  >
                     <span className="sr-only">Yandex</span>
-                    <svg className="w-5 h-5" viewBox="0 0 73 73" fill="none" style={{ transform: 'scale(1.15)' }}>
-                      <path d="M43.1721 16.4533H38.9343C31.1651 16.4533 27.0844 20.3516 27.0844 26.1205C27.0844 32.6694 29.9096 35.7098 35.7169 39.6081L40.5036 42.8045L26.6921 63.3083H16.4115L28.8108 44.9873C21.6694 39.9196 17.667 35.0083 17.667 26.6663C17.667 16.2197 24.9654 9.12499 38.8558 9.12499H52.6677V63.3083H43.1721V16.4533Z" fill="#FCA5A5"/>
-                    </svg>
+                    {loadingProvider === 'yandex' ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#FCA5A5" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="#FCA5A5" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 73 73" fill="none" style={{ transform: 'scale(1.15)' }}>
+                        <path d="M43.1721 16.4533H38.9343C31.1651 16.4533 27.0844 20.3516 27.0844 26.1205C27.0844 32.6694 29.9096 35.7098 35.7169 39.6081L40.5036 42.8045L26.6921 63.3083H16.4115L28.8108 44.9873C21.6694 39.9196 17.667 35.0083 17.667 26.6663C17.667 16.2197 24.9654 9.12499 38.8558 9.12499H52.6677V63.3083H43.1721V16.4533Z" fill="#FCA5A5"/>
+                      </svg>
+                    )}
                   </button>
 
                   {/* VK */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-blue-600/15 ring-1 ring-blue-500/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-600/25 hover:ring-blue-500/40 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
+                  <button 
+                    type="button" 
+                    onClick={handleVKLogin}
+                    disabled={loadingProvider !== null}
+                    className="flex items-center justify-center rounded-xl bg-blue-600/15 ring-1 ring-blue-500/30 px-2 py-3 text-xs font-medium transition-all hover:bg-blue-600/25 hover:ring-blue-500/40 active:scale-95 backdrop-blur disabled:opacity-50" 
+                    style={{ willChange: 'transform' }}
+                  >
                     <span className="sr-only">ВКонтакте</span>
                     <svg className="w-5 h-5" viewBox="0 0 57 36" fill="none">
                       <path d="M31.0456 36C11.5709 36 0.462836 22.4865 0 0H9.75515C10.0756 16.5045 17.2673 23.4955 22.9638 24.9369V0H32.1493V14.2342C37.7745 13.6216 43.6846 7.13513 45.6783 0H54.8638C54.1125 3.70048 52.6149 7.20425 50.4647 10.2921C48.3145 13.38 45.5578 15.9856 42.3673 17.9459C45.9287 19.7371 49.0744 22.2724 51.5967 25.3845C54.119 28.4965 55.9606 32.1146 57 36H46.8888C45.9558 32.6253 44.0594 29.6044 41.4374 27.3158C38.8154 25.0273 35.5844 23.573 32.1493 23.1351V36H31.0456Z" fill="#93C5FD"/>
@@ -331,14 +557,27 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
                   </button>
 
                   {/* Google - оригинальные цвета */}
-                  <button type="button" className="flex items-center justify-center rounded-xl bg-white/[0.08] ring-1 ring-white/20 px-2 py-3 text-xs font-medium transition-all hover:bg-white/[0.12] hover:ring-white/30 active:scale-95 backdrop-blur" style={{ willChange: 'transform' }}>
+                  <button 
+                    type="button" 
+                    onClick={handleGoogleLogin}
+                    disabled={loadingProvider !== null}
+                    className="flex items-center justify-center rounded-xl bg-white/[0.08] ring-1 ring-white/20 px-2 py-3 text-xs font-medium transition-all hover:bg-white/[0.12] hover:ring-white/30 active:scale-95 backdrop-blur disabled:opacity-50" 
+                    style={{ willChange: 'transform' }}
+                  >
                     <span className="sr-only">Google</span>
-                    <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M48 24.5456C48 22.8438 47.8442 21.2074 47.5547 19.6365H24.4898V28.9201H37.6697C37.102 31.9202 35.3766 34.462 32.7829 36.1638V42.1856H40.6976C45.3284 38.0074 48 31.8547 48 24.5456Z" fill="#4285F4"/>
-                      <path fillRule="evenodd" clipRule="evenodd" d="M24.4888 48C31.1011 48 36.6447 45.8509 40.6966 42.1854L32.782 36.1636C30.589 37.6036 27.7838 38.4545 24.4888 38.4545C18.1103 38.4545 12.7114 34.2327 10.7856 28.5599H2.60382V34.7781C6.63351 42.6218 14.9155 48 24.4888 48Z" fill="#34A853"/>
-                      <path fillRule="evenodd" clipRule="evenodd" d="M10.7867 28.5599C10.2969 27.1199 10.0186 25.5817 10.0186 23.9999C10.0186 22.4181 10.2969 20.8799 10.7867 19.4399V13.2217H2.60483C0.946197 16.4617 0 20.1272 0 23.9999C0 27.8726 0.946197 31.5381 2.60483 34.7781L10.7867 28.5599Z" fill="#FBBC05"/>
-                      <path fillRule="evenodd" clipRule="evenodd" d="M24.4888 9.54549C28.0844 9.54549 31.3126 10.7564 33.8506 13.1346L40.8747 6.25093C36.6335 2.37819 31.0899 0 24.4888 0C14.9155 0 6.63351 5.3782 2.60382 13.2219L10.7856 19.4401C12.7114 13.7673 18.1103 9.54549 24.4888 9.54549Z" fill="#EA4335"/>
-                    </svg>
+                    {loadingProvider === 'google' ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M48 24.5456C48 22.8438 47.8442 21.2074 47.5547 19.6365H24.4898V28.9201H37.6697C37.102 31.9202 35.3766 34.462 32.7829 36.1638V42.1856H40.6976C45.3284 38.0074 48 31.8547 48 24.5456Z" fill="#4285F4"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M24.4888 48C31.1011 48 36.6447 45.8509 40.6966 42.1854L32.782 36.1636C30.589 37.6036 27.7838 38.4545 24.4888 38.4545C18.1103 38.4545 12.7114 34.2327 10.7856 28.5599H2.60382V34.7781C6.63351 42.6218 14.9155 48 24.4888 48Z" fill="#34A853"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M10.7867 28.5599C10.2969 27.1199 10.0186 25.5817 10.0186 23.9999C10.0186 22.4181 10.2969 20.8799 10.7867 19.4399V13.2217H2.60483C0.946197 16.4617 0 20.1272 0 23.9999C0 27.8726 0.946197 31.5381 2.60483 34.7781L10.7867 28.5599Z" fill="#FBBC05"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M24.4888 9.54549C28.0844 9.54549 31.3126 10.7564 33.8506 13.1346L40.8747 6.25093C36.6335 2.37819 31.0899 0 24.4888 0C14.9155 0 6.63351 5.3782 2.60382 13.2219L10.7856 19.4401C12.7114 13.7673 18.1103 9.54549 24.4888 9.54549Z" fill="#EA4335"/>
+                      </svg>
+                    )}
                   </button>
                 </div>
 

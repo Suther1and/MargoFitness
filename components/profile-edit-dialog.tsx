@@ -34,11 +34,10 @@ export function ProfileEditDialog({
   
   const isTelegramAccount = !!profile.telegram_id
   const hasTelegramEmail = profile.email?.includes('@telegram.local')
-  const hasRealEmail = !hasTelegramEmail
 
   const [formData, setFormData] = useState({
     full_name: profile.full_name || '',
-    email: hasRealEmail ? profile.email || '' : '',
+    email: profile.email?.includes('@telegram.local') ? '' : (profile.email || ''),
     phone: profile.phone || '',
   })
 
@@ -88,10 +87,10 @@ export function ProfileEditDialog({
     if (!selectedFile) return
 
     setUploadingAvatar(true)
-    const formData = new FormData()
-    formData.append('avatar', selectedFile)
+    const uploadFormData = new FormData()
+    uploadFormData.append('avatar', selectedFile)
 
-    const result = await uploadUserAvatar(formData)
+    const result = await uploadUserAvatar(uploadFormData)
     
     if (result.success) {
       setAvatarPreview(null)

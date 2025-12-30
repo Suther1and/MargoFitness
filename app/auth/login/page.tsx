@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
@@ -10,8 +10,19 @@ function LoginRedirect() {
 
   useEffect(() => {
     const redirect = searchParams.get('redirect')
-    const url = redirect ? `/auth?redirect=${redirect}` : '/auth'
-    router.replace(url)
+    const ref = searchParams.get('ref')
+    
+    let targetUrl = '/'
+    const params = new URLSearchParams()
+    
+    if (ref) params.append('ref', ref)
+    if (redirect) params.append('redirect', redirect)
+    
+    if (params.toString()) {
+      targetUrl = `/?${params.toString()}`
+    }
+    
+    router.replace(targetUrl)
   }, [router, searchParams])
 
   return (
@@ -24,7 +35,7 @@ function LoginRedirect() {
   )
 }
 
-// Редирект на новую единую страницу /auth
+// Редирект со старой страницы /auth/login на главную
 export default function LoginPage() {
   return (
     <Suspense fallback={
@@ -39,3 +50,4 @@ export default function LoginPage() {
     </Suspense>
   )
 }
+

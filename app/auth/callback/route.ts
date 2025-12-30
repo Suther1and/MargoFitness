@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       
       if (sessionError) {
         console.error('[Callback] Session exchange error:', sessionError)
-        return NextResponse.redirect(`${origin}/auth/login?error=session_exchange_failed`)
+        return NextResponse.redirect(`${origin}/?error=session_exchange_failed`)
       }
 
       console.log('[Callback] Session created for user:', sessionData.user?.id, sessionData.user?.email)
@@ -119,7 +119,7 @@ export async function GET(request: Request) {
       }
     } catch (error) {
       console.error('[Callback] Unexpected error:', error)
-      return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
+      return NextResponse.redirect(`${origin}/?error=callback_failed`)
     }
   } else {
     console.log('[Callback] No code provided, redirecting directly')

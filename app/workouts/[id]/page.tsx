@@ -19,7 +19,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
   const profile = await getCurrentProfile()
 
   if (!profile) {
-    redirect('/auth/login?redirect=/workouts')
+    redirect('/')
   }
 
   const workout = await getWorkoutSessionById(id)

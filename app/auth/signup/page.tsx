@@ -4,12 +4,12 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
-// Редирект на новую единую страницу /auth
+// Редирект со старой страницы /auth/signup на главную
 export default function SignupPage() {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace('/auth')
+    router.replace('/')
   }, [router])
 
   return (

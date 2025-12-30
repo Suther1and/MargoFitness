@@ -12,14 +12,14 @@ import PaymentSuccessAlert from "./payment-success-alert"
 import { UserAvatar } from "@/components/user-avatar"
 import { ProfileEditDialogWrapper } from "./profile-edit-wrapper"
 import { SubscriptionManager } from "./subscription-manager"
-import { ReferralProcessor } from "@/components/referral-processor"
 import { SubscriptionActionsDialog } from "./subscription-actions-dialog"
+import { ReferralProcessor } from "@/components/referral-processor"
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile()
 
   if (!profile) {
-    redirect('/auth/login?redirect=/dashboard')
+    redirect('/')
   }
 
   const purchases = await getUserPurchasesWithProducts(profile.id)

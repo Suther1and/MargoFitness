@@ -2,6 +2,7 @@
 
 import { Inter, Oswald } from 'next/font/google'
 import { useEffect, useRef, useState, useMemo, memo } from 'react'
+import { ReferralProcessor } from '@/components/referral-processor'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -308,6 +309,7 @@ export default function DashboardDesignPage() {
 
   return (
     <>
+      <ReferralProcessor />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <style jsx global>{`

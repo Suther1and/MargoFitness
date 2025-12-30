@@ -11,7 +11,7 @@ export default async function WorkoutsPage() {
   const profile = await getCurrentProfile()
 
   if (!profile) {
-    redirect('/auth/login?redirect=/workouts')
+    redirect('/')
   }
 
   const weekData = await getCurrentWeekWithAccess()
