@@ -86,19 +86,11 @@ export function ProductHeroCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3"
+        className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 pr-14"
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
         
         <div className="relative z-10 flex items-center gap-3">
-          {/* Цена - компактно */}
-          <div className="text-left flex-shrink-0 pr-2 border-r border-white/10">
-            <div className="text-2xl font-bold text-white font-oswald leading-none">
-              {pricePerMonth.toLocaleString('ru-RU')}
-            </div>
-            <div className="text-xs text-white/50">₽/мес</div>
-          </div>
-
           {/* Иконка - маленькая */}
           <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/20 flex-shrink-0">
             <div className="scale-75">
@@ -114,6 +106,14 @@ export function ProductHeroCard({
             <p className="text-xs text-white/50 mt-0.5">
               {getDurationText(product.duration_months || 1)}
             </p>
+          </div>
+
+          {/* Цена - компактно */}
+          <div className="text-right flex-shrink-0">
+            <div className="text-2xl font-bold text-white font-oswald leading-none">
+              {pricePerMonth.toLocaleString('ru-RU')}
+            </div>
+            <div className="text-xs text-white/50">₽/мес</div>
           </div>
         </div>
       </motion.div>
