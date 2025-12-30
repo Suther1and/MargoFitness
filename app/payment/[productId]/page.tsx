@@ -47,34 +47,7 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
           <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         </div>
 
-        {/* Кнопка назад - парящая на мобильных */}
-        <a 
-          href="/dashboard"
-          className="lg:hidden fixed top-4 left-4 z-50 inline-flex items-center gap-2 rounded-xl bg-white/[0.08] ring-1 ring-white/10 px-3 py-2 text-sm text-white/80 transition-all hover:bg-white/[0.12] backdrop-blur-xl active:scale-95"
-          style={{ touchAction: 'manipulation' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m12 19-7-7 7-7"></path>
-            <path d="M19 12H5"></path>
-          </svg>
-          <span className="font-medium">Назад</span>
-        </a>
-
         <div className="container mx-auto max-w-7xl px-4 md:px-8 pt-16 lg:pt-12 pb-8 md:pb-12 relative z-10">
-          {/* Кнопка назад - desktop (на одном уровне с контентом) */}
-          <div className="hidden lg:block mb-6">
-            <a 
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-4 py-2.5 text-sm text-white/80 transition-all hover:bg-white/[0.08] hover:ring-white/20 active:scale-95"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m12 19-7-7 7-7"></path>
-                <path d="M19 12H5"></path>
-              </svg>
-              <span className="font-medium">Назад</span>
-            </a>
-          </div>
-
           {/* Новый клиентский компонент с улучшенным дизайном */}
           <PaymentPageNewClient
             product={product}

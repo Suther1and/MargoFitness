@@ -79,9 +79,9 @@ export function ProductHeroCard({
   // Есть ли скидка (сравниваем finalPrice с базовой ценой за этот период)
   const hasDiscount = finalPrice < product.price
 
-  // Условный wrapper - на мобильных без framer-motion
-  const Wrapper = isMobile ? 'div' : motion.div
-  const wrapperProps = isMobile ? {} : {
+  // Условный wrapper - всегда motion.div
+  const Wrapper = motion.div
+  const wrapperProps = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
@@ -90,7 +90,10 @@ export function ProductHeroCard({
   if (isMobile) {
     // Mobile: ультракомпактный горизонтальный layout
     return (
-      <div className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3">
+      <Wrapper
+        {...wrapperProps}
+        className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3"
+      >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} via-transparent ${gradient.to} pointer-events-none`} />
         
         <div className="relative z-10 flex items-center gap-3">
@@ -119,7 +122,7 @@ export function ProductHeroCard({
             <div className="text-xs text-white/50">₽/мес</div>
           </div>
         </div>
-      </div>
+      </Wrapper>
     )
   }
 
@@ -180,11 +183,6 @@ export function ProductHeroCard({
 
         {/* Цена */}
         <div className="mb-4">
-          {hasDiscount && !isDiscountApplied && (
-            <div className="text-lg text-white/40 line-through font-oswald mb-1">
-              {product.price.toLocaleString('ru-RU')} ₽
-            </div>
-          )}
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-4xl font-bold text-white font-oswald transition-all duration-300">
               {pricePerMonth.toLocaleString('ru-RU')}
