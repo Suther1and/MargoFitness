@@ -6,6 +6,7 @@ import { ReferralProcessor } from '@/components/referral-processor'
 import { ProfileEditDialogWrapper } from './profile-edit-wrapper'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
+import { getMonthGenitiveCase } from '@/lib/utils'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -612,7 +613,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                                 <>
                                   <span className="text-xs text-white/50">•</span>
                                   <span className="text-sm text-white/60 whitespace-nowrap">
-                                    Участник с {new Date(profile.created_at).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+                                    Участник с {getMonthGenitiveCase(new Date(profile.created_at))} {new Date(profile.created_at).getFullYear()} г.
                                   </span>
                                 </>
                               )}
