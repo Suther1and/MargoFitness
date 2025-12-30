@@ -151,11 +151,7 @@ export function PriceOptimizer({
             {appliedPromo && (
               <div className="flex items-center gap-1 text-xs text-green-400">
                 <Check className="size-3" />
-                <span>OK</span>
               </div>
-            )}
-            {promoError && (
-              <div className="text-xs text-red-400 truncate">{promoError}</div>
             )}
           </div>
 
@@ -240,12 +236,6 @@ export function PriceOptimizer({
             )}
           </div>
 
-          {promoError && (
-            <div className="flex items-center gap-1.5 text-xs text-red-400">
-              <X className="size-3" />
-              <span>{promoError}</span>
-            </div>
-          )}
         </div>
       </div>
 
