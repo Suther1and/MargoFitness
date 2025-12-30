@@ -2,6 +2,7 @@
  * API Route: Получить продукты по длительности
  * GET /api/products/by-duration?duration=1
  * GET /api/products/by-duration?duration=all (все продукты)
+ * GET /api/products/by-duration?duration=1&tier=2 (конкретный продукт по tier и duration)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -12,6 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const durationParam = searchParams.get('duration') || '1'
+    const tierParam = searchParams.get('tier')
 
     // Если запрашивают все продукты
     if (durationParam === 'all') {
@@ -41,6 +43,37 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Если указан tier - возвращаем конкретный продукт
+    if (tierParam) {
+      const tier = parseInt(tierParam)
+      if (![1, 2, 3].includes(tier)) {
+        return NextResponse.json(
+          { error: 'Invalid tier. Must be 1, 2, or 3' },
+          { status: 400 }
+        )
+      }
+
+      const supabase = await createClient()
+      const { data: product, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('type', 'subscription_tier')
+        .eq('is_active', true)
+        .eq('tier_level', tier)
+        .eq('duration_months', duration)
+        .single()
+
+      if (error || !product) {
+        return NextResponse.json(
+          { error: 'Product not found' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json(product)
+    }
+
+    // Возвращаем все продукты для данной длительности
     const products = await getSubscriptionsByDuration(duration)
 
     return NextResponse.json(products)

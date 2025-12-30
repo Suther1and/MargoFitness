@@ -1,9 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Check, X, Tag } from 'lucide-react'
+import { Check, X, Tag, Loader2 } from 'lucide-react'
 import { validatePromoCode } from '@/lib/actions/promo-codes'
 import type { PromoCode } from '@/types/database'
 
@@ -32,7 +30,7 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
       onPromoApplied(result.data)
       setError('')
     } else {
-      setError(result.error || 'Ошибка применения промокода')
+      setError(result.error || 'Неверный промокод')
       setAppliedPromo(null)
       onPromoApplied(null)
     }
@@ -48,84 +46,73 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
     setIsExpanded(false)
   }
 
-  return (
-    <div className="py-2">
-      {!isExpanded && !appliedPromo ? (
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Tag className="size-4" />
-          <span>У меня есть промокод</span>
-        </button>
-      ) : (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Введите промокод"
-                disabled={loading}
-                readOnly={!!appliedPromo}
-                className={`font-mono text-sm ${appliedPromo ? 'bg-muted' : ''}`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !appliedPromo) {
-                    handleApply()
-                  }
-                }}
-                autoFocus={!appliedPromo}
-              />
-              {appliedPromo && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Check className="size-4 text-green-600 dark:text-green-400" />
-                </div>
-              )}
-            </div>
-            {appliedPromo ? (
-              <Button
-                onClick={handleRemove}
-                variant="ghost"
-                size="sm"
-                className="flex-shrink-0 h-9"
-              >
-                <X className="size-4 mr-1" />
-                Отменить
-              </Button>
-            ) : (
-              <>
-                <Button
-                  onClick={handleApply}
-                  disabled={!code.trim() || loading}
-                  size="sm"
-                  className="flex-shrink-0 h-9"
-                >
-                  {loading ? 'Проверка...' : 'Применить'}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsExpanded(false)
-                    setCode('')
-                    setError('')
-                  }}
-                  variant="ghost"
-                  size="icon"
-                  className="flex-shrink-0 h-9 w-9"
-                >
-                  <X className="size-4" />
-                </Button>
-              </>
-            )}
-          </div>
+  if (!isExpanded && !appliedPromo) {
+    return (
+      <button
+        onClick={() => setIsExpanded(true)}
+        className="text-sm text-white/60 hover:text-orange-400 flex items-center gap-2 transition-colors"
+      >
+        <Tag className="size-4" />
+        <span>Есть промокод?</span>
+      </button>
+    )
+  }
 
-          {error && (
-            <div className="flex items-center gap-2 rounded-md bg-red-50 dark:bg-red-950 p-2 text-xs text-red-800 dark:text-red-300">
-              <X className="size-3 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
+  return (
+    <div className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 space-y-2.5">
+      <input
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        placeholder="ПРОМОКОД"
+        disabled={loading || !!appliedPromo}
+        readOnly={!!appliedPromo}
+        className={`w-full bg-transparent text-white placeholder-white/40 outline-none font-mono text-sm ${appliedPromo ? 'text-green-400' : ''}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !appliedPromo) {
+            handleApply()
+          }
+        }}
+        autoFocus={!appliedPromo}
+      />
+      
+      {appliedPromo && (
+        <div className="flex items-center gap-2 text-xs text-green-400">
+          <Check className="size-3" />
+          <span>Промокод применен</span>
         </div>
       )}
+
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-red-400">
+          <X className="size-3" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-1">
+        <button 
+          onClick={handleRemove}
+          className="text-xs text-white/60 hover:text-white transition-colors"
+        >
+          Отменить
+        </button>
+        {!appliedPromo && (
+          <button 
+            onClick={handleApply}
+            disabled={!code.trim() || loading}
+            className="text-xs text-orange-400 hover:text-orange-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="size-3 animate-spin" />
+                <span>Проверка...</span>
+              </>
+            ) : (
+              <span>Применить</span>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   )
 }

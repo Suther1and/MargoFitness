@@ -181,6 +181,36 @@ export default function HomeNewPage() {
     }
   }
 
+  // Обработчик выбора тарифа
+  const handleTierSelect = async (tierLevel: 1 | 2 | 3) => {
+    if (!isAuthenticated) {
+      // Сохраняем намерение выбрать тариф в localStorage
+      const months = DAYS_TO_MONTHS[selectedDuration]
+      localStorage.setItem('pending_tier_selection', JSON.stringify({
+        tierLevel,
+        duration: months,
+        timestamp: Date.now()
+      }))
+      setSignInOpen(true)
+      return
+    }
+
+    // Если авторизован - получаем продукт и переходим на страницу оплаты
+    try {
+      const months = DAYS_TO_MONTHS[selectedDuration]
+      const response = await fetch(`/api/products/by-duration?duration=${months}&tier=${tierLevel}`)
+      const product = await response.json()
+      
+      if (product && product.id) {
+        router.push(`/payment/${product.id}`)
+      } else {
+        console.error('Product not found')
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    }
+  }
+
   const animateElement = (element: HTMLElement | null, newValue?: string) => {
     if (!element) return
     
@@ -776,7 +806,7 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       <button 
-                        onClick={handleStartAction}
+                        onClick={() => handleTierSelect(1)}
                         className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
                         style={{
                           background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
@@ -854,7 +884,7 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       <button 
-                        onClick={handleStartAction}
+                        onClick={() => handleTierSelect(2)}
                         className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto" 
                         style={{
                           background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
@@ -928,7 +958,7 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       <button 
-                        onClick={handleStartAction}
+                        onClick={() => handleTierSelect(3)}
                         className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
                         style={{
                           background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,

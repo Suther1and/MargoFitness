@@ -558,7 +558,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
 
                   {/* Right side - Desktop User Profile */}
                   <div className="hidden xl:block flex-shrink-0 w-full xl:w-auto">
-                <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:hover:ring-white/20 md:hover:shadow-xl">
+                <section ref={profileDesktopRef} className="profile-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 pt-5 px-6 pb-6 md:hover:ring-white/20 md:hover:shadow-xl">
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -566,8 +566,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                         {/* Avatar */}
                         <ProfileEditDialogWrapper profile={profile}>
                           <button className="relative flex-shrink-0 group/avatar" style={{ touchAction: 'manipulation' }}>
-                            <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
-                              <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+                          <div className="w-32 h-32 rounded-[20px] bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
+                            <div className="w-full h-full rounded-[18px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
                                 {profile.avatar_url ? (
                                   <img 
                                     src={profile.avatar_url} 
@@ -581,8 +581,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                                 )}
                               </div>
                             </div>
-                            {/* Edit overlay on hover */}
-                            <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                          {/* Edit overlay on hover */}
+                          <div className="absolute inset-0 rounded-[20px] bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                                 <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                 <path d="m15 5 4 4"></path>
@@ -592,11 +592,22 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                         </ProfileEditDialogWrapper>
 
                         {/* Info */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 relative">
+                          {/* Logout Button - positioned absolutely to not affect layout height */}
+                          <a href="/auth/logout" className="absolute top-2 right-0 z-20 flex items-center gap-2 rounded-lg bg-red-500/10 ring-1 ring-red-400/30 px-3 py-2 transition-all hover:bg-red-500/15 hover:ring-red-400/40 active:scale-95 text-sm" style={{ touchAction: 'manipulation' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-300">
+                              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                              <polyline points="16 17 21 12 16 7"></polyline>
+                              <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            <span className="text-red-200/90 font-medium">Выход</span>
+                          </a>
+                          
                           <div>
                             <h3 className="text-3xl font-semibold text-white font-oswald uppercase tracking-tight whitespace-nowrap">
                               {displayName}
                             </h3>
+                            
                             <div className="flex items-center gap-2 mt-2">
                               <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-3 py-1.5 text-sm text-purple-200 ring-1 ring-purple-400/30">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
@@ -666,8 +677,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                   {/* Avatar - clickable for editing */}
                   <ProfileEditDialogWrapper profile={profile}>
                     <button className="relative flex-shrink-0 group/avatar" style={{ touchAction: 'manipulation' }}>
-                      <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
-                        <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+                      <div className="w-28 h-28 rounded-[18px] bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-orange-400/50 active:scale-95">
+                        <div className="w-full h-full rounded-[16px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
                           {profile.avatar_url ? (
                             <img 
                               src={profile.avatar_url} 
@@ -681,8 +692,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                           )}
                         </div>
                       </div>
-                      {/* Edit overlay on active/hover */}
-                      <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 group-active/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    {/* Edit overlay on active/hover */}
+                    <div className="absolute inset-0 rounded-[18px] bg-black/60 opacity-0 group-hover/avatar:opacity-100 group-active/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                           <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                           <path d="m15 5 4 4"></path>
@@ -692,11 +703,22 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                   </ProfileEditDialogWrapper>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0 space-y-3.5">
+                  <div className="flex-1 min-w-0 space-y-3.5 relative">
+                    {/* Logout Button - positioned absolutely to not affect layout height */}
+                    <a href="/auth/logout" className="absolute top-1 right-0 z-20 flex items-center gap-1.5 rounded-lg bg-red-500/10 ring-1 ring-red-400/30 px-2.5 py-1.5 transition-all hover:bg-red-500/15 hover:ring-red-400/40 active:scale-95 text-xs" style={{ touchAction: 'manipulation' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-300">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                      <span className="text-red-200/90 font-medium">Выход</span>
+                    </a>
+                    
                     <div>
-                      <h3 className="text-xl md:text-2xl font-semibold text-white font-oswald uppercase tracking-tight truncate">
+                      <h3 className="text-xl md:text-2xl font-semibold text-white font-oswald uppercase tracking-tight truncate pr-20">
                         {displayName}
                       </h3>
+                      
                       <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-2.5 py-1 text-xs text-purple-200 ring-1 ring-purple-400/30 mt-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
                           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>

@@ -1,11 +1,11 @@
 import { getProductById } from "@/lib/actions/products"
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { redirect } from "next/navigation"
-import { Crown, Zap, Sparkles, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { PaymentPageClient } from "./payment-page-client"
+import { PaymentPageNewClient } from "./components/payment-page-new-client"
+import { Inter, Oswald } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
 
 interface PaymentPageProps {
   params: Promise<{
@@ -30,67 +30,46 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   const product = await getProductById(productId)
 
   if (!product) {
-    redirect('/pricing')
+    redirect('/')
   }
 
   // Рассчитать детали
   const duration = product.duration_months || 1
   const pricePerMonth = Math.round(product.price / duration)
-  const hasDiscount = (product.discount_percentage || 0) > 0
-  const originalPrice = hasDiscount 
-    ? Math.round(product.price / (1 - (product.discount_percentage || 0) / 100))
-    : product.price
-  const savings = originalPrice - product.price
-
-  // Определить тип действия
-  const isRenewal = action === 'renewal'
-  const isUpgrade = action === 'upgrade'
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-8 py-10">
-      {/* Кнопка назад */}
-      <Link href="/dashboard">
-        <Button variant="ghost" className="gap-2">
-          <ArrowLeft className="size-4" />
-          Назад в личный кабинет
-        </Button>
-      </Link>
+    <div className={`min-h-screen antialiased font-inter ${inter.variable} ${oswald.variable}`} style={{ background: 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)' }}>
+      <main className="relative w-full min-h-screen">
+        {/* Декоративные фоновые блобы */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-48 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        </div>
 
-      {/* Заголовок */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {isRenewal ? 'Продление подписки' : isUpgrade ? 'Апгрейд подписки' : 'Оформление подписки'}
-        </h1>
-        <p className="text-muted-foreground">
-          {isRenewal ? `Продление тарифа ${product.name}` : 
-           isUpgrade ? `Повышение до тарифа ${product.name}` :
-           `Вы выбрали тариф ${product.name}`}
-        </p>
-      </div>
-
-      {/* Клиентский компонент с калькулятором */}
-      <PaymentPageClient
-        product={product}
-        profile={profile}
-        tierLevel={product.tier_level || 1}
-        pricePerMonth={pricePerMonth}
-        action={action as 'renewal' | 'upgrade' | undefined}
-      />
-
-      {/* Безопасность */}
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <div className="text-2xl">🔒</div>
-            <div className="space-y-1">
-              <p className="font-medium">Безопасные платежи</p>
-              <p className="text-sm text-muted-foreground">
-                Все платежи обрабатываются через защищенное соединение. Мы не храним данные вашей карты.
-              </p>
-            </div>
+        <div className="container mx-auto max-w-7xl px-4 md:px-8 py-8 md:py-12 relative z-10">
+          {/* Кнопка назад */}
+          <div className="mb-8">
+            <a 
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-4 py-2.5 text-sm text-white/80 transition-all hover:bg-white/[0.08] hover:ring-white/20 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+              </svg>
+              <span className="font-medium">Назад</span>
+            </a>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Новый клиентский компонент с улучшенным дизайном */}
+          <PaymentPageNewClient
+            product={product}
+            profile={profile}
+            pricePerMonth={pricePerMonth}
+            action={action as 'renewal' | 'upgrade' | undefined}
+          />
+        </div>
+      </main>
     </div>
   )
 }

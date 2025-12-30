@@ -132,7 +132,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
   const userLinks = profile
     ? [
-        { href: '/dashboard', label: 'Кабинет' },
         ...(profile.role === 'admin'
           ? [{ href: '/admin', label: 'Админка', isAdmin: true }]
           : []),
@@ -231,7 +230,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           background: colors.navbarBg,
           border: `1px solid ${colors.cardBorder}`
         }}>
-          <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 gap-4">
+          <div className="flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2 gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
               <div className="flex text-white rounded-lg md:rounded-xl w-8 h-8 md:w-10 md:h-10 items-center justify-center shadow-lg" style={{
@@ -282,24 +281,23 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
             {/* Desktop Auth/Profile */}
             <div className="flex items-center gap-2">
               {profile ? (
-                <>
-                  {profile.avatar_url && (
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                      <img 
-                        src={profile.avatar_url} 
-                        alt={profile.full_name || profile.email || 'Avatar'} 
-                        className="size-8 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
-                      />
-                    </Link>
-                  )}
-                  <Link href="/auth/logout" className="flex items-center gap-2 uppercase text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 backdrop-blur flex-shrink-0 transition-all hover:opacity-80 active:scale-95" style={{
-                    color: colors.textPrimary,
-                    border: `1px solid ${colors.cardBorder}`,
-                    background: `${colors.textPrimary}0D`,
-                  }}>
-                    <span className="pointer-events-none">Выход</span>
-                  </Link>
-                </>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="relative w-[52px] h-[52px] rounded-[14px] bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all hover:ring-2 hover:ring-orange-400/50 active:scale-95">
+                    <div className="w-full h-full rounded-[12px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+                      {profile.avatar_url ? (
+                        <img 
+                          src={profile.avatar_url} 
+                          alt={profile.full_name || profile.email || 'Avatar'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
+                          {(profile.full_name || profile.email || 'U').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               ) : (
                 <AuthButton onAuthClick={() => setIsSignInOpen(true)} />
               )}

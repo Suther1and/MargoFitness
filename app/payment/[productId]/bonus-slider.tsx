@@ -1,17 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Switch } from '@/components/ui/switch'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
 
-interface BonusSliderProps {
+interface BonusToggleProps {
   userId: string
   priceAfterDiscounts: number
   onBonusChange: (amount: number) => void
   currentBonusAmount?: number
 }
 
-export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, currentBonusAmount = 0 }: BonusSliderProps) {
+export function BonusToggle({ userId, priceAfterDiscounts, onBonusChange, currentBonusAmount = 0 }: BonusToggleProps) {
   const [availableBalance, setAvailableBalance] = useState(0)
   const [useBonuses, setUseBonuses] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -50,9 +49,10 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, curren
     setLoading(false)
   }
 
-  const handleToggle = (checked: boolean) => {
-    setUseBonuses(checked)
-    onBonusChange(checked ? maxBonus : 0)
+  const handleToggle = () => {
+    const newState = !useBonuses
+    setUseBonuses(newState)
+    onBonusChange(newState ? maxBonus : 0)
   }
 
   if (loading || availableBalance === 0) {
@@ -64,21 +64,33 @@ export function BonusSlider({ userId, priceAfterDiscounts, onBonusChange, curren
   }
 
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex-1">
-        <div className="text-sm text-muted-foreground">
-          Использовать шаги 👟 
-          <span className="ml-2">
-            (доступно: {availableBalance.toLocaleString('ru-RU')})
-          </span>
+    <button
+      onClick={handleToggle}
+      className={`w-full rounded-xl p-3.5 transition-all ${
+        useBonuses 
+          ? 'bg-orange-500/10 ring-1 ring-orange-400/30' 
+          : 'bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.06]'
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-left">
+          <div className="text-sm font-medium text-white flex items-center gap-2">
+            <span>Использовать шаги</span>
+            <span className="text-base">👟</span>
+          </div>
+          <div className="text-xs text-white/60 mt-0.5">
+            Доступно: {availableBalance.toLocaleString('ru-RU')}
+          </div>
+        </div>
+        <div className={`text-sm font-semibold ${useBonuses ? 'text-orange-400' : 'text-white/40'}`}>
+          {useBonuses ? `-${maxBonus.toLocaleString('ru-RU')} ₽` : 'Применить'}
         </div>
       </div>
-      <Switch
-        checked={useBonuses}
-        onCheckedChange={handleToggle}
-      />
-    </div>
+    </button>
   )
 }
+
+// Экспорт под старым именем для обратной совместимости
+export { BonusToggle as BonusSlider }
 
 

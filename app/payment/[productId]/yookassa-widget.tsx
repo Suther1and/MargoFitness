@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { CreditCard, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { PromoInput } from './promo-input'
 import { BonusSlider } from './bonus-slider'
@@ -179,57 +177,68 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
 
   if (success) {
     return (
-      <Card className="border-green-500 bg-green-50 dark:bg-green-950">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="rounded-full bg-green-500 p-3">
-              <CheckCircle2 className="size-8 text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-green-700 dark:text-green-300">
-                Оплата прошла успешно!
-              </h3>
-              <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                Подписка активирована. Перенаправляем в личный кабинет...
-              </p>
-            </div>
+      <section className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-green-400/30 p-6">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-transparent pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+          <div className="flex size-16 items-center justify-center rounded-full bg-green-500/20 ring-1 ring-green-400/30">
+            <CheckCircle2 className="size-8 text-green-400" />
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <h3 className="text-xl font-bold text-white font-oswald uppercase tracking-tight">
+              Оплата прошла успешно!
+            </h3>
+            <p className="text-sm text-white/70 mt-2">
+              Подписка активирована. Перенаправляем в личный кабинет...
+            </p>
+          </div>
+        </div>
+      </section>
     )
   }
 
   if (loadingCalc && !calculation) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <section className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-8">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="size-6 animate-spin text-orange-400" />
+        </div>
+      </section>
     )
   }
 
   if (!calculation) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
+      <section className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-8">
+        <div className="py-8 text-center text-white/60">
           Ошибка расчета стоимости
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Оплата</CardTitle>
-        <CardDescription>
-          Безопасная оплата через ЮKassa
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <section className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 md:p-8">
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
+
+      <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-6 ring-1 ring-white/10 backdrop-blur relative z-10 space-y-6">
         {!confirmationToken ? (
           <>
+            {/* Заголовок */}
+            <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-orange-500/10 ring-1 ring-orange-400/20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
+                  <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white font-oswald uppercase tracking-tight">Оплата</h3>
+                <p className="text-xs text-white/60">Безопасная оплата через ЮKassa</p>
+              </div>
+            </div>
+
             {/* Промокод */}
             <PromoInput
               productId={product.id}
@@ -247,18 +256,18 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
             )}
 
             {/* Детальный расчет */}
-            <div className="space-y-2 pt-3 border-t">
+            <div className="space-y-3 pt-3 border-t border-white/10">
               {/* Базовая цена */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Базовая цена</span>
-                <span className="text-muted-foreground">
+                <span className="text-white/60">Базовая цена</span>
+                <span className="text-white/60">
                   {calculation.basePrice.toLocaleString('ru-RU')} ₽
                 </span>
               </div>
 
               {/* Скидка за срок */}
               {calculation.durationDiscountAmount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center justify-between text-sm text-orange-400">
                   <span>Скидка за срок ({calculation.durationDiscountPercent}%)</span>
                   <span>-{calculation.durationDiscountAmount.toLocaleString('ru-RU')} ₽</span>
                 </div>
@@ -266,7 +275,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
 
               {/* Промокод */}
               {calculation.promoDiscountAmount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center justify-between text-sm text-orange-400">
                   <span>
                     Промокод {calculation.promoCode} 
                     ({calculation.promoDiscountType === 'percent' 
@@ -280,26 +289,26 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
 
               {/* Шаги */}
               {calculation.bonusToUse > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center justify-between text-sm text-orange-400">
                   <span>Использовано шагов 👟</span>
                   <span>-{calculation.bonusToUse.toLocaleString('ru-RU')} ₽</span>
                 </div>
               )}
 
-              <div className="border-t pt-3" />
+              <div className="border-t border-white/10 pt-3" />
 
               {/* Итого к оплате */}
               <div className="flex items-center justify-between text-lg font-bold">
-                <span>К оплате</span>
-                <span className="text-2xl text-primary">
+                <span className="text-white">К оплате</span>
+                <span className="text-2xl text-orange-400 font-oswald">
                   {calculation.finalPrice.toLocaleString('ru-RU')} ₽
                 </span>
               </div>
 
               {/* Экономия */}
               {calculation.totalSavings > 0 && (
-                <div className="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center">
-                  <div className="text-sm font-medium text-green-800 dark:text-green-300">
+                <div className="rounded-lg bg-orange-500/10 ring-1 ring-orange-400/20 p-3 text-center">
+                  <div className="text-sm font-medium text-orange-300">
                     🎉 Вы экономите {calculation.totalSavings.toLocaleString('ru-RU')} ₽
                   </div>
                 </div>
@@ -307,13 +316,13 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
 
               {/* Кешбек */}
               {calculation.cashbackAmount > 0 && (
-                <div className="rounded-lg bg-primary/10 p-3">
+                <div className="rounded-lg bg-orange-500/10 ring-1 ring-orange-400/20 p-3">
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Вы получите кешбек:</span>
+                    <span className="text-white/70">Вы получите кешбек:</span>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="font-semibold">
+                      <span className="font-semibold text-white">
                         {calculation.cashbackAmount.toLocaleString('ru-RU')} 👟 
-                        <span className="text-muted-foreground ml-1">
+                        <span className="text-white/60 ml-1">
                           ({calculation.cashbackPercent}%)
                         </span>
                       </span>
@@ -324,21 +333,22 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
             </div>
 
             {/* Чекбокс сохранения карты */}
-            <div className="flex items-start space-x-3 pt-4">
+            <div className="flex items-start space-x-3 pt-4 border-t border-white/10">
               <Checkbox 
                 id="save-card" 
                 checked={saveCard}
                 onCheckedChange={(checked) => setSaveCard(checked as boolean)}
                 disabled={processing}
+                className="border-white/20"
               />
               <div className="space-y-1">
                 <label
                   htmlFor="save-card"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="text-sm font-medium leading-none text-white cursor-pointer"
                 >
                   Сохранить карту для автопродления
                 </label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/60">
                   Рекомендуется для автоматического продления подписки
                 </p>
               </div>
@@ -346,74 +356,76 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
 
             {/* Сообщение об ошибке */}
             {error && (
-              <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 p-3 text-sm text-red-800 dark:text-red-300 flex items-start gap-2">
+              <div className="rounded-lg bg-red-500/10 ring-1 ring-red-400/30 p-3 text-sm text-red-300 flex items-start gap-2">
                 <AlertCircle className="size-4 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* Кнопка оплаты */}
-            <Button
-              className="w-full"
-              size="lg"
+            <button
+              className="group relative w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 disabled:from-white/5 disabled:to-white/5 p-4 ring-1 ring-orange-400/30 disabled:ring-white/10 transition-all duration-300 overflow-hidden shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 disabled:shadow-none active:scale-95 disabled:cursor-not-allowed"
               onClick={handlePayment}
               disabled={processing || !widgetReady || loadingCalc}
             >
-              {processing ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Подготовка платежа...
-                </>
-              ) : !widgetReady ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Загрузка виджета...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 size-4" />
-                  Перейти к оплате {calculation.finalPrice.toLocaleString('ru-RU')} ₽
-                </>
-              )}
-            </Button>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
+              <div className="relative flex items-center justify-center gap-2">
+                {processing || !widgetReady ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    <span className="font-semibold text-white text-lg">
+                      {processing ? 'Обработка...' : 'Загрузка...'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-white text-lg font-oswald uppercase tracking-wide">
+                      Оплатить {calculation.finalPrice.toLocaleString('ru-RU')} ₽
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white group-hover:translate-x-1 transition-transform">
+                      <path d="M5 12h14"></path>
+                      <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                  </>
+                )}
+              </div>
+            </button>
+
+            {/* Информация */}
+            <div className="text-xs text-white/50 space-y-1 pt-2">
+              <p>✓ Безопасное соединение SSL</p>
+              <p>✓ Данные карты не сохраняются на нашем сервере</p>
+              <p>✓ Автопродление можно отключить в любое время</p>
+            </div>
           </>
         ) : (
           <>
             {/* Кнопка назад */}
-            <Button
-              variant="outline"
+            <button
               onClick={() => {
                 setConfirmationToken(null)
                 setProcessing(false)
                 setError('')
                 setBonusToUse(0)
               }}
-              className="w-full"
+              className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-4 py-2.5 text-sm text-white/80 transition-all hover:bg-white/[0.08] hover:ring-white/20 active:scale-95"
             >
               ← Изменить параметры оплаты
-            </Button>
+            </button>
 
             {/* Контейнер для виджета ЮКассы */}
             <div id="payment-form" className="min-h-[400px]"></div>
             
             {/* Сообщение об ошибке */}
             {error && (
-              <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 p-3 text-sm text-red-800 dark:text-red-300 flex items-start gap-2">
+              <div className="rounded-lg bg-red-500/10 ring-1 ring-red-400/30 p-3 text-sm text-red-300 flex items-start gap-2">
                 <AlertCircle className="size-4 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
           </>
         )}
-
-        {/* Информация */}
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p>✓ Безопасное соединение SSL</p>
-          <p>✓ Данные карты не сохраняются на нашем сервере</p>
-          <p>✓ Автопродление можно отключить в любое время</p>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
-

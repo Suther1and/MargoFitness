@@ -110,6 +110,35 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
     alert("Вход через ВКонтакте скоро будет доступен! 🚀")
   }
 
+  // Проверка и обработка pending_tier_selection
+  const handlePostAuthRedirect = async () => {
+    const pendingSelection = localStorage.getItem('pending_tier_selection')
+    
+    if (pendingSelection) {
+      try {
+        const { tierLevel, duration } = JSON.parse(pendingSelection)
+        
+        // Получаем продукт
+        const response = await fetch(`/api/products/by-duration?duration=${duration}&tier=${tierLevel}`)
+        const product = await response.json()
+        
+        if (product && product.id) {
+          // Очищаем localStorage
+          localStorage.removeItem('pending_tier_selection')
+          // Перенаправляем на payment
+          router.push(`/payment/${product.id}`)
+          return true
+        }
+      } catch (error) {
+        console.error('Error handling pending tier selection:', error)
+      }
+      // Очищаем даже если была ошибка
+      localStorage.removeItem('pending_tier_selection')
+    }
+    
+    return false
+  }
+
   // Обработчик отправки формы с auto-режимом (вход или регистрация)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,7 +170,13 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
 
     // Если вход успешный
     if (!signInError) {
-      router.push('/dashboard')
+      // Проверяем, есть ли pending tier selection
+      const redirected = await handlePostAuthRedirect()
+      
+      if (!redirected) {
+        router.push('/dashboard')
+      }
+      
       router.refresh()
       onClose()
       setLoading(false)
@@ -172,10 +207,16 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
       }
 
       // Успешная регистрация
-      console.log('[SignInPopup] Регистрация успешна, редирект на dashboard')
+      console.log('[SignInPopup] Регистрация успешна, проверяем pending tier selection')
       
-      // Важно: не удаляем код из localStorage - это сделает ReferralProcessor
-      router.push('/dashboard')
+      // Проверяем, есть ли pending tier selection
+      const redirected = await handlePostAuthRedirect()
+      
+      if (!redirected) {
+        router.push('/dashboard')
+      }
+      
+      // Важно: не удаляем реферальный код из localStorage - это сделает ReferralProcessor
       router.refresh()
       onClose()
       setLoading(false)
