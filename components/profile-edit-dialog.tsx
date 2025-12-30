@@ -248,7 +248,8 @@ export function ProfileEditDialog({
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingAvatar}
-                      className="relative"
+                      tabIndex={-1}
+                      className="relative outline-none"
                     >
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 p-[2px] shadow-lg shadow-purple-500/20 transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-purple-400/50 active:scale-95">
                         <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
