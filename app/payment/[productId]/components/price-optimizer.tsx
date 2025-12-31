@@ -234,11 +234,14 @@ export function PriceOptimizer({
           </div>
 
           {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
-            <div className={`optimizer-card relative overflow-hidden rounded-2xl p-4 transition-all ${
-              useBonuses 
-                ? 'bg-orange-500/10 ring-1 ring-orange-400/40' 
-                : 'bg-white/[0.04] ring-1 ring-white/10'
-            }`}>
+            <button
+              onClick={handleBonusToggle}
+              className={`optimizer-card w-full relative overflow-hidden rounded-2xl p-4 transition-all text-left active:scale-[0.98] ${
+                useBonuses 
+                  ? 'bg-orange-500/10 ring-1 ring-orange-400/40' 
+                  : 'bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.06]'
+              }`}
+            >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -250,18 +253,13 @@ export function PriceOptimizer({
                   </div>
                 </div>
 
-                <button
-                  onClick={handleBonusToggle}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 ${
-                    useBonuses 
-                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                      : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-                  }`}
-                >
+                <div className={`text-sm font-bold transition-all ${
+                  useBonuses ? 'text-orange-400' : 'text-white/20'
+                }`}>
                   {useBonuses ? 'УБРАТЬ' : 'ПРИМЕНИТЬ'}
-                </button>
+                </div>
               </div>
-            </div>
+            </button>
           )}
         </div>
       )}
