@@ -88,19 +88,12 @@ export async function POST(request: NextRequest) {
           .eq('id', transaction.id)
 
         // Обработать успешный платеж (обновить подписку)
-        // Определяем тип платежа из payment_type или metadata
-        const isRenewal = transaction.payment_type === 'renewal'
-        const metadata = transaction.metadata as any
-        const customExpiryDays = metadata?.conversion?.totalDays // Для апгрейда
-        
-        console.log(`[Webhook] Payment type: ${transaction.payment_type}, isRenewal: ${isRenewal}, customExpiryDays: ${customExpiryDays}`)
+        console.log(`[Webhook] Payment type: ${transaction.payment_type}`)
         
         const result = await processSuccessfulPayment({
           userId: transaction.user_id,
           productId: transaction.product_id!,
-          paymentMethodId: payment.payment_method?.id,
-          isRenewal,
-          customExpiryDays
+          paymentMethodId: payment.payment_method?.id
         })
 
         if (!result.success) {

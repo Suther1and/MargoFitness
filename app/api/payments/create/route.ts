@@ -32,8 +32,7 @@ export async function POST(request: NextRequest) {
       savePaymentMethod, 
       confirmationType = 'embedded',
       promoCode,
-      bonusToUse,
-      action = 'purchase' // 'renewal' | 'upgrade' | 'purchase'
+      bonusToUse
     } = body
 
     if (!productId) {
@@ -72,34 +71,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Проверка: нельзя купить подписку если уже есть активная того же или более высокого уровня
-    // ИСКЛЮЧЕНИЕ: если это продление (renewal) или апгрейд (upgrade) - разрешаем
-    if (product.type === 'subscription_tier' && profile.subscription_status === 'active' && action !== 'renewal' && action !== 'upgrade') {
-      const currentTierLevel = profile.subscription_tier === 'basic' ? 1 : 
-                                profile.subscription_tier === 'pro' ? 2 : 
-                                profile.subscription_tier === 'elite' ? 3 : 0
-      const newTierLevel = product.tier_level || 1
-      
-      // Если новый уровень такой же или ниже - запрещаем
-      if (newTierLevel <= currentTierLevel) {
-        return NextResponse.json(
-          { 
-            error: 'Нельзя купить подписку того же или более низкого уровня',
-            details: `У вас уже активна подписка ${profile.subscription_tier.toUpperCase()}. Используйте продление для текущего тарифа или апгрейд для повышения.`,
-            currentTier: profile.subscription_tier,
-            suggestUpgrade: true
-          },
-          { status: 400 }
-        )
-      }
-      
-      // Если новый уровень выше - предлагаем использовать апгрейд
+    // Проверка: нельзя купить подписку если уже есть активная
+    if (product.type === 'subscription_tier' && profile.subscription_status === 'active') {
       return NextResponse.json(
         { 
-          error: 'Используйте апгрейд для повышения тарифа',
-          details: 'У вас уже есть активная подписка. При апгрейде оставшиеся дни конвертируются в бонус!',
-          suggestUpgrade: true,
-          upgradeAvailable: true
+          error: 'У вас уже есть активная подписка',
+          details: `У вас активна подписка ${profile.subscription_tier.toUpperCase()}. Дождитесь её окончания или обратитесь в поддержку.`,
+          currentTier: profile.subscription_tier
         },
         { status: 400 }
       )
@@ -155,73 +133,9 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     
-    // Определить payment_type на основе action
-    let paymentType: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' = 'initial'
-    if (action === 'renewal') {
-      paymentType = 'renewal'
-    } else if (action === 'upgrade') {
-      paymentType = 'upgrade'
-    } else if (product.type === 'one_time_pack') {
-      paymentType = 'one_time'
-    }
-    
-    // Рассчитать конвертацию для апгрейда
-    let upgradeConversion = null
-    if (action === 'upgrade' && profile.subscription_status === 'active') {
-      const { 
-        getRemainingDays, 
-        calculateUpgradeConversion, 
-        getActualSubscriptionPrice 
-      } = await import('@/lib/services/subscription-manager')
-      
-      const currentTierLevel = profile.subscription_tier === 'basic' ? 1 :
-                               profile.subscription_tier === 'pro' ? 2 :
-                               profile.subscription_tier === 'elite' ? 3 : 0
-      const newTierLevel = product.tier_level || 1
-      const remainingDays = getRemainingDays(profile.subscription_expires_at)
-      
-      // Получить фактическую стоимость текущей подписки
-      const actualPrice = await getActualSubscriptionPrice({
-        userId: user.id,
-        tierLevel: currentTierLevel,
-        durationMonths: profile.subscription_duration_months
-      })
-      
-      // Fallback на цену из products
-      const { data: currentProductData } = await supabaseAdmin
-        .from('products')
-        .select('price')
-        .eq('type', 'subscription_tier')
-        .eq('tier_level', currentTierLevel)
-        .eq('duration_months', profile.subscription_duration_months)
-        .single()
-      
-      const currentPrice = actualPrice || currentProductData?.price || 0
-      
-      // Получить базовую месячную цену нового тарифа (1 месяц без скидки)
-      const { data: newBaseProduct } = await supabaseAdmin
-        .from('products')
-        .select('price')
-        .eq('type', 'subscription_tier')
-        .eq('tier_level', newTierLevel)
-        .eq('duration_months', 1)
-        .single()
-      
-      const newBaseMonthlyPrice = newBaseProduct?.price || product.price
-      
-      upgradeConversion = calculateUpgradeConversion({
-        currentTierLevel,
-        currentDurationMonths: profile.subscription_duration_months,
-        currentPrice,
-        remainingDays,
-        newTierLevel,
-        newDurationMonths: product.duration_months,
-        newPrice: product.price,
-        newBaseMonthlyPrice
-      })
-      
-      console.log('[Create Payment] Upgrade conversion calculated:', upgradeConversion)
-    }
+    // Определить payment_type
+    const paymentType: 'initial' | 'recurring' | 'one_time' = 
+      product.type === 'one_time_pack' ? 'one_time' : 'initial'
     
     const { error: transactionError } = await supabaseAdmin
       .from('payment_transactions')
@@ -234,15 +148,13 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         payment_type: paymentType,
         metadata: {
-          action,
           productName: product.name,
           productType: product.type,
           originalPrice: product.price,
           promoCode: promoCode || null,
           bonusUsed: bonusToUse || 0,
           promoDiscount: calculation.promoDiscountAmount,
-          bonusDiscount: calculation.bonusToUse,
-          ...(upgradeConversion ? { conversion: upgradeConversion } : {})
+          bonusDiscount: calculation.bonusToUse
         } as any
       })
 
