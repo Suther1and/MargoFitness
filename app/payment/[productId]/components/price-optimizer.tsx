@@ -234,29 +234,34 @@ export function PriceOptimizer({
           </div>
 
           {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
-            <button
-              onClick={handleBonusToggle}
-              className={`bonus-button w-full rounded-2xl p-4 relative overflow-hidden active:scale-98 ${
-                useBonuses 
-                  ? 'bg-orange-500/15 ring-1 ring-orange-400/40' 
-                  : 'bg-white/[0.04] ring-1 ring-white/10 hover:bg-white/[0.06]'
-              }`}
-            >
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="text-left">
-                  <div className="text-sm font-semibold text-white flex items-center gap-1.5 mb-1">
-                    <span>Шаги</span>
-                    <span className="text-base">👟</span>
+            <div className={`optimizer-card relative overflow-hidden rounded-2xl p-4 transition-all ${
+              useBonuses 
+                ? 'bg-orange-500/10 ring-1 ring-orange-400/40' 
+                : 'bg-white/[0.04] ring-1 ring-white/10'
+            }`}>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-bold text-white uppercase tracking-tight">Шаги</span>
+                    <span className="text-sm">👟</span>
                   </div>
-                  <div className="text-xs text-white/60">
+                  <div className="text-[10px] text-white/40 uppercase tracking-widest font-medium">
                     Баланс: {availableBalance.toLocaleString('ru-RU')}
                   </div>
                 </div>
-                <div className={`text-sm font-bold ${useBonuses ? 'text-orange-400' : 'text-white/40'}`}>
-                  {useBonuses ? 'ПРИМЕНЕНО' : 'ПРИМЕНИТЬ'}
-                </div>
+
+                <button
+                  onClick={handleBonusToggle}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 ${
+                    useBonuses 
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                      : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
+                  }`}
+                >
+                  {useBonuses ? 'УБРАТЬ' : 'ПРИМЕНИТЬ'}
+                </button>
               </div>
-            </button>
+            </div>
           )}
         </div>
       )}
