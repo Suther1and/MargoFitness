@@ -127,11 +127,7 @@ export function PaymentPageNewClient({
             finalPrice={displayPrice}
             isDiscountApplied={isDiscountApplied}
           />
-          <TrustBadges />
-        </div>
-
-        {/* Правая колонка */}
-        <div className="space-y-6">
+          
           <PriceOptimizer
             productId={product.id}
             userId={profile.id}
@@ -140,11 +136,16 @@ export function PaymentPageNewClient({
             onBonusChange={setBonusToUse}
             currentBonusAmount={bonusToUse}
           />
+        </div>
 
+        {/* Правая колонка */}
+        <div className="flex flex-col gap-3">
           <PriceBreakdown 
             calculation={calculation}
             loading={loadingCalc}
           />
+
+          <TrustBadges />
 
           <PaymentCTAButton
             finalPrice={calculation?.finalPrice || product.price}

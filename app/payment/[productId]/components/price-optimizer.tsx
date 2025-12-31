@@ -181,14 +181,9 @@ export function PriceOptimizer({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="flex flex-col gap-3">
           <div className="optimizer-card relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-4">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white/80">🏷️ Промокод</span>
-              </div>
-              
-              <div className="flex gap-2">
+            <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <input
                     value={promoCode}
@@ -236,7 +231,6 @@ export function PriceOptimizer({
                   </button>
                 )}
               </div>
-            </div>
           </div>
 
           {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
