@@ -185,9 +185,6 @@ export function ProductHeroCard({
             </span>
             <span className="text-xl text-white/60 font-oswald">₽/мес</span>
           </div>
-          <div className="text-sm text-white/50">
-            {finalPrice.toLocaleString('ru-RU')} ₽ за весь период
-          </div>
         </div>
 
         {/* Преимущества */}
