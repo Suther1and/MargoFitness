@@ -185,6 +185,9 @@ export function ProductHeroCard({
             </span>
             <span className="text-xl text-white/60 font-oswald">₽/мес</span>
           </div>
+          <p className="text-[10px] text-white/40 uppercase tracking-wider font-medium">
+            При оплате за {getDurationText(product.duration_months || 1)}
+          </p>
         </div>
 
         {/* Преимущества */}

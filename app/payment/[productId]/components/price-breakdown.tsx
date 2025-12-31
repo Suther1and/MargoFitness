@@ -141,8 +141,8 @@ export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
             <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Расчет стоимости</span>
           </div>
 
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between text-white/60">
+          <div className="text-sm">
+            <div className="flex justify-between text-white/60 mb-1">
               <span>Базовая цена</span>
               <span className="font-medium"><AnimatedNumber value={calculation.basePrice} /> ₽</span>
             </div>
@@ -182,23 +182,21 @@ export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
               </span>
             </div>
 
-            <div className="border-t border-white/10 pt-3" />
-
-            <div className="flex items-center justify-between gap-2 mt-4 min-h-[32px]">
-              <div className={`savings-badge flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/10 ring-1 ring-orange-500/30 text-orange-400 ${calculation.cashbackAmount > 0 ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-90 -translate-x-2'}`}>
-                <span className="text-xs">👟</span>
-                <span className="text-[11px] font-bold uppercase tracking-wider">
-                  +<AnimatedNumber value={calculation.cashbackAmount} format={false} /> кешбэк
+            <div className="flex items-center gap-2 mt-1 mb-4 min-h-[24px]">
+              <div className={`savings-badge flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 ring-1 ring-orange-500/20 text-orange-400 ${calculation.cashbackAmount > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  +{calculation.cashbackAmount} кешбэк
                 </span>
               </div>
 
-              <div className={`savings-badge flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/10 ring-1 ring-green-500/30 text-green-400 ${calculation.totalSavings > 0 ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-90 translate-x-2'}`}>
-                <Sparkles className="size-3" />
-                <span className="text-[11px] font-bold uppercase tracking-wider">
-                  Выгода <AnimatedNumber value={calculation.totalSavings} /> ₽
+              <div className={`savings-badge flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/10 ring-1 ring-green-500/20 text-green-400 ${calculation.totalSavings > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Выгода {calculation.totalSavings.toLocaleString('ru-RU')} ₽
                 </span>
               </div>
             </div>
+
+            <div className="border-t border-white/10 pt-3" />
           </div>
         </div>
       </div>

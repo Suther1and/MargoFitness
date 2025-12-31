@@ -107,7 +107,7 @@ export function PaymentCTAButton({
         <button
           onClick={onClick}
           disabled={isDisabled}
-          className={`cta-button group relative w-full rounded-2xl p-6 ring-1 overflow-hidden ${
+          className={`cta-button group relative w-full rounded-2xl ${isMobile ? 'p-4' : 'p-6'} ring-1 overflow-hidden ${
             isDisabled
               ? 'bg-white/5 ring-white/10 cursor-not-allowed text-white/20'
               : 'ring-orange-400/30 shadow-xl shadow-orange-500/25 text-white hover:brightness-110'

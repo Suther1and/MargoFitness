@@ -159,7 +159,7 @@ export function PaymentPageNewClient({
       </div>
 
       {/* Mobile: single column */}
-      <div className="lg:hidden w-full max-w-2xl mx-auto space-y-4">
+      <div className="lg:hidden w-full max-w-2xl mx-auto space-y-4 pb-32">
         <ProductHeroCard 
           product={product}
           pricePerMonth={displayPricePerMonth}
@@ -189,14 +189,19 @@ export function PaymentPageNewClient({
           />
         </div>
 
-        <PaymentCTAButton
-          finalPrice={calculation?.finalPrice || product.price}
-          processing={processing}
-          disabled={loadingCalc || !calculation}
-          error={error}
-          onClick={handlePayment}
-          action={action}
-        />
+        {/* Sticky Mobile Button Wrapper */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent z-50 backdrop-blur-sm lg:hidden">
+          <div className="max-w-2xl mx-auto">
+            <PaymentCTAButton
+              finalPrice={calculation?.finalPrice || product.price}
+              processing={processing}
+              disabled={loadingCalc || !calculation}
+              error={error}
+              onClick={handlePayment}
+              action={action}
+            />
+          </div>
+        </div>
       </div>
     </>
   )

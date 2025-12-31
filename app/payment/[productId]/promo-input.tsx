@@ -59,14 +59,23 @@ export function PromoInput({ productId, onPromoApplied }: PromoInputProps) {
   }
 
   return (
-    <div className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 space-y-2.5">
+    <div className={`rounded-xl bg-white/[0.04] ring-1 transition-all duration-300 p-3 space-y-2.5 ${
+      appliedPromo 
+        ? 'ring-green-500/50 bg-green-500/5' 
+        : error 
+          ? 'ring-red-500/50 bg-red-500/5' 
+          : 'ring-white/10'
+    }`}>
       <input
         value={code}
-        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        onChange={(e) => {
+          setCode(e.target.value.toUpperCase())
+          if (error) setError('')
+        }}
         placeholder="ПРОМОКОД"
         disabled={loading || !!appliedPromo}
         readOnly={!!appliedPromo}
-        className={`w-full bg-transparent text-white placeholder-white/40 outline-none font-mono text-sm ${appliedPromo ? 'text-green-400' : ''}`}
+        className={`w-full bg-transparent text-white placeholder-white/40 outline-none font-mono text-sm transition-colors ${appliedPromo ? 'text-green-400' : ''}`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !appliedPromo) {
             handleApply()
