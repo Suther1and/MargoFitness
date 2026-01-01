@@ -434,25 +434,28 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
           </div>
 
           {/* Компактный блок конверсии (Smart Convert) */}
-          <div className="flex items-center gap-4 mb-8 px-2">
-            <div className="flex-1 space-y-1">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Текущий остаток:</p>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-oswald font-bold text-white/50 line-through">
-                  <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
-                </span>
-                <ArrowRight className="w-4 h-4 text-white/20" />
-                <span className={`text-xl font-oswald font-bold ${currentConfig?.color}`}>
-                  <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
-                </span>
+          <div className="mb-8 px-2">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <Zap className="w-3 h-3 text-emerald-400" />
+                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
               </div>
+              <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
             </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="flex-1 space-y-1 text-right">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-right">Умная конвертация:</p>
-              <div className="flex items-center justify-end gap-2 text-emerald-400/80">
-                <Zap className="w-3.5 h-3.5" />
-                <span className="text-xs font-bold uppercase tracking-wider">Активна</span>
+            
+            <div className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+              <div className="flex-1">
+                <p className="text-[9px] font-bold text-white/30 uppercase mb-1">Остаток {currentTier}:</p>
+                <p className="text-lg font-oswald font-bold text-white/40 line-through leading-none">
+                  <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
+                </p>
+              </div>
+              <ArrowBigRightDash className={`w-5 h-5 text-white/10 flex-shrink-0`} />
+              <div className="flex-1 text-right">
+                <p className="text-[9px] font-bold text-white/30 uppercase mb-1">В эквиваленте {selectedTier}:</p>
+                <p className={`text-lg font-oswald font-bold ${currentConfig?.color} leading-none`}>
+                  <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
+                </p>
               </div>
             </div>
           </div>
@@ -504,38 +507,40 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
           <div className="mt-auto space-y-6">
             <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 overflow-hidden relative">
               {/* Декоративная иконка - еще более деликатная */}
-              <div className="absolute -top-1 -right-1 p-2 opacity-[0.03] pointer-events-none">
+              <div className="absolute -top-1 -right-1 p-2 opacity-[0.02] pointer-events-none">
                 <Clock className="w-16 h-16 text-white" />
               </div>
               
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Итоговый срок:</p>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Итоговый расчет</p>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">
                     до: <span className="text-white/80 ml-1 normal-case">{conversionData ? formatDate(conversionData.newExpirationDate) : '...'}</span>
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex items-baseline gap-1">
-                    <span className={`text-xl font-oswald font-bold ${currentConfig?.color}`}>
-                      <AnimatedNumber value={conversionData?.convertedDays || 0} />
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-white/40">Конвертация {currentTier}:</span>
+                    <span className={`font-oswald font-bold ${currentConfig?.color}`}>
+                      + <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
                     </span>
-                    <span className="text-[9px] font-bold text-white/20 uppercase">конв.</span>
                   </div>
-                  <Plus className="w-3 h-3 text-white/20" />
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-oswald font-bold text-white/90">
-                      <AnimatedNumber value={conversionData?.newProductDays || 0} />
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-white/40">Выбранный период:</span>
+                    <span className="text-white/80 font-oswald font-bold">
+                      + <AnimatedNumber value={conversionData?.newProductDays || 0} /> дн.
                     </span>
-                    <span className="text-[9px] font-bold text-white/20 uppercase">нов.</span>
                   </div>
-                  <Equal className="w-3 h-3 text-white/20 ml-0.5" />
-                  <div className="flex items-baseline gap-1.5 ml-1">
-                    <span className="text-3xl font-oswald font-bold text-white leading-none">
-                      <AnimatedNumber value={conversionData?.totalDays || 0} />
-                    </span>
-                    <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
+                  
+                  <div className="pt-2 flex justify-between items-end">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Итого:</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-3xl font-oswald font-bold text-white leading-none">
+                        <AnimatedNumber value={conversionData?.totalDays || 0} />
+                      </span>
+                      <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
+                    </div>
                   </div>
                 </div>
               </div>
