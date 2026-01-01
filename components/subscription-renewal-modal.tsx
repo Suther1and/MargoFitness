@@ -233,9 +233,23 @@ export function SubscriptionRenewalModal({
               <div>
                 <h3 className="text-2xl font-oswald uppercase leading-none text-white">Продление</h3>
                 <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
-                  {currentTier} • {remainingDays} дн.
+                  Подписка активна
                 </p>
               </div>
+            </div>
+
+            {/* Текущий статус - Сделал заметнее */}
+            <div className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Осталось:</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-oswald font-bold text-white">
+                  <AnimatedNumber value={remainingDays} />
+                </span>
+                <span className="text-sm font-medium text-white/50">дн.</span>
+              </div>
+              <p className="text-[10px] font-medium text-white/40 mt-1">
+                Тариф: <span className="text-orange-400/80 uppercase">{currentTier}</span>
+              </p>
             </div>
             
             {/* Преимущества - из metadata продукта */}
@@ -289,9 +303,15 @@ export function SubscriptionRenewalModal({
 
         {/* Правая панель */}
         <div className="flex-1 p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-hide min-h-0">
-          <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6">
-            Выберите срок продления:
-          </h4>
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+              Выберите срок продления:
+            </h4>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 md:hidden">
+              <span className="text-[10px] font-bold text-white/40 uppercase">У вас:</span>
+              <span className="text-xs font-bold text-orange-400">{remainingDays} дн.</span>
+            </div>
+          </div>
           
           {/* Карточки продуктов */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">

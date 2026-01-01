@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getUpgradeOptions, calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Equal } from 'lucide-react'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Equal, Clock, Calendar } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Компонент для плавной анимации чисел (как в checkout)
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -334,31 +335,43 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
             </div>
             
             {/* Преимущества - из metadata продукта */}
-            <div className="space-y-4 hidden md:block">
+            <div className="space-y-4 hidden md:block flex-1">
               <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                Преимущества:
+                Преимущества тарифа:
               </p>
-              <div className="space-y-3" key={selectedProduct?.id}>
-                {productBenefits.slice(0, 5).map((b, i) => (
-                  <div 
-                    key={i}
-                    className="flex items-center gap-3 text-sm text-white/70 benefit-item"
+              
+              <div className="relative min-h-[160px]">
+                <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={selectedTier}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="space-y-3"
                   >
-                    <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center transition-colors duration-300`}>
-                      <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
-                    </div>
-                    {b === '2→3 тренировки в неделю' ? (
-                      <span className="flex items-center gap-1.5">
-                        <span className="opacity-40">2</span>
-                        <ArrowRight className="w-3 h-3 opacity-40" />
-                        <span>3</span>
-                        <span className="ml-0.5">тренировки в неделю</span>
-                      </span>
-                    ) : (
-                      b
-                    )}
-                  </div>
-                ))}
+                    {productBenefits.slice(0, 6).map((b, i) => (
+                      <motion.div 
+                        key={i}
+                        className="flex items-center gap-3 text-sm text-white/70"
+                      >
+                        <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center transition-colors duration-300`}>
+                          <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
+                        </div>
+                        {b === '2→3 тренировки в неделю' ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className="opacity-40">2</span>
+                            <ArrowRight className="w-3 h-3 opacity-40" />
+                            <span>3</span>
+                            <span className="ml-0.5">тренировки в неделю</span>
+                          </span>
+                        ) : (
+                          <span className="leading-tight">{b}</span>
+                        )}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
               </div>
               
               {/* Красивый разделитель */}
@@ -396,7 +409,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
         {/* Правая панель */}
         <div className="flex-1 p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-hide min-h-0">
           {/* Табы тарифов */}
-          <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-6">
+          <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-8">
             {availableTiersData.map(t => {
               const isSelected = selectedTier === t.tier
               const config = tierConfig[t.tier as keyof typeof tierConfig]
@@ -420,54 +433,32 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
             })}
           </div>
 
-          {/* Блок конверсии (Smart Convert) */}
-          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-4 md:p-5 mb-3">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
-                Smart Convert
-              </span>
-              <Zap className={`w-4 h-4 transition-colors duration-300 ${currentConfig?.color || 'text-blue-400'}`} />
-            </div>
-            
-            {/* Только конвертация: было → стало */}
-            <div className="flex items-center justify-between gap-3">
+          {/* Компактный блок конверсии (Smart Convert) */}
+          <div className="flex items-center gap-4 mb-8 px-2">
+            <div className="flex-1 space-y-1">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Текущий остаток:</p>
               <div className="flex items-center gap-2">
-                <p className="text-[10px] text-white/40 uppercase tracking-wide font-medium">
-                  У вас:
-                </p>
-                <p className="text-lg md:text-xl font-oswald text-white/40 font-bold line-through">
-                  <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.{' '}
-                  <span key={`current-tier`} className="smooth-transition inline-block">
-                    {currentTier}
-                  </span>
-                </p>
-              </div>
-              
-              <ArrowBigRightDash className={`w-8 h-8 flex-shrink-0 transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`} />
-              
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] text-white/40 uppercase tracking-wide font-medium">
-                  Станет:
-                </p>
-                <p className={`text-lg md:text-xl font-oswald font-bold transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
-                  <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.{' '}
-                  <span key={`selected-tier-${selectedTier}`} className="smooth-transition inline-block">
-                    {selectedTier}
-                  </span>
-                </p>
+                <span className="text-xl font-oswald font-bold text-white/50 line-through">
+                  <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
+                </span>
+                <ArrowRight className="w-4 h-4 text-white/20" />
+                <span className={`text-xl font-oswald font-bold ${currentConfig?.color}`}>
+                  <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
+                </span>
               </div>
             </div>
-          </div>
-          
-          {/* Разделитель с плюсом */}
-          <div className="flex justify-center -my-1 mb-3">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-              <Plus className="w-5 h-5 text-white/30" />
+            <div className="w-px h-10 bg-white/10" />
+            <div className="flex-1 space-y-1 text-right">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-right">Умная конвертация:</p>
+              <div className="flex items-center justify-end gap-2 text-emerald-400/80">
+                <Zap className="w-3.5 h-3.5" />
+                <span className="text-xs font-bold uppercase tracking-wider">Активна</span>
+              </div>
             </div>
           </div>
 
-          {/* Пакеты (продукты) - БЕЗ блокировки при пересчете */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3" key={`products-${selectedTier}`}>
+          {/* Пакеты (продукты) */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8" key={`products-${selectedTier}`}>
             {products.map((p, index) => {
               const isSelected = selectedProduct?.id === p.id
               
@@ -476,110 +467,103 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                   key={p.id}
                   onClick={() => handleProductChange(p)}
                   className={`
-                    relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition
+                    relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200
                     ${isSelected 
-                      ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-transparent ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` 
+                      ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` 
                       : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'
                     }
                   `}
-                  style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
+                  style={{ touchAction: 'manipulation' }}
                 >
                   {p.discount_percentage > 0 && (
                     <span className={`
-                      absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 font-medium overflow-hidden
+                      absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden
                       ${selectedTier === 'elite' 
                         ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' 
                         : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'
                       }
                     `}>
-                      <span className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-shimmer ${
-                        selectedTier === 'elite' ? 'via-amber-300/20' : 'via-purple-300/20'
-                      }`}></span>
-                      <span className="relative">−{p.discount_percentage}%</span>
+                      −{p.discount_percentage}%
                     </span>
                   )}
                   <p className={`
-                    text-[10px] font-bold uppercase mb-1.5 tracking-wider transition-colors
+                    text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors
                     ${isSelected ? currentConfig?.color : 'text-white/40'}
                   `}>
                     {p.duration_months} мес.
                   </p>
-                  <p 
-                    key={`price-${p.id}-${isSelected}`}
-                    className="text-2xl md:text-3xl font-oswald font-bold text-white"
-                  >
-                    {p.price.toLocaleString('ru-RU')} <span className="text-base text-white/50">₽</span>
+                  <p className="text-2xl md:text-3xl font-oswald font-bold text-white">
+                    {p.price.toLocaleString('ru-RU')} <span className="text-sm text-white/50 font-normal">₽</span>
                   </p>
                 </button>
               )
             })}
           </div>
-          
-          {/* Разделитель с равно */}
-          <div className="flex justify-center -my-1 mb-4">
-            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-              <Equal className="w-5 h-5 text-white/30" />
-            </div>
-          </div>
 
           {/* Футер с итоговой информацией и кнопкой */}
-          <div className="mt-auto space-y-4">
-            {/* Итоговый расчет - в одну строку */}
-            <div className="rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.03] ring-1 ring-white/10 p-4 md:p-5">
-              <div className="mb-3">
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
-                  Итоговый срок:
-                </p>
-                <div className="flex items-center gap-2 text-lg md:text-xl font-oswald font-bold">
-                  <span className={`transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
-                    <AnimatedNumber value={conversionData?.convertedDays || 0} />
-                  </span>
-                  <span className="text-white/30 text-base">+</span>
-                  <span className="text-white">
-                    <AnimatedNumber value={conversionData?.newProductDays || 0} />
-                  </span>
-                  <span className="text-white/30 text-base">=</span>
-                  <span className={`text-xl md:text-2xl transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
-                    <AnimatedNumber value={conversionData?.totalDays || 0} /> <span className="text-base text-white/50">дн.</span>
-                  </span>
-                </div>
+          <div className="mt-auto space-y-6">
+            <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 overflow-hidden relative">
+              {/* Декоративная иконка - еще более деликатная */}
+              <div className="absolute -top-1 -right-1 p-2 opacity-[0.03] pointer-events-none">
+                <Clock className="w-16 h-16 text-white" />
               </div>
               
-              {/* Дата под итогом */}
-              <div className="pt-3 border-t border-white/10">
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
-                  Доступ до:
-                </p>
-                <p 
-                  key={`date-${conversionData?.newExpirationDate}`}
-                  className={`text-sm font-semibold text-white/90 smooth-transition transition-opacity duration-300 ${calculating ? 'opacity-0' : 'opacity-100'}`}
-                >
-                  {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
-                </p>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Итоговый срок:</p>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                    до: <span className="text-white/80 ml-1 normal-case">{conversionData ? formatDate(conversionData.newExpirationDate) : '...'}</span>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className={`text-xl font-oswald font-bold ${currentConfig?.color}`}>
+                      <AnimatedNumber value={conversionData?.convertedDays || 0} />
+                    </span>
+                    <span className="text-[9px] font-bold text-white/20 uppercase">конв.</span>
+                  </div>
+                  <Plus className="w-3 h-3 text-white/20" />
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-oswald font-bold text-white/90">
+                      <AnimatedNumber value={conversionData?.newProductDays || 0} />
+                    </span>
+                    <span className="text-[9px] font-bold text-white/20 uppercase">нов.</span>
+                  </div>
+                  <Equal className="w-3 h-3 text-white/20 ml-0.5" />
+                  <div className="flex items-baseline gap-1.5 ml-1">
+                    <span className="text-3xl font-oswald font-bold text-white leading-none">
+                      <AnimatedNumber value={conversionData?.totalDays || 0} />
+                    </span>
+                    <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Кнопка апгрейда - блокируем ТОЛЬКО во время calculating */}
+            {/* Кнопка апгрейда */}
             <button
               onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
               disabled={calculating || !selectedProduct}
               className={`
-                w-full py-4 md:py-5 rounded-xl md:rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-wider 
-                shadow-lg transition-all duration-300
+                w-full py-4 md:py-5 rounded-2xl text-white font-bold text-xs uppercase tracking-widest
+                shadow-lg transition-all duration-300 relative overflow-hidden group
                 ${selectedTier === 'pro' 
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30' 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' 
                   : selectedTier === 'elite'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30'
-                  : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-500/25'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-blue-500/25'
                 }
                 ${calculating || !selectedProduct 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:brightness-110 active:scale-[0.98]'
+                  : 'hover:shadow-xl hover:brightness-110 active:scale-[0.98]'
                 }
               `}
-              style={{ touchAction: 'manipulation' }}
             >
-              {calculating ? 'Подсчет...' : `Апгрейд до ${selectedTier}`}
+              <span className="relative z-10">
+                {calculating ? 'Подсчет...' : `Перейти на ${selectedTier}`}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
             </button>
           </div>
         </div>
