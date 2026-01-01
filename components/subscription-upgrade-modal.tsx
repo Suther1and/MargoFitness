@@ -227,7 +227,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
   if (loading && open) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
+        <DialogContent className="sm:max-w-[760px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
           <DialogTitle className="sr-only">Апгрейд тарифа</DialogTitle>
           <DialogDescription className="sr-only">Загрузка...</DialogDescription>
           
@@ -267,7 +267,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
+      <DialogContent className="sm:max-w-[760px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
         <DialogTitle className="sr-only">Апгрейд тарифа</DialogTitle>
         <DialogDescription className="sr-only">Перейдите на новый уровень</DialogDescription>
         
@@ -358,13 +358,16 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                         <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center transition-colors duration-300`}>
                           <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
                         </div>
-                        {b === '2→3 тренировки в неделю' ? (
-                          <span className="flex items-center gap-1.5">
-                            <span className="opacity-40">2</span>
-                            <ArrowRight className="w-3 h-3 opacity-40" />
-                            <span>3</span>
-                            <span className="ml-0.5">тренировки в неделю</span>
-                          </span>
+                        {b.includes('2→3') ? (
+                          <div className="flex flex-col leading-none py-0.5">
+                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight mb-0.5">Интенсивность</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-bold text-white/40">2</span>
+                              <ArrowRight className="w-2.5 h-2.5 text-white/20" />
+                              <span className="text-sm font-bold text-white">3</span>
+                              <span className="text-sm text-white/70 ml-0.5">тренировки в неделю</span>
+                            </div>
+                          </div>
                         ) : (
                           <span className="leading-tight">{b}</span>
                         )}
@@ -434,8 +437,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
           </div>
 
           {/* Компактный блок конверсии (Smart Convert) */}
-          <div className="mb-8 px-2">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2 px-2">
               <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <Zap className="w-3 h-3 text-emerald-400" />
                 <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
@@ -443,69 +446,79 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
               <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
             </div>
             
-            <div className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="flex-1">
-                <p className="text-[9px] font-bold text-white/30 uppercase mb-1">Остаток {currentTier}:</p>
-                <p className="text-lg font-oswald font-bold text-white/40 line-through leading-none">
+            <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
+              <div className="flex-1 flex flex-col items-center">
+                <p className="text-[9px] font-bold text-white/30 uppercase mb-1.5">Остаток {currentTier}:</p>
+                <p className="text-xl font-oswald font-bold text-white/40 line-through leading-none">
                   <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
                 </p>
               </div>
-              <ArrowBigRightDash className={`w-5 h-5 text-white/10 flex-shrink-0`} />
-              <div className="flex-1 text-right">
-                <p className="text-[9px] font-bold text-white/30 uppercase mb-1">В эквиваленте {selectedTier}:</p>
-                <p className={`text-lg font-oswald font-bold ${currentConfig?.color} leading-none`}>
+              
+              <div className="w-px h-8 bg-white/5" />
+              
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1a1a24] border border-white/5 flex items-center justify-center z-10">
+                <ArrowBigRightDash className={`w-4 h-4 text-white/20`} />
+              </div>
+              
+              <div className="flex-1 flex flex-col items-center">
+                <p className="text-[9px] font-bold text-white/30 uppercase mb-1.5">В эквиваленте {selectedTier}:</p>
+                <p className={`text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
                   <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Пакеты (продукты) */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8" key={`products-${selectedTier}`}>
-            {products.map((p, index) => {
-              const isSelected = selectedProduct?.id === p.id
-              
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => handleProductChange(p)}
-                  className={`
-                    relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200
-                    ${isSelected 
-                      ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` 
-                      : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'
-                    }
-                  `}
-                  style={{ touchAction: 'manipulation' }}
-                >
-                  {p.discount_percentage > 0 && (
-                    <span className={`
-                      absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden
-                      ${selectedTier === 'elite' 
-                        ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' 
-                        : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'
-                      }
-                    `}>
-                      −{p.discount_percentage}%
-                    </span>
-                  )}
-                  <p className={`
-                    text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors
-                    ${isSelected ? currentConfig?.color : 'text-white/40'}
-                  `}>
-                    {p.duration_months} мес.
-                  </p>
-                  <p className="text-2xl md:text-3xl font-oswald font-bold text-white">
-                    {p.price.toLocaleString('ru-RU')} <span className="text-sm text-white/50 font-normal">₽</span>
-                  </p>
-                </button>
-              )
-            })}
+          {/* Пакеты (продукты) в подложке */}
+          <div className="mb-8">
+            <div className="rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-4 backdrop-blur-sm">
+              <div className="grid grid-cols-2 gap-3 md:gap-4" key={`products-${selectedTier}`}>
+                {products.map((p, index) => {
+                  const isSelected = selectedProduct?.id === p.id
+                  
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleProductChange(p)}
+                      className={`
+                        relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200
+                        ${isSelected 
+                          ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` 
+                          : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'
+                        }
+                      `}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {p.discount_percentage > 0 && (
+                        <span className={`
+                          absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden
+                          ${selectedTier === 'elite' 
+                            ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' 
+                            : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'
+                          }
+                        `}>
+                          −{p.discount_percentage}%
+                        </span>
+                      )}
+                      <p className={`
+                        text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors
+                        ${isSelected ? currentConfig?.color : 'text-white/40'}
+                      `}>
+                        {p.duration_months} мес.
+                      </p>
+                      <p className="text-2xl md:text-3xl font-oswald font-bold text-white">
+                        {p.price.toLocaleString('ru-RU')} <span className="text-sm text-white/50 font-normal">₽</span>
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Футер с итоговой информацией и кнопкой */}
-          <div className="mt-auto space-y-6">
-            <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 overflow-hidden relative">
+          <div className="mt-auto pt-6 border-t border-white/5">
+            <div className="rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-5 overflow-hidden relative backdrop-blur-sm mb-6">
               {/* Декоративная иконка - еще более деликатная */}
               <div className="absolute -top-1 -right-1 p-2 opacity-[0.02] pointer-events-none">
                 <Clock className="w-16 h-16 text-white" />
@@ -519,28 +532,33 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-white/40">Конвертация {currentTier}:</span>
-                    <span className={`font-oswald font-bold ${currentConfig?.color}`}>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-4">
+                  <div className="text-center">
+                    <p className="text-[9px] font-bold text-white/20 uppercase mb-1">Конвертация:</p>
+                    <p className={`font-oswald font-bold ${currentConfig?.color} text-base`}>
                       + <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-white/40">Выбранный период:</span>
-                    <span className="text-white/80 font-oswald font-bold">
-                      + <AnimatedNumber value={conversionData?.newProductDays || 0} /> дн.
-                    </span>
+                    </p>
                   </div>
                   
-                  <div className="pt-2 flex justify-between items-end">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Итого:</span>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-3xl font-oswald font-bold text-white leading-none">
-                        <AnimatedNumber value={conversionData?.totalDays || 0} />
-                      </span>
-                      <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
-                    </div>
+                  <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
+                    <Plus className="w-3 h-3 text-white/20" />
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-[9px] font-bold text-white/20 uppercase mb-1">Новый период:</p>
+                    <p className="text-white/80 font-oswald font-bold text-base">
+                      + <AnimatedNumber value={conversionData?.newProductDays || 0} /> дн.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="pt-3 border-t border-white/5 flex flex-col items-center">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Итого:</span>
+                    <span className="text-3xl font-oswald font-bold text-white leading-none">
+                      <AnimatedNumber value={conversionData?.totalDays || 0} />
+                    </span>
+                    <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
                   </div>
                 </div>
               </div>
