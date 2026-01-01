@@ -170,6 +170,11 @@ export function SubscriptionRenewalModal({
           animation: modalFadeOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
         }
 
+        /* Force hide Dialog default close button */
+        [data-slot="dialog-close"] {
+          display: none !important;
+        }
+
         @media (max-width: 1023px) {
           [data-slot="dialog-content"] {
             background-color: #1a1a24 !important;
@@ -182,13 +187,29 @@ export function SubscriptionRenewalModal({
         }
       `}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px] w-[95vw] md:h-[640px] h-auto max-h-[95vh] bg-[#1a1a24] md:bg-[#1a1a24]/95 border-0 md:border-white/10 text-white p-0 overflow-hidden md:shadow-2xl md:ring-1 md:ring-white/10 md:backdrop-blur-xl flex flex-col md:flex-row rounded-3xl">
+        <DialogContent 
+          className="sm:max-w-[800px] w-[95vw] md:h-[640px] h-auto max-h-[95vh] bg-transparent border-0 p-0 overflow-visible shadow-none ring-0"
+          showCloseButton={false}
+        >
           <DialogTitle className="sr-only">Продление подписки</DialogTitle>
           <DialogDescription className="sr-only">Выберите период продления</DialogDescription>
           
           {loading ? (
-              <div className="flex flex-col md:flex-row w-full h-full min-h-[450px] md:min-h-[500px] bg-[#1a1a24] rounded-3xl overflow-hidden"
+              <div className="relative flex flex-col md:flex-row w-full h-full min-h-[450px] md:min-h-[500px] bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
               >
+                {/* Кнопка закрытия */}
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  style={{ position: 'absolute', zIndex: 70, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: 'none' }}
+                  className="top-4 right-4 md:top-[6px] md:right-[6px] transition-all hover:opacity-70 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 hover:text-white/80">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+
                 {/* Левая панель skeleton */}
                 <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5">
                   <div className="relative z-10 space-y-6 animate-pulse">
@@ -223,26 +244,27 @@ export function SubscriptionRenewalModal({
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden"
+              <div className="relative flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
               >
+                {/* Кнопка закрытия */}
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  style={{ position: 'absolute', zIndex: 70, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: 'none' }}
+                  className="top-4 right-4 md:top-[6px] md:right-[6px] transition-all hover:opacity-70 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 hover:text-white/80">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+
                 {/* Левая панель */}
                 <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5 h-auto">
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none hidden md:block" />
                   
                   <div className="relative z-10 flex flex-col h-full">
-                    {/* Close button */}
-                    <button
-                      onClick={() => onOpenChange(false)}
-                      className="absolute top-0 right-0 md:top-2 md:right-2 z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80">
-                        <path d="M18 6 6 18"></path>
-                        <path d="m6 6 12 12"></path>
-                      </svg>
-                      <span className="sr-only">Закрыть</span>
-                    </button>
-                    
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-orange-500/30 shadow-lg">
                         <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-300" />

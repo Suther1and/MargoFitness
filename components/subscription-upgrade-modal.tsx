@@ -259,6 +259,11 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
           animation: modalFadeOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
         }
 
+        /* Force hide Dialog default close button */
+        [data-slot="dialog-close"] {
+          display: none !important;
+        }
+
         @media (max-width: 1023px) {
           [data-slot="dialog-content"] {
             background-color: #1a1a24 !important;
@@ -271,13 +276,29 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
         }
       `}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[760px] w-[95vw] md:h-[620px] h-auto max-h-[95vh] bg-[#1a1a24] md:bg-[#1a1a24]/95 border-0 md:border-white/10 text-white p-0 overflow-hidden md:shadow-2xl md:ring-1 md:ring-white/10 md:backdrop-blur-xl flex flex-col md:flex-row rounded-3xl">
+        <DialogContent 
+          className="sm:max-w-[760px] w-[95vw] md:h-[620px] h-auto max-h-[95vh] bg-transparent border-0 p-0 overflow-visible shadow-none ring-0"
+          showCloseButton={false}
+        >
           <DialogTitle className="sr-only">Апгрейд тарифа</DialogTitle>
           <DialogDescription className="sr-only">Перейдите на новый уровень</DialogDescription>
           
           {loading ? (
-              <div className="flex flex-col md:flex-row w-full h-full min-h-[450px] md:min-h-[500px] bg-[#1a1a24] rounded-3xl overflow-hidden"
+              <div className="relative flex flex-col md:flex-row w-full h-full min-h-[450px] md:min-h-[500px] bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
               >
+                {/* Кнопка закрытия */}
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  style={{ position: 'absolute', zIndex: 70, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: 'none' }}
+                  className="top-4 right-4 md:top-[6px] md:right-[6px] transition-all hover:opacity-70 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 hover:text-white/80">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+
                 {/* Левая панель skeleton */}
                 <div className="md:w-[280px] bg-gradient-to-b from-purple-500/10 via-purple-900/5 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5">
                   <div className="relative z-10 space-y-6 animate-pulse">
@@ -312,8 +333,21 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden"
+              <div className="relative flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
               >
+                {/* Кнопка закрытия */}
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  style={{ position: 'absolute', zIndex: 70, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: 'none' }}
+                  className="top-4 right-4 md:top-[6px] md:right-[6px] transition-all hover:opacity-70 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 hover:text-white/80">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+
                 {/* Левая панель */}
                 <div className={`md:w-[280px] pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 bg-gradient-to-b ${currentConfig?.gradient || 'from-purple-500/10'} to-transparent border-b md:border-b-0 md:border-r border-white/5 flex-shrink-0 relative transition-all duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
@@ -322,25 +356,13 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                   }`} />
                   
                   <div className="relative z-10 flex flex-col h-full">
-                    {/* Close button */}
-                    <button
-                      onClick={() => onOpenChange(false)}
-                      className="absolute top-0 right-0 md:top-2 md:right-2 z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80">
-                        <path d="M18 6 6 18"></path>
-                        <path d="m6 6 12 12"></path>
-                      </svg>
-                      <span className="sr-only">Закрыть</span>
-                    </button>
-                    
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center ring-1 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg transition-all duration-300`}>
                         <Sparkles className={`w-6 h-6 md:w-6 md:h-6 transition-colors duration-300 ${currentConfig?.color || 'text-purple-300'}`} />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl md:text-2xl font-oswald uppercase leading-none text-white">Апгрейд</h3>
-                        <p className="text-[10px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 md:hidden">
+                        <p className="text-xs md:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 md:hidden">
                           <button 
                             onClick={() => setShowMobileTooltip(!showMobileTooltip)}
                             className="underline hover:text-white/60 transition-colors"
@@ -358,8 +380,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                         {[
                           'Выбери срок новой подписки',
                           'Оставшиеся дни будут конвертированы и добавлены в новую подписку',
-                          'Скидки и промокоды применяемы к новой подписке на странице оплаты',
-                          `Перейти на ${selectedTier} перенесет на страницу оплаты`
+                          `"Перейти на ${selectedTier?.toUpperCase()}" перенесет на страницу оплаты`
                         ].map((text, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs text-white/70">
                             <div className={`flex-shrink-0 w-3 h-3 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center`}>
@@ -379,8 +400,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                           {[
                             'Выбери срок новой подписки',
                             'Оставшиеся дни будут конвертированы и добавлены в новую подписку',
-                            'Скидки и промокоды применяемы к новой подписке на странице оплаты',
-                            `Перейти на ${selectedTier} перенесет на страницу оплаты`
+                            `"Перейти на ${selectedTier?.toUpperCase()}" перенесет на страницу оплаты`
                           ].map((text, i) => (
                             <div key={i} className="flex items-center gap-3 text-sm text-white/70">
                               <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center`}>
@@ -441,12 +461,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                         <Zap className="w-3 h-3 text-emerald-400" />
                         <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
                       </div>
-                      <p className="text-[10px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
+                      <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
                     </div>
                     
                     <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
                       <div className="flex-1 flex flex-col items-center">
-                        <p className="text-[10px] md:text-[9px] font-bold text-white/30 uppercase mb-1">Осталось дней {currentTier}:</p>
+                        <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">Осталось дней {currentTier}:</p>
                         <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
                           <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
                         </p>
@@ -456,7 +476,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                         <ArrowBigRightDash className="w-4 h-4 md:w-4 md:h-4 text-white/20" />
                       </div>
                       <div className="flex-1 flex flex-col items-center">
-                        <p className="text-[10px] md:text-[9px] font-bold text-white/30 uppercase mb-1">Будет добавлено {selectedTier}:</p>
+                        <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">Будет добавлено {selectedTier}:</p>
                         <p className={`text-xl md:text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
                           <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
                         </p>
@@ -499,9 +519,9 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                       <div className="absolute -top-1 -right-1 p-2 opacity-[0.02] pointer-events-none">
                         <Clock className="w-12 h-12 md:w-12 md:h-12 text-white" />
                       </div>
-                      <div className="relative z-10 flex items-center justify-between gap-4">
+                      <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
                         <div className="flex flex-col">
-                          <p className="text-[10px] font-bold text-white/50 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
+                          <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
                           <div className="flex items-baseline gap-2">
                             <span className={`text-3xl md:text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
                               <AnimatedNumber value={conversionData?.totalDays || 0} />
@@ -511,23 +531,23 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
                                 <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>{selectedTier}</span>
                               </div>
-                              <span className="text-[10px] md:text-[9px] font-medium text-white/20 mt-1">
+                              <span className="text-[11px] md:text-[9px] font-medium text-white/40 md:text-white/20 mt-1">
                                 до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2.5 py-2 px-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                        <div className="flex items-center gap-2 md:gap-2.5 py-1.5 px-2 md:py-2 md:px-3 rounded-2xl bg-white/[0.04] border border-white/10">
                           <div className="text-center">
-                            <p className="text-[9px] font-bold text-white/20 uppercase mb-0.5">Конв.</p>
-                            <p className={`font-oswald font-bold ${currentConfig?.color} text-base md:text-lg leading-none`}>
+                            <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Конв.</p>
+                            <p className={`font-oswald font-bold ${currentConfig?.color} text-lg md:text-lg leading-none`}>
                               +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
                             </p>
                           </div>
                           <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
                           <div className="text-center">
-                            <p className="text-[9px] font-bold text-white/20 uppercase mb-0.5">Новый</p>
-                            <p className="text-white font-oswald font-bold text-base md:text-lg leading-none">
+                            <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Новый</p>
+                            <p className="text-white font-oswald font-bold text-lg md:text-lg leading-none">
                               +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
                             </p>
                           </div>
