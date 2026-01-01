@@ -91,7 +91,7 @@ export function SubscriptionRenewalModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
+      <DialogContent className="max-w-6xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -133,23 +133,20 @@ export function SubscriptionRenewalModal({
               )}
             </div>
 
-            {/* Выбор срока - новый компактный дизайн */}
+            {/* Выбор срока - упрощенный дизайн */}
             <div>
               <h3 className="text-sm font-medium text-white/80 mb-3">Выберите срок продления:</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {products.map((product) => {
                   const isSelected = selectedProduct?.id === product.id
                   const isBest = product.duration_months >= 6
-                  const savings = product.discount_percentage > 0 
-                    ? Math.round(product.price / (1 - product.discount_percentage / 100) - product.price)
-                    : 0
                   
                   return (
                     <button
                       key={product.id}
                       onClick={() => setSelectedProduct(product)}
                       className={`
-                        relative rounded-xl p-4 transition-all duration-200 text-left
+                        relative rounded-xl p-4 transition-all duration-200
                         ${isSelected 
                           ? 'ring-2 ring-orange-400 bg-gradient-to-br from-orange-500/10 to-red-500/10' 
                           : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06] hover:ring-white/20'
@@ -157,35 +154,24 @@ export function SubscriptionRenewalModal({
                         hover:scale-[1.02] active:scale-[0.98]
                       `}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xl font-bold text-white">
-                              {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
-                            </span>
-                            {isBest && (
-                              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
-                                ВЫГОДНО
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-white/50">
-                            {Math.round(product.price / (product.duration_months * 30))} ₽/день
+                      {isBest && (
+                        <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
+                          ВЫГОДНО
+                        </div>
+                      )}
+                      
+                      <div className="text-center space-y-2">
+                        <p className="text-base font-bold text-white">
+                          {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
+                        </p>
+                        <p className="text-2xl font-bold text-white">
+                          {product.price.toLocaleString('ru-RU')} ₽
+                        </p>
+                        {product.discount_percentage > 0 && (
+                          <p className="text-xs text-emerald-400">
+                            -{product.discount_percentage}%
                           </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-white">
-                              {product.price.toLocaleString('ru-RU')}
-                            </span>
-                            <span className="text-sm text-white/50">₽</span>
-                          </div>
-                          {product.discount_percentage > 0 && (
-                            <p className="text-xs text-emerald-400 mt-0.5">
-                              Экономия {savings.toLocaleString('ru-RU')} ₽
-                            </p>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </button>
                   )

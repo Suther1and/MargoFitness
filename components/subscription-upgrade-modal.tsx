@@ -141,7 +141,7 @@ export function SubscriptionUpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -167,50 +167,69 @@ export function SubscriptionUpgradeModal({
         ) : (
           <div className="p-6 space-y-6 overflow-y-auto flex-1">
 
-            {/* Tabs переключения тарифов - улучшенный дизайн */}
+            {/* Компактная информация о текущей подписке */}
+            {conversion && (
+              <div className="flex items-center gap-3 text-sm text-white/60">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-1 text-xs ring-1 ring-orange-400/30">
+                  <span className="font-semibold text-white">{currentTier.toUpperCase()}</span>
+                </span>
+                <span>•</span>
+                <span>{conversion.remainingDays} дней осталось</span>
+                <span>•</span>
+                <span>~{conversion.remainingValue.toLocaleString('ru-RU')} ₽</span>
+              </div>
+            )}
+
+            {/* Tabs переключения тарифов - компактный дизайн */}
             {availableTiers.length > 0 && (
-              <div>
-                {conversion && (
-                  <div className="flex items-center gap-3 text-sm text-white/60 mb-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-1 text-xs ring-1 ring-orange-400/30">
-                      <span className="font-semibold text-white">{currentTier.toUpperCase()}</span>
-                    </span>
-                    <span>•</span>
-                    <span>{conversion.remainingDays} дней осталось</span>
-                    <span>•</span>
-                    <span>~{conversion.remainingValue.toLocaleString('ru-RU')} ₽</span>
-                  </div>
-                )}
-                <div className="bg-white/[0.03] rounded-xl p-1 flex gap-1">
-                  {availableTiers.map((tierData) => {
-                    const config = tierConfig[tierData.tier]
-                    const isSelected = selectedTierData?.tier === tierData.tier
-                    const isRecommended = tierData.tierLevel === currentTierLevel + 1
-                    
-                    return (
-                      <button
-                        key={tierData.tier}
-                        onClick={() => setSelectedTierData(tierData)}
-                        className={`
-                          flex-1 relative py-3 px-4 rounded-lg transition-all duration-200
-                          ${isSelected
-                            ? `bg-gradient-to-br from-${config.color}-500/20 to-${config.color}-600/20 ring-1 ring-${config.color}-400/50 text-white`
-                            : 'text-white/60 hover:bg-white/5 hover:text-white/80'
-                          }
-                        `}
-                      >
-                        {isRecommended && (
-                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-orange-500 text-[10px] font-bold text-white whitespace-nowrap">
-                            Рекомендуем
-                          </div>
-                        )}
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-xl">{config.icon}</span>
-                          <span className="font-bold text-base">{config.name}</span>
+              <div className="bg-white/[0.03] rounded-lg p-1 flex gap-1">
+                {availableTiers.map((tierData) => {
+                  const config = tierConfig[tierData.tier]
+                  const isSelected = selectedTierData?.tier === tierData.tier
+                  const isRecommended = tierData.tierLevel === currentTierLevel + 1
+                  
+                  return (
+                    <button
+                      key={tierData.tier}
+                      onClick={() => setSelectedTierData(tierData)}
+                      className={`
+                        flex-1 relative py-2 px-3 rounded-md transition-all duration-200
+                        ${isSelected
+                          ? `bg-gradient-to-br from-${config.color}-500/20 to-${config.color}-600/20 ring-1 ring-${config.color}-400/50 text-white`
+                          : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                        }
+                      `}
+                    >
+                      {isRecommended && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-orange-500 text-[9px] font-bold text-white whitespace-nowrap">
+                          Рекомендуем
                         </div>
-                      </button>
-                    )
-                  })}
+                      )}
+                      <div className="flex items-center justify-center gap-1.5">
+                        <span className="text-base">{config.icon}</span>
+                        <span className="font-bold text-sm">{config.name}</span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Калькулятор конвертации - всегда видимый */}
+            {conversion && !loadingConversion && (
+              <div className={`rounded-xl bg-white/10 ring-2 ring-${selectedTierData ? tierConfig[selectedTierData.tier].color : 'purple'}-400/50 p-4`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">💎</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-white/70 mb-1">Бонус за оставшиеся дни:</p>
+                    <p className="text-base font-bold text-white">
+                      <span className="text-orange-300">{conversion.remainingDays} дней {currentTier.toUpperCase()}</span>
+                      {' → '}
+                      <span className={`text-${selectedTierData ? tierConfig[selectedTierData.tier].color : 'purple'}-300`}>
+                        {conversion.convertedDays} дней {selectedTierData?.tier.toUpperCase()}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -219,61 +238,20 @@ export function SubscriptionUpgradeModal({
             {selectedTierData && (
               <div className={`rounded-2xl bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/5 to-transparent ring-1 ring-${tierConfig[selectedTierData.tier].color}-400/30 p-5 space-y-4`}>
 
-                {/* Калькулятор конвертации - главный элемент */}
-                {conversion && !loadingConversion && (
-                  <div className={`rounded-xl bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/20 to-transparent ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 p-5 shadow-lg shadow-${tierConfig[selectedTierData.tier].color}-500/20`}>
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center flex-shrink-0">
-                        <span className="text-3xl">💎</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-white/60 mb-2 uppercase tracking-wide">Бонус за оставшиеся дни</p>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="flex-1">
-                            <p className="text-sm text-white/70 mb-1">У вас сейчас:</p>
-                            <p className="text-xl font-bold text-orange-300">{conversion.remainingDays} дней</p>
-                            <p className="text-xs text-white/50">{currentTier.toUpperCase()}</p>
-                          </div>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
-                            <path d="M5 12h14"></path>
-                            <path d="m12 5 7 7-7 7"></path>
-                          </svg>
-                          <div className="flex-1">
-                            <p className="text-sm text-white/70 mb-1">Получите:</p>
-                            <p className={`text-xl font-bold text-${tierConfig[selectedTierData.tier].color}-300`}>{conversion.convertedDays} дней</p>
-                            <p className="text-xs text-white/50">{selectedTierData.tier.toUpperCase()}</p>
-                          </div>
-                        </div>
-                        <div className="rounded-lg bg-white/5 px-3 py-2 flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 16v-4"></path>
-                            <path d="M12 8h.01"></path>
-                          </svg>
-                          <p className="text-xs text-white/70">Конвертация по справедливой формуле</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Выбор срока - новый компактный дизайн */}
+                {/* Выбор срока - упрощенный дизайн */}
                 <div>
                   <h3 className="text-sm font-semibold text-white/80 mb-3">Выберите срок:</h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {selectedTierData.products.map((product) => {
                       const isSelected = selectedProduct?.id === product.id
                       const isBest = product.duration_months >= 6
-                      const savings = product.discount_percentage > 0 
-                        ? Math.round(product.price / (1 - product.discount_percentage / 100) - product.price)
-                        : 0
                       
                       return (
                         <button
                           key={product.id}
                           onClick={() => setSelectedProduct(product)}
                           className={`
-                            relative rounded-xl p-4 transition-all duration-200 text-left
+                            relative rounded-xl p-4 transition-all duration-200
                             ${isSelected
                               ? `ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/10 to-transparent`
                               : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06] hover:ring-white/20'
@@ -281,35 +259,24 @@ export function SubscriptionUpgradeModal({
                             hover:scale-[1.02] active:scale-[0.98]
                           `}
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xl font-bold text-white">
-                                  {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
-                                </span>
-                                {isBest && (
-                                  <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
-                                    ВЫГОДНО
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-white/50">
-                                {Math.round(product.price / (product.duration_months * 30))} ₽/день
+                          {isBest && (
+                            <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
+                              ВЫГОДНО
+                            </div>
+                          )}
+                          
+                          <div className="text-center space-y-2">
+                            <p className="text-base font-bold text-white">
+                              {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
+                            </p>
+                            <p className="text-2xl font-bold text-white">
+                              {product.price.toLocaleString('ru-RU')} ₽
+                            </p>
+                            {product.discount_percentage > 0 && (
+                              <p className="text-xs text-emerald-400">
+                                -{product.discount_percentage}%
                               </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-white">
-                                  {product.price.toLocaleString('ru-RU')}
-                                </span>
-                                <span className="text-sm text-white/50">₽</span>
-                              </div>
-                              {product.discount_percentage > 0 && (
-                                <p className="text-xs text-emerald-400 mt-0.5">
-                                  Экономия {savings.toLocaleString('ru-RU')} ₽
-                                </p>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </button>
                       )
