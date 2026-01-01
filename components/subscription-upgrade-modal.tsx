@@ -141,7 +141,7 @@ export function SubscriptionUpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="!max-w-[1200px] w-[95vw] bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
