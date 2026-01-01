@@ -359,15 +359,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                           <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
                         </div>
                         {b.includes('2→3') ? (
-                          <div className="flex flex-col leading-none py-0.5">
-                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight mb-0.5">Интенсивность</span>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-sm font-bold text-white/40">2</span>
-                              <ArrowRight className="w-2.5 h-2.5 text-white/20" />
-                              <span className="text-sm font-bold text-white">3</span>
-                              <span className="text-sm text-white/70 ml-0.5">тренировки в неделю</span>
-                            </div>
-                          </div>
+                          <span className="leading-tight">
+                            <span className="opacity-40 font-bold">2</span>
+                            <ArrowRight className="inline-block w-3 h-3 mx-1 opacity-20 -translate-y-[1px]" />
+                            <span className="font-bold text-white mr-1">3</span>
+                            тренировки в неделю
+                          </span>
                         ) : (
                           <span className="leading-tight">{b}</span>
                         )}
@@ -518,47 +515,50 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
 
           {/* Футер с итоговой информацией и кнопкой */}
           <div className="mt-auto pt-6 border-t border-white/5">
-            <div className="rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-5 overflow-hidden relative backdrop-blur-sm mb-6">
-              {/* Декоративная иконка - еще более деликатная */}
+            <div className="rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 relative backdrop-blur-sm mb-6 overflow-hidden">
+              {/* Декоративная иконка - еще меньше и в углу */}
               <div className="absolute -top-1 -right-1 p-2 opacity-[0.02] pointer-events-none">
-                <Clock className="w-16 h-16 text-white" />
+                <Clock className="w-12 h-12 text-white" />
               </div>
               
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Итоговый расчет</p>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">
-                    до: <span className="text-white/80 ml-1 normal-case">{conversionData ? formatDate(conversionData.newExpirationDate) : '...'}</span>
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-4">
-                  <div className="text-center">
-                    <p className="text-[9px] font-bold text-white/20 uppercase mb-1">Конвертация:</p>
-                    <p className={`font-oswald font-bold ${currentConfig?.color} text-base`}>
-                      + <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
-                    </p>
+              <div className="relative z-10 flex items-center justify-between gap-4">
+                {/* Левая часть: Итоговый результат */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Итоговый срок:</p>
                   </div>
-                  
-                  <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
-                    <Plus className="w-3 h-3 text-white/20" />
-                  </div>
-
-                  <div className="text-center">
-                    <p className="text-[9px] font-bold text-white/20 uppercase mb-1">Новый период:</p>
-                    <p className="text-white/80 font-oswald font-bold text-base">
-                      + <AnimatedNumber value={conversionData?.newProductDays || 0} /> дн.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="pt-3 border-t border-white/5 flex flex-col items-center">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Итого:</span>
-                    <span className="text-3xl font-oswald font-bold text-white leading-none">
+                    <span className={`text-4xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
                       <AnimatedNumber value={conversionData?.totalDays || 0} />
                     </span>
-                    <span className="text-[10px] font-bold text-white/40 uppercase">дней</span>
+                    <div className="flex flex-col leading-none">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>
+                          {selectedTier}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-medium text-white/20 mt-1 whitespace-nowrap">
+                        до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Правая часть: Быстрая расшифровка */}
+                <div className="flex items-center gap-2.5 py-2 px-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                  <div className="text-center">
+                    <p className="text-[9px] font-bold text-white/20 uppercase mb-0.5 whitespace-nowrap">Конв.</p>
+                    <p className={`font-oswald font-bold ${currentConfig?.color} text-xl leading-none`}>
+                      +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
+                    </p>
+                  </div>
+                  <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
+                  <div className="text-center">
+                    <p className="text-[9px] font-bold text-white/20 uppercase mb-0.5 whitespace-nowrap">Новый</p>
+                    <p className="text-white font-oswald font-bold text-xl leading-none">
+                      +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
+                    </p>
                   </div>
                 </div>
               </div>
