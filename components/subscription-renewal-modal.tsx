@@ -91,7 +91,7 @@ export function SubscriptionRenewalModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -118,82 +118,74 @@ export function SubscriptionRenewalModal({
           </div>
         ) : (
           <div className="p-6 space-y-6">
-            {/* Текущая подписка */}
-            <div className="rounded-2xl bg-white/[0.03] ring-1 ring-white/10 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <div className={`inline-flex items-center gap-2 rounded-full bg-${tierColor}-500/15 px-3 py-1.5 ring-1 ring-${tierColor}-400/30`}>
-                    <span className="text-sm font-semibold text-white">{currentTier.toUpperCase()}</span>
-                  </div>
-                  {currentExpires && (
-                    <p className="text-sm text-white/70 mt-2 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                      Истекает: {formatDate(new Date(currentExpires))}
-                    </p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-white">{remainingDays}</p>
-                  <p className="text-xs text-white/50">дней</p>
-                </div>
-              </div>
-              
-              {/* Прогресс бар */}
-              <div className="mt-3">
-                <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full bg-gradient-to-r from-${tierColor}-400 to-${tierColor}-600 transition-all duration-500`}
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
+            {/* Текущая подписка - компактная версия */}
+            <div className="flex items-center gap-3 text-sm text-white/60">
+              <span className={`inline-flex items-center gap-1.5 rounded-full bg-${tierColor}-500/15 px-2.5 py-1 text-xs ring-1 ring-${tierColor}-400/30`}>
+                <span className="font-semibold text-white">{currentTier.toUpperCase()}</span>
+              </span>
+              <span>•</span>
+              <span>{remainingDays} дней осталось</span>
+              {currentExpires && (
+                <>
+                  <span>•</span>
+                  <span>до {formatDate(new Date(currentExpires))}</span>
+                </>
+              )}
             </div>
 
-            {/* Выбор срока */}
+            {/* Выбор срока - новый компактный дизайн */}
             <div>
               <h3 className="text-sm font-medium text-white/80 mb-3">Выберите срок продления:</h3>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {products.map((product) => {
                   const isSelected = selectedProduct?.id === product.id
                   const isBest = product.duration_months >= 6
+                  const savings = product.discount_percentage > 0 
+                    ? Math.round(product.price / (1 - product.discount_percentage / 100) - product.price)
+                    : 0
                   
                   return (
                     <button
                       key={product.id}
                       onClick={() => setSelectedProduct(product)}
                       className={`
-                        relative rounded-xl p-4 transition-all duration-200
+                        relative rounded-xl p-4 transition-all duration-200 text-left
                         ${isSelected 
-                          ? `ring-2 ring-orange-400 bg-gradient-to-br from-orange-500/10 to-red-500/10` 
+                          ? 'ring-2 ring-orange-400 bg-gradient-to-br from-orange-500/10 to-red-500/10' 
                           : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06] hover:ring-white/20'
                         }
-                        hover:scale-105 active:scale-95
+                        hover:scale-[1.02] active:scale-[0.98]
                       `}
                     >
-                      {/* ТОП badge */}
-                      {isBest && (
-                        <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white shadow-lg">
-                          ТОП
-                        </div>
-                      )}
-                      
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-white mb-1">
-                          {product.duration_months} {product.duration_months === 1 ? 'месяц' : product.duration_months < 5 ? 'месяца' : 'месяцев'}
-                        </p>
-                        <p className="text-2xl font-bold text-white mb-2">
-                          {product.price.toLocaleString('ru-RU')} ₽
-                        </p>
-                        {product.discount_percentage > 0 && (
-                          <div className="inline-block px-2 py-0.5 rounded bg-orange-500/20 text-xs text-orange-200">
-                            Скидка {product.discount_percentage}%
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xl font-bold text-white">
+                              {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
+                            </span>
+                            {isBest && (
+                              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
+                                ВЫГОДНО
+                              </span>
+                            )}
                           </div>
-                        )}
+                          <p className="text-xs text-white/50">
+                            {Math.round(product.price / (product.duration_months * 30))} ₽/день
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-white">
+                              {product.price.toLocaleString('ru-RU')}
+                            </span>
+                            <span className="text-sm text-white/50">₽</span>
+                          </div>
+                          {product.discount_percentage > 0 && (
+                            <p className="text-xs text-emerald-400 mt-0.5">
+                              Экономия {savings.toLocaleString('ru-RU')} ₽
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </button>
                   )

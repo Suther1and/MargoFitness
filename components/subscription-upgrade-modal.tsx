@@ -141,13 +141,14 @@ export function SubscriptionUpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
-                <polyline points="18 15 12 9 6 15"></polyline>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
+                <path d="M9 19h6"></path>
+                <path d="M9 15v-3H5l7-7 7 7h-4v3H9z"></path>
               </svg>
             </div>
             <div>
@@ -165,172 +166,151 @@ export function SubscriptionUpgradeModal({
           </div>
         ) : (
           <div className="p-6 space-y-6 overflow-y-auto flex-1">
-            {/* Текущая подписка */}
-            {conversion && (
-              <div className="rounded-xl bg-white/[0.02] ring-1 ring-white/5 p-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="px-3 py-1 rounded-full bg-orange-500/15 ring-1 ring-orange-400/30 text-sm font-semibold text-white">
-                    {currentTier.toUpperCase()}
-                  </div>
-                  <span className="text-sm text-white/70">
-                    {conversion.remainingDays} дней осталось • ~{conversion.remainingValue.toLocaleString('ru-RU')} ₽
-                  </span>
-                </div>
-              </div>
-            )}
 
-            {/* Tabs переключения тарифов */}
+            {/* Tabs переключения тарифов - улучшенный дизайн */}
             {availableTiers.length > 0 && (
-              <div className="bg-white/[0.03] rounded-xl p-1 flex gap-1">
-                {availableTiers.map((tierData) => {
-                  const config = tierConfig[tierData.tier]
-                  const isSelected = selectedTierData?.tier === tierData.tier
-                  const isRecommended = tierData.tierLevel === currentTierLevel + 1
-                  
-                  return (
-                    <button
-                      key={tierData.tier}
-                      onClick={() => setSelectedTierData(tierData)}
-                      className={`
-                        flex-1 relative py-3 px-4 rounded-lg transition-all duration-300
-                        ${isSelected
-                          ? `bg-gradient-to-br from-${config.color}-500/20 to-${config.color}-600/20 ring-1 ring-${config.color}-400/50 text-white`
-                          : 'text-white/60 hover:bg-white/5'
-                        }
-                      `}
-                    >
-                      {isRecommended && (
-                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-orange-500 text-[10px] font-bold text-white whitespace-nowrap">
-                          Рекомендуем
+              <div>
+                {conversion && (
+                  <div className="flex items-center gap-3 text-sm text-white/60 mb-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-1 text-xs ring-1 ring-orange-400/30">
+                      <span className="font-semibold text-white">{currentTier.toUpperCase()}</span>
+                    </span>
+                    <span>•</span>
+                    <span>{conversion.remainingDays} дней осталось</span>
+                    <span>•</span>
+                    <span>~{conversion.remainingValue.toLocaleString('ru-RU')} ₽</span>
+                  </div>
+                )}
+                <div className="bg-white/[0.03] rounded-xl p-1 flex gap-1">
+                  {availableTiers.map((tierData) => {
+                    const config = tierConfig[tierData.tier]
+                    const isSelected = selectedTierData?.tier === tierData.tier
+                    const isRecommended = tierData.tierLevel === currentTierLevel + 1
+                    
+                    return (
+                      <button
+                        key={tierData.tier}
+                        onClick={() => setSelectedTierData(tierData)}
+                        className={`
+                          flex-1 relative py-3 px-4 rounded-lg transition-all duration-200
+                          ${isSelected
+                            ? `bg-gradient-to-br from-${config.color}-500/20 to-${config.color}-600/20 ring-1 ring-${config.color}-400/50 text-white`
+                            : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                          }
+                        `}
+                      >
+                        {isRecommended && (
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-orange-500 text-[10px] font-bold text-white whitespace-nowrap">
+                            Рекомендуем
+                          </div>
+                        )}
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-xl">{config.icon}</span>
+                          <span className="font-bold text-base">{config.name}</span>
                         </div>
-                      )}
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-lg">{config.icon}</span>
-                        <span className="font-bold">{config.name}</span>
-                      </div>
-                    </button>
-                  )
-                })}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             )}
 
             {/* Контент выбранного тарифа */}
             {selectedTierData && (
               <div className={`rounded-2xl bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/5 to-transparent ring-1 ring-${tierConfig[selectedTierData.tier].color}-400/30 p-5 space-y-4`}>
-                {/* Преимущества */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-white/80 mb-3">Что входит:</h3>
-                  {selectedTierData.tier === 'pro' && (
-                    <>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Все из Basic
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Персональные тренировки
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Консультации с тренером
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Дневник питания
-                      </div>
-                    </>
-                  )}
-                  {selectedTierData.tier === 'elite' && (
-                    <>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Все из Pro
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        VIP поддержка 24/7
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Индивидуальный план питания
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Эксклюзивный контент
-                      </div>
-                    </>
-                  )}
-                </div>
 
-                {/* Калькулятор конвертации */}
+                {/* Калькулятор конвертации - главный элемент */}
                 {conversion && !loadingConversion && (
-                  <div className={`rounded-xl bg-white/10 ring-2 ring-${tierConfig[selectedTierData.tier].color}-400/50 p-4`}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">💎</span>
+                  <div className={`rounded-xl bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/20 to-transparent ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 p-5 shadow-lg shadow-${tierConfig[selectedTierData.tier].color}-500/20`}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center flex-shrink-0">
+                        <span className="text-3xl">💎</span>
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm text-white/70 mb-1">Бонус за оставшиеся дни:</p>
-                        <p className="text-base font-bold text-white">
-                          <span className="text-orange-300">{conversion.remainingDays} дней {currentTier.toUpperCase()}</span>
-                          {' → '}
-                          <span className={`text-${tierConfig[selectedTierData.tier].color}-300`}>{conversion.convertedDays} дней {selectedTierData.tier.toUpperCase()}</span>
-                        </p>
+                        <p className="text-xs text-white/60 mb-2 uppercase tracking-wide">Бонус за оставшиеся дни</p>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="flex-1">
+                            <p className="text-sm text-white/70 mb-1">У вас сейчас:</p>
+                            <p className="text-xl font-bold text-orange-300">{conversion.remainingDays} дней</p>
+                            <p className="text-xs text-white/50">{currentTier.toUpperCase()}</p>
+                          </div>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm text-white/70 mb-1">Получите:</p>
+                            <p className={`text-xl font-bold text-${tierConfig[selectedTierData.tier].color}-300`}>{conversion.convertedDays} дней</p>
+                            <p className="text-xs text-white/50">{selectedTierData.tier.toUpperCase()}</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-white/5 px-3 py-2 flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                          </svg>
+                          <p className="text-xs text-white/70">Конвертация по справедливой формуле</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Выбор срока */}
+                {/* Выбор срока - новый компактный дизайн */}
                 <div>
                   <h3 className="text-sm font-semibold text-white/80 mb-3">Выберите срок:</h3>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     {selectedTierData.products.map((product) => {
                       const isSelected = selectedProduct?.id === product.id
                       const isBest = product.duration_months >= 6
+                      const savings = product.discount_percentage > 0 
+                        ? Math.round(product.price / (1 - product.discount_percentage / 100) - product.price)
+                        : 0
                       
                       return (
                         <button
                           key={product.id}
                           onClick={() => setSelectedProduct(product)}
                           className={`
-                            relative rounded-lg p-3 transition-all duration-200 text-center
+                            relative rounded-xl p-4 transition-all duration-200 text-left
                             ${isSelected
-                              ? `ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 bg-${tierConfig[selectedTierData.tier].color}-500/20`
-                              : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06]'
+                              ? `ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/10 to-transparent`
+                              : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06] hover:ring-white/20'
                             }
+                            hover:scale-[1.02] active:scale-[0.98]
                           `}
                         >
-                          {isBest && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-[10px]">
-                              ⭐
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xl font-bold text-white">
+                                  {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
+                                </span>
+                                {isBest && (
+                                  <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white">
+                                    ВЫГОДНО
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-white/50">
+                                {Math.round(product.price / (product.duration_months * 30))} ₽/день
+                              </p>
                             </div>
-                          )}
-                          <p className="text-sm font-semibold text-white mb-1">
-                            {product.duration_months} мес
-                          </p>
-                          <p className="text-lg font-bold text-white">
-                            {product.price.toLocaleString('ru-RU')} ₽
-                          </p>
-                          {product.discount_percentage > 0 && (
-                            <p className="text-[10px] text-emerald-300 mt-1">
-                              -{product.discount_percentage}%
-                            </p>
-                          )}
+                            <div className="text-right">
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-white">
+                                  {product.price.toLocaleString('ru-RU')}
+                                </span>
+                                <span className="text-sm text-white/50">₽</span>
+                              </div>
+                              {product.discount_percentage > 0 && (
+                                <p className="text-xs text-emerald-400 mt-0.5">
+                                  Экономия {savings.toLocaleString('ru-RU')} ₽
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </button>
                       )
                     })}
