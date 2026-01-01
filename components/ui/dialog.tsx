@@ -20,6 +20,10 @@ function Dialog({
     }
     
     if (props.open) {
+      // Блокируем скролл body
+      document.body.style.overflow = 'hidden'
+      document.body.style.paddingRight = 'var(--removed-body-scroll-bar-size, 0px)'
+
       // Создаем blur overlay
       const blur = document.createElement('div')
       blur.style.cssText = `
@@ -53,6 +57,10 @@ function Dialog({
         }
       })
     } else if (blurRef.current) {
+      // Возвращаем скролл body
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+
       // Анимация исчезновения
       const blur = blurRef.current
       blur.style.backdropFilter = 'blur(0px)'
@@ -71,6 +79,9 @@ function Dialog({
     
     // Cleanup
     return () => {
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+      
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
         timeoutRef.current = null

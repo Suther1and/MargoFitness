@@ -1,324 +1,560 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getUpgradeOptions, calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
-import { Product, SubscriptionTier, TIER_LEVELS } from '@/types/database'
-import { Loader2 } from 'lucide-react'
+import { Product, SubscriptionTier } from '@/types/database'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star } from 'lucide-react'
+
+// Компонент для плавной анимации чисел (как в checkout)
+function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
+  const spanRef = useRef<HTMLSpanElement>(null)
+  const prevValueRef = useRef(value)
+  const requestRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const isMobile = window.innerWidth < 1024
+    const DURATION = isMobile ? 600 : 900
+    const startValue = prevValueRef.current
+    const diff = value - startValue
+    
+    if (diff === 0) {
+      if (spanRef.current) {
+        spanRef.current.textContent = format 
+          ? Math.round(value).toLocaleString('ru-RU')
+          : Math.round(value).toString()
+      }
+      return
+    }
+
+    const startTime = performance.now()
+    const frameInterval = isMobile ? 32 : 16
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / DURATION, 1)
+
+      const easeProgress = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2
+
+      const currentValue = startValue + diff * easeProgress
+      
+      if (spanRef.current) {
+        spanRef.current.textContent = format 
+          ? Math.round(currentValue).toLocaleString('ru-RU')
+          : Math.round(currentValue).toString()
+      }
+
+      if (progress < 1) {
+        requestRef.current = requestAnimationFrame(animate)
+      } else {
+        prevValueRef.current = value
+        if (spanRef.current) {
+          spanRef.current.textContent = format 
+            ? Math.round(value).toLocaleString('ru-RU')
+            : Math.round(value).toString()
+        }
+      }
+    }
+
+    requestRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current)
+    }
+  }, [value, format])
+
+  return (
+    <span ref={spanRef} className="tabular-nums">
+      {format ? value.toLocaleString('ru-RU') : value}
+    </span>
+  )
+}
 
 interface UpgradeModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   currentTier: SubscriptionTier
+  currentExpires: string | null
   userId: string
 }
 
-type TierData = {
-  tier: SubscriptionTier
-  tierLevel: number
-  products: Product[]
+const tierConfig = {
+  basic: {
+    gradient: 'from-blue-500/10 to-blue-500/5',
+    color: 'text-blue-400',
+    ring: 'ring-blue-500/30',
+    bg: 'bg-blue-500/20',
+    shadow: 'shadow-blue-500/20',
+    icon: <Star className="w-5 h-5" />,
+    benefits: ['Базовые тренировки', 'Доступ к сообществу']
+  },
+  pro: {
+    gradient: 'from-purple-500/10 to-purple-600/5',
+    color: 'text-purple-400',
+    ring: 'ring-purple-500/30',
+    bg: 'bg-purple-500/20',
+    shadow: 'shadow-purple-500/20',
+    icon: <Star className="w-5 h-5" />,
+    benefits: ['Всё из Basic', '2→3 тренировки в неделю', 'Дневник здоровья', 'Доступ в Telegram сообщество навсегда']
+  },
+  elite: {
+    gradient: 'from-amber-500/10 to-amber-600/5',
+    color: 'text-amber-400',
+    ring: 'ring-amber-500/30',
+    bg: 'bg-amber-500/20',
+    shadow: 'shadow-amber-500/20',
+    icon: <Trophy className="w-5 h-5" />,
+    benefits: ['Всё из PRO', 'Личное ведение с Марго', 'Индивидуальный план питания', 'Коррекция техники по видео', 'Прямая связь в Telegram']
+  }
 }
 
-export function SubscriptionUpgradeModal({
-  open,
-  onOpenChange,
-  currentTier,
-  userId
-}: UpgradeModalProps) {
+export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, currentExpires, userId }: UpgradeModalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [availableTiers, setAvailableTiers] = useState<TierData[]>([])
-  const [selectedTierData, setSelectedTierData] = useState<TierData | null>(null)
+  const [calculating, setCalculating] = useState(false)
+  
+  const [availableTiersData, setAvailableTiersData] = useState<{
+    tier: SubscriptionTier
+    tierLevel: number
+    products: Product[]
+  }[]>([])
+  
+  const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [conversion, setConversion] = useState<any>(null)
-
-  const currentTierLevel = TIER_LEVELS[currentTier]
-  const isElite = currentTierLevel >= 3
+  const [conversionData, setConversionData] = useState<{
+    newExpirationDate: string
+    bonusDays: number
+    totalDays: number
+    remainingDays: number
+  } | null>(null)
 
   useEffect(() => {
-    if (open) {
-      loadUpgradeOptions()
-    }
+    if (open) loadData()
   }, [open, userId])
 
-  useEffect(() => {
-    if (selectedTierData) {
-      loadConversion(selectedTierData.tierLevel)
-      const sixMonths = selectedTierData.products.find(p => p.duration_months === 6)
-      setSelectedProduct(sixMonths || selectedTierData.products[0])
-    }
-  }, [selectedTierData])
-
-  const loadUpgradeOptions = async () => {
+  const loadData = async () => {
     setLoading(true)
     const result = await getUpgradeOptions(userId)
-    if (result.success && result.data) {
-      setAvailableTiers(result.data.availableTiers)
-      if (result.data.availableTiers.length > 0) {
-        setSelectedTierData(result.data.availableTiers[0])
+    if (result.success && result.data && result.data.availableTiers.length > 0) {
+      setAvailableTiersData(result.data.availableTiers)
+      const initialTier = result.data.availableTiers[0]
+      setSelectedTier(initialTier.tier)
+      const initialProd = initialTier.products.find(p => p.duration_months === 6) || initialTier.products[0]
+      setSelectedProduct(initialProd)
+      
+      const conv = await calculateUpgradeConversion(userId, initialProd.tier_level)
+      if (conv.success && conv.data) {
+        setConversionData({
+          newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + initialProd.duration_months * 30) * 86400000).toISOString(),
+          bonusDays: conv.data.convertedDays,
+          totalDays: conv.data.convertedDays + initialProd.duration_months * 30,
+          remainingDays: conv.data.remainingDays
+        })
       }
     }
     setLoading(false)
   }
 
-  const loadConversion = async (newTierLevel: number) => {
-    const result = await calculateUpgradeConversion(userId, newTierLevel)
-    if (result.success && result.data) {
-      setConversion(result.data)
+  const handleTierChange = async (tier: SubscriptionTier) => {
+    if (tier === selectedTier || calculating) return
+    
+    setCalculating(true)
+    setSelectedTier(tier)
+    
+    const tierData = availableTiersData.find(t => t.tier === tier)
+    if (!tierData) {
+      setCalculating(false)
+      return
     }
+    
+    const prod = tierData.products.find(p => p.duration_months === 6) || tierData.products[0]
+    setSelectedProduct(prod)
+    
+    const res = await calculateUpgradeConversion(userId, prod.tier_level)
+    if (res.success && res.data) {
+      setConversionData({
+        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + prod.duration_months * 30) * 86400000).toISOString(),
+        bonusDays: res.data.convertedDays,
+        totalDays: res.data.convertedDays + prod.duration_months * 30,
+        remainingDays: res.data.remainingDays
+      })
+    }
+    
+    setCalculating(false)
   }
 
-  const tierConfig: Record<string, { color: string; icon: string; name: string }> = {
-    pro: { color: 'purple', icon: '⭐', name: 'PRO' },
-    elite: { color: 'amber', icon: '👑', name: 'ELITE' }
+  const handleProductChange = async (product: Product) => {
+    if (product.id === selectedProduct?.id || calculating) return
+    
+    setCalculating(true)
+    setSelectedProduct(product)
+    
+    const res = await calculateUpgradeConversion(userId, product.tier_level)
+    if (res.success && res.data) {
+      setConversionData({
+        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + product.duration_months * 30) * 86400000).toISOString(),
+        bonusDays: res.data.convertedDays,
+        totalDays: res.data.convertedDays + product.duration_months * 30,
+        remainingDays: res.data.remainingDays
+      })
+    }
+    
+    setCalculating(false)
   }
 
-  const getTotalDays = () => {
-    if (!selectedProduct || !conversion) return 0
-    return (selectedProduct.duration_months * 30) + conversion.convertedDays
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
-  const getNewExpiryDate = () => {
-    const totalDays = getTotalDays()
-    if (totalDays === 0) return null
-    const newDate = new Date()
-    newDate.setDate(newDate.getDate() + totalDays)
-    return newDate
-  }
+  const currentConfig = selectedTier ? tierConfig[selectedTier as keyof typeof tierConfig] : null
+  const products = availableTiersData.find(t => t.tier === selectedTier)?.products || []
+  
+  // Извлекаем benefits из metadata выбранного продукта
+  const metadata = selectedProduct?.metadata as { benefits?: string[] } | null
+  const productBenefits = metadata?.benefits || currentConfig?.benefits || []
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
-  }
-
-  const handleUpgrade = () => {
-    if (!selectedProduct) return
-    router.push(`/payment/${selectedProduct.id}?action=upgrade`)
-  }
-
-  // Elite специальный случай
-  if (isElite) {
+  // Skeleton loader для загрузки
+  if (loading && open) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="!max-w-[480px] w-[90vw] bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
-          <div className="p-8 text-center space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center text-4xl">
-              👑
+        <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
+          <DialogTitle className="sr-only">Апгрейд тарифа</DialogTitle>
+          <DialogDescription className="sr-only">Загрузка...</DialogDescription>
+          
+          {/* Левая панель skeleton */}
+          <div className="md:w-[280px] bg-gradient-to-b from-purple-500/10 via-purple-900/5 to-transparent p-8 flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5">
+            <div className="relative z-10 space-y-6 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/5" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-6 bg-white/5 rounded w-3/4" />
+                  <div className="h-3 bg-white/5 rounded w-1/2" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-4 bg-white/5 rounded" />
+                ))}
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-oswald uppercase tracking-tight mb-2">
-                У вас максимальный тариф!
-              </h2>
-              <p className="text-white/70">
-                Вы используете Elite - наш лучший план с полным доступом ко всем возможностям.
-              </p>
+          </div>
+          
+          {/* Правая панель skeleton */}
+          <div className="flex-1 p-6 md:p-10 animate-pulse space-y-6">
+            <div className="h-12 bg-white/5 rounded-xl" />
+            <div className="h-24 bg-white/5 rounded-2xl" />
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-24 bg-white/5 rounded-2xl" />
+              ))}
             </div>
-            <p className="text-white/60">Хотите продлить подписку?</p>
-            <button
-              onClick={() => {
-                onOpenChange(false)
-              }}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold uppercase tracking-wide hover:brightness-110 transition-all"
-            >
-              🚀 Продлить Elite
-            </button>
+            <div className="h-32 bg-white/5 rounded-2xl" />
           </div>
         </DialogContent>
       </Dialog>
     )
   }
 
-  const newExpiryDate = getNewExpiryDate()
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[850px] w-[90vw] bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
-                <path d="M9 19h6"></path>
-                <path d="M9 15v-3H5l7-7 7 7h-4v3H9z"></path>
-              </svg>
-            </div>
-            <div>
-              <DialogTitle className="text-xl font-oswald uppercase tracking-tight">
-                Апгрейд тарифа
-              </DialogTitle>
-              <p className="text-sm text-white/60 mt-0.5">Получи больше возможностей</p>
-            </div>
-          </div>
-        </DialogHeader>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-          </div>
-        ) : (
-          <div className="px-6 pb-6 space-y-5 overflow-y-auto flex-1">
-            {/* Текущая подписка - компактная строка */}
-            {conversion && (
-              <div className="flex items-center gap-3 text-sm text-white/60 pt-4">
-                <span className="text-white font-medium">{currentTier.toUpperCase()}</span>
-                <span>•</span>
-                <span>{conversion.remainingDays} дней осталось</span>
-                <span>•</span>
-                <span>~{conversion.remainingValue.toLocaleString('ru-RU')} ₽</span>
+      <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
+        <DialogTitle className="sr-only">Апгрейд тарифа</DialogTitle>
+        <DialogDescription className="sr-only">Перейдите на новый уровень</DialogDescription>
+        
+        {/* Стили для плавных анимаций */}
+        <style jsx>{`
+          @keyframes smoothFadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+          
+          @keyframes textFade {
+            0% {
+              opacity: 0;
+              transform: translateY(-2px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .smooth-transition {
+            animation: textFade 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          }
+          
+          .tabular-nums {
+            font-variant-numeric: tabular-nums;
+          }
+          
+          /* Оптимизация для мобильных */
+          @media (max-width: 768px) {
+            .mobile-blur-off {
+              backdrop-filter: none !important;
+            }
+          }
+        `}</style>
+        
+        {/* Левая панель */}
+        <div 
+          className={`md:w-[280px] p-8 bg-gradient-to-b ${currentConfig?.gradient || 'from-purple-500/10'} to-transparent border-b md:border-b-0 md:border-r border-white/5 flex-shrink-0 relative overflow-hidden transition-all duration-500`}
+        >
+          {/* Фоновые эффекты */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+          <div 
+            className={`absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-3xl pointer-events-none hidden md:block transition-all duration-700 ${
+              selectedTier === 'pro' ? 'bg-purple-500/15' : selectedTier === 'elite' ? 'bg-amber-500/15' : 'bg-blue-500/15'
+            }`} 
+          />
+          
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-8">
+              <div className={`w-12 h-12 rounded-2xl ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center ring-1 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg transition-all duration-300`}>
+                <Sparkles className={`w-6 h-6 transition-colors duration-300 ${currentConfig?.color || 'text-purple-300'}`} />
               </div>
-            )}
-
-            {/* Tabs - компактный сегментированный контрол */}
-            {availableTiers.length > 0 && (
-              <div className="bg-white/[0.03] rounded-lg p-1 flex gap-1">
-                {availableTiers.map((tierData) => {
-                  const config = tierConfig[tierData.tier]
-                  const isSelected = selectedTierData?.tier === tierData.tier
-                  const isRecommended = tierData.tierLevel === currentTierLevel + 1
-                  
-                  return (
-                    <button
-                      key={tierData.tier}
-                      onClick={() => setSelectedTierData(tierData)}
-                      className={`
-                        flex-1 relative py-2 px-3 rounded-md transition-all duration-200
-                        ${isSelected
-                          ? `bg-gradient-to-br from-${config.color}-500/20 to-${config.color}-600/20 ring-1 ring-${config.color}-400/50 text-white`
-                          : 'text-white/60 hover:bg-white/5 hover:text-white/80'
-                        }
-                      `}
-                    >
-                      {isRecommended && (
-                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-orange-500 text-[9px] font-bold text-white whitespace-nowrap">
-                          Рекомендуем
-                        </div>
-                      )}
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-base">{config.icon}</span>
-                        <span className="font-bold text-sm">{config.name}</span>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Блок конвертации - элегантный и компактный */}
-            {conversion && selectedTierData && (
-              <div className={`rounded-xl bg-white/[0.08] ring-1 ring-${tierConfig[selectedTierData.tier].color}-400/40 p-4`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xl">💎</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-white/60 mb-1">Бонус за оставшиеся дни:</p>
-                    <p className="text-sm font-bold text-white">
-                      <span className="text-orange-300">{conversion.remainingDays} дней {currentTier.toUpperCase()}</span>
-                      {' → '}
-                      <span className={`text-${tierConfig[selectedTierData.tier].color}-300`}>
-                        {conversion.convertedDays} дней {selectedTierData.tier.toUpperCase()}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Выбор срока */}
-            {selectedTierData && (
               <div>
-                <h3 className="text-sm font-medium text-white/80 mb-3">Выберите срок:</h3>
-                <div className="grid grid-cols-4 gap-3">
-                  {selectedTierData.products.map((product) => {
-                    const isSelected = selectedProduct?.id === product.id
-                    const isBest = product.duration_months >= 6
-                    
-                    return (
-                      <button
-                        key={product.id}
-                        onClick={() => setSelectedProduct(product)}
-                        className={`
-                          relative rounded-xl p-3.5 transition-all duration-200
-                          ${isSelected
-                            ? `ring-2 ring-${tierConfig[selectedTierData.tier].color}-400 bg-gradient-to-br from-${tierConfig[selectedTierData.tier].color}-500/10 to-transparent`
-                            : 'ring-1 ring-white/10 bg-white/[0.04] hover:bg-white/[0.06] hover:ring-white/20'
-                          }
-                          hover:scale-[1.02] active:scale-[0.98]
-                        `}
-                      >
-                        {isBest && (
-                          <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-bold text-white shadow-lg">
-                            ВЫГОДНО
-                          </div>
-                        )}
-                        
-                        <div className="text-center space-y-1.5">
-                          <p className="text-sm font-semibold text-white/90">
-                            {product.duration_months} {product.duration_months === 1 ? 'мес' : 'мес'}
-                          </p>
-                          <p className="text-xl font-bold text-white">
-                            {product.price.toLocaleString('ru-RU')} ₽
-                          </p>
-                          {product.discount_percentage > 0 && (
-                            <p className="text-xs text-emerald-400 font-medium">
-                              -{product.discount_percentage}%
-                            </p>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
+                <h3 className="text-2xl font-oswald uppercase leading-none text-white">Апгрейд</h3>
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+                  New Level
+                </p>
               </div>
-            )}
-
-            {/* Preview результата */}
-            {selectedProduct && conversion && (
-              <div className="rounded-xl bg-emerald-500/10 ring-1 ring-emerald-400/30 p-4">
-                <div className="flex items-start gap-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 flex-shrink-0 mt-0.5">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  <div className="flex-1 text-sm space-y-1.5">
-                    <p className="text-white font-medium">
-                      Итого: <span className="text-emerald-300 font-bold">{getTotalDays()} дней</span> ({selectedProduct.duration_months * 30} дней + {conversion.convertedDays} дней бонус)
-                    </p>
-                    {newExpiryDate && (
-                      <p className="text-white/70 flex items-center gap-2">
-                        <span>📅</span>
-                        До: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
-                      </p>
+            </div>
+            
+            {/* Преимущества - из metadata продукта */}
+            <div className="space-y-4 hidden md:block">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                Преимущества:
+              </p>
+              <div className="space-y-3" key={selectedProduct?.id}>
+                {productBenefits.slice(0, 5).map((b, i) => (
+                  <div 
+                    key={i}
+                    className="flex items-center gap-3 text-sm text-white/70 smooth-transition"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center transition-colors duration-300`}>
+                      <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
+                    </div>
+                    {b === '2→3 тренировки в неделю' ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="opacity-40">2</span>
+                        <ArrowRight className="w-3 h-3 opacity-40" />
+                        <span>3</span>
+                        <span className="ml-0.5">тренировки в неделю</span>
+                      </span>
+                    ) : (
+                      b
                     )}
-                    <p className="text-white/70">
-                      Цена: <span className="font-bold text-white">{selectedProduct.price.toLocaleString('ru-RU')} ₽</span>
-                    </p>
                   </div>
+                ))}
+              </div>
+              
+              {/* Красивый разделитель */}
+              <div className="flex items-center gap-3 py-4">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <div className="w-1 h-1 rounded-full bg-white/30" />
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </div>
+              
+              {/* Дополнительные гарантии */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '240ms' }}>
+                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                  </div>
+                  Моментальный доступ
+                </div>
+                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '280ms' }}>
+                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <ArrowRight className="w-2.5 h-2.5 text-blue-400" />
+                  </div>
+                  Умная конвертация
+                </div>
+                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '320ms' }}>
+                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-orange-400" />
+                  </div>
+                  Безопасная оплата
                 </div>
               </div>
-            )}
-
-            {/* CTA кнопка */}
-            {selectedTierData && (
-              <button
-                onClick={handleUpgrade}
-                disabled={!selectedProduct}
-                className={`
-                  w-full py-3.5 rounded-xl font-bold text-sm uppercase tracking-wide transition-all
-                  bg-gradient-to-r from-${tierConfig[selectedTierData.tier].color}-500 to-${tierConfig[selectedTierData.tier].color}-600
-                  hover:brightness-110 hover:scale-[1.01] active:scale-[0.99]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  flex items-center justify-center gap-2 text-white
-                `}
-              >
-                Выбрать {selectedTierData.tier.toUpperCase()}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
-              </button>
-            )}
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Правая панель */}
+        <div className="flex-1 p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-hide min-h-0">
+          {/* Табы тарифов */}
+          <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-6">
+            {availableTiersData.map(t => {
+              const isSelected = selectedTier === t.tier
+              const config = tierConfig[t.tier as keyof typeof tierConfig]
+              
+              return (
+                <button
+                  key={t.tier}
+                  onClick={() => handleTierChange(t.tier)}
+                  className={`
+                    flex-1 py-3 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200
+                    ${isSelected 
+                      ? `bg-gradient-to-br ${config.bg} ring-1 ${config.ring} text-white shadow-lg ${config.shadow}` 
+                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03] active:scale-[0.97]'
+                    }
+                  `}
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {t.tier}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Блок конверсии (Smart Convert) */}
+          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-5 md:p-6 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
+                Smart Convert
+              </span>
+              <Zap className={`w-4 h-4 transition-colors duration-300 ${currentConfig?.color || 'text-blue-400'}`} />
+            </div>
+            
+            {/* Контент с плавной анимацией чисел */}
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              <div className="flex-1 w-full">
+                <p className="text-xs text-white/40 line-through font-medium mb-1.5">
+                  <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.{' '}
+                  <span key={`current-tier`} className="smooth-transition inline-block">
+                    {currentTier}
+                  </span>
+                </p>
+                <p className="text-xl md:text-2xl font-oswald text-white font-bold">
+                  +<AnimatedNumber value={conversionData?.bonusDays || 0} /> дн.{' '}
+                  <span key={`selected-tier-${selectedTier}`} className="smooth-transition inline-block">
+                    {selectedTier}
+                  </span>
+                </p>
+              </div>
+              
+              <div className="hidden md:flex flex-shrink-0">
+                <ArrowRight className="w-5 h-5 text-white/20" />
+              </div>
+              
+              <div className="flex-1 w-full md:text-right">
+                <p className="text-[10px] font-bold text-white/40 uppercase mb-1.5 tracking-wider">
+                  Итого доступ
+                </p>
+                <p className="text-xl md:text-2xl font-oswald text-emerald-400 font-bold">
+                  <AnimatedNumber value={conversionData?.totalDays || 0} /> дн.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Пакеты (продукты) - БЕЗ блокировки при пересчете */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6" key={`products-${selectedTier}`}>
+            {products.map((p, index) => {
+              const isSelected = selectedProduct?.id === p.id
+              
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => handleProductChange(p)}
+                  className={`
+                    relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition
+                    ${isSelected 
+                      ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-transparent ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` 
+                      : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'
+                    }
+                  `}
+                  style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
+                >
+                  {p.discount_percentage > 0 && (
+                    <span className={`
+                      absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 font-medium overflow-hidden
+                      ${selectedTier === 'elite' 
+                        ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' 
+                        : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'
+                      }
+                    `}>
+                      <span className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-shimmer ${
+                        selectedTier === 'elite' ? 'via-amber-300/20' : 'via-purple-300/20'
+                      }`}></span>
+                      <span className="relative">−{p.discount_percentage}%</span>
+                    </span>
+                  )}
+                  <p className={`
+                    text-[10px] font-bold uppercase mb-1.5 tracking-wider transition-colors
+                    ${isSelected ? currentConfig?.color : 'text-white/40'}
+                  `}>
+                    {p.duration_months} мес.
+                  </p>
+                  <p 
+                    key={`price-${p.id}-${isSelected}`}
+                    className="text-2xl md:text-3xl font-oswald font-bold text-white"
+                  >
+                    {p.price.toLocaleString('ru-RU')} <span className="text-base text-white/50">₽</span>
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Футер с итоговой информацией и кнопкой */}
+          <div className="mt-auto space-y-4">
+            {/* Итоговая информация */}
+            <div className="rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.03] ring-1 ring-white/10 p-4 md:p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
+                    Доступ до:
+                  </p>
+                  <p 
+                    key={`date-${conversionData?.newExpirationDate}`}
+                    className={`text-sm font-semibold text-white/90 smooth-transition transition-opacity duration-300 ${calculating ? 'opacity-0' : 'opacity-100'}`}
+                  >
+                    {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                  </p>
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
+                    Общий срок:
+                  </p>
+                  <p className={`text-lg font-bold transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
+                    <AnimatedNumber value={conversionData?.totalDays || 0} /> дн.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Кнопка апгрейда - блокируем ТОЛЬКО во время calculating */}
+            <button
+              onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
+              disabled={calculating || !selectedProduct}
+              className={`
+                w-full py-4 md:py-5 rounded-xl md:rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-wider 
+                shadow-lg transition-all duration-300
+                ${selectedTier === 'pro' 
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30' 
+                  : selectedTier === 'elite'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30'
+                }
+                ${calculating || !selectedProduct 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:brightness-110 active:scale-[0.98]'
+                }
+              `}
+              style={{ touchAction: 'manipulation' }}
+            >
+              {calculating ? 'Подсчет...' : `Апгрейд до ${selectedTier}`}
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
