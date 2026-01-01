@@ -447,7 +447,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
           }
         }
         
-        /* Pulse with glow */
+        /* Pulse with glow - green */
         @keyframes pulseGlow {
           0%, 100% {
             opacity: 1;
@@ -456,12 +456,26 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
           }
           50% {
             opacity: 0.75;
-            transform: scale(1.4);
-            box-shadow: 0 0 9px 3px rgba(74, 222, 128, 0.675);
+            transform: scale(1.28);
+            box-shadow: 0 0 6px 2px rgba(74, 222, 128, 0.675);
           }
         }
         
-        /* Ring ripple effect */
+        /* Pulse with glow - red */
+        @keyframes pulseGlowRed {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 1.5px 0.75px rgba(248, 113, 113, 0.45);
+          }
+          50% {
+            opacity: 0.75;
+            transform: scale(1.28);
+            box-shadow: 0 0 6px 2px rgba(248, 113, 113, 0.675);
+          }
+        }
+        
+        /* Ring ripple effect - green */
         @keyframes ringRipple {
           0% {
             opacity: 0.8;
@@ -469,7 +483,19 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
           }
           100% {
             opacity: 0;
-            transform: scale(2.5);
+            transform: scale(1.75);
+          }
+        }
+        
+        /* Ring ripple effect - red */
+        @keyframes ringRippleRed {
+          0% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.75);
           }
         }
         
@@ -511,8 +537,16 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
           animation: pulseGlow 2s ease-in-out infinite !important;
         }
         
+        .animate-pulse-glow-red {
+          animation: pulseGlowRed 2s ease-in-out infinite !important;
+        }
+        
         .animate-ring-ripple {
           animation: ringRipple 2s ease-out infinite !important;
+        }
+        
+        .animate-ring-ripple-red {
+          animation: ringRippleRed 2s ease-out infinite !important;
         }
         
         /* Mobile optimizations - aggressive performance boost */
@@ -830,27 +864,41 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                         <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow">
                           <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ring-ripple"></span>
                         </span>
-                        Active
+                        Активна
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-500/15 px-2.5 py-1 text-xs text-gray-200 ring-1 ring-gray-400/30">
-                        Inactive
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-2.5 py-1 text-xs text-red-200 ring-1 ring-red-400/30">
+                        <span className="relative h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse-glow-red">
+                          <span className="absolute inset-0 rounded-full bg-red-400 animate-ring-ripple-red"></span>
+                        </span>
+                        Неактивна
                       </span>
                     )}
                   </div>
 
                   <div className="rounded-xl bg-white/[0.04] p-4 ring-1 ring-white/10 mb-3">
                     <div className="flex items-center justify-between mb-3">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-2xl font-semibold text-white font-oswald uppercase tracking-tight">{tierDisplayName}</h3>
                         <p className="text-sm text-white/60 mt-1">
                           {subscriptionActive ? 'Активная подписка' : 'Подписка неактивна'}
                         </p>
                       </div>
                       {daysLeft !== null && daysLeft > 0 && (
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-white">{daysLeft}</p>
-                          <p className="text-xs text-white/50">дней</p>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xl text-white whitespace-nowrap">
+                            <span className="font-bold">{daysLeft}</span>{' '}
+                            <span className="text-xs font-normal text-white/50">
+                              {(() => {
+                                const lastDigit = daysLeft % 10
+                                const lastTwoDigits = daysLeft % 100
+                                if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'дней'
+                                if (lastDigit === 1) return 'день'
+                                if (lastDigit >= 2 && lastDigit <= 4) return 'дня'
+                                return 'дней'
+                              })()}
+                            </span>
+                          </p>
                         </div>
                       )}
                     </div>
@@ -895,14 +943,14 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                       <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
-                              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                              <circle cx="12" cy="12" r="3"></circle>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
+                              <path d="M9 19h6"></path>
+                              <path d="M9 15v-3H5l7-7 7 7h-4v3H9z"></path>
                             </svg>
                           </div>
                           <div className="text-left flex-1">
-                            <p className="text-sm font-medium text-white">Настройки тарифа</p>
-                            <p className="text-xs text-white/60">Авто-продление и другое</p>
+                            <p className="text-sm font-medium text-white">Апгрейд тарифа</p>
+                            <p className="text-xs text-white/60">Улучши свою подписку</p>
                           </div>
                         </div>
                         <div className="rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white/80 whitespace-nowrap flex-shrink-0">
