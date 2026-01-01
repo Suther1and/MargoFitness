@@ -231,6 +231,18 @@ export function SubscriptionRenewalModal({
                   <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none hidden md:block" />
                   
                   <div className="relative z-10 flex flex-col h-full">
+                    {/* Close button */}
+                    <button
+                      onClick={() => onOpenChange(false)}
+                      className="absolute top-0 right-0 md:top-2 md:right-2 z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                      </svg>
+                      <span className="sr-only">Закрыть</span>
+                    </button>
+                    
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-orange-500/30 shadow-lg">
                         <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-300" />
