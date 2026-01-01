@@ -75,7 +75,6 @@ interface UpgradeModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   currentTier: SubscriptionTier
-  currentExpires: string | null
   userId: string
 }
 
@@ -109,7 +108,7 @@ const tierConfig = {
   }
 }
 
-export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, currentExpires, userId }: UpgradeModalProps) {
+export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, userId }: UpgradeModalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [calculating, setCalculating] = useState(false)
