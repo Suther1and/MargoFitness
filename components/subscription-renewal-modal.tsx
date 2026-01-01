@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getRenewalOptions } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Calendar, CheckCircle2 } from 'lucide-react'
+import { Calendar, CheckCircle2, Zap, Clock } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Компонент для плавной анимации чисел (как в checkout)
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -138,256 +139,255 @@ export function SubscriptionRenewalModal({
   const metadata = selectedProduct?.metadata as { benefits?: string[] } | null
   const productBenefits = metadata?.benefits || ['Мгновенный доступ', 'Безопасная оплата', 'Дни суммируются']
 
-  // Skeleton loader для загрузки
-  if (loading && open) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
-          <DialogTitle className="sr-only">Продление подписки</DialogTitle>
-          <DialogDescription className="sr-only">Загрузка...</DialogDescription>
-          
-          {/* Левая панель skeleton */}
-          <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent p-8 flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
-            <div className="relative z-10 space-y-6 animate-pulse">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white/5" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-6 bg-white/5 rounded w-3/4" />
-                  <div className="h-3 bg-white/5 rounded w-1/2" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Правая панель skeleton */}
-          <div className="flex-1 p-6 md:p-10 animate-pulse space-y-6">
-            <div className="h-4 bg-white/5 rounded w-1/3" />
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-24 bg-white/5 rounded-2xl" />
-              ))}
-            </div>
-            <div className="h-32 bg-white/5 rounded-2xl mt-auto" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] w-[95vw] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl">
+      <DialogContent className="sm:max-w-[800px] w-[95vw] md:h-[640px] bg-[#1a1a24]/95 border-white/10 text-white p-0 overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl transition-all duration-300">
         <DialogTitle className="sr-only">Продление подписки</DialogTitle>
         <DialogDescription className="sr-only">Выберите период продления</DialogDescription>
         
-        {/* Стили для плавных анимаций */}
-        <style jsx>{`
-          @keyframes smoothFadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-          
-          @keyframes textFade {
-            0% {
-              opacity: 0;
-              transform: translateY(-2px);
-            }
-            100% {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          
-          .smooth-transition {
-            animation: textFade 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-          }
-          
-          .tabular-nums {
-            font-variant-numeric: tabular-nums;
-          }
-          
-          /* Оптимизация для мобильных */
-          @media (max-width: 768px) {
-            .mobile-blur-off {
-              backdrop-filter: none !important;
-            }
-          }
-        `}</style>
-        
-        {/* Левая панель */}
-        <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent p-8 flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5">
-          {/* Фоновые эффекты */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none hidden md:block" />
-          
-          <div className="relative z-10 flex flex-col h-full">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-orange-500/30 shadow-lg">
-                <Calendar className="w-6 h-6 text-orange-300" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-oswald uppercase leading-none text-white">Продление</h3>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
-                  Подписка активна
-                </p>
-              </div>
-            </div>
-
-            {/* Текущий статус - Сделал заметнее */}
-            <div className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Осталось:</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-oswald font-bold text-white">
-                  <AnimatedNumber value={remainingDays} />
-                </span>
-                <span className="text-sm font-medium text-white/50">дн.</span>
-              </div>
-              <p className="text-[10px] font-medium text-white/40 mt-1">
-                Тариф: <span className="text-orange-400/80 uppercase">{currentTier}</span>
-              </p>
-            </div>
-            
-            {/* Преимущества - из metadata продукта */}
-            <div className="space-y-4 hidden md:block">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Преимущества:</p>
-              <div className="space-y-3" key={selectedProduct?.id}>
-                {productBenefits.slice(0, 4).map((text, i) => (
-                  <div 
-                    key={i} 
-                    className="flex items-center gap-3 text-sm text-white/70 benefit-item"
-                  >
-                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-3 h-3 text-orange-400" />
-                    </div>
-                    {text}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Красивый разделитель */}
-              <div className="flex items-center gap-3 py-4">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                <div className="w-1 h-1 rounded-full bg-white/30" />
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              </div>
-              
-              {/* Дополнительные гарантии */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '240ms' }}>
-                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
-                  </div>
-                  Моментальный доступ
-                </div>
-                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '280ms' }}>
-                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <Calendar className="w-2.5 h-2.5 text-blue-400" />
-                  </div>
-                  Дни суммируются
-                </div>
-                <div className="flex items-center gap-3 text-xs text-white/70 smooth-transition" style={{ animationDelay: '320ms' }}>
-                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-orange-400" />
-                  </div>
-                  Безопасная оплата
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Правая панель */}
-        <div className="flex-1 p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-hide min-h-0">
-          <div className="flex items-center justify-between mb-6">
-            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-              Выберите срок продления:
-            </h4>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 md:hidden">
-              <span className="text-[10px] font-bold text-white/40 uppercase">У вас:</span>
-              <span className="text-xs font-bold text-orange-400">{remainingDays} дн.</span>
-            </div>
-          </div>
-          
-          {/* Карточки продуктов */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
-            {products.map((p, index) => {
-              const isSelected = selectedProduct?.id === p.id
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedProduct(p)}
-                  className={`
-                    relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition
-                    ${isSelected 
-                      ? 'bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-500/50 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10' 
-                      : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'
-                    }
-                  `}
-                  style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
-                >
-                  {p.discount_percentage > 0 && (
-                    <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100 ring-1 ring-orange-400/40 font-medium overflow-hidden">
-                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent animate-shimmer"></span>
-                      <span className="relative">−{p.discount_percentage}%</span>
-                    </span>
-                  )}
-                  <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${
-                    isSelected ? 'text-orange-300' : 'text-white/40'
-                  }`}>
-                    {p.duration_months} {p.duration_months === 1 ? 'мес.' : 'мес.'}
-                  </p>
-                  <p 
-                    key={`price-${p.id}-${isSelected}`}
-                    className="text-2xl md:text-3xl font-oswald font-bold text-white"
-                  >
-                    {p.price.toLocaleString('ru-RU')} <span className="text-base text-white/50">₽</span>
-                  </p>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Итоговая информация */}
-          <div className="mt-auto space-y-4">
-            <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-5 md:p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
-                    Итоговый срок:
-                  </p>
-                  <p className="text-2xl md:text-3xl font-oswald font-bold text-emerald-400">
-                    <AnimatedNumber value={newTotalDays} /> дн.
-                  </p>
-                </div>
-                <div className="text-right flex-1">
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
-                    Активность до:
-                  </p>
-                  <p 
-                    key={`renewal-date-${newExpiryDate?.getTime()}`}
-                    className="text-sm md:text-base font-semibold text-white/90 smooth-transition"
-                  >
-                    {newExpiryDate ? formatDate(newExpiryDate) : '...'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Кнопка оплаты */}
-            <button
-              onClick={handleRenewal}
-              className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm md:text-xs uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/30 hover:brightness-110 active:scale-[0.98]"
-              style={{ touchAction: 'manipulation' }}
+        <AnimatePresence mode="wait" initial={false}>
+          {loading ? (
+            <motion.div 
+              key="skeleton"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col md:flex-row w-full h-full"
             >
-              Продлить подписку
-            </button>
-          </div>
-        </div>
+              {/* Левая панель skeleton */}
+              <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent p-8 flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5 h-[320px] md:h-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
+                <div className="relative z-10 space-y-6 animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-6 bg-white/5 rounded w-3/4" />
+                      <div className="h-3 bg-white/5 rounded w-1/2" />
+                    </div>
+                  </div>
+                  {/* Status skeleton */}
+                  <div className="h-24 bg-white/5 rounded-2xl" />
+                  {/* Benefits skeleton */}
+                  <div className="space-y-3 pt-4 hidden md:block">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full bg-white/5 flex-shrink-0" />
+                        <div className="h-3 bg-white/5 rounded w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Правая панель skeleton */}
+              <div className="flex-1 p-6 md:p-10 animate-pulse flex flex-col h-full">
+                <div className="h-4 bg-white/5 rounded w-1/3 mb-6" />
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-24 md:h-32 bg-white/5 rounded-3xl" />
+                  ))}
+                </div>
+                <div className="mt-auto h-32 bg-white/5 rounded-3xl" />
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="flex flex-col md:flex-row w-full h-full"
+            >
+              {/* Стили для плавных анимаций */}
+              <style jsx>{`
+                @keyframes smoothFadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes textFade {
+                  0% { opacity: 0; transform: translateY(-2px); }
+                  100% { opacity: 1; transform: translateY(0); }
+                }
+                .smooth-transition {
+                  animation: textFade 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                }
+                .tabular-nums { font-variant-numeric: tabular-nums; }
+                @media (max-width: 768px) {
+                  .mobile-blur-off { backdrop-filter: none !important; }
+                }
+              `}</style>
+              
+              {/* Левая панель */}
+              <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent p-8 flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5 h-full">
+                {/* Фоновые эффекты */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none hidden md:block" />
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-orange-500/30 shadow-lg">
+                      <Calendar className="w-6 h-6 text-orange-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-oswald uppercase leading-none text-white">Продление</h3>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+                        Подписка активна
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Текущий статус */}
+                  <div className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Осталось:</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-oswald font-bold text-white">
+                        <AnimatedNumber value={remainingDays} />
+                      </span>
+                      <span className="text-sm font-medium text-white/50">дн.</span>
+                    </div>
+                    <p className="text-[10px] font-medium text-white/40 mt-1">
+                      Тариф: <span className="text-orange-400/80 uppercase">{currentTier}</span>
+                    </p>
+                  </div>
+                  
+                  {/* Преимущества */}
+                  <div className="space-y-4 hidden md:block flex-1">
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Преимущества:</p>
+                    <div className="relative min-h-[160px]">
+                      <div className="space-y-3" key={selectedProduct?.id}>
+                        {productBenefits.slice(0, 4).map((text, i) => (
+                          <div 
+                            key={i} 
+                            className="flex items-center gap-3 text-sm text-white/70 benefit-item"
+                          >
+                            <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
+                              <CheckCircle2 className="w-3 h-3 text-orange-400" />
+                            </div>
+                            {text}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Красивый разделитель */}
+                    <div className="flex items-center gap-3 py-4">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <div className="w-1 h-1 rounded-full bg-white/30" />
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    </div>
+                    
+                    {/* Дополнительные гарантии */}
+                    <div className="mt-auto space-y-2 pt-4">
+                      {[
+                        { icon: CheckCircle2, text: 'Мгновенный доступ', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/10' },
+                        { icon: Calendar, text: 'Дни суммируются', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/10' },
+                        { icon: CheckCircle2, text: 'Безопасная оплата', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/10' }
+                      ].map((item, idx) => (
+                        <div 
+                          key={idx} 
+                          className="flex items-center gap-3 p-2 rounded-2xl bg-white/[0.03] border border-white/5 transition-all duration-300 hover:bg-white/[0.06] group"
+                        >
+                          <div className={`w-8 h-8 rounded-xl ${item.bg} border ${item.border} flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105`}>
+                            <item.icon className={`w-4 h-4 ${item.color}`} />
+                          </div>
+                          <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-tight transition-colors group-hover:text-white/60">
+                            {item.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Правая панель */}
+              <div className="flex-1 p-6 md:p-10 flex flex-col overflow-hidden min-h-0">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                    Выберите срок продления:
+                  </h4>
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 md:hidden">
+                    <span className="text-[10px] font-bold text-white/40 uppercase">У вас:</span>
+                    <span className="text-xs font-bold text-orange-400">{remainingDays} дн.</span>
+                  </div>
+                </div>
+                
+                {/* Карточки продуктов */}
+                <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+                  {products.map((p, index) => {
+                    const isSelected = selectedProduct?.id === p.id
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedProduct(p)}
+                        className={`
+                          relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition
+                          ${isSelected 
+                            ? 'bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-500/50 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10' 
+                            : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'
+                          }
+                        `}
+                        style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
+                      >
+                        {p.discount_percentage > 0 && (
+                          <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100 ring-1 ring-orange-400/40 font-medium overflow-hidden">
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent animate-shimmer"></span>
+                            <span className="relative">−{p.discount_percentage}%</span>
+                          </span>
+                        )}
+                        <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${
+                          isSelected ? 'text-orange-300' : 'text-white/40'
+                        }`}>
+                          {p.duration_months} мес.
+                        </p>
+                        <p 
+                          key={`price-${p.id}-${isSelected}`}
+                          className="text-2xl md:text-3xl font-oswald font-bold text-white"
+                        >
+                          {p.price.toLocaleString('ru-RU')} <span className="text-base text-white/50">₽</span>
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Итоговая информация */}
+                <div className="mt-auto space-y-4">
+                  <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-5 md:p-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
+                          Итоговый срок:
+                        </p>
+                        <p className="text-2xl md:text-3xl font-oswald font-bold text-emerald-400">
+                          <AnimatedNumber value={newTotalDays} /> дн.
+                        </p>
+                      </div>
+                      <div className="text-right flex-1">
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
+                          Активность до:
+                        </p>
+                        <p 
+                          key={`renewal-date-${newExpiryDate?.getTime()}`}
+                          className="text-sm md:text-base font-semibold text-white/90 smooth-transition"
+                        >
+                          {newExpiryDate ? formatDate(newExpiryDate) : '...'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Кнопка оплаты */}
+                  <button
+                    onClick={handleRenewal}
+                    className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm md:text-xs uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/30 hover:brightness-110 active:scale-[0.98]"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    Продлить подписку
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </DialogContent>
     </Dialog>
   )
