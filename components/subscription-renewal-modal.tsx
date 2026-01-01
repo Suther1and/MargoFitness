@@ -91,7 +91,7 @@ export function SubscriptionRenewalModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[1200px] w-[95vw] bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
+      <DialogContent className="!max-w-[920px] w-[90vw] bg-[#0a0a0f] border-white/10 text-white p-0 overflow-hidden">
         {/* Заголовок */}
         <DialogHeader className="p-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
