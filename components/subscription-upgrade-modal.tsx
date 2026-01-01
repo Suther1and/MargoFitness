@@ -145,7 +145,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       const initialTier = tiers[0]
       const initialProd = initialTier.products.find(p => p.duration_months === 6) || initialTier.products[0]
       
-      const conv = await calculateUpgradeConversion(userId, initialProd.tier_level)
+      const conv = await calculateUpgradeConversion(userId, initialProd.tier_level || 0)
       
       setSelectedTier(initialTier.tier)
       setSelectedProduct(initialProd)
@@ -179,7 +179,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     const prod = tierData.products.find(p => p.duration_months === 6) || tierData.products[0]
     setSelectedProduct(prod)
     
-    const res = await calculateUpgradeConversion(userId, prod.tier_level)
+    const res = await calculateUpgradeConversion(userId, prod.tier_level || 0)
     if (res.success && res.data) {
       const newProductDays = prod.duration_months * 30
       setConversionData({
@@ -200,7 +200,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     setCalculating(true)
     setSelectedProduct(product)
     
-    const res = await calculateUpgradeConversion(userId, product.tier_level)
+    const res = await calculateUpgradeConversion(userId, product.tier_level || 0)
     if (res.success && res.data) {
       const newProductDays = product.duration_months * 30
       setConversionData({
