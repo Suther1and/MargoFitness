@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getUpgradeOptions, calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star } from 'lucide-react'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Equal } from 'lucide-react'
 
 // Компонент для плавной анимации чисел (как в checkout)
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -125,9 +125,10 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [conversionData, setConversionData] = useState<{
     newExpirationDate: string
-    bonusDays: number
+    convertedDays: number  // Дни после конвертации
+    newProductDays: number  // Дни новой подписки
     totalDays: number
-    remainingDays: number
+    remainingDays: number  // Оставшиеся дни старого тира
   } | null>(null)
 
   useEffect(() => {
@@ -146,10 +147,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
       
       const conv = await calculateUpgradeConversion(userId, initialProd.tier_level)
       if (conv.success && conv.data) {
+        const newProductDays = initialProd.duration_months * 30
         setConversionData({
-          newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + initialProd.duration_months * 30) * 86400000).toISOString(),
-          bonusDays: conv.data.convertedDays,
-          totalDays: conv.data.convertedDays + initialProd.duration_months * 30,
+          newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + newProductDays) * 86400000).toISOString(),
+          convertedDays: conv.data.convertedDays,
+          newProductDays: newProductDays,
+          totalDays: conv.data.convertedDays + newProductDays,
           remainingDays: conv.data.remainingDays
         })
       }
@@ -174,10 +177,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
     
     const res = await calculateUpgradeConversion(userId, prod.tier_level)
     if (res.success && res.data) {
+      const newProductDays = prod.duration_months * 30
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + prod.duration_months * 30) * 86400000).toISOString(),
-        bonusDays: res.data.convertedDays,
-        totalDays: res.data.convertedDays + prod.duration_months * 30,
+        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + newProductDays) * 86400000).toISOString(),
+        convertedDays: res.data.convertedDays,
+        newProductDays: newProductDays,
+        totalDays: res.data.convertedDays + newProductDays,
         remainingDays: res.data.remainingDays
       })
     }
@@ -193,10 +198,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
     
     const res = await calculateUpgradeConversion(userId, product.tier_level)
     if (res.success && res.data) {
+      const newProductDays = product.duration_months * 30
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + product.duration_months * 30) * 86400000).toISOString(),
-        bonusDays: res.data.convertedDays,
-        totalDays: res.data.convertedDays + product.duration_months * 30,
+        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + newProductDays) * 86400000).toISOString(),
+        convertedDays: res.data.convertedDays,
+        newProductDays: newProductDays,
+        totalDays: res.data.convertedDays + newProductDays,
         remainingDays: res.data.remainingDays
       })
     }
@@ -414,48 +421,53 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
           </div>
 
           {/* Блок конверсии (Smart Convert) */}
-          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-5 md:p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
+          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-4 md:p-5 mb-3">
+            <div className="flex justify-between items-center mb-3">
               <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
                 Smart Convert
               </span>
               <Zap className={`w-4 h-4 transition-colors duration-300 ${currentConfig?.color || 'text-blue-400'}`} />
             </div>
             
-            {/* Контент с плавной анимацией чисел */}
-            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-              <div className="flex-1 w-full">
-                <p className="text-xs text-white/40 line-through font-medium mb-1.5">
+            {/* Только конвертация: было → стало */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] text-white/40 uppercase tracking-wide font-medium">
+                  У вас:
+                </p>
+                <p className="text-lg md:text-xl font-oswald text-white/40 font-bold line-through">
                   <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.{' '}
                   <span key={`current-tier`} className="smooth-transition inline-block">
                     {currentTier}
                   </span>
                 </p>
-                <p className="text-xl md:text-2xl font-oswald text-white font-bold">
-                  +<AnimatedNumber value={conversionData?.bonusDays || 0} /> дн.{' '}
+              </div>
+              
+              <ArrowBigRightDash className={`w-8 h-8 flex-shrink-0 transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`} />
+              
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] text-white/40 uppercase tracking-wide font-medium">
+                  Станет:
+                </p>
+                <p className={`text-lg md:text-xl font-oswald font-bold transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
+                  <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.{' '}
                   <span key={`selected-tier-${selectedTier}`} className="smooth-transition inline-block">
                     {selectedTier}
                   </span>
                 </p>
               </div>
-              
-              <div className="hidden md:flex flex-shrink-0">
-                <ArrowRight className="w-5 h-5 text-white/20" />
-              </div>
-              
-              <div className="flex-1 w-full md:text-right">
-                <p className="text-[10px] font-bold text-white/40 uppercase mb-1.5 tracking-wider">
-                  Итого доступ
-                </p>
-                <p className="text-xl md:text-2xl font-oswald text-emerald-400 font-bold">
-                  <AnimatedNumber value={conversionData?.totalDays || 0} /> дн.
-                </p>
-              </div>
+            </div>
+          </div>
+          
+          {/* Разделитель с плюсом */}
+          <div className="flex justify-center -my-1 mb-3">
+            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+              <Plus className="w-5 h-5 text-white/30" />
             </div>
           </div>
 
           {/* Пакеты (продукты) - БЕЗ блокировки при пересчете */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6" key={`products-${selectedTier}`}>
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3" key={`products-${selectedTier}`}>
             {products.map((p, index) => {
               const isSelected = selectedProduct?.id === p.id
               
@@ -502,31 +514,48 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
               )
             })}
           </div>
+          
+          {/* Разделитель с равно */}
+          <div className="flex justify-center -my-1 mb-4">
+            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+              <Equal className="w-5 h-5 text-white/30" />
+            </div>
+          </div>
 
           {/* Футер с итоговой информацией и кнопкой */}
           <div className="mt-auto space-y-4">
-            {/* Итоговая информация */}
+            {/* Итоговый расчет - в одну строку */}
             <div className="rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.03] ring-1 ring-white/10 p-4 md:p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
-                    Доступ до:
-                  </p>
-                  <p 
-                    key={`date-${conversionData?.newExpirationDate}`}
-                    className={`text-sm font-semibold text-white/90 smooth-transition transition-opacity duration-300 ${calculating ? 'opacity-0' : 'opacity-100'}`}
-                  >
-                    {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
-                  </p>
+              <div className="mb-3">
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
+                  Итоговый срок:
+                </p>
+                <div className="flex items-center gap-2 text-lg md:text-xl font-oswald font-bold">
+                  <span className={`transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
+                    <AnimatedNumber value={conversionData?.convertedDays || 0} />
+                  </span>
+                  <span className="text-white/30 text-base">+</span>
+                  <span className="text-white">
+                    <AnimatedNumber value={conversionData?.newProductDays || 0} />
+                  </span>
+                  <span className="text-white/30 text-base">=</span>
+                  <span className={`text-xl md:text-2xl transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
+                    <AnimatedNumber value={conversionData?.totalDays || 0} /> <span className="text-base text-white/50">дн.</span>
+                  </span>
                 </div>
-                <div className="flex-1 text-right">
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
-                    Общий срок:
-                  </p>
-                  <p className={`text-lg font-bold transition-colors duration-300 ${currentConfig?.color || 'text-purple-400'}`}>
-                    <AnimatedNumber value={conversionData?.totalDays || 0} /> дн.
-                  </p>
-                </div>
+              </div>
+              
+              {/* Дата под итогом */}
+              <div className="pt-3 border-t border-white/10">
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">
+                  Доступ до:
+                </p>
+                <p 
+                  key={`date-${conversionData?.newExpirationDate}`}
+                  className={`text-sm font-semibold text-white/90 smooth-transition transition-opacity duration-300 ${calculating ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                </p>
               </div>
             </div>
 
