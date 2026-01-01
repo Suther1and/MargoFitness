@@ -90,10 +90,20 @@ export async function POST(request: NextRequest) {
         // Обработать успешный платеж (обновить подписку)
         console.log(`[Webhook] Payment type: ${transaction.payment_type}`)
         
+        // Получаем action из metadata
+        const metadata = transaction.metadata as any
+        const action = metadata?.action || 'purchase'
+        const actualPaidAmount = metadata?.finalPrice || Number(transaction.amount)
+        
+        console.log(`[Webhook] Processing payment with action: ${action}, actualPaidAmount: ${actualPaidAmount}`)
+        
         const result = await processSuccessfulPayment({
           userId: transaction.user_id,
           productId: transaction.product_id!,
-          paymentMethodId: payment.payment_method?.id
+          paymentMethodId: payment.payment_method?.id,
+          action: action as 'purchase' | 'renewal' | 'upgrade',
+          actualPaidAmount: actualPaidAmount,
+          paymentId: payment.id
         })
 
         if (!result.success) {
@@ -111,10 +121,9 @@ export async function POST(request: NextRequest) {
         // ============================================
         
         try {
-          // Получаем информацию из метаданных
-          const metadata = transaction.metadata as any
+          // Получаем информацию из метаданных (уже получено выше)
           const bonusUsed = metadata?.bonusUsed || 0
-          const actualPaidAmount = Number(transaction.amount)
+          // actualPaidAmount уже получен выше
           
           console.log(`[Webhook] Processing bonuses - metadata:`, JSON.stringify(metadata, null, 2))
           console.log(`[Webhook] Processing bonuses for amount: ${actualPaidAmount}, bonusUsed: ${bonusUsed}`)

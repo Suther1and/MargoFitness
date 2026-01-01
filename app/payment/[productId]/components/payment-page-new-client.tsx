@@ -8,6 +8,7 @@ import { PriceBreakdown } from './price-breakdown'
 import { TrustBadges } from './trust-badges'
 import { PaymentCTAButton } from './payment-cta-button'
 import { calculateFinalPrice } from '@/lib/services/price-calculator'
+import { calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
 import type { Product, Profile, PromoCode } from '@/types/database'
 import type { PriceCalculation } from '@/lib/services/price-calculator'
 
@@ -32,7 +33,23 @@ export function PaymentPageNewClient({
   const [bonusToUse, setBonusToUse] = useState(0)
   const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
   const [loadingCalc, setLoadingCalc] = useState(true)
+  const [conversionData, setConversionData] = useState<any>(null)
   const router = useRouter()
+
+  // Загрузить данные конвертации для upgrade
+  useEffect(() => {
+    if (action === 'upgrade' && product.tier_level) {
+      loadConversionData()
+    }
+  }, [action, product.tier_level])
+
+  const loadConversionData = async () => {
+    if (!product.tier_level) return
+    const result = await calculateUpgradeConversion(profile.id, product.tier_level)
+    if (result.success && result.data) {
+      setConversionData(result.data)
+    }
+  }
 
   // Расчет цены при изменении промокода или бонусов
   useEffect(() => {
@@ -115,6 +132,30 @@ export function PaymentPageNewClient({
 
   const isDiscountApplied = !!appliedPromo || bonusToUse > 0
 
+  // Рассчитать новую дату окончания для renewal
+  const getNewExpiryDate = () => {
+    if (action === 'renewal' && profile.subscription_expires_at) {
+      const currentExpires = new Date(profile.subscription_expires_at)
+      const now = new Date()
+      const baseDate = currentExpires > now ? currentExpires : now
+      const newDate = new Date(baseDate)
+      newDate.setDate(newDate.getDate() + (product.duration_months * 30))
+      return newDate
+    } else if (action === 'upgrade' && conversionData) {
+      const totalDays = (product.duration_months * 30) + conversionData.convertedDays
+      const newDate = new Date()
+      newDate.setDate(newDate.getDate() + totalDays)
+      return newDate
+    }
+    return null
+  }
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+  }
+
+  const newExpiryDate = getNewExpiryDate()
+
   return (
     <>
       {/* Desktop: 2 колонки */}
@@ -127,6 +168,61 @@ export function PaymentPageNewClient({
             finalPrice={displayPrice}
             isDiscountApplied={isDiscountApplied}
           />
+
+          {/* Баннер для Renewal */}
+          {action === 'renewal' && (
+            <div className="rounded-xl bg-blue-500/10 ring-1 ring-blue-400/30 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                  <path d="M16 16h5v5"></path>
+                </svg>
+                <h3 className="text-sm font-bold text-white">Продление подписки</h3>
+              </div>
+              <p className="text-sm text-white/70">
+                Новые дни будут добавлены к вашей текущей подписке
+              </p>
+              {newExpiryDate && (
+                <p className="text-sm text-white/70 flex items-center gap-2">
+                  <span>📅</span>
+                  Новая дата окончания: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Баннер для Upgrade */}
+          {action === 'upgrade' && conversionData && (
+            <div className="rounded-xl bg-purple-500/10 ring-1 ring-purple-400/30 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <h3 className="text-sm font-bold text-white">Апгрейд тарифа</h3>
+              </div>
+              <div className="rounded-lg bg-white/10 p-3">
+                <p className="text-xs text-white/60 mb-1">Конвертация оставшихся дней:</p>
+                <p className="text-sm font-bold text-white">
+                  <span className="text-orange-300">{conversionData.remainingDays} дней {conversionData.currentTier.toUpperCase()}</span>
+                  {' → '}
+                  <span className="text-purple-300">{conversionData.convertedDays} дней {['FREE', 'BASIC', 'PRO', 'ELITE'][product.tier_level || 1]}</span>
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-white/70">
+                  Итого дней: <span className="font-bold text-emerald-300">{(product.duration_months * 30) + conversionData.convertedDays}</span>
+                </p>
+                {newExpiryDate && (
+                  <p className="text-sm text-white/70 flex items-center gap-2">
+                    <span>📅</span>
+                    До: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
           
           <PriceOptimizer
             productId={product.id}
@@ -166,6 +262,51 @@ export function PaymentPageNewClient({
           finalPrice={displayPrice}
           isDiscountApplied={isDiscountApplied}
         />
+
+        {/* Баннер для Renewal (Mobile) */}
+        {action === 'renewal' && (
+          <div className="rounded-xl bg-blue-500/10 ring-1 ring-blue-400/30 p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                <path d="M16 16h5v5"></path>
+              </svg>
+              <h3 className="text-sm font-bold text-white">Продление подписки</h3>
+            </div>
+            <p className="text-sm text-white/70">
+              Новые дни будут добавлены к вашей текущей подписке
+            </p>
+            {newExpiryDate && (
+              <p className="text-sm text-white/70 flex items-center gap-2">
+                <span>📅</span>
+                Новая дата: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Баннер для Upgrade (Mobile) */}
+        {action === 'upgrade' && conversionData && (
+          <div className="rounded-xl bg-purple-500/10 ring-1 ring-purple-400/30 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              <h3 className="text-sm font-bold text-white">Апгрейд тарифа</h3>
+            </div>
+            <div className="rounded-lg bg-white/10 p-3">
+              <p className="text-xs text-white/60 mb-1">Конвертация:</p>
+              <p className="text-sm font-bold text-white">
+                {conversionData.remainingDays} дн. → {conversionData.convertedDays} дн.
+              </p>
+            </div>
+            <p className="text-sm text-white/70">
+              Итого: <span className="font-bold text-emerald-300">{(product.duration_months * 30) + conversionData.convertedDays} дней</span>
+            </p>
+          </div>
+        )}
 
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-1">

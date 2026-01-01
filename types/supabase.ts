@@ -173,6 +173,8 @@ export interface Database {
           payment_provider: string | null
           payment_id: string | null
           amount: number
+          actual_paid_amount: number
+          purchased_days: number
           created_at: string
         }
         Insert: {
@@ -182,6 +184,8 @@ export interface Database {
           payment_provider?: string | null
           payment_id?: string | null
           amount: number
+          actual_paid_amount?: number
+          purchased_days?: number
           created_at?: string
         }
         Update: {
@@ -191,6 +195,8 @@ export interface Database {
           payment_provider?: string | null
           payment_id?: string | null
           amount?: number
+          actual_paid_amount?: number
+          purchased_days?: number
           created_at?: string
         }
         Relationships: [

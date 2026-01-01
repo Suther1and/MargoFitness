@@ -5,6 +5,8 @@ import { useEffect, useRef, useState, memo } from 'react'
 import Link from 'next/link'
 import { ReferralProcessor } from '@/components/referral-processor'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
+import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
+import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { getMonthGenitiveCase } from '@/lib/utils'
@@ -63,6 +65,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
   const bonusCountRef = useRef<HTMLSpanElement>(null)
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
+  const [renewalModalOpen, setRenewalModalOpen] = useState(false)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const [isFirstTime, setIsFirstTime] = useState(false)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
   const profileDesktopRef = useRef<HTMLElement>(null)
@@ -917,7 +921,11 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <button className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                    <button 
+                      onClick={() => setRenewalModalOpen(true)}
+                      className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 active:scale-95" 
+                      style={{ touchAction: 'manipulation' }}
+                    >
                       <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
@@ -939,7 +947,11 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                       </div>
                     </button>
                     
-                    <button className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95" style={{ touchAction: 'manipulation' }}>
+                    <button 
+                      onClick={() => setUpgradeModalOpen(true)}
+                      className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95" 
+                      style={{ touchAction: 'manipulation' }}
+                    >
                       <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
@@ -1550,6 +1562,22 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
               </section>
             </div>
           </div>
+
+          {/* Модальные окна */}
+          <SubscriptionRenewalModal
+            open={renewalModalOpen}
+            onOpenChange={setRenewalModalOpen}
+            currentTier={profile.subscription_tier}
+            currentExpires={profile.subscription_expires_at}
+            userId={profile.id}
+          />
+
+          <SubscriptionUpgradeModal
+            open={upgradeModalOpen}
+            onOpenChange={setUpgradeModalOpen}
+            currentTier={profile.subscription_tier}
+            userId={profile.id}
+          />
     </>
   )
 }

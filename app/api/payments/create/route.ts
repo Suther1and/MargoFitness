@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
       savePaymentMethod, 
       confirmationType = 'embedded',
       promoCode,
-      bonusToUse
+      bonusToUse,
+      action = 'purchase' // 'purchase' | 'renewal' | 'upgrade'
     } = body
 
     if (!productId) {
@@ -72,7 +73,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверка: нельзя купить подписку если уже есть активная
-    if (product.type === 'subscription_tier' && profile.subscription_status === 'active') {
+    // НО можно продлить (renewal) или апгрейдить (upgrade)
+    if (product.type === 'subscription_tier' && 
+        profile.subscription_status === 'active' &&
+        !['renewal', 'upgrade'].includes(action)) {
       return NextResponse.json(
         { 
           error: 'У вас уже есть активная подписка',
@@ -81,6 +85,20 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    // Валидация для upgrade: новый tier должен быть выше текущего
+    if (action === 'upgrade') {
+      const { TIER_LEVELS } = await import('@/types/database')
+      const currentTierLevel = TIER_LEVELS[profile.subscription_tier]
+      const newTierLevel = product.tier_level || 1
+      
+      if (newTierLevel <= currentTierLevel) {
+        return NextResponse.json({ 
+          error: 'Выберите тариф выше текущего',
+          details: `Ваш текущий тариф: ${profile.subscription_tier.toUpperCase()}. Выберите тариф выше для апгрейда.`
+        }, { status: 400 })
+      }
     }
 
     // Рассчитать финальную цену с учетом промокода и бонусов
@@ -123,7 +141,8 @@ export async function POST(request: NextRequest) {
         promoCode: promoCode || null,
         bonusUsed: bonusToUse || 0,
         originalPrice: product.price,
-        finalPrice: calculation.finalPrice
+        finalPrice: calculation.finalPrice,
+        action: action // Добавляем action для webhook
       }
     })
 
