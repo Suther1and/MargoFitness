@@ -245,8 +245,7 @@ export function SubscriptionRenewalModal({
                 {productBenefits.slice(0, 4).map((text, i) => (
                   <div 
                     key={i} 
-                    className="flex items-center gap-3 text-sm text-white/70 smooth-transition"
-                    style={{ animationDelay: `${i * 60}ms` }}
+                    className="flex items-center gap-3 text-sm text-white/70 benefit-item"
                   >
                     <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
                       <CheckCircle2 className="w-3 h-3 text-orange-400" />

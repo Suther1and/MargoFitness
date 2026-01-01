@@ -335,8 +335,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, curr
                 {productBenefits.slice(0, 5).map((b, i) => (
                   <div 
                     key={i}
-                    className="flex items-center gap-3 text-sm text-white/70 smooth-transition"
-                    style={{ animationDelay: `${i * 60}ms` }}
+                    className="flex items-center gap-3 text-sm text-white/70 benefit-item"
                   >
                     <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center transition-colors duration-300`}>
                       <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'} transition-colors duration-300`} />
