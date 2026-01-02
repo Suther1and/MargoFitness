@@ -10,7 +10,7 @@ import { SubscriptionRenewalModal } from '@/components/subscription-renewal-moda
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 import { createClient } from '@/lib/supabase/client'
 import type { Product, Profile, SubscriptionTier } from '@/types/database'
-import { TIER_LEVELS } from '@/types/database'
+import { TIER_LEVELS, isSubscriptionExpired } from '@/types/database'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
@@ -218,9 +218,17 @@ export default function HomeNewPage() {
     }
   }
 
+  // Функция для проверки активной подписки
+  const isSubscriptionActive = (profile: Profile | null): boolean => {
+    if (!profile) return false
+    if (profile.subscription_status !== 'active') return false
+    if (isSubscriptionExpired(profile.subscription_expires_at)) return false
+    return true
+  }
+
   // Функция для определения состояния кнопки тарифа
   const getTierButtonState = (tierLevel: 1 | 2 | 3) => {
-    if (!isAuthenticated || !profile || profile.subscription_status !== 'active') {
+    if (!isAuthenticated || !profile || !isSubscriptionActive(profile)) {
       return { type: 'purchase' as const, disabled: false }
     }
 
@@ -251,7 +259,7 @@ export default function HomeNewPage() {
     }
 
     // Проверяем состояние подписки
-    if (profile && profile.subscription_status === 'active') {
+    if (profile && isSubscriptionActive(profile)) {
       const currentTierLevel = TIER_LEVELS[profile.subscription_tier]
       const targetTierLevel = tierLevel
 
@@ -896,8 +904,9 @@ export default function HomeNewPage() {
                       {/* Кнопка снаружи */}
                       {(() => {
                         const buttonState = getTierButtonState(1)
-                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 1
-                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 1
+                        const isActive = isSubscriptionActive(profile)
+                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 1
+                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 1
                         
                         return (
                           <button 
@@ -987,9 +996,10 @@ export default function HomeNewPage() {
                       {/* Кнопка снаружи */}
                       {(() => {
                         const buttonState = getTierButtonState(2)
-                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 2
-                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 2
-                        const isHigherTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] < 2
+                        const isActive = isSubscriptionActive(profile)
+                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 2
+                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 2
+                        const isHigherTier = isActive && TIER_LEVELS[profile!.subscription_tier] < 2
                         
                         return (
                           <button 
@@ -1075,9 +1085,10 @@ export default function HomeNewPage() {
                       {/* Кнопка снаружи */}
                       {(() => {
                         const buttonState = getTierButtonState(3)
-                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 3
-                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 3
-                        const isHigherTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] < 3
+                        const isActive = isSubscriptionActive(profile)
+                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 3
+                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 3
+                        const isHigherTier = isActive && TIER_LEVELS[profile!.subscription_tier] < 3
                         
                         return (
                           <button 
@@ -1498,7 +1509,7 @@ export default function HomeNewPage() {
         onClose={() => setSignInOpen(false)} 
       />
 
-      {profile && profile.subscription_status === 'active' && (
+      {profile && isSubscriptionActive(profile) && (
         <>
           <SubscriptionRenewalModal
             open={renewalModalOpen}
