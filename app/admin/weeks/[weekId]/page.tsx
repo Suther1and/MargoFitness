@@ -1,7 +1,7 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { createClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
-import { ArrowLeft, ChevronRight, Edit } from "lucide-react"
+import { ArrowLeft, ChevronRight, Edit, Plus } from "lucide-react"
 import Link from "next/link"
 import CreateSessionButton from "./create-session-button"
 import SessionActions from "./session-actions"
