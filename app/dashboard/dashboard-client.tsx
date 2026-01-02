@@ -97,10 +97,15 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
   }, [profile])
 
   // Отдельный эффект для обработки payment=success (только один раз)
+  const paymentSuccessProcessed = useRef(false)
   useEffect(() => {
+    if (paymentSuccessProcessed.current) return // Уже обработали
+    
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('payment') === 'success') {
-      // Убираем параметр из URL, чтобы избежать бесконечного цикла
+      paymentSuccessProcessed.current = true
+      
+      // Убираем параметр из URL сразу, чтобы избежать бесконечного цикла
       const newUrl = window.location.pathname
       window.history.replaceState({}, '', newUrl)
       

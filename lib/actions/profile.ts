@@ -23,7 +23,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       return null
     }
 
-    console.log('Fetching profile for user:', user.id, user.email)
+    // Убрано избыточное логирование для уменьшения шума в консоли
+    // console.log('Fetching profile for user:', user.id, user.email)
 
     const { data: profile, error } = await supabase
       .from('profiles')
@@ -33,10 +34,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
     // Если профиля нет (триггер не сработал), создаем вручную
     if (error) {
-      console.log('Error fetching profile:', error.code, error.message, error.details)
-      
       if (error.code === 'PGRST116') {
-        console.log('Profile not found, creating one...')
+        // console.log('Profile not found, creating one...')
         
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
@@ -54,8 +53,6 @@ export async function getCurrentProfile(): Promise<Profile | null> {
           // Если получили ошибку дублирования ключа (23505), 
           // значит профиль уже создан триггером - просто получаем его
           if (createError.code === '23505') {
-            console.log('Profile already exists (created by trigger), fetching...')
-            
             const { data: existingProfile } = await supabase
               .from('profiles')
               .select('*')
@@ -69,7 +66,6 @@ export async function getCurrentProfile(): Promise<Profile | null> {
           return null
         }
 
-        console.log('Profile created successfully:', newProfile)
         return newProfile
       }
       
@@ -77,7 +73,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       return null
     }
 
-    console.log('Profile found:', profile)
+    // Убрано избыточное логирование
+    // console.log('Profile found:', profile)
     return profile
   } catch (err) {
     console.error('Unexpected error in getCurrentProfile:', err)
