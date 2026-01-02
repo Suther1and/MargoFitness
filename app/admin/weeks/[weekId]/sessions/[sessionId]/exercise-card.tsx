@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { deleteExercise } from '@/lib/actions/admin'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Video, Repeat, Clock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { Exercise } from '@/types/database'
 import EditExerciseButton from './edit-exercise-button'
@@ -39,56 +37,74 @@ export default function ExerciseCard({ exercise, index }: ExerciseCardProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex gap-3 flex-1">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+    <section className="group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 transition-all hover:ring-white/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent pointer-events-none" />
+      
+      <div className="relative z-10 p-5 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="flex gap-4 flex-1 min-w-0">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm font-black text-blue-400 font-oswald shadow-lg shadow-blue-500/10">
               {index + 1}
             </div>
-            <div className="flex-1">
-              <CardTitle className="text-lg">{exercise.title}</CardTitle>
-              <CardDescription className="mt-1">
-                {exercise.description}
-              </CardDescription>
+            <div className="flex-1 space-y-3 min-w-0">
+              <div>
+                <h3 className="text-xl font-bold text-white font-oswald uppercase tracking-tight group-hover:text-blue-400 transition-colors">
+                  {exercise.title}
+                </h3>
+                <p className="text-sm text-white/50 leading-relaxed mt-1 line-clamp-2 md:line-clamp-none">
+                  {exercise.description}
+                </p>
+              </div>
               
-              <div className="flex flex-wrap gap-2 mt-3 text-xs">
-                <span className="rounded-full bg-muted px-2 py-1">
-                  Видео: {exercise.video_kinescope_id}
-                </span>
-                {exercise.sets && (
-                  <span className="rounded-full bg-muted px-2 py-1">
-                    Подходы: {exercise.sets}
+              <div className="flex flex-wrap gap-4 pt-1">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                  <Video className="size-3 text-white/20" />
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate max-w-[120px]">
+                    {exercise.video_kinescope_id}
                   </span>
+                </div>
+                {exercise.sets && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                    <Repeat className="size-3 text-blue-400/40" />
+                    <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
+                      {exercise.sets} подходов
+                    </span>
+                  </div>
                 )}
                 {exercise.reps && (
-                  <span className="rounded-full bg-muted px-2 py-1">
-                    Повторения: {exercise.reps}
-                  </span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                    <Repeat className="size-3 text-blue-400/40" />
+                    <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
+                      {exercise.reps} повт.
+                    </span>
+                  </div>
                 )}
                 {exercise.rest_seconds && (
-                  <span className="rounded-full bg-muted px-2 py-1">
-                    Отдых: {exercise.rest_seconds}с
-                  </span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                    <Clock className="size-3 text-blue-400/40" />
+                    <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
+                      Отдых: {exercise.rest_seconds}с
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity self-end md:self-start">
             <EditExerciseButton exercise={exercise} />
-            <Button
-              variant="destructive"
-              size="sm"
+            <button
               onClick={handleDelete}
               disabled={loading}
+              className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all active:scale-95 disabled:opacity-50"
+              title="Удалить"
             >
               <Trash2 className="size-4" />
-            </Button>
+            </button>
           </div>
         </div>
-      </CardHeader>
-    </Card>
+      </div>
+    </section>
   )
 }
 

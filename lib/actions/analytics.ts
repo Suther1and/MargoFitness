@@ -49,6 +49,7 @@ export interface RegistrationStats {
   conversionRate: number
   newThisMonth: number
   newThisWeek: number
+  activeToday: number
 }
 
 export interface AnalyticsPeriod {
@@ -288,6 +289,9 @@ export async function getRegistrationStats(): Promise<{
     }
     
     const now = new Date()
+    const todayStart = new Date(now)
+    todayStart.setHours(0, 0, 0, 0)
+    
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
     
@@ -303,6 +307,10 @@ export async function getRegistrationStats(): Promise<{
     const newThisMonth = profiles?.filter(p => 
       new Date(p.created_at) > monthAgo
     ).length || 0
+
+    const activeToday = profiles?.filter(p => 
+      new Date(p.updated_at) > todayStart
+    ).length || 0
     
     const conversionRate = total > 0 ? (withActiveSubscription / total) * 100 : 0
     
@@ -313,7 +321,8 @@ export async function getRegistrationStats(): Promise<{
         withActiveSubscription,
         conversionRate,
         newThisMonth,
-        newThisWeek
+        newThisWeek,
+        activeToday
       }
     }
   } catch (error) {

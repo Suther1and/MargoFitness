@@ -58,7 +58,7 @@ export default async function RootLayout({
           <div 
             className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] rounded-b-[3rem] overflow-hidden" 
             style={{ 
-              background: pathname.startsWith('/dashboard') 
+              background: pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
                 ? 'linear-gradient(to bottom right, #18181b, #09090b, #18181b)'
                 : '#0C0C11',
               minHeight: '100vh'

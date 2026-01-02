@@ -1,180 +1,210 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
-import { getAllWeeks } from "@/lib/actions/content"
+import { getRegistrationStats, getRevenueByPeriod } from "@/lib/actions/analytics"
 import { redirect } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar, Plus, FileText, BookOpen, Users, TrendingUp } from "lucide-react"
+import { Calendar, BookOpen, Users, TrendingUp, Tag, ArrowRight, Settings, Activity, DollarSign, Percent } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminPage() {
   const profile = await getCurrentProfile()
 
-  // Проверка доступа: только для админов
   if (!profile || profile.role !== 'admin') {
     redirect('/')
   }
 
-  const weeks = await getAllWeeks()
+  const [registrationsResult, revenueResult] = await Promise.all([
+    getRegistrationStats(),
+    getRevenueByPeriod()
+  ])
+
+  const statsData = registrationsResult.data
+  const revenueData = revenueResult.data
+
+  const stats = [
+    {
+      label: 'Пользователей',
+      value: statsData?.total || 0,
+      icon: Users,
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+    },
+    {
+      label: 'С подпиской',
+      value: statsData?.withActiveSubscription || 0,
+      icon: Activity,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+    },
+    {
+      label: 'Заходов сегодня',
+      value: statsData?.activeToday || 0,
+      icon: TrendingUp,
+      color: 'text-orange-400',
+      bg: 'bg-orange-500/10',
+    },
+    {
+      label: 'Выручка',
+      value: `${(revenueData?.totalRevenue || 0).toLocaleString('ru-RU')} ₽`,
+      icon: DollarSign,
+      color: 'text-purple-400',
+      bg: 'bg-purple-500/10',
+    },
+    {
+      label: 'Конверсия',
+      value: `${(statsData?.conversionRate || 0).toFixed(1)}%`,
+      icon: Percent,
+      color: 'text-rose-400',
+      bg: 'bg-rose-500/10',
+    }
+  ]
+
+  const navCards = [
+    {
+      title: 'Управление неделями',
+      description: 'Создание и редактирование тренировочных недель',
+      href: '/admin/weeks',
+      icon: Calendar,
+      color: 'text-purple-300',
+      bg: 'bg-purple-500/10',
+      ring: 'ring-purple-400/20',
+      accent: 'from-purple-500/10'
+    },
+    {
+      title: 'Пользователи',
+      description: 'Управление подписками и ролями пользователей',
+      href: '/admin/users',
+      icon: Users,
+      color: 'text-blue-300',
+      bg: 'bg-blue-500/10',
+      ring: 'ring-blue-400/20',
+      accent: 'from-blue-500/10'
+    },
+    {
+      title: 'Аналитика',
+      description: 'Выручка, конверсия и статистика платежей',
+      href: '/admin/analytics',
+      icon: TrendingUp,
+      color: 'text-emerald-300',
+      bg: 'bg-emerald-500/10',
+      ring: 'ring-emerald-400/20',
+      accent: 'from-emerald-500/10'
+    },
+    {
+      title: 'Бесплатные материалы',
+      description: 'Управление контентом для всех пользователей',
+      href: '/admin/free-content',
+      icon: BookOpen,
+      color: 'text-orange-300',
+      bg: 'bg-orange-500/10',
+      ring: 'ring-orange-400/20',
+      accent: 'from-orange-500/10'
+    },
+    {
+      title: 'Промокоды',
+      description: 'Создание скидок и маркетинговые акции',
+      href: '/admin/promo-codes',
+      icon: Tag,
+      color: 'text-rose-300',
+      bg: 'bg-rose-500/10',
+      ring: 'ring-rose-400/20',
+      accent: 'from-rose-500/10'
+    }
+  ]
 
   return (
-    <div className="container mx-auto space-y-8 py-10">
-      {/* Заголовок */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Админ-панель</h1>
-          <p className="text-muted-foreground">
-            Управление контентом и тренировками
+    <div className="space-y-10 py-6">
+      {/* Header */}
+      <div className="mb-12">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 mb-6 backdrop-blur">
+          <Settings className="size-4 text-orange-300" />
+          <span className="text-sm text-orange-200/90">Управление платформой</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white font-oswald uppercase">
+          Админ-панель
+        </h1>
+        <p className="mt-4 text-white/70 max-w-2xl text-lg">
+          Добро пожаловать в центр управления MargoFitness. Здесь вы можете управлять контентом, пользователями и анализировать показатели.
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {stats.map((stat, i) => (
+          <div 
+            key={i}
+            className="group relative overflow-hidden rounded-3xl bg-white/[0.03] border border-white/5 p-5 transition-all hover:bg-white/[0.06] hover:border-white/10"
+          >
+            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${stat.bg} blur-2xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none`} />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`p-1.5 rounded-lg ${stat.bg}`}>
+                  <stat.icon className={`size-3.5 ${stat.color}`} />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 truncate">
+                  {stat.label}
+                </span>
+              </div>
+              
+              <div className="flex items-baseline gap-1">
+                <span className={`text-2xl font-bold font-oswald tracking-tight ${stat.color}`}>
+                  {stat.value}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Main Navigation Grid */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold text-white font-oswald uppercase tracking-tight">Разделы управления</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {navCards.map((card, i) => (
+            <Link key={i} href={card.href} className="group block h-full">
+              <section className={`h-full relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 flex flex-col transition-all hover:ring-white/25 hover:shadow-2xl hover:shadow-black/50 active:scale-[0.98]`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${card.accent} via-transparent to-transparent pointer-events-none`} />
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className={`w-12 h-12 rounded-2xl ${card.bg} ring-1 ${card.ring} flex items-center justify-center`}>
+                      <card.icon className={`size-6 ${card.color}`} />
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight className="size-4 text-white" />
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-white font-oswald uppercase tracking-tight mb-2">
+                    {card.title}
+                  </h3>
+                  <p className="text-sm text-white/60 leading-relaxed mb-6 flex-1">
+                    {card.description}
+                  </p>
+                  
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-xs font-medium text-white/40 uppercase tracking-widest group-hover:text-white/80 transition-colors">Перейти</span>
+                    <div className="flex -space-x-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${card.color.replace('text-', 'bg-')} opacity-40`} />
+                      <div className={`w-1.5 h-1.5 rounded-full ${card.color.replace('text-', 'bg-')} opacity-20`} />
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Note */}
+      <section className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6 border-l-4 border-orange-500/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative z-10">
+          <h3 className="text-lg font-semibold text-white mb-2 font-oswald uppercase tracking-tight">Подсказка</h3>
+          <p className="text-sm text-white/60">
+            Используйте боковую навигацию или карточки выше для быстрого доступа к разделам. Все изменения вступают в силу мгновенно для всех пользователей.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/admin/analytics">
-            <Button variant="outline">
-              <TrendingUp className="mr-2 size-4" />
-              Аналитика
-            </Button>
-          </Link>
-          <Link href="/admin/users">
-            <Button variant="outline">
-              <Users className="mr-2 size-4" />
-              Пользователи
-            </Button>
-          </Link>
-          <Link href="/admin/free-content">
-            <Button variant="outline">
-              <BookOpen className="mr-2 size-4" />
-              Бесплатные материалы
-            </Button>
-          </Link>
-          <Link href="/admin/weeks">
-            <Button>
-              <Calendar className="mr-2 size-4" />
-              Управление неделями
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Статистика */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Всего недель</CardDescription>
-            <CardTitle className="text-3xl">{weeks.length}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Опубликованных</CardDescription>
-            <CardTitle className="text-3xl text-green-600">
-              {weeks.filter(w => w.is_published).length}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Черновиков</CardDescription>
-            <CardTitle className="text-3xl text-muted-foreground">
-              {weeks.filter(w => !w.is_published).length}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Список недель */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Недели контента</h2>
-        
-        {weeks.length > 0 ? (
-          <div className="grid gap-4">
-            {weeks.map((week) => (
-              <Card key={week.id} className={week.is_published ? '' : 'opacity-75'}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar className="size-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {formatDate(week.start_date)} - {formatDate(week.end_date)}
-                        </span>
-                      </div>
-                      <CardTitle>{week.title || 'Без названия'}</CardTitle>
-                      <CardDescription className="mt-2">
-                        {week.description || 'Описание отсутствует'}
-                      </CardDescription>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {week.is_published ? (
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
-                          Опубликовано
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                          Черновик
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-2">
-                  <div className="flex gap-2">
-                    <Link href={`/admin/weeks/${week.id}`}>
-                      <Button variant="outline" size="sm">
-                        <FileText className="mr-2 size-4" />
-                        Управление
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="text-sm text-muted-foreground">
-                    Создано: {new Date(week.created_at).toLocaleDateString('ru-RU')}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="flex min-h-[200px] items-center justify-center">
-              <div className="text-center space-y-2">
-                <p className="text-muted-foreground">
-                  Недель пока нет
-                </p>
-                <Link href="/admin/weeks">
-                  <Button>
-                    <Plus className="mr-2 size-4" />
-                    Создать первую неделю
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Примечание */}
-      <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
-        <CardHeader>
-          <CardTitle className="text-amber-900 dark:text-amber-100">
-            📝 Заметка
-          </CardTitle>
-          <CardDescription className="text-amber-700 dark:text-amber-300">
-            CRUD админка готова! Вы можете создавать недели, тренировки и упражнения.
-            Перейдите в "Управление неделями" для начала работы.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      </section>
     </div>
   )
 }
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  })
-}
-

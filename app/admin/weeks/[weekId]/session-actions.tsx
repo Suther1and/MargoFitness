@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { deleteWorkoutSession } from '@/lib/actions/admin'
-import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -37,14 +36,14 @@ export default function SessionActions({ session }: SessionActionsProps) {
   }
 
   return (
-    <Button
-      variant="destructive"
-      size="sm"
+    <button
       onClick={handleDelete}
       disabled={loading}
+      className="flex items-center justify-center p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all active:scale-95 disabled:opacity-50"
+      title="Удалить тренировку"
     >
       <Trash2 className="size-4" />
-    </Button>
+    </button>
   )
 }
 

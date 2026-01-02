@@ -37,18 +37,18 @@ export function InlineSelect({ value, options, onSave, displayClassName }: Inlin
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button 
-          className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${displayClassName || ''} ${isLoading ? 'opacity-50' : ''}`}
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all hover:brightness-110 active:scale-95 ring-1 ${displayClassName || 'bg-white/5 text-white ring-white/10'} ${isLoading ? 'opacity-50' : ''}`}
           disabled={isLoading}
         >
-          {isLoading ? 'Сохранение...' : currentOption?.label || value}
+          {isLoading ? '...' : currentOption?.label || value}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="bg-[#1a1a24] border-white/10 text-white">
         {options.map(option => (
           <DropdownMenuItem 
             key={option.value}
             onClick={() => handleSelect(option.value)}
-            className={option.className}
+            className={`cursor-pointer hover:bg-white/5 focus:bg-white/5 transition-colors ${option.className}`}
           >
             {option.label}
           </DropdownMenuItem>
@@ -123,7 +123,7 @@ export function InlineNumberInput({ value, onSave, min, max, suffix }: InlineNum
         disabled={isLoading}
         min={min}
         max={max}
-        className="w-24 h-7 text-sm"
+        className="w-24 h-8 text-xs bg-white/5 border-white/10 text-white rounded-xl focus:ring-orange-500/50"
         autoFocus
       />
     )
@@ -132,9 +132,9 @@ export function InlineNumberInput({ value, onSave, min, max, suffix }: InlineNum
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="text-sm font-medium hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+      className="text-xs font-medium text-white/80 hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 transition-all active:scale-95"
     >
-      {value} {suffix || ''}
+      {value.toLocaleString('ru-RU')} {suffix || ''}
     </button>
   )
 }
@@ -189,7 +189,7 @@ export function InlineDateInput({ value, onSave }: InlineDateInputProps) {
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         disabled={isLoading}
-        className="w-48 h-7 text-sm"
+        className="w-48 h-8 text-xs bg-white/5 border-white/10 text-white rounded-xl focus:ring-orange-500/50"
         autoFocus
       />
     )
@@ -198,10 +198,9 @@ export function InlineDateInput({ value, onSave }: InlineDateInputProps) {
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="text-sm text-gray-600 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+      className="text-xs font-medium text-white/60 hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 transition-all active:scale-95"
     >
       {value ? new Date(value).toLocaleDateString('ru-RU') : '—'}
     </button>
   )
 }
-
