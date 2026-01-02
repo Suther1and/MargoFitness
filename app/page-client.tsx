@@ -8,7 +8,6 @@ import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
 import { SignInPopup } from '@/components/signin-popup'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
-import { createClient } from '@/lib/supabase/client'
 import type { Product, Profile, SubscriptionTier } from '@/types/database'
 import { TIER_LEVELS, isSubscriptionExpired } from '@/types/database'
 
@@ -62,8 +61,8 @@ export default function HomeNewPage() {
   const [previousDuration, setPreviousDuration] = useState<Period>(30)
   const [certificateOpen, setCertificateOpen] = useState(false)
   const [signInOpen, setSignInOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(!!initialProfile)
+  const [profile, setProfile] = useState<Profile | null>(initialProfile)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const [upgradeInitialTier, setUpgradeInitialTier] = useState<SubscriptionTier | undefined>(undefined)
@@ -160,103 +159,35 @@ export default function HomeNewPage() {
     window.dispatchEvent(event)
   }, [signInOpen])
 
-  // Проверка статуса авторизации и загрузка профиля
+  // Обновление профиля при изменении авторизации (только если не передан initialProfile)
   useEffect(() => {
-    console.log('[HomePage] useEffect: Starting auth check')
-    const checkAuth = async () => {
+    if (initialProfile) {
+      // Профиль уже загружен на сервере, только подписываемся на изменения
+      const { createClient } = require('@/lib/supabase/client')
       const supabase = createClient()
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
-      console.log('[HomePage] Session check:', { 
-        hasSession: !!session, 
-        userId: session?.user?.id,
-        error: sessionError 
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (!session) {
+          setIsAuthenticated(false)
+          setProfile(null)
+        } else if (!profile) {
+          // Если профиль был null, но появилась сессия - загружаем через API
+          try {
+            const response = await fetch('/api/profile')
+            const result = await response.json()
+            if (result.profile) {
+              setProfile(result.profile)
+              setIsAuthenticated(true)
+            }
+          } catch (err) {
+            console.error('[HomePage] Error loading profile on auth change:', err)
+          }
+        }
       })
-      
-      setIsAuthenticated(!!session)
-      
-      if (session) {
-        console.log('[HomePage] User authenticated, loading profile via API for userId:', session.user.id)
-        try {
-          // Загружаем профиль через API
-          const response = await fetch('/api/profile')
-          const result = await response.json()
-          
-          console.log('[HomePage] Profile API response (initial):', {
-            hasProfile: !!result.profile,
-            profileTier: result.profile?.subscription_tier,
-            profileStatus: result.profile?.subscription_status
-          })
-          
-          if (result.profile) {
-            const isActive = result.profile.subscription_status === 'active' && !isSubscriptionExpired(result.profile.subscription_expires_at)
-            console.log('[HomePage] ✅ Profile loaded via API:', {
-              id: result.profile.id,
-              subscription_tier: result.profile.subscription_tier,
-              subscription_status: result.profile.subscription_status,
-              isActive
-            })
-            setProfile(result.profile)
-          } else {
-            console.warn('[HomePage] ⚠️ No profile in API response (initial)')
-            setProfile(null)
-          }
-        } catch (err) {
-          console.error('[HomePage] ❌ Exception loading profile via API (initial):', err)
-          setProfile(null)
-        }
-      } else {
-        console.log('[HomePage] No session, setting profile to null')
-        setProfile(null)
-      }
+
+      return () => subscription.unsubscribe()
     }
-    
-    checkAuth()
-
-    // Подписка на изменения статуса авторизации
-    const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('[HomePage] Auth state changed:', { event: _event, hasSession: !!session, userId: session?.user?.id })
-      setIsAuthenticated(!!session)
-      
-      if (session) {
-        console.log('[HomePage] Session in auth change, loading profile via API for userId:', session.user.id)
-        try {
-          // Загружаем профиль через API
-          const response = await fetch('/api/profile')
-          const result = await response.json()
-          
-          console.log('[HomePage] Profile API response:', {
-            hasProfile: !!result.profile,
-            profileTier: result.profile?.subscription_tier,
-            profileStatus: result.profile?.subscription_status
-          })
-          
-          if (result.profile) {
-            const isActive = result.profile.subscription_status === 'active' && !isSubscriptionExpired(result.profile.subscription_expires_at)
-            console.log('[HomePage] ✅ Profile loaded via API:', {
-              id: result.profile.id,
-              subscription_tier: result.profile.subscription_tier,
-              subscription_status: result.profile.subscription_status,
-              isActive
-            })
-            setProfile(result.profile)
-          } else {
-            console.warn('[HomePage] ⚠️ No profile in API response')
-            setProfile(null)
-          }
-        } catch (err) {
-          console.error('[HomePage] ❌ Exception loading profile via API:', err)
-          setProfile(null)
-        }
-      } else {
-        console.log('[HomePage] No session in auth change, setting profile to null')
-        setProfile(null)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
+  }, [initialProfile, profile])
 
   // Обработчик действия "начать" - проверяет авторизацию
   const handleStartAction = () => {
