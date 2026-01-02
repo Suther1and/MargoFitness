@@ -161,154 +161,66 @@ export async function calculateUpgradeConversion(
   success: boolean
   data?: {
     currentTier: SubscriptionTier
-    currentTierLevel: number
     remainingDays: number
-    actualPaidAmount: number
-    purchasedDays: number
-    usedDays: number
-    remainingValue: number
-    newTierLevel: number
-    basePricePerDayNew: number
     convertedDays: number
   }
   error?: string
 }> {
-  console.log(`[ConversionCalc] ==========================================`)
-  console.log(`[ConversionCalc] FUNCTION CALLED: calculateUpgradeConversion`)
-  console.log(`[ConversionCalc] userId: ${userId}`)
-  console.log(`[ConversionCalc] newTierLevel: ${newTierLevel}`)
-  console.log(`[ConversionCalc] ==========================================`)
-  
-  // Используем переданный клиент или создаем новый (стандартный)
   const supabase = supabaseClient || await createClient()
   
-  // Получить профиль пользователя
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('*')
+    .select('subscription_tier, subscription_expires_at')
     .eq('id', userId)
     .single()
   
   if (profileError || !profile) {
-    console.error(`[ConversionCalc] ❌ Profile not found:`, profileError)
+    console.error('[ConversionCalc] Profile not found:', profileError)
     return { success: false, error: 'Профиль не найден' }
   }
   
-  console.log(`[ConversionCalc] Profile found:`)
-  console.log(`[ConversionCalc]   - Current tier: ${profile.subscription_tier}`)
-  console.log(`[ConversionCalc]   - Expires at: ${profile.subscription_expires_at}`)
+  const currentTier = profile.subscription_tier as SubscriptionTier
+  const currentTierLevel = TIER_LEVELS[currentTier]
   
-  const currentTierLevel = TIER_LEVELS[profile.subscription_tier as SubscriptionTier]
-  console.log(`[ConversionCalc]   - Current tier level: ${currentTierLevel}`)
-  
-  // Проверка: нельзя апгрейдиться на тот же или ниже
   if (newTierLevel <= currentTierLevel) {
-    console.error(`[ConversionCalc] ❌ Cannot upgrade to same/lower tier: ${newTierLevel} <= ${currentTierLevel}`)
     return { success: false, error: 'Новый тариф должен быть выше текущего' }
   }
   
   // Рассчитать оставшиеся дни
   const now = new Date()
   const expiresAt = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) : now
-  
-  // Если дата в прошлом, считаем как 0
   const diffTime = expiresAt.getTime() - now.getTime()
-  const diffDays = diffTime / (1000 * 60 * 60 * 24)
-  // Используем ceil чтобы не терять дни (даже если прошло несколько часов, считаем как полный день)
-  const remainingDays = diffTime > 0 ? Math.ceil(diffDays) : 0
+  const remainingDays = diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0
   
-  console.log(`[ConversionCalc] Expires at: ${expiresAt.toISOString()}`)
-  console.log(`[ConversionCalc] Now: ${now.toISOString()}`)
-  console.log(`[ConversionCalc] Diff time: ${diffTime} ms`)
-  console.log(`[ConversionCalc] Diff days (raw): ${diffDays.toFixed(4)}`)
-  console.log(`[ConversionCalc] Remaining days (floor): ${remainingDays}`)
-  
-  // Если нет оставшихся дней - нет конвертации
   if (remainingDays <= 0) {
-    console.log(`[ConversionCalc] ⚠️ No remaining days, no conversion needed`)
     return {
       success: true,
       data: {
-        currentTier: profile.subscription_tier,
-        currentTierLevel,
+        currentTier,
         remainingDays: 0,
-        actualPaidAmount: 0,
-        purchasedDays: 0,
-        usedDays: 0,
-        remainingValue: 0,
-        newTierLevel,
-        basePricePerDayNew: BASE_PRICES_PER_MONTH[newTierLevel] / 30,
         convertedDays: 0
       }
     }
   }
   
-  // УПРОЩЕННАЯ ЛОГИКА КОНВЕРТАЦИИ
-  // Конвертируем оставшиеся дни по базовым ценам тарифов
-  // Не зависит от истории покупок - просто конвертируем дни по справедливой стоимости
-  
+  // Конвертация по базовым ценам тарифов
   const pricePerDayOld = BASE_PRICES_PER_MONTH[currentTierLevel] / 30
   const remainingValue = remainingDays * pricePerDayOld
-  
   const basePricePerDayNew = BASE_PRICES_PER_MONTH[newTierLevel] / 30
-  // Используем Math.round для честной конвертации (не теряем дни)
   const conversionRatio = remainingValue / basePricePerDayNew
   const roundedConvertedDays = Math.round(conversionRatio)
   
-  console.log(`[ConversionCalc] Conversion ratio: ${conversionRatio.toFixed(4)}`)
-  console.log(`[ConversionCalc] Rounded converted days: ${roundedConvertedDays}`)
-  
-  // Если остались неиспользованные дни, не теряем их полностью (даже если новый тариф дороже)
   // Если конвертация дает 0, но есть оставшиеся дни - даем минимум 1 день
-  // Иначе используем рассчитанное значение
-  let convertedDays = remainingDays > 0
-    ? (roundedConvertedDays === 0 ? 1 : roundedConvertedDays)
-    : 0
+  const convertedDays = roundedConvertedDays === 0 ? 1 : roundedConvertedDays
   
-  // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: если конвертация дает слишком мало дней по сравнению с оставшимися,
-  // используем более справедливый расчет (минимум 50% от оставшихся дней)
-  if (remainingDays > 0 && convertedDays > 0 && convertedDays < Math.ceil(remainingDays * 0.5)) {
-    console.log(`[ConversionCalc] ⚠️ Converted days (${convertedDays}) seems too low compared to remaining (${remainingDays})`)
-    console.log(`[ConversionCalc] Using minimum: ${Math.ceil(remainingDays * 0.5)} days`)
-    convertedDays = Math.max(convertedDays, Math.ceil(remainingDays * 0.5))
-  }
-  
-  
-  console.log(`[ConversionCalc] ========== SIMPLIFIED CONVERSION ==========`)
-  console.log(`[ConversionCalc] Current tier level: ${currentTierLevel}`)
-  console.log(`[ConversionCalc] New tier level: ${newTierLevel}`)
-  console.log(`[ConversionCalc] Remaining days: ${remainingDays}`)
-  console.log(`[ConversionCalc] Base price per day OLD: ${pricePerDayOld.toFixed(2)} RUB`)
-  console.log(`[ConversionCalc] Remaining value: ${remainingValue.toFixed(2)} RUB`)
-  console.log(`[ConversionCalc] Base price per day NEW: ${basePricePerDayNew.toFixed(2)} RUB`)
-  console.log(`[ConversionCalc] Converted days (rounded): ${roundedConvertedDays}`)
-  console.log(`[ConversionCalc] Converted days (final): ${convertedDays}`)
-  console.log(`[ConversionCalc] =======================================`)
-  
-  const finalConvertedDays = Math.max(0, convertedDays)
-  const result = {
+  return {
     success: true,
     data: {
-      currentTier: profile.subscription_tier,
-      currentTierLevel,
+      currentTier,
       remainingDays,
-      actualPaidAmount: Math.round(remainingValue), // Стоимость оставшихся дней
-      purchasedDays: remainingDays, // Для обратной совместимости
-      usedDays: 0, // Для обратной совместимости
-      remainingValue: Math.round(remainingValue),
-      newTierLevel,
-      basePricePerDayNew: Math.round(basePricePerDayNew * 100) / 100,
-      convertedDays: finalConvertedDays
+      convertedDays: Math.max(0, convertedDays)
     }
   }
-  
-  console.log(`[ConversionCalc] ✅✅✅ CONVERSION SUCCESSFUL!`)
-  console.log(`[ConversionCalc] INPUT: ${remainingDays} old days of tier ${currentTierLevel}`)
-  console.log(`[ConversionCalc] OUTPUT: ${finalConvertedDays} new days of tier ${newTierLevel}`)
-  console.log(`[ConversionCalc] RETURNING DATA:`, JSON.stringify(result.data, null, 2))
-  console.log(`[ConversionCalc] ================================================`)
-  
-  return result
 }
 
 /**
