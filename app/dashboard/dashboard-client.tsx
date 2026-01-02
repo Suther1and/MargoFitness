@@ -81,6 +81,34 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
   const displayName = profile.full_name || 'Пользователь'
   const displayEmail = profile.email && !profile.email.includes('@telegram.local') ? profile.email : null
   const displayPhone = profile.phone || null
+
+  const tierColors = {
+    free: {
+      bg: 'bg-gray-500/15',
+      text: 'text-gray-200',
+      ring: 'ring-gray-400/30',
+      icon: 'text-gray-300'
+    },
+    basic: {
+      bg: 'bg-amber-700/15',
+      text: 'text-amber-200',
+      ring: 'ring-amber-700/30',
+      icon: 'text-amber-600'
+    },
+    pro: {
+      bg: 'bg-purple-500/15',
+      text: 'text-purple-200',
+      ring: 'ring-purple-400/30',
+      icon: 'text-purple-300'
+    },
+    elite: {
+      bg: 'bg-yellow-400/15',
+      text: 'text-yellow-200',
+      ring: 'ring-yellow-400/30',
+      icon: 'text-yellow-400'
+    }
+  }
+  const currentTierColors = tierColors[profile.subscription_tier as keyof typeof tierColors] || tierColors.free
   
   // Auto-open profile dialog on first login
   useEffect(() => {
@@ -667,8 +695,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                             </h3>
                             
                             <div className="flex items-center gap-2 mt-2">
-                              <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-3 py-1.5 text-sm text-purple-200 ring-1 ring-purple-400/30">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
+                              <div className={`inline-flex items-center gap-1.5 rounded-full ${currentTierColors.bg} px-3 py-1.5 text-sm ${currentTierColors.text} ring-1 ${currentTierColors.ring}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={currentTierColors.icon}>
                                   <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                                   <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                                   <path d="M4 22h16"></path>
@@ -785,8 +813,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                         {displayName}
                       </h3>
                       
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 px-2.5 py-1 text-xs text-purple-200 ring-1 ring-purple-400/30 mt-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
+                      <div className={`inline-flex items-center gap-1.5 rounded-full ${currentTierColors.bg} px-2.5 py-1 text-xs ${currentTierColors.text} ring-1 ${currentTierColors.ring} mt-2`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={currentTierColors.icon}>
                           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                           <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                           <path d="M4 22h16"></path>

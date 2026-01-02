@@ -220,7 +220,9 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
-  const currentConfig = selectedTier ? tierConfig[selectedTier as keyof typeof tierConfig] : null
+  const currentConfig = selectedTier 
+    ? tierConfig[selectedTier as keyof typeof tierConfig] 
+    : (availableTiersData.length === 0 ? tierConfig.elite : null)
   const products = availableTiersData.find(t => t.tier === selectedTier)?.products || []
   
   const metadata = selectedProduct?.metadata as { benefits?: string[] } | null
@@ -352,13 +354,14 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                 <div className={`md:w-[280px] pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 bg-gradient-to-b ${currentConfig?.gradient || 'from-purple-500/10'} to-transparent border-b md:border-b-0 md:border-r border-white/5 flex-shrink-0 relative transition-all duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
                   <div className={`absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-3xl pointer-events-none hidden md:block transition-all duration-700 ${
-                    selectedTier === 'pro' ? 'bg-purple-500/15' : selectedTier === 'elite' ? 'bg-amber-500/15' : 'bg-blue-500/15'
+                    (selectedTier === 'pro' || (availableTiersData.length === 0 && currentTier === 'pro')) ? 'bg-purple-500/15' : 
+                    (selectedTier === 'elite' || (availableTiersData.length === 0 && currentTier === 'elite')) ? 'bg-yellow-400/15' : 'bg-amber-500/15'
                   }`} />
                   
                   <div className="relative z-10 flex flex-col h-full">
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center ring-1 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg transition-all duration-300`}>
-                        <Sparkles className={`w-6 h-6 md:w-6 md:h-6 transition-colors duration-300 ${currentConfig?.color || 'text-purple-300'}`} />
+                        {currentConfig?.icon || <Sparkles className={`w-6 h-6 md:w-6 md:h-6 transition-colors duration-300 ${currentConfig?.color || 'text-purple-300'}`} />}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl md:text-2xl font-oswald uppercase leading-none text-white">Апгрейд</h3>
@@ -380,11 +383,11 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         {[
                           'Выбери срок новой подписки',
                           'Оставшиеся дни будут конвертированы и добавлены в новую подписку',
-                          `"Перейти на ${selectedTier?.toUpperCase()}" перенесет на страницу оплаты`
+                          `"Перейти на ${(selectedTier || currentTier).toUpperCase()}" перенесет на страницу оплаты`
                         ].map((text, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs text-white/70">
-                            <div className={`flex-shrink-0 w-3 h-3 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center`}>
-                              <CheckCircle2 className={`w-2 h-2 ${currentConfig?.color || 'text-purple-400'}`} />
+                            <div className={`flex-shrink-0 w-3 h-3 rounded-full ${currentConfig?.bg || 'bg-white/10'} flex items-center justify-center`}>
+                              <CheckCircle2 className={`w-2 h-2 ${currentConfig?.color || 'text-white/40'}`} />
                             </div>
                             <span className="leading-tight">{text}</span>
                           </div>
@@ -403,8 +406,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                             `"Перейти на ${selectedTier?.toUpperCase()}" перенесет на страницу оплаты`
                           ].map((text, i) => (
                             <div key={i} className="flex items-center gap-3 text-sm text-white/70">
-                              <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-purple-500/20'} flex items-center justify-center`}>
-                                <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-purple-400'}`} />
+                              <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-white/10'} flex items-center justify-center`}>
+                                <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-white/40'}`} />
                               </div>
                               <span className="leading-tight">{text}</span>
                             </div>
@@ -518,7 +521,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                 <button
                                   key={p.id}
                                   onClick={() => handleProductChange(p)}
-                                  className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
+                                  className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-white/10'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-white/20'} shadow-lg ${currentConfig?.shadow || ''}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
                                   style={{ touchAction: 'manipulation' }}
                                 >
                                   {p.discount_percentage > 0 && (
