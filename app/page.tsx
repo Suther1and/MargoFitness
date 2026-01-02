@@ -162,12 +162,21 @@ export default function HomeNewPage() {
 
   // Проверка статуса авторизации и загрузка профиля
   useEffect(() => {
+    console.log('[HomePage] useEffect: Starting auth check')
     const checkAuth = async () => {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      console.log('[HomePage] Session check:', { 
+        hasSession: !!session, 
+        userId: session?.user?.id,
+        error: sessionError 
+      })
+      
       setIsAuthenticated(!!session)
       
       if (session) {
+        console.log('[HomePage] User authenticated, loading profile...')
         // Загружаем профиль
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -181,16 +190,20 @@ export default function HomeNewPage() {
         
         if (profileData) {
           const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
-          console.log('[HomePage] Profile loaded:', {
+          console.log('[HomePage] ✅ Profile loaded:', {
             id: profileData.id,
             subscription_tier: profileData.subscription_tier,
             subscription_status: profileData.subscription_status,
             subscription_expires_at: profileData.subscription_expires_at,
-            isActive
+            isActive,
+            expiresInFuture: profileData.subscription_expires_at ? new Date(profileData.subscription_expires_at) > new Date() : false
           })
           setProfile(profileData)
+        } else {
+          console.warn('[HomePage] ⚠️ Profile data is null')
         }
       } else {
+        console.log('[HomePage] No session, setting profile to null')
         setProfile(null)
       }
     }
@@ -928,16 +941,15 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
-                        // Debug: логируем состояние профиля
-                        if (profile) {
-                          console.log('[Pricing] Profile state for Basic:', {
-                            hasProfile: !!profile,
-                            subscription_tier: profile.subscription_tier,
-                            subscription_status: profile.subscription_status,
-                            expires_at: profile.subscription_expires_at,
-                            isExpired: isSubscriptionExpired(profile.subscription_expires_at)
-                          })
-                        }
+                        // Debug: логируем состояние профиля при каждом рендере
+                        console.log('[Pricing Basic] Render check:', {
+                          hasProfile: !!profile,
+                          isAuthenticated,
+                          profileTier: profile?.subscription_tier,
+                          profileStatus: profile?.subscription_status,
+                          expiresAt: profile?.subscription_expires_at,
+                          isExpired: profile?.subscription_expires_at ? isSubscriptionExpired(profile.subscription_expires_at) : null
+                        })
                         
                         const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
                         const currentTierLevel = hasActiveSubscription ? TIER_LEVELS[profile.subscription_tier] : null
