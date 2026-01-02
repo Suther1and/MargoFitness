@@ -248,7 +248,8 @@ export function SubscriptionRenewalModal({
                 </button>
 
                 {/* Левая панель skeleton */}
-                <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5">
+                <div className={`md:w-[280px] bg-gradient-to-b ${currentConfig.gradient} pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5`}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
                   <div className="relative z-10 space-y-6 animate-pulse">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5" />
