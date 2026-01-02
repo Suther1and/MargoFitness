@@ -205,6 +205,24 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
   // Проверка активной подписки
   const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
 
+  // Получить состояние кнопки тарифа
+  const getTierButtonConfig = (tierLevel: 1 | 2 | 3, tierName: string) => {
+    if (!hasActiveSubscription) {
+      return { text: 'Выбрать тариф', disabled: false }
+    }
+
+    const currentLevel = TIER_LEVELS[profile!.subscription_tier]
+    const targetLevel = tierLevel
+
+    if (currentLevel === targetLevel) {
+      return { text: 'Продлить тариф', disabled: false }
+    } else if (currentLevel > targetLevel) {
+      return { text: 'Твой тариф лучше!', disabled: true }
+    } else {
+      return { text: `Сделать апгрейд до ${tierName}`, disabled: false }
+    }
+  }
+
   // Обработчик выбора тарифа
   const handleTierSelect = async (tierLevel: 1 | 2 | 3) => {
     if (!isAuthenticated) {
