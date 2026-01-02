@@ -612,7 +612,15 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
 
                 {/* Mobile Hero - Overlay Glass */}
                 <div className="md:hidden relative h-[85vh] mx-auto -mt-4 overflow-hidden max-w-full">
-                  <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" alt="Training" className="w-full h-full object-cover" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Training" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
+                    }}
+                  />
                   <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background} 0%, transparent 100%)` }}></div>
                   <div className="absolute bottom-8 left-4 right-4 rounded-3xl p-5" style={{
                     background: colors.cardBg,
