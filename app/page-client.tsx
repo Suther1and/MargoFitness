@@ -170,7 +170,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
       const { createClient } = require('@/lib/supabase/client')
       const supabase = createClient()
       
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
         if (!session) {
           setIsAuthenticated(false)
           setProfile(null)
