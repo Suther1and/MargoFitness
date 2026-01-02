@@ -613,7 +613,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                     src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" 
                     alt="Training" 
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background} 0%, transparent 100%)` }}></div>
                   <div className="absolute bottom-8 left-4 right-4 rounded-3xl p-5" style={{
@@ -732,7 +732,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                         src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop" 
                         alt="Тренер" 
                         className="w-full h-full object-cover object-top"
-                        loading="lazy"
+                        referrerPolicy="no-referrer"
                       />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}E6 0%, ${colors.background}33 50%, transparent 100%)` }}></div>
                       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
