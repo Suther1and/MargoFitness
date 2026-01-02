@@ -126,7 +126,8 @@ export function getDaysUntilExpiration(profile: Profile): number | null {
   const expirationDate = new Date(profile.subscription_expires_at)
   const now = new Date()
   const diffTime = expirationDate.getTime() - now.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  // Используем Math.round для честного отображения (округляем до ближайшего дня)
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
   return diffDays > 0 ? diffDays : 0
 }

@@ -7,9 +7,17 @@ import { ReferralProcessor } from '@/components/referral-processor'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
-import { Profile } from '@/types/database'
+import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { getMonthGenitiveCase } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from '@/components/ui/dialog'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -56,9 +64,15 @@ const TOOLTIPS = {
 
 interface DashboardClientProps {
   profile: Profile
+  bonusStats: {
+    account: UserBonus
+    levelData: CashbackLevel
+    progress: ReturnType<typeof calculateLevelProgress>
+  } | null
 }
 
-export default function DashboardClient({ profile }: DashboardClientProps) {
+export default function DashboardClient({ profile, bonusStats }: DashboardClientProps) {
+  const router = useRouter()
   const progressRef = useRef<HTMLDivElement>(null)
   const bonusProgressRef = useRef<HTMLDivElement>(null)
   const countRef = useRef<HTMLSpanElement>(null)
@@ -67,6 +81,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [bonusUsageModalOpen, setBonusUsageModalOpen] = useState(false)
   const [isFirstTime, setIsFirstTime] = useState(false)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
   const profileDesktopRef = useRef<HTMLElement>(null)
@@ -74,9 +89,29 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
 
   // Subscription data
   const subscriptionActive = isSubscriptionActive(profile)
-  const daysLeft = getDaysUntilExpiration(profile)
+  const [daysLeft, setDaysLeft] = useState<number | null>(null)
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
-  
+
+  useEffect(() => {
+    setDaysLeft(getDaysUntilExpiration(profile))
+  }, [profile])
+
+  // Отдельный эффект для обработки payment=success (только один раз)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('payment') === 'success') {
+      // Убираем параметр из URL, чтобы избежать бесконечного цикла
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+      
+      // Обновляем данные один раз после задержки
+      const timer = setTimeout(() => {
+        router.refresh()
+      }, 2000) // Задержка, чтобы webhook успел отработать
+      return () => clearTimeout(timer)
+    }
+  }, [router]) // Зависимость только от router, не от profile
+
   // Display name and contact info
   const displayName = profile.full_name || 'Пользователь'
   const displayEmail = profile.email && !profile.email.includes('@telegram.local') ? profile.email : null
@@ -250,8 +285,8 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
             animateElements(
               bonusProgressRef.current,
               bonusCountRef.current,
-              62,
-              1250,
+              bonusStats?.progress.progress || 0,
+              bonusStats?.account.balance || 0,
               (n) => Math.floor(n).toLocaleString('ru-RU')
             )
             bonusObserver.disconnect()
@@ -982,7 +1017,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
 
                   <div className="space-y-2">
                     <button 
-                      onClick={() => setRenewalModalOpen(true)}
+                      onClick={() => profile.subscription_tier === 'free' ? window.location.href = '/#pricing' : setRenewalModalOpen(true)}
                       className={`w-full rounded-xl bg-gradient-to-r ${currentTierColors.buttonBg} ring-1 ${currentTierColors.buttonRing} p-3 transition-all ${currentTierColors.buttonHover} active:scale-95`} 
                       style={{ touchAction: 'manipulation' }}
                     >
@@ -1008,7 +1043,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                     </button>
                     
                     <button 
-                      onClick={() => setUpgradeModalOpen(true)}
+                      onClick={() => profile.subscription_tier === 'free' ? window.location.href = '/#pricing' : setUpgradeModalOpen(true)}
                       className="w-full rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95" 
                       style={{ touchAction: 'manipulation' }}
                     >
@@ -1222,90 +1257,158 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                 </section>
 
                 {/* Card 4: Бонусная система */}
-                <Link href="/dashboard/bonuses">
+                <div className="flex flex-col h-full">
                   <section 
                     ref={(el) => { cardsRef.current[3] = el }}
-                    className="card-hidden group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-400/30 p-5 md:p-6 flex flex-col md:hover:ring-amber-400/60 md:hover:shadow-2xl md:hover:shadow-amber-500/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard/bonuses')}
+                    className={`card-hidden group relative overflow-hidden rounded-3xl p-5 md:p-6 flex flex-col md:hover:shadow-2xl cursor-pointer flex-1 transition-all duration-300 ${
+                      bonusStats?.levelData.level === 4 ? 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 ring-purple-400/30 md:hover:ring-purple-400/60 md:hover:shadow-purple-500/20' :
+                      bonusStats?.levelData.level === 3 ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-amber-400/30 md:hover:ring-amber-400/60 md:hover:shadow-amber-500/20' :
+                      bonusStats?.levelData.level === 2 ? 'bg-gradient-to-br from-gray-400/20 to-gray-600/20 ring-gray-400/30 md:hover:ring-gray-400/60 md:hover:shadow-gray-500/20' :
+                      'bg-gradient-to-br from-amber-700/20 to-amber-900/20 ring-amber-700/30 md:hover:ring-amber-700/60 md:hover:shadow-amber-900/20'
+                    }`}
                     style={{ backgroundSize: '200% 200%' }}
                   >
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${
+                      bonusStats?.levelData.level === 4 ? 'from-purple-500/10' :
+                      bonusStats?.levelData.level === 3 ? 'from-amber-500/10' :
+                      bonusStats?.levelData.level === 2 ? 'from-gray-400/10' :
+                      'from-amber-700/10'
+                    } via-transparent to-transparent pointer-events-none`} />
+                    <div className={`absolute -left-24 -bottom-24 h-72 w-72 rounded-full ${
+                      bonusStats?.levelData.level === 4 ? 'bg-purple-500/20' :
+                      bonusStats?.levelData.level === 3 ? 'bg-amber-500/20' :
+                      bonusStats?.levelData.level === 2 ? 'bg-gray-400/20' :
+                      'bg-amber-700/20'
+                    } blur-3xl pointer-events-none`} />
 
-                  <div className="rounded-2xl bg-gradient-to-b from-white/10 to-white/[0.05] p-4 ring-1 ring-white/20 backdrop-blur relative z-10 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-white/90 text-sm relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
-                          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                          <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                        </svg>
-                        <span className="font-medium">Бонусная программа</span>
-                        <InfoButton tooltipKey="bonuses" />
-                        <Tooltip tooltipKey="bonuses" />
+                    <div className="rounded-2xl bg-gradient-to-b from-white/10 to-white/[0.05] p-4 ring-1 ring-white/20 backdrop-blur relative z-10 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 text-white/90 text-sm relative">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={
+                            bonusStats?.levelData.level === 4 ? 'text-purple-300' :
+                            bonusStats?.levelData.level === 3 ? 'text-amber-300' :
+                            bonusStats?.levelData.level === 2 ? 'text-gray-300' :
+                            'text-amber-600'
+                          }>
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                          </svg>
+                          <span className="font-medium">Бонусная программа</span>
+                          <InfoButton tooltipKey="bonuses" />
+                          <Tooltip tooltipKey="bonuses" />
+                        </div>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium relative overflow-hidden ring-1 ${
+                          bonusStats?.levelData.level === 4 ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :
+                          bonusStats?.levelData.level === 3 ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' :
+                          bonusStats?.levelData.level === 2 ? 'bg-gray-500/20 text-gray-100 ring-gray-400/40' :
+                          'bg-amber-700/20 text-amber-100 ring-amber-600/40'
+                        }`}>
+                          <span className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer`}></span>
+                          <span className="relative">{bonusStats?.levelData.name || 'Bronze'} {bonusStats?.levelData.icon || '🥉'}</span>
+                        </span>
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 ring-1 ring-amber-400/40 font-medium relative overflow-hidden">
-                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent animate-shimmer"></span>
-                        <span className="relative">Gold 🥇</span>
-                      </span>
-                    </div>
 
-                    <div className="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 mb-3">
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span ref={bonusCountRef} className="text-4xl font-bold text-white font-oswald">0</span>
-                        <span className="text-lg text-white/70">шагов</span>
-                      </div>
-                      <p className="text-sm text-white/80">Твой текущий баланс</p>
-                      
-                      <div className="mt-3 pt-3 border-t border-white/20">
-                        <div className="flex justify-between text-xs text-white/70 mb-2">
-                          <span>До Silver осталось</span>
-                          <span className="font-medium">750 шагов</span>
+                      <div className="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 mb-3">
+                        <div className="flex items-baseline gap-2 mb-2">
+                          <span ref={bonusCountRef} className="text-4xl font-bold text-white font-oswald">0</span>
+                          <span className="text-lg text-white/70">шагов</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
-                          <div 
-                            ref={bonusProgressRef}
-                            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-none"
-                            style={{ width: '0%' }}
-                          ></div>
+                        <p className="text-sm text-white/80">Твой текущий баланс</p>
+                        
+                        <div className="mt-3 pt-3 border-t border-white/20">
+                          <div className="flex justify-between text-xs text-white/70 mb-2">
+                            {bonusStats?.progress.nextLevel ? (
+                              <>
+                                <span>До {CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name} осталось</span>
+                                <span className="font-medium">{bonusStats.progress.remaining.toLocaleString('ru-RU')} шагов</span>
+                              </>
+                            ) : (
+                              <span>Максимальный уровень достигнут</span>
+                            )}
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
+                            <div 
+                              ref={bonusProgressRef}
+                              className={`h-full rounded-full transition-none bg-gradient-to-r ${
+                                bonusStats?.levelData.level === 4 ? 'from-purple-400 to-purple-600' :
+                                bonusStats?.levelData.level === 3 ? 'from-amber-300 to-amber-500' :
+                                bonusStats?.levelData.level === 2 ? 'from-gray-300 to-gray-500' :
+                                'from-amber-600 to-amber-800'
+                              }`}
+                              style={{ width: '0%' }}
+                            ></div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <button className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3  transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95">
-                        <div className="flex flex-col items-center justify-center text-center gap-2">
-                          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
-                              <circle cx="12" cy="12" r="10"></circle>
-                              <path d="M12 16v-4"></path>
-                              <path d="M12 8h.01"></path>
-                            </svg>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (profile.subscription_tier === 'free') {
+                              window.location.href = '/#pricing'
+                            } else {
+                              setBonusUsageModalOpen(true)
+                            }
+                          }}
+                          className="rounded-xl bg-white/[0.04] ring-1 ring-white/10 p-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-95 group/btn"
+                        >
+                          <div className="flex flex-col items-center justify-center text-center gap-2">
+                            <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-white">Использовать</p>
+                              <p className="text-xs text-white/60 mt-0.5 whitespace-nowrap">Оплата шагами</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">Использовать</p>
-                            <p className="text-xs text-white/60 mt-0.5">Оплата шагами</p>
+                        </button>
+                        
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push('/dashboard/bonuses#referral')
+                          }}
+                          className={`rounded-xl ring-1 p-3 transition-all active:scale-95 group/btn ${
+                            bonusStats?.levelData.level === 4 ? 'bg-purple-500/10 ring-purple-400/30 hover:bg-purple-500/20 hover:ring-purple-400/40' :
+                            bonusStats?.levelData.level === 3 ? 'bg-amber-500/10 ring-amber-400/30 hover:bg-amber-500/20 hover:ring-amber-400/40' :
+                            bonusStats?.levelData.level === 2 ? 'bg-gray-500/10 ring-gray-400/30 hover:bg-gray-500/20 hover:ring-gray-400/40' :
+                            'bg-amber-700/10 ring-amber-600/30 hover:bg-amber-700/20 hover:ring-amber-600/40'
+                          }`}
+                        >
+                          <div className="flex flex-col items-center justify-center text-center gap-2">
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center group-hover/btn:scale-110 transition-transform ${
+                              bonusStats?.levelData.level === 4 ? 'bg-purple-500/20 text-purple-300' :
+                              bonusStats?.levelData.level === 3 ? 'bg-amber-500/20 text-amber-300' :
+                              bonusStats?.levelData.level === 2 ? 'bg-gray-500/20 text-gray-300' :
+                              'bg-amber-700/20 text-amber-600'
+                            }`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                <polyline points="16 6 12 2 8 6"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-white">Пригласить</p>
+                              <p className={`text-xs mt-0.5 whitespace-nowrap ${
+                                bonusStats?.levelData.level === 4 ? 'text-purple-300/70' :
+                                bonusStats?.levelData.level === 3 ? 'text-amber-300/70' :
+                                bonusStats?.levelData.level === 2 ? 'text-gray-300/70' :
+                                'text-amber-600/70'
+                              }`}>+500 шагов</p>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                      
-                      <button className="rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 ring-1 ring-amber-400/30 p-3  transition-all hover:from-amber-500/15 hover:to-orange-500/15 hover:ring-amber-400/40 active:scale-95">
-                        <div className="flex flex-col items-center justify-center text-center gap-2">
-                          <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-300">
-                              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                              <polyline points="16 6 12 2 8 6"></polyline>
-                              <line x1="12" y1="2" x2="12" y2="15"></line>
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">Пригласить</p>
-                            <p className="text-xs text-white/70 mt-0.5">+500 шагов</p>
-                          </div>
-                        </div>
-                      </button>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </section>
-                </Link>
+                  </section>
+                </div>
 
                 {/* Card 5: Полезные материалы */}
                 <section 
@@ -1639,6 +1742,50 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
             userId={profile.id}
             onOpenRenewal={() => setRenewalModalOpen(true)}
           />
+
+          {/* Модальное окно использования бонусов */}
+          <Dialog open={bonusUsageModalOpen} onOpenChange={setBonusUsageModalOpen}>
+            <DialogContent className="bg-[#1a1a24] border-white/10 text-white max-w-md rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-oswald uppercase tracking-tight">Использовать бонусы</DialogTitle>
+                <DialogDescription className="text-white/60">
+                  Выбери способ использования своих накопленных шагов
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 mt-4">
+                <button
+                  onClick={() => {
+                    setBonusUsageModalOpen(false)
+                    setRenewalModalOpen(true)
+                  }}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Продлить подписку</h4>
+                    <p className="text-sm text-white/60">Использовать шаги для продления текущего тарифа</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setBonusUsageModalOpen(false)
+                    setUpgradeModalOpen(true)
+                  }}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-300 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19h6"/><path d="M9 15v-3H5l7-7 7 7h-4v3H9z"/></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Апгрейд тарифа</h4>
+                    <p className="text-sm text-white/60">Перейти на более высокий уровень подписки за бонусы</p>
+                  </div>
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
     </>
   )
 }

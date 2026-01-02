@@ -143,9 +143,13 @@ export function SubscriptionRenewalModal({
     setLoading(false)
   }
 
-  const remainingDays = currentExpires
-    ? Math.max(0, Math.ceil((new Date(currentExpires).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
-    : 0
+  const [remainingDays, setRemainingDays] = useState(0)
+
+  useEffect(() => {
+    if (currentExpires) {
+      setRemainingDays(Math.max(0, Math.ceil((new Date(currentExpires).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))))
+    }
+  }, [currentExpires])
 
   const getNewExpiryDate = (product: Product | null) => {
     if (!product) return null

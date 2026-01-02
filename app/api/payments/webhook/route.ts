@@ -116,6 +116,15 @@ export async function POST(request: NextRequest) {
 
         console.log(`[Webhook] Successfully processed payment for user ${transaction.user_id}`)
 
+        // Принудительная ревалидация кеша для пользователя
+        try {
+          const { revalidatePath } = await import('next/cache')
+          revalidatePath('/dashboard')
+          console.log(`[Webhook] Cache revalidated for /dashboard`)
+        } catch (revalidateError) {
+          console.error('[Webhook] Revalidation error:', revalidateError)
+        }
+
         // ============================================
         // БОНУСНАЯ СИСТЕМА: Начисление кешбека и реферальных бонусов
         // ============================================

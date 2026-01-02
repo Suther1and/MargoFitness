@@ -170,6 +170,8 @@ export async function POST(request: NextRequest) {
           productName: product.name,
           productType: product.type,
           originalPrice: product.price,
+          finalPrice: calculation.finalPrice,
+          action: action,
           promoCode: promoCode || null,
           bonusUsed: bonusToUse || 0,
           promoDiscount: calculation.promoDiscountAmount,
