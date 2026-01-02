@@ -941,14 +941,15 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
-                        // Debug: логируем состояние профиля при каждом рендере
-                        console.log('[Pricing Basic] Render check:', {
+                        // Debug: логируем состояние профиля при каждом рендере - ВСЕГДА
+                        console.log('[Pricing Basic] 🔍 Render check - ALWAYS:', {
+                          timestamp: new Date().toISOString(),
                           hasProfile: !!profile,
                           isAuthenticated,
-                          profileTier: profile?.subscription_tier,
-                          profileStatus: profile?.subscription_status,
-                          expiresAt: profile?.subscription_expires_at,
-                          isExpired: profile?.subscription_expires_at ? isSubscriptionExpired(profile.subscription_expires_at) : null
+                          profileTier: profile?.subscription_tier || 'null',
+                          profileStatus: profile?.subscription_status || 'null',
+                          expiresAt: profile?.subscription_expires_at || 'null',
+                          isExpired: profile?.subscription_expires_at ? isSubscriptionExpired(profile.subscription_expires_at) : 'no_expires_at'
                         })
                         
                         const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
