@@ -87,25 +87,57 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
       bg: 'bg-gray-500/15',
       text: 'text-gray-200',
       ring: 'ring-gray-400/30',
-      icon: 'text-gray-300'
+      icon: 'text-gray-300',
+      accent: 'from-gray-500/10',
+      glow: 'bg-gray-500/10',
+      hoverShadow: 'md:hover:shadow-gray-500/10',
+      buttonBg: 'from-gray-500/10 to-slate-500/10',
+      buttonHover: 'hover:from-gray-500/15 hover:to-slate-500/15 hover:ring-gray-400/40',
+      buttonRing: 'ring-gray-400/30',
+      buttonIconBg: 'bg-gray-500/20',
+      buttonBadge: 'bg-gray-500/20 text-gray-200'
     },
     basic: {
       bg: 'bg-amber-700/15',
       text: 'text-amber-200',
       ring: 'ring-amber-700/30',
-      icon: 'text-amber-600'
+      icon: 'text-orange-300',
+      accent: 'from-orange-500/10',
+      glow: 'bg-orange-500/10',
+      hoverShadow: 'md:hover:shadow-orange-500/10',
+      buttonBg: 'from-orange-500/10 to-red-500/10',
+      buttonHover: 'hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40',
+      buttonRing: 'ring-orange-400/30',
+      buttonIconBg: 'bg-orange-500/20',
+      buttonBadge: 'bg-orange-500/20 text-orange-200'
     },
     pro: {
       bg: 'bg-purple-500/15',
       text: 'text-purple-200',
       ring: 'ring-purple-400/30',
-      icon: 'text-purple-300'
+      icon: 'text-purple-300',
+      accent: 'from-purple-500/10',
+      glow: 'bg-purple-500/10',
+      hoverShadow: 'md:hover:shadow-purple-500/10',
+      buttonBg: 'from-purple-500/10 to-indigo-500/10',
+      buttonHover: 'hover:from-purple-500/15 hover:to-indigo-500/15 hover:ring-purple-400/40',
+      buttonRing: 'ring-purple-400/30',
+      buttonIconBg: 'bg-purple-500/20',
+      buttonBadge: 'bg-purple-500/20 text-purple-200'
     },
     elite: {
       bg: 'bg-yellow-400/15',
       text: 'text-yellow-200',
       ring: 'ring-yellow-400/30',
-      icon: 'text-yellow-400'
+      icon: 'text-yellow-400',
+      accent: 'from-yellow-500/10',
+      glow: 'bg-yellow-500/10',
+      hoverShadow: 'md:hover:shadow-yellow-500/10',
+      buttonBg: 'from-yellow-500/10 to-amber-500/10',
+      buttonHover: 'hover:from-yellow-500/15 hover:to-amber-500/15 hover:ring-yellow-400/40',
+      buttonRing: 'ring-yellow-400/30',
+      buttonIconBg: 'bg-yellow-500/20',
+      buttonBadge: 'bg-yellow-500/20 text-yellow-200'
     }
   }
   const currentTierColors = tierColors[profile.subscription_tier as keyof typeof tierColors] || tierColors.free
@@ -871,15 +903,15 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                 {/* Card 1: Подписка */}
                 <section 
                   ref={(el) => { cardsRef.current[0] = el }}
-                  className="card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl md:hover:shadow-orange-500/10"
+                  className={`card-hidden group relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6 flex flex-col md:hover:ring-white/25 md:hover:shadow-2xl ${currentTierColors.hoverShadow}`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${currentTierColors.accent} via-transparent to-transparent pointer-events-none`} />
+                  <div className={`absolute -right-24 -top-24 h-72 w-72 rounded-full ${currentTierColors.glow} blur-3xl pointer-events-none`} />
 
                 <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 ring-1 ring-white/10 backdrop-blur relative z-10 flex-1 flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-white/80 text-sm relative">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={currentTierColors.icon}>
                         <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                         <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                         <path d="M4 22h16"></path>
@@ -937,7 +969,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                     
                     {profile.subscription_expires_at && (
                       <div className="flex items-center gap-2 text-xs text-white/60 pt-3 border-t border-white/10">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={currentTierColors.icon}>
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                           <line x1="16" y1="2" x2="16" y2="6"></line>
                           <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -951,13 +983,13 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                   <div className="space-y-2">
                     <button 
                       onClick={() => setRenewalModalOpen(true)}
-                      className="w-full rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 ring-1 ring-orange-400/30 p-3 transition-all hover:from-orange-500/15 hover:to-red-500/15 hover:ring-orange-400/40 active:scale-95" 
+                      className={`w-full rounded-xl bg-gradient-to-r ${currentTierColors.buttonBg} ring-1 ${currentTierColors.buttonRing} p-3 transition-all ${currentTierColors.buttonHover} active:scale-95`} 
                       style={{ touchAction: 'manipulation' }}
                     >
                       <div className="flex items-center justify-between pointer-events-none">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
+                          <div className={`w-10 h-10 rounded-lg ${currentTierColors.buttonIconBg} flex items-center justify-center flex-shrink-0`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={currentTierColors.icon}>
                               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                               <path d="M3 3v5h5"></path>
                               <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
@@ -969,7 +1001,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
                             <p className="text-xs text-white/60">Выбери новый тариф</p>
                           </div>
                         </div>
-                        <div className="rounded-lg bg-orange-500/20 px-3 py-1.5 text-xs text-orange-200 whitespace-nowrap flex-shrink-0">
+                        <div className={`rounded-lg ${currentTierColors.buttonBadge} px-3 py-1.5 text-xs whitespace-nowrap flex-shrink-0`}>
                           Открыть
                         </div>
                       </div>
