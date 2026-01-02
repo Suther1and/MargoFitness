@@ -83,8 +83,8 @@ export function ProductHeroCard({
     // Mobile: ультракомпактный горизонтальный layout
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 pr-20"
       >
@@ -123,8 +123,8 @@ export function ProductHeroCard({
   // Desktop: полная версия с преимуществами
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ y: 20 }}
+      animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5"
     >

@@ -130,6 +130,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     newProductDays: number
     totalDays: number
     remainingDays: number
+    currentTier: SubscriptionTier
   } | null>(null)
 
   useEffect(() => {
@@ -161,7 +162,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
           convertedDays: conv.data.convertedDays,
           newProductDays: newProductDays,
           totalDays: conv.data.convertedDays + newProductDays,
-          remainingDays: conv.data.remainingDays
+          remainingDays: conv.data.remainingDays,
+          currentTier: conv.data.currentTier
         })
       }
     }
@@ -191,7 +193,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         convertedDays: res.data.convertedDays,
         newProductDays: newProductDays,
         totalDays: res.data.convertedDays + newProductDays,
-        remainingDays: res.data.remainingDays
+        remainingDays: res.data.remainingDays,
+        currentTier: res.data.currentTier
       })
     }
     
@@ -212,7 +215,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         convertedDays: res.data.convertedDays,
         newProductDays: newProductDays,
         totalDays: res.data.convertedDays + newProductDays,
-        remainingDays: res.data.remainingDays
+        remainingDays: res.data.remainingDays,
+        currentTier: res.data.currentTier
       })
     }
     
@@ -511,7 +515,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
                           <div className="flex-1 flex flex-col items-center">
                             <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
-                              Осталось дней <span className="text-amber-600">Basic</span>:
+                              Осталось дней <span className={conversionData?.currentTier === 'pro' ? 'text-purple-400' : conversionData?.currentTier === 'elite' ? 'text-yellow-400' : 'text-amber-600'}>{conversionData?.currentTier?.toUpperCase() || currentTier.toUpperCase()}</span>:
                             </p>
                             <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
                               <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
