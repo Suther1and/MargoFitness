@@ -1,5 +1,5 @@
 import { getCurrentProfile } from '@/lib/actions/profile'
-import HomeNewPage from './page'
+import HomeNewPage from './page-client'
 
 export default async function HomePageWrapper() {
   const profile = await getCurrentProfile()
