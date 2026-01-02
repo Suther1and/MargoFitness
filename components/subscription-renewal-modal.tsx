@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getRenewalOptions } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Calendar, CheckCircle2, Zap, Clock, Plus } from 'lucide-react'
+import { Calendar, CheckCircle2, Zap, Clock, Plus, Star } from 'lucide-react'
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -79,6 +79,41 @@ interface RenewalModalProps {
   userId: string
 }
 
+const tierConfig = {
+  basic: {
+    gradient: 'from-orange-500/10 to-orange-900/5',
+    color: 'text-orange-400',
+    ring: 'ring-orange-500/30',
+    bg: 'bg-orange-500/20',
+    button: 'from-orange-500 to-orange-600 shadow-orange-500/25',
+    icon: <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-300" />
+  },
+  pro: {
+    gradient: 'from-purple-500/10 to-purple-900/5',
+    color: 'text-purple-400',
+    ring: 'ring-purple-500/30',
+    bg: 'bg-purple-500/20',
+    button: 'from-purple-600 to-purple-500 shadow-purple-500/25',
+    icon: <Zap className="w-5 h-5 md:w-6 md:h-6 text-purple-300" />
+  },
+  elite: {
+    gradient: 'from-yellow-400/10 to-yellow-900/5',
+    color: 'text-yellow-400',
+    ring: 'ring-yellow-400/30',
+    bg: 'bg-yellow-400/20',
+    button: 'from-yellow-500 to-yellow-600 shadow-yellow-500/25',
+    icon: <Star className="w-5 h-5 md:w-6 md:h-6 text-yellow-300" />
+  },
+  free: {
+    gradient: 'from-gray-500/10 to-gray-900/5',
+    color: 'text-gray-400',
+    ring: 'ring-gray-500/30',
+    bg: 'bg-gray-500/20',
+    button: 'from-gray-500 to-gray-600 shadow-gray-500/25',
+    icon: <Clock className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
+  }
+}
+
 export function SubscriptionRenewalModal({
   open,
   onOpenChange,
@@ -124,6 +159,8 @@ export function SubscriptionRenewalModal({
 
   const newExpiryDate = getNewExpiryDate(selectedProduct)
   const newTotalDays = selectedProduct ? remainingDays + (selectedProduct.duration_months * 30) : 0
+
+  const currentConfig = tierConfig[currentTier as keyof typeof tierConfig] || tierConfig.free
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -244,7 +281,7 @@ export function SubscriptionRenewalModal({
                 </div>
               </div>
             ) : (
-              <div className="relative flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
+              <div className="flex flex-col md:flex-row w-full h-full bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
               >
                 {/* Кнопка закрытия */}
                 <button
@@ -260,19 +297,20 @@ export function SubscriptionRenewalModal({
                 </button>
 
                 {/* Левая панель */}
-                <div className="md:w-[280px] bg-gradient-to-b from-orange-500/10 via-orange-900/5 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5 h-auto">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none hidden md:block" />
+                <div className={`md:w-[280px] bg-gradient-to-b ${currentConfig.gradient} pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5 h-auto`}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                  <div className={`absolute -bottom-24 -left-24 w-64 h-64 ${currentConfig.bg.replace('bg-', 'bg-').replace('20', '15')} rounded-full blur-3xl pointer-events-none hidden md:block`} />
                   
                   <div className="relative z-10 flex flex-col h-full">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center ring-1 ring-orange-500/30 shadow-lg">
-                        <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-300" />
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br ${currentConfig.bg} flex items-center justify-center ring-1 ${currentConfig.ring} shadow-lg`}>
+                        {currentConfig.icon}
                       </div>
                       <div>
                         <h3 className="text-xl md:text-2xl font-oswald uppercase leading-none text-white">Продление</h3>
-                        <p className="text-[10px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
-                          Подписка активна
+                        <p className={`text-[10px] md:text-[10px] font-bold ${currentConfig.color} uppercase tracking-widest mt-1`}>
+                          <span className="md:hidden">{currentTier} активна</span>
+                          <span className="hidden md:inline">Подписка активна</span>
                         </p>
                       </div>
                     </div>
@@ -286,7 +324,7 @@ export function SubscriptionRenewalModal({
                         <span className="text-sm font-medium text-white/50">дн.</span>
                       </div>
                       <p className="text-[10px] font-medium text-white/40 mt-1">
-                        Тариф: <span className="text-orange-400/80 uppercase">{currentTier}</span>
+                        Тариф: <span className={`uppercase ${currentConfig.color}`}>{currentTier}</span>
                       </p>
                     </div>
                     
@@ -296,8 +334,8 @@ export function SubscriptionRenewalModal({
                         <div className="space-y-3" key={selectedProduct?.id}>
                           {productBenefits.slice(0, 3).map((text, i) => (
                             <div key={i} className="flex items-center gap-3 text-sm text-white/70">
-                              <div className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-500/20 flex items-center justify-center">
-                                <CheckCircle2 className="w-3 h-3 text-orange-400" />
+                              <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig.bg} flex items-center justify-center`}>
+                                <CheckCircle2 className={`w-3 h-3 ${currentConfig.color}`} />
                               </div>
                               {text}
                             </div>
@@ -309,21 +347,6 @@ export function SubscriptionRenewalModal({
                         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                         <div className="w-1 h-1 rounded-full bg-white/30" />
                         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                      </div>
-                      
-                      <div className="mt-auto space-y-2 pt-4">
-                        {[
-                          { icon: CheckCircle2, text: 'Мгновенный доступ', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-                          { icon: Calendar, text: 'Дни суммируются', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-                          { icon: CheckCircle2, text: 'Безопасная оплата', color: 'text-orange-400', bg: 'bg-orange-500/10' }
-                        ].map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-3 p-2 rounded-2xl bg-white/[0.03] border border-white/5">
-                            <div className={`w-8 h-8 rounded-xl ${item.bg} flex items-center justify-center flex-shrink-0`}>
-                              <item.icon className={`w-4 h-4 ${item.color}`} />
-                            </div>
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-tight">{item.text}</span>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   </div>
@@ -337,7 +360,7 @@ export function SubscriptionRenewalModal({
                     </h4>
                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 md:hidden">
                       <span className="text-[10px] font-bold text-white/40 uppercase">У вас:</span>
-                      <span className="text-sm font-bold text-orange-400">{remainingDays} дн.</span>
+                      <span className={`text-sm font-bold ${currentConfig.color}`}>{remainingDays} дн.</span>
                     </div>
                   </div>
                   
@@ -348,16 +371,16 @@ export function SubscriptionRenewalModal({
                         <button
                           key={p.id}
                           onClick={() => setSelectedProduct(p)}
-                          className={`relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition ${isSelected ? 'bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-500/50 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10' : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'}`}
+                          className={`relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition ${isSelected ? `bg-gradient-to-br ${currentConfig.bg.replace('20', '15')} ${currentConfig.ring.replace('30', '50')} ring-2 ${currentConfig.ring} shadow-lg ${currentConfig.bg.replace('bg-', 'shadow-').replace('20', '10')}` : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'}`}
                           style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
                         >
                           {p.discount_percentage > 0 && (
-                            <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100 ring-1 ring-orange-400/40 font-medium overflow-hidden">
-                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-300/20 to-transparent animate-shimmer"></span>
+                            <span className={`absolute top-2 right-2 inline-flex items-center rounded-full ${currentConfig.bg} px-2 py-0.5 text-xs text-white ring-1 ${currentConfig.ring} font-medium overflow-hidden`}>
+                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
                               <span className="relative">−{p.discount_percentage}%</span>
                             </span>
                           )}
-                          <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? 'text-orange-300' : 'text-white/40'}`}>
+                          <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? currentConfig.color : 'text-white/40'}`}>
                             {p.duration_months} мес.
                           </p>
                           <p key={`price-${p.id}-${isSelected}`} className="text-2xl md:text-3xl font-oswald font-bold text-white">
@@ -373,7 +396,7 @@ export function SubscriptionRenewalModal({
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
                           <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1 md:mb-2">Итоговый срок:</p>
-                          <p className="text-3xl md:text-3xl font-oswald font-bold text-emerald-400">
+                          <p className={`text-3xl md:text-3xl font-oswald font-bold ${currentConfig.color}`}>
                             <AnimatedNumber value={newTotalDays} /> дн.
                           </p>
                         </div>
@@ -388,7 +411,7 @@ export function SubscriptionRenewalModal({
 
                     <button
                       onClick={handleRenewal}
-                      className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm md:text-sm uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/30 hover:brightness-110 active:scale-[0.98]"
+                      className={`w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-gradient-to-r ${currentConfig.button} text-white font-bold text-sm md:text-sm uppercase tracking-wider shadow-lg transition-all duration-300 hover:shadow-xl hover:brightness-110 active:scale-[0.98]`}
                       style={{ touchAction: 'manipulation' }}
                     >
                       Продлить подписку

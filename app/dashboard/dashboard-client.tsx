@@ -1577,6 +1577,7 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
             onOpenChange={setUpgradeModalOpen}
             currentTier={profile.subscription_tier}
             userId={profile.id}
+            onOpenRenewal={() => setRenewalModalOpen(true)}
           />
     </>
   )

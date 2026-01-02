@@ -76,15 +76,16 @@ interface UpgradeModalProps {
   onOpenChange: (open: boolean) => void
   currentTier: SubscriptionTier
   userId: string
+  onOpenRenewal?: () => void
 }
 
 const tierConfig = {
   basic: {
-    gradient: 'from-blue-500/10 to-blue-500/5',
-    color: 'text-blue-400',
-    ring: 'ring-blue-500/30',
-    bg: 'bg-blue-500/20',
-    shadow: 'shadow-blue-500/20',
+    gradient: 'from-amber-700/10 to-amber-800/5',
+    color: 'text-amber-600',
+    ring: 'ring-amber-700/30',
+    bg: 'bg-amber-700/20',
+    shadow: 'shadow-amber-700/20',
     icon: <Star className="w-5 h-5" />,
     benefits: ['Базовые тренировки', 'Доступ к сообществу']
   },
@@ -98,17 +99,17 @@ const tierConfig = {
     benefits: ['Всё из Basic', '2→3 тренировки в неделю', 'Дневник здоровья', 'Доступ в Telegram сообщество навсегда']
   },
   elite: {
-    gradient: 'from-amber-500/10 to-amber-600/5',
-    color: 'text-amber-400',
-    ring: 'ring-amber-500/30',
-    bg: 'bg-amber-500/20',
-    shadow: 'shadow-amber-500/20',
+    gradient: 'from-yellow-400/10 to-yellow-500/5',
+    color: 'text-yellow-400',
+    ring: 'ring-yellow-400/30',
+    bg: 'bg-yellow-400/20',
+    shadow: 'shadow-yellow-400/20',
     icon: <Trophy className="w-5 h-5" />,
     benefits: ['Всё из PRO', 'Личное ведение с Марго', 'Индивидуальный план питания', 'Коррекция техники по видео', 'Прямая связь в Telegram']
   }
 }
 
-export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, userId }: UpgradeModalProps) {
+export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, userId, onOpenRenewal }: UpgradeModalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [calculating, setCalculating] = useState(false)
@@ -437,132 +438,156 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
 
                 {/* Правая панель */}
                 <div className="flex-1 px-6 pt-5 md:pt-7 pb-6 md:px-10 md:pb-10 flex flex-col min-h-0">
-                  <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-5 md:mb-5">
-                    {availableTiersData.map(t => {
-                      const isSelected = selectedTier === t.tier
-                      const config = tierConfig[t.tier as keyof typeof tierConfig]
-                      return (
-                        <button
-                          key={t.tier}
-                          onClick={() => handleTierChange(t.tier)}
-                          className={`flex-1 py-2.5 md:py-2.5 px-2 rounded-xl text-xs md:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${config.bg} ring-1 ${config.ring} text-white shadow-lg ${config.shadow}` : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03] active:scale-[0.97]'}`}
-                          style={{ touchAction: 'manipulation' }}
-                        >
-                          {t.tier}
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  <div className="mb-5 md:mb-5">
-                    <div className="flex items-center justify-between mb-2 px-2">
-                      <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                        <Zap className="w-3 h-3 text-emerald-400" />
-                        <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
+                  {availableTiersData.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                      <div className="w-20 h-20 rounded-full bg-yellow-400/10 flex items-center justify-center ring-1 ring-yellow-400/20">
+                        <Trophy className="w-10 h-10 text-yellow-400" />
                       </div>
-                      <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-white uppercase tracking-tight">У вас уже максимальный уровень!</h3>
+                        <p className="text-sm text-white/60">Хотите продлить текущую подписку?</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          onOpenChange(false);
+                          onOpenRenewal?.();
+                        }}
+                        className="px-8 py-3 rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold text-sm uppercase tracking-widest shadow-lg shadow-yellow-500/20 transition-all hover:brightness-110 active:scale-95"
+                      >
+                        Перейти к продлению
+                      </button>
                     </div>
-                    
-                    <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
-                      <div className="flex-1 flex flex-col items-center">
-                        <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">Осталось дней {currentTier}:</p>
-                        <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
-                          <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
-                        </p>
-                      </div>
-                      <div className="w-px h-8 md:h-8 bg-white/5" />
-                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 rounded-full bg-[#1a1a24] border border-white/5 flex items-center justify-center z-10">
-                        <ArrowBigRightDash className="w-4 h-4 md:w-4 md:h-4 text-white/20" />
-                      </div>
-                      <div className="flex-1 flex flex-col items-center">
-                        <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">Будет добавлено {selectedTier}:</p>
-                        <p className={`text-xl md:text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
-                          <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-5 md:mb-5">
-                    <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-3 md:p-3 backdrop-blur-sm">
-                      <div className="grid grid-cols-2 gap-3 md:gap-3" key={`products-${selectedTier}`}>
-                        {products.map((p) => {
-                          const isSelected = selectedProduct?.id === p.id
+                  ) : (
+                    <>
+                      <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-5 md:mb-5">
+                        {availableTiersData.map(t => {
+                          const isSelected = selectedTier === t.tier
+                          const config = tierConfig[t.tier as keyof typeof tierConfig]
                           return (
                             <button
-                              key={p.id}
-                              onClick={() => handleProductChange(p)}
-                              className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
+                              key={t.tier}
+                              onClick={() => handleTierChange(t.tier)}
+                              className={`flex-1 py-2.5 md:py-2.5 px-2 rounded-xl text-xs md:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${config.bg} ring-1 ${config.ring} text-white shadow-lg ${config.shadow}` : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03] active:scale-[0.97]'}`}
                               style={{ touchAction: 'manipulation' }}
                             >
-                              {p.discount_percentage > 0 && (
-                                <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'}`}>
-                                  −{p.discount_percentage}%
-                                </span>
-                              )}
-                              <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? currentConfig?.color : 'text-white/40'}`}>
-                                {p.duration_months} мес.
-                              </p>
-                              <p className="text-xl md:text-xl font-oswald font-bold text-white">
-                                {p.price.toLocaleString('ru-RU')} <span className="text-sm md:text-sm text-white/50 font-normal">₽</span>
-                              </p>
+                              {t.tier}
                             </button>
                           )
                         })}
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-auto pt-4 md:pt-4 border-t border-white/5">
-                    <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 md:p-4 relative backdrop-blur-sm mb-4 md:mb-4 overflow-hidden">
-                      <div className="absolute -top-1 -right-1 p-2 opacity-[0.02] pointer-events-none">
-                        <Clock className="w-12 h-12 md:w-12 md:h-12 text-white" />
+                      <div className="mb-5 md:mb-5">
+                        <div className="flex items-center justify-between mb-2 px-2">
+                          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                            <Zap className="w-3 h-3 text-emerald-400" />
+                            <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
+                          </div>
+                          <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
+                          <div className="flex-1 flex flex-col items-center">
+                            <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
+                              Осталось дней <span className="text-amber-600">Basic</span>:
+                            </p>
+                            <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
+                              <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
+                            </p>
+                          </div>
+                          <div className="w-px h-8 md:h-8 bg-white/5" />
+                          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 rounded-full bg-[#1a1a24] border border-white/5 flex items-center justify-center z-10">
+                            <ArrowBigRightDash className="w-4 h-4 md:w-4 md:h-4 text-white/20" />
+                          </div>
+                          <div className="flex-1 flex flex-col items-center">
+                            <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
+                              Будет добавлено <span className={currentConfig?.color}>{selectedTier}</span>:
+                            </p>
+                            <p className={`text-xl md:text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
+                              <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
-                        <div className="flex flex-col">
-                          <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
-                          <div className="flex items-baseline gap-2">
-                            <span className={`text-3xl md:text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
-                              <AnimatedNumber value={conversionData?.totalDays || 0} />
-                            </span>
-                            <div className="flex flex-col leading-none">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
-                                <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>{selectedTier}</span>
+
+                      <div className="mb-5 md:mb-5">
+                        <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-3 md:p-3 backdrop-blur-sm">
+                          <div className="grid grid-cols-2 gap-3 md:gap-3" key={`products-${selectedTier}`}>
+                            {products.map((p) => {
+                              const isSelected = selectedProduct?.id === p.id
+                              return (
+                                <button
+                                  key={p.id}
+                                  onClick={() => handleProductChange(p)}
+                                  className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-purple-500/15'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-purple-500/30'} shadow-lg ${currentConfig?.shadow || 'shadow-purple-500/10'}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
+                                  style={{ touchAction: 'manipulation' }}
+                                >
+                                  {p.discount_percentage > 0 && (
+                                    <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'}`}>
+                                      −{p.discount_percentage}%
+                                    </span>
+                                  )}
+                                  <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? currentConfig?.color : 'text-white/40'}`}>
+                                    {p.duration_months} мес.
+                                  </p>
+                                  <p className="text-xl md:text-xl font-oswald font-bold text-white">
+                                    {p.price.toLocaleString('ru-RU')} <span className="text-sm md:text-sm text-white/50 font-normal">₽</span>
+                                  </p>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto pt-4 md:pt-4 border-t border-white/5">
+                        <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 md:p-4 relative backdrop-blur-sm mb-4 md:mb-4 overflow-hidden">
+                          <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
+                            <div className="flex flex-col">
+                              <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
+                              <div className="flex items-baseline gap-2">
+                                <span className={`text-3xl md:text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
+                                  <AnimatedNumber value={conversionData?.totalDays || 0} />
+                                </span>
+                                <div className="flex flex-col leading-none">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>{selectedTier}</span>
+                                  </div>
+                                  <span className="text-[11px] md:text-[9px] font-medium text-white/40 md:text-white/20 mt-1">
+                                    до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                                  </span>
+                                </div>
                               </div>
-                              <span className="text-[11px] md:text-[9px] font-medium text-white/40 md:text-white/20 mt-1">
-                                до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
-                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 md:gap-2.5 py-1.5 px-2 md:py-2 md:px-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                              <div className="text-center">
+                                <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Конв.</p>
+                                <p className={`font-oswald font-bold ${currentConfig?.color} text-lg md:text-lg leading-none`}>
+                                  +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
+                                </p>
+                              </div>
+                              <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
+                              <div className="text-center">
+                                <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Новый</p>
+                                <p className="text-white font-oswald font-bold text-lg md:text-lg leading-none">
+                                  +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 md:gap-2.5 py-1.5 px-2 md:py-2 md:px-3 rounded-2xl bg-white/[0.04] border border-white/10">
-                          <div className="text-center">
-                            <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Конв.</p>
-                            <p className={`font-oswald font-bold ${currentConfig?.color} text-lg md:text-lg leading-none`}>
-                              +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
-                            </p>
-                          </div>
-                          <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
-                          <div className="text-center">
-                            <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Новый</p>
-                            <p className="text-white font-oswald font-bold text-lg md:text-lg leading-none">
-                              +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
 
-                    <button
-                      onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
-                      disabled={calculating || !selectedProduct}
-                      className={`w-full py-4 md:py-3.5 rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${selectedTier === 'pro' ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' : selectedTier === 'elite' ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-500/25' : 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-blue-500/25'} ${calculating || !selectedProduct ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl hover:brightness-110 active:scale-[0.98]'}`}
-                    >
-                      <span className="relative z-10">{calculating ? 'Подсчет...' : `Перейти на ${selectedTier}`}</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                    </button>
-                  </div>
+                        <button
+                          onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
+                          disabled={calculating || !selectedProduct}
+                          className={`w-full py-4 md:py-3.5 rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${selectedTier === 'pro' ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' : selectedTier === 'elite' ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-500/25' : 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-blue-500/25'} ${calculating || !selectedProduct ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl hover:brightness-110 active:scale-[0.98]'}`}
+                        >
+                          <span className="relative z-10">{calculating ? 'Подсчет...' : `Перейти на ${selectedTier}`}</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
