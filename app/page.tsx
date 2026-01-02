@@ -176,7 +176,7 @@ export default function HomeNewPage() {
       setIsAuthenticated(!!session)
       
       if (session) {
-        console.log('[HomePage] User authenticated, loading profile...')
+        console.log('[HomePage] User authenticated, loading profile for userId:', session.user.id)
         // Загружаем профиль
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -184,11 +184,17 @@ export default function HomeNewPage() {
           .eq('id', session.user.id)
           .single()
         
-        if (profileError) {
-          console.error('[HomePage] Error loading profile:', profileError)
-        }
+        console.log('[HomePage] Profile query result:', {
+          hasData: !!profileData,
+          hasError: !!profileError,
+          error: profileError,
+          dataKeys: profileData ? Object.keys(profileData) : null
+        })
         
-        if (profileData) {
+        if (profileError) {
+          console.error('[HomePage] ❌ Error loading profile:', profileError)
+          setProfile(null)
+        } else if (profileData) {
           const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
           console.log('[HomePage] ✅ Profile loaded:', {
             id: profileData.id,
@@ -200,7 +206,8 @@ export default function HomeNewPage() {
           })
           setProfile(profileData)
         } else {
-          console.warn('[HomePage] ⚠️ Profile data is null')
+          console.warn('[HomePage] ⚠️ Profile data is null or undefined')
+          setProfile(null)
         }
       } else {
         console.log('[HomePage] No session, setting profile to null')
@@ -213,9 +220,11 @@ export default function HomeNewPage() {
     // Подписка на изменения статуса авторизации
     const supabase = createClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('[HomePage] Auth state changed:', { event: _event, hasSession: !!session, userId: session?.user?.id })
       setIsAuthenticated(!!session)
       
       if (session) {
+        console.log('[HomePage] Session in auth change, loading profile for userId:', session.user.id)
         // Загружаем профиль
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -223,13 +232,19 @@ export default function HomeNewPage() {
           .eq('id', session.user.id)
           .single()
         
-        if (profileError) {
-          console.error('[HomePage] Error loading profile on auth change:', profileError)
-        }
+        console.log('[HomePage] Profile query result (auth change):', {
+          hasData: !!profileData,
+          hasError: !!profileError,
+          error: profileError,
+          dataKeys: profileData ? Object.keys(profileData) : null
+        })
         
-        if (profileData) {
+        if (profileError) {
+          console.error('[HomePage] ❌ Error loading profile on auth change:', profileError)
+          setProfile(null)
+        } else if (profileData) {
           const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
-          console.log('[HomePage] Profile loaded on auth change:', {
+          console.log('[HomePage] ✅ Profile loaded on auth change:', {
             id: profileData.id,
             subscription_tier: profileData.subscription_tier,
             subscription_status: profileData.subscription_status,
@@ -237,8 +252,12 @@ export default function HomeNewPage() {
             isActive
           })
           setProfile(profileData)
+        } else {
+          console.warn('[HomePage] ⚠️ Profile data is null or undefined (auth change)')
+          setProfile(null)
         }
       } else {
+        console.log('[HomePage] No session in auth change, setting profile to null')
         setProfile(null)
       }
     })
