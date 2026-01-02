@@ -559,10 +559,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                           src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" 
                           alt="Training" 
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
-                          }}
+                          loading="lazy"
                         />
                         <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}CC, transparent)` }}></div>
                         
@@ -616,10 +613,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                     src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" 
                     alt="Training" 
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
-                    }}
+                    loading="lazy"
                   />
                   <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background} 0%, transparent 100%)` }}></div>
                   <div className="absolute bottom-8 left-4 right-4 rounded-3xl p-5" style={{
@@ -738,10 +732,7 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                         src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop" 
                         alt="Тренер" 
                         className="w-full h-full object-cover object-top"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
-                        }}
+                        loading="lazy"
                       />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}E6 0%, ${colors.background}33 50%, transparent 100%)` }}></div>
                       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
