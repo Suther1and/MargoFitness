@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { RefreshCw, ArrowUpCircle, Calendar, Zap, ChevronRight } from 'lucide-react'
 import { ProductHeroCard } from './product-hero-card'
 import { PriceOptimizer } from './price-optimizer'
 import { PriceBreakdown } from './price-breakdown'
@@ -156,6 +158,29 @@ export function PaymentPageNewClient({
 
   const newExpiryDate = getNewExpiryDate()
 
+  // Расчет дней для Renewal
+  const getRemainingDays = () => {
+    if (!profile.subscription_expires_at) return 0
+    const expiresAt = new Date(profile.subscription_expires_at)
+    const now = new Date()
+    const diffTime = expiresAt.getTime() - now.getTime()
+    return diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0
+  }
+
+  const currentRemainingDays = getRemainingDays()
+  const addedDays = product.duration_months * 30
+  const totalDaysAfterRenewal = currentRemainingDays + addedDays
+
+  // Динамические цвета для апгрейда
+  const targetTierLevel = product.tier_level || 1
+  const isElite = targetTierLevel === 3
+  const isPro = targetTierLevel === 2
+  
+  const tierColor = isElite ? 'text-[#FFD700]' : isPro ? 'text-purple-400' : 'text-orange-400'
+  const tierBg = isElite ? 'bg-amber-500/10' : isPro ? 'bg-purple-500/10' : 'bg-orange-500/10'
+  const tierRing = isElite ? 'ring-amber-400/20' : isPro ? 'ring-purple-400/20' : 'ring-orange-400/20'
+  const tierAccent = isElite ? 'text-amber-300' : isPro ? 'text-purple-300' : 'text-orange-300'
+
   return (
     <>
       {/* Desktop: 2 колонки */}
@@ -171,57 +196,125 @@ export function PaymentPageNewClient({
 
           {/* Баннер для Renewal */}
           {action === 'renewal' && (
-            <div className="rounded-xl bg-blue-500/10 ring-1 ring-blue-400/30 p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
-                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <path d="M3 3v5h5"></path>
-                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                  <path d="M16 16h5v5"></path>
-                </svg>
-                <h3 className="text-sm font-bold text-white">Продление подписки</h3>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 p-5 group"
+            >
+              <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <RefreshCw className={`size-24 ${tierColor}`} />
               </div>
-              <p className="text-sm text-white/70">
-                Новые дни будут добавлены к вашей текущей подписке
-              </p>
-              {newExpiryDate && (
-                <p className="text-sm text-white/70 flex items-center gap-2">
-                  <span>📅</span>
-                  Новая дата окончания: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
-                </p>
-              )}
-            </div>
+              
+              <div className="relative z-10 flex flex-col gap-4">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className={`size-10 rounded-xl ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner`}>
+                    <RefreshCw className={`size-5 ${tierColor}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-white/90 uppercase tracking-[0.1em] leading-none">Продление подписки</h3>
+                    <p className="text-[10px] text-white/30 uppercase mt-1 font-bold">Добавление дней к текущему сроку</p>
+                  </div>
+                </div>
+
+                <div className="py-2.5 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Текущий остаток</span>
+                    <span className="text-sm font-bold text-white/60 font-oswald">{currentRemainingDays} дн</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2.5 border-t border-white/5">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Новые дни</span>
+                    <span className={`text-sm font-bold ${tierAccent}`}>+{addedDays} дн</span>
+                  </div>
+                </div>
+
+                <div className="flex items-end justify-between pt-1">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Итоговый срок</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`text-4xl font-bold font-oswald leading-none ${tierColor}`}>
+                        {totalDaysAfterRenewal}
+                      </span>
+                      <span className={`text-sm font-bold uppercase ${tierColor} opacity-40`}>дней</span>
+                    </div>
+                  </div>
+                  {newExpiryDate && (
+                    <div className="text-right flex flex-col items-end">
+                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Доступ до</span>
+                      <span className="text-xs font-black text-white/70 uppercase tracking-tight">
+                        {formatDate(newExpiryDate).split('г.')[0]}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {/* Баннер для Upgrade */}
-          {action === 'upgrade' && conversionData && (
-            <div className="rounded-xl bg-purple-500/10 ring-1 ring-purple-400/30 p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
-                  <polyline points="18 15 12 9 6 15"></polyline>
-                </svg>
-                <h3 className="text-sm font-bold text-white">Апгрейд тарифа</h3>
+          {action === 'upgrade' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 p-5 group"
+            >
+              <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Zap className={`size-24 ${tierColor}`} />
               </div>
-              <div className="rounded-lg bg-white/10 p-3">
-                <p className="text-xs text-white/60 mb-1">Конвертация оставшихся дней:</p>
-                <p className="text-sm font-bold text-white">
-                  <span className="text-orange-300">{conversionData.remainingDays} дней {conversionData.currentTier.toUpperCase()}</span>
-                  {' → '}
-                  <span className="text-purple-300">{conversionData.convertedDays} дней {['FREE', 'BASIC', 'PRO', 'ELITE'][product.tier_level || 1]}</span>
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-white/70">
-                  Итого дней: <span className="font-bold text-emerald-300">{(product.duration_months * 30) + conversionData.convertedDays}</span>
-                </p>
-                {newExpiryDate && (
-                  <p className="text-sm text-white/70 flex items-center gap-2">
-                    <span>📅</span>
-                    До: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
-                  </p>
-                )}
-              </div>
-            </div>
+
+              {!conversionData ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-4 text-white/10">
+                  <RefreshCw className="size-6 animate-spin" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Расчет условий...</span>
+                </div>
+              ) : (
+                <div className="relative z-10 flex flex-col gap-4">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className={`size-10 rounded-xl ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner`}>
+                      <Zap className={`size-5 fill-current ${tierColor}`} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-white/90 uppercase tracking-[0.1em] leading-none">Апгрейд тарифа</h3>
+                      <p className="text-[10px] text-white/30 uppercase mt-1 font-bold">Оптимизация дней при переходе</p>
+                    </div>
+                  </div>
+
+                  <div className="py-2.5 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Конверсия остатка</span>
+                      <div className={`flex items-center gap-2 text-sm font-bold ${tierAccent}`}>
+                        <span className="text-white/30 font-medium">{conversionData.remainingDays} дн</span>
+                        <ChevronRight className="size-3 text-white/10" />
+                        <span>{conversionData.convertedDays} дн</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2.5 border-t border-white/5">
+                      <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Новая покупка</span>
+                      <span className={`text-sm font-bold ${tierAccent}`}>+{addedDays} дн</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-end justify-between pt-1">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Итоговый срок</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className={`text-4xl font-bold font-oswald leading-none ${tierColor}`}>
+                          {(product.duration_months * 30) + conversionData.convertedDays}
+                        </span>
+                        <span className={`text-sm font-bold uppercase ${tierColor} opacity-40`}>дней</span>
+                      </div>
+                    </div>
+                    {newExpiryDate && (
+                      <div className="text-right flex flex-col items-end">
+                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Доступ до</span>
+                        <span className="text-xs font-black text-white/70 uppercase tracking-tight">
+                          {formatDate(newExpiryDate).split('г.')[0]}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </motion.div>
           )}
           
           <PriceOptimizer
@@ -265,47 +358,111 @@ export function PaymentPageNewClient({
 
         {/* Баннер для Renewal (Mobile) */}
         {action === 'renewal' && (
-          <div className="rounded-xl bg-blue-500/10 ring-1 ring-blue-400/30 p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                <path d="M16 16h5v5"></path>
-              </svg>
-              <h3 className="text-sm font-bold text-white">Продление подписки</h3>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 p-4 group flex flex-col justify-center"
+          >
+            <div className="absolute -right-2 -top-2 opacity-5">
+              <RefreshCw className={`size-16 ${tierColor}`} />
             </div>
-            <p className="text-sm text-white/70">
-              Новые дни будут добавлены к вашей текущей подписке
-            </p>
-            {newExpiryDate && (
-              <p className="text-sm text-white/70 flex items-center gap-2">
-                <span>📅</span>
-                Новая дата: <span className="font-semibold text-white">{formatDate(newExpiryDate)}</span>
-              </p>
-            )}
-          </div>
+            
+            <div className="relative z-10 flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className={`size-7 rounded-lg ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner ${tierColor}`}>
+                    <RefreshCw className="size-3.5" />
+                  </div>
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Продление</h3>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
+                  <span className={`text-2xl font-bold font-oswald leading-none ${tierColor}`}>
+                    {totalDaysAfterRenewal} дней
+                  </span>
+                </div>
+              </div>
+
+              <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Текущий остаток</span>
+                  <span className="text-xs font-bold text-white/60">{currentRemainingDays} дн</span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Добавляем</span>
+                  <span className={`text-xs font-bold ${tierAccent}`}>+{addedDays} дн</span>
+                </div>
+              </div>
+
+              {newExpiryDate && (
+                <div className="text-center pt-1 border-t border-white/5">
+                  <span className="text-[10px] text-white/30 font-medium uppercase tracking-tighter italic">
+                    Доступ до {formatDate(newExpiryDate).split('г.')[0]}
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
 
         {/* Баннер для Upgrade (Mobile) */}
-        {action === 'upgrade' && conversionData && (
-          <div className="rounded-xl bg-purple-500/10 ring-1 ring-purple-400/30 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-              <h3 className="text-sm font-bold text-white">Апгрейд тарифа</h3>
+        {action === 'upgrade' && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 p-4 group"
+          >
+            <div className="absolute -right-2 -top-2 opacity-5">
+              <Zap className={`size-16 ${tierColor}`} />
             </div>
-            <div className="rounded-lg bg-white/10 p-3">
-              <p className="text-xs text-white/60 mb-1">Конвертация:</p>
-              <p className="text-sm font-bold text-white">
-                {conversionData.remainingDays} дн. → {conversionData.convertedDays} дн.
-              </p>
-            </div>
-            <p className="text-sm text-white/70">
-              Итого: <span className="font-bold text-emerald-300">{(product.duration_months * 30) + conversionData.convertedDays} дней</span>
-            </p>
-          </div>
+
+            {!conversionData ? (
+              <div className="flex items-center gap-3 text-white/10 w-full justify-center py-4">
+                <RefreshCw className="size-3.5 animate-spin" />
+                <span className="text-[9px] font-bold uppercase tracking-widest">Расчет...</span>
+              </div>
+            ) : (
+              <div className="relative z-10 flex flex-col gap-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`size-8 rounded-lg ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner`}>
+                      <Zap className={`size-4 fill-current ${tierColor}`} />
+                    </div>
+                    <h3 className="text-[11px] font-black text-white uppercase tracking-widest leading-none">Апгрейд</h3>
+                  </div>
+                  <div className="text-right flex flex-col items-end">
+                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
+                    <span className={`text-2xl font-bold font-oswald leading-none ${tierColor}`}>
+                      {(product.duration_months * 30) + conversionData.convertedDays} дней
+                    </span>
+                  </div>
+                </div>
+
+                <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Конверсия {conversionData.currentTier[0].toUpperCase()}</span>
+                    <div className={`flex items-center gap-1.5 text-xs font-bold ${tierAccent}`}>
+                      <span className="text-white/20 font-medium">{conversionData.remainingDays}д</span>
+                      <ChevronRight className="size-2 text-white/10" />
+                      <span>{conversionData.convertedDays}д</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Новая покупка</span>
+                    <span className={`text-xs font-bold ${tierAccent}`}>+{addedDays} дн</span>
+                  </div>
+                </div>
+
+                {newExpiryDate && (
+                  <div className="text-center pt-1 border-t border-white/5">
+                    <span className="text-[10px] text-white/30 font-medium uppercase tracking-tighter italic">
+                      Доступ до {formatDate(newExpiryDate).split('г.')[0]}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
         )}
 
         <div className="space-y-3">
@@ -347,4 +504,3 @@ export function PaymentPageNewClient({
     </>
   )
 }
-
