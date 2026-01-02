@@ -555,7 +555,15 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                     <div className="lg:col-span-6 relative z-10 w-full">
                       <div className="absolute bottom-10 -left-10 w-[20rem] h-[20rem] md:w-[30rem] md:h-[30rem] blur-[5rem] rounded-full pointer-events-none" style={{ background: colors.blurColor1 }}></div>
                       <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[30rem] lg:h-[40rem] w-full" style={{ border: `1px solid ${colors.cardBorder}` }}>
-                        <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" alt="Training" className="w-full h-full object-cover" />
+                        <img 
+                          src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=2070&auto=format&fit=crop" 
+                          alt="Training" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
+                          }}
+                        />
                         <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}CC, transparent)` }}></div>
                         
                         <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:right-8 md:left-auto md:w-80 rounded-2xl shadow-xl p-4 md:p-5" style={{
@@ -718,7 +726,15 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24 items-center">
                   <div className="order-1 relative w-full">
                     <div className="relative h-[22rem] md:h-[40rem] rounded-3xl overflow-hidden shadow-2xl" style={{ border: `1px solid ${colors.cardBorder}` }}>
-                      <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop" alt="Тренер" className="w-full h-full object-cover object-top" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop" 
+                        alt="Тренер" 
+                        className="w-full h-full object-cover object-top"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%2318181b" width="800" height="600"/%3E%3C/svg%3E'
+                        }}
+                      />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${colors.background}E6 0%, ${colors.background}33 50%, transparent 100%)` }}></div>
                       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
                         <div className="inline-block px-3 py-1.5 mb-3 rounded-full text-white text-[0.7rem] uppercase tracking-widest font-bold font-montserrat shadow-lg" style={{
