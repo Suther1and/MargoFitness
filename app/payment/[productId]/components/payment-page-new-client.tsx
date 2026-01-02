@@ -211,36 +211,36 @@ export function PaymentPageNewClient({
                     <RefreshCw className={`size-5 ${tierColor}`} />
                   </div>
                   <div>
-                    <h3 className="text-xs font-black text-white/90 uppercase tracking-[0.1em] leading-none">Продление подписки</h3>
-                    <p className="text-[10px] text-white/30 uppercase mt-1 font-bold">Добавление дней к текущему сроку</p>
+                    <h3 className="text-[13px] font-bold text-white uppercase tracking-wider leading-none">Продление подписки</h3>
+                    <p className="text-[10px] text-white/30 uppercase mt-1.5 font-medium">Добавление дней к текущему сроку</p>
                   </div>
                 </div>
 
-                <div className="py-2.5 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2.5">
+                <div className="py-3 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Текущий остаток</span>
+                    <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Текущий остаток</span>
                     <span className="text-sm font-bold text-white/60 font-oswald">{currentRemainingDays} дн</span>
                   </div>
-                  <div className="flex items-center justify-between pt-2.5 border-t border-white/5">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Новые дни</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                    <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Новые дни</span>
                     <span className={`text-sm font-bold ${tierAccent}`}>+{addedDays} дн</span>
                   </div>
                 </div>
 
                 <div className="flex items-end justify-between pt-1">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Итоговый срок</span>
+                    <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] leading-none mb-2">Итоговый срок</span>
                     <div className="flex items-baseline gap-1.5">
                       <span className={`text-4xl font-bold font-oswald leading-none ${tierColor}`}>
                         {totalDaysAfterRenewal}
                       </span>
-                      <span className={`text-sm font-bold uppercase ${tierColor} opacity-40`}>дней</span>
+                      <span className={`text-sm font-bold uppercase ${tierColor} opacity-30`}>дней</span>
                     </div>
                   </div>
                   {newExpiryDate && (
                     <div className="text-right flex flex-col items-end">
-                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Доступ до</span>
-                      <span className="text-xs font-black text-white/70 uppercase tracking-tight">
+                      <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] leading-none mb-2">Доступ до</span>
+                      <span className="text-xs font-medium text-white/50 uppercase tracking-tight">
                         {formatDate(newExpiryDate).split('г.')[0]}
                       </span>
                     </div>
@@ -273,40 +273,40 @@ export function PaymentPageNewClient({
                       <Zap className={`size-5 fill-current ${tierColor}`} />
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-white/90 uppercase tracking-[0.1em] leading-none">Апгрейд тарифа</h3>
-                      <p className="text-[10px] text-white/30 uppercase mt-1 font-bold">Оптимизация дней при переходе</p>
+                      <h3 className="text-[13px] font-bold text-white uppercase tracking-wider leading-none">Апгрейд тарифа</h3>
+                      <p className="text-[10px] text-white/30 uppercase mt-1.5 font-medium">Оптимизация дней при переходе</p>
                     </div>
                   </div>
 
-                  <div className="py-2.5 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2.5">
+                  <div className="py-3 px-4 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Конверсия остатка</span>
+                      <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Конверсия остатка</span>
                       <div className={`flex items-center gap-2 text-sm font-bold ${tierAccent}`}>
                         <span className="text-white/30 font-medium">{conversionData.remainingDays} дн</span>
                         <ChevronRight className="size-3 text-white/10" />
                         <span>{conversionData.convertedDays} дн</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2.5 border-t border-white/5">
-                      <span className="text-[11px] font-bold text-white/40 uppercase tracking-tight">Новая покупка</span>
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                      <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Новая покупка</span>
                       <span className={`text-sm font-bold ${tierAccent}`}>+{addedDays} дн</span>
                     </div>
                   </div>
 
                   <div className="flex items-end justify-between pt-1">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Итоговый срок</span>
+                      <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] leading-none mb-2">Итоговый срок</span>
                       <div className="flex items-baseline gap-1.5">
                         <span className={`text-4xl font-bold font-oswald leading-none ${tierColor}`}>
                           {(product.duration_months * 30) + conversionData.convertedDays}
                         </span>
-                        <span className={`text-sm font-bold uppercase ${tierColor} opacity-40`}>дней</span>
+                        <span className={`text-sm font-bold uppercase ${tierColor} opacity-30`}>дней</span>
                       </div>
                     </div>
                     {newExpiryDate && (
                       <div className="text-right flex flex-col items-end">
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1.5">Доступ до</span>
-                        <span className="text-xs font-black text-white/70 uppercase tracking-tight">
+                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] leading-none mb-2">Доступ до</span>
+                        <span className="text-xs font-medium text-white/50 uppercase tracking-tight">
                           {formatDate(newExpiryDate).split('г.')[0]}
                         </span>
                       </div>
@@ -373,10 +373,10 @@ export function PaymentPageNewClient({
                   <div className={`size-7 rounded-lg ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner ${tierColor}`}>
                     <RefreshCw className="size-3.5" />
                   </div>
-                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Продление</h3>
+                  <h3 className="text-[11px] font-bold text-white uppercase tracking-wider leading-none">Продление</h3>
                 </div>
                 <div className="text-right flex flex-col items-end">
-                  <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
+                  <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
                   <span className={`text-2xl font-bold font-oswald leading-none ${tierColor}`}>
                     {totalDaysAfterRenewal} дней
                   </span>
@@ -385,18 +385,18 @@ export function PaymentPageNewClient({
 
               <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Текущий остаток</span>
+                  <span className="text-[10px] font-semibold text-white/30 uppercase tracking-tight">Текущий остаток</span>
                   <span className="text-xs font-bold text-white/60">{currentRemainingDays} дн</span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Добавляем</span>
+                  <span className="text-[10px] font-semibold text-white/30 uppercase tracking-tight">Добавляем</span>
                   <span className={`text-xs font-bold ${tierAccent}`}>+{addedDays} дн</span>
                 </div>
               </div>
 
               {newExpiryDate && (
                 <div className="text-center pt-1 border-t border-white/5">
-                  <span className="text-[10px] text-white/30 font-medium uppercase tracking-tighter italic">
+                  <span className="text-[10px] text-white/40 font-medium uppercase tracking-tighter italic">
                     Доступ до {formatDate(newExpiryDate).split('г.')[0]}
                   </span>
                 </div>
@@ -428,10 +428,10 @@ export function PaymentPageNewClient({
                     <div className={`size-8 rounded-lg ${tierBg} flex items-center justify-center ring-1 ${tierRing} shadow-inner`}>
                       <Zap className={`size-4 fill-current ${tierColor}`} />
                     </div>
-                    <h3 className="text-[11px] font-black text-white uppercase tracking-widest leading-none">Апгрейд</h3>
+                    <h3 className="text-[11px] font-bold text-white uppercase tracking-wider leading-none">Апгрейд</h3>
                   </div>
                   <div className="text-right flex flex-col items-end">
-                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
+                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
                     <span className={`text-2xl font-bold font-oswald leading-none ${tierColor}`}>
                       {(product.duration_months * 30) + conversionData.convertedDays} дней
                     </span>
@@ -440,7 +440,7 @@ export function PaymentPageNewClient({
 
                 <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.04] ring-1 ring-white/10 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Конверсия {conversionData.currentTier[0].toUpperCase()}</span>
+                    <span className="text-[10px] font-semibold text-white/30 uppercase tracking-tight">Конверсия {conversionData.currentTier[0].toUpperCase()}</span>
                     <div className={`flex items-center gap-1.5 text-xs font-bold ${tierAccent}`}>
                       <span className="text-white/20 font-medium">{conversionData.remainingDays}д</span>
                       <ChevronRight className="size-2 text-white/10" />
@@ -448,14 +448,14 @@ export function PaymentPageNewClient({
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-tight">Новая покупка</span>
+                    <span className="text-[10px] font-semibold text-white/30 uppercase tracking-tight">Новая покупка</span>
                     <span className={`text-xs font-bold ${tierAccent}`}>+{addedDays} дн</span>
                   </div>
                 </div>
 
                 {newExpiryDate && (
                   <div className="text-center pt-1 border-t border-white/5">
-                    <span className="text-[10px] text-white/30 font-medium uppercase tracking-tighter italic">
+                    <span className="text-[10px] text-white/40 font-medium uppercase tracking-tighter italic">
                       Доступ до {formatDate(newExpiryDate).split('г.')[0]}
                     </span>
                   </div>
