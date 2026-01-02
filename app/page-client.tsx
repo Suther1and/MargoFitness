@@ -56,7 +56,11 @@ const colors = {
   blurColor2: 'rgba(168, 85, 247, 0.1)',
 }
 
-export default function HomeNewPage() {
+interface HomeNewPageProps {
+  initialProfile?: Profile | null
+}
+
+export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps) {
   const [selectedDuration, setSelectedDuration] = useState<Period>(30)
   const [previousDuration, setPreviousDuration] = useState<Period>(30)
   const [certificateOpen, setCertificateOpen] = useState(false)
