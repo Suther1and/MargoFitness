@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation'
 import { SiTelegram, SiVk, SiInstagram, SiTiktok } from 'react-icons/si'
 import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
 import { SignInPopup } from '@/components/signin-popup'
+import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
+import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 import { createClient } from '@/lib/supabase/client'
-import type { Product } from '@/types/database'
+import type { Product, Profile, SubscriptionTier } from '@/types/database'
+import { TIER_LEVELS } from '@/types/database'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })
@@ -60,6 +63,10 @@ export default function HomeNewPage() {
   const [certificateOpen, setCertificateOpen] = useState(false)
   const [signInOpen, setSignInOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [renewalModalOpen, setRenewalModalOpen] = useState(false)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [upgradeInitialTier, setUpgradeInitialTier] = useState<SubscriptionTier | undefined>(undefined)
   const [products, setProducts] = useState<Product[]>([])
   const [pricingData, setPricingData] = useState<PricingData>({
     basic: { original: BASE_PRICES.basic, current: BASE_PRICES.basic },
@@ -153,20 +160,50 @@ export default function HomeNewPage() {
     window.dispatchEvent(event)
   }, [signInOpen])
 
-  // Проверка статуса авторизации
+  // Проверка статуса авторизации и загрузка профиля
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       setIsAuthenticated(!!session)
+      
+      if (session) {
+        // Загружаем профиль
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profileData) {
+          setProfile(profileData)
+        }
+      } else {
+        setProfile(null)
+      }
     }
     
     checkAuth()
 
     // Подписка на изменения статуса авторизации
     const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setIsAuthenticated(!!session)
+      
+      if (session) {
+        // Загружаем профиль
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profileData) {
+          setProfile(profileData)
+        }
+      } else {
+        setProfile(null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -178,6 +215,24 @@ export default function HomeNewPage() {
       router.push('/dashboard')
     } else {
       setSignInOpen(true)
+    }
+  }
+
+  // Функция для определения состояния кнопки тарифа
+  const getTierButtonState = (tierLevel: 1 | 2 | 3) => {
+    if (!isAuthenticated || !profile || profile.subscription_status !== 'active') {
+      return { type: 'purchase' as const, disabled: false }
+    }
+
+    const currentTierLevel = TIER_LEVELS[profile.subscription_tier]
+    const targetTierLevel = tierLevel
+
+    if (currentTierLevel === targetTierLevel) {
+      return { type: 'renewal' as const, disabled: false }
+    } else if (currentTierLevel > targetTierLevel) {
+      return { type: 'lower' as const, disabled: true }
+    } else {
+      return { type: 'upgrade' as const, disabled: false }
     }
   }
 
@@ -195,7 +250,41 @@ export default function HomeNewPage() {
       return
     }
 
-    // Если авторизован - получаем продукт и переходим на страницу оплаты
+    // Проверяем состояние подписки
+    if (profile && profile.subscription_status === 'active') {
+      const currentTierLevel = TIER_LEVELS[profile.subscription_tier]
+      const targetTierLevel = tierLevel
+
+      // Текущий тариф - открываем окно продления
+      if (currentTierLevel === targetTierLevel) {
+        setRenewalModalOpen(true)
+        return
+      }
+
+      // Тариф ниже - ничего не делаем (кнопка неактивна)
+      if (currentTierLevel > targetTierLevel) {
+        return
+      }
+
+      // Тариф выше - открываем окно апгрейда
+      // Если кликнули на Elite (tierLevel 3), сразу открываем апгрейд с Elite
+      if (currentTierLevel < targetTierLevel) {
+        // Определяем тариф для initialTier
+        const tierMap: Record<number, SubscriptionTier> = {
+          1: 'basic',
+          2: 'pro',
+          3: 'elite'
+        }
+        const targetTier = tierMap[tierLevel]
+        
+        // Устанавливаем initialTier и открываем модальное окно
+        setUpgradeInitialTier(targetTier)
+        setUpgradeModalOpen(true)
+        return
+      }
+    }
+
+    // Если нет активной подписки - обычная покупка
     try {
       const months = DAYS_TO_MONTHS[selectedDuration]
       const response = await fetch(`/api/products/by-duration?duration=${months}&tier=${tierLevel}`)
@@ -805,19 +894,32 @@ export default function HomeNewPage() {
                       </div>
 
                       {/* Кнопка снаружи */}
-                      <button 
-                        onClick={() => handleTierSelect(1)}
-                        className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
-                        style={{
-                          background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
-                          border: `1px solid ${colors.cardBorder}`,
-                          touchAction: 'manipulation'
-                        }}
-                      >
-                        <div className="flex items-center justify-center p-4 pointer-events-none">
-                          <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>Выбрать тариф</span>
-                        </div>
-                      </button>
+                      {(() => {
+                        const buttonState = getTierButtonState(1)
+                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 1
+                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 1
+                        
+                        return (
+                          <button 
+                            onClick={() => handleTierSelect(1)}
+                            disabled={buttonState.disabled}
+                            className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
+                            style={{
+                              background: buttonState.disabled 
+                                ? `rgba(255, 255, 255, 0.03)`
+                                : `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
+                              border: `1px solid ${colors.cardBorder}`,
+                              touchAction: 'manipulation'
+                            }}
+                          >
+                            <div className="flex items-center justify-center p-4 pointer-events-none">
+                              <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>
+                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : 'Выбрать тариф'}
+                              </span>
+                            </div>
+                          </button>
+                        )
+                      })()}
                     </div>
 
                     {/* Premium */}
@@ -883,19 +985,33 @@ export default function HomeNewPage() {
                       </div>
 
                       {/* Кнопка снаружи */}
-                      <button 
-                        onClick={() => handleTierSelect(2)}
-                        className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto" 
-                        style={{
-                          background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                          boxShadow: `0 8px 24px ${colors.primary}4D`,
-                          touchAction: 'manipulation'
-                        }}
-                      >
-                        <div className="flex items-center justify-center p-4 pointer-events-none">
-                          <span className="uppercase text-sm font-semibold tracking-widest">Выбрать тариф</span>
-                        </div>
-                      </button>
+                      {(() => {
+                        const buttonState = getTierButtonState(2)
+                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 2
+                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 2
+                        const isHigherTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] < 2
+                        
+                        return (
+                          <button 
+                            onClick={() => handleTierSelect(2)}
+                            disabled={buttonState.disabled}
+                            className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
+                            style={{
+                              background: buttonState.disabled 
+                                ? `rgba(255, 255, 255, 0.1)`
+                                : `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                              boxShadow: buttonState.disabled ? 'none' : `0 8px 24px ${colors.primary}4D`,
+                              touchAction: 'manipulation'
+                            }}
+                          >
+                            <div className="flex items-center justify-center p-4 pointer-events-none">
+                              <span className="uppercase text-sm font-semibold tracking-widest">
+                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : isHigherTier ? 'Сделать апгрейд до PRO' : 'Выбрать тариф'}
+                              </span>
+                            </div>
+                          </button>
+                        )
+                      })()}
                     </div>
 
                     {/* Elite */}
@@ -957,19 +1073,33 @@ export default function HomeNewPage() {
           </div>
 
                       {/* Кнопка снаружи */}
-                      <button 
-                        onClick={() => handleTierSelect(3)}
-                        className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto" 
-                        style={{
-                          background: `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
-                          border: `1px solid ${colors.cardBorder}`,
-                          touchAction: 'manipulation'
-                        }}
-                      >
-                        <div className="flex items-center justify-center p-4 pointer-events-none">
-                          <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>Выбрать тариф</span>
-                        </div>
-                      </button>
+                      {(() => {
+                        const buttonState = getTierButtonState(3)
+                        const isCurrentTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] === 3
+                        const isLowerTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] > 3
+                        const isHigherTier = profile && profile.subscription_status === 'active' && TIER_LEVELS[profile.subscription_tier] < 3
+                        
+                        return (
+                          <button 
+                            onClick={() => handleTierSelect(3)}
+                            disabled={buttonState.disabled}
+                            className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
+                            style={{
+                              background: buttonState.disabled 
+                                ? `rgba(255, 255, 255, 0.03)`
+                                : `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
+                              border: `1px solid ${colors.cardBorder}`,
+                              touchAction: 'manipulation'
+                            }}
+                          >
+                            <div className="flex items-center justify-center p-4 pointer-events-none">
+                              <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>
+                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : isHigherTier ? 'Сделать апгрейд до Elite' : 'Выбрать тариф'}
+                              </span>
+                            </div>
+                          </button>
+                        )
+                      })()}
                     </div>
           </div>
         </div>
@@ -1367,6 +1497,32 @@ export default function HomeNewPage() {
         isOpen={signInOpen} 
         onClose={() => setSignInOpen(false)} 
       />
+
+      {profile && profile.subscription_status === 'active' && (
+        <>
+          <SubscriptionRenewalModal
+            open={renewalModalOpen}
+            onOpenChange={setRenewalModalOpen}
+            currentTier={profile.subscription_tier}
+            currentExpires={profile.subscription_expires_at}
+            userId={profile.id}
+          />
+
+          <SubscriptionUpgradeModal
+            open={upgradeModalOpen}
+            onOpenChange={(open) => {
+              setUpgradeModalOpen(open)
+              if (!open) {
+                setUpgradeInitialTier(undefined)
+              }
+            }}
+            currentTier={profile.subscription_tier}
+            userId={profile.id}
+            onOpenRenewal={() => setRenewalModalOpen(true)}
+            initialTier={upgradeInitialTier}
+          />
+        </>
+      )}
     </>
   )
 }

@@ -156,12 +156,13 @@ export async function POST(request: NextRequest) {
           }
           
           // 2. Начислить кешбек пользователю (от фактически оплаченной суммы)
-          console.log(`[Webhook] Awarding cashback for user ${transaction.user_id}, amount: ${actualPaidAmount}`)
+          console.log(`[Webhook] Awarding cashback for user ${transaction.user_id}, amount: ${actualPaidAmount}, action: ${action}`)
           const cashbackResult = await awardCashback(
             {
               userId: transaction.user_id,
               paidAmount: actualPaidAmount,
               paymentId: payment.id,
+              action: action as 'purchase' | 'renewal' | 'upgrade',
             },
             supabase // Передаем admin client для обхода RLS
           )

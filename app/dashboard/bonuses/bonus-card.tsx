@@ -35,7 +35,7 @@ const getLevelColors = (level: number) => {
       badgeText: 'text-slate-200',
       badgeRing: 'ring-slate-400/50',
       badgeShimmer: 'via-slate-300/20',
-      progress: 'from-slate-400 to-slate-500',
+      progress: 'from-slate-300 to-slate-400',
     },
     3: { // Gold - золотой
       bgGradient: 'from-yellow-600/30 to-amber-700/30',
@@ -110,7 +110,7 @@ export function BonusCard({ account, levelData, progress }: BonusCardProps) {
                   <span>До {levelData.level === 1 ? 'Silver' : levelData.level === 2 ? 'Gold' : 'Platinum'}</span>
                   <span className="font-medium">{progress.remaining.toLocaleString('ru-RU')} ₽</span>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
+                <div className={`h-1.5 w-full rounded-full ${levelData.level === 2 ? 'bg-white/30' : 'bg-white/20'} overflow-hidden`}>
                   <div 
                     className={`h-full rounded-full bg-gradient-to-r ${colors.progress} transition-all duration-500`}
                     style={{ width: `${progress.progress}%` }}

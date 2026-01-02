@@ -77,6 +77,7 @@ interface UpgradeModalProps {
   currentTier: SubscriptionTier
   userId: string
   onOpenRenewal?: () => void
+  initialTier?: SubscriptionTier // Для предварительного выбора тарифа (например, Elite)
 }
 
 const tierConfig = {
@@ -109,7 +110,7 @@ const tierConfig = {
   }
 }
 
-export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, userId, onOpenRenewal }: UpgradeModalProps) {
+export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, userId, onOpenRenewal, initialTier }: UpgradeModalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [calculating, setCalculating] = useState(false)
@@ -133,7 +134,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
 
   useEffect(() => {
     if (open) loadData()
-  }, [open, userId])
+  }, [open, userId, initialTier])
 
   const loadData = async () => {
     setLoading(true)
@@ -143,12 +144,14 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       const tiers = result.data.availableTiers
       setAvailableTiersData(tiers)
       
-      const initialTier = tiers[0]
-      const initialProd = initialTier.products.find(p => p.duration_months === 6) || initialTier.products[0]
+      // Если указан initialTier, используем его, иначе первый доступный
+      let targetTier = tiers.find(t => t.tier === initialTier) || tiers[0]
+      
+      const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
       
       const conv = await calculateUpgradeConversion(userId, initialProd.tier_level || 0)
       
-      setSelectedTier(initialTier.tier)
+      setSelectedTier(targetTier.tier)
       setSelectedProduct(initialProd)
       
       if (conv.success && conv.data) {

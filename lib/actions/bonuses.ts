@@ -308,6 +308,7 @@ export async function awardCashback(
     userId: string
     paidAmount: number // фактически оплаченная сумма
     paymentId: string
+    action?: 'purchase' | 'renewal' | 'upgrade' // тип операции
   },
   supabaseClient?: any // Опциональный admin client для вызова из webhook
 ): Promise<{
@@ -339,6 +340,14 @@ export async function awardCashback(
       return { success: true, cashbackAmount: 0 }
     }
 
+    // Формируем описание в зависимости от типа операции
+    let description = `Кешбек ${levelData.percent}% с покупки`
+    if (params.action === 'renewal') {
+      description = `Кешбек ${levelData.percent}% с продления`
+    } else if (params.action === 'upgrade') {
+      description = `Кешбек ${levelData.percent}% с апгрейда`
+    }
+
     // Создаем транзакцию кешбека напрямую через admin client
     const { error: txError } = await supabase
       .from('bonus_transactions')
@@ -346,12 +355,13 @@ export async function awardCashback(
         user_id: params.userId,
         amount: cashbackAmount,
         type: 'cashback',
-        description: `Кешбек ${levelData.percent}% с покупки`,
+        description: description,
         related_payment_id: params.paymentId,
         metadata: {
           paid_amount: params.paidAmount,
           cashback_percent: levelData.percent,
           level: levelData.name,
+          action: params.action || 'purchase',
         },
       })
 
