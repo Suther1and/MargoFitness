@@ -177,36 +177,48 @@ export default function HomeNewPage() {
       
       if (session) {
         console.log('[HomePage] User authenticated, loading profile for userId:', session.user.id)
-        // Загружаем профиль
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-        
-        console.log('[HomePage] Profile query result:', {
-          hasData: !!profileData,
-          hasError: !!profileError,
-          error: profileError,
-          dataKeys: profileData ? Object.keys(profileData) : null
-        })
-        
-        if (profileError) {
-          console.error('[HomePage] ❌ Error loading profile:', profileError)
-          setProfile(null)
-        } else if (profileData) {
-          const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
-          console.log('[HomePage] ✅ Profile loaded:', {
-            id: profileData.id,
-            subscription_tier: profileData.subscription_tier,
-            subscription_status: profileData.subscription_status,
-            subscription_expires_at: profileData.subscription_expires_at,
-            isActive,
-            expiresInFuture: profileData.subscription_expires_at ? new Date(profileData.subscription_expires_at) > new Date() : false
+        try {
+          // Загружаем профиль
+          console.log('[HomePage] Making profile query (initial)...')
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+          
+          console.log('[HomePage] Profile query completed (initial). Result:', {
+            hasData: !!profileData,
+            hasError: !!profileError,
+            error: profileError ? {
+              message: profileError.message,
+              code: profileError.code,
+              details: profileError.details,
+              hint: profileError.hint
+            } : null,
+            dataKeys: profileData ? Object.keys(profileData) : null,
+            rawData: profileData
           })
-          setProfile(profileData)
-        } else {
-          console.warn('[HomePage] ⚠️ Profile data is null or undefined')
+          
+          if (profileError) {
+            console.error('[HomePage] ❌ Error loading profile:', profileError)
+            setProfile(null)
+          } else if (profileData) {
+            const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
+            console.log('[HomePage] ✅ Profile loaded:', {
+              id: profileData.id,
+              subscription_tier: profileData.subscription_tier,
+              subscription_status: profileData.subscription_status,
+              subscription_expires_at: profileData.subscription_expires_at,
+              isActive,
+              expiresInFuture: profileData.subscription_expires_at ? new Date(profileData.subscription_expires_at) > new Date() : false
+            })
+            setProfile(profileData)
+          } else {
+            console.warn('[HomePage] ⚠️ Profile data is null or undefined')
+            setProfile(null)
+          }
+        } catch (err) {
+          console.error('[HomePage] ❌ Exception loading profile (initial):', err)
           setProfile(null)
         }
       } else {
@@ -225,35 +237,47 @@ export default function HomeNewPage() {
       
       if (session) {
         console.log('[HomePage] Session in auth change, loading profile for userId:', session.user.id)
-        // Загружаем профиль
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-        
-        console.log('[HomePage] Profile query result (auth change):', {
-          hasData: !!profileData,
-          hasError: !!profileError,
-          error: profileError,
-          dataKeys: profileData ? Object.keys(profileData) : null
-        })
-        
-        if (profileError) {
-          console.error('[HomePage] ❌ Error loading profile on auth change:', profileError)
-          setProfile(null)
-        } else if (profileData) {
-          const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
-          console.log('[HomePage] ✅ Profile loaded on auth change:', {
-            id: profileData.id,
-            subscription_tier: profileData.subscription_tier,
-            subscription_status: profileData.subscription_status,
-            subscription_expires_at: profileData.subscription_expires_at,
-            isActive
+        try {
+          // Загружаем профиль
+          console.log('[HomePage] Making profile query...')
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+          
+          console.log('[HomePage] Profile query completed. Result:', {
+            hasData: !!profileData,
+            hasError: !!profileError,
+            error: profileError ? {
+              message: profileError.message,
+              code: profileError.code,
+              details: profileError.details,
+              hint: profileError.hint
+            } : null,
+            dataKeys: profileData ? Object.keys(profileData) : null,
+            rawData: profileData
           })
-          setProfile(profileData)
-        } else {
-          console.warn('[HomePage] ⚠️ Profile data is null or undefined (auth change)')
+          
+          if (profileError) {
+            console.error('[HomePage] ❌ Error loading profile on auth change:', profileError)
+            setProfile(null)
+          } else if (profileData) {
+            const isActive = profileData.subscription_status === 'active' && !isSubscriptionExpired(profileData.subscription_expires_at)
+            console.log('[HomePage] ✅ Profile loaded on auth change:', {
+              id: profileData.id,
+              subscription_tier: profileData.subscription_tier,
+              subscription_status: profileData.subscription_status,
+              subscription_expires_at: profileData.subscription_expires_at,
+              isActive
+            })
+            setProfile(profileData)
+          } else {
+            console.warn('[HomePage] ⚠️ Profile data is null or undefined (auth change)')
+            setProfile(null)
+          }
+        } catch (err) {
+          console.error('[HomePage] ❌ Exception loading profile:', err)
           setProfile(null)
         }
       } else {
