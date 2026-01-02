@@ -283,7 +283,8 @@ export default function HomeNewPage() {
     }
 
     // Проверяем состояние подписки
-    if (profile && isSubscriptionActive(profile)) {
+    const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
+    if (hasActiveSubscription) {
       const currentTierLevel = TIER_LEVELS[profile.subscription_tier]
       const targetTierLevel = tierLevel
 
@@ -927,18 +928,29 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
-                        const buttonState = getTierButtonState(1)
-                        const isActive = isSubscriptionActive(profile)
-                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 1
-                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 1
+                        const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
+                        const currentTierLevel = hasActiveSubscription ? TIER_LEVELS[profile.subscription_tier] : null
+                        const targetTierLevel = 1
+                        
+                        let buttonText = 'Выбрать тариф'
+                        let isDisabled = false
+                        
+                        if (hasActiveSubscription && currentTierLevel !== null) {
+                          if (currentTierLevel === targetTierLevel) {
+                            buttonText = 'Продлить тариф'
+                          } else if (currentTierLevel > targetTierLevel) {
+                            buttonText = 'Твой тариф лучше!'
+                            isDisabled = true
+                          }
+                        }
                         
                         return (
                           <button 
                             onClick={() => handleTierSelect(1)}
-                            disabled={buttonState.disabled}
+                            disabled={isDisabled}
                             className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
                             style={{
-                              background: buttonState.disabled 
+                              background: isDisabled 
                                 ? `rgba(255, 255, 255, 0.03)`
                                 : `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
                               border: `1px solid ${colors.cardBorder}`,
@@ -947,7 +959,7 @@ export default function HomeNewPage() {
                           >
                             <div className="flex items-center justify-center p-4 pointer-events-none">
                               <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>
-                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : 'Выбрать тариф'}
+                                {buttonText}
                               </span>
                             </div>
                           </button>
@@ -1019,28 +1031,40 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
-                        const buttonState = getTierButtonState(2)
-                        const isActive = isSubscriptionActive(profile)
-                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 2
-                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 2
-                        const isHigherTier = isActive && TIER_LEVELS[profile!.subscription_tier] < 2
+                        const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
+                        const currentTierLevel = hasActiveSubscription ? TIER_LEVELS[profile.subscription_tier] : null
+                        const targetTierLevel = 2
+                        
+                        let buttonText = 'Выбрать тариф'
+                        let isDisabled = false
+                        
+                        if (hasActiveSubscription && currentTierLevel !== null) {
+                          if (currentTierLevel === targetTierLevel) {
+                            buttonText = 'Продлить тариф'
+                          } else if (currentTierLevel > targetTierLevel) {
+                            buttonText = 'Твой тариф лучше!'
+                            isDisabled = true
+                          } else if (currentTierLevel < targetTierLevel) {
+                            buttonText = 'Сделать апгрейд до PRO'
+                          }
+                        }
                         
                         return (
                           <button 
                             onClick={() => handleTierSelect(2)}
-                            disabled={buttonState.disabled}
+                            disabled={isDisabled}
                             className="w-full rounded-xl text-white transition-all hover:opacity-90 shadow-lg active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
                             style={{
-                              background: buttonState.disabled 
+                              background: isDisabled 
                                 ? `rgba(255, 255, 255, 0.1)`
                                 : `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                              boxShadow: buttonState.disabled ? 'none' : `0 8px 24px ${colors.primary}4D`,
+                              boxShadow: isDisabled ? 'none' : `0 8px 24px ${colors.primary}4D`,
                               touchAction: 'manipulation'
                             }}
                           >
                             <div className="flex items-center justify-center p-4 pointer-events-none">
                               <span className="uppercase text-sm font-semibold tracking-widest">
-                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : isHigherTier ? 'Сделать апгрейд до PRO' : 'Выбрать тариф'}
+                                {buttonText}
                               </span>
                             </div>
                           </button>
@@ -1108,19 +1132,31 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
-                        const buttonState = getTierButtonState(3)
-                        const isActive = isSubscriptionActive(profile)
-                        const isCurrentTier = isActive && TIER_LEVELS[profile!.subscription_tier] === 3
-                        const isLowerTier = isActive && TIER_LEVELS[profile!.subscription_tier] > 3
-                        const isHigherTier = isActive && TIER_LEVELS[profile!.subscription_tier] < 3
+                        const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
+                        const currentTierLevel = hasActiveSubscription ? TIER_LEVELS[profile.subscription_tier] : null
+                        const targetTierLevel = 3
+                        
+                        let buttonText = 'Выбрать тариф'
+                        let isDisabled = false
+                        
+                        if (hasActiveSubscription && currentTierLevel !== null) {
+                          if (currentTierLevel === targetTierLevel) {
+                            buttonText = 'Продлить тариф'
+                          } else if (currentTierLevel > targetTierLevel) {
+                            buttonText = 'Твой тариф лучше!'
+                            isDisabled = true
+                          } else if (currentTierLevel < targetTierLevel) {
+                            buttonText = 'Сделать апгрейд до Elite'
+                          }
+                        }
                         
                         return (
                           <button 
                             onClick={() => handleTierSelect(3)}
-                            disabled={buttonState.disabled}
+                            disabled={isDisabled}
                             className="w-full rounded-xl transition-all hover:opacity-90 active:scale-95 relative z-10 mt-auto disabled:opacity-50 disabled:cursor-not-allowed" 
                             style={{
-                              background: buttonState.disabled 
+                              background: isDisabled 
                                 ? `rgba(255, 255, 255, 0.03)`
                                 : `linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06))`,
                               border: `1px solid ${colors.cardBorder}`,
@@ -1129,7 +1165,7 @@ export default function HomeNewPage() {
                           >
                             <div className="flex items-center justify-center p-4 pointer-events-none">
                               <span className="uppercase text-sm font-semibold tracking-widest" style={{ color: colors.textPrimary }}>
-                                {isCurrentTier ? 'Продлить тариф' : isLowerTier ? 'Твой тариф лучше!' : isHigherTier ? 'Сделать апгрейд до Elite' : 'Выбрать тариф'}
+                                {buttonText}
                               </span>
                             </div>
                           </button>
@@ -1533,7 +1569,7 @@ export default function HomeNewPage() {
         onClose={() => setSignInOpen(false)} 
       />
 
-      {profile && isSubscriptionActive(profile) && (
+      {profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at) && (
         <>
           <SubscriptionRenewalModal
             open={renewalModalOpen}
