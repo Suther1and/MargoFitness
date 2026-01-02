@@ -78,11 +78,9 @@ export function UserTableRow({ user }: UserTableRowProps) {
       <td className="p-4">
         <div className="flex items-center gap-3">
           <UserAvatar 
-            user={{ 
-              full_name: user.full_name, 
-              avatar_url: user.avatar_url,
-              email: user.email 
-            }} 
+            fullName={user.full_name}
+            avatarUrl={user.avatar_url}
+            email={user.email}
             className="w-10 h-10 rounded-xl ring-1 ring-white/10"
           />
           <div className="flex flex-col min-w-0">
