@@ -282,7 +282,7 @@ export async function getRegistrationStats(): Promise<{
     
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('created_at, subscription_status, subscription_tier')
+      .select('created_at, updated_at, subscription_status, subscription_tier')
     
     if (error) {
       return { success: false, error: 'Failed to fetch registration data' }
