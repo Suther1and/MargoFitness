@@ -302,7 +302,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                 </button>
 
                 {/* Левая панель skeleton */}
-                <div className={`md:w-[280px] bg-gradient-to-b ${tierConfig[currentTier as keyof typeof tierConfig]?.gradient || 'from-purple-500/10'} via-transparent to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5`}>
+                <div className={`md:w-[280px] bg-gradient-to-b from-white/10 to-transparent pt-5 md:pt-6 px-6 md:px-8 pb-3 md:pb-6 flex-shrink-0 relative border-b md:border-b-0 md:border-r border-white/5`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
                   <div className="relative z-10 space-y-6 animate-pulse">
                     <div className="flex items-center gap-4">
@@ -381,11 +381,18 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                     {/* Mobile tooltip */}
                     {showMobileTooltip && (
                       <div className="md:hidden mt-4 p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                        {[
-                          'Выбери срок новой подписки',
-                          'Оставшиеся дни будут конвертированы и добавлены в новую подписку',
-                          `"Перейти на ${(selectedTier || currentTier).toUpperCase()}" перенесет на страницу оплаты`
-                        ].map((text, i) => (
+                        {(availableTiersData.length === 0 
+                          ? [
+                              'У тебя максимальный уровень подписки Elite',
+                              'Все функции и личное ведение уже доступны',
+                              'Продли тариф для сохранения доступа'
+                            ]
+                          : [
+                              'Выбери срок новой подписки',
+                              'Оставшиеся дни будут конвертированы',
+                              `"Перейти на ${(selectedTier || currentTier).toUpperCase()}" перенесет к оплате`
+                            ]
+                        ).map((text, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs text-white/70">
                             <div className={`flex-shrink-0 w-3 h-3 rounded-full ${currentConfig?.bg || 'bg-white/10'} flex items-center justify-center`}>
                               <CheckCircle2 className={`w-2 h-2 ${currentConfig?.color || 'text-white/40'}`} />
@@ -398,14 +405,23 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                     
                     {/* Как это работает - скрыто на мобильных */}
                     <div className="space-y-4 flex-1 hidden md:block pt-8">
-                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Как это работает:</p>
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                        {availableTiersData.length === 0 ? 'Твой статус:' : 'Как это работает:'}
+                      </p>
                       <div className="relative min-h-[220px]">
                         <div className="space-y-3">
-                          {[
-                            'Выбери срок новой подписки',
-                            'Оставшиеся дни будут конвертированы и добавлены в новую подписку',
-                            `"Перейти на ${selectedTier?.toUpperCase()}" перенесет на страницу оплаты`
-                          ].map((text, i) => (
+                          {(availableTiersData.length === 0 
+                            ? [
+                                'У тебя максимальный уровень подписки Elite',
+                                'Все функции и личное ведение уже доступны',
+                                'Продли тариф для сохранения доступа'
+                              ]
+                            : [
+                                'Выбери срок новой подписки',
+                                'Оставшиеся дни будут конвертированы',
+                                `"Перейти на ${(selectedTier || currentTier).toUpperCase()}" перенесет к оплате`
+                              ]
+                          ).map((text, i) => (
                             <div key={i} className="flex items-center gap-3 text-sm text-white/70">
                               <div className={`flex-shrink-0 w-4 h-4 rounded-full ${currentConfig?.bg || 'bg-white/10'} flex items-center justify-center`}>
                                 <CheckCircle2 className={`w-3 h-3 ${currentConfig?.color || 'text-white/40'}`} />
