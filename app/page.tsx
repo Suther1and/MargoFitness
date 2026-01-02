@@ -928,6 +928,17 @@ export default function HomeNewPage() {
 
                       {/* Кнопка снаружи */}
                       {(() => {
+                        // Debug: логируем состояние профиля
+                        if (profile) {
+                          console.log('[Pricing] Profile state for Basic:', {
+                            hasProfile: !!profile,
+                            subscription_tier: profile.subscription_tier,
+                            subscription_status: profile.subscription_status,
+                            expires_at: profile.subscription_expires_at,
+                            isExpired: isSubscriptionExpired(profile.subscription_expires_at)
+                          })
+                        }
+                        
                         const hasActiveSubscription = profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at)
                         const currentTierLevel = hasActiveSubscription ? TIER_LEVELS[profile.subscription_tier] : null
                         const targetTierLevel = 1
