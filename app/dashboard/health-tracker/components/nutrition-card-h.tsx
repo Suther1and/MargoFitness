@@ -119,7 +119,7 @@ export function NutritionCardH({
             <input
               type="number"
               placeholder="Добавить"
-              className="flex-1 bg-transparent text-[10px] md:text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0"
+              className="flex-1 bg-transparent text-[16px] md:text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0 origin-left scale-[0.625] md:scale-100 w-[160%] md:w-full"
               value={mealInput}
               onChange={(e) => setMealInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddMeal()}
