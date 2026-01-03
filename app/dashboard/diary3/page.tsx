@@ -19,12 +19,12 @@ import { NotesCard } from './components/notes-card'
 import { DailyPhotosCard } from './components/daily-photos-card'
 import { HabitsCard } from './components/habits-card'
 import { AchievementsCard } from './components/achievements-card'
-import { HealthTrackerCard } from './components/health-tracker-card'
+import { DiaryCard } from './components/diary-card'
 import { WeekNavigator } from './components/week-navigator'
 
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 
-export default function HealthTrackerPage() {
+export default function Diary3Page() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
@@ -111,6 +111,7 @@ export default function HealthTrackerPage() {
                 <SleepCardH 
                     hours={data.sleepHours} 
                     goal={data.sleepGoal} 
+                    quality={data.sleepQuality} 
                     onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
                 />
                 <MoodEnergyCardH 
@@ -152,7 +153,7 @@ export default function HealthTrackerPage() {
           {/* Column 4: Info & Progress (Desktop Right) */}
           <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
             {/* Calendar */}
-            <HealthTrackerCard 
+            <DiaryCard 
                 className="p-4" 
                 title="Календарь" 
                 subtitle={format(selectedDate, 'LLLL', { locale: ru })}
@@ -166,7 +167,7 @@ export default function HealthTrackerPage() {
                 }
             >
                 <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={isCalendarExpanded} />
-            </HealthTrackerCard>
+            </DiaryCard>
 
             <GoalsSummaryCard data={data} />
             <AchievementsCard />
