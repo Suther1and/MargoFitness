@@ -669,6 +669,105 @@ export interface Database {
         }
         Relationships: []
       }
+      diary_settings: {
+        Row: {
+          user_id: string
+          enabled_metrics: string[]
+          goals: Json
+          streaks: Json
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          enabled_metrics?: string[]
+          goals?: Json
+          streaks?: Json
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          enabled_metrics?: string[]
+          goals?: Json
+          streaks?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_settings_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      diary_entries: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          metrics: Json
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date?: string
+          metrics?: Json
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          metrics?: Json
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      progress_photos: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          image_url: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date?: string
+          image_url: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          image_url?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_photos_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

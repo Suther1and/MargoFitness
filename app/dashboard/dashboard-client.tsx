@@ -7,10 +7,12 @@ import { ReferralProcessor } from '@/components/referral-processor'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
-import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS } from '@/types/database'
+import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS, DiarySettings, DiaryEntry } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { getMonthGenitiveCase } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { getDiarySettings, getDiaryEntries } from '@/lib/actions/diary'
+import { Settings2, Activity, Smile, Moon } from 'lucide-react'
 import { 
   Dialog, 
   DialogContent, 
@@ -82,6 +84,9 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const [bonusUsageModalOpen, setBonusUsageModalOpen] = useState(false)
+  const [habitPickerOpen, setHabitPickerOpen] = useState(false)
+  const [diarySettings, setDiarySettings] = useState<DiarySettings | null>(null)
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
   const [isFirstTime, setIsFirstTime] = useState(false)
   const cardsRef = useRef<(HTMLElement | null)[]>([])
   const profileDesktopRef = useRef<HTMLElement>(null)
@@ -95,6 +100,28 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
   useEffect(() => {
     setDaysLeft(getDaysUntilExpiration(profile))
   }, [profile])
+
+  useEffect(() => {
+    const loadDiaryData = async () => {
+      if (profile.subscription_tier !== 'free' && profile.subscription_tier !== 'basic') {
+        const settingsRes = await getDiarySettings(profile.id)
+        if (settingsRes.success && settingsRes.data) {
+          setDiarySettings(settingsRes.data)
+        } else if (settingsRes.error) {
+          console.error('[Dashboard Diary Fetch] Settings error:', settingsRes.error)
+        }
+        
+        const today = new Date().toISOString().split('T')[0]
+        const entriesRes = await getDiaryEntries(profile.id, today, today)
+        if (entriesRes.success && entriesRes.data) {
+          setDiaryEntries(entriesRes.data as DiaryEntry[])
+        } else if (entriesRes.error) {
+          console.error('[Dashboard Diary Fetch] Entries error:', entriesRes.error)
+        }
+      }
+    }
+    loadDiaryData()
+  }, [profile.id, profile.subscription_tier])
 
   // Отдельный эффект для обработки payment=success (только один раз)
   const paymentSuccessProcessed = useRef(false)
@@ -446,6 +473,92 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
       </div>
     )
   })
+
+  const todayEntry = diaryEntries.find(e => e.date === new Date().toISOString().split('T')[0])
+  const metricsData = (todayEntry?.metrics as Record<string, any>) || {}
+
+  const METRIC_WIDGETS = [
+    { 
+      id: 'weight', 
+      label: 'Вес', 
+      unit: 'кг', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
+          <path d="M3 3v18h18"></path>
+          <rect x="7" y="12" width="3" height="9"></rect>
+          <rect x="14" y="8" width="3" height="13"></rect>
+        </svg>
+      ),
+      bg: 'bg-purple-500/20',
+      value: metricsData.weight ? `${metricsData.weight} кг` : '—'
+    },
+    { 
+      id: 'steps', 
+      label: 'Шаги', 
+      unit: '', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      ),
+      bg: 'bg-orange-500/20',
+      value: metricsData.steps?.toLocaleString('ru-RU') || '—'
+    },
+    { 
+      id: 'water', 
+      label: 'Вода', 
+      unit: 'л', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+        </svg>
+      ),
+      bg: 'bg-blue-500/20',
+      value: metricsData.water ? `${metricsData.water} л` : '—'
+    },
+    { 
+      id: 'calories', 
+      label: 'Калории', 
+      unit: '', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
+          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+        </svg>
+      ),
+      bg: 'bg-rose-500/20',
+      value: metricsData.calories || '—'
+    },
+    { 
+      id: 'mood', 
+      label: 'Настроение', 
+      unit: '', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-300">
+          <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      ),
+      bg: 'bg-yellow-500/20',
+      value: metricsData.mood || '—'
+    },
+    { 
+      id: 'sleep', 
+      label: 'Сон', 
+      unit: 'ч', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-300">
+          <path d="M2 12a10 10 0 1 0 10-10 10 10 0 0 1-10 10Z"/>
+        </svg>
+      ),
+      bg: 'bg-indigo-500/20',
+      value: metricsData.sleep ? `${metricsData.sleep} ч` : '—'
+    }
+  ]
+
+  const enabledMetrics = METRIC_WIDGETS.filter(m => diarySettings?.enabled_metrics?.includes(m.id)).slice(0, 4)
+
+  const handleUpdateDiarySettings = (newSettings: DiarySettings) => {
+    setDiarySettings(newSettings)
+  }
 
   return (
     <>
@@ -1163,7 +1276,43 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
-                  <div className="rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 ring-1 ring-white/10 backdrop-blur relative z-10 flex-1 flex flex-col">
+                  {/* PRO Lock Overlay */}
+                  {(profile.subscription_tier === 'free' || profile.subscription_tier === 'basic') && (
+                    <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-auto" style={{ zIndex: 1 }}>
+                      {/* Легкое затемнение всей карточки без блюра */}
+                      <div className="absolute inset-0 bg-black/20 rounded-3xl" />
+                      
+                      {/* Центральный блок с замком и кнопкой */}
+                      <div className="relative flex flex-col items-center justify-center p-6 md:p-8 rounded-[2.5rem] bg-gradient-to-b from-white/[0.1] to-white/[0.05] backdrop-blur-2xl ring-1 ring-white/20 shadow-2xl shadow-black/60 max-w-[260px] w-full overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-purple-500/10 opacity-50" />
+                        <div className="relative z-10 flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 ring-1 ring-white/20 shadow-xl backdrop-blur-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                          </div>
+                          <p className="text-white font-oswald text-center mb-5 uppercase tracking-wider text-sm md:text-base leading-tight">
+                            Доступно только в PRO
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (profile.subscription_tier === 'free') {
+                                router.push('/#pricing');
+                              } else {
+                                setUpgradeModalOpen(true);
+                              }
+                            }}
+                            className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition-all"
+                          >
+                            {profile.subscription_tier === 'free' ? 'Открыть всё' : 'Апгрейд до PRO'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={`rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 ring-1 ring-white/10 relative z-0 flex-1 flex flex-col transition-all duration-300 ${(profile.subscription_tier === 'free' || profile.subscription_tier === 'basic') ? 'blur-[1px] opacity-50 grayscale pointer-events-none' : ''}`}>
                     <div className="flex items-center gap-2 text-white/80 text-sm mb-4 relative">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
                         <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
@@ -1173,69 +1322,48 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                       <span className="font-medium">Дневник здоровья</span>
                       <InfoButton tooltipKey="diary" />
                       <Tooltip tooltipKey="diary" />
+                      
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setHabitPickerOpen(true)
+                        }}
+                        className="ml-auto w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/10 transition-all active:scale-95"
+                      >
+                        <Settings2 className="w-4 h-4" />
+                      </button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      {/* Вес */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
-                              <path d="M3 3v18h18"></path>
-                              <rect x="7" y="12" width="3" height="9"></rect>
-                              <rect x="14" y="8" width="3" height="13"></rect>
-                            </svg>
+                      {enabledMetrics.length > 0 ? enabledMetrics.map((metric) => (
+                        <button 
+                          key={metric.id}
+                          onClick={() => router.push('/dashboard/diary')}
+                          className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className={`w-7 h-7 rounded-lg ${metric.bg} flex items-center justify-center`}>
+                              {metric.icon}
+                            </div>
+                            <span className="text-xs text-white/60">{metric.label}</span>
                           </div>
-                          <span className="text-xs text-white/60">Вес</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-2xl font-bold text-white font-oswald">65.3<span className="text-sm text-white/60 ml-1">кг</span></p>
-                          <span className="text-xs font-bold text-emerald-400">-2.7</span>
-                        </div>
-                      </button>
-
-                      {/* Шаги */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-300">
-                              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                            </svg>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-xl font-bold text-white font-oswald">{metric.value}</p>
                           </div>
-                          <span className="text-xs text-white/60">Шаги</span>
+                        </button>
+                      )) : (
+                        <div className="col-span-2 py-8 flex flex-col items-center justify-center text-center px-4 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
+                          <Activity className="w-8 h-8 text-white/20 mb-2" />
+                          <p className="text-xs text-white/40">Настройте показатели для отображения</p>
                         </div>
-                        <p className="text-2xl font-bold text-white font-oswald">8 547</p>
-                      </button>
-
-                      {/* Вода */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300">
-                              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                            </svg>
-                          </div>
-                          <span className="text-xs text-white/60">Вода</span>
-                        </div>
-                        <p className="text-2xl font-bold text-white font-oswald">1.8<span className="text-sm text-white/60 ml-1">л</span></p>
-                      </button>
-
-                      {/* Калории */}
-                      <button className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10  transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-lg bg-rose-500/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-300">
-                              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-                            </svg>
-                          </div>
-                          <span className="text-xs text-white/60">Калории</span>
-                        </div>
-                        <p className="text-2xl font-bold text-white font-oswald">1 450</p>
-                      </button>
+                      )}
                     </div>
 
                     <div className="flex gap-2">
-                      <button className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3  transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95">
+                      <button 
+                        onClick={() => router.push('/dashboard/diary')}
+                        className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3 transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95"
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
@@ -1250,7 +1378,10 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                         </div>
                       </button>
                       
-                      <button className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all active:scale-95">
+                      <button 
+                        onClick={() => router.push('/dashboard/diary?stats=true')}
+                        className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all active:scale-95"
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <line x1="18" y1="20" x2="18" y2="10"></line>
                           <line x1="12" y1="20" x2="12" y2="4"></line>

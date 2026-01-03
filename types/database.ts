@@ -16,6 +16,9 @@ export type BonusTransaction = Database['public']['Tables']['bonus_transactions'
 export type ReferralCode = Database['public']['Tables']['referral_codes']['Row']
 export type Referral = Database['public']['Tables']['referrals']['Row']
 export type PromoCode = Database['public']['Tables']['promo_codes']['Row']
+export type DiarySettings = Database['public']['Tables']['diary_settings']['Row']
+export type DiaryEntry = Database['public']['Tables']['diary_entries']['Row']
+export type ProgressPhoto = Database['public']['Tables']['progress_photos']['Row']
 
 // ============================================
 // Типы для вставки (Insert)
@@ -33,6 +36,9 @@ export type BonusTransactionInsert = Database['public']['Tables']['bonus_transac
 export type ReferralCodeInsert = Database['public']['Tables']['referral_codes']['Insert']
 export type ReferralInsert = Database['public']['Tables']['referrals']['Insert']
 export type PromoCodeInsert = Database['public']['Tables']['promo_codes']['Insert']
+export type DiarySettingsInsert = Database['public']['Tables']['diary_settings']['Insert']
+export type DiaryEntryInsert = Database['public']['Tables']['diary_entries']['Insert']
+export type ProgressPhotoInsert = Database['public']['Tables']['progress_photos']['Insert']
 
 // ============================================
 // Типы для обновления (Update)
@@ -50,6 +56,9 @@ export type BonusTransactionUpdate = Database['public']['Tables']['bonus_transac
 export type ReferralCodeUpdate = Database['public']['Tables']['referral_codes']['Update']
 export type ReferralUpdate = Database['public']['Tables']['referrals']['Update']
 export type PromoCodeUpdate = Database['public']['Tables']['promo_codes']['Update']
+export type DiarySettingsUpdate = Database['public']['Tables']['diary_settings']['Update']
+export type DiaryEntryUpdate = Database['public']['Tables']['diary_entries']['Update']
+export type ProgressPhotoUpdate = Database['public']['Tables']['progress_photos']['Update']
 
 // ============================================
 // ENUM типы
