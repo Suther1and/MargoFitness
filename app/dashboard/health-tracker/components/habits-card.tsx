@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Flame, Plus, Clock, Sun, Moon, Calendar, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DailyHabit } from '../types'
-import { DiaryCard } from './diary-card'
+import { HealthTrackerCard } from './health-tracker-card'
 
 interface HabitItemProps {
   habit: DailyHabit
@@ -69,7 +69,7 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
   const totalCount = habits.length
 
   return (
-    <DiaryCard
+    <HealthTrackerCard
       title="Привычки"
       subtitle={`${completedCount}/${totalCount}`}
       icon={Target}
@@ -113,6 +113,6 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
         <Plus className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
         Добавить привычку
       </button>
-    </DiaryCard>
+    </HealthTrackerCard>
   )
 }

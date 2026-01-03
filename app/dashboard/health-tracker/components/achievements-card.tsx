@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Award, Target, Flame, Trophy, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DiaryCard } from './diary-card'
+import { HealthTrackerCard } from './health-tracker-card'
 
 interface Achievement {
   id: string
@@ -21,7 +21,7 @@ const ACHIEVEMENTS: Achievement[] = [
 
 export function AchievementsCard() {
   return (
-    <DiaryCard
+    <HealthTrackerCard
       title="Достижения"
       subtitle="Твои победы"
       icon={Award}
@@ -63,7 +63,7 @@ export function AchievementsCard() {
             </div>
         </div>
       </div>
-    </DiaryCard>
+    </HealthTrackerCard>
   )
 }
 

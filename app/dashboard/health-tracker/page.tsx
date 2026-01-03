@@ -19,12 +19,12 @@ import { NotesCard } from './components/notes-card'
 import { DailyPhotosCard } from './components/daily-photos-card'
 import { HabitsCard } from './components/habits-card'
 import { AchievementsCard } from './components/achievements-card'
-import { DiaryCard } from './components/diary-card'
-import { WeekNavigator } from '../diary/components/week-navigator'
+import { HealthTrackerCard } from './components/health-tracker-card'
+import { WeekNavigator } from './components/week-navigator'
 
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 
-export default function Diary3Page() {
+export default function HealthTrackerPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
@@ -153,7 +153,7 @@ export default function Diary3Page() {
           {/* Column 4: Info & Progress (Desktop Right) */}
           <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
             {/* Calendar */}
-            <DiaryCard 
+            <HealthTrackerCard 
                 className="p-4" 
                 title="Календарь" 
                 subtitle={format(selectedDate, 'LLLL', { locale: ru })}
@@ -167,7 +167,7 @@ export default function Diary3Page() {
                 }
             >
                 <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={isCalendarExpanded} />
-            </DiaryCard>
+            </HealthTrackerCard>
 
             <GoalsSummaryCard data={data} />
             <AchievementsCard />

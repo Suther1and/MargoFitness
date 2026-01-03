@@ -11,7 +11,7 @@ import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEV
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { getMonthGenitiveCase } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
-import { getDiarySettings, getDiaryEntries } from '@/lib/actions/diary'
+import { getDiarySettings, getDiaryEntries } from '@/lib/actions/health-tracker'
 import { Settings2, Activity, Smile, Moon } from 'lucide-react'
 import { 
   Dialog, 
@@ -1338,7 +1338,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                       {enabledMetrics.length > 0 ? enabledMetrics.map((metric) => (
                         <button 
                           key={metric.id}
-                          onClick={() => router.push('/dashboard/diary')}
+                          onClick={() => router.push('/dashboard/health-tracker')}
                           className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.06] hover:ring-white/15 text-left active:scale-95"
                         >
                           <div className="flex items-center gap-2 mb-2">
@@ -1361,7 +1361,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
 
                     <div className="flex gap-2">
                       <button 
-                        onClick={() => router.push('/dashboard/diary')}
+                        onClick={() => router.push('/dashboard/health-tracker')}
                         className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 ring-1 ring-emerald-400/30 p-3 transition-all hover:from-emerald-500/15 hover:to-teal-500/15 hover:ring-emerald-400/40 active:scale-95"
                       >
                         <div className="flex items-center gap-3">
@@ -1379,7 +1379,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                       </button>
                       
                       <button 
-                        onClick={() => router.push('/dashboard/diary?stats=true')}
+                        onClick={() => router.push('/dashboard/health-tracker?stats=true')}
                         className="w-16 md:w-14 flex items-center justify-center rounded-xl bg-white/5 px-2 py-3 text-white/80 ring-1 ring-white/10 hover:bg-white/10 transition-all active:scale-95"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

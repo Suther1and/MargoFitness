@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface DiaryCardProps {
+interface HealthTrackerCardProps {
   children: ReactNode
   title?: string
   subtitle?: string
@@ -17,7 +17,7 @@ interface DiaryCardProps {
   rightAction?: ReactNode
 }
 
-export function DiaryCard({
+export function HealthTrackerCard({
   children,
   title,
   subtitle,
@@ -27,7 +27,7 @@ export function DiaryCard({
   className,
   containerClassName,
   rightAction
-}: DiaryCardProps) {
+}: HealthTrackerCardProps) {
   return (
     <div className={cn(
       "relative h-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl transition-all duration-500 hover:border-white/10 group",
