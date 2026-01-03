@@ -50,7 +50,7 @@ export function WeekNavigator({
         )}
       >
         <AnimatePresence mode="wait">
-          {!isExpanded ? (
+          {!isExpanded || onCalendarClick ? (
             <motion.div
               key="week"
               initial={{ opacity: 0, height: 0 }}
@@ -122,9 +122,19 @@ export function WeekNavigator({
                 {minimal && onCalendarClick && (
                   <button
                     onClick={onCalendarClick}
-                    className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all shrink-0 group ml-1"
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center border transition-all shrink-0 group ml-1",
+                      isExpanded 
+                        ? "bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30" 
+                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                    )}
                   >
-                    <ChevronDown className={cn("w-4 h-4 text-white/40 group-hover:text-white transition-transform duration-300", isExpanded && "rotate-180")} />
+                    <ChevronDown className={cn(
+                      "w-4 h-4 transition-all duration-300",
+                      isExpanded 
+                        ? "text-black rotate-180" 
+                        : "text-white/40 group-hover:text-white"
+                    )} />
                   </button>
                 )}
               </div>
