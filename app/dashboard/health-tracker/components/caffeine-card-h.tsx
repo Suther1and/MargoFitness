@@ -20,10 +20,10 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
   const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-500'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-6 pt-4 pb-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
-      <div className="absolute top-4 right-4">
-        <div className={cn('flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5', accentColor)}>
-          <span className="text-[10px] font-bold">{Math.round((localValue / goal) * 100)}%</span>
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
+      <div className="absolute top-3 right-3 md:top-4 md:right-4">
+        <div className={cn('flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg bg-white/5 border border-white/5', accentColor)}>
+          <span className="text-[8px] md:text-[10px] font-bold">{Math.round((localValue / goal) * 100)}%</span>
         </div>
       </div>
 
@@ -35,30 +35,31 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
               isOverLimit ? 'bg-red-500/10 border-red-500/20' : `${COLORS.caffeine.bg} ${COLORS.caffeine.border}`
             )}
           >
-            <Coffee className={cn('w-3.5 h-3.5', accentColor)} />
+            <Coffee className={cn('w-3 h-3 md:w-3.5 md:h-3.5', accentColor)} />
           </div>
-          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Кофеин</span>
+          <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Кофеин</span>
         </div>
 
-        <div className="flex items-center justify-between gap-2 my-2">
-          <MetricButton icon={Minus} onClick={handleDecrement} iconClassName="text-white/40" />
+        <div className="flex items-center justify-between gap-1 md:gap-2 my-2">
+          <MetricButton icon={Minus} onClick={handleDecrement} size="small" iconClassName="text-white/40" />
 
-          <div className="flex items-baseline justify-center flex-1">
+          <div className="flex items-baseline justify-center flex-1 min-w-0">
             <AnimatePresence mode="wait">
               <motion.span
                 key={localValue}
                 {...ANIMATIONS.valueChange}
-                className={cn('text-5xl font-black font-oswald tracking-tighter', isOverLimit ? 'text-red-500' : 'text-white')}
+                className={cn('text-3xl md:text-5xl font-black font-oswald tracking-tighter truncate', isOverLimit ? 'text-red-500' : 'text-white')}
               >
                 {localValue}
               </motion.span>
             </AnimatePresence>
-            <span className="ml-1 text-[10px] font-bold text-white/20 uppercase tracking-tighter">/ {goal}</span>
+            <span className="ml-0.5 md:ml-1 text-[8px] md:text-[10px] font-bold text-white/20 uppercase tracking-tighter whitespace-nowrap">/ {goal}</span>
           </div>
 
           <MetricButton
             icon={Plus}
             onClick={handleIncrement}
+            size="small"
             iconClassName={isOverLimit ? 'text-red-400' : 'text-white/40'}
             className={isOverLimit ? 'hover:bg-red-500/20 hover:border-red-500/40' : ''}
           />

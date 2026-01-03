@@ -33,11 +33,11 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
   const changeColor = weekChange < 0 ? (isGoalToLose ? 'text-emerald-400' : 'text-red-400') : isGoalToLose ? 'text-red-400' : 'text-emerald-400'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-all duration-500 h-[180px]">
-      <div className="absolute top-4 right-4">
-        <div className={cn('flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5', changeColor)}>
-          {weekChange < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-          <span className="text-[10px] font-bold">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-all duration-500 h-[180px]">
+      <div className="absolute top-3 right-3 md:top-4 md:right-4">
+        <div className={cn('flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg bg-white/5 border border-white/5', changeColor)}>
+          {weekChange < 0 ? <TrendingDown className="w-2.5 h-2.5 md:w-3 md:h-3" /> : <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" />}
+          <span className="text-[8px] md:text-[10px] font-bold">
             {weekChange > 0 ? '+' : ''}
             {weekChange.toFixed(1)} кг
           </span>
@@ -47,15 +47,15 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
       <div className="relative flex flex-col h-full justify-between">
         <div className="flex items-center gap-2">
           <div className={cn('p-1.5 rounded-lg', COLORS.weight.bg, COLORS.weight.border, 'border')}>
-            <Scale className={cn('w-3.5 h-3.5', COLORS.weight.primary)} />
+            <Scale className={cn('w-3 h-3 md:w-3.5 md:h-3.5', COLORS.weight.primary)} />
           </div>
-          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Вес тела</span>
+          <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Вес тела</span>
         </div>
 
-        <div className="flex items-center justify-between gap-2 my-2">
-          <MetricButton icon={Minus} onClick={handleDecrement} iconClassName="text-white/40" />
+        <div className="flex items-center justify-between gap-1 md:gap-2 my-2">
+          <MetricButton icon={Minus} onClick={handleDecrement} size="small" iconClassName="text-white/40" />
 
-          <div className="flex items-baseline justify-center flex-1">
+          <div className="flex items-baseline justify-center flex-1 min-w-0">
             <EditableMetricValue
               value={localValue}
               isEditing={isEditing}
@@ -66,13 +66,13 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
               unit="кг"
               step="0.1"
               format={(v) => v.toFixed(1)}
-              className="hover:text-emerald-400"
-              unitClassName="text-emerald-500/40"
-              inputClassName="text-center w-full"
+              className="text-3xl md:text-4xl hover:text-emerald-400 truncate"
+              unitClassName="text-emerald-500/40 text-[8px] md:text-[10px]"
+              inputClassName="text-center w-full text-2xl md:text-4xl"
             />
           </div>
 
-          <MetricButton icon={Plus} onClick={handleIncrement} iconClassName="text-white/40" />
+          <MetricButton icon={Plus} onClick={handleIncrement} size="small" iconClassName="text-white/40" />
         </div>
 
         {goalWeight && (

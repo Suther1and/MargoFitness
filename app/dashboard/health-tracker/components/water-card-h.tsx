@@ -89,10 +89,10 @@ export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                className="hover:text-blue-400"
-                inputClassName="text-left"
+                className="text-3xl md:text-4xl hover:text-blue-400"
+                inputClassName="text-left text-2xl md:text-4xl w-20 md:w-24"
               />
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest tabular-nums">
+              <span className="text-[8px] md:text-[10px] font-bold text-white/20 uppercase tracking-widest tabular-nums">
                 / {goal} мл
               </span>
             </div>

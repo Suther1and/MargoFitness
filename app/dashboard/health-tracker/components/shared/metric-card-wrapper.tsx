@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { CARD_STYLES, SIZES } from '../../constants'
 
@@ -25,7 +26,8 @@ export function MetricCardWrapper({
   doneGlowColor = 'bg-emerald-500/10',
 }: MetricCardWrapperProps) {
   return (
-    <div
+    <motion.div
+      layout="position"
       className={cn(
         CARD_STYLES.base,
         CARD_STYLES.background,
@@ -46,7 +48,7 @@ export function MetricCardWrapper({
       />
 
       <div className="relative z-10 flex flex-col h-full">{children}</div>
-    </div>
+    </motion.div>
   )
 }
 

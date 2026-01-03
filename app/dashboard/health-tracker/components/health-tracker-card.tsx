@@ -29,10 +29,13 @@ export function HealthTrackerCard({
   rightAction
 }: HealthTrackerCardProps) {
   return (
-    <div className={cn(
-      "relative h-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl transition-all duration-500 hover:border-white/10 group",
-      containerClassName
-    )}>
+    <motion.div 
+      layout="position"
+      className={cn(
+        "relative h-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl transition-all duration-500 hover:border-white/10 group",
+        containerClassName
+      )}
+    >
       {/* Background Glow Effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
         <div className={cn(

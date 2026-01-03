@@ -63,6 +63,7 @@ export function EditableMetricValue({
 
   return (
     <motion.div
+      layout="position"
       onClick={onEdit}
       className="flex items-baseline cursor-pointer hover:opacity-80 transition-opacity"
     >

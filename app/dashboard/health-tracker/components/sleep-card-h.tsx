@@ -60,11 +60,11 @@ export function SleepCardH({ hours, goal, onUpdate }: SleepCardHProps) {
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 unit="ч"
-                size="xlarge"
+                size="large"
                 step="0.5"
-                className={cn('leading-none transition-colors duration-500', isDone ? 'text-emerald-400' : 'text-white')}
-                unitClassName={cn('text-sm leading-none ml-0.5 transition-colors duration-500', isDone ? 'text-emerald-400/40' : 'text-white/20')}
-                inputClassName="w-16 text-center"
+                className={cn('text-3xl md:text-5xl leading-none transition-colors duration-500', isDone ? 'text-emerald-400' : 'text-white')}
+                unitClassName={cn('text-xs md:text-sm leading-none ml-0.5 transition-colors duration-500', isDone ? 'text-emerald-400/40' : 'text-white/20')}
+                inputClassName="w-12 md:w-16 text-center text-2xl md:text-4xl"
               />
             </div>
           </ProgressRing>

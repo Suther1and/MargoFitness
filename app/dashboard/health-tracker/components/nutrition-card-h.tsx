@@ -81,20 +81,20 @@ export function NutritionCardH({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-6 hover:border-violet-500/20 transition-all duration-500 h-[210px]">
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-6 hover:border-violet-500/20 transition-all duration-500 min-h-[210px] md:h-[210px]">
       {/* Background Ambient */}
       <div className="absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none -z-10" />
       
-      <div className="flex gap-8 h-full">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8 h-full">
         {/* Левая часть: Кольцо калорий и Добавление */}
-        <div className="flex flex-col justify-between h-full items-center w-[130px] flex-shrink-0">
+        <div className="flex flex-row md:flex-col justify-between md:justify-between h-auto md:h-full items-center md:w-[130px] flex-shrink-0 gap-4 md:gap-0">
           <div className="cursor-pointer -translate-y-1" onClick={handleEdit}>
-            <ProgressRing percentage={percentage} size="medium" color="#8b5cf6" className="w-[120px] h-[120px]">
+            <ProgressRing percentage={percentage} size="medium" color="#8b5cf6" className="w-[100px] h-[100px] md:w-[120px] md:h-[120px]">
               {isEditing ? (
                 <input
                   autoFocus
                   type="number"
-                  className="w-16 bg-transparent text-center text-3xl font-black text-white font-oswald outline-none"
+                  className="w-16 bg-transparent text-center text-2xl md:text-3xl font-black text-white font-oswald outline-none"
                   value={localValue}
                   onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
                   onBlur={handleBlur}
@@ -102,19 +102,19 @@ export function NutritionCardH({
                 />
               ) : (
                 <>
-                  <span className="text-4xl font-black text-white font-oswald leading-none">{localValue}</span>
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mt-1">ккал</span>
+                  <span className="text-3xl md:text-4xl font-black text-white font-oswald leading-none">{localValue}</span>
+                  <span className="text-[8px] md:text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mt-1">ккал</span>
                 </>
               )}
             </ProgressRing>
           </div>
 
           {/* Кнопка быстрого добавления */}
-          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-[110px] h-[34px] overflow-hidden">
+          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-[100px] md:w-[110px] h-[32px] md:h-[34px] overflow-hidden">
             <input
               type="number"
               placeholder="Добавить"
-              className="flex-1 bg-transparent text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0"
+              className="flex-1 bg-transparent text-[10px] md:text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0"
               value={mealInput}
               onChange={(e) => setMealInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddMeal()}
@@ -130,24 +130,24 @@ export function NutritionCardH({
         </div>
 
         {/* Правая часть: ИМТ, Нормы и Качество */}
-        <div className="flex-1 flex flex-col justify-between h-full py-0.5">
+        <div className="flex-1 flex flex-col justify-between h-full py-0.5 gap-4 md:gap-0">
           {/* Верх: ИМТ и Нормы */}
-          <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-row md:flex-row justify-between items-start gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <Info className="w-3 h-3 text-white/20" />
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">ИМТ</span>
+                <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">ИМТ</span>
               </div>
               <div className="flex flex-col items-start gap-1">
-                <span className="text-2xl font-black text-white font-oswald leading-none">{bmi}</span>
-                <span className={cn("text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-white/5", bmiCategory.color)}>
+                <span className="text-xl md:text-2xl font-black text-white font-oswald leading-none">{bmi}</span>
+                <span className={cn("text-[7px] md:text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-white/5", bmiCategory.color)}>
                   {bmiCategory.label}
                 </span>
               </div>
             </div>
 
             <div className="space-y-1.5 flex-1 flex flex-col items-end">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Суточные нормы</span>
+                <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Суточные нормы</span>
                 <div className="flex items-center gap-0.5">
                     {[
                       { label: 'Сброс', val: norms.loss, color: 'text-emerald-400' },
@@ -158,14 +158,14 @@ export function NutritionCardH({
                         <button 
                           onClick={() => onUpdate('caloriesGoal', n.val)} 
                           className={cn(
-                            "flex flex-col items-center px-2.5 py-1.5 rounded-xl transition-all min-w-[50px]",
+                            "flex flex-col items-center px-1.5 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-all min-w-[40px] md:min-w-[50px]",
                             caloriesGoal === n.val ? "bg-white/10 border border-white/10 shadow-lg" : "hover:bg-white/5 border border-transparent"
                           )}
                         >
-                            <span className={cn("text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
-                            <span className="text-[7px] text-white/20 uppercase font-bold mt-1 tracking-tighter">{n.label}</span>
+                            <span className={cn("text-sm md:text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
+                            <span className="text-[6px] md:text-[7px] text-white/20 uppercase font-bold mt-1 tracking-tighter">{n.label}</span>
                         </button>
-                        {i < 2 && <div className="w-px h-5 bg-white/5 mx-0.5" />}
+                        {i < 2 && <div className="w-px h-4 md:h-5 bg-white/5 mx-0.5" />}
                       </div>
                     ))}
                 </div>
@@ -173,16 +173,16 @@ export function NutritionCardH({
           </div>
 
           {/* Низ: Выбор качества еды */}
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="p-1 rounded bg-violet-500/10">
                         <Utensils className="w-3 h-3 text-violet-400" />
                     </div>
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Качество питания</span>
+                    <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">Качество питания</span>
                 </div>
                 {foodQuality && (
-                    <span className={cn("text-[9px] font-bold uppercase", foodItems.find(i => i.rating === foodQuality)?.color)}>
+                    <span className={cn("text-[7px] md:text-[9px] font-bold uppercase", foodItems.find(i => i.rating === foodQuality)?.color)}>
                         {foodItems.find(i => i.rating === foodQuality)?.label}
                     </span>
                 )}
@@ -196,14 +196,14 @@ export function NutritionCardH({
                     key={item.rating}
                     onClick={() => onUpdate('foodQuality', item.rating)}
                     className={cn(
-                      "flex-1 py-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center",
+                      "flex-1 py-1.5 md:py-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center",
                       isActive 
                         ? "bg-white/10 border-white/20 scale-105 shadow-lg" 
                         : "bg-white/5 border-white/5 opacity-30 hover:opacity-100 hover:bg-white/[0.07]"
                     )}
                   >
                     <item.icon className={cn(
-                        "w-5 h-5 transition-all duration-300",
+                        "w-4 h-4 md:w-5 md:h-5 transition-all duration-300",
                         isActive ? item.color : "text-white"
                     )} />
                   </button>
@@ -214,6 +214,7 @@ export function NutritionCardH({
         </div>
       </div>
     </div>
+  )
   )
 }
 

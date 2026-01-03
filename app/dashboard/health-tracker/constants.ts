@@ -90,9 +90,9 @@ export const SIZES = {
   },
   
   progressRing: {
-    small: 'w-[90px] h-[90px]',
-    medium: 'w-[120px] h-[120px]',
-    large: 'w-[125px] h-[125px]',
+    small: 'w-[70px] h-[70px] md:w-[90px] md:h-[90px]',
+    medium: 'w-[100px] h-[100px] md:w-[120px] md:h-[120px]',
+    large: 'w-[110px] h-[110px] md:w-[125px] md:h-[125px]',
   },
 }
 
@@ -162,10 +162,10 @@ export const TYPOGRAPHY = {
   },
   
   value: {
-    small: 'text-2xl font-black font-oswald',
-    medium: 'text-3xl font-black font-oswald',
-    large: 'text-4xl font-black font-oswald tracking-tighter',
-    xlarge: 'text-5xl font-black font-oswald tracking-tighter',
+    small: 'text-xl md:text-2xl font-black font-oswald',
+    medium: 'text-2xl md:text-3xl font-black font-oswald',
+    large: 'text-3xl md:text-4xl font-black font-oswald tracking-tighter',
+    xlarge: 'text-4xl md:text-5xl font-black font-oswald tracking-tighter',
   },
 }
 
