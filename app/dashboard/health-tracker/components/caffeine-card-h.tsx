@@ -21,23 +21,22 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
 
   return (
     <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
-      <div className="absolute top-3 right-3 md:top-4 md:right-4">
-        <div className={cn('flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg bg-white/5 border border-white/5', accentColor)}>
-          <span className="text-[8px] md:text-[10px] font-bold">{Math.round((localValue / goal) * 100)}%</span>
-        </div>
-      </div>
-
       <div className="relative flex flex-col h-full justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              'p-1.5 rounded-lg border transition-colors duration-500',
-              isOverLimit ? 'bg-red-500/10 border-red-500/20' : `${COLORS.caffeine.bg} ${COLORS.caffeine.border}`
-            )}
-          >
-            <Coffee className={cn('w-3 h-3 md:w-3.5 md:h-3.5', accentColor)} />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'p-1.5 rounded-lg border transition-colors duration-500',
+                isOverLimit ? 'bg-red-500/10 border-red-500/20' : `${COLORS.caffeine.bg} ${COLORS.caffeine.border}`
+              )}
+            >
+              <Coffee className={cn('w-3.5 h-3.5', accentColor)} />
+            </div>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Кофеин</span>
           </div>
-          <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Кофеин</span>
+          <div className={cn('hidden md:flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5', accentColor)}>
+            <span className="text-[10px] font-bold">{Math.round((localValue / goal) * 100)}%</span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-1 md:gap-2 my-2">

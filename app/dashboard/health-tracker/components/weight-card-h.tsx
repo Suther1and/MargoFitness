@@ -34,22 +34,22 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
 
   return (
     <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-all duration-500 h-[180px]">
-      <div className="absolute top-3 right-3 md:top-4 md:right-4">
-        <div className={cn('flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg bg-white/5 border border-white/5', changeColor)}>
-          {weekChange < 0 ? <TrendingDown className="w-2.5 h-2.5 md:w-3 md:h-3" /> : <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" />}
-          <span className="text-[8px] md:text-[10px] font-bold">
-            {weekChange > 0 ? '+' : ''}
-            {weekChange.toFixed(1)} кг
-          </span>
-        </div>
-      </div>
-
       <div className="relative flex flex-col h-full justify-between">
-        <div className="flex items-center gap-2">
-          <div className={cn('p-1.5 rounded-lg', COLORS.weight.bg, COLORS.weight.border, 'border')}>
-            <Scale className={cn('w-3 h-3 md:w-3.5 md:h-3.5', COLORS.weight.primary)} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={cn('p-1.5 rounded-lg', COLORS.weight.bg, COLORS.weight.border, 'border')}>
+              <Scale className={cn('w-3.5 h-3.5', COLORS.weight.primary)} />
+            </div>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] md:hidden">Вес</span>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] hidden md:inline">Вес тела</span>
           </div>
-          <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Вес тела</span>
+          <div className={cn('flex items-center gap-1 px-2 py-1 rounded-lg md:bg-white/5 md:border md:border-white/5', changeColor)}>
+            {weekChange < 0 ? <TrendingDown className="w-3 h-3 hidden md:block" /> : <TrendingUp className="w-3 h-3 hidden md:block" />}
+            <span className="text-[10px] font-bold">
+              {weekChange > 0 ? '+' : ''}
+              {weekChange.toFixed(1)} кг
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-1 md:gap-2 my-2">
