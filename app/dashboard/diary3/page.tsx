@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Settings, Share2, MoreVertical, LayoutGrid, Activity } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Settings, Share2, MoreVertical, LayoutGrid, Activity, ChevronDown, ChevronUp } from 'lucide-react'
+import { format, addMonths } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { WaterCard } from './components/water-card'
 import { SleepCard } from './components/sleep-card'
 import { WeightCard } from './components/weight-card'
@@ -10,11 +12,13 @@ import { MoodEnergyCard } from './components/mood-energy-card'
 import { StepsCard } from './components/steps-card'
 import { HabitsCard } from './components/habits-card'
 import { DiaryCard } from './components/diary-card'
+import { AchievementsCard } from './components/achievements-card'
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 import { WeekNavigator } from '../diary/components/week-navigator'
 
 export default function Diary3Page() {
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
 
@@ -28,6 +32,13 @@ export default function Diary3Page() {
       habits: prev.habits.map(h => 
         h.id === id ? { ...h, completed: !h.completed } : h
       )
+    }))
+  }
+
+  const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
+    setData(prev => ({
+      ...prev,
+      [metric]: value
     }))
   }
 
@@ -84,40 +95,11 @@ export default function Diary3Page() {
           </div>
         </header>
 
-        {/* Navigation Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 bg-[#121214]/60 backdrop-blur-md p-4 rounded-[2rem] border border-white/5 shadow-2xl">
-           <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 text-xs uppercase tracking-widest">
-                 <Calendar className="w-4 h-4" />
-                 Сегодня
-              </button>
-              <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1">
-                 <button className="p-2.5 rounded-lg hover:bg-white/10 transition-all text-white/40 hover:text-white">
-                    <ChevronLeft className="w-4 h-4" />
-                 </button>
-                 <button className="p-2.5 rounded-lg hover:bg-white/10 transition-all text-white/40 hover:text-white">
-                    <ChevronRight className="w-4 h-4" />
-                 </button>
-              </div>
-           </div>
-           
-           <div className="flex-1 max-w-2xl mx-auto w-full">
-            <WeekNavigator 
-                selectedDate={selectedDate} 
-                onDateChange={setSelectedDate} 
-            />
-           </div>
-           
-           <button className="p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all hidden lg:block">
-              <LayoutGrid className="w-5 h-5 text-white/40" />
-           </button>
-        </div>
-
         {/* Main Content - 3 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Column 1: Physical Metrics (Left) */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-5">
             <WaterCard 
                 value={data.waterIntake} 
                 goal={data.waterGoal} 
@@ -127,6 +109,7 @@ export default function Diary3Page() {
                 hours={data.sleepHours} 
                 quality={data.sleepQuality} 
                 onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
+                onQualityUpdate={(val) => handleMetricUpdate('sleepQuality', val)}
             />
             <WeightCard 
                 value={data.weight} 
@@ -135,10 +118,11 @@ export default function Diary3Page() {
           </div>
 
           {/* Column 2: Focus Area (Center) */}
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-6 space-y-5">
             <StepsCard 
                 steps={data.steps} 
                 goal={data.stepsGoal} 
+                onUpdate={(val) => handleMetricUpdate('steps', val)}
             />
             <HabitsCard 
                 habits={data.habits} 
@@ -146,8 +130,61 @@ export default function Diary3Page() {
             />
           </div>
 
-          {/* Column 3: Mental & Insights (Right) */}
-          <div className="lg:col-span-3 space-y-6">
+      {/* Column 3: Navigation & Mental & Achievements (Right) */}
+      <div className="lg:col-span-3 space-y-5">
+        {/* Calendar Navigator Card - Simplified */}
+        <DiaryCard 
+            className="p-4" 
+            title="Календарь" 
+            subtitle={format(selectedDate, 'LLLL', { locale: ru })}
+            icon={Calendar} 
+            iconColor="text-amber-500" 
+            iconBg="bg-amber-500/10"
+            rightAction={
+                <div className="flex items-center gap-1">
+                    {isCalendarExpanded && (
+                        <div className="flex items-center gap-0.5 mr-2">
+                            <button 
+                                onClick={() => setSelectedDate(addMonths(selectedDate, -1))}
+                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5 text-white/40" />
+                            </button>
+                            <button 
+                                onClick={() => setSelectedDate(addMonths(selectedDate, 1))}
+                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                            >
+                                <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+                            </button>
+                        </div>
+                    )}
+                    <button 
+                        onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                        className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all group"
+                    >
+                        <motion.div
+                            animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                            <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-amber-500 transition-colors" />
+                        </motion.div>
+                    </button>
+                </div>
+            }
+        >
+            <div className="pt-0">
+                <div className="w-full">
+                    <WeekNavigator 
+                        selectedDate={selectedDate} 
+                        onDateChange={setSelectedDate} 
+                        showDate={false}
+                        minimal={true}
+                        isExpanded={isCalendarExpanded}
+                    />
+                </div>
+            </div>
+        </DiaryCard>
+
             <MoodEnergyCard 
                 mood={data.mood} 
                 energy={data.energyLevel} 
@@ -155,41 +192,21 @@ export default function Diary3Page() {
                 onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
             />
             
-            {/* Achievements / Insights Placeholder (Simplified Zone 3) */}
-            <DiaryCard title="Инсайты" subtitle="Ваш прогресс" icon={Activity} iconColor="text-blue-400" iconBg="bg-blue-500/10">
-                <div className="space-y-4">
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                        <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">🔥 Стрик</div>
-                        <div className="text-xs font-bold text-white/80">7 дней подряд "Креатин 5г"</div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                        <div className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">🎯 Цель</div>
-                        <div className="text-xs font-bold text-white/80">Шаги выполнены на 64%</div>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/10">
-                        <div className="text-sm font-bold text-white mb-1">Отличный темп!</div>
-                        <p className="text-[10px] text-white/40 uppercase leading-relaxed">Вы активнее, чем 85% пользователей</p>
-                    </div>
-                </div>
-            </DiaryCard>
+            <AchievementsCard />
           </div>
         </div>
 
-        {/* Footer Insights */}
-        <footer className="mt-12 p-10 rounded-[3rem] bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="max-w-xl">
-                    <h3 className="text-2xl font-bold text-white mb-2">Аналитика недели готова</h3>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                        На этой неделе ваша активность выросла на <span className="text-green-400 font-bold">12.4%</span>. 
-                        Вы соблюдаете норму воды 5 дней подряд. Так держать!
-                    </p>
+        {/* Simplified Footer */}
+        <footer className="mt-8 p-6 rounded-3xl bg-white/5 border border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold text-xs">
+                    74%
                 </div>
-                <button className="px-10 py-5 rounded-2xl bg-white text-black font-black hover:bg-amber-400 transition-all hover:scale-105 active:scale-95 shadow-2xl text-xs uppercase tracking-widest whitespace-nowrap">
-                    Подробный отчет
-                </button>
+                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Цели дня почти выполнены</p>
             </div>
+            <button className="px-6 py-3 rounded-xl bg-white text-black font-black hover:bg-amber-400 transition-all text-[10px] uppercase tracking-widest">
+                Отчет
+            </button>
         </footer>
       </div>
     </div>

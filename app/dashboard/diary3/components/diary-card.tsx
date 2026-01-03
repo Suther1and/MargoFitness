@@ -14,6 +14,7 @@ interface DiaryCardProps {
   iconBg?: string
   className?: string
   containerClassName?: string
+  rightAction?: ReactNode
 }
 
 export function DiaryCard({
@@ -24,7 +25,8 @@ export function DiaryCard({
   iconColor = "text-white",
   iconBg = "bg-white/5",
   className,
-  containerClassName
+  containerClassName,
+  rightAction
 }: DiaryCardProps) {
   return (
     <div className={cn(
@@ -60,6 +62,11 @@ export function DiaryCard({
                 </div>
               )}
             </div>
+            {rightAction && (
+              <div className="flex items-center">
+                {rightAction}
+              </div>
+            )}
           </div>
         )}
 
