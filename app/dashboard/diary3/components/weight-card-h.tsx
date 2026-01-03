@@ -69,9 +69,9 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleDecrement}
-                className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
               >
-                <Minus className="w-3.5 h-3.5 text-white/40" />
+                <Minus className="w-4 h-4 text-white/40" />
               </motion.button>
               
               <div className="flex items-baseline justify-center w-[95px]">
@@ -104,9 +104,9 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleIncrement}
-                className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
               >
-                <Plus className="w-3.5 h-3.5 text-white/40" />
+                <Plus className="w-4 h-4 text-white/40" />
               </motion.button>
             </div>
           </div>
