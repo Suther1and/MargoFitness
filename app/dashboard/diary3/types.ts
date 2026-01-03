@@ -41,6 +41,12 @@ export interface DailyMetrics {
   notes: string;
   dailyPhotos: string[]; // URL миниатюр
   
+  // Новые поля
+  foodQuality: number | null; // 1-5
+  height?: number; // см
+  age?: number;
+  gender?: 'male' | 'female';
+  
   habits: DailyHabit[];
 }
 
@@ -72,6 +78,10 @@ export const MOCK_DATA: DailyMetrics = {
     "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&h=150&fit=crop"
   ],
+  foodQuality: 4,
+  height: 170,
+  age: 28,
+  gender: 'female',
   habits: [
     { id: "1", title: "Креатин 5г", completed: true, streak: 12, category: "morning" },
     { id: "2", title: "Вакуум живота", completed: false, streak: 5, category: "morning" },

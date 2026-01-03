@@ -11,7 +11,7 @@ import { WaterCardH } from './components/water-card-h'
 import { StepsCardH } from './components/steps-card-h'
 import { WeightCardH } from './components/weight-card-h'
 import { SleepCardH } from './components/sleep-card-h'
-import { KbzhuCardH } from './components/kbzhu-card-h'
+import { NutritionCardH } from './components/nutrition-card-h'
 import { MoodEnergyCardH } from './components/mood-energy-card-h'
 import { CaffeineCardH } from './components/caffeine-card-h'
 import { GoalsSummaryCard } from './components/goals-summary-card'
@@ -123,11 +123,14 @@ export default function Diary3Page() {
             </div>
             
             <div className="grid grid-cols-1 gap-4">
-                <KbzhuCardH 
-                    calories={data.calories} caloriesGoal={data.caloriesGoal}
-                    protein={data.protein} proteinGoal={data.proteinGoal}
-                    fats={data.fats} fatsGoal={data.fatsGoal}
-                    carbs={data.carbs} carbsGoal={data.carbsGoal}
+                <NutritionCardH 
+                    calories={data.calories} 
+                    caloriesGoal={data.caloriesGoal}
+                    foodQuality={data.foodQuality}
+                    weight={data.weight}
+                    height={data.height}
+                    age={data.age}
+                    gender={data.gender}
                     onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
                 />
             </div>
