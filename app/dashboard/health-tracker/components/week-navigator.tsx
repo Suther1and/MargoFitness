@@ -67,7 +67,7 @@ export function WeekNavigator({
                 </button>
               )}
 
-              <div className={cn("flex items-center flex-1", minimal ? (daysCount === 3 ? "gap-2" : "gap-1") : "gap-1 justify-center")}>
+              <div className={cn("flex items-center flex-1", minimal ? (daysCount === 3 ? "gap-2" : "justify-between gap-0.5") : "gap-1 justify-center")}>
                 {displayDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
@@ -79,7 +79,7 @@ export function WeekNavigator({
                       className={cn(
                         "relative rounded-xl flex flex-col items-center justify-center transition-all duration-200",
                         minimal 
-                          ? (daysCount === 3 ? "w-11 h-12" : "w-8 md:w-9 h-12") 
+                          ? (daysCount === 3 ? "w-11 h-12" : "flex-1 max-w-[40px] h-12") 
                           : "w-9 h-14",
                         minimal && "bg-white/5 border border-white/5",
                         isSelected
@@ -90,21 +90,21 @@ export function WeekNavigator({
                       whileTap={{ scale: 0.95 }}
                     >
                       <span className={cn(
-                          "uppercase font-black tracking-widest mb-0.5",
+                          "uppercase font-black tracking-widest mt-1",
                           minimal ? "text-[7px]" : "text-[8px]",
                           isSelected ? "text-black/40" : "text-white/20"
                       )}>
                         {format(day, 'EEEEEE', { locale: ru })}
                       </span>
                       <span className={cn(
-                        "font-black leading-none",
+                        "font-black leading-none -mt-1",
                         minimal ? "text-base" : "text-base",
                         isSelected ? "text-black" : "text-white"
                       )}>
                         {format(day, 'd')}
                       </span>
                       
-                      <div className={cn("absolute bottom-1.5 flex gap-0.5 h-1 items-center")}>
+                      <div className={cn("absolute bottom-1 flex gap-0.5 h-1 items-center")}>
                         {isToday && !isSelected && (
                           <div className="w-1 h-1 rounded-full bg-amber-500" />
                         )}
