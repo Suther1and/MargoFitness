@@ -69,7 +69,7 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative w-9 h-14 rounded-2xl flex flex-col items-center justify-center pt-1 pb-2",
+                        "relative w-9 h-14 rounded-xl flex flex-col items-center justify-center pt-1 pb-2",
                         "transition-all duration-200",
                         isSelected
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30"
@@ -82,7 +82,7 @@ export function WeekNavigator({
                           "text-[8px] uppercase font-black tracking-widest mb-1",
                           isSelected ? "text-black/40" : "text-white/20"
                       )}>
-                        {format(day, 'EEEEE', { locale: ru })}
+                        {format(day, 'EEEEEE', { locale: ru })}
                       </span>
                       <span className={cn(
                         "text-base font-black leading-none",
@@ -123,8 +123,8 @@ export function WeekNavigator({
               className="w-full"
             >
               <div className="grid grid-cols-7 gap-1">
-                {['П', 'В', 'С', 'Ч', 'П', 'С', 'В'].map(d => (
-                  <div key={d} className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest">{d}</div>
+                {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d, i) => (
+                  <div key={`${d}-${i}`} className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest">{d}</div>
                 ))}
                 {monthDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
@@ -136,7 +136,7 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative aspect-square rounded-xl flex flex-col items-center justify-center transition-all",
+                        "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-all",
                         isSelected ? "bg-amber-500 text-black shadow-lg" : "hover:bg-white/5",
                         !isCurrentMonth && "opacity-10"
                       )}
