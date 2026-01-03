@@ -25,9 +25,13 @@ export function WeekNavigator({
   isExpanded = false
 }: WeekNavigatorProps) {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  
+  // Для мобильного минимального режима берем 3 дня (выбранный и 2 предыдущих)
+  const displayDays = minimal 
+    ? [addDays(selectedDate, -2), addDays(selectedDate, -1), selectedDate]
+    : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
-  // Month grid calculation
+  // ... rest of calculations ...
   const monthStart = startOfMonth(selectedDate)
   const monthEnd = endOfMonth(selectedDate)
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
@@ -50,20 +54,19 @@ export function WeekNavigator({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex items-center w-full justify-center gap-0"
+              className="flex items-center w-full gap-2"
             >
-              <button
-                onClick={() => onDateChange(addDays(selectedDate, -7))}
-                className={cn(
-                  "rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group",
-                  minimal ? "w-7 h-7" : "w-8 h-8"
-                )}
-              >
-                <ChevronLeft className={cn("text-white/40 group-hover:text-white transition-colors", minimal ? "w-3 h-3" : "w-4 h-4")} />
-              </button>
+              {!minimal && (
+                <button
+                  onClick={() => onDateChange(addDays(selectedDate, -7))}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group"
+                >
+                  <ChevronLeft className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                </button>
+              )}
 
-              <div className={cn("flex items-center px-0.5 flex-1 justify-center", minimal ? "gap-0.5" : "gap-1")}>
-                {weekDays.map((day, index) => {
+              <div className={cn("flex items-center flex-1", minimal ? "gap-2" : "gap-1 justify-center")}>
+                {displayDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
                   
@@ -72,12 +75,11 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative rounded-xl flex flex-col items-center justify-center pt-1 pb-2",
-                        "transition-all duration-200",
-                        minimal ? "w-8 h-11" : "w-9 h-14",
+                        "relative rounded-xl flex flex-col items-center justify-center transition-all duration-200",
+                        minimal ? "w-11 h-12 bg-white/5 border border-white/5" : "w-9 h-14",
                         isSelected
-                          ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30"
-                          : "hover:bg-white/5 text-white/60"
+                          ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-transparent"
+                          : "hover:bg-white/10 text-white/60"
                       )}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -91,13 +93,13 @@ export function WeekNavigator({
                       </span>
                       <span className={cn(
                         "font-black leading-none",
-                        minimal ? "text-sm" : "text-base",
+                        minimal ? "text-base" : "text-base",
                         isSelected ? "text-black" : "text-white"
                       )}>
                         {format(day, 'd')}
                       </span>
                       
-                      <div className={cn("absolute bottom-1.5 flex gap-0.5 h-1 items-center", minimal && "bottom-1")}>
+                      <div className={cn("absolute bottom-1.5 flex gap-0.5 h-1 items-center")}>
                         {isToday && !isSelected && (
                           <div className="w-1 h-1 rounded-full bg-amber-500" />
                         )}
@@ -111,17 +113,25 @@ export function WeekNavigator({
                     </motion.button>
                   )
                 })}
+
+                {minimal && onCalendarClick && (
+                  <button
+                    onClick={onCalendarClick}
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all shrink-0 group ml-1"
+                  >
+                    <ChevronDown className={cn("w-4 h-4 text-white/40 group-hover:text-white transition-transform duration-300", isExpanded && "rotate-180")} />
+                  </button>
+                )}
               </div>
 
-              <button
-                onClick={() => onDateChange(addDays(selectedDate, 7))}
-                className={cn(
-                  "rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group",
-                  minimal ? "w-7 h-7" : "w-8 h-8"
-                )}
-              >
-                <ChevronRight className={cn("text-white/40 group-hover:text-white transition-colors", minimal ? "w-3 h-3" : "w-4 h-4")} />
-              </button>
+              {!minimal && (
+                <button
+                  onClick={() => onDateChange(addDays(selectedDate, 7))}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group"
+                >
+                  <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                </button>
+              )}
             </motion.div>
           ) : (
             <motion.div
