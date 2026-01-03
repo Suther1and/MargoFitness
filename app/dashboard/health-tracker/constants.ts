@@ -65,7 +65,7 @@ export const COLORS = {
     border: 'border-violet-500/20',
     glow: 'bg-violet-500/10',
   },
-} as const
+}
 
 // Размеры и отступы
 export const SIZES = {
@@ -94,7 +94,7 @@ export const SIZES = {
     medium: 'w-[120px] h-[120px]',
     large: 'w-[125px] h-[125px]',
   },
-} as const
+}
 
 // Конфигурации анимаций
 export const ANIMATIONS = {
@@ -102,14 +102,14 @@ export const ANIMATIONS = {
   trophy: {
     initial: { scale: 0, rotate: -45 },
     animate: { scale: 1, rotate: 0 },
-    transition: { type: 'spring', stiffness: 300, damping: 20 },
+    transition: { type: 'spring' as const, stiffness: 300, damping: 20 },
   },
   
   // Анимация появления иконок
   icon: {
     initial: { scale: 0 },
     animate: { scale: 1 },
-    transition: { type: 'spring', stiffness: 300, damping: 20 },
+    transition: { type: 'spring' as const, stiffness: 300, damping: 20 },
   },
   
   // Анимация кнопок
@@ -126,7 +126,7 @@ export const ANIMATIONS = {
   // Анимация прогресс-бара
   progressBar: {
     initial: { width: 0 },
-    transition: { type: 'spring', stiffness: 50, damping: 15 },
+    transition: { type: 'spring' as const, stiffness: 50, damping: 15 },
   },
   
   // Анимация числового значения
@@ -144,14 +144,14 @@ export const ANIMATIONS = {
     },
     transition: { duration: 2, repeat: Infinity },
   },
-} as const
+}
 
 // Общие стили для карточек
 export const CARD_STYLES = {
   base: 'relative group overflow-hidden border transition-all duration-700 backdrop-blur-2xl',
   background: 'bg-zinc-900/50',
   hover: 'hover:border-white/10',
-} as const
+}
 
 // Типографика
 export const TYPOGRAPHY = {
@@ -167,7 +167,7 @@ export const TYPOGRAPHY = {
     large: 'text-4xl font-black font-oswald tracking-tighter',
     xlarge: 'text-5xl font-black font-oswald tracking-tighter',
   },
-} as const
+}
 
 // Настройки для прогресс-колец
 export const PROGRESS_RING = {
@@ -181,5 +181,4 @@ export const PROGRESS_RING = {
     circumference: 276.5,
     strokeWidth: 8,
   },
-} as const
-
+}
