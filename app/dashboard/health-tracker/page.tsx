@@ -174,9 +174,7 @@ export default function HealthTrackerPage() {
           }}
           className="overflow-hidden lg:hidden"
         >
-          <div className="rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-            <GoalsSummaryCard data={data} />
-          </div>
+          <GoalsSummaryCard data={data} />
         </motion.div>
 
         {/* Mobile Habits Expansion */}
@@ -189,14 +187,12 @@ export default function HealthTrackerPage() {
           }}
           className="overflow-hidden lg:hidden"
         >
-          <div className="rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-            <HabitsCard 
-              habits={data.habits} 
-              onToggle={(id) => {
-                handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
-              }} 
-            />
-          </div>
+          <HabitsCard 
+            habits={data.habits} 
+            onToggle={(id) => {
+              handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
+            }} 
+          />
         </motion.div>
 
         {/* Main Grid - 12 Columns */}
