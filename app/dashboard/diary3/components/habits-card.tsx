@@ -15,112 +15,39 @@ function HabitItem({ habit, onToggle }: HabitItemProps) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      whileTap={{ scale: 0.98 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileTap={{ scale: 0.99 }}
       onClick={() => onToggle(habit.id)}
       className={cn(
-        "group relative flex items-center justify-between p-3 rounded-2xl",
-        "border transition-all duration-300 cursor-pointer",
+        "group relative flex items-center justify-between p-2 rounded-xl",
+        "border transition-all duration-200 cursor-pointer",
         habit.completed
-          ? "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10"
+          ? "border-amber-500/20 bg-amber-500/5 opacity-60"
           : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
       )}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <motion.div
-          className={cn(
-            "relative w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0",
-            "border-2",
-            habit.completed
-              ? "bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30"
-              : "border-white/10 bg-white/5 group-hover:border-white/20"
-          )}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait">
-            {habit.completed && (
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              >
-                <Check className="w-5 h-5 text-black stroke-[3px]" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {!habit.completed && (
-            <motion.div
-              className="absolute inset-0 rounded-xl border-2 border-white/20"
-              initial={{ scale: 1, opacity: 0 }}
-              whileHover={{ scale: 1.15, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            />
-          )}
-        </motion.div>
+      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+        <div className={cn(
+          "relative w-7 h-7 rounded-lg flex items-center justify-center transition-all shrink-0",
+          "border-2",
+          habit.completed
+            ? "bg-amber-500 border-amber-500 shadow-sm shadow-amber-500/30"
+            : "border-white/10 bg-white/5"
+        )}>
+          {habit.completed && <Check className="w-4 h-4 text-black stroke-[3px]" />}
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className={cn(
-            "text-sm font-bold truncate transition-all",
-            habit.completed ? "text-white/40 line-through" : "text-white/90"
+            "text-[12px] font-bold truncate transition-all",
+            habit.completed ? "text-white/30 line-through" : "text-white/80"
           )}>
             {habit.title}
           </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            {habit.streak > 0 && (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/10">
-                <Flame className="w-2.5 h-2.5 text-orange-500 fill-orange-500" />
-                <span className="text-[10px] font-bold text-orange-500">{habit.streak}</span>
-              </div>
-            )}
-          </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {habit.completed && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="flex items-center px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 ml-2"
-          >
-            <span className="text-[8px] font-black text-amber-500 uppercase tracking-wider">
-              Готово
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Confetti Effect */}
-      <AnimatePresence>
-        {habit.completed && (
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1.5 h-1.5 rounded-full bg-amber-500"
-                style={{ left: '30%', top: '50%' }}
-                initial={{ scale: 0, x: 0, y: 0 }}
-                animate={{
-                  scale: [0, 1, 0],
-                  x: Math.cos((i * Math.PI * 2) / 6) * 30,
-                  y: Math.sin((i * Math.PI * 2) / 6) * 30,
-                }}
-                transition={{ duration: 0.5 }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   )
 }

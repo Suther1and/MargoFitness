@@ -22,63 +22,59 @@ export function MoodEnergyCard({ mood, energy, onMoodUpdate, onEnergyUpdate }: M
     { rating: 5, icon: Heart, label: 'Супер', color: 'text-pink-400', bg: 'bg-pink-400/10' },
   ]
 
-  const getEnergyIcon = (val: number) => {
-    if (val <= 3) return BatteryLow
-    if (val <= 7) return BatteryMedium
-    return BatteryFull
-  }
-
-  const EnergyIcon = getEnergyIcon(energy)
-
   return (
     <DiaryCard
-      title="Настроение"
-      subtitle="Эмоции и Энергия"
+      title="Состояние"
+      subtitle="Настроение и Энергия"
       icon={Smile}
       iconColor="text-yellow-400"
       iconBg="bg-yellow-500/10"
-      className="gap-4"
+      className="gap-5"
     >
-      {/* Mood Selector - Vertical/Compact grid for sidebar */}
-      <div className="grid grid-cols-5 gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
-        {moods.map((m) => {
-          const Icon = m.icon
-          const isSelected = mood === m.rating
-          return (
-            <button
-              key={m.rating}
-              onClick={() => onMoodUpdate(m.rating)}
-              className={cn(
-                "relative flex items-center justify-center py-2.5 rounded-lg transition-all",
-                isSelected ? "bg-white/10" : "hover:bg-white/5 opacity-40 hover:opacity-80"
-              )}
-            >
-              <Icon className={cn("w-4 h-4", isSelected ? m.color : "text-white")} />
-            </button>
-          )
-        })}
+      {/* Mood Selector */}
+      <div className="space-y-2">
+        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest px-1">Настроение</span>
+        <div className="grid grid-cols-5 gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
+          {moods.map((m) => {
+            const Icon = m.icon
+            const isSelected = mood === m.rating
+            return (
+              <button
+                key={m.rating}
+                onClick={() => onMoodUpdate(m.rating)}
+                className={cn(
+                  "relative flex flex-col items-center py-2.5 rounded-lg transition-all",
+                  isSelected ? "bg-white/10" : "hover:bg-white/5 opacity-40 hover:opacity-100"
+                )}
+              >
+                <Icon className={cn("w-5 h-5 transition-transform", isSelected ? m.color : "text-white")} />
+                <span className={cn("text-[8px] font-black mt-1 uppercase tracking-widest", isSelected ? m.color : "text-white/20")}>
+                    {m.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Energy Slider */}
+      {/* Energy Grid */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between px-0.5">
-          <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Энергия: {energy}</span>
-        </div>
-
-        <div className="relative h-7 bg-white/5 rounded-lg border border-white/5 p-1 flex items-center overflow-hidden">
-          <input
-            type="range"
-            min="1"
-            max="100"
-            step="1"
-            value={energy * 10}
-            onChange={(e) => onEnergyUpdate(Math.ceil(parseInt(e.target.value) / 10))}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-          />
-          <motion.div 
-            className="h-full rounded-md bg-gradient-to-r from-orange-600 to-orange-400"
-            animate={{ width: `${energy * 10}%` }}
-          />
+        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest px-1">Энергия</span>
+        <div className="grid grid-cols-5 gap-1.5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <button
+                key={i}
+                onClick={() => onEnergyUpdate(i + 1)}
+                className={cn(
+                    "h-7 rounded-lg flex items-center justify-center font-black text-[10px] transition-all",
+                    energy === i + 1 
+                        ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30 scale-105" 
+                        : "bg-white/5 text-white/20 hover:text-white/40 border border-white/5"
+                )}
+            >
+                {i + 1}
+            </button>
+          ))}
         </div>
       </div>
     </DiaryCard>

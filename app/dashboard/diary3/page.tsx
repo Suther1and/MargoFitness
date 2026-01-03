@@ -114,15 +114,15 @@ export default function Diary3Page() {
                     quality={data.sleepQuality} 
                     onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
                 />
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4">
                 <MoodEnergyCardH 
                     mood={data.mood} 
                     energy={data.energyLevel} 
                     onMoodUpdate={(val) => handleMoodUpdate(val)} 
                     onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
                 />
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
                 <KbzhuCardH 
                     calories={data.calories} caloriesGoal={data.caloriesGoal}
                     protein={data.protein} proteinGoal={data.proteinGoal}

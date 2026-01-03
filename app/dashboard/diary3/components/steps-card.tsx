@@ -9,18 +9,15 @@ import { DiaryCard } from './diary-card'
 interface StepsCardProps {
   steps: number
   goal: number
+  onUpdate: (steps: number) => void
 }
 
-export function StepsCard({ steps, goal }: StepsCardProps) {
-  const [isSyncing, setIsSyncing] = useState(false)
+export function StepsCard({ steps, goal, onUpdate }: StepsCardProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [tempValue, setTempValue] = useState(steps.toString())
   const percentage = Math.min(Math.round((steps / goal) * 100), 100)
   const calories = Math.round(steps * 0.04)
   const distance = (steps * 0.0007).toFixed(1)
-
-  const handleSync = () => {
-    setIsSyncing(true)
-    setTimeout(() => setIsSyncing(false), 2000)
-  }
 
   return (
     <DiaryCard
@@ -32,10 +29,36 @@ export function StepsCard({ steps, goal }: StepsCardProps) {
       className="gap-6"
     >
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
-        <div className="space-y-0.5">
-          <div className="text-4xl md:text-5xl font-oswald font-bold text-white tracking-tighter leading-none">
-            {steps.toLocaleString()}
-          </div>
+        <div className="space-y-0.5 min-w-0 flex-1">
+          {isEditing ? (
+            <input
+              type="number"
+              value={tempValue}
+              autoFocus
+              className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-1 text-3xl font-bold text-white outline-none"
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={() => {
+                onUpdate(parseInt(tempValue) || 0)
+                setIsEditing(false)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  onUpdate(parseInt(tempValue) || 0)
+                  setIsEditing(false)
+                }
+              }}
+            />
+          ) : (
+            <div 
+              className="text-3xl md:text-4xl font-oswald font-bold text-white tracking-tighter leading-none cursor-pointer hover:text-green-400 transition-colors truncate"
+              onClick={() => {
+                setTempValue(steps.toString())
+                setIsEditing(true)
+              }}
+            >
+              {steps.toLocaleString()}
+            </div>
+          )}
           <div className="flex items-center gap-2 text-white/40 uppercase text-[9px] font-bold tracking-[0.1em]">
             <span>Цель: {goal.toLocaleString()}</span>
             <div className="w-1 h-1 rounded-full bg-white/20" />
@@ -43,14 +66,10 @@ export function StepsCard({ steps, goal }: StepsCardProps) {
           </div>
         </div>
         
-        <button 
-          onClick={handleSync}
-          disabled={isSyncing}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-[9px] font-bold uppercase tracking-widest text-white/60"
-        >
-          <RefreshCw className={cn("w-2.5 h-2.5", isSyncing && "animate-spin text-green-400")} />
-          {isSyncing ? "..." : "Синхрон"}
-        </button>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold uppercase tracking-widest text-white/20">
+          <Smartphone className="w-2.5 h-2.5" />
+          Ручной ввод
+        </div>
       </div>
 
       <div className="py-5">
