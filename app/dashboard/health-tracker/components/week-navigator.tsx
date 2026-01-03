@@ -54,12 +54,15 @@ export function WeekNavigator({
             >
               <button
                 onClick={() => onDateChange(addDays(selectedDate, -7))}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group"
+                className={cn(
+                  "rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group",
+                  minimal ? "w-7 h-7" : "w-8 h-8"
+                )}
               >
-                <ChevronLeft className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                <ChevronLeft className={cn("text-white/40 group-hover:text-white transition-colors", minimal ? "w-3 h-3" : "w-4 h-4")} />
               </button>
 
-              <div className="flex gap-1 items-center px-0.5 flex-1 justify-center">
+              <div className={cn("flex items-center px-0.5 flex-1 justify-center", minimal ? "gap-0.5" : "gap-1")}>
                 {weekDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
@@ -69,8 +72,9 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative w-9 h-14 rounded-xl flex flex-col items-center justify-center pt-1 pb-2",
+                        "relative rounded-xl flex flex-col items-center justify-center pt-1 pb-2",
                         "transition-all duration-200",
+                        minimal ? "w-8 h-11" : "w-9 h-14",
                         isSelected
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30"
                           : "hover:bg-white/5 text-white/60"
@@ -79,19 +83,21 @@ export function WeekNavigator({
                       whileTap={{ scale: 0.95 }}
                     >
                       <span className={cn(
-                          "text-[8px] uppercase font-black tracking-widest mb-1",
+                          "uppercase font-black tracking-widest mb-0.5",
+                          minimal ? "text-[7px]" : "text-[8px]",
                           isSelected ? "text-black/40" : "text-white/20"
                       )}>
                         {format(day, 'EEEEEE', { locale: ru })}
                       </span>
                       <span className={cn(
-                        "text-base font-black leading-none",
+                        "font-black leading-none",
+                        minimal ? "text-sm" : "text-base",
                         isSelected ? "text-black" : "text-white"
                       )}>
                         {format(day, 'd')}
                       </span>
                       
-                      <div className="absolute bottom-2 flex gap-0.5 h-1 items-center">
+                      <div className={cn("absolute bottom-1.5 flex gap-0.5 h-1 items-center", minimal && "bottom-1")}>
                         {isToday && !isSelected && (
                           <div className="w-1 h-1 rounded-full bg-amber-500" />
                         )}
@@ -109,9 +115,12 @@ export function WeekNavigator({
 
               <button
                 onClick={() => onDateChange(addDays(selectedDate, 7))}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group"
+                className={cn(
+                  "rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 group",
+                  minimal ? "w-7 h-7" : "w-8 h-8"
+                )}
               >
-                <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                <ChevronRight className={cn("text-white/40 group-hover:text-white transition-colors", minimal ? "w-3 h-3" : "w-4 h-4")} />
               </button>
             </motion.div>
           ) : (

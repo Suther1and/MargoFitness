@@ -54,39 +54,54 @@ export default function HealthTrackerPage() {
 
       <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-10">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-2">
-                <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                    V3.0 Beta
-                </div>
-                <div className="h-px w-8 bg-white/10" />
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                    <Activity className="w-3 h-3" />
-                    Live Dashboard
-                </span>
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-2">
+                  <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                      V3.0 Beta
+                  </div>
+                  <div className="h-px w-8 bg-white/10" />
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                      <Activity className="w-3 h-3" />
+                      Live Dashboard
+                  </span>
+              </div>
+              <h1 className="text-3xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
+                Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
+              </h1>
             </div>
-            <h1 className="text-3xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
-              Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
-            </h1>
+
+            {/* Мобильные кнопки (Share/Settings) - Рядом с заголовком */}
+            <div className="flex items-center gap-2 md:hidden">
+                <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                    <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
+                </button>
+                <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                    <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                </button>
+            </div>
           </div>
-          <div className="flex items-center justify-between md:justify-end gap-3">
-             <div className="flex-1 md:flex-none">
-                <button 
-                  onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                  className="w-full md:w-auto px-4 py-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all flex items-center justify-between gap-3 group"
-                >
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-500" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-white/60">
-                      {format(selectedDate, 'd MMMM', { locale: ru })}
+
+          <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
+             {/* Навигация по датам - только для мобильной версии (7 дней) */}
+             <div className="flex-1 md:hidden bg-white/5 border border-white/10 rounded-2xl p-1.5 overflow-hidden">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between px-2">
+                    <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                      {format(selectedDate, 'LLLL', { locale: ru })}
                     </span>
                   </div>
-                  <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                    <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-white" />
-                  </motion.div>
-                </button>
+                  <WeekNavigator 
+                    selectedDate={selectedDate} 
+                    onDateChange={setSelectedDate} 
+                    minimal={true} 
+                    isExpanded={false} 
+                  />
+                </div>
              </div>
-             <div className="flex items-center gap-2">
+
+             {/* Десктопные кнопки (Share/Settings) - Справа от календаря */}
+             <div className="hidden md:flex items-center gap-2">
                 <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
                     <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
                 </button>
@@ -96,17 +111,6 @@ export default function HealthTrackerPage() {
              </div>
           </div>
         </header>
-
-        {/* Mobile Calendar Expansion */}
-        <motion.div 
-          initial={false}
-          animate={{ height: isCalendarExpanded ? 'auto' : 0, opacity: isCalendarExpanded ? 1 : 0 }}
-          className="overflow-hidden mb-6 lg:hidden"
-        >
-          <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl mb-6">
-            <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={true} />
-          </div>
-        </motion.div>
 
         {/* Main Grid - 12 Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
