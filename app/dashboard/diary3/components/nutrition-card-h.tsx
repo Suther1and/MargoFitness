@@ -119,20 +119,20 @@ export function NutritionCardH({
           </div>
 
           {/* Кнопка быстрого добавления */}
-          <div className="relative flex items-center gap-1 bg-white/5 border border-white/10 rounded-full pl-3 pr-1 py-1 group/input focus-within:border-violet-500/40 transition-all">
+          <div className="relative flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl pl-3 pr-1 py-1 group/input focus-within:border-violet-500/40 transition-all">
             <input 
               type="number"
-              placeholder="Добавить..."
-              className="w-16 bg-transparent text-[11px] font-bold text-white outline-none placeholder:text-white/20"
+              placeholder="Добавить"
+              className="w-16 bg-transparent text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               value={mealInput}
               onChange={(e) => setMealInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddMeal()}
             />
             <button 
               onClick={handleAddMeal}
-              className="p-1 rounded-full bg-violet-500/20 text-violet-400 hover:bg-violet-500/40 transition-colors"
+              className="p-1.5 rounded-lg bg-violet-500/20 text-violet-400 hover:bg-violet-500/40 transition-colors"
             >
-              <Check className="w-3 h-3" />
+              <Check className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
