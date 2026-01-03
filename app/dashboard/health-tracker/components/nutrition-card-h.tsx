@@ -1,9 +1,12 @@
 'use client'
 
-import { Utensils, Info, Salad, Soup, Pizza, Hamburger, Apple, Plus, Check } from 'lucide-react'
+import { Utensils, Info, Salad, Soup, Pizza, Hamburger, Apple, Check, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useState, useMemo } from 'react'
+import { useEditableValue, useGoalProgress } from '../hooks'
+import { ProgressRing } from './shared'
+import { ANIMATIONS } from '../constants'
 
 interface NutritionCardHProps {
   calories: number
@@ -24,10 +27,14 @@ export function NutritionCardH({
   height = 170,
   age = 25,
   gender = 'female',
-  onUpdate
+  onUpdate,
 }: NutritionCardHProps) {
-  const [isEditing, setIsEditing] = useState(false)
   const [mealInput, setMealInput] = useState('')
+  const { percentage } = useGoalProgress({ current: calories, goal: caloriesGoal })
+  const { isEditing, localValue, handleEdit, handleChange, handleBlur, handleKeyDown } = useEditableValue(calories, {
+    onUpdate: (val) => onUpdate('calories', val),
+    min: 0,
+  })
 
   // Расчет ИМТ
   const bmi = useMemo(() => {
@@ -65,12 +72,10 @@ export function NutritionCardH({
     { rating: 5, icon: Salad, label: 'Идеальный рацион', color: 'text-pink-400' },
   ]
 
-  const calPerc = Math.min((calories / caloriesGoal) * 100, 100)
-
   const handleAddMeal = () => {
     const val = parseInt(mealInput)
     if (val) {
-      onUpdate('calories', calories + val)
+      onUpdate('calories', localValue + val)
       setMealInput('')
     }
   }
@@ -83,44 +88,30 @@ export function NutritionCardH({
       <div className="flex gap-8 h-full">
         {/* Левая часть: Кольцо калорий и Добавление */}
         <div className="flex flex-col justify-between h-full items-center w-[130px] flex-shrink-0">
-          <div className="relative w-[120px] h-[120px] flex-shrink-0 flex items-center justify-center group cursor-pointer -translate-y-1" onClick={() => setIsEditing(true)}>
-            <svg className="w-full h-full -rotate-90 relative overflow-visible" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="44" className="stroke-white/5" strokeWidth="6" fill="none" />
-              <motion.circle
-                cx="50" cy="50" r="44"
-                className="stroke-violet-500"
-                style={{ filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.3))' }}
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-                initial={{ strokeDasharray: "276.5", strokeDashoffset: "276.5" }}
-                animate={{ strokeDashoffset: 276.5 - (276.5 * calPerc) / 100 }}
-                transition={{ duration: 1.5, ease: "circOut" }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="cursor-pointer -translate-y-1" onClick={handleEdit}>
+            <ProgressRing percentage={percentage} size="medium" color="#8b5cf6" className="w-[120px] h-[120px]">
               {isEditing ? (
-                <input 
+                <input
                   autoFocus
                   type="number"
                   className="w-16 bg-transparent text-center text-3xl font-black text-white font-oswald outline-none"
-                  value={calories}
-                  onChange={(e) => onUpdate('calories', parseInt(e.target.value) || 0)}
-                  onBlur={() => setIsEditing(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
+                  value={localValue}
+                  onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
                 />
               ) : (
                 <>
-                  <span className="text-4xl font-black text-white font-oswald leading-none">{calories}</span>
+                  <span className="text-4xl font-black text-white font-oswald leading-none">{localValue}</span>
                   <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mt-1">ккал</span>
                 </>
               )}
-            </div>
+            </ProgressRing>
           </div>
 
           {/* Кнопка быстрого добавления */}
-          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 group/input focus-within:border-violet-500/40 transition-all w-[110px] h-[34px] overflow-hidden">
-            <input 
+          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-[110px] h-[34px] overflow-hidden">
+            <input
               type="number"
               placeholder="Добавить"
               className="flex-1 bg-transparent text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0"
@@ -130,13 +121,7 @@ export function NutritionCardH({
             />
             <AnimatePresence>
               {mealInput && (
-                <motion.button 
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 20, opacity: 0 }}
-                  onClick={handleAddMeal}
-                  className="p-1 rounded-lg bg-violet-500/20 text-violet-400 hover:bg-violet-500/40 transition-colors ml-1"
-                >
+                <motion.button {...ANIMATIONS.valueChange} onClick={handleAddMeal} className="p-1 rounded-lg bg-violet-500/20 text-violet-400 hover:bg-violet-500/40 transition-colors ml-1">
                   <Check className="w-3.5 h-3.5" />
                 </motion.button>
               )}

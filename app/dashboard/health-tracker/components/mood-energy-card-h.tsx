@@ -3,7 +3,6 @@
 import { Smile, Zap, Frown, Meh, Heart, Annoyed } from 'lucide-react'
 import { MoodRating } from '../types'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
 
 interface MoodEnergyCardHProps {
   mood: MoodRating | null
