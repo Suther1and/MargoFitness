@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Flame, Plus, Clock, Sun, Moon, Calendar, Target } from 'lucide-react'
+import { Check, Flame, Plus, Clock, Sun, Moon, Calendar, ListChecks } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DailyHabit } from '../types'
 import { HealthTrackerCard } from './health-tracker-card'
@@ -72,7 +72,7 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
     <HealthTrackerCard
       title="Привычки"
       subtitle={`${completedCount}/${totalCount}`}
-      icon={Target}
+      icon={ListChecks}
       iconColor="text-amber-500"
       iconBg="bg-amber-500/10"
       className="gap-3"

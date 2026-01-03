@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Share2, Settings, Activity, ChevronDown } from 'lucide-react'
+import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -27,6 +27,8 @@ import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 export default function HealthTrackerPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
+  const [isDailyPlanExpanded, setIsDailyPlanExpanded] = useState(false)
+  const [isHabitsExpanded, setIsHabitsExpanded] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
 
@@ -79,12 +81,47 @@ export default function HealthTrackerPage() {
                   minimal={true} 
                   isExpanded={isCalendarExpanded}
                   daysCount={3}
-                  onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                  onCalendarClick={() => {
+                    setIsCalendarExpanded(!isCalendarExpanded)
+                    if (!isCalendarExpanded) {
+                      setIsDailyPlanExpanded(false)
+                      setIsHabitsExpanded(false)
+                    }
+                  }}
                 />
                 
                 <div className="flex items-center gap-2 shrink-0">
-                    <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                        <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
+                    <button 
+                      onClick={() => {
+                        setIsHabitsExpanded(!isHabitsExpanded)
+                        if (!isHabitsExpanded) {
+                          setIsCalendarExpanded(false)
+                          setIsDailyPlanExpanded(false)
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border transition-all group ${
+                        isHabitsExpanded 
+                          ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30' 
+                          : 'bg-white/5 border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                        <ListChecks className={`w-5 h-5 ${isHabitsExpanded ? 'text-black' : 'text-white/40 group-hover:text-white'}`} />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setIsDailyPlanExpanded(!isDailyPlanExpanded)
+                        if (!isDailyPlanExpanded) {
+                          setIsCalendarExpanded(false)
+                          setIsHabitsExpanded(false)
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border transition-all group ${
+                        isDailyPlanExpanded 
+                          ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30' 
+                          : 'bg-white/5 border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                        <Target className={`w-5 h-5 ${isDailyPlanExpanded ? 'text-black' : 'text-white/40 group-hover:text-white'}`} />
                     </button>
                     <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
                         <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
@@ -123,6 +160,41 @@ export default function HealthTrackerPage() {
               }} 
               minimal={true} 
               isExpanded={true} 
+            />
+          </div>
+        </motion.div>
+
+        {/* Mobile Daily Plan Expansion */}
+        <motion.div 
+          initial={false}
+          animate={{ 
+            height: isDailyPlanExpanded ? 'auto' : 0, 
+            opacity: isDailyPlanExpanded ? 1 : 0,
+            marginBottom: isDailyPlanExpanded ? 24 : 0 
+          }}
+          className="overflow-hidden lg:hidden"
+        >
+          <div className="rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+            <GoalsSummaryCard data={data} />
+          </div>
+        </motion.div>
+
+        {/* Mobile Habits Expansion */}
+        <motion.div 
+          initial={false}
+          animate={{ 
+            height: isHabitsExpanded ? 'auto' : 0, 
+            opacity: isHabitsExpanded ? 1 : 0,
+            marginBottom: isHabitsExpanded ? 24 : 0 
+          }}
+          className="overflow-hidden lg:hidden"
+        >
+          <div className="rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+            <HabitsCard 
+              habits={data.habits} 
+              onToggle={(id) => {
+                handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
+              }} 
             />
           </div>
         </motion.div>
@@ -185,12 +257,15 @@ export default function HealthTrackerPage() {
 
           {/* Column 3: Focus Area (Habits + Notes) */}
           <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-            <HabitsCard 
-                habits={data.habits} 
-                onToggle={(id) => {
-                    handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
-                }} 
-            />
+            {/* Habits - Desktop only, mobile has button */}
+            <div className="hidden lg:block">
+              <HabitsCard 
+                  habits={data.habits} 
+                  onToggle={(id) => {
+                      handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
+                  }} 
+              />
+            </div>
             
             <div className="lg:hidden flex flex-col gap-6">
                 <AchievementsCard />
@@ -227,7 +302,10 @@ export default function HealthTrackerPage() {
                 </HealthTrackerCard>
             </div>
 
-            <GoalsSummaryCard data={data} />
+            {/* Plan on Day - Desktop only, mobile has button */}
+            <div className="hidden lg:block">
+              <GoalsSummaryCard data={data} />
+            </div>
             
             <div className="hidden lg:flex flex-col gap-6">
                 <AchievementsCard />
