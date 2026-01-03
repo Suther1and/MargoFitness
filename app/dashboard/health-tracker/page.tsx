@@ -78,6 +78,7 @@ export default function HealthTrackerPage() {
                   onDateChange={setSelectedDate} 
                   minimal={true} 
                   isExpanded={isCalendarExpanded}
+                  daysCount={3}
                   onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
                 />
                 

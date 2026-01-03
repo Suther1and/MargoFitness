@@ -14,6 +14,7 @@ interface WeekNavigatorProps {
   showDate?: boolean
   minimal?: boolean
   isExpanded?: boolean
+  daysCount?: 3 | 7
 }
 
 export function WeekNavigator({ 
@@ -22,12 +23,13 @@ export function WeekNavigator({
   onCalendarClick, 
   showDate = true,
   minimal = false,
-  isExpanded = false
+  isExpanded = false,
+  daysCount = 7
 }: WeekNavigatorProps) {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   
-  // Для мобильного минимального режима берем 3 дня (выбранный и 2 предыдущих)
-  const displayDays = minimal 
+  // Определяем количество отображаемых дней
+  const displayDays = daysCount === 3
     ? [addDays(selectedDate, -2), addDays(selectedDate, -1), selectedDate]
     : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
@@ -65,7 +67,7 @@ export function WeekNavigator({
                 </button>
               )}
 
-              <div className={cn("flex items-center flex-1", minimal ? "gap-2" : "gap-1 justify-center")}>
+              <div className={cn("flex items-center flex-1", minimal ? (daysCount === 3 ? "gap-2" : "gap-1") : "gap-1 justify-center")}>
                 {displayDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
@@ -76,7 +78,10 @@ export function WeekNavigator({
                       onClick={() => onDateChange(day)}
                       className={cn(
                         "relative rounded-xl flex flex-col items-center justify-center transition-all duration-200",
-                        minimal ? "w-11 h-12 bg-white/5 border border-white/5" : "w-9 h-14",
+                        minimal 
+                          ? (daysCount === 3 ? "w-11 h-12" : "w-8 md:w-9 h-12") 
+                          : "w-9 h-14",
+                        minimal && "bg-white/5 border border-white/5",
                         isSelected
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-transparent"
                           : "hover:bg-white/10 text-white/60"
