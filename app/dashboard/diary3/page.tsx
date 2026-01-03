@@ -90,6 +90,11 @@ export default function Diary3Page() {
                     goal={data.waterGoal} 
                     onUpdate={(val) => handleMetricUpdate('waterIntake', val)} 
                 />
+                <StepsCardH 
+                    steps={data.steps} 
+                    goal={data.stepsGoal} 
+                    onUpdate={(val) => handleMetricUpdate('steps', val)} 
+                />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -102,11 +107,6 @@ export default function Diary3Page() {
                     value={data.caffeineIntake} 
                     goal={data.caffeineGoal} 
                     onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} 
-                />
-                <StepsCardH 
-                    steps={data.steps} 
-                    goal={data.stepsGoal} 
-                    onUpdate={(val) => handleMetricUpdate('steps', val)} 
                 />
                 <SleepCardH 
                     hours={data.sleepHours} 
