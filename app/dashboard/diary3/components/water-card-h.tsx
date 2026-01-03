@@ -14,99 +14,18 @@ interface WaterCardHProps {
 const WaveBackground = ({ percentage, isDone }: { percentage: number, isDone: boolean }) => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[2rem]">
-      {/* Основная заполняющая область */}
+      {/* Простое заполнение с градиентом */}
       <motion.div 
         className={cn(
-          "absolute inset-y-0 left-0 transition-colors duration-1000",
-          isDone ? "bg-emerald-500/10" : "bg-blue-600/10"
+          "absolute inset-y-0 left-0 h-full transition-colors duration-1000",
+          isDone 
+            ? "bg-gradient-to-r from-emerald-500/15 via-emerald-400/20 to-emerald-500/15" 
+            : "bg-gradient-to-r from-blue-600/15 via-blue-500/20 to-blue-600/15"
         )}
         initial={{ width: 0 }}
         animate={{ width: `${percentage}%` }}
-        transition={{ type: "spring", stiffness: 40, damping: 15 }}
-      >
-        {/* Анимированный волновой край (Живой морфинг) */}
-        <div className="absolute right-[-20px] top-0 bottom-0 w-[40px] overflow-visible">
-          <svg className="h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 1000">
-            {/* Глубокий слой */}
-            <motion.path
-              fill="currentColor"
-              className={cn(
-                "opacity-20 transition-colors duration-1000",
-                isDone ? "text-emerald-400" : "text-blue-400"
-              )}
-              animate={{
-                d: [
-                  "M0,0 Q40,100 0,200 Q40,300 0,400 Q40,500 0,600 Q40,700 0,800 Q40,900 0,1000 L100,1000 L100,0 Z",
-                  "M0,0 Q-20,100 0,200 Q-20,300 0,400 Q-20,500 0,600 Q-20,700 0,800 Q-20,900 0,1000 L100,1000 L100,0 Z",
-                  "M0,0 Q40,100 0,200 Q40,300 0,400 Q40,500 0,600 Q40,700 0,800 Q40,900 0,1000 L100,1000 L100,0 Z"
-                ]
-              }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Основной слой */}
-            <motion.path
-              fill="currentColor"
-              className={cn(
-                "opacity-40 transition-colors duration-1000",
-                isDone ? "text-emerald-500" : "text-blue-500"
-              )}
-              animate={{
-                d: [
-                  "M0,0 Q-20,100 0,200 Q-20,300 0,400 Q-20,500 0,600 Q-20,700 0,800 Q-20,900 0,1000 L100,1000 L100,0 Z",
-                  "M0,0 Q30,100 0,200 Q30,300 0,400 Q30,500 0,600 Q30,700 0,800 Q30,900 0,1000 L100,1000 L100,0 Z",
-                  "M0,0 Q-20,100 0,200 Q-20,300 0,400 Q-20,500 0,600 Q-20,700 0,800 Q-20,900 0,1000 L100,1000 L100,0 Z"
-                ]
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            />
-            {/* Яркий блик на краю */}
-            <motion.path
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className={cn(
-                "opacity-50 transition-colors duration-1000 shadow-[0_0_10px_currentColor]",
-                isDone ? "text-emerald-300" : "text-blue-300"
-              )}
-              animate={{
-                d: [
-                  "M0,0 Q-20,100 0,200 Q-20,300 0,400 Q-20,500 0,600 Q-20,700 0,800 Q-20,900 0,1000",
-                  "M0,0 Q30,100 0,200 Q30,300 0,400 Q30,500 0,600 Q30,700 0,800 Q30,900 0,1000",
-                  "M0,0 Q-20,100 0,200 Q-20,300 0,400 Q-20,500 0,600 Q-20,700 0,800 Q-20,900 0,1000"
-                ]
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            />
-          </svg>
-        </div>
-
-        {/* Пузырьки (Исправленная физика) */}
-        <div className="absolute inset-0">
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-white/40 border border-white/20"
-              style={{
-                width: Math.random() * 3 + 1,
-                height: Math.random() * 3 + 1,
-                left: Math.random() * 100 + "%",
-              }}
-              initial={{ y: "110%", opacity: 0 }}
-              animate={{ 
-                y: "-10%",
-                opacity: [0, 0.6, 0.6, 0],
-                x: [0, (Math.random() - 0.5) * 30, 0]
-              }}
-              transition={{
-                duration: Math.random() * 2 + 3,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-                ease: "linear"
-              }}
-            />
-          ))}
-        </div>
-      </motion.div>
+        transition={{ type: "spring", stiffness: 50, damping: 15 }}
+      />
     </div>
   )
 }
