@@ -28,8 +28,8 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
         {/* Mood Section - Адаптация для мобильных */}
         <div className="flex flex-col justify-between h-[45%] md:h-auto md:space-y-3 px-1 md:px-0">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
-              <Smile className="w-3.5 h-3.5 text-white/40" />
+            <div className="p-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <Smile className="w-3.5 h-3.5 text-yellow-400" />
             </div>
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Настроение</span>
           </div>
@@ -42,10 +42,10 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
                   key={m.rating}
                   onClick={() => onMoodUpdate(m.rating)}
                   className={cn(
-                    "flex-1 py-1.5 md:py-2 rounded-xl border transition-all duration-300 flex items-center justify-center",
+                    "flex-1 py-1.5 md:py-2 rounded-xl transition-all duration-300 flex items-center justify-center",
                     isActive 
-                      ? "bg-white/10 border-white/20 shadow-lg scale-105" 
-                      : "bg-white/5 border-white/5 opacity-30 active:opacity-100"
+                      ? "bg-transparent md:bg-white/10 border-0 md:border md:border-white/20 shadow-lg scale-110 md:scale-105" 
+                      : "bg-transparent md:bg-white/5 border-0 md:border md:border-white/5 opacity-30 active:opacity-100"
                   )}
                 >
                   <m.icon className={cn(
@@ -59,7 +59,7 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
         </div>
 
         {/* Energy Section - Адаптация для мобильных */}
-        <div className="flex flex-col justify-between h-[45%] md:h-auto md:space-y-2 px-1 md:px-0 mt-2 md:mt-0">
+        <div className="flex flex-col justify-between h-[45%] md:h-auto md:space-y-2 px-1 md:px-0 mt-4 md:mt-0 translate-y-1 md:translate-y-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
@@ -69,7 +69,7 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
             </div>
             <span className="text-[10px] font-bold text-orange-400/60 tabular-nums">{energy}/10</span>
           </div>
-          <div className="flex gap-1 h-8 md:h-5 mt-2 md:mt-0">
+          <div className="flex gap-1 h-6 md:h-5 mt-2 md:mt-0">
             {Array.from({ length: 10 }).map((_, i) => {
                 const val = i + 1
                 return (

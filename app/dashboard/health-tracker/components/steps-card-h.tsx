@@ -35,12 +35,12 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
       "relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[120px] backdrop-blur-2xl px-6 pt-2 md:pt-3 pb-5",
       isDone 
         ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
-        : "border-white/10 bg-zinc-900/50 hover:border-orange-500/20"
+        : "border-white/10 bg-zinc-900/50 hover:border-red-500/20"
     )}>
       {/* Фоновое свечение */}
       <div className={cn(
         "absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000",
-        isDone ? "bg-emerald-500/10" : "bg-orange-500/5"
+        isDone ? "bg-emerald-500/10" : "bg-red-500/5"
       )} />
 
       {/* DESKTOP VERSION - UNTOUCHED */}
@@ -53,8 +53,8 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
                   <Trophy className="w-3.5 h-3.5 text-emerald-400" />
                 </motion.div>
               ) : (
-                <motion.div key="feet" initial={{ scale: 0 }} animate={{ scale: 1 }} className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                  <Footprints className="w-3.5 h-3.5 text-orange-400" />
+                <motion.div key="feet" initial={{ scale: 0 }} animate={{ scale: 1 }} className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <Footprints className="w-3.5 h-3.5 text-red-500" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -81,7 +81,7 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
                 ШАГОВ СЕГОДНЯ
               </span>
             </div>
-            <MetricButton icon={Plus} onClick={handleIncrement} size="small" variant={isDone ? 'success' : 'default'} iconClassName={isDone ? 'text-emerald-400' : 'text-orange-400'} className={isDone ? '' : 'bg-orange-500/10 border-orange-500/20'} />
+            <MetricButton icon={Plus} onClick={handleIncrement} size="small" variant={isDone ? 'success' : 'default'} iconClassName={isDone ? 'text-emerald-400' : 'text-red-500'} className={isDone ? '' : 'bg-red-500/10 border-red-500/20'} />
           </div>
         </div>
 
@@ -89,8 +89,8 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
 
         <div className="flex flex-col justify-center gap-4">
           <div className="flex items-center gap-2.5">
-            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", isDone ? "bg-emerald-500/5 border-emerald-500/10" : "bg-orange-500/5 border-orange-500/10")}>
-              <MapPin className={cn("w-4 h-4", isDone ? "text-emerald-400/60" : "text-orange-400/70")} />
+            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", isDone ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10")}>
+              <MapPin className={cn("w-4 h-4", isDone ? "text-emerald-400/60" : "text-red-500/70")} />
             </div>
             <div className="flex flex-col">
               <span className="text-[13px] font-black text-white/80 tabular-nums leading-tight">{distance} км</span>
@@ -98,8 +98,8 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
             </div>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", isDone ? "bg-emerald-500/5 border-emerald-500/10" : "bg-orange-500/5 border-orange-500/10")}>
-              <Flame className={cn("w-4 h-4", isDone ? "text-emerald-400/60" : "text-orange-400/70")} />
+            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", isDone ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10")}>
+              <Flame className={cn("w-4 h-4", isDone ? "text-emerald-400/60" : "text-red-500/70")} />
             </div>
             <div className="flex flex-col">
               <span className="text-[13px] font-black text-white/80 tabular-nums leading-tight">{calories} ккал</span>
@@ -109,9 +109,21 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
         </div>
 
         <div className="relative w-full h-full flex items-center justify-end">
-          <ProgressRing percentage={percentage} isDone={isDone} size="small" color="#f97316" achievedColor="#10b981">
+          <ProgressRing 
+            percentage={percentage} 
+            isDone={isDone} 
+            size="small" 
+            color="#ef4444" 
+            glowColor="bg-red-500/15"
+            achievedColor="#10b981"
+          >
             <span className={cn("text-[14px] font-black tabular-nums leading-none", isDone ? "text-emerald-400" : "text-white")}>{percentage}%</span>
-            <span className="text-[8px] font-black text-white/40 uppercase mt-1">цель</span>
+            <div className="flex items-center gap-0.5 mt-1">
+              <span className="text-[8px] font-black text-white/40 uppercase">цель</span>
+              <span className="text-[8px] font-black text-white/20 uppercase hidden md:inline">
+                {goal >= 1000 ? `${(goal / 1000).toFixed(0)}к` : goal}
+              </span>
+            </div>
           </ProgressRing>
         </div>
       </div>
@@ -121,8 +133,8 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
         {/* Left: Info & Main Controls */}
         <div className="flex flex-col h-full justify-between py-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 pt-0">
-            <div className={cn("p-1.5 rounded-lg border", isDone ? "bg-emerald-500/20 border-emerald-500/30" : "bg-orange-500/10 border-orange-500/20")}>
-              <Footprints className={cn("w-3.5 h-3.5", isDone ? "text-emerald-400" : "text-orange-400")} />
+            <div className={cn("p-1.5 rounded-lg border", isDone ? "bg-emerald-500/20 border-emerald-500/30" : "bg-red-500/10 border-red-500/20")}>
+              <Footprints className={cn("w-3.5 h-3.5", isDone ? "text-emerald-400" : "text-red-500")} />
             </div>
             <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500", isDone ? "text-emerald-400/60" : "text-white/40")}>
               {isDone ? "ГОТОВО" : "АКТИВНОСТЬ"}
@@ -145,25 +157,32 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
               />
               <span className={cn("text-[8px] font-bold uppercase tracking-tighter mt-1", isDone ? "text-emerald-400" : "text-white/20")}>ШАГОВ</span>
             </div>
-            <MetricButton icon={Plus} onClick={handleIncrement} size="small" variant={isDone ? 'success' : 'default'} iconClassName={isDone ? 'text-emerald-400' : 'text-orange-400'} />
+            <MetricButton icon={Plus} onClick={handleIncrement} size="small" variant={isDone ? 'success' : 'default'} iconClassName={isDone ? 'text-emerald-400' : 'text-red-500'} className={isDone ? '' : 'bg-red-500/10 border-red-500/20'} />
           </div>
         </div>
 
         {/* Center: Detail Metrics (Vertically in the gap) */}
         <div className="flex flex-col justify-center gap-3 px-3 translate-y-3">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-orange-400/70" />
+            <MapPin className="w-4 h-4 text-red-500/70" />
             <span className="text-[13px] font-black text-white/80 tabular-nums">{distance} км</span>
           </div>
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-orange-400/70" />
+            <Flame className="w-4 h-4 text-red-500/70" />
             <span className="text-[13px] font-black text-white/80 tabular-nums">{calories} ккал</span>
           </div>
         </div>
 
         {/* Right: Ring */}
         <div className="flex-shrink-0 translate-y-3">
-          <ProgressRing percentage={percentage} isDone={isDone} size="small" color="#f97316" achievedColor="#10b981">
+          <ProgressRing 
+            percentage={percentage} 
+            isDone={isDone} 
+            size="small" 
+            color="#ef4444" 
+            glowColor="bg-red-500/15"
+            achievedColor="#10b981"
+          >
             <span className="text-[12px] font-black text-white">{percentage}%</span>
           </ProgressRing>
         </div>

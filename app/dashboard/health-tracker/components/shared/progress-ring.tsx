@@ -10,6 +10,8 @@ interface ProgressRingProps {
   size?: 'small' | 'medium' | 'large'
   color?: string
   achievedColor?: string
+  glowColor?: string
+  achievedGlowColor?: string
   children?: React.ReactNode
   className?: string
 }
@@ -20,6 +22,8 @@ export function ProgressRing({
   size = 'medium',
   color = '#3b82f6',
   achievedColor = '#10b981',
+  glowColor,
+  achievedGlowColor = 'bg-emerald-500/30',
   children,
   className,
 }: ProgressRingProps) {
@@ -27,7 +31,11 @@ export function ProgressRing({
   const sizeClass = SIZES.progressRing[size]
 
   const strokeColor = isDone ? achievedColor : color
-  const gradientId = `gradient-${size}-${isDone ? 'achieved' : 'progress'}`
+  
+  // Определяем цвета свечения
+  const currentGlowColor = isDone 
+    ? achievedGlowColor 
+    : (glowColor || 'bg-blue-500/15')
 
   return (
     <div className={cn('relative flex-shrink-0 flex items-center justify-center', sizeClass, className)}>
@@ -36,7 +44,7 @@ export function ProgressRing({
         {...(isDone ? ANIMATIONS.glowPulse : {})}
         className={cn(
           'absolute inset-2 blur-[24px] rounded-full transition-colors duration-1000',
-          isDone ? 'bg-emerald-500/30' : 'bg-blue-500/15'
+          currentGlowColor
         )}
       />
 
@@ -65,8 +73,8 @@ export function ProgressRing({
           transition={{ duration: 1.5, ease: 'circOut' }}
           style={{
             filter: isDone
-              ? 'drop-shadow(0 0 12px rgba(16, 185, 129, 0.5))'
-              : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.4))',
+              ? `drop-shadow(0 0 12px ${achievedColor}80)`
+              : `drop-shadow(0 0 8px ${color}66)`,
           }}
         />
       </svg>

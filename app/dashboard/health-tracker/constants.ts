@@ -29,10 +29,10 @@ export const COLORS = {
   },
   
   steps: {
-    primary: 'text-orange-400',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/20',
-    glow: 'bg-orange-500/5',
+    primary: 'text-red-500',
+    bg: 'bg-red-500/10',
+    border: 'border-red-500/20',
+    glow: 'bg-red-500/5',
   },
   
   weight: {
@@ -49,9 +49,9 @@ export const COLORS = {
   },
   
   caffeine: {
-    primary: 'text-amber-500',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
+    primary: 'text-amber-600',
+    bg: 'bg-amber-600/10',
+    border: 'border-amber-600/20',
     overLimit: {
       primary: 'text-red-500',
       bg: 'bg-red-500/10',
@@ -72,7 +72,7 @@ export const SIZES = {
   card: {
     borderRadius: 'rounded-[2rem]',
     borderRadiusLarge: 'rounded-[2.5rem]',
-    padding: 'px-6 pt-4 pb-6',
+    padding: 'px-4 pt-3 pb-6 md:px-6 md:pt-4 md:pb-6',
     paddingCompact: 'p-4',
   },
   

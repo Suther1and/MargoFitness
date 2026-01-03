@@ -17,17 +17,17 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
   const { isOverLimit } = useGoalProgress({ current: value, goal })
   const { localValue, handleIncrement, handleDecrement } = useEditableValue(value, { onUpdate, step: 1, min: 0 })
 
-  const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-500'
+  const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-600'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-600/20 transition-all duration-500 h-[180px]">
       <div className="relative flex flex-col h-full justify-between">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div
               className={cn(
                 'p-1.5 rounded-lg border transition-colors duration-500',
-                isOverLimit ? 'bg-red-500/10 border-red-500/20' : `${COLORS.caffeine.bg} ${COLORS.caffeine.border}`
+                isOverLimit ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-600/10 border-amber-600/20'
               )}
             >
               <Coffee className={cn('w-3.5 h-3.5', accentColor)} />
@@ -73,7 +73,7 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
               </div>
             ) : (
               <div className="flex items-center gap-1 opacity-20">
-                <Zap className="w-2.5 h-2.5 text-amber-500" />
+                <Zap className="w-2.5 h-2.5 text-amber-600" />
                 <span className="text-[8px] font-bold uppercase tracking-widest text-white">Энергия и фокус</span>
               </div>
             )}
@@ -84,7 +84,7 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
                 <motion.div
                   animate={{
                     width: i < localValue ? '100%' : '0%',
-                    backgroundColor: isOverLimit ? 'rgb(239, 68, 68)' : 'rgb(245, 158, 11)',
+                    backgroundColor: isOverLimit ? 'rgb(239, 68, 68)' : 'rgb(217, 119, 6)',
                   }}
                   className="h-full rounded-full"
                 />

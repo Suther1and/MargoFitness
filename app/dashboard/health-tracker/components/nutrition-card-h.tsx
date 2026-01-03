@@ -81,15 +81,21 @@ export function NutritionCardH({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-6 hover:border-violet-500/20 transition-all duration-500 min-h-[210px] md:h-[210px]">
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-5 md:p-6 hover:border-violet-500/20 transition-all duration-500 h-[180px] md:h-[210px]">
       {/* Background Ambient */}
       <div className="absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none -z-10" />
       
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8 h-full">
+      <div className="flex flex-row gap-6 md:gap-8 h-full">
         {/* Левая часть: Кольцо калорий и Добавление */}
-        <div className="flex flex-row md:flex-col justify-between md:justify-between h-auto md:h-full items-center md:w-[130px] flex-shrink-0 gap-4 md:gap-0">
-          <div className="cursor-pointer -translate-y-1" onClick={handleEdit}>
-            <ProgressRing percentage={percentage} size="medium" color="#8b5cf6" className="w-[100px] h-[100px] md:w-[120px] md:h-[120px]">
+        <div className="flex flex-col justify-between h-full items-center w-[110px] md:w-[130px] flex-shrink-0">
+          <div className="cursor-pointer" onClick={handleEdit}>
+            <ProgressRing 
+              percentage={percentage} 
+              size="medium" 
+              color="#8b5cf6" 
+              glowColor="bg-violet-500/15"
+              className="w-[100px] h-[100px] md:w-[120px] md:h-[120px]"
+            >
               {isEditing ? (
                 <input
                   autoFocus
@@ -109,8 +115,7 @@ export function NutritionCardH({
             </ProgressRing>
           </div>
 
-          {/* Кнопка быстрого добавления */}
-          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-[100px] md:w-[110px] h-[32px] md:h-[34px] overflow-hidden">
+          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-full h-[30px] md:h-[34px] overflow-hidden">
             <input
               type="number"
               placeholder="Добавить"
@@ -130,9 +135,8 @@ export function NutritionCardH({
         </div>
 
         {/* Правая часть: ИМТ, Нормы и Качество */}
-        <div className="flex-1 flex flex-col justify-between h-full py-0.5 gap-4 md:gap-0">
-          {/* Верх: ИМТ и Нормы */}
-          <div className="flex flex-row md:flex-row justify-between items-start gap-4">
+        <div className="flex-1 flex flex-col justify-between h-full py-0.5">
+          <div className="flex flex-row justify-between items-start gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <Info className="w-3 h-3 text-white/20" />
@@ -158,11 +162,11 @@ export function NutritionCardH({
                         <button 
                           onClick={() => onUpdate('caloriesGoal', n.val)} 
                           className={cn(
-                            "flex flex-col items-center px-1.5 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-all min-w-[40px] md:min-w-[50px]",
+                            "flex flex-col items-center px-2 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-all min-w-[42px] md:min-w-[50px]",
                             caloriesGoal === n.val ? "bg-white/10 border border-white/10 shadow-lg" : "hover:bg-white/5 border border-transparent"
                           )}
                         >
-                            <span className={cn("text-sm md:text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
+                            <span className={cn("text-[14px] md:text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
                             <span className="text-[6px] md:text-[7px] text-white/20 uppercase font-bold mt-1 tracking-tighter">{n.label}</span>
                         </button>
                         {i < 2 && <div className="w-px h-4 md:h-5 bg-white/5 mx-0.5" />}
@@ -172,7 +176,6 @@ export function NutritionCardH({
             </div>
           </div>
 
-          {/* Низ: Выбор качества еды */}
           <div className="space-y-2 md:space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -196,14 +199,14 @@ export function NutritionCardH({
                     key={item.rating}
                     onClick={() => onUpdate('foodQuality', item.rating)}
                     className={cn(
-                      "flex-1 py-1.5 md:py-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center",
+                      "flex-1 py-2 md:py-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center",
                       isActive 
                         ? "bg-white/10 border-white/20 scale-105 shadow-lg" 
                         : "bg-white/5 border-white/5 opacity-30 hover:opacity-100 hover:bg-white/[0.07]"
                     )}
                   >
                     <item.icon className={cn(
-                        "w-4 h-4 md:w-5 md:h-5 transition-all duration-300",
+                        "w-[18px] h-[18px] md:w-5 md:h-5 transition-all duration-300",
                         isActive ? item.color : "text-white"
                     )} />
                   </button>
@@ -215,6 +218,4 @@ export function NutritionCardH({
       </div>
     </div>
   )
-  )
 }
-
