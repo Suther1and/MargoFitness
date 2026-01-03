@@ -25,7 +25,7 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
 
   return (
     <div className={cn(
-      "relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[120px] backdrop-blur-2xl px-6 py-5",
+      "relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[120px] backdrop-blur-2xl px-6 pt-3 pb-5",
       isDone 
         ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/40" 
         : "border-white/10 bg-zinc-900/50 hover:border-orange-500/20"

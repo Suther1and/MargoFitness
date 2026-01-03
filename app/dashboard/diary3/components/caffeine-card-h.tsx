@@ -16,7 +16,7 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
   const bgColor = isOverLimit ? 'bg-red-500' : 'bg-amber-500'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-6 pt-4 pb-6 hover:border-amber-500/20 transition-all duration-500 h-[180px]">
       <div className="absolute top-4 right-4">
         <div className={cn("flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5", accentColor)}>
           <span className="text-[10px] font-bold">{Math.round((value / goal) * 100)}%</span>

@@ -19,7 +19,7 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
   ]
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-6 hover:border-white/20 transition-all duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-6 pt-4 pb-6 hover:border-white/20 transition-all duration-500 h-[180px]">
       <div className="flex flex-col justify-between h-full">
         {/* Mood Section */}
         <div className="space-y-2">

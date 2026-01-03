@@ -45,7 +45,7 @@ export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
       {/* Живой фон */}
       <WaveBackground percentage={percentage} isDone={isDone} />
 
-      <div className="relative z-10 flex flex-col h-full p-5">
+      <div className="relative z-10 flex flex-col h-full px-5 pt-3 pb-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
