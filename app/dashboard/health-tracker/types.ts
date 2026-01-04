@@ -140,8 +140,7 @@ export interface Habit {
 export const HABIT_FREQUENCY_OPTIONS: Record<HabitFrequency, string> = {
   daily: 'Каждый день',
   '2week': '2 раза в неделю',
-  '3week': '3 раза в неделю',
-  '4-5week': '4-5 раз в неделю'
+  '3week': '3 раза в неделю'
 }
 
 export const HABIT_TIME_OPTIONS: Record<HabitTime, string> = {

@@ -136,8 +136,14 @@ export default function TrackerSettingsPage() {
     <div className="min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20">
       {/* Ambient BG */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-green-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px]" />
+        <div className={cn(
+          "absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] transition-colors duration-1000",
+          activeTab === 'widgets' ? "bg-green-500/5" : "bg-amber-500/5"
+        )} />
+        <div className={cn(
+          "absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] transition-colors duration-1000",
+          activeTab === 'widgets' ? "bg-emerald-500/5" : "bg-orange-500/5"
+        )} />
       </div>
 
       {/* Header */}
@@ -154,8 +160,8 @@ export default function TrackerSettingsPage() {
                   <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
                 </motion.button>
               </Link>
-              <h1 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4">
-                Настройки <span className="text-green-500">трекера</span>
+              <h1 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500">
+                Настройки <span className={activeTab === 'widgets' ? "text-green-500" : "text-amber-500"}>трекера</span>
               </h1>
             </div>
 
@@ -308,7 +314,7 @@ export default function TrackerSettingsPage() {
               {activeTab === 'habits' && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-green-500"
+                  className="absolute inset-0 bg-amber-500"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -319,7 +325,12 @@ export default function TrackerSettingsPage() {
           {/* Кнопка сохранения для десктопа */}
           <button
             onClick={handleSave}
-            className="hidden md:flex items-center gap-2 px-6 h-full bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-[#09090b] rounded-xl border border-green-500/20 hover:border-green-500 transition-all duration-300 group font-black text-[10px] uppercase tracking-[0.2em]"
+            className={cn(
+              "hidden md:flex items-center gap-2 px-6 h-full rounded-xl border transition-all duration-300 group font-black text-[10px] uppercase tracking-[0.2em]",
+              activeTab === 'widgets'
+                ? "bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-[#09090b] border-green-500/20 hover:border-green-500"
+                : "bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-[#09090b] border-amber-500/20 hover:border-amber-500"
+            )}
           >
             Сохранить настройки
             <ChevronLeft className="w-3.5 h-3.5 rotate-180 transition-transform group-hover:translate-x-0.5" />
@@ -556,7 +567,12 @@ export default function TrackerSettingsPage() {
       <div className="fixed bottom-8 left-0 right-0 z-[60] px-4 md:hidden">
         <button
           onClick={handleSave}
-          className="w-full bg-green-500 hover:bg-green-400 text-black h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(34,197,94,0.3)] flex items-center justify-center gap-3 transition-all active:scale-95"
+          className={cn(
+            "w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95",
+            activeTab === 'widgets'
+              ? "bg-green-500 hover:bg-green-400 text-black shadow-green-500/30"
+              : "bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/30"
+          )}
         >
           <Activity className="w-4 h-4" />
           Сохранить настройки
