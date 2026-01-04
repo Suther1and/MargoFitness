@@ -396,7 +396,7 @@ export function HabitsSection() {
 
             <div className="flex flex-row items-end gap-3 w-full">
               <div className="space-y-1.5 flex-1">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько дней в неделю?</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько раз в неделю?</span>
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between">
                   {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                     <button

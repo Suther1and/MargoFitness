@@ -426,6 +426,7 @@ export default function TrackerSettingsPage() {
                                     {widget.enabled ? (
                                       <input
                                         type="text"
+                                        inputMode="decimal"
                                         value={widget.goal ?? ''}
                                         onChange={(e) => handleGoalChange(id, e.target.value)}
                                         placeholder="Цель"
