@@ -32,13 +32,6 @@ const applyScrollbarCompensation = (scrollbarWidth: number) => {
   if (navbar) {
     navbar.style.right = `${scrollbarWidth}px`
   }
-
-  setTimeout(() => {
-    const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
-    if (dialogContent) {
-      dialogContent.style.left = `calc(50% - ${scrollbarWidth / 2}px)`
-    }
-  }, 0)
 }
 
 const removeScrollbarCompensation = () => {
@@ -46,9 +39,6 @@ const removeScrollbarCompensation = () => {
 
   const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
   if (navbar) navbar.style.right = ''
-
-  const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
-  if (dialogContent) dialogContent.style.left = ''
 }
 
 // Утилиты для блокировки скролла
@@ -224,7 +214,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-dialog-content="true"
         className={cn(
-          "bg-background fixed top-[50%] left-[50%] z-[60] grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
+          "bg-background fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-[60] grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
           className
         )}
         {...props}

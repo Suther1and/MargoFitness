@@ -181,34 +181,8 @@ export function SubscriptionRenewalModal({
   return (
     <>
       <style jsx global>{`
-        @keyframes modalFadeIn {
-          from { 
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.96);
-          }
-          to { 
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-        
-        @keyframes modalFadeOut {
-          from { 
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-          }
-          to { 
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.98);
-          }
-        }
-
-        [data-slot="dialog-content"][data-state="open"] {
-          animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        
-        [data-slot="dialog-content"][data-state="closed"] {
-          animation: modalFadeOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
+        .tabular-nums { 
+          font-variant-numeric: tabular-nums; 
         }
 
         /* Force hide Dialog default close button */
@@ -221,10 +195,6 @@ export function SubscriptionRenewalModal({
             background-color: #1a1a24 !important;
             border: none !important;
           }
-        }
-        
-        .tabular-nums { 
-          font-variant-numeric: tabular-nums; 
         }
       `}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
