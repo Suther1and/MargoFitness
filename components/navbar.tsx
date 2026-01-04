@@ -25,7 +25,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [isBackdropClosing, setIsBackdropClosing] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSignInOpen, setIsSignInOpen] = useState(false)
-  const [isAnyPopupOpen, setIsAnyPopupOpen] = useState(false)
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
@@ -217,18 +216,12 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           color: #f97316 !important;
         }
 
-        /* Принудительный блюр для navbar */
-        div[data-navbar-container][data-navbar-blur="true"],
-        div[data-navbar-blur="true"][data-navbar-container] {
+        /* Блюр для navbar при открытом диалоге */
+        [data-navbar-container][data-navbar-blur="true"] {
           filter: blur(4px) !important;
           -webkit-filter: blur(4px) !important;
+          pointer-events: none !important;
           transition: filter 0.2s ease-in-out !important;
-        }
-        
-        /* Убеждаемся что backdrop-blur не мешает */
-        div[data-navbar-container][data-navbar-blur="true"] *,
-        div[data-navbar-blur="true"][data-navbar-container] * {
-          will-change: auto !important;
         }
 
       `}</style>
@@ -237,9 +230,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       <div 
         className="hidden lg:flex fixed top-0 left-0 right-0 z-50 px-4 py-4 max-w-[96rem] mx-auto xl:px-8"
         data-navbar-container
-        style={{
-          pointerEvents: isAnyPopupOpen || isSignInOpen ? 'none' : 'auto'
-        }}
       >
         <nav 
           className="backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full"
@@ -349,9 +339,8 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       <SignInPopup isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
 
       {/* Mobile: только бургер */}
-      {!isSignInOpen && !isAnyPopupOpen && (
-        <div 
-          className="lg:hidden fixed top-[15px] right-4 z-50"
+      <div 
+        className="lg:hidden fixed top-[15px] right-4 z-50"
           data-navbar-container
         >
           <button
@@ -372,7 +361,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
             )}
           </button>
         </div>
-      )}
 
       {/* Mobile Menu Overlay */}
       {(mobileMenuOpen || isClosing) && (

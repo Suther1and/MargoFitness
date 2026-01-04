@@ -6,9 +6,70 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Константы
+const BLUR_ANIMATION_DURATION = 200
+const BLUR_Z_INDEX = 48
+
 // Глобальный счетчик открытых диалогов
 let openDialogsCount = 0
 let savedScrollPosition = 0
+
+// Утилиты для работы с navbar blur
+const setNavbarBlur = (enabled: boolean) => {
+  const navbars = document.querySelectorAll('[data-navbar-container]')
+  navbars.forEach(navbar => {
+    (navbar as HTMLElement).setAttribute('data-navbar-blur', String(enabled))
+  })
+}
+
+// Утилиты для компенсации scrollbar
+const applyScrollbarCompensation = (scrollbarWidth: number) => {
+  if (scrollbarWidth <= 0) return
+
+  document.body.style.paddingRight = `${scrollbarWidth}px`
+
+  const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
+  if (navbar) {
+    navbar.style.right = `${scrollbarWidth}px`
+  }
+
+  setTimeout(() => {
+    const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
+    if (dialogContent) {
+      dialogContent.style.left = `calc(50% - ${scrollbarWidth / 2}px)`
+    }
+  }, 0)
+}
+
+const removeScrollbarCompensation = () => {
+  document.body.style.paddingRight = ''
+
+  const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
+  if (navbar) navbar.style.right = ''
+
+  const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
+  if (dialogContent) dialogContent.style.left = ''
+}
+
+// Утилиты для блокировки скролла
+const lockScroll = () => {
+  savedScrollPosition = window.scrollY
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+
+  document.documentElement.classList.add('dialog-open')
+  document.body.classList.add('dialog-open')
+
+  applyScrollbarCompensation(scrollbarWidth)
+}
+
+const unlockScroll = () => {
+  document.documentElement.classList.remove('dialog-open')
+  document.body.classList.remove('dialog-open')
+
+  removeScrollbarCompensation()
+
+  window.scrollTo(0, savedScrollPosition)
+}
 
 function Dialog({
   ...props
@@ -18,7 +79,6 @@ function Dialog({
   const isOpenRef = React.useRef(false)
   
   React.useEffect(() => {
-    // Очистка предыдущего timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
@@ -28,51 +88,18 @@ function Dialog({
       isOpenRef.current = true
       openDialogsCount++
       
-      // Блокируем скролл только для первого диалога
       if (openDialogsCount === 1) {
-        savedScrollPosition = window.scrollY
-        
-        // Вычисляем ширину scrollbar ДО блокировки
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-        
-        // Добавляем CSS класс для блокировки скролла
-        document.documentElement.classList.add('dialog-open')
-        document.body.classList.add('dialog-open')
-        
-        // Компенсируем исчезновение scrollbar
-        if (scrollbarWidth > 0) {
-          document.body.style.paddingRight = `${scrollbarWidth}px`
-          
-          // Для navbar (fixed, left:0, right:0) уменьшаем right
-          const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
-          if (navbar) {
-            navbar.style.right = `${scrollbarWidth}px`
-          }
-          
-          // Для DialogContent корректируем left для сохранения центрирования
-          setTimeout(() => {
-            const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
-            if (dialogContent) {
-              dialogContent.style.left = `calc(50% - ${scrollbarWidth / 2}px)`
-            }
-          }, 0)
-        }
+        lockScroll()
       }
 
-      // Применяем blur к navbar через DOM
-      requestAnimationFrame(() => {
-        const navbars = document.querySelectorAll('[data-navbar-container]')
-        navbars.forEach(navbar => {
-          (navbar as HTMLElement).setAttribute('data-navbar-blur', 'true')
-        })
-      })
+      requestAnimationFrame(() => setNavbarBlur(true))
 
       // Создаем blur overlay
       const blur = document.createElement('div')
       blur.style.cssText = `
         position: fixed;
         inset: 0;
-        z-index: 48;
+        z-index: ${BLUR_Z_INDEX};
         backdrop-filter: blur(0px);
         -webkit-backdrop-filter: blur(0px);
         background: rgba(0, 0, 0, 0);
@@ -80,22 +107,19 @@ function Dialog({
       `
       blur.setAttribute('data-dialog-blur-overlay', '')
       
-      // Закрываем при клике на blur
-      const handleClick = (e: MouseEvent) => {
+      blur.addEventListener('click', (e) => {
         if (e.target === blur && props.onOpenChange) {
           props.onOpenChange(false)
         }
-      }
-      blur.addEventListener('click', handleClick)
+      })
       
       document.body.appendChild(blur)
       blurRef.current = blur
       
-      // Анимация появления
       requestAnimationFrame(() => {
         if (blur.parentElement) {
           blur.style.backdropFilter = 'blur(8px)'
-          ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
+          blur.style.webkitBackdropFilter = 'blur(8px)'
           blur.style.background = 'rgba(0, 0, 0, 0.3)'
         }
       })
@@ -103,17 +127,12 @@ function Dialog({
       isOpenRef.current = false
       openDialogsCount = Math.max(0, openDialogsCount - 1)
       
-      // Убираем blur с navbar
-      const navbars = document.querySelectorAll('[data-navbar-container]')
-      navbars.forEach(navbar => {
-        (navbar as HTMLElement).setAttribute('data-navbar-blur', 'false')
-      })
+      setNavbarBlur(false)
 
-      // Анимация исчезновения blur overlay
       if (blurRef.current) {
         const blur = blurRef.current
         blur.style.backdropFilter = 'blur(0px)'
-        ;(blur.style as any).webkitBackdropFilter = 'blur(0px)'
+        blur.style.webkitBackdropFilter = 'blur(0px)'
         blur.style.background = 'rgba(0, 0, 0, 0)'
         
         timeoutRef.current = setTimeout(() => {
@@ -122,56 +141,23 @@ function Dialog({
           }
           blurRef.current = null
           timeoutRef.current = null
-        }, 200)
+        }, BLUR_ANIMATION_DURATION)
       }
       
-      // Разблокируем скролл только когда все диалоги закрыты
       if (openDialogsCount === 0) {
-        document.documentElement.classList.remove('dialog-open')
-        document.body.classList.remove('dialog-open')
-        
-        // Убираем компенсацию
-        document.body.style.paddingRight = ''
-        
-        const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
-        if (navbar) {
-          navbar.style.right = ''
-        }
-        
-        const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
-        if (dialogContent) {
-          dialogContent.style.left = ''
-        }
-        
-        // Восстанавливаем позицию скролла
-        window.scrollTo(0, savedScrollPosition)
+        unlockScroll()
       }
     }
     
-    // Cleanup при размонтировании
     return () => {
       if (isOpenRef.current) {
         isOpenRef.current = false
         openDialogsCount = Math.max(0, openDialogsCount - 1)
         
-        const navbars = document.querySelectorAll('[data-navbar-container]')
-        navbars.forEach(navbar => {
-          (navbar as HTMLElement).setAttribute('data-navbar-blur', 'false')
-        })
+        setNavbarBlur(false)
         
         if (openDialogsCount === 0) {
-          document.documentElement.classList.remove('dialog-open')
-          document.body.classList.remove('dialog-open')
-          
-          document.body.style.paddingRight = ''
-          const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
-          if (navbar) {
-            navbar.style.right = ''
-          }
-          const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
-          if (dialogContent) {
-            dialogContent.style.left = ''
-          }
+          unlockScroll()
         }
       }
       
