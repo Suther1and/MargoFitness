@@ -3,7 +3,6 @@ import { getCurrentProfile } from "@/lib/actions/profile"
 import { redirect } from "next/navigation"
 import { PaymentPageNewClient } from "./components/payment-page-new-client"
 import { Inter, Oswald } from 'next/font/google'
-import './components/mobile-optimizations.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' })

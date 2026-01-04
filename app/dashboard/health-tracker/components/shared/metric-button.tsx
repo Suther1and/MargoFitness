@@ -40,7 +40,7 @@ export function MetricButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'flex-shrink-0 rounded-xl border flex items-center justify-center transition-all active:scale-95',
+        'flex-shrink-0 rounded-xl border flex items-center justify-center transform-gpu',
         sizeClass,
         variantStyles[variant],
         disabled && 'opacity-50 cursor-not-allowed',

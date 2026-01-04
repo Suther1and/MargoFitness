@@ -76,7 +76,7 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative rounded-xl flex flex-col items-center justify-center transition-all duration-200",
+                        "relative rounded-xl flex flex-col items-center justify-center transform-gpu",
                         minimal 
                           ? (daysCount === 3 ? "w-11 h-12" : "flex-1 max-w-[40px] h-12") 
                           : "w-9 h-14",
@@ -116,18 +116,23 @@ export function WeekNavigator({
                   <button
                     onClick={onCalendarClick}
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center border transition-all shrink-0 group ml-1",
+                      "w-8 h-8 rounded-full flex items-center justify-center border shrink-0 group ml-1 transition-colors",
                       isExpanded 
                         ? "bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/30" 
                         : "bg-white/5 border-white/10 hover:bg-white/10"
                     )}
                   >
-                    <ChevronDown className={cn(
-                      "w-4 h-4 transition-all duration-300",
-                      isExpanded 
-                        ? "text-black rotate-180" 
-                        : "text-white/40 group-hover:text-white"
-                    )} />
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    >
+                      <ChevronDown className={cn(
+                        "w-4 h-4",
+                        isExpanded 
+                          ? "text-black" 
+                          : "text-white/40 group-hover:text-white"
+                      )} />
+                    </motion.div>
                   </button>
                 )}
               </div>
@@ -163,7 +168,7 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-all",
+                        "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
                         isSelected ? "bg-amber-500 text-black shadow-lg" : "hover:bg-white/5",
                         !isCurrentMonth && "opacity-10"
                       )}
@@ -209,7 +214,7 @@ export function WeekNavigator({
       {onCalendarClick && (
         <motion.button
           onClick={onCalendarClick}
-          className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+          className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:bg-white/10 transition-colors transform-gpu"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

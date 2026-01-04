@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X } from 'lucide-react'
 import { format } from 'date-fns'
@@ -186,58 +186,79 @@ export default function HealthTrackerPage() {
         )}
 
         {/* Mobile Calendar Expansion */}
-        <motion.div 
-          initial={false}
-          animate={{ 
-            height: isCalendarExpanded ? 'auto' : 0, 
-            opacity: isCalendarExpanded ? 1 : 0,
-            marginBottom: isCalendarExpanded ? 24 : 0 
-          }}
-          className="overflow-hidden lg:hidden"
-        >
-          <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-            <WeekNavigator 
-              selectedDate={selectedDate} 
-              onDateChange={(date) => {
-                setSelectedDate(date)
-                setIsCalendarExpanded(false)
-              }} 
-              minimal={true} 
-              isExpanded={true} 
-            />
-          </div>
-        </motion.div>
+        <AnimatePresence>
+          {isCalendarExpanded && (
+            <motion.div 
+              key="mobile-calendar"
+              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+              animate={{ 
+                height: 'auto', 
+                opacity: 1,
+                marginBottom: 24 
+              }}
+              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              className="overflow-hidden lg:hidden transform-gpu"
+            >
+              <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+                <WeekNavigator 
+                  selectedDate={selectedDate} 
+                  onDateChange={(date) => {
+                    setSelectedDate(date)
+                    setIsCalendarExpanded(false)
+                  }} 
+                  minimal={true} 
+                  isExpanded={true} 
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Daily Plan Expansion */}
-        <motion.div 
-          initial={false}
-          animate={{ 
-            height: isDailyPlanExpanded ? 'auto' : 0, 
-            opacity: isDailyPlanExpanded ? 1 : 0,
-            marginBottom: isDailyPlanExpanded ? 24 : 0 
-          }}
-          className="overflow-hidden lg:hidden"
-        >
-          <GoalsSummaryCard data={data} />
-        </motion.div>
+        <AnimatePresence>
+          {isDailyPlanExpanded && (
+            <motion.div 
+              key="mobile-daily-plan"
+              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+              animate={{ 
+                height: 'auto', 
+                opacity: 1,
+                marginBottom: 24 
+              }}
+              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              className="overflow-hidden lg:hidden transform-gpu"
+            >
+              <GoalsSummaryCard data={data} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Habits Expansion */}
-        <motion.div 
-          initial={false}
-          animate={{ 
-            height: isHabitsExpanded ? 'auto' : 0, 
-            opacity: isHabitsExpanded ? 1 : 0,
-            marginBottom: isHabitsExpanded ? 24 : 0 
-          }}
-          className="overflow-hidden lg:hidden"
-        >
-          <HabitsCard 
-            habits={data.habits} 
-            onToggle={(id) => {
-              handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
-            }} 
-          />
-        </motion.div>
+        <AnimatePresence>
+          {isHabitsExpanded && (
+            <motion.div 
+              key="mobile-habits"
+              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+              animate={{ 
+                height: 'auto', 
+                opacity: 1,
+                marginBottom: 24 
+              }}
+              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              className="overflow-hidden lg:hidden transform-gpu"
+            >
+              <HabitsCard 
+                habits={data.habits} 
+                onToggle={(id) => {
+                  handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
+                }} 
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Grid - 12 Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
