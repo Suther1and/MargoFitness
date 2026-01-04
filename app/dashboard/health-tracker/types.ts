@@ -138,7 +138,7 @@ export interface Habit {
 }
 
 export const HABIT_FREQUENCY_OPTIONS: Record<number, string> = {
-  1: '1 день в неделю',
+  1: 'Раз в неделю',
   2: '2 раза в неделю',
   3: '3 раза в неделю',
   4: '4 раза в неделю',

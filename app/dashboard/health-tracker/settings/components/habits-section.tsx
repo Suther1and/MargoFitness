@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, MoreVertical, CheckCircle2, Power, EyeOff } from 'lucide-react'
+import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, MoreVertical, CheckCircle2, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp, LayoutDashboard, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../../hooks/use-habits'
 import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../../types'
@@ -191,6 +191,7 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
 export function HabitsSection() {
   const { habits, isLoaded, addHabit, updateHabit, deleteHabit } = useHabits()
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
   
   const [newHabit, setNewHabit] = useState<{
     title: string
@@ -386,33 +387,52 @@ export function HabitsSection() {
           if (time === 'disabled') {
             return (
               <div key={time} className="space-y-3 pt-6 border-t border-white/5">
-                <div className="flex items-center gap-3 px-2">
-                  <EyeOff className="w-4 h-4 text-white/20" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 whitespace-nowrap">Временно неактивные</h3>
+                <button 
+                  onClick={() => setIsDisabledExpanded(!isDisabledExpanded)}
+                  className="flex items-center gap-3 px-2 w-full group"
+                >
+                  <EyeOff className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors" />
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 whitespace-nowrap group-hover:text-white/40 transition-colors">
+                    Временно неактивные ({items.length})
+                  </h3>
                   <div className="h-px bg-white/5 flex-1" />
-                </div>
+                  {isDisabledExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-white/20 group-hover:text-white/40" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-white/20 group-hover:text-white/40" />
+                  )}
+                </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <AnimatePresence mode="popLayout">
-                    {items.map(habit => (
-                      <HabitCard 
-                        key={habit.id}
-                        habit={habit}
-                        isEditing={editingId === habit.id}
-                        editForm={editForm}
-                        setEditForm={setEditForm}
-                        startEditing={startEditing}
-                        saveEdit={saveEdit}
-                        cancelEditing={() => {
-                          setEditingId(null)
-                          setEditForm(null)
-                        }}
-                        toggleHabitStatus={toggleHabitStatus}
-                        deleteHabit={deleteHabit}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </div>
+                <AnimatePresence>
+                  {isDisabledExpanded && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        {items.map(habit => (
+                          <HabitCard 
+                            key={habit.id}
+                            habit={habit}
+                            isEditing={editingId === habit.id}
+                            editForm={editForm}
+                            setEditForm={setEditForm}
+                            startEditing={startEditing}
+                            saveEdit={saveEdit}
+                            cancelEditing={() => {
+                              setEditingId(null)
+                              setEditForm(null)
+                            }}
+                            toggleHabitStatus={toggleHabitStatus}
+                            deleteHabit={deleteHabit}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )
           }
@@ -452,6 +472,56 @@ export function HabitsSection() {
             </div>
           )
         })}
+      </div>
+
+      {/* Empty State */}
+      {habits.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-10 px-6 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.01]">
+          <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
+            <PlusCircle className="w-7 h-7 text-amber-500/40" />
+          </div>
+          <h3 className="text-xl font-oswald font-black uppercase text-white mb-8 tracking-tight">Как это работает?</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[800px] w-full">
+            {/* Левая колонка */}
+            <div className="relative">
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-amber-500/20 rounded-full" />
+              <div className="space-y-3">
+                <h4 className="font-oswald font-black uppercase text-amber-500 text-lg leading-none">Создай систему</h4>
+                <p className="text-sm text-white/40 leading-relaxed">
+                  Задай название привычке, регулярность и время суток. Следи за серией и временно отключай задачи, если нужен перерыв.
+                </p>
+              </div>
+            </div>
+            
+            {/* Правая колонка */}
+            <div className="relative">
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-cyan-500/20 rounded-full" />
+              <div className="space-y-3">
+                <a 
+                  href="/dashboard/health-tracker" 
+                  className="block font-oswald font-black uppercase text-cyan-400 text-lg leading-none hover:text-cyan-300 transition-colors"
+                >
+                  Выполняй запланированное
+                </a>
+                <p className="text-sm text-white/40 leading-relaxed">
+                  Активные привычки будут автоматически появляться в твоем трекере с выбранной периодичностью: отмечай выполненное и достигай своих целей.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Кнопка наверх */}
+      <div className="flex justify-center pt-8">
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 text-white/20 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all group font-black text-[10px] uppercase tracking-widest"
+        >
+          <ArrowUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+          Наверх
+        </button>
       </div>
     </div>
   )
