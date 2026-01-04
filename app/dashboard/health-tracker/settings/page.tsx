@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium } from 'lucide-react'
+import { Target, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
@@ -389,7 +389,7 @@ export default function TrackerSettingsPage() {
                                     )}>
                                       {config.name}
                                     </h3>
-                                    <p className="text-[8px] font-black text-white/10 uppercase tracking-widest">
+                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">
                                       {config.description}
                                     </p>
                                   </div>
@@ -418,8 +418,14 @@ export default function TrackerSettingsPage() {
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-lg font-oswald font-black text-white placeholder:text-white/10 focus:outline-none focus:border-green-500/50 transition-all"
                                       />
                                     ) : (
-                                      <div className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-4 py-3 h-[54px] flex items-center pointer-events-none">
-                                        <div className="flex items-center gap-2 opacity-20">
+                                      <div 
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleToggle(id)
+                                        }}
+                                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-4 py-3 h-[54px] flex items-center cursor-pointer transition-all"
+                                      >
+                                        <div className="flex items-center gap-2 opacity-10">
                                           <div className="w-12 h-4 bg-white/10 rounded animate-pulse" />
                                           <div className="w-4 h-4 bg-white/10 rounded animate-pulse" />
                                         </div>
@@ -436,17 +442,23 @@ export default function TrackerSettingsPage() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation()
-                                      handleToggleInPlan(id)
+                                      if (!widget.enabled) {
+                                        handleToggle(id)
+                                      } else {
+                                        handleToggleInPlan(id)
+                                      }
                                     }}
                                     className={cn(
                                       "w-[54px] h-[54px] rounded-2xl flex items-center justify-center transition-all duration-500 border",
-                                      widget.inDailyPlan
-                                        ? "bg-amber-500/20 border-amber-500/20 text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.1)]"
-                                        : "bg-white/5 border-white/10 text-white/10 hover:text-white/30"
+                                      widget.enabled 
+                                        ? widget.inDailyPlan 
+                                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                                          : "bg-white/5 border-white/10 text-white/10 hover:text-white/30"
+                                        : "bg-white/[0.03] border-white/5 text-white/5"
                                     )}
                                   >
-                                    <Star 
-                                      className={cn("w-5 h-5 transition-transform duration-500", widget.inDailyPlan && "fill-current")} 
+                                    <Target 
+                                      className="w-5 h-5 transition-transform duration-500" 
                                       strokeWidth={2.25} 
                                     />
                                   </button>
