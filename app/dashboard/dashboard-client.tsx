@@ -1354,7 +1354,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                       )) : (
                         <div className="col-span-2 py-8 flex flex-col items-center justify-center text-center px-4 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
                           <Activity className="w-8 h-8 text-white/20 mb-2" />
-                          <p className="text-xs text-white/40">Настройте показатели для отображения</p>
+                          <p className="text-xs text-white/40">Настрой показатели для отображения</p>
                         </div>
                       )}
                     </div>

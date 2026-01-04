@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
         !['renewal', 'upgrade'].includes(action)) {
       return NextResponse.json(
         { 
-          error: 'У вас уже есть активная подписка',
-          details: `У вас активна подписка ${profile.subscription_tier.toUpperCase()}. Дождитесь её окончания или обратитесь в поддержку.`,
+          error: 'У тебя уже есть активная подписка',
+          details: `У тебя активна подписка ${profile.subscription_tier.toUpperCase()}. Дождись её окончания или обратись в поддержку.`,
           currentTier: profile.subscription_tier
         },
         { status: 400 }
@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
       
       if (newTierLevel <= currentTierLevel) {
         return NextResponse.json({ 
-          error: 'Выберите тариф выше текущего',
-          details: `Ваш текущий тариф: ${profile.subscription_tier.toUpperCase()}. Выберите тариф выше для апгрейда.`
+          error: 'Выбери тариф выше текущего',
+          details: `Твой текущий тариф: ${profile.subscription_tier.toUpperCase()}. Выбери тариф выше для апгрейда.`
         }, { status: 400 })
       }
     }

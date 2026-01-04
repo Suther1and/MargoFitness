@@ -161,10 +161,10 @@ export default function HealthTrackerPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-white mb-1 text-lg">
-                    Настройте виджеты для отслеживания
+                    Настрой виджеты для отслеживания
                   </h3>
                   <p className="text-sm text-white/60">
-                    Выберите метрики здоровья, которые хотите контролировать
+                    Выбери метрики здоровья, которые хочешь контролировать
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

@@ -40,7 +40,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'мл',
     goalLabel: 'Цель по воде',
     goalPlaceholder: 'Например: 2000',
-    description: 'Отслеживайте потребление воды'
+    description: 'Отслеживай потребление воды'
   },
   steps: {
     id: 'steps',
@@ -50,7 +50,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'шагов',
     goalLabel: 'Цель по шагам',
     goalPlaceholder: 'Например: 10000',
-    description: 'Считайте шаги за день'
+    description: 'Считай шаги за день'
   },
   weight: {
     id: 'weight',
@@ -60,17 +60,17 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'кг',
     goalLabel: 'Целевой вес',
     goalPlaceholder: 'Например: 70',
-    description: 'Отслеживайте изменения веса'
+    description: 'Отслеживай изменения веса'
   },
   caffeine: {
     id: 'caffeine',
-    name: 'Кофеин',
+    name: 'Кофе',
     icon: 'coffee',
     hasGoal: true,
     goalUnit: 'чашек',
-    goalLabel: 'Лимит кофеина',
+    goalLabel: 'Лимит кофе',
     goalPlaceholder: 'Например: 3',
-    description: 'Контролируйте потребление кофеина'
+    description: 'Контролируй потребление кофе'
   },
   sleep: {
     id: 'sleep',
@@ -80,14 +80,14 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'часов',
     goalLabel: 'Цель по сну',
     goalPlaceholder: 'Например: 8',
-    description: 'Отслеживайте качество сна'
+    description: 'Отслеживай качество сна'
   },
   mood: {
     id: 'mood',
     name: 'Настроение',
     icon: 'smile',
     hasGoal: false,
-    description: 'Фиксация эмоций и уровня энергии'
+    description: 'Фиксируй эмоции и уровень энергии'
   },
   nutrition: {
     id: 'nutrition',
@@ -97,21 +97,21 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'ккал',
     goalLabel: 'Цель по калориям',
     goalPlaceholder: 'Например: 2000',
-    description: 'Отслеживайте КБЖУ'
+    description: 'Отслеживай КБЖУ'
   },
   photos: {
     id: 'photos',
     name: 'Фотоотчеты',
     icon: 'camera',
     hasGoal: false,
-    description: 'Добавляйте фото своего прогресса'
+    description: 'Добавляй фото своего прогресса'
   },
   notes: {
     id: 'notes',
     name: 'Заметки',
     icon: 'notebook-text',
     hasGoal: false,
-    description: 'Записывайте важные мысли и наблюдения'
+    description: 'Записывай важные мысли и наблюдения'
   }
 };
 

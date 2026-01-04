@@ -233,7 +233,7 @@ export function SubscriptionRenewalModal({
           showCloseButton={false}
         >
           <DialogTitle className="sr-only">Продление подписки</DialogTitle>
-          <DialogDescription className="sr-only">Выберите период продления</DialogDescription>
+          <DialogDescription className="sr-only">Выбери период продления</DialogDescription>
           
           {loading ? (
               <div className="relative flex flex-col md:flex-row w-full h-full min-h-[450px] md:min-h-[500px] bg-[#1a1a24] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 backdrop-blur-xl"
@@ -361,10 +361,10 @@ export function SubscriptionRenewalModal({
                 <div className="flex-1 p-6 md:p-10 flex flex-col min-h-0">
                   <div className="flex items-center justify-between mb-5 md:mb-6">
                     <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                      Выберите срок продления:
+                      Выбери срок продления:
                     </h4>
                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 md:hidden">
-                      <span className="text-[10px] font-bold text-white/40 uppercase">У вас:</span>
+                      <span className="text-[10px] font-bold text-white/40 uppercase">У тебя:</span>
                       <span className={`text-sm font-bold ${currentConfig.color}`}>{remainingDays} дн.</span>
                     </div>
                   </div>

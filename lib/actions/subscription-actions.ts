@@ -240,7 +240,7 @@ export async function canUpgrade(userId: string): Promise<{
   
   // Elite - максимальный тариф
   if (currentTierLevel >= 3) {
-    return { canUpgrade: false, reason: 'У вас уже максимальный тариф' }
+    return { canUpgrade: false, reason: 'У тебя уже максимальный тариф' }
   }
   
   return { canUpgrade: true }

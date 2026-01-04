@@ -471,8 +471,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         <Trophy className="w-10 h-10 text-yellow-400" />
                       </div>
                       <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-white uppercase tracking-tight">У вас уже максимальный уровень!</h3>
-                        <p className="text-sm text-white/60">Хотите продлить текущую подписку?</p>
+                        <h3 className="text-xl font-bold text-white uppercase tracking-tight">У тебя уже максимальный уровень!</h3>
+                        <p className="text-sm text-white/60">Хочешь продлить текущую подписку?</p>
                       </div>
                       <button
                         onClick={() => {

@@ -59,7 +59,7 @@ export function ProfileEditDialog({
     const file = e.target.files?.[0]
     if (file) {
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        setErrors({ ...errors, avatar: 'Неподдерживаемый формат. Используйте JPG, PNG или WEBP' })
+        setErrors({ ...errors, avatar: 'Неподдерживаемый формат. Используй JPG, PNG или WEBP' })
         return
       }
       
@@ -234,8 +234,8 @@ export function ProfileEditDialog({
                 </h1>
                 <p className="mt-2 text-sm font-normal text-white/70">
                   {isFirstTime 
-                    ? 'Заполните информацию о себе'
-                    : 'Обновите информацию вашего профиля'
+                    ? 'Заполни информацию о себе'
+                    : 'Обнови информацию твоего профиля'
                   }
                 </p>
               </div>
@@ -307,7 +307,7 @@ export function ProfileEditDialog({
                       <input
                         id="full_name"
                         type="text"
-                        placeholder="Ваше имя"
+                        placeholder="Твоё имя"
                         value={formData.full_name}
                         onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                         className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
@@ -327,7 +327,7 @@ export function ProfileEditDialog({
                       <input
                         id="email"
                         type="email"
-                        placeholder={hasTelegramEmail ? "Введите ваш email" : "email@example.com"}
+                        placeholder={hasTelegramEmail ? "Введи твой email" : "email@example.com"}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required={isTelegramAccount && isFirstTime}
@@ -336,7 +336,7 @@ export function ProfileEditDialog({
                     </div>
                     {isTelegramAccount && isFirstTime && hasTelegramEmail && (
                       <p className="text-xs text-white/50">
-                        Укажите ваш реальный email - он нужен для уведомлений и связи
+                        Укажи твой реальный email - он нужен для уведомлений и связи
                       </p>
                     )}
                     {errors.email && (
@@ -408,7 +408,7 @@ export function ProfileEditDialog({
                 
                 {isTelegramAccount && isFirstTime && hasTelegramEmail && (
                   <p className="text-xs text-center text-white/50 mt-3">
-                    Пожалуйста, укажите email для продолжения
+                    Пожалуйста, укажи email для продолжения
                   </p>
                 )}
               </form>
