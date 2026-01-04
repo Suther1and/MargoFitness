@@ -166,66 +166,69 @@ export default function TrackerSettingsPage() {
             </div>
 
             {/* Unified Metrics Panel */}
-            <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[68px] min-w-[420px]">
+            <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[68px] w-full md:w-auto md:min-w-[420px]">
               {/* Inputs Group */}
-              <div className="flex items-center p-1 border-r border-white/5 bg-white/[0.02] flex-1">
-                <div className="flex flex-col px-4 py-2 border-r border-white/5 w-[100px]">
-                  <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-0.5">Рост</label>
-                  <div className="flex items-baseline gap-1">
+              <div className="flex items-center p-1 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
+                <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
+                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Рост</label>
+                  <div className="flex items-baseline gap-0.5 md:gap-1">
                     <input
                       type="text"
                       inputMode="decimal"
                       placeholder="---"
                       value={localSettings.userParams.height ?? ''}
                       onChange={(e) => handleParamChange('height', e.target.value)}
-                      className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                      className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                     />
-                    <span className="text-[10px] font-bold text-white/10 uppercase">см</span>
+                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">см</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col px-4 py-2 border-r border-white/5 w-[100px]">
-                  <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-0.5">Вес</label>
-                  <div className="flex items-baseline gap-1">
+                <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
+                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Вес</label>
+                  <div className="flex items-baseline gap-0.5 md:gap-1">
                     <input
                       type="text"
                       inputMode="decimal"
                       placeholder="---"
                       value={localSettings.userParams.weight ?? ''}
                       onChange={(e) => handleParamChange('weight', e.target.value)}
-                      className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                      className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                     />
-                    <span className="text-[10px] font-bold text-white/10 uppercase">кг</span>
+                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">кг</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col px-4 py-2 w-[80px]">
-                  <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-0.5">Возраст</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="--"
-                    value={localSettings.userParams.age ?? ''}
-                    onChange={(e) => handleParamChange('age', e.target.value)}
-                    className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
-                  />
+                <div className="flex flex-col px-2 md:px-4 py-2 flex-1 md:flex-none md:w-[100px] min-w-0">
+                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Возраст</label>
+                  <div className="flex items-baseline gap-0.5 md:gap-1">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="--"
+                      value={localSettings.userParams.age ?? ''}
+                      onChange={(e) => handleParamChange('age', e.target.value)}
+                      className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
+                    />
+                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">лет</span>
+                  </div>
                 </div>
               </div>
 
               {/* BMI Result Group */}
               <div className={cn(
-                "px-4 py-2 flex flex-col transition-all duration-500 w-[115px] shrink-0 relative",
+                "px-3 md:px-4 py-2 flex flex-col transition-all duration-500 flex-[1.2] md:flex-none md:w-[115px] min-w-0 relative",
                 bmiValue ? "bg-white/[0.05]" : "bg-transparent"
               )}>
                 {bmiValue ? (
                   <>
-                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
-                    <div className="flex items-center mt-auto pb-0.5">
-                      <div className="flex items-center gap-1.5 overflow-hidden">
-                        <span className="text-[34px] font-oswald font-black text-white leading-none tracking-tighter shrink-0">
+                    <span className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.3em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
+                    <div className="flex items-center mt-auto pb-0.5 overflow-hidden">
+                      <div className="flex items-center gap-1 md:gap-1.5 min-w-0">
+                        <span className="text-[26px] md:text-[34px] font-oswald font-black text-white leading-none tracking-tighter shrink-0">
                           {bmiValue}
                         </span>
-                        <div className={cn("w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.2)] mt-1 shrink-0", 
+                        <div className={cn("w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.2)] mt-1 shrink-0", 
                           bmiCategory?.color === 'text-blue-400' && 'bg-blue-400',
                           bmiCategory?.color === 'text-green-400' && 'bg-green-400',
                           bmiCategory?.color === 'text-amber-400' && 'bg-amber-400',
@@ -237,8 +240,8 @@ export default function TrackerSettingsPage() {
                     <div className="absolute right-0 top-0">
                       <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
                         <DialogTrigger asChild>
-                          <button className="p-2 text-white/40 hover:text-white transition-all shrink-0 focus:outline-none focus:ring-0 outline-none ring-0">
-                            <Info className="w-4 h-4" />
+                          <button className="p-1.5 md:p-2 text-white/40 hover:text-white transition-all shrink-0 focus:outline-none focus:ring-0 outline-none ring-0">
+                            <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </DialogTrigger>
                         <DialogContent 
@@ -283,11 +286,11 @@ export default function TrackerSettingsPage() {
       {/* Табы и Кнопка сохранения */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 mt-2">
         <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg backdrop-blur-md h-[54px]">
-          <div className="flex h-full gap-1">
+          <div className="flex h-full gap-1 w-full md:w-auto">
             <button
               onClick={() => setActiveTab('widgets')}
               className={cn(
-                "px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center",
+                "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center justify-center",
                 activeTab === 'widgets'
                   ? "text-[#09090b]"
                   : "text-white/30 hover:text-white/60"
@@ -305,7 +308,7 @@ export default function TrackerSettingsPage() {
             <button
               onClick={() => setActiveTab('habits')}
               className={cn(
-                "px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center",
+                "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center justify-center",
                 activeTab === 'habits'
                   ? "text-[#09090b]"
                   : "text-white/30 hover:text-white/60"
@@ -380,13 +383,13 @@ export default function TrackerSettingsPage() {
                             )}
                           >
                             <div className={cn(
-                              "relative z-10 p-6 flex flex-col h-full min-h-[170px] transition-opacity duration-500",
+                              "relative z-10 p-5 md:px-6 md:py-5 flex flex-col h-full min-h-[145px] md:min-h-[120px] transition-opacity duration-500",
                               !widget.enabled && "opacity-60 group-hover:opacity-100"
                             )}>
-                              <div className="flex items-start justify-between mb-5">
-                                <div className="flex items-center gap-4">
+                              <div className="flex items-start justify-between mb-4 md:mb-4">
+                                <div className="flex items-center gap-3 md:gap-4">
                                   <div className={cn(
-                                    "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-700 border shadow-inner shrink-0",
+                                    "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-700 border shadow-inner shrink-0",
                                     widget.enabled 
                                       ? "bg-green-500/20 border-green-500/20 text-green-400" 
                                       : "bg-white/5 border-white/5 text-white/20"
@@ -395,12 +398,12 @@ export default function TrackerSettingsPage() {
                                   </div>
                                   <div className="flex flex-col">
                                     <h3 className={cn(
-                                      "font-oswald font-black text-xl uppercase tracking-tight transition-colors duration-500",
+                                      "font-oswald font-black text-lg md:text-xl uppercase tracking-tight transition-colors duration-500 leading-none mb-1",
                                       widget.enabled ? "text-white" : "text-white/40"
                                     )}>
                                       {config.name}
                                     </h3>
-                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">
+                                    <p className="text-[10px] md:text-[8px] font-black text-white/20 uppercase tracking-[0.15em] md:tracking-widest leading-tight">
                                       {config.description}
                                     </p>
                                   </div>
@@ -415,7 +418,7 @@ export default function TrackerSettingsPage() {
                               </div>
 
                               {config.hasGoal && (
-                                <div className="mt-auto flex items-end gap-3">
+                                <div className="mt-auto flex items-end gap-2.5">
                                   <div 
                                     className="relative flex-1"
                                     onClick={(e) => widget.enabled && e.stopPropagation()}
@@ -426,7 +429,7 @@ export default function TrackerSettingsPage() {
                                         value={widget.goal ?? ''}
                                         onChange={(e) => handleGoalChange(id, e.target.value)}
                                         placeholder="Цель"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-lg font-oswald font-black text-white placeholder:text-white/10 focus:outline-none focus:border-green-500/50 transition-all"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white placeholder:text-white/10 focus:outline-none focus:border-green-500/50 transition-all h-[42px]"
                                       />
                                     ) : (
                                       <div 
@@ -434,17 +437,17 @@ export default function TrackerSettingsPage() {
                                           e.stopPropagation()
                                           handleToggle(id)
                                         }}
-                                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-4 py-3 h-[54px] flex items-center cursor-pointer transition-all"
+                                        className="w-full bg-white/[0.03] border border-white/5 rounded-xl px-3.5 py-2 h-[42px] flex items-center cursor-pointer transition-all"
                                       >
                                         <div className="flex items-center gap-2 opacity-10">
-                                          <div className="w-12 h-4 bg-white/10 rounded animate-pulse" />
-                                          <div className="w-4 h-4 bg-white/10 rounded animate-pulse" />
+                                          <div className="w-10 h-3 bg-white/10 rounded animate-pulse" />
+                                          <div className="w-3.5 h-3.5 bg-white/10 rounded animate-pulse" />
                                         </div>
                                       </div>
                                     )}
                                     
                                     {widget.enabled && (
-                                      <span className="absolute right-4 bottom-[14px] text-[9px] font-black text-white/20 uppercase tracking-widest pointer-events-none">
+                                      <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest pointer-events-none">
                                         {config.goalUnit}
                                       </span>
                                     )}
@@ -460,7 +463,7 @@ export default function TrackerSettingsPage() {
                                       }
                                     }}
                                     className={cn(
-                                      "w-[54px] h-[54px] rounded-2xl flex items-center justify-center transition-all duration-500 border",
+                                      "w-[42px] h-[42px] rounded-xl flex items-center justify-center transition-all duration-500 border shrink-0",
                                       widget.enabled 
                                         ? widget.inDailyPlan 
                                           ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
@@ -469,7 +472,7 @@ export default function TrackerSettingsPage() {
                                     )}
                                   >
                                     <Target 
-                                      className="w-5 h-5 transition-transform duration-500" 
+                                      className="w-4.5 h-4.5 transition-transform duration-500" 
                                       strokeWidth={2.25} 
                                     />
                                   </button>
