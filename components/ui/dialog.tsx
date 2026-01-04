@@ -6,12 +6,22 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Глобальный счетчик открытых диалогов
+let openDialogsCount = 0
+let savedScrollPosition = 0
+let scrollbarWidth = 0
+
+// Вычисляем ширину scrollbar один раз
+if (typeof window !== 'undefined') {
+  scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+}
+
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   const blurRef = React.useRef<HTMLDivElement | null>(null)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
-  const scrollPositionRef = React.useRef<number>(0)
+  const isOpenRef = React.useRef(false)
   
   React.useEffect(() => {
     // Очистка предыдущего timeout
@@ -20,25 +30,28 @@ function Dialog({
       timeoutRef.current = null
     }
     
-    if (props.open) {
-      // Сохраняем текущую позицию скролла
-      scrollPositionRef.current = window.scrollY
+    if (props.open && !isOpenRef.current) {
+      isOpenRef.current = true
+      openDialogsCount++
       
-      // Блокируем скролл (работает на всех устройствах)
-      document.documentElement.style.overflow = 'hidden'
-      document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollPositionRef.current}px`
-      document.body.style.width = '100%'
-      document.body.style.paddingRight = 'var(--removed-body-scroll-bar-size, 0px)'
+      // Блокируем скролл только для первого диалога
+      if (openDialogsCount === 1) {
+        savedScrollPosition = window.scrollY
+        
+        // Добавляем CSS класс для блокировки скролла
+        document.body.classList.add('dialog-open')
+        
+        // Устанавливаем CSS переменную для ширины scrollbar
+        document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`)
+      }
 
       // Применяем blur к navbar через DOM
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const navbars = document.querySelectorAll('[data-navbar-container]')
         navbars.forEach(navbar => {
           (navbar as HTMLElement).setAttribute('data-navbar-blur', 'true')
         })
-      }, 10)
+      })
 
       // Создаем blur overlay
       const blur = document.createElement('div')
@@ -72,18 +85,10 @@ function Dialog({
           blur.style.background = 'rgba(0, 0, 0, 0.3)'
         }
       })
-    } else {
-      // Возвращаем скролл
-      document.documentElement.style.overflow = ''
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      document.body.style.paddingRight = ''
+    } else if (!props.open && isOpenRef.current) {
+      isOpenRef.current = false
+      openDialogsCount = Math.max(0, openDialogsCount - 1)
       
-      // Восстанавливаем позицию скролла
-      window.scrollTo(0, scrollPositionRef.current)
-
       // Убираем blur с navbar
       const navbars = document.querySelectorAll('[data-navbar-container]')
       navbars.forEach(navbar => {
@@ -105,21 +110,35 @@ function Dialog({
           timeoutRef.current = null
         }, 200)
       }
+      
+      // Разблокируем скролл только когда все диалоги закрыты
+      if (openDialogsCount === 0) {
+        document.body.classList.remove('dialog-open')
+        document.documentElement.style.removeProperty('--scrollbar-width')
+        
+        // Восстанавливаем позицию скролла плавно
+        requestAnimationFrame(() => {
+          window.scrollTo(0, savedScrollPosition)
+        })
+      }
     }
     
-    // Cleanup
+    // Cleanup при размонтировании
     return () => {
-      document.documentElement.style.overflow = ''
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      document.body.style.paddingRight = ''
-      
-      const navbars = document.querySelectorAll('[data-navbar-container]')
-      navbars.forEach(navbar => {
-        (navbar as HTMLElement).setAttribute('data-navbar-blur', 'false')
-      })
+      if (isOpenRef.current) {
+        isOpenRef.current = false
+        openDialogsCount = Math.max(0, openDialogsCount - 1)
+        
+        const navbars = document.querySelectorAll('[data-navbar-container]')
+        navbars.forEach(navbar => {
+          (navbar as HTMLElement).setAttribute('data-navbar-blur', 'false')
+        })
+        
+        if (openDialogsCount === 0) {
+          document.body.classList.remove('dialog-open')
+          document.documentElement.style.removeProperty('--scrollbar-width')
+        }
+      }
       
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)

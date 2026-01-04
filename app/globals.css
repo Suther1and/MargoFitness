@@ -130,6 +130,15 @@
     overscroll-behavior-x: none;
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Блокировка скролла при открытом диалоге */
+  body.dialog-open {
+    overflow: hidden !important;
+    touch-action: none;
+    -webkit-overflow-scrolling: auto;
+    padding-right: var(--scrollbar-width, 0px);
+  }
+  
   body::-webkit-scrollbar {
     display: none;
   }
