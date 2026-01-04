@@ -68,7 +68,9 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
             </div>
             
             <div className="space-y-1.5">
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Когда выполнять</span>
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">
+                {TIME_CONFIG[editForm.time].label}
+              </span>
               <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
                 {Object.entries(HABIT_TIME_OPTIONS).map(([key, label]) => {
                   const Config = TIME_CONFIG[key as HabitTime]
@@ -294,7 +296,7 @@ export function HabitsSection() {
           <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
             {/* Title Input */}
             <div className="flex-1 space-y-1.5">
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Название привычки</span>
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Что планируем?</span>
               <input
                 placeholder="Йога, Чтение или Зарядка"
                 value={newHabit.title}
@@ -307,7 +309,7 @@ export function HabitsSection() {
             <div className="flex flex-wrap items-end gap-6">
               {/* Frequency Selection */}
               <div className="space-y-1.5">
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Дней в неделю</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Сколько раз в неделю?</span>
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
                   {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                     <button
@@ -328,7 +330,12 @@ export function HabitsSection() {
 
               {/* Time Selection */}
               <div className="space-y-1.5">
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Когда выполнять</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">
+                  {newHabit.time === 'morning' && 'Утром'}
+                  {newHabit.time === 'afternoon' && 'Днем'}
+                  {newHabit.time === 'evening' && 'Вечером'}
+                  {newHabit.time === 'anytime' && 'В любое время'}
+                </span>
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
                   {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
                     const Config = TIME_CONFIG[key]
