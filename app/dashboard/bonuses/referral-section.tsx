@@ -38,14 +38,10 @@ const getReferralLevelColors = (level: number) => {
 
 export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
   const [copied, setCopied] = useState(false)
-  const [canShare, setCanShare] = useState(false)
-
-  // Проверяем поддержку Web Share API
-  useEffect(() => {
-    if (typeof window !== 'undefined' && typeof navigator.share === 'function') {
-      setCanShare(true)
-    }
-  }, [])
+  const [canShare, setCanShare] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return typeof navigator.share === 'function'
+  })
 
   if (!stats) return null
 

@@ -1,7 +1,7 @@
 export type MoodRating = 1 | 2 | 3 | 4 | 5;
 
 // Типы для настроек трекера
-export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition';
+export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
 
 export interface WidgetSettings {
   enabled: boolean;
@@ -87,7 +87,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     name: 'Настроение',
     icon: 'smile',
     hasGoal: false,
-    description: 'Фиксируйте свое настроение'
+    description: 'Фиксация эмоций и уровня энергии'
   },
   nutrition: {
     id: 'nutrition',
@@ -98,6 +98,20 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalLabel: 'Цель по калориям',
     goalPlaceholder: 'Например: 2000',
     description: 'Отслеживайте КБЖУ'
+  },
+  photos: {
+    id: 'photos',
+    name: 'Фотоотчеты',
+    icon: 'camera',
+    hasGoal: false,
+    description: 'Добавляйте фото своего прогресса'
+  },
+  notes: {
+    id: 'notes',
+    name: 'Заметки',
+    icon: 'notebook-text',
+    hasGoal: false,
+    description: 'Записывайте важные мысли и наблюдения'
   }
 };
 

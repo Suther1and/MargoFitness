@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2, Check, X, Tag } from 'lucide-react'
 import { validatePromoCode } from '@/lib/actions/promo-codes'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
@@ -23,7 +23,10 @@ export function PriceOptimizer({
   onBonusChange,
   currentBonusAmount = 0
 }: PriceOptimizerProps) {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 1024
+  })
 
   // Промокод state
   const [promoCode, setPromoCode] = useState('')
@@ -42,14 +45,21 @@ export function PriceOptimizer({
     availableBalance
   )
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 1024)
-  }, [])
+  const loadBonusData = useCallback(async () => {
+    setBonusesLoading(true)
+    const result = await calculateMaxBonusUsage(priceAfterDiscounts, userId)
+    
+    if (result.success) {
+      setAvailableBalance(result.availableBalance || 0)
+    }
+    
+    setBonusesLoading(false)
+  }, [priceAfterDiscounts, userId])
 
   // Загружаем баланс бонусов
   useEffect(() => {
     loadBonusData()
-  }, [userId])
+  }, [userId, loadBonusData])
 
   // Синхронизируем внутреннее состояние с внешним
   useEffect(() => {
@@ -61,18 +71,7 @@ export function PriceOptimizer({
     if (useBonuses && maxBonus !== currentBonusAmount && maxBonus > 0) {
       onBonusChange(maxBonus)
     }
-  }, [priceAfterDiscounts])
-
-  const loadBonusData = async () => {
-    setBonusesLoading(true)
-    const result = await calculateMaxBonusUsage(priceAfterDiscounts, userId)
-    
-    if (result.success) {
-      setAvailableBalance(result.availableBalance || 0)
-    }
-    
-    setBonusesLoading(false)
-  }
+  }, [priceAfterDiscounts, useBonuses, maxBonus, currentBonusAmount, onBonusChange])
 
   const handlePromoApply = async () => {
     if (!promoCode.trim()) return

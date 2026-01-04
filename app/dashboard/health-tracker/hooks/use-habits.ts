@@ -6,21 +6,24 @@ import { Habit } from '../types'
 const STORAGE_KEY = 'health_tracker_habits'
 
 export function useHabits() {
-  const [habits, setHabits] = useState<Habit[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // Загрузка из localStorage
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    if (typeof window === 'undefined') return []
+    
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        setHabits(JSON.parse(stored))
+        return JSON.parse(stored)
       } catch (error) {
         console.error('Error parsing habits:', error)
+        return []
       }
     }
+    return []
+  })
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Отмечаем загрузку после монтирования
+  useEffect(() => {
     setIsLoaded(true)
   }, [])
 

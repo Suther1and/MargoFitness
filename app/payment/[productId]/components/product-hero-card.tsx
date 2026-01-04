@@ -52,11 +52,11 @@ export function ProductHeroCard({
   finalPrice,
   isDiscountApplied = false 
 }: ProductHeroCardProps) {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 1024
+  })
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 1024)
-  }, [])
 
   const tierLevel = (product.tier_level || 1) as 1 | 2 | 3
   const Icon = tierIcons[tierLevel]

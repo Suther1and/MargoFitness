@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getRenewalOptions } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Calendar, CheckCircle2, Zap, Clock, Plus, Star } from 'lucide-react'
+import { Calendar, CheckCircle2, Zap, Clock, Star } from 'lucide-react'
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -126,13 +126,7 @@ export function SubscriptionRenewalModal({
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
-  useEffect(() => {
-    if (open) {
-      loadProducts()
-    }
-  }, [open, userId])
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setLoading(true)
     const result = await getRenewalOptions(userId)
     if (result.success && result.products) {
@@ -141,7 +135,13 @@ export function SubscriptionRenewalModal({
       setSelectedProduct(twelveMonths || result.products[result.products.length - 1])
     }
     setLoading(false)
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (open) {
+      loadProducts()
+    }
+  }, [open, userId, loadProducts])
 
   const [remainingDays, setRemainingDays] = useState(0)
 

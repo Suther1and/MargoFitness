@@ -84,12 +84,11 @@ function AnimatedNumber({ value, format = true }: { value: number; format?: bool
   )
 }
 
-export function PriceBreakdown({ calculation, loading }: PriceBreakdownProps) {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 1024)
-  }, [])
+export function PriceBreakdown({ calculation }: PriceBreakdownProps) {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 1024
+  })
 
   if (!calculation) return (
     <div className={`relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 ${isMobile ? 'p-4' : 'p-6'}`} style={{ minHeight: isMobile ? '120px' : '320px' }}>

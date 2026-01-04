@@ -62,7 +62,7 @@ export default function CreateWeekButton() {
         end_date: formatDateForInput(followingMonday),
       }))
     }
-  }, [open])
+  }, [open, formData.start_date])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

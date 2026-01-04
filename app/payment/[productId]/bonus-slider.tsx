@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
 
 interface BonusToggleProps {
@@ -21,10 +21,21 @@ export function BonusToggle({ userId, priceAfterDiscounts, onBonusChange, curren
     availableBalance
   )
 
+  const loadBonusData = useCallback(async () => {
+    setLoading(true)
+    const result = await calculateMaxBonusUsage(priceAfterDiscounts, userId)
+    
+    if (result.success) {
+      setAvailableBalance(result.availableBalance || 0)
+    }
+    
+    setLoading(false)
+  }, [priceAfterDiscounts, userId])
+
   // Загружаем баланс только один раз
   useEffect(() => {
     loadBonusData()
-  }, [userId])
+  }, [userId, loadBonusData])
 
   // Синхронизируем внутреннее состояние с внешним
   useEffect(() => {
@@ -36,18 +47,7 @@ export function BonusToggle({ userId, priceAfterDiscounts, onBonusChange, curren
     if (useBonuses && maxBonus !== currentBonusAmount) {
       onBonusChange(maxBonus)
     }
-  }, [priceAfterDiscounts])
-
-  const loadBonusData = async () => {
-    setLoading(true)
-    const result = await calculateMaxBonusUsage(priceAfterDiscounts, userId)
-    
-    if (result.success) {
-      setAvailableBalance(result.availableBalance || 0)
-    }
-    
-    setLoading(false)
-  }
+  }, [priceAfterDiscounts, useBonuses, maxBonus, currentBonusAmount, onBonusChange])
 
   const handleToggle = () => {
     const newState = !useBonuses

@@ -16,6 +16,8 @@ const DEFAULT_SETTINGS: TrackerSettings = {
     sleep: { enabled: false, goal: null, inDailyPlan: false },
     mood: { enabled: false, goal: null, inDailyPlan: false },
     nutrition: { enabled: false, goal: null, inDailyPlan: false },
+    photos: { enabled: false, goal: null, inDailyPlan: false },
+    notes: { enabled: false, goal: null, inDailyPlan: false },
   },
   userParams: {
     height: null,
@@ -25,28 +27,43 @@ const DEFAULT_SETTINGS: TrackerSettings = {
 }
 
 export function useTrackerSettings() {
-  const [settings, setSettings] = useState<TrackerSettings>(DEFAULT_SETTINGS)
-  const [isFirstVisit, setIsFirstVisit] = useState(false)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // Загрузка настроек из localStorage при монтировании
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+  const [settings, setSettings] = useState<TrackerSettings>(() => {
+    if (typeof window === 'undefined') return DEFAULT_SETTINGS
 
     const storedSettings = localStorage.getItem(STORAGE_KEY)
-    const hasVisited = localStorage.getItem(VISITED_KEY)
-
     if (storedSettings) {
       try {
         const parsed = JSON.parse(storedSettings) as TrackerSettings
-        setSettings(parsed)
+        // Мержим сохраненные настройки с дефолтными, чтобы добавить новые виджеты
+        return {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+          widgets: {
+            ...DEFAULT_SETTINGS.widgets,
+            ...parsed.widgets
+          },
+          userParams: {
+            ...DEFAULT_SETTINGS.userParams,
+            ...(parsed.userParams || {})
+          }
+        }
       } catch (error) {
         console.error('Ошибка парсинга настроек трекера:', error)
-        setSettings(DEFAULT_SETTINGS)
+        return DEFAULT_SETTINGS
       }
     }
+    return DEFAULT_SETTINGS
+  })
+  
+  const [isFirstVisit, setIsFirstVisit] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !localStorage.getItem(VISITED_KEY)
+  })
+  
+  const [isLoaded, setIsLoaded] = useState(false)
 
-    setIsFirstVisit(!hasVisited)
+  // Отмечаем загрузку после монтирования
+  useEffect(() => {
     setIsLoaded(true)
   }, [])
 

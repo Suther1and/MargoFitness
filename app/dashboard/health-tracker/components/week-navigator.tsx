@@ -1,11 +1,10 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react'
-import { format, addDays, startOfWeek, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, endOfWeek, addMonths, isSameMonth } from 'date-fns'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown } from 'lucide-react'
+import { format, addDays, startOfWeek, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, endOfWeek, isSameMonth } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
 
 interface WeekNavigatorProps {
   selectedDate: Date
@@ -108,12 +107,6 @@ export function WeekNavigator({
                         {isToday && !isSelected && (
                           <div className="w-1 h-1 rounded-full bg-amber-500" />
                         )}
-                        {!isToday && !isSelected && (
-                          <div className={cn(
-                            "w-1 h-1 rounded-full",
-                            Math.random() > 0.5 ? "bg-green-500" : "bg-red-500"
-                          )} />
-                        )}
                       </div>
                     </motion.button>
                   )
@@ -184,9 +177,6 @@ export function WeekNavigator({
                       {!isSelected && (
                         <div className="absolute bottom-1.5 flex gap-0.5">
                             {isToday && <div className="w-1 h-1 rounded-full bg-amber-500" />}
-                            {!isToday && isCurrentMonth && (
-                                <div className={cn("w-1 h-1 rounded-full", Math.random() > 0.5 ? "bg-green-500" : "bg-red-500")} />
-                            )}
                         </div>
                       )}
                     </button>

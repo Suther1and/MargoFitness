@@ -1,7 +1,7 @@
 'use client'
 
 import { Inter, Oswald, Montserrat, Roboto } from 'next/font/google'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { SiTelegram, SiVk, SiInstagram, SiTiktok } from 'react-icons/si'
 import { TrainerCertificatePopup } from '@/components/trainer-certificate-popup'
@@ -93,26 +93,8 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
   
   const router = useRouter()
 
-  // Загрузка продуктов
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const response = await fetch('/api/products/by-duration?duration=all')
-        const data = await response.json()
-        setProducts(data)
-        
-        // Загружаем цены для дефолтного периода (30 дней = 1 месяц)
-        updatePricing(30, data)
-      } catch (error) {
-        // Ошибка загрузки продуктов
-      }
-    }
-    
-    loadProducts()
-  }, [])
-
   // Обновление цен при изменении периода
-  const updatePricing = (days: Period, allProducts: Product[]) => {
+  const updatePricing = useCallback((days: Period, allProducts: Product[]) => {
     const months = DAYS_TO_MONTHS[days]
     const productsForDuration = allProducts.filter(p => p.duration_months === months)
     
@@ -155,7 +137,25 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
         if (priceEliteOriginalRef.current) priceEliteOriginalRef.current.innerText = newPricing.elite.original.toLocaleString('ru-RU')
       }
     }, 0)
-  }
+  }, [])
+
+  // Загрузка продуктов
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products/by-duration?duration=all')
+        const data = await response.json()
+        setProducts(data)
+        
+        // Загружаем цены для дефолтного периода (30 дней = 1 месяц)
+        updatePricing(30, data)
+      } catch (error) {
+        // Ошибка загрузки продуктов
+      }
+    }
+    
+    loadProducts()
+  }, [updatePricing])
 
   // Обновление профиля при изменении авторизации (только если не передан initialProfile)
   useEffect(() => {

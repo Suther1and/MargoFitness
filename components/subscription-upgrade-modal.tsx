@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getUpgradeOptions, calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier } from '@/types/database'
-import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Clock, Calendar } from 'lucide-react'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus } from 'lucide-react'
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -133,11 +133,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     currentTier: SubscriptionTier
   } | null>(null)
 
-  useEffect(() => {
-    if (open) loadData()
-  }, [open, userId, initialTier])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     const result = await getUpgradeOptions(userId)
     
@@ -146,7 +142,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       setAvailableTiersData(tiers)
       
       // Если указан initialTier, используем его, иначе первый доступный
-      let targetTier = tiers.find(t => t.tier === initialTier) || tiers[0]
+      const targetTier = tiers.find(t => t.tier === initialTier) || tiers[0]
       
       const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
       
@@ -168,7 +164,11 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       }
     }
     setLoading(false)
-  }
+  }, [userId, initialTier])
+
+  useEffect(() => {
+    if (open) loadData()
+  }, [open, userId, initialTier, loadData])
 
   const handleTierChange = async (tier: SubscriptionTier) => {
     if (tier === selectedTier || calculating) return

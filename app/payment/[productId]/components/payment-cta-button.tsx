@@ -20,12 +20,12 @@ export function PaymentCTAButton({
   onClick,
   action
 }: PaymentCTAButtonProps) {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 1024
+  })
   const isDisabled = processing || disabled
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 1024)
-  }, [])
 
   // Текст кнопки в зависимости от действия
   const getButtonText = () => {

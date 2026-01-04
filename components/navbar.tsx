@@ -26,11 +26,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSignInOpen, setIsSignInOpen] = useState(false)
 
-  // Скрываем навигацию на тестовых страницах дизайна
-  if (pathname.startsWith('/design-test')) {
-    return null
-  }
-
   // Отслеживание скролла для sticky эффекта
   useEffect(() => {
     const handleScroll = () => {
@@ -81,6 +76,11 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       return () => observer.disconnect()
     }
   }, [mobileMenuOpen])
+
+  // Скрываем навигацию на тестовых страницах дизайна
+  if (pathname.startsWith('/design-test')) {
+    return null
+  }
 
   const handleCloseMobileMenu = () => {
     setIsClosing(true)

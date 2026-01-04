@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Check, X, Flame, Sun, Moon, Sunset, Clock, PlusCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Plus, Edit2, Trash2, Flame, Sun, Moon, Sunset, Clock, PlusCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../../hooks/use-habits'
 import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../../types'

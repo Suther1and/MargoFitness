@@ -123,7 +123,7 @@ export async function POST(request: Request) {
       .single()
 
     let userId: string
-    let isNewUser = false
+      const isNewUser = false
 
     if (existingProfile) {
       userId = existingProfile.id
