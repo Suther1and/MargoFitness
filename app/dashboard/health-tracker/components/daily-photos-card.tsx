@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { Camera, Plus } from 'lucide-react'
 
 interface DailyPhotosCardProps {
