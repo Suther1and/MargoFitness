@@ -9,12 +9,6 @@ import { cn } from "@/lib/utils"
 // Глобальный счетчик открытых диалогов
 let openDialogsCount = 0
 let savedScrollPosition = 0
-let scrollbarWidth = 0
-
-// Вычисляем ширину scrollbar один раз
-if (typeof window !== 'undefined') {
-  scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-}
 
 function Dialog({
   ...props
@@ -38,12 +32,31 @@ function Dialog({
       if (openDialogsCount === 1) {
         savedScrollPosition = window.scrollY
         
-        // Добавляем CSS класс для блокировки скролла на html и body
+        // Вычисляем ширину scrollbar ДО блокировки
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+        
+        // Добавляем CSS класс для блокировки скролла
         document.documentElement.classList.add('dialog-open')
         document.body.classList.add('dialog-open')
         
-        // Устанавливаем CSS переменную для ширины scrollbar
-        document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`)
+        // Компенсируем исчезновение scrollbar
+        if (scrollbarWidth > 0) {
+          document.body.style.paddingRight = `${scrollbarWidth}px`
+          
+          // Для navbar (fixed, left:0, right:0) уменьшаем right
+          const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
+          if (navbar) {
+            navbar.style.right = `${scrollbarWidth}px`
+          }
+          
+          // Для DialogContent корректируем left для сохранения центрирования
+          setTimeout(() => {
+            const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
+            if (dialogContent) {
+              dialogContent.style.left = `calc(50% - ${scrollbarWidth / 2}px)`
+            }
+          }, 0)
+        }
       }
 
       // Применяем blur к navbar через DOM
@@ -116,12 +129,22 @@ function Dialog({
       if (openDialogsCount === 0) {
         document.documentElement.classList.remove('dialog-open')
         document.body.classList.remove('dialog-open')
-        document.documentElement.style.removeProperty('--scrollbar-width')
         
-        // Восстанавливаем позицию скролла плавно
-        requestAnimationFrame(() => {
-          window.scrollTo(0, savedScrollPosition)
-        })
+        // Убираем компенсацию
+        document.body.style.paddingRight = ''
+        
+        const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
+        if (navbar) {
+          navbar.style.right = ''
+        }
+        
+        const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
+        if (dialogContent) {
+          dialogContent.style.left = ''
+        }
+        
+        // Восстанавливаем позицию скролла
+        window.scrollTo(0, savedScrollPosition)
       }
     }
     
@@ -139,7 +162,16 @@ function Dialog({
         if (openDialogsCount === 0) {
           document.documentElement.classList.remove('dialog-open')
           document.body.classList.remove('dialog-open')
-          document.documentElement.style.removeProperty('--scrollbar-width')
+          
+          document.body.style.paddingRight = ''
+          const navbar = document.querySelector('[data-navbar-container]') as HTMLElement
+          if (navbar) {
+            navbar.style.right = ''
+          }
+          const dialogContent = document.querySelector('[data-dialog-content]') as HTMLElement
+          if (dialogContent) {
+            dialogContent.style.left = ''
+          }
         }
       }
       
@@ -204,6 +236,7 @@ function DialogContent({
       <DialogOverlay className="z-[45]" />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-dialog-content="true"
         className={cn(
           "bg-background fixed top-[50%] left-[50%] z-[60] grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
           className

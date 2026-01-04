@@ -124,11 +124,19 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
     overflow-x: hidden;
     overscroll-behavior-x: none;
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Скрываем scrollbar */
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   /* Блокировка скролла при открытом диалоге */
@@ -136,21 +144,7 @@
   body.dialog-open {
     overflow: hidden !important;
     touch-action: none;
-    -webkit-overflow-scrolling: auto;
     overscroll-behavior: none;
-  }
-  
-  body.dialog-open {
-    padding-right: var(--scrollbar-width, 0px);
-  }
-  
-  /* Компенсация scrollbar для fixed элементов */
-  body.dialog-open [data-navbar-container] {
-    padding-right: var(--scrollbar-width, 0px);
-  }
-  
-  body::-webkit-scrollbar {
-    display: none;
   }
   
   html {

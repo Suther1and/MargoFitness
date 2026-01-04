@@ -77,7 +77,7 @@ export function HealthTrackerCard({
           {children}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
