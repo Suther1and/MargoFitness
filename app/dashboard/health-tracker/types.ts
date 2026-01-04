@@ -1,5 +1,106 @@
 export type MoodRating = 1 | 2 | 3 | 4 | 5;
 
+// Типы для настроек трекера
+export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition';
+
+export interface WidgetSettings {
+  enabled: boolean;
+  goal: number | null;
+  inDailyPlan: boolean;
+}
+
+export interface UserParameters {
+  height: number | null;
+  weight: number | null;
+  age: number | null;
+}
+
+export interface TrackerSettings {
+  widgets: Record<WidgetId, WidgetSettings>;
+  userParams: UserParameters;
+}
+
+export interface WidgetConfig {
+  id: WidgetId;
+  name: string;
+  icon: string;
+  hasGoal: boolean;
+  goalUnit?: string;
+  goalLabel?: string;
+  goalPlaceholder?: string;
+  description?: string;
+}
+
+export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
+  water: {
+    id: 'water',
+    name: 'Вода',
+    icon: 'droplet',
+    hasGoal: true,
+    goalUnit: 'мл',
+    goalLabel: 'Цель по воде',
+    goalPlaceholder: 'Например: 2000',
+    description: 'Отслеживайте потребление воды'
+  },
+  steps: {
+    id: 'steps',
+    name: 'Шаги',
+    icon: 'footprints',
+    hasGoal: true,
+    goalUnit: 'шагов',
+    goalLabel: 'Цель по шагам',
+    goalPlaceholder: 'Например: 10000',
+    description: 'Считайте шаги за день'
+  },
+  weight: {
+    id: 'weight',
+    name: 'Вес',
+    icon: 'scale',
+    hasGoal: true,
+    goalUnit: 'кг',
+    goalLabel: 'Целевой вес',
+    goalPlaceholder: 'Например: 70',
+    description: 'Отслеживайте изменения веса'
+  },
+  caffeine: {
+    id: 'caffeine',
+    name: 'Кофеин',
+    icon: 'coffee',
+    hasGoal: true,
+    goalUnit: 'чашек',
+    goalLabel: 'Лимит кофеина',
+    goalPlaceholder: 'Например: 3',
+    description: 'Контролируйте потребление кофеина'
+  },
+  sleep: {
+    id: 'sleep',
+    name: 'Сон',
+    icon: 'moon',
+    hasGoal: true,
+    goalUnit: 'часов',
+    goalLabel: 'Цель по сну',
+    goalPlaceholder: 'Например: 8',
+    description: 'Отслеживайте качество сна'
+  },
+  mood: {
+    id: 'mood',
+    name: 'Настроение',
+    icon: 'smile',
+    hasGoal: false,
+    description: 'Фиксируйте свое настроение'
+  },
+  nutrition: {
+    id: 'nutrition',
+    name: 'Питание',
+    icon: 'utensils',
+    hasGoal: true,
+    goalUnit: 'ккал',
+    goalLabel: 'Цель по калориям',
+    goalPlaceholder: 'Например: 2000',
+    description: 'Отслеживайте КБЖУ'
+  }
+};
+
 export interface DailyHabit {
   id: string;
   title: string;

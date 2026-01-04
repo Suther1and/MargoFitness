@@ -119,7 +119,7 @@ function Dialog({
       requestAnimationFrame(() => {
         if (blur.parentElement) {
           blur.style.backdropFilter = 'blur(8px)'
-          blur.style.webkitBackdropFilter = 'blur(8px)'
+          ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
           blur.style.background = 'rgba(0, 0, 0, 0.3)'
         }
       })
@@ -132,7 +132,7 @@ function Dialog({
       if (blurRef.current) {
         const blur = blurRef.current
         blur.style.backdropFilter = 'blur(0px)'
-        blur.style.webkitBackdropFilter = 'blur(0px)'
+        ;(blur.style as any).webkitBackdropFilter = 'blur(0px)'
         blur.style.background = 'rgba(0, 0, 0, 0)'
         
         timeoutRef.current = setTimeout(() => {
