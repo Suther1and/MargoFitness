@@ -207,10 +207,20 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
         /* Блюр для navbar при открытом диалоге */
         [data-navbar-container][data-navbar-blur="true"] {
+          pointer-events: none !important;
+        }
+
+        /* Применяем blur к содержимому, а не к контейнеру (чтобы сохранить background) */
+        [data-navbar-container][data-navbar-blur="true"] > nav {
           filter: blur(4px) !important;
           -webkit-filter: blur(4px) !important;
-          pointer-events: none !important;
           transition: filter 0.2s ease-in-out !important;
+        }
+
+        /* Отключаем backdrop-blur при применении filter для предотвращения конфликта */
+        [data-navbar-container][data-navbar-blur="true"] .backdrop-blur-xl {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
       `}</style>
