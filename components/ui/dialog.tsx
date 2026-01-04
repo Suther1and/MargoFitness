@@ -11,6 +11,7 @@ function Dialog({
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   const blurRef = React.useRef<HTMLDivElement | null>(null)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const scrollPositionRef = React.useRef<number>(0)
   
   React.useEffect(() => {
     // Очистка предыдущего timeout
@@ -20,8 +21,15 @@ function Dialog({
     }
     
     if (props.open) {
-      // Блокируем скролл body
+      // Сохраняем текущую позицию скролла
+      scrollPositionRef.current = window.scrollY
+      
+      // Блокируем скролл (работает на всех устройствах)
+      document.documentElement.style.overflow = 'hidden'
       document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollPositionRef.current}px`
+      document.body.style.width = '100%'
       document.body.style.paddingRight = 'var(--removed-body-scroll-bar-size, 0px)'
 
       // Применяем blur к navbar через DOM
@@ -65,9 +73,16 @@ function Dialog({
         }
       })
     } else {
-      // Возвращаем скролл body
+      // Возвращаем скролл
+      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
       document.body.style.paddingRight = ''
+      
+      // Восстанавливаем позицию скролла
+      window.scrollTo(0, scrollPositionRef.current)
 
       // Убираем blur с navbar
       const navbars = document.querySelectorAll('[data-navbar-container]')
@@ -94,7 +109,11 @@ function Dialog({
     
     // Cleanup
     return () => {
+      document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
       document.body.style.paddingRight = ''
       
       const navbars = document.querySelectorAll('[data-navbar-container]')
