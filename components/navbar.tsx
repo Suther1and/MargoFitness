@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useReducer } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { SignInPopup } from './signin-popup'
@@ -26,16 +26,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [isAnyPopupOpen, setIsAnyPopupOpen] = useState(false)
-  
-  // Используем useReducer для гарантированного обновления
-  const [isDialogOpen, toggleDialogOpen] = useReducer((state: boolean, newState: boolean) => {
-    console.log('[Navbar] Reducer: изменение с', state, 'на', newState)
-    return newState
-  }, false)
-
-  useEffect(() => {
-    console.log('[Navbar] isDialogOpen изменилось на:', isDialogOpen)
-  }, [isDialogOpen])
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
@@ -73,22 +63,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
     window.addEventListener('signInPopupStateChange', handlePopupStateChange)
     return () => window.removeEventListener('signInPopupStateChange', handlePopupStateChange)
-  }, [])
-
-  // Слушаем события об открытии диалогов
-  useEffect(() => {
-    const handleDialogStateChange = (e: Event) => {
-      const customEvent = e as CustomEvent<boolean>
-      console.log('[Navbar] Событие получено, isDialogOpen:', customEvent.detail)
-      toggleDialogOpen(customEvent.detail)
-    }
-
-    console.log('[Navbar] Подписываюсь на события dialogStateChange')
-    window.addEventListener('dialogStateChange', handleDialogStateChange)
-    return () => {
-      console.log('[Navbar] Отписываюсь от событий dialogStateChange')
-      window.removeEventListener('dialogStateChange', handleDialogStateChange)
-    }
   }, [])
 
   // Скролл не блокируем - пользователь может скроллить под открытым меню
@@ -264,11 +238,11 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         className="hidden lg:flex fixed top-0 left-0 right-0 z-50 px-4 py-4 max-w-[96rem] mx-auto xl:px-8"
         data-navbar-container
         style={{
-          pointerEvents: isDialogOpen ? 'none' : 'auto'
+          pointerEvents: isAnyPopupOpen || isSignInOpen ? 'none' : 'auto'
         }}
       >
         <nav 
-          className={isDialogOpen ? 'rounded-2xl shadow-2xl shadow-black/30 w-full' : 'backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full'}
+          className="backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full"
           style={{
             background: colors.navbarBg,
             border: `1px solid ${colors.cardBorder}`
@@ -379,13 +353,10 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         <div 
           className="lg:hidden fixed top-[15px] right-4 z-50"
           data-navbar-container
-          style={{
-            pointerEvents: isDialogOpen ? 'none' : 'auto'
-          }}
         >
           <button
             onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
-            className={isDialogOpen ? "p-3 rounded-xl transition-all active:scale-95" : "p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"}
+            className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
             style={{
               background: colors.navbarBg,
               border: `1px solid ${colors.cardBorder}`,
@@ -419,8 +390,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
             className={`fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 lg:hidden ${isClosing ? 'closing' : ''}`}
             style={{
               background: '#0C0C11',
-              borderLeft: `1px solid ${colors.cardBorder}`,
-              pointerEvents: isDialogOpen ? 'none' : 'auto'
+              borderLeft: `1px solid ${colors.cardBorder}`
             }}
           >
             <div className="flex flex-col h-full">
