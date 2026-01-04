@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText } from 'lucide-react'
+import { Star, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
@@ -450,6 +450,71 @@ export default function TrackerSettingsPage() {
                                       strokeWidth={2.25} 
                                     />
                                   </button>
+                                </div>
+                              )}
+
+                              {!config.hasGoal && (
+                                <div className="mt-auto pt-2">
+                                  {id === 'mood' && (
+                                    <div className={cn(
+                                      "flex gap-1.5 transition-all duration-500",
+                                      widget.enabled ? "opacity-60" : "opacity-10"
+                                    )}>
+                                      {[
+                                        { icon: Frown, active: false },
+                                        { icon: Meh, active: false },
+                                        { icon: Smile, active: true },
+                                        { icon: SmilePlus, active: false },
+                                        { icon: BatteryMedium, active: false }
+                                      ].map((item, i) => (
+                                        <div 
+                                          key={i} 
+                                          className={cn(
+                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
+                                            item.active 
+                                              ? "bg-green-500/20 text-green-400 ring-1 ring-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]" 
+                                              : "bg-white/5 text-white/20"
+                                          )}
+                                        >
+                                          <item.icon className={cn(item.active ? "w-5 h-5" : "w-4 h-4")} />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {id === 'photos' && (
+                                    <div className={cn(
+                                      "flex items-center gap-3 transition-all duration-500",
+                                      widget.enabled ? "opacity-60" : "opacity-10"
+                                    )}>
+                                      <div className="flex -space-x-3">
+                                        {[Image, Camera, Film].map((Icon, i) => (
+                                          <div 
+                                            key={i} 
+                                            className={cn(
+                                              "w-10 h-10 rounded-xl bg-zinc-800 border-2 border-[#121214] flex items-center justify-center shadow-xl transition-transform hover:translate-y-[-2px]",
+                                              i === 1 ? "z-10 bg-zinc-700" : "z-0 scale-90"
+                                            )}
+                                          >
+                                            <Icon className="w-4 h-4 text-white/30" />
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="flex flex-col gap-1">
+                                        <div className="w-12 h-1 bg-white/10 rounded-full" />
+                                        <div className="w-8 h-1 bg-white/10 rounded-full" />
+                                      </div>
+                                    </div>
+                                  )}
+                                  {id === 'notes' && (
+                                    <div className={cn(
+                                      "space-y-1.5 transition-opacity duration-500",
+                                      widget.enabled ? "opacity-20" : "opacity-5"
+                                    )}>
+                                      <div className="h-1.5 bg-white rounded-full w-full" />
+                                      <div className="h-1.5 bg-white rounded-full w-[80%]" />
+                                      <div className="h-1.5 bg-white rounded-full w-[60%]" />
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>

@@ -64,11 +64,11 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
   },
   caffeine: {
     id: 'caffeine',
-    name: 'Кофе',
+    name: 'Кофеин',
     icon: 'coffee',
     hasGoal: true,
     goalUnit: 'чашек',
-    goalLabel: 'Лимит кофе',
+    goalLabel: 'Лимит кофеина',
     goalPlaceholder: 'Например: 3',
     description: 'Контролируй потребление кофе'
   },
@@ -87,7 +87,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     name: 'Настроение',
     icon: 'smile',
     hasGoal: false,
-    description: 'Фиксируй эмоции и уровень энергии'
+    description: 'Фиксируй эмоции и энергию'
   },
   nutrition: {
     id: 'nutrition',
@@ -97,7 +97,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     goalUnit: 'ккал',
     goalLabel: 'Цель по калориям',
     goalPlaceholder: 'Например: 2000',
-    description: 'Отслеживай КБЖУ'
+    description: 'Отслеживай потребление калорий'
   },
   photos: {
     id: 'photos',
@@ -111,7 +111,7 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     name: 'Заметки',
     icon: 'notebook-text',
     hasGoal: false,
-    description: 'Записывай важные мысли и наблюдения'
+    description: 'Записывай мысли и наблюдения'
   }
 };
 
