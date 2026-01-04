@@ -170,7 +170,7 @@ export default function TrackerSettingsPage() {
               {/* Inputs Group */}
               <div className="flex items-center p-1 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
                 <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
-                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Рост</label>
+                  <label className="text-[8px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Рост</label>
                   <div className="flex items-baseline gap-0.5 md:gap-1">
                     <input
                       type="text"
@@ -180,12 +180,12 @@ export default function TrackerSettingsPage() {
                       onChange={(e) => handleParamChange('height', e.target.value)}
                       className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                     />
-                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">см</span>
+                    <span className="text-[9px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">см</span>
                   </div>
                 </div>
 
                 <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
-                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Вес</label>
+                  <label className="text-[8px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Вес</label>
                   <div className="flex items-baseline gap-0.5 md:gap-1">
                     <input
                       type="text"
@@ -195,12 +195,12 @@ export default function TrackerSettingsPage() {
                       onChange={(e) => handleParamChange('weight', e.target.value)}
                       className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                     />
-                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">кг</span>
+                    <span className="text-[9px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">кг</span>
                   </div>
                 </div>
 
                 <div className="flex flex-col px-2 md:px-4 py-2 flex-1 md:flex-none md:w-[100px] min-w-0">
-                  <label className="text-[7px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Возраст</label>
+                  <label className="text-[8px] md:text-[8px] font-black text-white/30 uppercase tracking-[0.2em] md:tracking-[0.2em] mb-0.5">Возраст</label>
                   <div className="flex items-baseline gap-0.5 md:gap-1">
                     <input
                       type="text"
@@ -210,7 +210,7 @@ export default function TrackerSettingsPage() {
                       onChange={(e) => handleParamChange('age', e.target.value)}
                       className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                     />
-                    <span className="text-[8px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">лет</span>
+                    <span className="text-[9px] md:text-[10px] font-bold text-white/10 uppercase shrink-0">лет</span>
                   </div>
                 </div>
               </div>
@@ -363,7 +363,7 @@ export default function TrackerSettingsPage() {
                       <div className="h-px bg-white/5 w-full" />
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                       {group.widgets.map(widgetId => {
                         const id = widgetId as WidgetId
                         const config = WIDGET_CONFIGS[id]
