@@ -38,7 +38,8 @@ function Dialog({
       if (openDialogsCount === 1) {
         savedScrollPosition = window.scrollY
         
-        // Добавляем CSS класс для блокировки скролла
+        // Добавляем CSS класс для блокировки скролла на html и body
+        document.documentElement.classList.add('dialog-open')
         document.body.classList.add('dialog-open')
         
         // Устанавливаем CSS переменную для ширины scrollbar
@@ -113,6 +114,7 @@ function Dialog({
       
       // Разблокируем скролл только когда все диалоги закрыты
       if (openDialogsCount === 0) {
+        document.documentElement.classList.remove('dialog-open')
         document.body.classList.remove('dialog-open')
         document.documentElement.style.removeProperty('--scrollbar-width')
         
@@ -135,6 +137,7 @@ function Dialog({
         })
         
         if (openDialogsCount === 0) {
+          document.documentElement.classList.remove('dialog-open')
           document.body.classList.remove('dialog-open')
           document.documentElement.style.removeProperty('--scrollbar-width')
         }
