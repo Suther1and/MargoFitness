@@ -2,10 +2,16 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, MoreVertical, CheckCircle2, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp, LayoutDashboard, Sparkles } from 'lucide-react'
+import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../../hooks/use-habits'
 import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../../types'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const TIME_CONFIG = {
   morning: { label: 'Утро', icon: Coffee, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
@@ -72,7 +78,7 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
                 {TIME_CONFIG[editForm.time].label}
               </span>
               <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
-                {Object.entries(HABIT_TIME_OPTIONS).map(([key, label]) => {
+                {Object.entries(HABIT_TIME_OPTIONS).map(([key]) => {
                   const Config = TIME_CONFIG[key as HabitTime]
                   const Icon = Config.icon
                   return (
@@ -211,7 +217,6 @@ export function HabitsSection() {
     time: HabitTime
   } | null>(null)
 
-  // Группировка привычек по времени суток
   const groupedHabits = useMemo(() => {
     const groups: Record<HabitTime | 'disabled', Habit[]> = {
       morning: [],
@@ -293,9 +298,9 @@ export function HabitsSection() {
           <div className="h-px bg-white/5 w-full" />
         </div>
 
-        <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl backdrop-blur-md">
+        {/* DESKTOP VERSION */}
+        <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl backdrop-blur-md">
           <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
-            {/* Title Input */}
             <div className="flex-1 space-y-1.5">
               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Что планируем?</span>
               <input
@@ -308,7 +313,6 @@ export function HabitsSection() {
             </div>
 
             <div className="flex flex-wrap items-end gap-6">
-              {/* Frequency Selection */}
               <div className="space-y-1.5">
                 <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Сколько раз в неделю?</span>
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
@@ -329,7 +333,6 @@ export function HabitsSection() {
                 </div>
               </div>
 
-              {/* Time Selection */}
               <div className="space-y-1.5">
                 <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">
                   {newHabit.time === 'morning' && 'Утром'}
@@ -360,7 +363,6 @@ export function HabitsSection() {
                 </div>
               </div>
 
-              {/* Create Button */}
               <button
                 onClick={handleAdd}
                 disabled={newHabit.title.trim().length < 2}
@@ -375,6 +377,104 @@ export function HabitsSection() {
                 Добавить
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* MOBILE VERSION */}
+        <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl backdrop-blur-md">
+          <div className="flex flex-col gap-6">
+            <div className="space-y-1.5">
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Что планируем?</span>
+              <input
+                placeholder="Йога, Чтение или Зарядка"
+                value={newHabit.title}
+                onChange={(e) => setNewHabit({...newHabit, title: e.target.value})}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"
+              />
+            </div>
+
+            <div className="flex flex-row items-end gap-3 w-full">
+              <div className="space-y-1.5 flex-1">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько дней в неделю?</span>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between">
+                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setNewHabit({...newHabit, frequency: num})}
+                      className={cn(
+                        "w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center",
+                        newHabit.frequency === num 
+                          ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                          : "text-white/30 hover:text-white/60"
+                      )}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5 flex-[0.7]">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
+                <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const Config = TIME_CONFIG[newHabit.time]
+                              const Icon = Config.icon
+                              return (
+                                <>
+                                  <Icon className={cn("w-3.5 h-3.5", Config.color)} />
+                                  <span className="text-[10px] font-black uppercase tracking-wider">
+                                    {newHabit.time === 'anytime' ? 'Любое' : Config.label}
+                                  </span>
+                                </>
+                              )
+                            })()}
+                          </div>
+                          <ChevronDown className="w-3.5 h-3.5 opacity-40" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 backdrop-blur-xl rounded-xl min-w-[140px]">
+                        {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                          const Config = TIME_CONFIG[key]
+                          const Icon = Config.icon
+                          return (
+                            <DropdownMenuItem 
+                              key={key}
+                              onClick={() => setNewHabit({...newHabit, time: key})}
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+                                newHabit.time === key ? "bg-white/5 text-white" : "text-white/60"
+                              )}
+                            >
+                              <Icon className={cn("w-4 h-4", Config.color)} />
+                              <span className="text-xs font-black uppercase tracking-widest">
+                                {key === 'anytime' ? 'Любое' : Config.label}
+                              </span>
+                            </DropdownMenuItem>
+                          )
+                        })}
+                      </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <button
+              onClick={handleAdd}
+              disabled={newHabit.title.trim().length < 2}
+              className={cn(
+                "h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
+                newHabit.title.trim().length >= 2
+                  ? "bg-amber-500 text-[#09090b] hover:bg-amber-400 active:scale-95"
+                  : "bg-white/5 text-white/10 cursor-not-allowed"
+              )}
+            >
+              <Plus className="w-4 h-4" strokeWidth={3} />
+              Добавить
+            </button>
           </div>
         </div>
       </div>
