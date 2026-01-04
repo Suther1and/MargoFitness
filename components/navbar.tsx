@@ -53,17 +53,6 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Слушаем события об открытии попапов со всех страниц
-  useEffect(() => {
-    const handlePopupStateChange = (e: Event) => {
-      const customEvent = e as CustomEvent<boolean>
-      setIsAnyPopupOpen(customEvent.detail)
-    }
-
-    window.addEventListener('signInPopupStateChange', handlePopupStateChange)
-    return () => window.removeEventListener('signInPopupStateChange', handlePopupStateChange)
-  }, [])
-
   // Скролл не блокируем - пользователь может скроллить под открытым меню
 
   // MutationObserver для гарантированного срабатывания анимации на мобильных

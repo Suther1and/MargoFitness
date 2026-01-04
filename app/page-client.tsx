@@ -157,12 +157,6 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
     }, 0)
   }
 
-  // Отправляем событие об изменении состояния попапа
-  useEffect(() => {
-    const event = new CustomEvent('signInPopupStateChange', { detail: signInOpen })
-    window.dispatchEvent(event)
-  }, [signInOpen])
-
   // Обновление профиля при изменении авторизации (только если не передан initialProfile)
   useEffect(() => {
     if (initialProfile) {
