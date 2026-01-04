@@ -24,6 +24,21 @@ function Dialog({
       document.body.style.overflow = 'hidden'
       document.body.style.paddingRight = 'var(--removed-body-scroll-bar-size, 0px)'
 
+      // Применяем blur напрямую через DOM с задержкой для гарантии
+      setTimeout(() => {
+        console.log('[Dialog] Применяю blur к navbar напрямую через DOM')
+        const navbars = document.querySelectorAll('[data-navbar-container]')
+        console.log('[Dialog] Найдено navbar элементов:', navbars.length)
+        navbars.forEach((navbar, index) => {
+          console.log(`[Dialog] Устанавливаю blur для navbar #${index}`)
+          ;(navbar as HTMLElement).setAttribute('data-navbar-blur', 'true')
+        })
+      }, 10)
+
+      // Отправляем событие об открытии диалога
+      console.log('[Dialog] Отправляю событие dialogStateChange: true')
+      window.dispatchEvent(new CustomEvent('dialogStateChange', { detail: true }))
+
       // Создаем blur overlay
       const blur = document.createElement('div')
       blur.style.cssText = `
@@ -56,31 +71,47 @@ function Dialog({
           blur.style.background = 'rgba(0, 0, 0, 0.3)'
         }
       })
-    } else if (blurRef.current) {
+    } else {
       // Возвращаем скролл body
       document.body.style.overflow = ''
       document.body.style.paddingRight = ''
 
-      // Анимация исчезновения
-      const blur = blurRef.current
-      blur.style.backdropFilter = 'blur(0px)'
-      ;(blur.style as any).webkitBackdropFilter = 'blur(0px)'
-      blur.style.background = 'rgba(0, 0, 0, 0)'
-      
-      // Удаляем после завершения анимации
-      timeoutRef.current = setTimeout(() => {
-        if (blur && document.body.contains(blur)) {
-          document.body.removeChild(blur)
-        }
-        blurRef.current = null
-        timeoutRef.current = null
-      }, 200)
+      // Убираем blur напрямую через DOM
+      console.log('[Dialog] Убираю blur с navbar напрямую через DOM')
+      const navbars = document.querySelectorAll('[data-navbar-container]')
+      navbars.forEach(navbar => {
+        (navbar as HTMLElement).setAttribute('data-navbar-blur', 'false')
+      })
+
+      // Отправляем событие о закрытии диалога
+      console.log('[Dialog] Отправляю событие dialogStateChange: false')
+      window.dispatchEvent(new CustomEvent('dialogStateChange', { detail: false }))
+
+      // Анимация исчезновения только если blur существует
+      if (blurRef.current) {
+        const blur = blurRef.current
+        blur.style.backdropFilter = 'blur(0px)'
+        ;(blur.style as any).webkitBackdropFilter = 'blur(0px)'
+        blur.style.background = 'rgba(0, 0, 0, 0)'
+        
+        // Удаляем после завершения анимации
+        timeoutRef.current = setTimeout(() => {
+          if (blur && document.body.contains(blur)) {
+            document.body.removeChild(blur)
+          }
+          blurRef.current = null
+          timeoutRef.current = null
+        }, 200)
+      }
     }
     
     // Cleanup
     return () => {
       document.body.style.overflow = ''
       document.body.style.paddingRight = ''
+      
+      // Отправляем событие о закрытии при размонтировании
+      window.dispatchEvent(new CustomEvent('dialogStateChange', { detail: false }))
       
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)

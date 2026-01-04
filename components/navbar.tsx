@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import Link from 'next/link'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { SignInPopup } from './signin-popup'
@@ -26,6 +26,16 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [isAnyPopupOpen, setIsAnyPopupOpen] = useState(false)
+  
+  // Используем useReducer для гарантированного обновления
+  const [isDialogOpen, toggleDialogOpen] = useReducer((state: boolean, newState: boolean) => {
+    console.log('[Navbar] Reducer: изменение с', state, 'на', newState)
+    return newState
+  }, false)
+
+  useEffect(() => {
+    console.log('[Navbar] isDialogOpen изменилось на:', isDialogOpen)
+  }, [isDialogOpen])
 
   // Скрываем навигацию на тестовых страницах дизайна
   if (pathname.startsWith('/design-test')) {
@@ -63,6 +73,22 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
 
     window.addEventListener('signInPopupStateChange', handlePopupStateChange)
     return () => window.removeEventListener('signInPopupStateChange', handlePopupStateChange)
+  }, [])
+
+  // Слушаем события об открытии диалогов
+  useEffect(() => {
+    const handleDialogStateChange = (e: Event) => {
+      const customEvent = e as CustomEvent<boolean>
+      console.log('[Navbar] Событие получено, isDialogOpen:', customEvent.detail)
+      toggleDialogOpen(customEvent.detail)
+    }
+
+    console.log('[Navbar] Подписываюсь на события dialogStateChange')
+    window.addEventListener('dialogStateChange', handleDialogStateChange)
+    return () => {
+      console.log('[Navbar] Отписываюсь от событий dialogStateChange')
+      window.removeEventListener('dialogStateChange', handleDialogStateChange)
+    }
   }, [])
 
   // Скролл не блокируем - пользователь может скроллить под открытым меню
@@ -216,14 +242,38 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         .hover-link:hover {
           color: #f97316 !important;
         }
+
+        /* Принудительный блюр для navbar */
+        div[data-navbar-container][data-navbar-blur="true"],
+        div[data-navbar-blur="true"][data-navbar-container] {
+          filter: blur(4px) !important;
+          -webkit-filter: blur(4px) !important;
+          transition: filter 0.2s ease-in-out !important;
+        }
+        
+        /* Убеждаемся что backdrop-blur не мешает */
+        div[data-navbar-container][data-navbar-blur="true"] *,
+        div[data-navbar-blur="true"][data-navbar-container] * {
+          will-change: auto !important;
+        }
+
       `}</style>
 
       {/* Desktop Navbar - Full */}
-      <div className="hidden lg:flex fixed top-0 left-0 right-0 z-50 px-4 py-4 max-w-[96rem] mx-auto xl:px-8">
-        <nav className="backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full" style={{
-          background: colors.navbarBg,
-          border: `1px solid ${colors.cardBorder}`
-        }}>
+      <div 
+        className="hidden lg:flex fixed top-0 left-0 right-0 z-50 px-4 py-4 max-w-[96rem] mx-auto xl:px-8"
+        data-navbar-container
+        style={{
+          pointerEvents: isDialogOpen ? 'none' : 'auto'
+        }}
+      >
+        <nav 
+          className={isDialogOpen ? 'rounded-2xl shadow-2xl shadow-black/30 w-full' : 'backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 w-full'}
+          style={{
+            background: colors.navbarBg,
+            border: `1px solid ${colors.cardBorder}`
+          }}
+        >
           <div className="flex items-center justify-between px-4 md:px-6 py-1.5 md:py-2 gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
@@ -328,10 +378,14 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       {!isSignInOpen && !isAnyPopupOpen && (
         <div 
           className="lg:hidden fixed top-[15px] right-4 z-50"
+          data-navbar-container
+          style={{
+            pointerEvents: isDialogOpen ? 'none' : 'auto'
+          }}
         >
           <button
             onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
-            className="p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"
+            className={isDialogOpen ? "p-3 rounded-xl transition-all active:scale-95" : "p-3 rounded-xl backdrop-blur-xl transition-all active:scale-95"}
             style={{
               background: colors.navbarBg,
               border: `1px solid ${colors.cardBorder}`,
@@ -361,10 +415,12 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           {/* Mobile Menu Panel */}
           <div
             data-mobile-menu
+            data-navbar-container
             className={`fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 lg:hidden ${isClosing ? 'closing' : ''}`}
             style={{
               background: '#0C0C11',
               borderLeft: `1px solid ${colors.cardBorder}`,
+              pointerEvents: isDialogOpen ? 'none' : 'auto'
             }}
           >
             <div className="flex flex-col h-full">
