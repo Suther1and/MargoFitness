@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { SignInPopup } from './signin-popup'
@@ -56,40 +56,13 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
   }
 
   // Управление блюром навбара при открытии попапов
-  useEffect(() => {
-    const checkDialogs = () => {
-      // Проверяем наличие открытых диалогов
-      const hasOpenDialog = document.querySelector('[role="dialog"][data-state="open"]')
-      const navbarContainers = document.querySelectorAll('[data-navbar-container]')
-      
-      navbarContainers.forEach(container => {
-        if (hasOpenDialog) {
-          container.setAttribute('data-navbar-blur', 'true')
-        } else {
-          container.removeAttribute('data-navbar-blur')
-        }
-      })
-    }
-
-    // Проверяем сразу при монтировании
-    checkDialogs()
-
-    // Наблюдаем за изменениями в DOM (появление/исчезновение диалогов)
-    const observer = new MutationObserver(checkDialogs)
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-state']
-    })
-
-    return () => observer.disconnect()
-  }, [])
+  // УБРАНО: Dialog компонент сам управляет data-navbar-blur через setNavbarBlur()
+  // MutationObserver здесь конфликтовал с Dialog
 
   return (
     <>
-      {/* SignIn Popup - выше всего, чтобы не размонтировался при закрытии меню */}
-      <SignInPopup isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+      {/* SignIn Popup - условное монтирование (глобальные стили удалены, проблем нет) */}
+      {isSignInOpen && <SignInPopup isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />}
 
       <style jsx global>{`
         @keyframes mobileMenuSlideIn {
@@ -221,37 +194,48 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
               ))}
             </div>
 
-            {/* Auth Buttons */}
-            <div className="flex items-center gap-3">
+            {/* Auth/Profile */}
+            <div className="flex items-center gap-2">
               {profile ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="px-4 py-2 text-sm font-medium text-white hover:text-orange-500 transition-colors"
-                  >
-                    Профиль
-                  </Link>
-                  <Link
-                    href="/auth/logout"
-                    className="px-4 py-2 text-sm font-medium rounded-xl transition-colors"
-                    style={{
-                      background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
-                      color: 'white'
-                    }}
-                  >
-                    Выйти
-                  </Link>
-                </>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="relative w-[52px] h-[52px] rounded-[14px] bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all hover:ring-2 hover:ring-orange-400/50 active:scale-95">
+                    <div className="w-full h-full rounded-[12px] bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+                      {profile.avatar_url ? (
+                        <img 
+                          src={profile.avatar_url} 
+                          alt={profile.full_name || profile.email || 'Avatar'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
+                          {(profile.full_name || profile.email || 'U').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               ) : (
-                <button
+                <button 
                   onClick={handleAuthClick}
-                  className="px-4 py-2 text-sm font-medium rounded-xl transition-colors"
+                  className="uppercase hover:opacity-80 transition-all flex text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 gap-2 items-center backdrop-blur flex-shrink-0 active:scale-95" 
                   style={{
-                    background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`,
-                    color: 'white'
+                    color: colors.textPrimary,
+                    border: `1px solid ${colors.cardBorder}`,
+                    background: `${colors.textPrimary}0D`,
+                    touchAction: 'manipulation',
                   }}
                 >
-                  Войти
+                  <span className="hidden sm:inline pointer-events-none">Войти</span>
+                  <span className="sm:hidden pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="hidden sm:block pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
                 </button>
               )}
             </div>

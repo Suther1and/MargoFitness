@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
@@ -228,152 +228,13 @@ export function SignInPopup({ isOpen, onClose }: SignInPopupProps) {
     setLoading(false)
   }
 
-  // Гарантированное срабатывание анимации на мобильных через MutationObserver
-  useEffect(() => {
-    if (!isOpen) return
-    
-    // Для мобильных используем более агрессивный подход
-    const isMobile = window.innerWidth < 1024
-    
-    if (isMobile) {
-      // Ждем появления dialog-content в DOM
-      const observer = new MutationObserver(() => {
-        const content = document.querySelector('[data-slot="dialog-content"]') as HTMLElement
-        if (content) {
-          // Принудительно перезапускаем анимацию
-          content.style.animation = 'none'
-          void content.offsetHeight // Force reflow
-          content.style.animation = ''
-          observer.disconnect()
-        }
-      })
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      })
-      
-      // Очистка через 2 секунды если не сработало
-      setTimeout(() => observer.disconnect(), 2000)
-      
-      return () => observer.disconnect()
-    } else {
-      // На десктопе используем простой force reflow
-      const content = document.querySelector('[data-slot="dialog-content"]') as HTMLElement | null
-      if (content) {
-        void content.offsetHeight
-      }
-    }
-  }, [isOpen])
-
   return (
     <>
-      <style jsx global>{`
-        /* Плавный рендеринг шрифтов */
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Оптимизация всех кнопок для touch-устройств */
-        button {
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-          touch-action: manipulation;
-          cursor: pointer;
-        }
-        
-        @keyframes popupScaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes popupScaleInMobile {
-          from {
-            opacity: 0;
-            transform: scale(0.5);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes popupScaleOut {
-          from {
-            opacity: 1;
-            transform: scale(1);
-          }
-          to {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-        }
-        
-        /* Desktop: bounce эффект (медленнее) */
-        [data-slot="dialog-content"][data-state="open"] {
-          animation: popupScaleIn 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
-          animation-fill-mode: both !important;
-        }
-        
-        [data-slot="dialog-content"][data-state="closed"] {
-          animation: popupScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards !important;
-          animation-fill-mode: both !important;
-        }
-        
-        /* Mobile: плавная анимация с bounce эффектом (scale от 0.5) */
-        @media (max-width: 1023px) {
-          [data-slot="dialog-content"][data-state="open"] {
-            animation: popupScaleInMobile 0.5s cubic-bezier(0.34, 1.26, 0.64, 1) forwards !important;
-            animation-fill-mode: both !important;
-          }
-          
-          [data-slot="dialog-content"][data-state="closed"] {
-            animation: popupScaleOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards !important;
-            animation-fill-mode: both !important;
-          }
-          
-          /* Отключаем декоративные blur круги на мобильных (очень тяжело для GPU) */
-          .absolute.rounded-full.blur-3xl {
-            display: none !important;
-          }
-          
-          /* Упрощаем backdrop-blur */
-          .backdrop-blur-xl,
-          .backdrop-blur {
-            backdrop-filter: blur(4px) !important;
-          }
-          
-          /* Упрощаем тени */
-          .shadow-2xl {
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15) !important;
-          }
-          
-          /* Ускоряем все transitions */
-          * {
-            transition-duration: 0.2s !important;
-          }
-          
-          /* Отключаем hover эффекты на touch устройствах */
-          @media (hover: none) {
-            button:hover {
-              transform: none !important;
-            }
-          }
-        }
-      `}</style>
-      
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent 
-          className="max-w-sm p-0 border-0 bg-transparent overflow-visible"
-          showCloseButton={false}
-        >
+      <DialogContent 
+        className="max-w-sm p-0 border-0 bg-transparent overflow-visible"
+        showCloseButton={false}
+      >
         <DialogTitle className="sr-only">Вход в MargoFitness</DialogTitle>
         
           {/* Card - Dashboard style glassmorphism */}
