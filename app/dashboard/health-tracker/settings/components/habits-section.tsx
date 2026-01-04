@@ -2,14 +2,14 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Flame, Sun, Moon, Sunset, Clock, PlusCircle, MoreVertical, CheckCircle2, Power, EyeOff } from 'lucide-react'
+import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, MoreVertical, CheckCircle2, Power, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../../hooks/use-habits'
 import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../../types'
 
 const TIME_CONFIG = {
-  morning: { label: 'Утро', icon: Sun, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-  afternoon: { label: 'День', icon: Sunset, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+  morning: { label: 'Утро', icon: Coffee, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+  afternoon: { label: 'День', icon: Sun, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   evening: { label: 'Вечер', icon: Moon, color: 'text-purple-400', bg: 'bg-purple-400/10' },
   anytime: { label: 'Любое время', icon: Clock, color: 'text-slate-400', bg: 'bg-slate-400/10' },
 }
@@ -46,39 +46,49 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 font-oswald font-black text-lg text-white focus:outline-none focus:border-amber-500/30"
           />
-          <div className="flex flex-wrap gap-2">
-            <div className="flex flex-wrap gap-1">
-              {Object.entries(HABIT_FREQUENCY_OPTIONS).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setEditForm({ ...editForm, frequency: key as HabitFrequency })}
-                  className={cn(
-                    "px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border",
-                    editForm.frequency === key 
-                      ? "bg-amber-500 border-amber-500 text-[#09090b]" 
-                      : "bg-white/5 border-white/5 text-white/30"
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
+          <div className="flex flex-col gap-4">
+            <div className="space-y-1.5">
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Дней в неделю</span>
+              <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
+                {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => setEditForm({ ...editForm, frequency: num })}
+                    className={cn(
+                      "w-6 h-6 rounded-md text-[9px] font-black transition-all flex items-center justify-center",
+                      editForm.frequency === num 
+                        ? "bg-amber-500 text-[#09090b]" 
+                        : "text-white/30 hover:text-white/60"
+                    )}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="w-px h-4 bg-white/5 mx-1" />
-            <div className="flex flex-wrap gap-1">
-              {Object.entries(HABIT_TIME_OPTIONS).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setEditForm({ ...editForm, time: key as HabitTime })}
-                  className={cn(
-                    "px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border",
-                    editForm.time === key 
-                      ? "bg-amber-500 border-amber-500 text-[#09090b]" 
-                      : "bg-white/5 border-white/5 text-white/30"
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
+            
+            <div className="space-y-1.5">
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Когда выполнять</span>
+              <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
+                {Object.entries(HABIT_TIME_OPTIONS).map(([key, label]) => {
+                  const Config = TIME_CONFIG[key as HabitTime]
+                  const Icon = Config.icon
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setEditForm({ ...editForm, time: key as HabitTime })}
+                      className={cn(
+                        "w-6 h-6 rounded-md flex items-center justify-center transition-all",
+                        editForm.time === key 
+                          ? "bg-amber-500 text-[#09090b]" 
+                          : "text-white/30 hover:text-white/60"
+                      )}
+                    >
+                      <Icon className="w-3 h-3" />
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
@@ -134,16 +144,13 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="flex flex-col items-end">
-          <div className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors",
-            habit.enabled ? "bg-amber-500/5 border-amber-500/10" : "bg-white/5 border-white/5"
-          )}>
-            <Flame className={cn("w-3.5 h-3.5", habit.enabled ? "text-amber-500 fill-amber-500" : "text-white/20")} />
-            <span className={cn("text-xs font-oswald font-black", habit.enabled ? "text-amber-500" : "text-white/20")}>{habit.streak}</span>
-          </div>
-          <span className="text-[7px] font-black text-white/10 uppercase tracking-[0.2em] mt-0.5 whitespace-nowrap">дней подряд</span>
+      <div className="flex items-center gap-3">
+        <div className={cn(
+          "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors",
+          habit.enabled ? "bg-amber-500/5 border-amber-500/10" : "bg-white/5 border-white/5"
+        )}>
+          <Flame className={cn("w-3.5 h-3.5", habit.enabled ? "text-amber-500 fill-amber-500" : "text-white/20")} />
+          <span className={cn("text-xs font-oswald font-black", habit.enabled ? "text-amber-500" : "text-white/20")}>{habit.streak}</span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -190,7 +197,7 @@ export function HabitsSection() {
     enabled: boolean
   }>({
     title: '',
-    frequency: 'daily',
+    frequency: 7,
     time: 'anytime',
     enabled: true
   })
@@ -232,7 +239,7 @@ export function HabitsSection() {
 
     setNewHabit({
       title: '',
-      frequency: 'daily',
+      frequency: 7,
       time: 'anytime',
       enabled: true
     })
@@ -274,7 +281,7 @@ export function HabitsSection() {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Quick Add Form */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
@@ -283,59 +290,66 @@ export function HabitsSection() {
           <div className="h-px bg-white/5 w-full" />
         </div>
 
-        <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-4 md:p-6 shadow-xl backdrop-blur-md">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
+        <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl backdrop-blur-md">
+          <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
             {/* Title Input */}
-            <div className="flex-1 relative">
+            <div className="flex-1 space-y-1.5">
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Название привычки</span>
               <input
-                placeholder="Назови привычку (напр. Йога)"
+                placeholder="Йога, Чтение или Зарядка"
                 value={newHabit.title}
                 onChange={(e) => setNewHabit({...newHabit, title: e.target.value})}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-lg font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all shadow-inner"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-end gap-6">
               {/* Frequency Selection */}
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-                {(['daily', '2week', '3week'] as HabitFrequency[]).map((key) => (
-                  <button
-                    key={key}
-                    onClick={() => setNewHabit({...newHabit, frequency: key})}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all",
-                      newHabit.frequency === key 
-                        ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                        : "text-white/30 hover:text-white/60"
-                    )}
-                  >
-                    {HABIT_FREQUENCY_OPTIONS[key]}
-                  </button>
-                ))}
-              </div>
-
-              {/* Time Selection */}
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-                {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
-                  const Config = TIME_CONFIG[key]
-                  const Icon = Config.icon
-                  return (
+              <div className="space-y-1.5">
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Дней в неделю</span>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                     <button
-                      key={key}
-                      title={Config.label}
-                      onClick={() => setNewHabit({...newHabit, time: key})}
+                      key={num}
+                      onClick={() => setNewHabit({...newHabit, frequency: num})}
                       className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
-                        newHabit.time === key 
+                        "w-9 h-9 rounded-lg text-sm font-black transition-all flex items-center justify-center",
+                        newHabit.frequency === num 
                           ? "bg-amber-500 text-[#09090b] shadow-lg" 
                           : "text-white/30 hover:text-white/60"
                       )}
                     >
-                      <Icon className="w-4 h-4" />
+                      {num}
                     </button>
-                  )
-                })}
+                  ))}
+                </div>
+              </div>
+
+              {/* Time Selection */}
+              <div className="space-y-1.5">
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Когда выполнять</span>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                  {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                    const Config = TIME_CONFIG[key]
+                    const Icon = Config.icon
+                    return (
+                      <button
+                        key={key}
+                        title={Config.label}
+                        onClick={() => setNewHabit({...newHabit, time: key})}
+                        className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                          newHabit.time === key 
+                            ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                            : "text-white/30 hover:text-white/60"
+                        )}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
 
               {/* Create Button */}
@@ -343,13 +357,14 @@ export function HabitsSection() {
                 onClick={handleAdd}
                 disabled={newHabit.title.trim().length < 2}
                 className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg shrink-0",
+                  "h-[46px] px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
                   newHabit.title.trim().length >= 2
                     ? "bg-amber-500 text-[#09090b] hover:bg-amber-400 active:scale-95"
                     : "bg-white/5 text-white/10 cursor-not-allowed"
                 )}
               >
-                <Plus className="w-6 h-6" strokeWidth={3} />
+                <Plus className="w-4 h-4" strokeWidth={3} />
+                Добавить
               </button>
             </div>
           </div>
@@ -357,13 +372,13 @@ export function HabitsSection() {
       </div>
 
       {/* Habits Groups */}
-      <div className="space-y-10">
+      <div className="space-y-6">
         {(Object.entries(groupedHabits) as [HabitTime | 'disabled', Habit[]][]).map(([time, items]) => {
           if (items.length === 0) return null
           
           if (time === 'disabled') {
             return (
-              <div key={time} className="space-y-5 pt-10 border-t border-white/5">
+              <div key={time} className="space-y-3 pt-6 border-t border-white/5">
                 <div className="flex items-center gap-3 px-2">
                   <EyeOff className="w-4 h-4 text-white/20" />
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 whitespace-nowrap">Временно неактивные</h3>
@@ -399,7 +414,7 @@ export function HabitsSection() {
           const Icon = config.icon
 
           return (
-            <div key={time} className="space-y-5">
+            <div key={time} className="space-y-3">
               <div className="flex items-center gap-3 px-2">
                 <Icon className={cn("w-4 h-4", config.color)} />
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">{config.label}</h3>

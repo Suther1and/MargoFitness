@@ -124,7 +124,7 @@ export interface DailyHabit {
 }
 
 // Типы для управления привычками в настройках
-export type HabitFrequency = 'daily' | '2week' | '3week' | '4-5week'
+export type HabitFrequency = 1 | 2 | 3 | 4 | 5 | 6 | 7
 export type HabitTime = 'anytime' | 'morning' | 'afternoon' | 'evening'
 
 export interface Habit {
@@ -137,10 +137,14 @@ export interface Habit {
   createdAt: string
 }
 
-export const HABIT_FREQUENCY_OPTIONS: Record<HabitFrequency, string> = {
-  daily: 'Каждый день',
-  '2week': '2 раза в неделю',
-  '3week': '3 раза в неделю'
+export const HABIT_FREQUENCY_OPTIONS: Record<number, string> = {
+  1: '1 день в неделю',
+  2: '2 раза в неделю',
+  3: '3 раза в неделю',
+  4: '4 раза в неделю',
+  5: '5 раз в неделю',
+  6: '6 раз в неделю',
+  7: 'Каждый день'
 }
 
 export const HABIT_TIME_OPTIONS: Record<HabitTime, string> = {
