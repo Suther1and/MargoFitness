@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks } from 'lucide-react'
+import Link from 'next/link'
+import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -23,6 +24,7 @@ import { HealthTrackerCard } from './components/health-tracker-card'
 import { WeekNavigator } from './components/week-navigator'
 
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
+import { useTrackerSettings } from './hooks/use-tracker-settings'
 
 export default function HealthTrackerPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -31,6 +33,9 @@ export default function HealthTrackerPage() {
   const [isHabitsExpanded, setIsHabitsExpanded] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+
+  const { isFirstVisit } = useTrackerSettings()
 
   useEffect(() => {
     setMounted(true)
@@ -123,9 +128,11 @@ export default function HealthTrackerPage() {
                     >
                         <Target className={`w-5 h-5 ${isDailyPlanExpanded ? 'text-black' : 'text-white/40 group-hover:text-white'}`} />
                     </button>
-                    <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                        <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
-                    </button>
+                    <Link href="/dashboard/health-tracker/settings">
+                      <button className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                          <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                      </button>
+                    </Link>
                 </div>
              </div>
 
@@ -134,12 +141,49 @@ export default function HealthTrackerPage() {
                 <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
                     <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
                 </button>
-                <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                    <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
-                </button>
+                <Link href="/dashboard/health-tracker/settings">
+                  <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                      <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                  </button>
+                </Link>
              </div>
           </div>
         </header>
+
+        {/* Баннер первого визита */}
+        {mounted && isFirstVisit && !dismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 mt-6"
+          >
+            <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white mb-1 text-lg">
+                    Настройте виджеты для отслеживания
+                  </h3>
+                  <p className="text-sm text-white/60">
+                    Выберите метрики здоровья, которые хотите контролировать
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link href="/dashboard/health-tracker/settings">
+                    <button className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 font-medium transition-all active:scale-95 whitespace-nowrap">
+                      Настроить
+                    </button>
+                  </Link>
+                  <button 
+                    onClick={() => setDismissed(true)}
+                    className="p-2 text-white/40 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Mobile Calendar Expansion */}
         <motion.div 

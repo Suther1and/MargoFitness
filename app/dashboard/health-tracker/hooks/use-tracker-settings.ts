@@ -135,6 +135,13 @@ export function useTrackerSettings() {
     })
   }, [settings])
 
+  // Отметить визит вручную (для баннера)
+  const markAsVisited = useCallback(() => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(VISITED_KEY, 'true')
+    setIsFirstVisit(false)
+  }, [])
+
   return {
     settings,
     isFirstVisit,
@@ -145,6 +152,7 @@ export function useTrackerSettings() {
     toggleInDailyPlan,
     updateUserParams,
     getSortedWidgets,
+    markAsVisited,
   }
 }
 

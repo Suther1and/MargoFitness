@@ -109,6 +109,34 @@ export interface DailyHabit {
   category: "morning" | "afternoon" | "evening" | "anytime";
 }
 
+// Типы для управления привычками в настройках
+export type HabitFrequency = 'daily' | '2week' | '3week' | '4-5week'
+export type HabitTime = 'anytime' | 'morning' | 'afternoon' | 'evening'
+
+export interface Habit {
+  id: string
+  title: string
+  frequency: HabitFrequency
+  time: HabitTime
+  enabled: boolean
+  streak: number
+  createdAt: string
+}
+
+export const HABIT_FREQUENCY_OPTIONS: Record<HabitFrequency, string> = {
+  daily: 'Каждый день',
+  '2week': '2 раза в неделю',
+  '3week': '3 раза в неделю',
+  '4-5week': '4-5 раз в неделю'
+}
+
+export const HABIT_TIME_OPTIONS: Record<HabitTime, string> = {
+  anytime: 'Любое время',
+  morning: 'Утро',
+  afternoon: 'День',
+  evening: 'Вечер'
+}
+
 export interface DailyMetrics {
   date: Date;
   // Основные метрики
