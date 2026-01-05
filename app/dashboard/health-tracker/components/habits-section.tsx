@@ -40,18 +40,19 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout
+        layout="position"
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{
           layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
           opacity: { duration: 0.2 },
-          scale: { duration: 0.3 }
+          scale: { duration: 0.3 },
+          exit: { duration: 0.2 }
         }}
-        className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:py-3.5 shadow-xl"
+        className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
-        <div className="flex flex-col gap-6 md:gap-4">
+        <div className="flex flex-col gap-6 md:gap-3">
           <div className="space-y-1.5 md:space-y-1">
             <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
             <input
@@ -183,12 +184,13 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
 
   return (
     <motion.div
-      layout
+      layout="position"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+        layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+        exit: { duration: 0.2 }
       }}
       className={cn(
         "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
