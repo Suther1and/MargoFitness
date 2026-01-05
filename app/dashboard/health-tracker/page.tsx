@@ -201,71 +201,83 @@ function HealthTrackerContent() {
                 </div>
               </div>
 
-              {/* Desktop: Заголовок с эффектом перетекания через Layout Animation */}
-              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[110px] px-4 md:px-8">
+              {/* Desktop: Заголовок с эффектом строго горизонтального перетекания */}
+              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[90px] px-4 md:px-8 mb-2">
                 <div className="w-full">
                   {activeTab === 'settings' ? (
-                    <motion.div 
-                      key="settings-header"
-                      layoutId="header-wrap"
-                      className="max-w-5xl mx-auto w-full"
-                      transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
-                    >
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-                        <motion.button 
-                          whileHover={{ x: -4 }}
-                          onClick={() => setActiveTab('overview')}
-                          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group mb-3 w-fit"
+                    <div className="max-w-5xl mx-auto w-full">
+                      {/* Фиксированная высота для верхнего элемента, чтобы h1 не прыгал по вертикали */}
+                      <div className="h-8 mb-2">
+                        <motion.div 
+                          initial={{ opacity: 0, x: -10 }} 
+                          animate={{ opacity: 1, x: 0 }} 
+                          transition={{ delay: 0.1, duration: 0.2 }}
                         >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
-                        </motion.button>
-                      </motion.div>
+                          <button 
+                            onClick={() => setActiveTab('overview')}
+                            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
+                          </button>
+                        </motion.div>
+                      </div>
                       
                       <motion.h1 
                         layoutId="header-title"
                         className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
+                        transition={{ 
+                          type: "spring", 
+                          stiffness: 150, 
+                          damping: 22,
+                          mass: 1
+                        }}
                       >
                         Настройки <span className={cn(
                           "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
                           settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
                         )}>трекера</span>
                       </motion.h1>
-                    </motion.div>
+                    </div>
                   ) : (
-                    <motion.div 
-                      key="overview-header"
-                      layoutId="header-wrap"
-                      className="flex items-center justify-between w-full"
-                      transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
-                    >
-                      <div className="space-y-1">
-                        <motion.div 
-                          initial={{ opacity: 0 }} 
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="flex items-center gap-2 mb-2"
-                        >
-                          <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                            V3.0 Beta
-                          </div>
-                          <div className="h-px w-8 bg-white/10" />
-                          <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                            <Activity className="w-3 h-3" />
-                            Live
-                          </span>
-                        </motion.div>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="space-y-0">
+                        {/* Та же фиксированная высота h-8 для плашки */}
+                        <div className="h-8 mb-2 flex items-center">
+                          <motion.div 
+                            initial={{ opacity: 0, x: 10 }} 
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1, duration: 0.2 }}
+                            className="flex items-center gap-2"
+                          >
+                            <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                              V3.0 Beta
+                            </div>
+                            <div className="h-px w-8 bg-white/10" />
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                              <Activity className="w-3 h-3" />
+                              Live
+                            </span>
+                          </motion.div>
+                        </div>
                         
                         <motion.h1 
                           layoutId="header-title"
                           className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
+                          transition={{ 
+                            type: "spring", 
+                            stiffness: 150, 
+                            damping: 22,
+                            mass: 1
+                          }}
                         >
                           Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
                         </motion.h1>
                       </div>
 
                       <motion.div 
-                        layoutId="header-actions"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         className="flex items-center gap-2"
                       >
                         <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
@@ -278,7 +290,7 @@ function HealthTrackerContent() {
                           <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
                         </button>
                       </motion.div>
-                    </motion.div>
+                    </div>
                   )}
                 </div>
               </div>
