@@ -76,6 +76,11 @@ function HealthTrackerContent() {
     handleMetricUpdate('mood', val)
   }
 
+  const handleTabChange = (tab: 'overview' | 'stats' | 'habits' | 'goals' | 'settings') => {
+    setActiveTab(tab)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div className={cn(
       "min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20",
@@ -158,7 +163,7 @@ function HealthTrackerContent() {
                         <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
                     </button>
                     <button 
-                      onClick={() => setActiveTab('settings')}
+                      onClick={() => handleTabChange('settings')}
                       className={cn(
                         "p-3 md:p-4 rounded-2xl border transition-all group",
                         activeTab === 'settings' 
@@ -182,7 +187,7 @@ function HealthTrackerContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => setActiveTab('settings')}
+                        onClick={() => handleTabChange('settings')}
                         className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 font-medium transition-all active:scale-95 whitespace-nowrap"
                       >
                         Настроить
@@ -324,19 +329,19 @@ function HealthTrackerContent() {
       {/* Mobile Bottom Navigation - Stable UI */}
       <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md mobile-nav-container">
         <div className="flex items-center justify-around p-1.5 rounded-full border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-          <button onClick={() => setActiveTab('overview')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => handleTabChange('overview')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Home className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('stats')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'stats' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => handleTabChange('stats')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'stats' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <BarChart3 className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('habits')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'habits' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => handleTabChange('habits')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'habits' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <ListChecks className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('goals')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'goals' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => handleTabChange('goals')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'goals' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Target className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('settings')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'settings' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => handleTabChange('settings')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'settings' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Settings className="w-5 h-5" />
           </button>
         </div>
