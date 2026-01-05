@@ -9,8 +9,7 @@ interface DailyPhotosCardProps {
 
 export function DailyPhotosCard({ photos }: DailyPhotosCardProps) {
   return (
-    <motion.div 
-      layout="position"
+    <div 
       className="rounded-[2.5rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl p-5 md:p-6 hover:border-white/10 transition-all duration-300"
     >
       <div className="flex items-center justify-between mb-4">
@@ -33,7 +32,7 @@ export function DailyPhotosCard({ photos }: DailyPhotosCardProps) {
           <span className="text-[7px] md:text-[8px] font-black text-white/10 uppercase group-hover:text-white/20">Добавить</span>
         </button>
       </div>
-    </motion.div>
+    </div>
   )
 }
 

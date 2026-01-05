@@ -25,17 +25,14 @@ export function AchievementsCard() {
       title="Достижения"
       subtitle="Твои победы"
       icon={Award}
-      iconColor="text-amber-500"
-      iconBg="bg-amber-500/10"
+      iconColor="text-green-400"
+      iconBg="bg-green-500/10"
       className="gap-4"
     >
       <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-        {ACHIEVEMENTS.map((achievement, index) => (
-          <motion.div
+        {ACHIEVEMENTS.map((achievement) => (
+          <div
             key={achievement.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
             className="group relative flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-default"
           >
             <div className="text-2xl shrink-0 group-hover:scale-110 transition-transform">{achievement.icon}</div>
@@ -43,14 +40,14 @@ export function AchievementsCard() {
               <h4 className="text-xs font-bold text-white truncate">{achievement.title}</h4>
               <p className="text-[9px] text-white/40 uppercase tracking-tight">{achievement.description}</p>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      <div className="mt-2 p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/10 relative overflow-hidden">
+      <div className="mt-2 p-4 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/10 relative overflow-hidden">
         <Trophy className="absolute -right-2 -bottom-2 w-12 h-12 text-white/5 rotate-12" />
         <div className="relative z-10">
-            <div className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Статистика</div>
+            <div className="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1">Статистика</div>
             <div className="flex justify-between items-end">
                 <div className="space-y-0.5">
                     <div className="text-lg font-oswald font-black text-white leading-none">142</div>

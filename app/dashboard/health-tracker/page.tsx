@@ -236,7 +236,10 @@ function HealthTrackerContent() {
                   </AnimatePresence>
 
                   <div className="lg:hidden mb-24">
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence 
+                      mode="wait"
+                      onExitComplete={() => window.scrollTo(0, 0)}
+                    >
                       {activeTab === 'goals' && (
                         <motion.div 
                           key="goals-mobile" 
@@ -245,7 +248,11 @@ function HealthTrackerContent() {
                           exit={{ opacity: 0 }} 
                           transition={{ duration: 0.2 }}
                         >
-                          <GoalsSummaryCard data={data} />
+                          <div className="flex flex-col gap-6">
+                            <GoalsSummaryCard data={data} />
+                            <AchievementsCard />
+                            <DailyPhotosCard photos={data.dailyPhotos} />
+                          </div>
                         </motion.div>
                       )}
                       {activeTab === 'habits' && (
@@ -256,7 +263,10 @@ function HealthTrackerContent() {
                           exit={{ opacity: 0 }} 
                           transition={{ duration: 0.2 }}
                         >
-                          <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                          <div className="flex flex-col gap-6">
+                            <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                          </div>
                         </motion.div>
                       )}
                       {activeTab === 'stats' && (
@@ -292,9 +302,6 @@ function HealthTrackerContent() {
                                 <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
                             </div>
                             <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                            <AchievementsCard />
-                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                            <DailyPhotosCard photos={data.dailyPhotos} />
                           </div>
                         </motion.div>
                       )}
@@ -316,10 +323,12 @@ function HealthTrackerContent() {
                       </motion.div>
 
                       <motion.div layout className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-                        <div className="hidden lg:block"><HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} /></div>
-                        <AchievementsCard />
-                        <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                        <DailyPhotosCard photos={data.dailyPhotos} />
+                        <div className="hidden lg:block">
+                          <div className="flex flex-col gap-6">
+                            <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                          </div>
+                        </div>
                       </motion.div>
 
                       <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
@@ -353,7 +362,13 @@ function HealthTrackerContent() {
                                 />
                             </HealthTrackerCard>
                         </div>
-                        <div className="hidden lg:block"><GoalsSummaryCard data={data} /></div>
+                        <div className="hidden lg:block">
+                          <div className="flex flex-col gap-6">
+                            <GoalsSummaryCard data={data} />
+                            <AchievementsCard />
+                            <DailyPhotosCard photos={data.dailyPhotos} />
+                          </div>
+                        </div>
                       </motion.div>
                     </div>
                   </LayoutGroup>
