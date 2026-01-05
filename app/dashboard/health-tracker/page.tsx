@@ -141,9 +141,31 @@ function HealthTrackerContent() {
                           <span className="text-[10px] font-black uppercase tracking-[0.3em]">назад в ЛК</span>
                         </Link>
                       </motion.div>
-                      <h1 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500">
-                        Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
-                      </h1>
+                <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.h1 
+                      key={activeTab}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap"
+                    >
+                      {activeTab === 'overview' && (
+                        <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
+                      )}
+                      {activeTab === 'stats' && (
+                        <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-blue-500 to-slate-400">Статистика</span></>
+                      )}
+                      {activeTab === 'habits' && (
+                        <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
+                      )}
+                      {activeTab === 'goals' && (
+                        <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
+                      )}
+                    </motion.h1>
+                  </AnimatePresence>
+                </div>
                     </div>
 
                     <div className="flex items-center justify-between md:justify-start gap-2 md:gap-3">
