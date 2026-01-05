@@ -17,11 +17,17 @@ export function NotesCard({ value, onUpdate }: NotesCardProps) {
     const textarea = textareaRef.current
     const container = containerRef.current
     if (textarea && container) {
-      textarea.style.height = '0px'
+      // Сбрасываем высоту, чтобы вычислить новую
+      textarea.style.height = 'auto'
       const scrollHeight = textarea.scrollHeight
+      
+      // Устанавливаем высоту textarea (базовую, до масштабирования)
       textarea.style.height = scrollHeight + 'px'
-      // Компенсируем высоту контейнера с учетом масштаба 0.875
-      container.style.height = (scrollHeight * 0.875) + 'px'
+      
+      // Вычисляем финальную высоту контейнера с учетом масштаба 0.875
+      // и добавляем небольшой запас для плавности
+      const finalHeight = Math.max(80, scrollHeight * 0.875)
+      container.style.height = finalHeight + 'px'
     }
   }, [value])
 
@@ -38,7 +44,7 @@ export function NotesCard({ value, onUpdate }: NotesCardProps) {
       
       <div 
         ref={containerRef}
-        className="relative group/edit min-h-[100px] overflow-hidden rounded-2xl bg-white/5 border border-white/5 transition-[height] duration-200"
+        className="relative group/edit overflow-hidden rounded-2xl bg-white/5 border border-white/5 transition-[height] duration-200"
       >
         <textarea
           ref={textareaRef}
