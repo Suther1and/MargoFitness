@@ -22,9 +22,10 @@ const TIME_CONFIG = {
 }
 
 const GPU_ENHANCED_STYLE = {
-  transform: 'translateZ(0)',
-  willChange: 'transform, opacity, height',
+  transform: 'translate3d(0,0,0)',
+  WebkitBackfaceVisibility: 'hidden' as const,
   backfaceVisibility: 'hidden' as const,
+  willChange: 'transform, opacity, height',
 }
 
 interface HabitCardProps {
@@ -47,12 +48,16 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
 
   return (
     <motion.div
-      layout
+      layout="position"
       initial={false}
       transition={{
-        layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] }
+        layout: { 
+          type: "spring", 
+          stiffness: 300, 
+          damping: 30,
+        }
       }}
-      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
+      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
       className={cn(
         "group relative rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
         isEditing 
@@ -63,17 +68,25 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
         isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
     >
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence mode="wait" initial={false}>
         {isEditing && editForm ? (
           <motion.div
             key="edit"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
             exit={{ 
               opacity: 0,
-              transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } 
+              height: 0,
+              transition: { 
+                opacity: { duration: 0.1 },
+                height: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
+              } 
             }}
-            className="flex flex-col gap-6 md:gap-3"
+            transition={{
+              height: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.2, delay: 0.1 }
+            }}
+            className="flex flex-col gap-6 md:gap-3 overflow-hidden"
           >
             <div className="space-y-1.5 md:space-y-1">
               <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
@@ -207,7 +220,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
             animate={{ opacity: 1 }}
             exit={{ 
               opacity: 0,
-              transition: { duration: 0.15, ease: [0.4, 0, 1, 1] }
+              transition: { duration: 0.1 }
             }}
             className="flex items-center justify-between"
           >
