@@ -43,27 +43,31 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
-        className="p-4 rounded-3xl border border-amber-500/30 bg-zinc-900/80 shadow-xl z-10"
+        className="bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl"
       >
-        <div className="space-y-4">
-          <input
-            autoFocus
-            value={editForm.title}
-            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 font-oswald font-black text-lg text-white focus:outline-none focus:border-amber-500/30"
-          />
-          <div className="flex flex-col gap-4">
-            <div className="space-y-1.5">
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Дней в неделю</span>
-              <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
+        <div className="flex flex-col gap-6">
+          <div className="space-y-1.5">
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Что планируем?</span>
+            <input
+              placeholder="Йога, Чтение или Зарядка"
+              value={editForm.title}
+              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-colors"
+            />
+          </div>
+
+          <div className="flex flex-row items-end gap-3 w-full">
+            <div className="space-y-1.5 flex-1">
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько раз в неделю?</span>
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between">
                 {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                   <button
                     key={num}
                     onClick={() => setEditForm({ ...editForm, frequency: num })}
                     className={cn(
-                      "w-6 h-6 rounded-md text-[9px] font-black transition-all flex items-center justify-center",
+                      "w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center",
                       editForm.frequency === num 
-                        ? "bg-amber-500 text-[#09090b]" 
+                        ? "bg-amber-500 text-[#09090b] shadow-lg" 
                         : "text-white/30 hover:text-white/60"
                     )}
                   >
@@ -72,43 +76,64 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
                 ))}
               </div>
             </div>
-            
-            <div className="space-y-1.5">
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">
-                {TIME_CONFIG[editForm.time].label}
-              </span>
-              <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5 w-fit">
-                {Object.entries(HABIT_TIME_OPTIONS).map(([key]) => {
-                  const Config = TIME_CONFIG[key as HabitTime]
-                  const Icon = Config.icon
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setEditForm({ ...editForm, time: key as HabitTime })}
-                      className={cn(
-                        "w-6 h-6 rounded-md flex items-center justify-center transition-all",
-                        editForm.time === key 
-                          ? "bg-amber-500 text-[#09090b]" 
-                          : "text-white/30 hover:text-white/60"
-                      )}
-                    >
-                      <Icon className="w-3 h-3" />
-                    </button>
-                  )
-                })}
-              </div>
+
+            <div className="space-y-1.5 flex-[0.7]">
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const Config = TIME_CONFIG[editForm.time]
+                        const Icon = Config.icon
+                        return (
+                          <>
+                            <Icon className={cn("w-3.5 h-3.5", Config.color)} />
+                            <span className="text-[10px] font-black uppercase tracking-wider">
+                              {editForm.time === 'anytime' ? 'Любое' : Config.label}
+                            </span>
+                          </>
+                        )
+                      })()}
+                    </div>
+                    <ChevronDown className="w-3.5 h-3.5 opacity-40" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 md:backdrop-blur-xl rounded-xl min-w-[140px]">
+                  {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                    const Config = TIME_CONFIG[key]
+                    const Icon = Config.icon
+                    return (
+                      <DropdownMenuItem 
+                        key={key}
+                        onClick={() => setEditForm({ ...editForm, time: key })}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+                          editForm.time === key ? "bg-white/5 text-white" : "text-white/60"
+                        )}
+                      >
+                        <Icon className={cn("w-4 h-4", Config.color)} />
+                        <span className="text-xs font-black uppercase tracking-widest">
+                          {key === 'anytime' ? 'Любое' : Config.label}
+                        </span>
+                      </DropdownMenuItem>
+                    )
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => saveEdit(habit.id)}
-              className="flex-1 py-2 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-wider text-[10px]"
+              className="h-[46px] flex-1 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
             >
               Сохранить
             </button>
             <button
               onClick={cancelEditing}
-              className="px-4 py-2 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-wider text-[10px]"
+              className="h-[46px] px-6 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
             >
               Отмена
             </button>

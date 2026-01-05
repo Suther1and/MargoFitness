@@ -219,7 +219,7 @@ export const MOCK_DATA: DailyMetrics = {
   carbsGoal: 250,
   caffeineIntake: 2,
   caffeineGoal: 3,
-  notes: "Сегодня отличная тренировка, чувствую прилив сил. Нужно больше пить воды вечером.",
+  notes: "",
   dailyPhotos: [
     "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&h=150&fit=crop"

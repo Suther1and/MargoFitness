@@ -135,7 +135,7 @@ function HealthTrackerContent() {
                       <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
                     </button>
                   </DialogTrigger>
-                  <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
+                  <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10">
                     <DialogHeader className="p-6 pb-2 border-b border-white/5">
                       <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
                         <Calendar className="w-5 h-5 text-amber-500" />
@@ -156,16 +156,19 @@ function HealthTrackerContent() {
                   </DialogContent>
                 </Dialog>
 
-                <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.h1 
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none"
-                    >
+                    <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
+                      <AnimatePresence mode="popLayout">
+                        <motion.h1 
+                          key={activeTab}
+                          initial={{ opacity: 0, y: 25 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -25 }}
+                          transition={{ 
+                            duration: 0.85,
+                            ease: [0.22, 1, 0.36, 1] 
+                          }}
+                          className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none absolute inset-0 flex items-center"
+                        >
                       {activeTab === 'overview' && (
                         <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
                       )}

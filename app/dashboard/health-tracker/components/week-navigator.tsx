@@ -2,8 +2,9 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown } from 'lucide-react'
-import { format, addDays, startOfWeek, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, endOfWeek, isSameMonth } from 'date-fns'
+import { format, addDays, startOfWeek, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, endOfWeek, isSameMonth, addMonths, subMonths } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 interface WeekNavigatorProps {
@@ -27,6 +28,13 @@ export function WeekNavigator({
   daysCount = 7,
   disableViewSwitch = false
 }: WeekNavigatorProps) {
+  const [viewDate, setViewDate] = useState(selectedDate)
+
+  // Синхронизируем viewDate при изменении selectedDate извне (например, при открытии)
+  useEffect(() => {
+    setViewDate(selectedDate)
+  }, [selectedDate, isExpanded])
+
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   
   // Определяем количество отображаемых дней
@@ -36,12 +44,21 @@ export function WeekNavigator({
       ? [addDays(selectedDate, -1), selectedDate, addDays(selectedDate, 1)]
       : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
-  // ... rest of calculations ...
-  const monthStart = startOfMonth(selectedDate)
-  const monthEnd = endOfMonth(selectedDate)
+  const monthStart = startOfMonth(viewDate)
+  const monthEnd = endOfMonth(viewDate)
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 })
+  const calendarEnd = addDays(calendarStart, 41) // Всегда 42 дня (6 недель), чтобы высота не прыгала
   const monthDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
+
+  const handleMonthPrev = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setViewDate(subMonths(viewDate, 1))
+  }
+
+  const handleMonthNext = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setViewDate(addMonths(viewDate, 1))
+  }
 
   const content = (
     <div className="w-full">
@@ -153,41 +170,71 @@ export function WeekNavigator({
           ) : (
             <motion.div
               key="month"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="w-full"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="w-full space-y-6"
             >
-              <div className="grid grid-cols-7 gap-1">
+              {/* Refined Month Navigation */}
+              <div className="flex items-center justify-between px-1">
+                <button 
+                  onClick={handleMonthPrev}
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all active:scale-90 outline-none"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex flex-col items-center">
+                  <span className="text-[16px] font-oswald font-black uppercase tracking-widest text-white leading-none">
+                    {format(viewDate, 'LLLL', { locale: ru })}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 mt-1 leading-none">
+                    {format(viewDate, 'yyyy')}
+                  </span>
+                </div>
+
+                <button 
+                  onClick={handleMonthNext}
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all active:scale-90 outline-none"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 md:gap-2">
                 {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d, i) => (
-                  <div key={`${d}-${i}`} className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest">{d}</div>
+                  <div key={`${d}-${i}`} className="text-[10px] font-black text-white/10 text-center pb-2 uppercase tracking-widest leading-none">{d}</div>
                 ))}
                 {monthDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
-                  const isCurrentMonth = isSameMonth(day, selectedDate)
+                  const isCurrentMonth = isSameMonth(day, viewDate)
                   
                   return (
                     <button
                       key={index}
-                      onClick={() => onDateChange(day)}
+                      onClick={() => {
+                        onDateChange(day)
+                        if (day.getMonth() !== viewDate.getMonth()) {
+                          setViewDate(day)
+                        }
+                      }}
                       className={cn(
-                        "relative aspect-square rounded-xl flex flex-col items-center justify-center transition-all duration-300",
+                        "relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-500 outline-none",
                         isSelected 
-                          ? "bg-amber-500 text-black shadow-[0_8px_20px_rgba(245,158,11,0.3)] scale-105 z-10" 
-                          : "hover:bg-white/10 text-white/60",
-                        !isCurrentMonth && "opacity-20",
-                        isToday && !isSelected && "border border-amber-500/30"
+                          ? "bg-amber-500 text-black shadow-[0_12px_24px_rgba(245,158,11,0.3)] scale-105 z-10" 
+                          : "hover:bg-white/5 text-white/60",
+                        !isCurrentMonth && "opacity-30 pointer-events-none"
                       )}
                     >
                       <span className={cn(
-                        "text-[14px] font-black",
+                        "text-[16px] font-black font-oswald",
                         isSelected ? "text-black" : isCurrentMonth ? "text-white" : "text-white/40"
                       )}>
                         {format(day, 'd')}
                       </span>
                       {isToday && !isSelected && (
-                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-500" />
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                       )}
                     </button>
                   )
