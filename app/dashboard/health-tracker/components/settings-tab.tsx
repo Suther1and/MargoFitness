@@ -258,29 +258,37 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
       </div>
 
       {/* Sub-Tabs */}
-      <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full md:w-fit">
-        <div className="flex h-full gap-1 w-full md:w-auto">
+      <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full md:w-fit relative overflow-hidden">
+        <div className="flex h-full gap-1 w-full md:w-auto relative">
           <button
             onClick={() => setActiveSubTab('widgets')}
             className={cn(
-              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center justify-center",
-              activeSubTab === 'widgets' ? "text-[#09090b]" : "text-white/30 hover:text-white/60"
+              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
+              activeSubTab === 'widgets' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
             )}
           >
             {activeSubTab === 'widgets' && (
-              <motion.div layoutId="activeSubTab" className="absolute inset-0 bg-green-500" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+              <motion.div 
+                layoutId="activeSubTab" 
+                className="absolute inset-0 bg-green-500 rounded-xl -z-10" 
+                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
+              />
             )}
             <span className="relative z-10">Виджеты</span>
           </button>
           <button
             onClick={() => setActiveSubTab('habits')}
             className={cn(
-              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden h-full flex items-center justify-center",
-              activeSubTab === 'habits' ? "text-[#09090b]" : "text-white/30 hover:text-white/60"
+              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
+              activeSubTab === 'habits' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
             )}
           >
             {activeSubTab === 'habits' && (
-              <motion.div layoutId="activeSubTab" className="absolute inset-0 bg-amber-500" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+              <motion.div 
+                layoutId="activeSubTab" 
+                className="absolute inset-0 bg-amber-500 rounded-xl -z-10" 
+                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
+              />
             )}
             <span className="relative z-10">Привычки</span>
           </button>
@@ -288,17 +296,17 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
       </div>
 
       {/* Content */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout" initial={false}>
         {activeSubTab === 'widgets' ? (
           <motion.div
             key="widgets"
             onAnimationStart={() => setIsAnimating(true)}
             onAnimationComplete={() => setIsAnimating(false)}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-10 settings-content-container"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="space-y-10 settings-content-container w-full"
           >
             {widgetGroups.map((group) => {
               const GroupIcon = group.icon
@@ -408,10 +416,11 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
             key="habits"
             onAnimationStart={() => setIsAnimating(true)}
             onAnimationComplete={() => setIsAnimating(false)}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-full"
           >
             <HabitsSection />
           </motion.div>
