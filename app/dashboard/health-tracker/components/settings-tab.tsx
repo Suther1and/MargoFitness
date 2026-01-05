@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target } from 'lucide-react'
+import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown } from 'lucide-react'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
 import { HabitsSection } from './habits-section'
+import { WeekNavigator } from './week-navigator'
 import {
   Dialog,
   DialogContent,
@@ -30,9 +33,19 @@ const ICON_MAP: Record<string, any> = {
 
 interface SettingsTabProps {
   onBack?: () => void;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
+  isCalendarExpanded: boolean;
+  setIsCalendarExpanded: (expanded: boolean) => void;
 }
 
-export default function SettingsTab({ onBack }: SettingsTabProps) {
+export default function SettingsTab({ 
+  onBack,
+  selectedDate,
+  onDateChange,
+  isCalendarExpanded,
+  setIsCalendarExpanded
+}: SettingsTabProps) {
   const { settings, saveSettings } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
   const [activeSubTab, setActiveSubTab] = useState<'widgets' | 'habits'>('widgets')
@@ -133,18 +146,37 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
     )}>
       {/* Header Area */}
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          {onBack && (
-            <motion.button 
-              whileHover={{ x: -4 }}
-              onClick={onBack}
-              className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад</span>
-            </motion.button>
-          )}
-          <h1 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500">
+        <div className="flex flex-col items-start">
+          <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
+                  {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
+                </span>
+                <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
+              </button>
+            </DialogTrigger>
+            <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
+              <DialogHeader className="p-6 pb-2 border-b border-white/5">
+                <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
+                  <Calendar className="w-5 h-5 text-amber-500" />
+                  Выберите дату
+                </DialogTitle>
+              </DialogHeader>
+              <div className="p-4 pb-8">
+                <WeekNavigator 
+                  selectedDate={selectedDate} 
+                  onDateChange={(date) => {
+                    onDateChange(date);
+                    setIsCalendarExpanded(false);
+                  }} 
+                  minimal={true} 
+                  isExpanded={true} 
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+          <h1 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500 leading-none">
             Настройки <span className={activeSubTab === 'widgets' ? "text-green-500" : "text-amber-500"}>трекера</span>
           </h1>
         </div>

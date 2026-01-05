@@ -138,111 +138,93 @@ function HealthTrackerContent() {
                   transition={{ duration: 0.25 }}
                   className="w-full"
                 >
-                  <header className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-10">
-                    <div className="flex flex-col gap-2 md:gap-4">
-                      <div className="flex items-center justify-between relative min-h-[40px]">
-                        <motion.div whileHover={{ x: -4 }}>
-                          <Link 
-                            href="/dashboard"
-                            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] hidden sm:inline">назад в ЛК</span>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:hidden">назад</span>
-                          </Link>
-                        </motion.div>
-
-                        {/* Mobile Date Selector Pill - Centered */}
-                        <div className="lg:hidden absolute left-1/2 -translate-x-1/2">
-                          <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
-                            <DialogTrigger asChild>
-                              <button className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 active:scale-95 transition-all shadow-lg backdrop-blur-md">
-                                <CalendarDays className="w-3.5 h-3.5 text-amber-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
-                                  {format(selectedDate, 'd MMM', { locale: ru })}
-                                </span>
-                                <ChevronDown className={cn("w-3 h-3 text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
-                              </button>
-                            </DialogTrigger>
-                            <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
-                              <DialogHeader className="p-6 pb-2 border-b border-white/5">
-                                <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
-                                  <Calendar className="w-5 h-5 text-amber-500" />
-                                  Выберите дату
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="p-4 pb-8">
-                                <WeekNavigator 
-                                  selectedDate={selectedDate} 
-                                  onDateChange={(date) => {
-                                    setSelectedDate(date);
-                                    setIsCalendarExpanded(false);
-                                  }} 
-                                  minimal={true} 
-                                  isExpanded={true} 
-                                />
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                <header className="mb-8 md:mb-12">
+                  <div className="flex flex-col">
+                    {/* Date as a stylish context/supra-header */}
+                    <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
+                      <DialogTrigger asChild>
+                        <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
+                          <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
+                            {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
+                          </span>
+                          <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
+                        <DialogHeader className="p-6 pb-2 border-b border-white/5">
+                          <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
+                            <Calendar className="w-5 h-5 text-amber-500" />
+                            Выберите дату
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="p-4 pb-8">
+                          <WeekNavigator 
+                            selectedDate={selectedDate} 
+                            onDateChange={(date) => {
+                              setSelectedDate(date);
+                              setIsCalendarExpanded(false);
+                            }} 
+                            minimal={true} 
+                            isExpanded={true} 
+                          />
                         </div>
-                        
-                        {/* Empty div to balance the flexbox if needed, or for hamburger space */}
-                        <div className="w-10 lg:hidden" />
-                      </div>
+                      </DialogContent>
+                    </Dialog>
 
-                      <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
-                        <AnimatePresence mode="wait">
-                          <motion.h1 
-                            key={activeTab}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.2 }}
-                            className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap"
-                          >
-                            {activeTab === 'overview' && (
-                              <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
-                            )}
-                            {activeTab === 'stats' && (
-                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-blue-500 to-slate-400">Статистика</span></>
-                            )}
-                            {activeTab === 'habits' && (
-                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
-                            )}
-                            {activeTab === 'goals' && (
-                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
-                            )}
-                          </motion.h1>
-                        </AnimatePresence>
-                      </div>
+                    <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        <motion.h1 
+                          key={activeTab}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none"
+                        >
+                          {activeTab === 'overview' && (
+                            <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
+                          )}
+                          {activeTab === 'stats' && (
+                            <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-blue-500 to-slate-400">Статистика</span></>
+                          )}
+                          {activeTab === 'habits' && (
+                            <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
+                          )}
+                          {activeTab === 'goals' && (
+                            <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
+                          )}
+                        </motion.h1>
+                      </AnimatePresence>
                     </div>
+                  </div>
 
-                    <div className="hidden lg:flex items-center justify-between md:justify-start gap-2 md:gap-3">
-                      <div className="flex items-center gap-2 flex-1 md:flex-none">
-                          <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
-                            <div className="flex items-center p-0.5 flex-1">
-                              <WeekNavigator 
-                                selectedDate={selectedDate} 
-                                onDateChange={setSelectedDate} 
-                                minimal={true} 
-                                isExpanded={isCalendarExpanded}
-                                disableViewSwitch={true}
-                                daysCount={1}
-                                onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                              />
-                              <div className="flex-1 px-2 md:px-4 pr-3 border-l border-white/5 ml-1 py-1">
-                                <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
-                                  {format(selectedDate, 'EEEE', { locale: ru })}
-                                </div>
-                                <div className="text-sm font-bold text-white leading-none">
-                                  {format(selectedDate, 'd MMMM', { locale: ru })}
-                                </div>
+                  {/* Desktop Only Week Navigator - kept for functional layout parity */}
+                  <div className="hidden lg:flex items-center justify-between md:justify-start gap-2 md:gap-3 mt-6">
+                    <div className="flex items-center gap-2 flex-1 md:flex-none">
+                        <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
+                          <div className="flex items-center p-0.5 flex-1">
+                            <WeekNavigator 
+                              selectedDate={selectedDate} 
+                              onDateChange={setSelectedDate} 
+                              minimal={true} 
+                              isExpanded={isCalendarExpanded}
+                              disableViewSwitch={true}
+                              daysCount={1}
+                              onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                            />
+                            <div className="flex-1 px-2 md:px-4 pr-3 border-l border-white/5 ml-1 py-1">
+                              <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
+                                {format(selectedDate, 'EEEE', { locale: ru })}
+                              </div>
+                              <div className="text-sm font-bold text-white leading-none">
+                                {format(selectedDate, 'd MMMM', { locale: ru })}
                               </div>
                             </div>
                           </div>
-                      </div>
+                        </div>
                     </div>
-                  </header>
+                  </div>
+                </header>
 
                   {isFirstVisit && !dismissed && (
                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 mb-6">
@@ -414,7 +396,13 @@ function HealthTrackerContent() {
                   transition={{ duration: 0.25 }}
                   className="w-full mb-24"
                 >
-                  <SettingsTab onBack={() => setActiveTab('overview')} />
+                  <SettingsTab 
+                    onBack={() => setActiveTab('overview')} 
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    isCalendarExpanded={isCalendarExpanded}
+                    setIsCalendarExpanded={setIsCalendarExpanded}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
