@@ -201,53 +201,58 @@ function HealthTrackerContent() {
                 </div>
               </div>
 
-              {/* Desktop: Заголовок с эффектом строго горизонтального перетекания */}
+              {/* Desktop: Заголовок с идеально горизонтальным перетеканием */}
               <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[90px] px-4 md:px-8 mb-2">
-                <div className="w-full">
+                <div className="w-full relative">
                   {activeTab === 'settings' ? (
-                    <div className="max-w-5xl mx-auto w-full">
-                      {/* Фиксированная высота для верхнего элемента, чтобы h1 не прыгал по вертикали */}
-                      <div className="h-8 mb-2">
-                        <motion.div 
-                          initial={{ opacity: 0, x: -10 }} 
-                          animate={{ opacity: 1, x: 0 }} 
-                          transition={{ delay: 0.1, duration: 0.2 }}
-                        >
-                          <button 
-                            onClick={() => setActiveTab('overview')}
-                            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                    <div className="flex items-center justify-between w-full">
+                      <div className="max-w-5xl mx-auto w-full">
+                        <div className="h-8 mb-1">
+                          <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            transition={{ duration: 0.2 }}
                           >
-                            <ChevronLeft className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
-                          </button>
-                        </motion.div>
+                            <button 
+                              onClick={() => setActiveTab('overview')}
+                              className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
+                            </button>
+                          </motion.div>
+                        </div>
+                        
+                        <motion.h1 
+                          layoutId="header-title"
+                          className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
+                          transition={{ 
+                            type: "spring", 
+                            stiffness: 200, 
+                            damping: 25,
+                            mass: 1
+                          }}
+                        >
+                          Настройки <span className={cn(
+                            "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
+                            settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
+                          )}>трекера</span>
+                        </motion.h1>
                       </div>
-                      
-                      <motion.h1 
-                        layoutId="header-title"
-                        className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
-                        transition={{ 
-                          type: "spring", 
-                          stiffness: 150, 
-                          damping: 22,
-                          mass: 1
-                        }}
-                      >
-                        Настройки <span className={cn(
-                          "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
-                          settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
-                        )}>трекера</span>
-                      </motion.h1>
+                      {/* Пустой блок для сохранения структуры flex justify-between */}
+                      <div className="flex items-center gap-2 opacity-0 pointer-events-none">
+                        <div className="p-3 md:p-4"><div className="w-5 h-5" /></div>
+                        <div className="p-3 md:p-4"><div className="w-5 h-5" /></div>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
                       <div className="space-y-0">
-                        {/* Та же фиксированная высота h-8 для плашки */}
-                        <div className="h-8 mb-2 flex items-center">
+                        <div className="h-8 mb-1 flex items-center">
                           <motion.div 
-                            initial={{ opacity: 0, x: 10 }} 
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1, duration: 0.2 }}
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.2 }}
                             className="flex items-center gap-2"
                           >
                             <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
@@ -266,8 +271,8 @@ function HealthTrackerContent() {
                           className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
                           transition={{ 
                             type: "spring", 
-                            stiffness: 150, 
-                            damping: 22,
+                            stiffness: 200, 
+                            damping: 25,
                             mass: 1
                           }}
                         >
