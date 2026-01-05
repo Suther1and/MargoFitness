@@ -48,19 +48,20 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout
-        layoutId={habit.id}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        layout="position"
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
         exit={{ 
-          opacity: 0,
+          opacity: 0, 
+          height: 0,
           transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
         }}
         transition={{
           layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.2 }
+          opacity: { duration: 0.2 },
+          height: { duration: 0.3 }
         }}
-        style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
+        style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
         className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
         <div className="flex flex-col gap-6 md:gap-3">
@@ -195,12 +196,12 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
 
   return (
     <motion.div
-      layout
-      layoutId={habit.id}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      layout="position"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       exit={{ 
-        opacity: 0,
+        opacity: 0, 
+        scale: 0.95,
         transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
       }}
       transition={{
