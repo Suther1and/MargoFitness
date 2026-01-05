@@ -37,6 +37,8 @@ interface SettingsTabProps {
   onDateChange: (date: Date) => void;
   isCalendarExpanded: boolean;
   setIsCalendarExpanded: (expanded: boolean) => void;
+  activeSubTab: 'widgets' | 'habits';
+  setActiveSubTab: (tab: 'widgets' | 'habits') => void;
 }
 
 export default function SettingsTab({ 
@@ -44,11 +46,12 @@ export default function SettingsTab({
   selectedDate,
   onDateChange,
   isCalendarExpanded,
-  setIsCalendarExpanded
+  setIsCalendarExpanded,
+  activeSubTab,
+  setActiveSubTab
 }: SettingsTabProps) {
   const { settings, saveSettings } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
-  const [activeSubTab, setActiveSubTab] = useState<'widgets' | 'habits'>('widgets')
   const [isBmiInfoOpen, setIsBmiInfoOpen] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -144,45 +147,8 @@ export default function SettingsTab({
       "w-full space-y-6 pb-24",
       isAnimating && "is-animating"
     )}>
-      {/* Header Area */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-start">
-          <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
-            <DialogTrigger asChild>
-              <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
-                  {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
-                </span>
-                <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
-              </button>
-            </DialogTrigger>
-            <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
-              <DialogHeader className="p-6 pb-2 border-b border-white/5">
-                <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
-                  <Calendar className="w-5 h-5 text-amber-500" />
-                  Выберите дату
-                </DialogTitle>
-              </DialogHeader>
-              <div className="p-4 pb-8">
-                <WeekNavigator 
-                  selectedDate={selectedDate} 
-                  onDateChange={(date) => {
-                    onDateChange(date);
-                    setIsCalendarExpanded(false);
-                  }} 
-                  minimal={true} 
-                  isExpanded={true} 
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
-          <h1 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500 leading-none">
-            Настройки <span className={activeSubTab === 'widgets' ? "text-green-500" : "text-amber-500"}>трекера</span>
-          </h1>
-        </div>
-
-        {/* BMI Panel */}
-        <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
+      {/* BMI Panel */}
+      <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
             <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
@@ -287,7 +253,6 @@ export default function SettingsTab({
             )}
           </div>
         </div>
-      </div>
 
       {/* Sub-Tabs */}
       <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full md:w-fit relative overflow-hidden">
