@@ -215,10 +215,14 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  variant = "default",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  variant?: "default" | "bottom"
 }) {
+  const isBottom = variant === "bottom"
+  
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay className="z-[45]" />
@@ -231,23 +235,32 @@ function DialogContent({
           {...props}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={isBottom ? { y: "100%", opacity: 0 } : { opacity: 0, scale: 0.9 }}
+            animate={isBottom ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
+            exit={isBottom ? { y: "100%", opacity: 0 } : { opacity: 0, scale: 0.9 }}
             transition={{
-              duration: 0.2,
+              duration: 0.3,
               ease: [0.16, 1, 0.3, 1],
             }}
             className={cn(
-              "bg-background fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-[60] grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
+              "bg-background fixed z-[60] grid w-full gap-4 border shadow-lg outline-none",
+              isBottom 
+                ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none" 
+                : "top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] max-w-[calc(100%-2rem)] rounded-lg p-6 sm:max-w-lg",
               className
             )}
           >
+            {isBottom && (
+              <div className="mx-auto w-12 h-1.5 rounded-full bg-white/10 mb-2" />
+            )}
             {children}
             {showCloseButton && (
               <DialogPrimitive.Close
                 data-slot="dialog-close"
-                className="ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-0 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                className={cn(
+                  "ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-0 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                  isBottom ? "top-6 right-6" : "top-4 right-4"
+                )}
               >
                 <XIcon />
                 <span className="sr-only">Close</span>

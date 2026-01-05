@@ -5,10 +5,18 @@ import dynamic from 'next/dynamic'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
-import { format } from 'date-fns'
+import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays } from 'lucide-react'
+import { format, isSameDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 // Ленивая загрузка тяжелых вкладок
 const SettingsTab = dynamic(() => import('./components/settings-tab'), {
@@ -130,45 +138,86 @@ function HealthTrackerContent() {
                   transition={{ duration: 0.25 }}
                   className="w-full"
                 >
-                  <header className="flex flex-col gap-6 mb-8 md:mb-10">
-                    <div className="flex flex-col gap-4">
-                      <motion.div whileHover={{ x: -4 }}>
-                        <Link 
-                          href="/dashboard"
-                          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em]">назад в ЛК</span>
-                        </Link>
-                      </motion.div>
-                <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.h1 
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap"
-                    >
-                      {activeTab === 'overview' && (
-                        <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
-                      )}
-                      {activeTab === 'stats' && (
-                        <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-blue-500 to-slate-400">Статистика</span></>
-                      )}
-                      {activeTab === 'habits' && (
-                        <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
-                      )}
-                      {activeTab === 'goals' && (
-                        <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
-                      )}
-                    </motion.h1>
-                  </AnimatePresence>
-                </div>
+                  <header className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-10">
+                    <div className="flex flex-col gap-2 md:gap-4">
+                      <div className="flex items-center justify-between relative min-h-[40px]">
+                        <motion.div whileHover={{ x: -4 }}>
+                          <Link 
+                            href="/dashboard"
+                            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] hidden sm:inline">назад в ЛК</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:hidden">назад</span>
+                          </Link>
+                        </motion.div>
+
+                        {/* Mobile Date Selector Pill - Centered */}
+                        <div className="lg:hidden absolute left-1/2 -translate-x-1/2">
+                          <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
+                            <DialogTrigger asChild>
+                              <button className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 active:scale-95 transition-all shadow-lg backdrop-blur-md">
+                                <CalendarDays className="w-3.5 h-3.5 text-amber-500" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
+                                  {format(selectedDate, 'd MMM', { locale: ru })}
+                                </span>
+                                <ChevronDown className={cn("w-3 h-3 text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6">
+                              <DialogHeader className="p-6 pb-2 border-b border-white/5">
+                                <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
+                                  <Calendar className="w-5 h-5 text-amber-500" />
+                                  Выберите дату
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="p-4 pb-8">
+                                <WeekNavigator 
+                                  selectedDate={selectedDate} 
+                                  onDateChange={(date) => {
+                                    setSelectedDate(date);
+                                    setIsCalendarExpanded(false);
+                                  }} 
+                                  minimal={true} 
+                                  isExpanded={true} 
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                        
+                        {/* Empty div to balance the flexbox if needed, or for hamburger space */}
+                        <div className="w-10 lg:hidden" />
+                      </div>
+
+                      <div className="h-[40px] md:h-[60px] flex items-center overflow-hidden">
+                        <AnimatePresence mode="wait">
+                          <motion.h1 
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap"
+                          >
+                            {activeTab === 'overview' && (
+                              <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
+                            )}
+                            {activeTab === 'stats' && (
+                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-blue-500 to-slate-400">Статистика</span></>
+                            )}
+                            {activeTab === 'habits' && (
+                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
+                            )}
+                            {activeTab === 'goals' && (
+                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
+                            )}
+                          </motion.h1>
+                        </AnimatePresence>
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between md:justify-start gap-2 md:gap-3">
+                    <div className="hidden lg:flex items-center justify-between md:justify-start gap-2 md:gap-3">
                       <div className="flex items-center gap-2 flex-1 md:flex-none">
                           <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
                             <div className="flex items-center p-0.5 flex-1">
@@ -217,23 +266,6 @@ function HealthTrackerContent() {
                     </motion.div>
                   )}
 
-                  <AnimatePresence initial={false} onExitComplete={() => setIsAnimating(false)}>
-                    {isCalendarExpanded && (
-                      <motion.div 
-                        key="mobile-calendar"
-                        onAnimationStart={() => setIsAnimating(true)}
-                        onAnimationComplete={() => setIsAnimating(false)}
-                        initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                        animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                        exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                        className="overflow-hidden lg:hidden"
-                      >
-                        <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl">
-                          <WeekNavigator selectedDate={selectedDate} onDateChange={(date) => { setSelectedDate(date); setIsCalendarExpanded(false); }} minimal={true} isExpanded={true} />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
 
                   <div className="lg:hidden mb-24">
                     <AnimatePresence 
@@ -387,64 +419,6 @@ function HealthTrackerContent() {
               )}
             </AnimatePresence>
 
-            {activeTab !== 'settings' && (
-              <LayoutGroup id="tracker-layout">
-                <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
-                  <motion.div layout className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-                    <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                    <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                    <div className="grid grid-cols-2 gap-4">
-                        <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                        <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                        <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                        <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
-                    </div>
-                    <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                  </motion.div>
-
-                  <motion.div layout className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-                    <div className="hidden lg:block"><HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} /></div>
-                    <AchievementsCard />
-                    <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                    <DailyPhotosCard photos={data.dailyPhotos} />
-                  </motion.div>
-
-                  <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
-                    <div className="hidden lg:block">
-                        <HealthTrackerCard 
-                          className="p-4" 
-                          title="Календарь" 
-                          subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
-                          icon={Calendar} 
-                          iconColor="text-amber-500" 
-                          iconBg="bg-amber-500/10"
-                          rightAction={
-                            <button 
-                              onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
-                            >
-                              <motion.div
-                                animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
-                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                              >
-                                <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-white" />
-                              </motion.div>
-                            </button>
-                          }
-                        >
-                            <WeekNavigator 
-                              selectedDate={selectedDate} 
-                              onDateChange={setSelectedDate} 
-                              minimal={true} 
-                              isExpanded={isCalendarExpanded} 
-                            />
-                        </HealthTrackerCard>
-                    </div>
-                    <div className="hidden lg:block"><GoalsSummaryCard data={data} /></div>
-                  </motion.div>
-                </div>
-              </LayoutGroup>
-            )}
           </div>
         )}
       </motion.div>

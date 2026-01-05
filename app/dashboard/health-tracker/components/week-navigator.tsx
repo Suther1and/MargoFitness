@@ -172,21 +172,22 @@ export function WeekNavigator({
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
-                        isSelected ? "bg-amber-500 text-black shadow-lg" : "hover:bg-white/5",
-                        !isCurrentMonth && "opacity-10"
+                        "relative aspect-square rounded-xl flex flex-col items-center justify-center transition-all duration-300",
+                        isSelected 
+                          ? "bg-amber-500 text-black shadow-[0_8px_20px_rgba(245,158,11,0.3)] scale-105 z-10" 
+                          : "hover:bg-white/10 text-white/60",
+                        !isCurrentMonth && "opacity-20",
+                        isToday && !isSelected && "border border-amber-500/30"
                       )}
                     >
                       <span className={cn(
-                        "text-[13px] font-black",
+                        "text-[14px] font-black",
                         isSelected ? "text-black" : isCurrentMonth ? "text-white" : "text-white/40"
                       )}>
                         {format(day, 'd')}
                       </span>
-                      {!isSelected && (
-                        <div className="absolute bottom-1.5 flex gap-0.5">
-                            {isToday && <div className="w-1 h-1 rounded-full bg-amber-500" />}
-                        </div>
+                      {isToday && !isSelected && (
+                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-500" />
                       )}
                     </button>
                   )
