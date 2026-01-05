@@ -295,7 +295,6 @@ function HealthTrackerContent() {
                 </div>
               </div>
             </header>
-            </header>
 
             <AnimatePresence 
               mode="wait"
