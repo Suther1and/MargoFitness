@@ -242,4 +242,22 @@
       animation: none !important;
     }
   }
+  
+  /* GPU Acceleration утилиты для оптимизации анимаций */
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+  
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  .smooth-animation {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 }
