@@ -64,8 +64,17 @@ function HealthTrackerContent() {
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   const { isFirstVisit } = useTrackerSettings()
+
+  // Detect desktop
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024)
+    checkDesktop()
+    window.addEventListener('resize', checkDesktop)
+    return () => window.removeEventListener('resize', checkDesktop)
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -126,7 +135,7 @@ function HealthTrackerContent() {
             <header className="mb-8 md:mb-12">
               {/* Mobile: Dialog календарь с анимированным заголовком */}
               <div className="flex flex-col lg:hidden">
-                <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
+                <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
                   <DialogTrigger asChild>
                     <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
                       <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
