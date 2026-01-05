@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
 import { HabitsSection } from './components/habits-section'
+import { useResponsiveAnimation } from '@/lib/hooks/use-responsive-animation'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ export default function TrackerSettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'widgets' | 'habits'>('widgets')
   const [isBmiInfoOpen, setIsBmiInfoOpen] = useState(false)
+  const { getTransition, gpuStyles } = useResponsiveAnimation()
 
   useEffect(() => {
     setMounted(true)
@@ -300,7 +302,8 @@ export default function TrackerSettingsPage() {
                 <motion.div
                   layoutId="activeTab"
                   className="absolute inset-0 bg-green-500"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  style={gpuStyles}
+                  transition={getTransition('tab')}
                 />
               )}
               <span className="relative z-10">Виджеты</span>
@@ -318,7 +321,8 @@ export default function TrackerSettingsPage() {
                 <motion.div
                   layoutId="activeTab"
                   className="absolute inset-0 bg-amber-500"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  style={gpuStyles}
+                  transition={getTransition('tab')}
                 />
               )}
               <span className="relative z-10">Привычки</span>
@@ -350,7 +354,8 @@ export default function TrackerSettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={getTransition('tab')}
+              style={gpuStyles}
               className="space-y-10"
             >
               {widgetGroups.map((group) => {
@@ -373,8 +378,10 @@ export default function TrackerSettingsPage() {
                         return (
                           <motion.div
                             key={id}
-                            layout
+                            layout="position"
                             onClick={() => handleToggle(id)}
+                            style={gpuStyles}
+                            transition={getTransition('layout')}
                             className={cn(
                               "group relative overflow-hidden rounded-[2.5rem] border transition-all duration-300 cursor-pointer",
                               widget.enabled 
@@ -559,7 +566,8 @@ export default function TrackerSettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={getTransition('tab')}
+              style={gpuStyles}
             >
               <HabitsSection />
             </motion.div>

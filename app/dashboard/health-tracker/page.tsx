@@ -25,6 +25,7 @@ import { WeekNavigator } from './components/week-navigator'
 
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
+import { useResponsiveAnimation } from '@/lib/hooks/use-responsive-animation'
 
 export default function HealthTrackerPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -36,6 +37,7 @@ export default function HealthTrackerPage() {
   const [dismissed, setDismissed] = useState(false)
 
   const { isFirstVisit } = useTrackerSettings()
+  const { getTransition, gpuStyles } = useResponsiveAnimation()
 
   useEffect(() => {
     setMounted(true)
@@ -190,15 +192,12 @@ export default function HealthTrackerPage() {
           {isCalendarExpanded && (
             <motion.div 
               key="mobile-calendar"
-              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-              animate={{ 
-                height: 'auto', 
-                opacity: 1,
-                marginBottom: 24 
-              }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
-              className="overflow-hidden lg:hidden transform-gpu"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={getTransition('expansion')}
+              style={gpuStyles}
+              className="lg:hidden mb-6"
             >
               <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
                 <WeekNavigator 
@@ -220,15 +219,12 @@ export default function HealthTrackerPage() {
           {isDailyPlanExpanded && (
             <motion.div 
               key="mobile-daily-plan"
-              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-              animate={{ 
-                height: 'auto', 
-                opacity: 1,
-                marginBottom: 24 
-              }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
-              className="overflow-hidden lg:hidden transform-gpu"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={getTransition('expansion')}
+              style={gpuStyles}
+              className="lg:hidden mb-6"
             >
               <GoalsSummaryCard data={data} />
             </motion.div>
@@ -240,15 +236,12 @@ export default function HealthTrackerPage() {
           {isHabitsExpanded && (
             <motion.div 
               key="mobile-habits"
-              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-              animate={{ 
-                height: 'auto', 
-                opacity: 1,
-                marginBottom: 24 
-              }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
-              className="overflow-hidden lg:hidden transform-gpu"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={getTransition('expansion')}
+              style={gpuStyles}
+              className="lg:hidden mb-6"
             >
               <HabitsCard 
                 habits={data.habits} 
