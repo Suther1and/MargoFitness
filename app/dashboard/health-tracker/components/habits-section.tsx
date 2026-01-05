@@ -21,6 +21,12 @@ const TIME_CONFIG = {
   anytime: { label: 'Любое время', icon: Clock, color: 'text-slate-400', bg: 'bg-slate-400/10' },
 }
 
+const GPU_ENHANCED_STYLE = {
+  transform: 'translateZ(0)',
+  willChange: 'transform, opacity, height',
+  backfaceVisibility: 'hidden' as const,
+}
+
 interface HabitCardProps {
   habit: Habit
   isEditing: boolean
@@ -42,15 +48,19 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout={!isMobile}
+        layout
+        layoutId={habit.id}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        exit={{ 
+          opacity: 0,
+          transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
+        }}
         transition={{
-          layout: !isMobile ? { duration: 0.3, ease: [0.4, 0, 0.2, 1] } : undefined,
+          layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
           opacity: { duration: 0.2 }
         }}
-        style={{ contain: 'paint layout' }}
+        style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
         className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
         <div className="flex flex-col gap-6 md:gap-3">
@@ -185,15 +195,17 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
 
   return (
     <motion.div
-      layout={!isMobile}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+      layout
+      layoutId={habit.id}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ 
+        opacity: 0,
+        transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
+      }}
       transition={{
-        layout: !isMobile ? { duration: 0.3, ease: [0.4, 0, 0.2, 1] } : undefined,
-        opacity: { duration: 0.2 },
-        y: { duration: 0.3 },
-        scale: { duration: 0.2 }
+        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+        opacity: { duration: 0.2 }
       }}
       className={cn(
         "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
@@ -202,7 +214,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
           : "border-white/5 bg-white/[0.01] opacity-40 grayscale",
         isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
-      style={{ contain: 'paint layout' }}
+      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
     >
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className={cn(
@@ -601,9 +613,10 @@ export function HabitsSection() {
                       style={{ willChange: 'height, opacity' }}
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-4 pt-2">
-                        {items.map(habit => (
-                          <HabitCard 
-                            key={habit.id}
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          {items.map(habit => (
+                            <HabitCard 
+                              key={habit.id}
                             habit={habit}
                             isEditing={editingId === habit.id}
                             isAnyEditing={editingId !== null}
@@ -620,6 +633,7 @@ export function HabitsSection() {
                             deleteHabit={deleteHabit}
                           />
                         ))}
+                        </AnimatePresence>
                       </div>
                     </motion.div>
                   )}
@@ -640,7 +654,7 @@ export function HabitsSection() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-4">
-                <AnimatePresence>
+                <AnimatePresence mode="popLayout" initial={false}>
                   {items.map(habit => (
                     <HabitCard 
                       key={habit.id}
