@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays } from 'lucide-react'
@@ -124,8 +124,8 @@ function HealthTrackerContent() {
             </div>
 
             <header className="mb-8 md:mb-12">
-              <div className="flex flex-col">
-                {/* Date as a stylish context/supra-header */}
+              {/* Mobile: Dialog календарь с анимированным заголовком */}
+              <div className="flex flex-col lg:hidden">
                 <Dialog open={isCalendarExpanded} onOpenChange={setIsCalendarExpanded}>
                   <DialogTrigger asChild>
                     <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
@@ -156,19 +156,19 @@ function HealthTrackerContent() {
                   </DialogContent>
                 </Dialog>
 
-                    <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
-                      <AnimatePresence mode="popLayout">
-                        <motion.h1 
-                          key={activeTab}
-                          initial={{ opacity: 0, y: 25 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -25 }}
-                          transition={{ 
-                            duration: 0.85,
-                            ease: [0.22, 1, 0.36, 1] 
-                          }}
-                          className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none absolute inset-0 flex items-center"
-                        >
+                <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
+                  <AnimatePresence mode="popLayout">
+                    <motion.h1 
+                      key={activeTab}
+                      initial={{ opacity: 0, y: 25 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -25 }}
+                      transition={{ 
+                        duration: 0.85,
+                        ease: [0.22, 1, 0.36, 1] 
+                      }}
+                      className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none absolute inset-0 flex items-center"
+                    >
                       {activeTab === 'overview' && (
                         <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
                       )}
@@ -181,41 +181,33 @@ function HealthTrackerContent() {
                       {activeTab === 'goals' && (
                         <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
                       )}
-                            {activeTab === 'settings' && (
-                              <>Настройки <span className={cn(
-                                "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
-                                settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
-                              )}>трекера</span></>
-                            )}
+                      {activeTab === 'settings' && (
+                        <>Настройки <span className={cn(
+                          "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
+                          settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
+                        )}>трекера</span></>
+                      )}
                     </motion.h1>
                   </AnimatePresence>
                 </div>
               </div>
 
-              {/* Desktop Only Week Navigator - kept for functional layout parity */}
-              <div className="hidden lg:flex items-center justify-between md:justify-start gap-2 md:gap-3 mt-6">
-                <div className="flex items-center gap-2 flex-1 md:flex-none">
-                    <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
-                      <div className="flex items-center p-0.5 flex-1">
-                        <WeekNavigator 
-                          selectedDate={selectedDate} 
-                          onDateChange={setSelectedDate} 
-                          minimal={true} 
-                          isExpanded={isCalendarExpanded}
-                          disableViewSwitch={true}
-                          daysCount={1}
-                          onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                        />
-                        <div className="flex-1 px-2 md:px-4 pr-3 border-l border-white/5 ml-1 py-1">
-                          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
-                            {format(selectedDate, 'EEEE', { locale: ru })}
-                          </div>
-                          <div className="text-sm font-bold text-white leading-none">
-                            {format(selectedDate, 'd MMMM', { locale: ru })}
-                          </div>
-                        </div>
-                      </div>
+              {/* Desktop: Простой статичный заголовок */}
+              <div className="hidden lg:block">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                      V3.0 Beta
                     </div>
+                    <div className="h-px w-8 bg-white/10" />
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                      <Activity className="w-3 h-3" />
+                      Live
+                    </span>
+                  </div>
+                  <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
+                    Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
+                  </h1>
                 </div>
               </div>
             </header>
@@ -349,9 +341,8 @@ function HealthTrackerContent() {
                   </AnimatePresence>
                 </div>
 
-                <LayoutGroup id="tracker-layout">
-                  <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
-                    <motion.div layout className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+                <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+                  <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
                       {activeTab === 'overview' && (
                         <div className="flex flex-col gap-6">
                           <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
@@ -378,22 +369,17 @@ function HealthTrackerContent() {
                           />
                         </div>
                       )}
-                    </motion.div>
+                    </div>
 
                     {activeTab !== 'settings' && (
                       <>
-                        <motion.div layout className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-                          <div className="hidden lg:block">
-                            <div className="flex flex-col gap-6">
-                              <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
-                              <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                            </div>
-                          </div>
-                        </motion.div>
+                        <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
+                          <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                          <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                        </div>
 
-                        <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
-                          <div className="hidden lg:block">
-                              <HealthTrackerCard 
+                        <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
+                          <HealthTrackerCard 
                                 className="p-4" 
                                 title="Календарь" 
                                 subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
@@ -401,15 +387,9 @@ function HealthTrackerContent() {
                                 iconColor="text-amber-500" 
                                 iconBg="bg-amber-500/10"
                                 rightAction={
-                                  <button 
-                                    onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
-                                  >
-                                    <motion.div
-                                      animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
-                                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                    >
-                                      <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-white" />
+                                  <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
+                                    <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
+                                      <ChevronDown className="w-4 h-4 text-white/40" />
                                     </motion.div>
                                   </button>
                                 }
@@ -421,19 +401,14 @@ function HealthTrackerContent() {
                                     isExpanded={isCalendarExpanded} 
                                   />
                               </HealthTrackerCard>
-                          </div>
-                          <div className="hidden lg:block">
-                            <div className="flex flex-col gap-6">
-                              <GoalsSummaryCard data={data} />
-                              <AchievementsCard />
-                              <DailyPhotosCard photos={data.dailyPhotos} />
-                            </div>
-                          </div>
-                        </motion.div>
+
+                          <GoalsSummaryCard data={data} />
+                          <AchievementsCard />
+                          <DailyPhotosCard photos={data.dailyPhotos} />
+                        </div>
                       </>
                     )}
-                  </div>
-                </LayoutGroup>
+                </div>
               </motion.div>
             </AnimatePresence>
 
