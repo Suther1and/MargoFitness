@@ -201,13 +201,12 @@ function HealthTrackerContent() {
                 </div>
               </div>
 
-              {/* Desktop: Заголовок с идеально горизонтальным перетеканием (Выравнивание по ЛЕВОМУ краю) */}
-              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[90px] px-4 md:px-8 mb-2">
+              {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
+              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[95px] px-4 md:px-8 mb-4">
                 <div className="w-full">
                   {activeTab === 'settings' ? (
-                    <div className="flex items-center justify-between w-full">
-                      {/* Левая часть (Кнопка назад и заголовок настроек) */}
-                      <div className="flex-1 flex flex-col">
+                    <div className="max-w-5xl mx-auto w-full">
+                      <div className="flex flex-col">
                         <div className="h-8 mb-1">
                           <motion.div 
                             initial={{ opacity: 0 }} 
@@ -229,8 +228,8 @@ function HealthTrackerContent() {
                           className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
                           transition={{ 
                             type: "spring", 
-                            stiffness: 200, 
-                            damping: 25,
+                            stiffness: 220, 
+                            damping: 28,
                             mass: 1
                           }}
                         >
@@ -240,20 +239,10 @@ function HealthTrackerContent() {
                           )}>трекера</span>
                         </motion.h1>
                       </div>
-
-                      {/* Правая часть (Пустая для симметрии) */}
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="h-8 mb-1" />
-                        <div className="flex items-center gap-2 opacity-0 pointer-events-none">
-                          <div className="p-3 md:p-4"><div className="w-5 h-5" /></div>
-                          <div className="p-3 md:p-4"><div className="w-5 h-5" /></div>
-                        </div>
-                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
-                      {/* Левая часть (Заголовок прогресса) */}
-                      <div className="flex-1 flex flex-col">
+                      <div className="flex flex-col">
                         <div className="h-8 mb-1 flex items-center">
                           <motion.div 
                             initial={{ opacity: 0 }} 
@@ -277,8 +266,8 @@ function HealthTrackerContent() {
                           className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
                           transition={{ 
                             type: "spring", 
-                            stiffness: 200, 
-                            damping: 25,
+                            stiffness: 220, 
+                            damping: 28,
                             mass: 1
                           }}
                         >
@@ -286,29 +275,26 @@ function HealthTrackerContent() {
                         </motion.h1>
                       </div>
 
-                      {/* Правая часть (Кнопки действий) */}
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="h-8 mb-1" />
-                        <motion.div 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="flex items-center gap-2"
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-2"
+                      >
+                        <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                          <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('settings')}
+                          className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
                         >
-                          <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                            <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
-                          </button>
-                          <button 
-                            onClick={() => setActiveTab('settings')}
-                            className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
-                          >
-                            <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
-                          </button>
-                        </motion.div>
-                      </div>
+                          <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                        </button>
+                      </motion.div>
                     </div>
                   )}
                 </div>
               </div>
+            </header>
             </header>
 
             <AnimatePresence 
