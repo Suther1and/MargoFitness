@@ -254,41 +254,150 @@ export default function SettingsTab({
           </div>
         </div>
 
-      {/* Sub-Tabs */}
-      <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full md:w-fit relative overflow-hidden">
-        <div className="flex h-full gap-1 w-full md:w-auto relative">
-          <button
-            onClick={() => setActiveSubTab('widgets')}
-            className={cn(
-              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
-              activeSubTab === 'widgets' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
+      {/* Sub-Tabs with BMI Panel on Desktop */}
+      <div className="flex items-center justify-between gap-4 w-full">
+        <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full lg:w-fit relative overflow-hidden">
+          <div className="flex h-full gap-1 w-full lg:w-auto relative">
+            <button
+              onClick={() => setActiveSubTab('widgets')}
+              className={cn(
+                "flex-1 lg:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
+                activeSubTab === 'widgets' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
+              )}
+            >
+              {activeSubTab === 'widgets' && (
+                <motion.div 
+                  layoutId="activeSubTab" 
+                  className="absolute inset-0 bg-green-500 rounded-xl -z-10" 
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
+                />
+              )}
+              <span className="relative z-10">Виджеты</span>
+            </button>
+            <button
+              onClick={() => setActiveSubTab('habits')}
+              className={cn(
+                "flex-1 lg:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
+                activeSubTab === 'habits' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
+              )}
+            >
+              {activeSubTab === 'habits' && (
+                <motion.div 
+                  layoutId="activeSubTab" 
+                  className="absolute inset-0 bg-amber-500 rounded-xl -z-10" 
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
+                />
+              )}
+              <span className="relative z-10">Привычки</span>
+            </button>
+          </div>
+        </div>
+
+        {/* BMI Panel on Desktop only */}
+        <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[60px] min-w-[420px]">
+          <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
+            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px]">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
+              <div className="flex items-baseline gap-0.5">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="---"
+                  value={localSettings.userParams.height ?? ''}
+                  onChange={(e) => handleParamChange('height', e.target.value)}
+                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                />
+                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
+              </div>
+            </div>
+            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px]">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
+              <div className="flex items-baseline gap-0.5">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="---"
+                  value={localSettings.userParams.weight ?? ''}
+                  onChange={(e) => handleParamChange('weight', e.target.value)}
+                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                />
+                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
+              </div>
+            </div>
+            <div className="flex flex-col px-4 py-1 w-[100px]">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
+              <div className="flex items-baseline gap-0.5">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="--"
+                  value={localSettings.userParams.age ?? ''}
+                  onChange={(e) => handleParamChange('age', e.target.value)}
+                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                />
+                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">лет</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={cn(
+            "px-4 py-1.5 flex flex-col transition-all duration-500 w-[115px] relative",
+            bmiValue ? "bg-white/[0.05]" : "bg-transparent"
+          )}>
+            {bmiValue ? (
+              <>
+                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
+                <div className="flex items-center mt-auto pb-0.5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[34px] font-oswald font-black text-white leading-none tracking-tighter">
+                      {bmiValue}
+                    </span>
+                    <div className={cn("w-2 h-2 rounded-full animate-pulse mt-1", 
+                      bmiCategory?.color === 'text-blue-400' && 'bg-blue-400',
+                      bmiCategory?.color === 'text-green-400' && 'bg-green-400',
+                      bmiCategory?.color === 'text-amber-400' && 'bg-amber-400',
+                      bmiCategory?.color === 'text-red-400' && 'bg-red-400'
+                    )} />
+                  </div>
+                </div>
+                <div className="absolute right-0 top-0">
+                  <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
+                    <DialogTrigger asChild>
+                      <button className="p-2 text-white/40 hover:text-white transition-all focus:outline-none">
+                        <Info className="w-4 h-4" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl">
+                      <DialogHeader>
+                        <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Что такое ИМТ?</DialogTitle>
+                        <DialogDescription className="text-white/60 text-sm pt-2 font-medium">
+                          Индекс массы тела (ИМТ) — оценка соответствия массы человека его росту.
+                          <br /><br />
+                          Формула: вес (кг) / рост² (м).
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Результат</span>
+                          <span className={cn("text-2xl font-oswald font-black", bmiCategory?.color)}>{bmiValue}</span>
+                        </div>
+                        <div className={cn("text-xs font-bold uppercase tracking-wider", bmiCategory?.color)}>
+                          {bmiCategory?.label}
+                        </div>
+                        <p className="text-xs text-white/40 leading-relaxed font-medium">
+                          {bmiCategory?.description}
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-tight text-center">Заполни данные</span>
+              </div>
             )}
-          >
-            {activeSubTab === 'widgets' && (
-              <motion.div 
-                layoutId="activeSubTab" 
-                className="absolute inset-0 bg-green-500 rounded-xl -z-10" 
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
-              />
-            )}
-            <span className="relative z-10">Виджеты</span>
-          </button>
-          <button
-            onClick={() => setActiveSubTab('habits')}
-            className={cn(
-              "flex-1 md:flex-none px-4 md:px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative h-full flex items-center justify-center z-10",
-              activeSubTab === 'habits' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
-            )}
-          >
-            {activeSubTab === 'habits' && (
-              <motion.div 
-                layoutId="activeSubTab" 
-                className="absolute inset-0 bg-amber-500 rounded-xl -z-10" 
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
-              />
-            )}
-            <span className="relative z-10">Привычки</span>
-          </button>
+          </div>
         </div>
       </div>
 
