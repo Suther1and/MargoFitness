@@ -13,7 +13,7 @@ interface WeekNavigatorProps {
   showDate?: boolean
   minimal?: boolean
   isExpanded?: boolean
-  daysCount?: 3 | 7
+  daysCount?: 1 | 3 | 7
 }
 
 export function WeekNavigator({ 
@@ -28,9 +28,11 @@ export function WeekNavigator({
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   
   // Определяем количество отображаемых дней
-  const displayDays = daysCount === 3
-    ? [addDays(selectedDate, -2), addDays(selectedDate, -1), selectedDate]
-    : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const displayDays = daysCount === 1
+    ? [selectedDate]
+    : daysCount === 3
+      ? [addDays(selectedDate, -1), selectedDate, addDays(selectedDate, 1)]
+      : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
   // ... rest of calculations ...
   const monthStart = startOfMonth(selectedDate)
