@@ -356,9 +356,9 @@ function HealthTrackerContent() {
                   </AnimatePresence>
                 </div>
 
-                {/* Desktop Settings - Full Width */}
+                {/* Desktop Settings - Limited Width Container */}
                 {activeTab === 'settings' && (
-                  <div className="hidden lg:block">
+                  <div className="hidden lg:block max-w-5xl mx-auto">
                     <SettingsTab 
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
