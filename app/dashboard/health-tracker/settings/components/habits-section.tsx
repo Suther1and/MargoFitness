@@ -120,16 +120,16 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       className={cn(
-        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
+        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-colors duration-300",
         habit.enabled 
           ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10" 
           : "border-white/5 bg-white/[0.01] opacity-40 grayscale"
       )}
+      style={{ contain: 'paint' }}
     >
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className={cn(
@@ -317,16 +317,16 @@ export function HabitsSection() {
                 <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Сколько раз в неделю?</span>
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
                   {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => setNewHabit({...newHabit, frequency: num})}
-                      className={cn(
-                        "w-9 h-9 rounded-lg text-sm font-black transition-all flex items-center justify-center",
-                        newHabit.frequency === num 
-                          ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                          : "text-white/30 hover:text-white/60"
-                      )}
-                    >
+                      <button
+                        key={num}
+                        onClick={() => setNewHabit({...newHabit, frequency: num})}
+                        className={cn(
+                          "w-9 h-9 rounded-lg text-sm font-black transition-colors flex items-center justify-center",
+                          newHabit.frequency === num 
+                            ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                            : "text-white/30 hover:text-white/60"
+                        )}
+                      >
                       {num}
                     </button>
                   ))}
@@ -345,17 +345,17 @@ export function HabitsSection() {
                     const Config = TIME_CONFIG[key]
                     const Icon = Config.icon
                     return (
-                      <button
-                        key={key}
-                        title={Config.label}
-                        onClick={() => setNewHabit({...newHabit, time: key})}
-                        className={cn(
-                          "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
-                          newHabit.time === key 
-                            ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                            : "text-white/30 hover:text-white/60"
-                        )}
-                      >
+                        <button
+                          key={key}
+                          title={Config.label}
+                          onClick={() => setNewHabit({...newHabit, time: key})}
+                          className={cn(
+                            "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                            newHabit.time === key 
+                              ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                              : "text-white/30 hover:text-white/60"
+                          )}
+                        >
                         <Icon className="w-4 h-4" />
                       </button>
                     )
@@ -390,7 +390,7 @@ export function HabitsSection() {
                 value={newHabit.title}
                 onChange={(e) => setNewHabit({...newHabit, title: e.target.value})}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-colors"
               />
             </div>
 
@@ -466,7 +466,7 @@ export function HabitsSection() {
               onClick={handleAdd}
               disabled={newHabit.title.trim().length < 2}
               className={cn(
-                "h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
+                "h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
                 newHabit.title.trim().length >= 2
                   ? "bg-amber-500 text-[#09090b] hover:bg-amber-400 active:scale-95"
                   : "bg-white/5 text-white/10 cursor-not-allowed"
@@ -507,9 +507,24 @@ export function HabitsSection() {
                   {isDisabledExpanded && (
                     <motion.div 
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
+                      animate={{ 
+                        height: 'auto', 
+                        opacity: 1,
+                        transition: {
+                          height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                          opacity: { duration: 0.25, delay: 0.1 }
+                        }
+                      }}
+                      exit={{ 
+                        height: 0, 
+                        opacity: 0,
+                        transition: {
+                          height: { duration: 0.3, ease: [0.4, 0, 1, 1] },
+                          opacity: { duration: 0.2 }
+                        }
+                      }}
                       className="overflow-hidden"
+                      style={{ willChange: 'height, opacity' }}
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         {items.map(habit => (
@@ -549,7 +564,7 @@ export function HabitsSection() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                   {items.map(habit => (
                     <HabitCard 
                       key={habit.id}
@@ -617,7 +632,7 @@ export function HabitsSection() {
       <div className="flex justify-center pt-8">
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 text-white/20 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all group font-black text-[10px] uppercase tracking-widest"
+          className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 text-white/20 hover:text-white hover:bg-white/10 hover:border-white/10 transition-colors group font-black text-[10px] uppercase tracking-widest"
         >
           <ArrowUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
           Наверх

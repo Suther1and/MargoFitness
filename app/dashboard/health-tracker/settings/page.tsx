@@ -37,6 +37,7 @@ export default function TrackerSettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'widgets' | 'habits'>('widgets')
   const [isBmiInfoOpen, setIsBmiInfoOpen] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -138,8 +139,27 @@ export default function TrackerSettingsPage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20"
+      className={cn(
+        "min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20",
+        isAnimating && "is-animating"
+      )}
     >
+      <style jsx global>{`
+        @media (max-width: 767px) {
+          .is-animating * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
+          
+          .is-animating .settings-content-container {
+            opacity: 0.9 !important;
+            pointer-events: none !important;
+            will-change: transform !important;
+          }
+        }
+      `}</style>
       {/* Ambient BG - Desktop only */}
       <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className={cn(
@@ -334,11 +354,24 @@ export default function TrackerSettingsPage() {
       </div>
 
       {/* Content */}
-      <main className="relative z-10 max-w-5xl mx-auto px-4 py-8 pb-32">
-        <AnimatePresence mode="wait">
+      <main 
+        className="relative z-10 max-w-5xl mx-auto px-4 py-8 pb-32 settings-content-container"
+        style={{ 
+          contain: 'layout paint',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden'
+        }}
+      >
+        <AnimatePresence 
+          mode="wait"
+          onExitComplete={() => setIsAnimating(false)}
+        >
           {activeTab === 'widgets' ? (
             <motion.div
               key="widgets"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -367,11 +400,12 @@ export default function TrackerSettingsPage() {
                             key={id}
                             onClick={() => handleToggle(id)}
                             className={cn(
-                              "group relative overflow-hidden rounded-[2.5rem] border transition-all duration-300 cursor-pointer",
+                              "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
                               widget.enabled 
                                 ? "border-green-500/30 bg-zinc-900/80 shadow-[0_0_40px_rgba(34,197,94,0.05)]"
                                 : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
                             )}
+                            style={{ contain: 'paint' }}
                           >
                             <div className={cn(
                               "relative z-10 p-5 md:px-6 md:py-5 flex flex-col h-full min-h-[145px] md:min-h-[120px] transition-opacity duration-500",
@@ -547,6 +581,8 @@ export default function TrackerSettingsPage() {
           ) : (
             <motion.div
               key="habits"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
