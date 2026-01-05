@@ -93,11 +93,11 @@ export function WeekNavigator({
                   const isToday = isSameDay(day, new Date())
                   
                   return (
-                    <motion.button
+                    <button
                       key={index}
                       onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative rounded-xl flex flex-col items-center justify-center transform-gpu",
+                        "relative rounded-xl flex flex-col items-center justify-center transform-gpu transition-colors",
                         minimal 
                           ? (daysCount === 3 ? "w-11 h-12" : "flex-1 max-w-[40px] h-12") 
                           : "w-9 h-14",
@@ -106,8 +106,6 @@ export function WeekNavigator({
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-transparent"
                           : "hover:bg-white/10 text-white/60"
                       )}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
                     >
                       <span className={cn(
                           "uppercase font-black tracking-widest mt-1",
@@ -129,7 +127,7 @@ export function WeekNavigator({
                           <div className="w-1 h-1 rounded-full bg-amber-500" />
                         )}
                       </div>
-                    </motion.button>
+                    </button>
                   )
                 })}
 
@@ -222,7 +220,7 @@ export function WeekNavigator({
                       className={cn(
                         "relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-500 outline-none",
                         isSelected 
-                          ? "bg-amber-500 text-black shadow-[0_12px_24px_rgba(245,158,11,0.3)] scale-105 z-10" 
+                          ? "bg-amber-500 text-black shadow-[0_12px_24px_rgba(245,158,11,0.3)] z-10" 
                           : "hover:bg-white/5 text-white/60",
                         !isCurrentMonth && "opacity-30 pointer-events-none"
                       )}
@@ -264,14 +262,12 @@ export function WeekNavigator({
 
       {/* Calendar Button */}
       {onCalendarClick && (
-        <motion.button
+        <button
           onClick={onCalendarClick}
-          className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:bg-white/10 transition-colors transform-gpu"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
         >
           <CalendarIcon className="w-5 h-5 text-white/60" />
-        </motion.button>
+        </button>
       )}
     </div>
   )
