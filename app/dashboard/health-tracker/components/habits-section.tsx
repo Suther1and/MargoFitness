@@ -45,239 +45,234 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
   const config = TIME_CONFIG[habit.time]
   const Icon = config.icon
 
-  if (isEditing && editForm) {
-    return (
-      <motion.div
-        layout="position"
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ 
-          opacity: 0, 
-          height: 0,
-          transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
-        }}
-        transition={{
-          layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.2 },
-          height: { duration: 0.3 }
-        }}
-        style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
-        className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
-      >
-        <div className="flex flex-col gap-6 md:gap-3">
-          <div className="space-y-1.5 md:space-y-1">
-            <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
-            <input
-              placeholder="Йога, Чтение или Зарядка"
-              value={editForm.title}
-              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-colors"
-            />
-          </div>
-
-          <div className="flex flex-row md:flex-row items-end gap-3 md:gap-4 w-full">
-            <div className="space-y-1.5 md:space-y-1 flex-1 md:flex-none">
-              <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Сколько раз в неделю?</span>
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between md:justify-start">
-                {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => setEditForm({ ...editForm, frequency: num })}
-                    className={cn(
-                      "w-8 h-8 md:w-9 md:h-9 rounded-lg text-xs md:text-sm font-black transition-all flex items-center justify-center",
-                      editForm.frequency === num 
-                        ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                        : "text-white/30 hover:text-white/60"
-                    )}
-                  >
-                    {num}
-                  </button>
-                ))}
-              </div>
+  return (
+    <motion.div
+      layout
+      initial={false}
+      transition={{
+        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
+      }}
+      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
+      className={cn(
+        "group relative rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
+        isEditing 
+          ? "bg-white/[0.02] border-amber-500/20 px-4 py-4 md:px-5 md:py-3 shadow-xl" 
+          : habit.enabled 
+            ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 p-4" 
+            : "border-white/5 bg-white/[0.01] opacity-40 grayscale p-4",
+        isAnyEditing && !isEditing && "opacity-40 saturate-50"
+      )}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {isEditing && editForm ? (
+          <motion.div
+            key="edit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0,
+              transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } 
+            }}
+            className="flex flex-col gap-6 md:gap-3"
+          >
+            <div className="space-y-1.5 md:space-y-1">
+              <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
+              <input
+                placeholder="Йога, Чтение или Зарядка"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-base font-oswald font-black text-white focus:outline-none focus:border-amber-500/50 focus:bg-white/10 transition-colors"
+              />
             </div>
 
-            {/* Mobile: Dropdown */}
-            <div className="space-y-1.5 flex-[0.7] md:hidden">
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const Config = TIME_CONFIG[editForm.time]
-                        const Icon = Config.icon
-                        return (
-                          <>
-                            <Icon className={cn("w-3.5 h-3.5", Config.color)} />
-                            <span className="text-[10px] font-black uppercase tracking-wider">
-                              {editForm.time === 'anytime' ? 'Любое' : Config.label}
-                            </span>
-                          </>
-                        )
-                      })()}
-                    </div>
-                    <ChevronDown className="w-3.5 h-3.5 opacity-40" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 md:backdrop-blur-xl rounded-xl min-w-[140px]">
-                  {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
-                    const Config = TIME_CONFIG[key]
-                    const Icon = Config.icon
-                    return (
-                      <DropdownMenuItem 
-                        key={key}
-                        onClick={() => setEditForm({ ...editForm, time: key })}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
-                          editForm.time === key ? "bg-white/5 text-white" : "text-white/60"
-                        )}
-                      >
-                        <Icon className={cn("w-4 h-4", Config.color)} />
-                        <span className="text-xs font-black uppercase tracking-widest">
-                          {key === 'anytime' ? 'Любое' : Config.label}
-                        </span>
-                      </DropdownMenuItem>
-                    )
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Desktop: Icon Buttons */}
-            <div className="hidden md:block space-y-1">
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
-                {editForm.time === 'morning' && 'Утром'}
-                {editForm.time === 'afternoon' && 'Днем'}
-                {editForm.time === 'evening' && 'Вечером'}
-                {editForm.time === 'anytime' && 'В любое время'}
-              </span>
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-                {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
-                  const Config = TIME_CONFIG[key]
-                  const Icon = Config.icon
-                  return (
+            <div className="flex flex-row md:flex-row items-end gap-3 md:gap-4 w-full">
+              <div className="space-y-1.5 md:space-y-1 flex-1 md:flex-none">
+                <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Сколько раз в неделю?</span>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between md:justify-start">
+                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                     <button
-                      key={key}
-                      title={Config.label}
-                      onClick={() => setEditForm({ ...editForm, time: key })}
+                      key={num}
+                      onClick={() => setEditForm({ ...editForm, frequency: num })}
                       className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
-                        editForm.time === key 
+                        "w-8 h-8 md:w-9 md:h-9 rounded-lg text-xs md:text-sm font-black transition-all flex items-center justify-center",
+                        editForm.frequency === num 
                           ? "bg-amber-500 text-[#09090b] shadow-lg" 
                           : "text-white/30 hover:text-white/60"
                       )}
                     >
-                      <Icon className="w-4 h-4" />
+                      {num}
                     </button>
-                  )
-                })}
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile: Dropdown */}
+              <div className="space-y-1.5 flex-[0.7] md:hidden">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const Config = TIME_CONFIG[editForm.time]
+                          const Icon = Config.icon
+                          return (
+                            <>
+                              <Icon className={cn("w-3.5 h-3.5", Config.color)} />
+                              <span className="text-[10px] font-black uppercase tracking-wider">
+                                {editForm.time === 'anytime' ? 'Любое' : Config.label}
+                              </span>
+                            </>
+                          )
+                        })()}
+                      </div>
+                      <ChevronDown className="w-3.5 h-3.5 opacity-40" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 md:backdrop-blur-xl rounded-xl min-w-[140px]">
+                    {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                      const Config = TIME_CONFIG[key]
+                      const Icon = Config.icon
+                      return (
+                        <DropdownMenuItem 
+                          key={key}
+                          onClick={() => setEditForm({ ...editForm, time: key })}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+                            editForm.time === key ? "bg-white/5 text-white" : "text-white/60"
+                          )}
+                        >
+                          <Icon className={cn("w-4 h-4", Config.color)} />
+                          <span className="text-xs font-black uppercase tracking-widest">
+                            {key === 'anytime' ? 'Любое' : Config.label}
+                          </span>
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Desktop: Icon Buttons */}
+              <div className="hidden md:block space-y-1">
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
+                  {editForm.time === 'morning' && 'Утром'}
+                  {editForm.time === 'afternoon' && 'Днем'}
+                  {editForm.time === 'evening' && 'Вечером'}
+                  {editForm.time === 'anytime' && 'В любое время'}
+                </span>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                  {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                    const Config = TIME_CONFIG[key]
+                    const Icon = Config.icon
+                    return (
+                      <button
+                        key={key}
+                        title={Config.label}
+                        onClick={() => setEditForm({ ...editForm, time: key })}
+                        className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                          editForm.time === key 
+                            ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                            : "text-white/30 hover:text-white/60"
+                        )}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => saveEdit(habit.id)}
-              className="h-[46px] md:h-[40px] flex-1 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
-            >
-              Сохранить
-            </button>
-            <button
-              onClick={cancelEditing}
-              className="h-[46px] md:h-[40px] px-6 md:px-5 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
-            >
-              Отмена
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    )
-  }
-
-  return (
-    <motion.div
-      layout="position"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ 
-        opacity: 0, 
-        scale: 0.95,
-        transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
-      }}
-      transition={{
-        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-        opacity: { duration: 0.2 }
-      }}
-      className={cn(
-        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
-        habit.enabled 
-          ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10" 
-          : "border-white/5 bg-white/[0.01] opacity-40 grayscale",
-        isAnyEditing && !isEditing && "opacity-40 saturate-50"
-      )}
-      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
-    >
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-          habit.enabled ? config.bg : "bg-white/5",
-          habit.enabled ? config.color : "text-white/20"
-        )}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className={cn(
-            "font-oswald font-black text-lg uppercase tracking-tight leading-none truncate transition-colors",
-            habit.enabled ? "text-white group-hover:text-amber-400" : "text-white/40"
-          )}>
-            {habit.title}
-          </h4>
-          <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">
-            {HABIT_FREQUENCY_OPTIONS[habit.frequency]}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors",
-          habit.enabled ? "bg-amber-500/5 border-amber-500/10" : "bg-white/5 border-white/5"
-        )}>
-          <Flame className={cn("w-3.5 h-3.5", habit.enabled ? "text-amber-500 fill-amber-500" : "text-white/20")} />
-          <span className={cn("text-xs font-oswald font-black", habit.enabled ? "text-amber-500" : "text-white/20")}>{habit.streak}</span>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => toggleHabitStatus(habit.id, !habit.enabled)}
-            title={habit.enabled ? "Выключить" : "Включить"}
-            className={cn(
-              "p-2 rounded-lg transition-colors",
-              habit.enabled ? "bg-white/5 text-white/40 hover:text-amber-400" : "bg-amber-500/20 text-amber-500"
-            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => saveEdit(habit.id)}
+                className="h-[46px] md:h-[40px] flex-1 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
+              >
+                Сохранить
+              </button>
+              <button
+                onClick={cancelEditing}
+                className="h-[46px] md:h-[40px] px-6 md:px-5 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
+              >
+                Отмена
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-between"
           >
-            <Power className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => startEditing(habit)}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => {
-              if (confirm(`Удалить привычку "${habit.title}"?`)) {
-                deleteHabit(habit.id)
-              }
-            }}
-            className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-white/40 hover:text-red-400 transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                habit.enabled ? config.bg : "bg-white/5",
+                habit.enabled ? config.color : "text-white/20"
+              )}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className={cn(
+                  "font-oswald font-black text-lg uppercase tracking-tight leading-none truncate transition-colors",
+                  habit.enabled ? "text-white group-hover:text-amber-400" : "text-white/40"
+                )}>
+                  {habit.title}
+                </h4>
+                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">
+                  {HABIT_FREQUENCY_OPTIONS[habit.frequency]}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors",
+                habit.enabled ? "bg-amber-500/5 border-amber-500/10" : "bg-white/5 border-white/5"
+              )}>
+                <Flame className={cn("w-3.5 h-3.5", habit.enabled ? "text-amber-500 fill-amber-500" : "text-white/20")} />
+                <span className={cn("text-xs font-oswald font-black", habit.enabled ? "text-amber-500" : "text-white/20")}>{habit.streak}</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => toggleHabitStatus(habit.id, !habit.enabled)}
+                  title={habit.enabled ? "Выключить" : "Включить"}
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    habit.enabled ? "bg-white/5 text-white/40 hover:text-amber-400" : "bg-amber-500/20 text-amber-500"
+                  )}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => startEditing(habit)}
+                  className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`Удалить привычку "${habit.title}"?`)) {
+                      deleteHabit(habit.id)
+                    }
+                  }}
+                  className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-white/40 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
+}
 }
 
 export function HabitsSection() {
