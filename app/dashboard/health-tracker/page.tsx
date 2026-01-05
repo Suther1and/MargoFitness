@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
 
 // Новые компоненты
 import { WaterCardH } from './components/water-card-h'
@@ -58,11 +59,19 @@ export default function HealthTrackerPage() {
       isAnimating && "is-animating"
     )}>
       <style jsx global>{`
-        .is-animating * {
-          box-shadow: none !important;
-          text-shadow: none !important;
-          filter: none !important;
-          backdrop-filter: none !important;
+        @media (max-width: 767px) {
+          .is-animating * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
+          
+          .is-animating .main-grid-container {
+            opacity: 0.9 !important;
+            pointer-events: none !important;
+            will-change: transform !important;
+          }
         }
       `}</style>
       {/* Ambient BG - Desktop only */}
@@ -325,14 +334,10 @@ export default function HealthTrackerPage() {
 
         {/* Main Grid - 12 Columns */}
         <div 
-          className={cn(
-            "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start transition-opacity duration-300",
-            isAnimating && "pointer-events-none opacity-90"
-          )}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start main-grid-container"
           style={{ 
             contain: 'layout paint',
             transform: 'translateZ(0)',
-            willChange: isAnimating ? 'transform' : 'auto',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden'
           }}
