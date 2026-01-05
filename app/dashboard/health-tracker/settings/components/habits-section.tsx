@@ -299,7 +299,7 @@ export function HabitsSection() {
         </div>
 
         {/* DESKTOP VERSION */}
-        <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl backdrop-blur-md">
+        <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl md:backdrop-blur-md">
           <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
             <div className="flex-1 space-y-1.5">
               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Что планируем?</span>
@@ -381,7 +381,7 @@ export function HabitsSection() {
         </div>
 
         {/* MOBILE VERSION */}
-        <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl backdrop-blur-md">
+        <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl">
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Что планируем?</span>
@@ -437,7 +437,7 @@ export function HabitsSection() {
                           <ChevronDown className="w-3.5 h-3.5 opacity-40" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 backdrop-blur-xl rounded-xl min-w-[140px]">
+                      <DropdownMenuContent align="end" className="bg-zinc-900/95 border-white/10 md:backdrop-blur-xl rounded-xl min-w-[140px]">
                         {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
                           const Config = TIME_CONFIG[key]
                           const Icon = Config.icon

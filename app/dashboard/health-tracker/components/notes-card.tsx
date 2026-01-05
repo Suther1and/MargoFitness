@@ -12,7 +12,7 @@ export function NotesCard({ value, onUpdate }: NotesCardProps) {
   return (
     <motion.div 
       layout="position"
-      className="rounded-[2.5rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl p-5 md:p-6 hover:border-white/10 transition-all duration-300"
+      className="rounded-[2.5rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl p-5 md:p-6 hover:border-white/10 transition-all duration-300"
     >
       <div className="flex items-center gap-2 mb-4">
         <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">

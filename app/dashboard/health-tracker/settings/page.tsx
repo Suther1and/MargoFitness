@@ -134,8 +134,8 @@ export default function TrackerSettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20">
-      {/* Ambient BG */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* Ambient BG - Desktop only */}
+      <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className={cn(
           "absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] transition-colors duration-1000",
           activeTab === 'widgets' ? "bg-green-500/5" : "bg-amber-500/5"
@@ -147,7 +147,7 @@ export default function TrackerSettingsPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-[#09090b]/40 backdrop-blur-2xl sticky top-0">
+      <header className="relative z-10 bg-[#09090b]/95 md:bg-[#09090b]/40 md:backdrop-blur-2xl sticky top-0">
         <div className="max-w-5xl mx-auto px-4 py-4 md:py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-col gap-4">
@@ -166,7 +166,7 @@ export default function TrackerSettingsPage() {
             </div>
 
             {/* Unified Metrics Panel */}
-            <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[68px] w-full md:w-auto md:min-w-[420px]">
+            <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[68px] w-full md:w-auto md:min-w-[420px]">
               {/* Inputs Group */}
               <div className="flex items-center p-1 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
                 <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
@@ -245,7 +245,7 @@ export default function TrackerSettingsPage() {
                           </button>
                         </DialogTrigger>
                         <DialogContent 
-                          className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl"
+                          className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm md:backdrop-blur-xl"
                           onOpenAutoFocus={(e) => e.preventDefault()}
                         >
                           <DialogHeader>
@@ -285,7 +285,7 @@ export default function TrackerSettingsPage() {
 
       {/* Табы и Кнопка сохранения */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 mt-2">
-        <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg backdrop-blur-md h-[54px]">
+        <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px]">
           <div className="flex h-full gap-1 w-full md:w-auto">
             <button
               onClick={() => setActiveTab('widgets')}

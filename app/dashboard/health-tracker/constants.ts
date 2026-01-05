@@ -148,8 +148,8 @@ export const ANIMATIONS = {
 
 // Общие стили для карточек
 export const CARD_STYLES = {
-  base: 'relative group overflow-hidden border transition-all duration-700 backdrop-blur-2xl',
-  background: 'bg-zinc-900/50',
+  base: 'relative group overflow-hidden border transition-all duration-700 md:backdrop-blur-2xl',
+  background: 'bg-zinc-900/90 md:bg-zinc-900/50',
   hover: 'hover:border-white/10',
 }
 

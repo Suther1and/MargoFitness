@@ -53,8 +53,8 @@ export default function HealthTrackerPage() {
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-20">
-      {/* Ambient BG */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* Ambient BG - Desktop only */}
+      <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
@@ -157,7 +157,7 @@ export default function HealthTrackerPage() {
             animate={{ opacity: 1, y: 0 }}
             className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 mt-6"
           >
-            <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 backdrop-blur-xl">
+            <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 md:backdrop-blur-xl">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-white mb-1 text-lg">
@@ -200,7 +200,7 @@ export default function HealthTrackerPage() {
               transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
               className="overflow-hidden lg:hidden transform-gpu"
             >
-              <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+              <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl">
                 <WeekNavigator 
                   selectedDate={selectedDate} 
                   onDateChange={(date) => {
