@@ -1,19 +1,91 @@
 'use client'
 
-import React, { useState, useEffect, useTransition } from 'react'
-import { motion, AnimatePresence, LayoutGroup, Reorder, MotionConfig } from 'framer-motion'
-import { ChevronDown, Trash2, Zap, Square, Plus, RefreshCw } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
+import { ChevronDown, Calendar, Target, ListChecks, Droplets, Footprints, Coffee, Moon, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const springConfig = { stiffness: 260, damping: 30 }
 
-export default function AnimationTestPageV11() {
+// Простая карточка виджета (копия стиля из health-tracker)
+function WidgetCard({ title, value, goal, icon: Icon, color }: any) {
+  const percentage = goal ? Math.min((value / goal) * 100, 100) : 0
+  const isDone = goal && value >= goal
+
+  return (
+    <div className={cn(
+      "relative group overflow-hidden border transition-all duration-700 backdrop-blur-2xl rounded-[2rem] p-4",
+      "bg-zinc-900/50 border-white/10 hover:border-white/20"
+    )}>
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", `bg-${color}-500/10`)}>
+            <Icon className={cn("w-4 h-4", `text-${color}-400`)} />
+          </div>
+          <span className="text-xs font-black uppercase tracking-wider text-white/50">{title}</span>
+        </div>
+        
+        <div className="flex items-baseline gap-2 mb-3">
+          <span className="text-3xl font-bold text-white">{value}</span>
+          {goal && <span className="text-sm text-white/30">/ {goal}</span>}
+        </div>
+
+        {goal && (
+          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${percentage}%` }}
+              className={cn("h-full", isDone ? "bg-emerald-500" : `bg-${color}-500`)}
+              transition={springConfig}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Компонент привычки
+function HabitItem({ title, completed, onToggle }: any) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      onClick={onToggle}
+      className={cn(
+        "flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all",
+        completed
+          ? "border-amber-500/20 bg-amber-500/5 opacity-60"
+          : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+      )}
+    >
+      <div className={cn(
+        "w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-all",
+        completed ? "bg-amber-500 border-amber-500" : "border-white/10 bg-white/5"
+      )}>
+        {completed && <Check className="w-4 h-4 text-black stroke-[3px]" />}
+      </div>
+      <span className={cn(
+        "text-sm font-bold transition-all",
+        completed ? "text-white/30 line-through" : "text-white/80"
+      )}>{title}</span>
+    </motion.div>
+  )
+}
+
+export default function AnimationTestHealthTracker() {
   const [mounted, setMounted] = useState(false)
-  const [isExp, setIsExp] = useState(false)
-  const [activeTab, setActiveTab] = useState(0)
-  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3'])
-  const [gridItems, setGridItems] = useState<number[]>([])
-  const [isTeleported, setIsTeleported] = useState(false)
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
+  const [isDailyPlanExpanded, setIsDailyPlanExpanded] = useState(false)
+  const [isHabitsExpanded, setIsHabitsExpanded] = useState(false)
+  
+  const [habits, setHabits] = useState([
+    { id: 1, title: 'Выпить воды', completed: false },
+    { id: 2, title: 'Зарядка', completed: true },
+    { id: 3, title: 'Прогулка', completed: false },
+  ])
 
   useEffect(() => {
     setMounted(true)
@@ -27,181 +99,193 @@ export default function AnimationTestPageV11() {
   return (
     <MotionConfig reducedMotion="never" transition={springConfig}>
       <div className="min-h-screen bg-[#09090b] text-white p-4 md:p-8 pb-32 font-sans overflow-x-hidden" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
-      <header className="max-w-xl mx-auto mb-12 text-center">
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">V11: STRESS TEST</h1>
-        <p className="text-white/40 text-sm">Здесь собраны все тяжелые тесты. Если они лагают — мы начинаем "чистку" проекта.</p>
-      </header>
-
-      <div className="max-w-md mx-auto space-y-16">
         
-        {/* 1. DISCLOSURE */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-500">1. Height & Content</h2>
-          <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-6">
-            <button onClick={() => setIsExp(!isExp)} className="w-full flex items-center justify-between font-bold">
-              <span>Expand Details</span>
-              <motion.div animate={{ rotate: isExp ? 180 : 0 }} transition={springConfig}>
-                <ChevronDown />
-              </motion.div>
-            </button>
-            <AnimatePresence>
-              {isExp && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={springConfig}
-                  className="overflow-hidden"
-                >
-                  <div className="pt-6 space-y-4">
-                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: '80%' }} transition={{ delay: 0.2, ...springConfig }} className="h-full bg-amber-500" />
-                    </div>
-                    <p className="text-xs text-white/40 leading-relaxed">Это тест на синхронизацию высоты и внутренних элементов.</p>
-                  </div>
-                </motion.div>
+        {/* Ambient BG */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto">
+          
+          <header className="mb-8">
+            <h1 className="text-3xl font-black uppercase tracking-tighter mb-2">
+              Health Tracker <span className="text-amber-500">Test</span>
+            </h1>
+            <p className="text-white/40 text-sm">Тестируем анимации реальных элементов</p>
+          </header>
+
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-2 mb-6 md:hidden">
+            <button 
+              onClick={() => {
+                setIsCalendarExpanded(!isCalendarExpanded)
+                if (!isCalendarExpanded) {
+                  setIsDailyPlanExpanded(false)
+                  setIsHabitsExpanded(false)
+                }
+              }}
+              className={cn(
+                "p-3 rounded-2xl border transition-all",
+                isCalendarExpanded 
+                  ? "bg-amber-500 border-amber-500" 
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
               )}
-            </AnimatePresence>
-          </div>
-        </section>
-
-        {/* 2. TABS */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-500">2. Floating Tabs</h2>
-          <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-6">
-            <div className="flex relative bg-white/5 rounded-[1.5rem] p-1 mb-6">
-              {[0, 1, 2].map((i) => (
-                <button key={i} onClick={() => setActiveTab(i)} className="flex-1 py-3 relative z-10 text-[10px] font-black uppercase tracking-widest">
-                  <span className={activeTab === i ? "text-black" : "text-white/40"}>Tab {i + 1}</span>
-                  {activeTab === i && (
-                    <motion.div layoutId="pill" className="absolute inset-0 bg-white rounded-xl -z-10" transition={springConfig} />
-                  )}
-                </button>
-              ))}
-            </div>
+            >
+              <Calendar className={cn("w-5 h-5", isCalendarExpanded ? "text-black" : "text-white/40")} />
+            </button>
             
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
+            <button 
+              onClick={() => {
+                setIsHabitsExpanded(!isHabitsExpanded)
+                if (!isHabitsExpanded) {
+                  setIsCalendarExpanded(false)
+                  setIsDailyPlanExpanded(false)
+                }
+              }}
+              className={cn(
+                "p-3 rounded-2xl border transition-all",
+                isHabitsExpanded 
+                  ? "bg-amber-500 border-amber-500" 
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
+              )}
+            >
+              <ListChecks className={cn("w-5 h-5", isHabitsExpanded ? "text-black" : "text-white/40")} />
+            </button>
+
+            <button 
+              onClick={() => {
+                setIsDailyPlanExpanded(!isDailyPlanExpanded)
+                if (!isDailyPlanExpanded) {
+                  setIsCalendarExpanded(false)
+                  setIsHabitsExpanded(false)
+                }
+              }}
+              className={cn(
+                "p-3 rounded-2xl border transition-all",
+                isDailyPlanExpanded 
+                  ? "bg-amber-500 border-amber-500" 
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
+              )}
+            >
+              <Target className={cn("w-5 h-5", isDailyPlanExpanded ? "text-black" : "text-white/40")} />
+            </button>
+          </div>
+
+          {/* Mobile Calendar Expansion */}
+          <AnimatePresence>
+            {isCalendarExpanded && (
+              <motion.div 
+                key="mobile-calendar"
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                exit={{ opacity: 0, y: -20 }}
                 transition={springConfig}
-                className="space-y-4"
+                className="md:hidden mb-6"
               >
-                {activeTab === 0 && (
-                  <div className="space-y-3">
-                    <div className="h-3 bg-white/10 rounded-full w-full" />
-                    <div className="h-3 bg-white/10 rounded-full w-[90%]" />
-                    <div className="h-3 bg-white/10 rounded-full w-[95%]" />
-                    <div className="grid grid-cols-2 gap-3 mt-4">
-                      <div className="h-20 bg-amber-500/10 border border-amber-500/20 rounded-2xl" />
-                      <div className="h-20 bg-amber-500/10 border border-amber-500/20 rounded-2xl" />
-                    </div>
-                    <p className="text-xs text-white/40 mt-4">Tab 1: Если этот контент мерцает при переключении — проблема в AnimatePresence</p>
+                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Calendar className="w-5 h-5 text-amber-400" />
+                    <h3 className="text-lg font-bold">Календарь</h3>
                   </div>
-                )}
-                {activeTab === 1 && (
-                  <div className="space-y-3">
-                    <div className="h-3 bg-white/10 rounded-full w-[85%]" />
-                    <div className="h-3 bg-white/10 rounded-full w-full" />
-                    <div className="h-3 bg-white/10 rounded-full w-[80%]" />
-                    <div className="aspect-video bg-white/5 rounded-2xl mt-4 flex items-center justify-center">
-                      <Square className="text-white/20" size={32} />
-                    </div>
-                    <p className="text-xs text-white/40 mt-4">Tab 2: Большой контент для демонстрации лагов</p>
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <div key={i} className="aspect-square bg-white/5 rounded-xl flex items-center justify-center text-xs">
+                        {i + 1}
+                      </div>
+                    ))}
                   </div>
-                )}
-                {activeTab === 2 && (
-                  <div className="space-y-3">
-                    <div className="h-3 bg-white/10 rounded-full w-[75%]" />
-                    <div className="h-3 bg-white/10 rounded-full w-[95%]" />
-                    <div className="h-3 bg-white/10 rounded-full w-full" />
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                      {[...Array(6)].map((_, i) => (
-                        <div key={i} className="aspect-square bg-white/5 rounded-xl" />
-                      ))}
-                    </div>
-                    <p className="text-xs text-white/40 mt-4">Tab 3: Сетка элементов для стресс-теста</p>
-                  </div>
-                )}
+                </div>
               </motion.div>
-            </AnimatePresence>
-          </div>
-        </section>
+            )}
+          </AnimatePresence>
 
-        {/* 3. REORDER LIST */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-500">3. Drag & Drop List</h2>
-          <Reorder.Group axis="y" values={items} onReorder={setItems} className="space-y-3">
-            <AnimatePresence mode="popLayout">
-              {items.map((item) => (
-                <Reorder.Item
-                  key={item}
-                  value={item}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={springConfig}
-                  className="p-5 bg-zinc-900 border border-white/5 rounded-3xl flex items-center justify-between cursor-grab active:cursor-grabbing"
-                >
-                  <span className="font-medium">{item}</span>
-                  <button onClick={() => setItems(items.filter(i => i !== item))} className="text-white/20 hover:text-red-500 transition-colors">
-                    <Trash2 size={18} />
-                  </button>
-                </Reorder.Item>
-              ))}
-            </AnimatePresence>
-          </Reorder.Group>
-          <button 
-            onClick={() => setItems([...items, `Item ${items.length + 1}`])}
-            className="w-full py-4 bg-white/5 border border-dashed border-white/20 rounded-3xl text-[10px] font-black uppercase text-white/40"
-          >
-            + Add New
-          </button>
-        </section>
+          {/* Mobile Daily Plan Expansion */}
+          <AnimatePresence>
+            {isDailyPlanExpanded && (
+              <motion.div 
+                key="mobile-daily-plan"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={springConfig}
+                className="md:hidden mb-6"
+              >
+                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Target className="w-5 h-5 text-emerald-400" />
+                    <h3 className="text-lg font-bold">План на день</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {['Вода: 1500/2000 мл', 'Шаги: 8000/10000', 'Сон: 7/8 ч'].map((item, i) => (
+                      <div key={i} className="p-3 bg-white/5 rounded-xl text-sm">{item}</div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* 4. HEAVY GRID */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-500">4. Staggered Grid (Heavy)</h2>
-          <div className="flex gap-2 mb-4">
-            <button onClick={() => setGridItems(Array.from({ length: 12 }, (_, i) => i))} className="flex-1 py-3 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-black text-[10px]">GENERATE 12</button>
-            <button onClick={() => setGridItems([])} className="p-3 bg-white/5 rounded-xl"><RefreshCw size={16} /></button>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <AnimatePresence>
-              {gridItems.map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ ...springConfig, delay: i * 0.05 }}
-                  className="aspect-square bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md flex items-center justify-center"
-                >
-                  <Zap size={16} className="text-amber-500/20" />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </section>
+          {/* Mobile Habits Expansion */}
+          <AnimatePresence>
+            {isHabitsExpanded && (
+              <motion.div 
+                key="mobile-habits"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={springConfig}
+                className="md:hidden mb-6"
+              >
+                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <ListChecks className="w-5 h-5 text-amber-400" />
+                    <h3 className="text-lg font-bold">Привычки</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <AnimatePresence mode="popLayout">
+                      {habits.map((habit) => (
+                        <HabitItem
+                          key={habit.id}
+                          title={habit.title}
+                          completed={habit.completed}
+                          onToggle={() => {
+                            setHabits(habits.map(h => 
+                              h.id === habit.id ? { ...h, completed: !h.completed } : h
+                            ))
+                          }}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* 5. TELEPORTATION */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-500">5. Magic Move</h2>
-          <div className="flex gap-4 h-32">
-            <div className="flex-1 border-2 border-dashed border-white/5 rounded-[2rem] flex items-center justify-center">
-              {!isTeleported && <motion.div layoutId="box" className="w-12 h-12 bg-amber-500 rounded-2xl shadow-2xl" transition={springConfig} />}
-            </div>
-            <div className="flex-1 border-2 border-dashed border-white/5 rounded-[2rem] flex items-center justify-center">
-              {isTeleported && <motion.div layoutId="box" className="w-12 h-12 bg-amber-500 rounded-2xl shadow-2xl" transition={springConfig} />}
-            </div>
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <WidgetCard title="Вода" value={1500} goal={2000} icon={Droplets} color="blue" />
+            <WidgetCard title="Шаги" value={8543} goal={10000} icon={Footprints} color="red" />
+            <WidgetCard title="Кофеин" value={200} goal={400} icon={Coffee} color="amber" />
+            <WidgetCard title="Сон" value={7.5} goal={8} icon={Moon} color="indigo" />
+            <WidgetCard title="Вода" value={1800} goal={2000} icon={Droplets} color="blue" />
+            <WidgetCard title="Шаги" value={12000} goal={10000} icon={Footprints} color="red" />
           </div>
-          <button onClick={() => setIsTeleported(!isTeleported)} className="w-full py-4 bg-white text-black rounded-[2rem] font-black uppercase text-[10px]">MOVE OBJECT</button>
-        </section>
 
+          <div className="mt-8 p-6 rounded-[2rem] bg-zinc-900/50 border border-white/10">
+            <h3 className="text-sm font-black uppercase tracking-widest text-amber-500 mb-4">Инструкции</h3>
+            <ul className="space-y-2 text-sm text-white/60">
+              <li>• Протестируй кнопки раскрытия (календарь, привычки, план)</li>
+              <li>• Проверь плавность смещения виджетов вниз</li>
+              <li>• Кликай по привычкам - проверь анимацию</li>
+              <li>• Все лагает? - начинаем удалять эффекты по одному</li>
+              <li>• Всё плавно? - переносим решение в основной проект</li>
+            </ul>
+          </div>
+
+        </div>
       </div>
-    </div>
     </MotionConfig>
   )
 }
