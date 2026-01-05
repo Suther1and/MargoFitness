@@ -294,7 +294,10 @@ export default function SettingsTab({
         </div>
 
         {/* BMI Panel on Desktop only */}
-        <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]">
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]"
+        >
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
             <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Рост</label>
@@ -363,11 +366,15 @@ export default function SettingsTab({
                     )} />
                   </div>
                 </div>
-                <div className="absolute right-0 top-0">
-                  <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
+                <div className="absolute right-0 top-0" onClick={(e) => e.stopPropagation()}>
+                  <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen} modal={true}>
                     <DialogTrigger asChild>
                       <button 
-                        onClick={(e) => e.stopPropagation()}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
                         className="p-1.5 text-white/40 hover:text-white transition-all focus:outline-none"
                       >
                         <Info className="w-3.5 h-3.5" />
