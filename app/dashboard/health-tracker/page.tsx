@@ -407,7 +407,7 @@ export default function HealthTrackerPage() {
       </div>
 
       {/* Mobile Bottom Navigation - Floating Safari-style */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
+      <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
         <div className="flex items-center justify-around p-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
           <button 
             onClick={() => setActiveTab('overview')}
