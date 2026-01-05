@@ -201,63 +201,86 @@ function HealthTrackerContent() {
                 </div>
               </div>
 
-              {/* Desktop: Простой статичный заголовок с кнопками */}
-              <div className="hidden lg:flex items-center justify-between max-w-[1600px] mx-auto w-full">
-                {activeTab === 'settings' ? (
-                  /* Settings Header */
-                  <div className="max-w-5xl mx-auto w-full">
-                    <div className="space-y-1">
-                      <motion.button 
-                        whileHover={{ x: -4 }}
-                        onClick={() => setActiveTab('overview')}
-                        className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group mb-3"
+              {/* Desktop: Заголовок с эффектом перетекания через Layout Animation */}
+              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[110px] px-4 md:px-8">
+                <div className="w-full">
+                  {activeTab === 'settings' ? (
+                    <motion.div 
+                      key="settings-header"
+                      layoutId="header-wrap"
+                      className="max-w-5xl mx-auto w-full"
+                      transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                    >
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                        <motion.button 
+                          whileHover={{ x: -4 }}
+                          onClick={() => setActiveTab('overview')}
+                          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group mb-3 w-fit"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
+                        </motion.button>
+                      </motion.div>
+                      
+                      <motion.h1 
+                        layoutId="header-title"
+                        className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
                       >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
-                      </motion.button>
-                      <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
                         Настройки <span className={cn(
                           "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
                           settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
                         )}>трекера</span>
-                      </h1>
-                    </div>
-                  </div>
-                ) : (
-                  /* Overview Header */
-                  <>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                          V3.0 Beta
-                        </div>
-                        <div className="h-px w-8 bg-white/10" />
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                          <Activity className="w-3 h-3" />
-                          Live
-                        </span>
+                      </motion.h1>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="overview-header"
+                      layoutId="header-wrap"
+                      className="flex items-center justify-between w-full"
+                      transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                    >
+                      <div className="space-y-1">
+                        <motion.div 
+                          initial={{ opacity: 0 }} 
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="flex items-center gap-2 mb-2"
+                        >
+                          <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                            V3.0 Beta
+                          </div>
+                          <div className="h-px w-8 bg-white/10" />
+                          <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                            <Activity className="w-3 h-3" />
+                            Live
+                          </span>
+                        </motion.div>
+                        
+                        <motion.h1 
+                          layoutId="header-title"
+                          className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none"
+                        >
+                          Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
+                        </motion.h1>
                       </div>
-                      <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
-                        Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
-                      </h1>
-                    </div>
 
-                    {/* Desktop Action Buttons */}
-                    <div className="flex items-center gap-2">
-                      <button 
-                        className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                      <motion.div 
+                        layoutId="header-actions"
+                        className="flex items-center gap-2"
                       >
-                        <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
-                      </button>
-                      <button 
-                        onClick={() => setActiveTab('settings')}
-                        className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
-                      >
-                        <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
-                      </button>
-                    </div>
-                  </>
-                )}
+                        <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                          <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('settings')}
+                          className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                        >
+                          <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </header>
 
