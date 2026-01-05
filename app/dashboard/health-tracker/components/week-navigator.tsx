@@ -168,40 +168,14 @@ export function WeekNavigator({
           ) : (
             <motion.div
               key="month"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="w-full space-y-6"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="w-full"
             >
-              {/* Refined Month Navigation */}
-              <div className="flex items-center justify-between px-1">
-                <button 
-                  onClick={handleMonthPrev}
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all active:scale-90 outline-none"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                
-                <div className="flex flex-col items-center">
-                  <span className="text-[16px] font-oswald font-black uppercase tracking-widest text-white leading-none">
-                    {format(viewDate, 'LLLL', { locale: ru })}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 mt-1 leading-none">
-                    {format(viewDate, 'yyyy')}
-                  </span>
-                </div>
-
-                <button 
-                  onClick={handleMonthNext}
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all active:scale-90 outline-none"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 md:gap-2">
+              <div className="grid grid-cols-7 gap-1">
                 {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d, i) => (
-                  <div key={`${d}-${i}`} className="text-[10px] font-black text-white/10 text-center pb-2 uppercase tracking-widest leading-none">{d}</div>
+                  <div key={`${d}-${i}`} className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest">{d}</div>
                 ))}
                 {monthDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
@@ -211,28 +185,23 @@ export function WeekNavigator({
                   return (
                     <button
                       key={index}
-                      onClick={() => {
-                        onDateChange(day)
-                        if (day.getMonth() !== viewDate.getMonth()) {
-                          setViewDate(day)
-                        }
-                      }}
+                      onClick={() => onDateChange(day)}
                       className={cn(
-                        "relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-500 outline-none",
-                        isSelected 
-                          ? "bg-amber-500 text-black shadow-[0_12px_24px_rgba(245,158,11,0.3)] z-10" 
-                          : "hover:bg-white/5 text-white/60",
-                        !isCurrentMonth && "opacity-30 pointer-events-none"
+                        "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
+                        isSelected ? "bg-amber-500 text-black shadow-lg" : "hover:bg-white/5",
+                        !isCurrentMonth && "opacity-10"
                       )}
                     >
                       <span className={cn(
-                        "text-[16px] font-black font-oswald",
+                        "text-[13px] font-black",
                         isSelected ? "text-black" : isCurrentMonth ? "text-white" : "text-white/40"
                       )}>
                         {format(day, 'd')}
                       </span>
-                      {isToday && !isSelected && (
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                      {!isSelected && (
+                        <div className="absolute bottom-1.5 flex gap-0.5">
+                            {isToday && <div className="w-1 h-1 rounded-full bg-amber-500" />}
+                        </div>
                       )}
                     </button>
                   )
