@@ -366,11 +366,17 @@ export default function SettingsTab({
                 <div className="absolute right-0 top-0">
                   <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
                     <DialogTrigger asChild>
-                      <button className="p-1.5 text-white/40 hover:text-white transition-all focus:outline-none">
+                      <button 
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 text-white/40 hover:text-white transition-all focus:outline-none"
+                      >
                         <Info className="w-3.5 h-3.5" />
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl">
+                    <DialogContent 
+                      className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
                       <DialogHeader>
                         <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Что такое ИМТ?</DialogTitle>
                         <DialogDescription className="text-white/60 text-sm pt-2 font-medium">
