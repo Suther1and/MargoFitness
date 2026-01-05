@@ -241,7 +241,8 @@ function HealthTrackerContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between w-full">
+                    /* Переключаем на items-start и добавляем mt-9 (36px), чтобы выровнять по верху h1 */
+                    <div className="flex items-start justify-between w-full">
                       <div className="flex flex-col">
                         <div className="h-8 mb-1 flex items-center">
                           <motion.div 
@@ -278,7 +279,7 @@ function HealthTrackerContent() {
                       <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 mt-9"
                       >
                         <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
                           <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
