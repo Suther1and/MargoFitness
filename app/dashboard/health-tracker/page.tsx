@@ -356,73 +356,70 @@ function HealthTrackerContent() {
                   </AnimatePresence>
                 </div>
 
-                <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+                {/* Desktop Settings - Full Width */}
+                {activeTab === 'settings' && (
+                  <div className="hidden lg:block">
+                    <SettingsTab 
+                      onBack={() => setActiveTab('overview')} 
+                      selectedDate={selectedDate}
+                      onDateChange={setSelectedDate}
+                      isCalendarExpanded={isCalendarExpanded}
+                      setIsCalendarExpanded={setIsCalendarExpanded}
+                      activeSubTab={settingsSubTab}
+                      setActiveSubTab={setSettingsSubTab}
+                    />
+                  </div>
+                )}
+
+                <div className={cn(
+                  "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",
+                  activeTab === 'settings' && "lg:hidden"
+                )} style={{ contain: 'layout paint' }}>
                   <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-                      {activeTab === 'overview' && (
-                        <div className="flex flex-col gap-6">
-                          <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                          <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                          <div className="grid grid-cols-2 gap-4">
-                              <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                              <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                              <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                              <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
-                          </div>
-                          <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                        </div>
-                      )}
-                      {activeTab === 'settings' && (
-                        <div className="col-span-12 w-full">
-                          <SettingsTab 
-                            onBack={() => setActiveTab('overview')} 
-                            selectedDate={selectedDate}
-                            onDateChange={setSelectedDate}
-                            isCalendarExpanded={isCalendarExpanded}
-                            setIsCalendarExpanded={setIsCalendarExpanded}
-                            activeSubTab={settingsSubTab}
-                            setActiveSubTab={setSettingsSubTab}
-                          />
-                        </div>
-                      )}
+                    <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                    <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                      <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                      <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                      <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
                     </div>
+                    <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                  </div>
 
-                    {activeTab !== 'settings' && (
-                      <>
-                        <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-                          <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
-                          <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                        </div>
+                  <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
+                    <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                    <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                  </div>
 
-                        <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
-                          <HealthTrackerCard 
-                                className="p-4" 
-                                title="Календарь" 
-                                subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
-                                icon={Calendar} 
-                                iconColor="text-amber-500" 
-                                iconBg="bg-amber-500/10"
-                                rightAction={
-                                  <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
-                                    <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                                      <ChevronDown className="w-4 h-4 text-white/40" />
-                                    </motion.div>
-                                  </button>
-                                }
-                              >
-                                  <WeekNavigator 
-                                    selectedDate={selectedDate} 
-                                    onDateChange={setSelectedDate} 
-                                    minimal={true} 
-                                    isExpanded={isCalendarExpanded} 
-                                  />
-                              </HealthTrackerCard>
+                  <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
+                    <HealthTrackerCard 
+                      className="p-4" 
+                      title="Календарь" 
+                      subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
+                      icon={Calendar} 
+                      iconColor="text-amber-500" 
+                      iconBg="bg-amber-500/10"
+                      rightAction={
+                        <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
+                          <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
+                            <ChevronDown className="w-4 h-4 text-white/40" />
+                          </motion.div>
+                        </button>
+                      }
+                    >
+                      <WeekNavigator 
+                        selectedDate={selectedDate} 
+                        onDateChange={setSelectedDate} 
+                        minimal={true} 
+                        isExpanded={isCalendarExpanded} 
+                      />
+                    </HealthTrackerCard>
 
-                          <GoalsSummaryCard data={data} />
-                          <AchievementsCard />
-                          <DailyPhotosCard photos={data.dailyPhotos} />
-                        </div>
-                      </>
-                    )}
+                    <GoalsSummaryCard data={data} />
+                    <AchievementsCard />
+                    <DailyPhotosCard photos={data.dailyPhotos} />
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
