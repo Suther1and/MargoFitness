@@ -53,8 +53,9 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
       transition={{
         layout: { 
           type: "spring", 
-          stiffness: 300, 
-          damping: 30,
+          stiffness: 120, 
+          damping: 24,
+          mass: 1
         }
       }}
       style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
@@ -78,13 +79,13 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
               opacity: 0,
               height: 0,
               transition: { 
-                opacity: { duration: 0.1 },
-                height: { duration: 0.2, ease: [0.4, 0, 1, 1] } 
+                opacity: { duration: 0.3 },
+                height: { duration: 0.45, ease: [0.4, 0, 0.2, 1] } 
               } 
             }}
             transition={{
-              height: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-              opacity: { duration: 0.2, delay: 0.1 }
+              height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.4, delay: 0.1 }
             }}
             className="flex flex-col gap-6 md:gap-3 overflow-hidden"
           >
@@ -220,7 +221,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
             animate={{ opacity: 1 }}
             exit={{ 
               opacity: 0,
-              transition: { duration: 0.1 }
+              transition: { duration: 0.3 }
             }}
             className="flex items-center justify-between"
           >
@@ -608,15 +609,15 @@ export function HabitsSection() {
                         height: 'auto', 
                         opacity: 1,
                         transition: {
-                          height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-                          opacity: { duration: 0.25, delay: 0.1 }
+                          height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                          opacity: { duration: 0.3, delay: 0.1 }
                         }
                       }}
                       exit={{ 
                         height: 0, 
                         opacity: 0,
                         transition: {
-                          height: { duration: 0.3, ease: [0.4, 0, 1, 1] },
+                          height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
                           opacity: { duration: 0.2 }
                         }
                       }}
