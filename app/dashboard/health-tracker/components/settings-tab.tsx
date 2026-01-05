@@ -296,8 +296,8 @@ export default function SettingsTab({
         {/* BMI Panel on Desktop only */}
         <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]">
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
-            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px]">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
+            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px] justify-center">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Рост</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -305,13 +305,13 @@ export default function SettingsTab({
                   placeholder="---"
                   value={localSettings.userParams.height ?? ''}
                   onChange={(e) => handleParamChange('height', e.target.value)}
-                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
                 />
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
               </div>
             </div>
-            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px]">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
+            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px] justify-center">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Вес</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -319,13 +319,13 @@ export default function SettingsTab({
                   placeholder="---"
                   value={localSettings.userParams.weight ?? ''}
                   onChange={(e) => handleParamChange('weight', e.target.value)}
-                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
                 />
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
               </div>
             </div>
-            <div className="flex flex-col px-4 py-0.5 w-[100px]">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
+            <div className="flex flex-col px-4 py-0.5 w-[100px] justify-center">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Возраст</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -333,7 +333,7 @@ export default function SettingsTab({
                   placeholder="--"
                   value={localSettings.userParams.age ?? ''}
                   onChange={(e) => handleParamChange('age', e.target.value)}
-                  className="w-full bg-transparent text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
+                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none"
                 />
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">лет</span>
               </div>
@@ -349,7 +349,7 @@ export default function SettingsTab({
                 <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
                 <div className="flex items-center mt-auto pb-0.5">
                   <div className="flex items-center gap-1">
-                    <span className="text-[34px] font-oswald font-black text-white leading-none tracking-tighter">
+                    <span className="text-[30px] font-oswald font-black text-white leading-none tracking-tighter">
                       {bmiValue}
                     </span>
                     <div className={cn("w-2 h-2 rounded-full animate-pulse mt-1", 
