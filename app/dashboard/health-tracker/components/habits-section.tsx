@@ -23,6 +23,7 @@ const TIME_CONFIG = {
 interface HabitCardProps {
   habit: Habit
   isEditing: boolean
+  isAnyEditing: boolean
   editForm: { title: string; frequency: HabitFrequency; time: HabitTime } | null
   setEditForm: (form: { title: string; frequency: HabitFrequency; time: HabitTime } | null) => void
   startEditing: (habit: Habit) => void
@@ -32,7 +33,7 @@ interface HabitCardProps {
   deleteHabit: (id: string) => void
 }
 
-function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit }: HabitCardProps) {
+function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit }: HabitCardProps) {
   const config = TIME_CONFIG[habit.time]
   const Icon = config.icon
 
@@ -43,11 +44,16 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
-        className="bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl"
+        transition={{
+          layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+          opacity: { duration: 0.2 },
+          scale: { duration: 0.3 }
+        }}
+        className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:py-3.5 shadow-xl"
       >
-        <div className="flex flex-col gap-6">
-          <div className="space-y-1.5">
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Что планируем?</span>
+        <div className="flex flex-col gap-6 md:gap-4">
+          <div className="space-y-1.5 md:space-y-1">
+            <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
             <input
               placeholder="Йога, Чтение или Зарядка"
               value={editForm.title}
@@ -56,16 +62,16 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
             />
           </div>
 
-          <div className="flex flex-row items-end gap-3 w-full">
-            <div className="space-y-1.5 flex-1">
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько раз в неделю?</span>
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between">
+          <div className="flex flex-row md:flex-row items-end gap-3 md:gap-4 w-full">
+            <div className="space-y-1.5 md:space-y-1 flex-1 md:flex-none">
+              <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Сколько раз в неделю?</span>
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between md:justify-start">
                 {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
                   <button
                     key={num}
                     onClick={() => setEditForm({ ...editForm, frequency: num })}
                     className={cn(
-                      "w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center",
+                      "w-8 h-8 md:w-9 md:h-9 rounded-lg text-xs md:text-sm font-black transition-all flex items-center justify-center",
                       editForm.frequency === num 
                         ? "bg-amber-500 text-[#09090b] shadow-lg" 
                         : "text-white/30 hover:text-white/60"
@@ -77,7 +83,8 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
               </div>
             </div>
 
-            <div className="space-y-1.5 flex-[0.7]">
+            {/* Mobile: Dropdown */}
+            <div className="space-y-1.5 flex-[0.7] md:hidden">
               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -122,18 +129,49 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
+            {/* Desktop: Icon Buttons */}
+            <div className="hidden md:block space-y-1">
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
+                {editForm.time === 'morning' && 'Утром'}
+                {editForm.time === 'afternoon' && 'Днем'}
+                {editForm.time === 'evening' && 'Вечером'}
+                {editForm.time === 'anytime' && 'В любое время'}
+              </span>
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                {(['morning', 'afternoon', 'evening', 'anytime'] as HabitTime[]).map((key) => {
+                  const Config = TIME_CONFIG[key]
+                  const Icon = Config.icon
+                  return (
+                    <button
+                      key={key}
+                      title={Config.label}
+                      onClick={() => setEditForm({ ...editForm, time: key })}
+                      className={cn(
+                        "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                        editForm.time === key 
+                          ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                          : "text-white/30 hover:text-white/60"
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={() => saveEdit(habit.id)}
-              className="h-[46px] flex-1 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
+              className="h-[46px] md:h-[40px] flex-1 bg-amber-500 text-[#09090b] rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
             >
               Сохранить
             </button>
             <button
               onClick={cancelEditing}
-              className="h-[46px] px-6 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
+              className="h-[46px] md:h-[40px] px-6 md:px-5 bg-white/5 text-white/40 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
             >
               Отмена
             </button>
@@ -145,14 +183,19 @@ function HabitCard({ habit, isEditing, editForm, setEditForm, startEditing, save
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      transition={{
+        layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+      }}
       className={cn(
-        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-colors duration-300",
+        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
         habit.enabled 
           ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10" 
-          : "border-white/5 bg-white/[0.01] opacity-40 grayscale"
+          : "border-white/5 bg-white/[0.01] opacity-40 grayscale",
+        isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
       style={{ contain: 'paint' }}
     >
@@ -551,12 +594,13 @@ export function HabitsSection() {
                       className="overflow-hidden"
                       style={{ willChange: 'height, opacity' }}
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-4 pt-2">
                         {items.map(habit => (
                           <HabitCard 
                             key={habit.id}
                             habit={habit}
                             isEditing={editingId === habit.id}
+                            isAnyEditing={editingId !== null}
                             editForm={editForm}
                             setEditForm={setEditForm}
                             startEditing={startEditing}
@@ -588,13 +632,14 @@ export function HabitsSection() {
                 <div className="h-px bg-white/5 flex-1" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-4">
                 <AnimatePresence>
                   {items.map(habit => (
                     <HabitCard 
                       key={habit.id}
                       habit={habit}
                       isEditing={editingId === habit.id}
+                      isAnyEditing={editingId !== null}
                       editForm={editForm}
                       setEditForm={setEditForm}
                       startEditing={startEditing}
