@@ -282,8 +282,21 @@ function HealthTrackerContent() {
 
                   <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
                     <div className="hidden lg:block">
-                        <HealthTrackerCard className="p-4" title="Календарь" subtitle={format(selectedDate, 'LLLL', { locale: ru })} icon={Calendar} iconColor="text-amber-500" iconBg="bg-amber-500/10">
-                            <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={isCalendarExpanded} />
+                        <HealthTrackerCard 
+                          className="p-4" 
+                          title="Календарь" 
+                          subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
+                          icon={Calendar} 
+                          iconColor="text-amber-500" 
+                          iconBg="bg-amber-500/10"
+                        >
+                            <WeekNavigator 
+                              selectedDate={selectedDate} 
+                              onDateChange={setSelectedDate} 
+                              minimal={true} 
+                              isExpanded={isCalendarExpanded} 
+                              onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                            />
                         </HealthTrackerCard>
                     </div>
                     <div className="hidden lg:block"><GoalsSummaryCard data={data} /></div>
