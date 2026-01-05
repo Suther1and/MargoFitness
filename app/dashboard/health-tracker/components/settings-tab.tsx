@@ -147,8 +147,8 @@ export default function SettingsTab({
       "w-full space-y-6 pb-24",
       isAnimating && "is-animating"
     )}>
-      {/* BMI Panel */}
-      <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
+      {/* BMI Panel - Hidden on Desktop (moved to header) */}
+      <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px] lg:hidden">
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
             <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
