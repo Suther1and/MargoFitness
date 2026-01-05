@@ -295,19 +295,20 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
         </div>
       </div>
 
-      {/* Content */}
-      <AnimatePresence mode="popLayout" initial={false}>
-        {activeSubTab === 'widgets' ? (
-          <motion.div
-            key="widgets"
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => setIsAnimating(false)}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="space-y-10 settings-content-container w-full"
-          >
+      {/* Content Container with stable height to prevent scroll jumping */}
+      <div className="relative min-h-[75vh]">
+        <AnimatePresence mode="wait">
+          {activeSubTab === 'widgets' ? (
+            <motion.div
+              key="widgets"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="space-y-10 settings-content-container w-full"
+            >
             {widgetGroups.map((group) => {
               const GroupIcon = group.icon
               return (
@@ -410,22 +411,23 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
                 </div>
               )
             })}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="habits"
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => setIsAnimating(false)}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full"
-          >
-            <HabitsSection />
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="habits"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="w-full"
+            >
+              <HabitsSection />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
