@@ -13,12 +13,7 @@ interface HabitItemProps {
 
 function HabitItem({ habit, onToggle }: HabitItemProps) {
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      whileTap={{ scale: 0.99 }}
+    <div
       onClick={() => onToggle(habit.id)}
       className={cn(
         "group relative flex items-center justify-between p-2 rounded-xl",
@@ -48,7 +43,7 @@ function HabitItem({ habit, onToggle }: HabitItemProps) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -93,15 +88,13 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-2">
-                  <AnimatePresence mode="popLayout">
-                    {categoryHabits.map((habit) => (
-                      <HabitItem
-                        key={habit.id}
-                        habit={habit}
-                        onToggle={onToggle}
-                      />
-                    ))}
-                  </AnimatePresence>
+                  {categoryHabits.map((habit) => (
+                    <HabitItem
+                      key={habit.id}
+                      habit={habit}
+                      onToggle={onToggle}
+                    />
+                  ))}
                 </div>
               </div>
             )

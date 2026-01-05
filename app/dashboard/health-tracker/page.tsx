@@ -194,10 +194,15 @@ export default function HealthTrackerPage() {
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
-                marginBottom: 24 
+                marginBottom: 24,
+                transition: { type: 'spring', duration: 0.4, bounce: 0 }
               }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              exit={{ 
+                height: 0, 
+                opacity: 0, 
+                marginBottom: 0,
+                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+              }}
               className="overflow-hidden lg:hidden transform-gpu"
             >
               <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl">
@@ -224,10 +229,15 @@ export default function HealthTrackerPage() {
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
-                marginBottom: 24 
+                marginBottom: 24,
+                transition: { type: 'spring', duration: 0.4, bounce: 0 }
               }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              exit={{ 
+                height: 0, 
+                opacity: 0, 
+                marginBottom: 0,
+                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+              }}
               className="overflow-hidden lg:hidden transform-gpu"
             >
               <GoalsSummaryCard data={data} />
@@ -244,10 +254,15 @@ export default function HealthTrackerPage() {
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
-                marginBottom: 24 
+                marginBottom: 24,
+                transition: { type: 'spring', duration: 0.4, bounce: 0 }
               }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
+              exit={{ 
+                height: 0, 
+                opacity: 0, 
+                marginBottom: 0,
+                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+              }}
               className="overflow-hidden lg:hidden transform-gpu"
             >
               <HabitsCard 

@@ -26,8 +26,7 @@ export function MetricCardWrapper({
   doneGlowColor = 'bg-emerald-500/10',
 }: MetricCardWrapperProps) {
   return (
-    <motion.div
-      layout="position"
+    <div
       className={cn(
         CARD_STYLES.base,
         CARD_STYLES.background,
@@ -48,7 +47,7 @@ export function MetricCardWrapper({
       />
 
       <div className="relative z-10 flex flex-col h-full">{children}</div>
-    </motion.div>
+    </div>
   )
 }
 

@@ -1,291 +1,248 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
-import { ChevronDown, Calendar, Target, ListChecks, Droplets, Footprints, Coffee, Moon, Check } from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { Check, Clock, Sun, Moon, Calendar as CalendarIcon, ListChecks, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const springConfig = { stiffness: 260, damping: 30 }
+// Реальные компоненты из health-tracker
+import { WaterCardH } from '@/app/dashboard/health-tracker/components/water-card-h'
+import { StepsCardH } from '@/app/dashboard/health-tracker/components/steps-card-h'
+import { WeightCardH } from '@/app/dashboard/health-tracker/components/weight-card-h'
+import { SleepCardH } from '@/app/dashboard/health-tracker/components/sleep-card-h'
+import { CaffeineCardH } from '@/app/dashboard/health-tracker/components/caffeine-card-h'
+import { MoodEnergyCardH } from '@/app/dashboard/health-tracker/components/mood-energy-card-h'
+import { NotesCard } from '@/app/dashboard/health-tracker/components/notes-card'
+import { GoalsSummaryCard } from '@/app/dashboard/health-tracker/components/goals-summary-card'
+import { MOCK_DATA } from '@/app/dashboard/health-tracker/types'
 
-// Простая карточка виджета (копия стиля из health-tracker)
-function WidgetCard({ title, value, goal, icon: Icon, color }: any) {
-  const percentage = goal ? Math.min((value / goal) * 100, 100) : 0
-  const isDone = goal && value >= goal
+// Мемоизированные версии виджетов - не ререндерятся при раскрытии HabitsCard
+const MemoizedWaterCard = React.memo(WaterCardH)
+const MemoizedStepsCard = React.memo(StepsCardH)
+const MemoizedWeightCard = React.memo(WeightCardH)
+const MemoizedSleepCard = React.memo(SleepCardH)
+const MemoizedCaffeineCard = React.memo(CaffeineCardH)
+const MemoizedMoodEnergyCard = React.memo(MoodEnergyCardH)
+const MemoizedNotesCard = React.memo(NotesCard)
+const MemoizedGoalsSummaryCard = React.memo(GoalsSummaryCard)
 
+// === ТИПЫ ===
+interface DailyHabit {
+  id: string
+  title: string
+  completed: boolean
+  streak: number
+  category: "morning" | "afternoon" | "evening" | "anytime"
+}
+
+// === БАЗОВЫЙ HabitItem (будем менять для каждого варианта) ===
+function HabitItem({ habit, onToggle, variant }: any) {
+  const baseClasses = cn(
+    "flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all",
+    habit.completed
+      ? "border-amber-500/20 bg-amber-500/5 opacity-60"
+      : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+  )
+
+  const content = (
+    <>
+      <div className={cn(
+        "w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all",
+        habit.completed ? "bg-amber-500 border-amber-500" : "border-white/10 bg-white/5"
+      )}>
+        {habit.completed && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+      </div>
+      <span className={cn("text-sm font-bold", habit.completed ? "text-white/30 line-through" : "text-white/80")}>
+        {habit.title}
+      </span>
+    </>
+  )
+
+  // Current Fix: обычный div без анимаций
   return (
-    <div className={cn(
-      "relative group overflow-hidden border transition-all duration-700 backdrop-blur-2xl rounded-[2rem] p-4",
-      "bg-zinc-900/50 border-white/10 hover:border-white/20"
-    )}>
-      <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-3">
-          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", `bg-${color}-500/10`)}>
-            <Icon className={cn("w-4 h-4", `text-${color}-400`)} />
-          </div>
-          <span className="text-xs font-black uppercase tracking-wider text-white/50">{title}</span>
-        </div>
-        
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-3xl font-bold text-white">{value}</span>
-          {goal && <span className="text-sm text-white/30">/ {goal}</span>}
-        </div>
+    <div onClick={() => onToggle(habit.id)} className={baseClasses}>
+      {content}
+    </div>
+  )
+}
 
-        {goal && (
-          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-              className={cn("h-full", isDone ? "bg-emerald-500" : `bg-${color}-500`)}
-              transition={springConfig}
-            />
-          </div>
-        )}
+// === HabitsCard с выбором варианта ===
+function TestHabitsCard({ habits, onToggle, variant, variantName }: any) {
+  return (
+    <div className="rounded-[2rem] border border-white/5 bg-[#121214]/90 p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+          <ListChecks className="w-4 h-4 text-amber-500" />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-white">{variantName}</h3>
+          <p className="text-[10px] text-white/40">Completed: {habits.filter((h: any) => h.completed).length}/{habits.length}</p>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        {habits.map((habit: any) => (
+          <HabitItem key={habit.id} habit={habit} onToggle={onToggle} variant={variant} />
+        ))}
       </div>
     </div>
   )
 }
 
-// Компонент привычки
-function HabitItem({ title, completed, onToggle }: any) {
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      onClick={onToggle}
-      className={cn(
-        "flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all",
-        completed
-          ? "border-amber-500/20 bg-amber-500/5 opacity-60"
-          : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
-      )}
-    >
-      <div className={cn(
-        "w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-all",
-        completed ? "bg-amber-500 border-amber-500" : "border-white/10 bg-white/5"
-      )}>
-        {completed && <Check className="w-4 h-4 text-black stroke-[3px]" />}
-      </div>
-      <span className={cn(
-        "text-sm font-bold transition-all",
-        completed ? "text-white/30 line-through" : "text-white/80"
-      )}>{title}</span>
-    </motion.div>
-  )
-}
-
-export default function AnimationTestHealthTracker() {
+export default function AnimationTestRealWorld() {
   const [mounted, setMounted] = useState(false)
-  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
-  const [isDailyPlanExpanded, setIsDailyPlanExpanded] = useState(false)
-  const [isHabitsExpanded, setIsHabitsExpanded] = useState(false)
+  const [openSections, setOpenSections] = useState<number[]>([])
   
-  const [habits, setHabits] = useState([
-    { id: 1, title: 'Выпить воды', completed: false },
-    { id: 2, title: 'Зарядка', completed: true },
-    { id: 3, title: 'Прогулка', completed: false },
+  const [habits, setHabits] = useState<DailyHabit[]>([
+    { id: '1', title: 'Выпить воды', completed: false, streak: 3, category: 'morning' },
+    { id: '2', title: 'Зарядка', completed: true, streak: 5, category: 'morning' },
+    { id: '3', title: 'Прогулка', completed: false, streak: 2, category: 'afternoon' },
+    { id: '4', title: 'Чтение', completed: false, streak: 7, category: 'evening' },
   ])
+  
+  // Хуки для варианта 2 (Measure Height) - ДОЛЖНЫ быть на верхнем уровне
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [measuredHeight, setMeasuredHeight] = useState<number | 'auto'>('auto')
+  
+  // Состояние для реальных компонентов трекера
+  const [trackerData, setTrackerData] = useState(MOCK_DATA)
+  
+  // Стабильный коллбэк - не создается заново при каждом рендере
+  const handleMetricUpdate = useCallback((metric: string, value: any) => {
+    setTrackerData(prev => ({ ...prev, [metric]: value }))
+  }, [])
+  
+  const handleHabitToggle = useCallback((id: string) => {
+    setHabits(prev => prev.map(h => 
+      h.id === id ? { ...h, completed: !h.completed } : h
+    ))
+  }, [])
 
   useEffect(() => {
     setMounted(true)
-    // Force GPU acceleration
-    document.documentElement.style.transform = 'translateZ(0)'
-    document.documentElement.style.willChange = 'transform'
   }, [])
 
   if (!mounted) return null
 
+  const toggleSection = (section: number) => {
+    setOpenSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    )
+  }
+
+  const variants = [
+    { id: 1, name: 'Different Exit', color: 'orange', desc: 'без подлага' },
+  ]
+
   return (
-    <MotionConfig reducedMotion="never" transition={springConfig}>
-      <div className="min-h-screen bg-[#09090b] text-white p-4 md:p-8 pb-32 font-sans overflow-x-hidden" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+    <div className="min-h-screen bg-[#09090b] text-white p-4 md:p-8 pb-32 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Ambient BG */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
+        {/* 5 КНОПОК */}
+        <div className="flex flex-nowrap gap-3 justify-center p-4 rounded-2xl bg-zinc-900/30 border border-white/5 overflow-x-auto">
+          {variants.map((v) => (
+            <button
+              key={v.id}
+              onClick={() => toggleSection(v.id)}
+              className={cn(
+                "flex flex-col items-center gap-1 px-4 py-3 rounded-xl border font-bold text-xs uppercase transition-all whitespace-nowrap",
+                openSections.includes(v.id)
+                  ? `bg-${v.color}-500 border-${v.color}-500 text-black`
+                  : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
+              )}
+            >
+              <span>{v.name}</span>
+              <span className="text-[10px] font-normal lowercase opacity-60">{v.desc}</span>
+            </button>
+          ))}
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto">
+        {/* РАСКРЫВАЮЩАЯСЯ СЕКЦИЯ */}
+        {variants.map((v) => {
+          const isOpen = openSections.includes(v.id)
           
-          <header className="mb-8">
-            <h1 className="text-3xl font-black uppercase tracking-tighter mb-2">
-              Health Tracker <span className="text-amber-500">Test</span>
-            </h1>
-            <p className="text-white/40 text-sm">Тестируем анимации реальных элементов</p>
-          </header>
-
-          {/* Mobile Actions */}
-          <div className="flex items-center gap-2 mb-6 md:hidden">
-            <button 
-              onClick={() => {
-                setIsCalendarExpanded(!isCalendarExpanded)
-                if (!isCalendarExpanded) {
-                  setIsDailyPlanExpanded(false)
-                  setIsHabitsExpanded(false)
-                }
-              }}
-              className={cn(
-                "p-3 rounded-2xl border transition-all",
-                isCalendarExpanded 
-                  ? "bg-amber-500 border-amber-500" 
-                  : "bg-white/5 border-white/5 hover:bg-white/10"
+          return (
+            <AnimatePresence key={v.id}>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ 
+                    height: 'auto', 
+                    opacity: 1,
+                    transition: { type: 'spring', duration: 0.4, bounce: 0 }
+                  }}
+                  exit={{ 
+                    height: 0, 
+                    opacity: 0,
+                    transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+                  }}
+                  className="overflow-hidden mb-6"
+                >
+                  <TestHabitsCard
+                    habits={habits}
+                    onToggle={handleHabitToggle}
+                    variant={1}
+                    variantName={`Different Exit (без подлага)`}
+                  />
+                </motion.div>
               )}
-            >
-              <Calendar className={cn("w-5 h-5", isCalendarExpanded ? "text-black" : "text-white/40")} />
-            </button>
-            
-            <button 
-              onClick={() => {
-                setIsHabitsExpanded(!isHabitsExpanded)
-                if (!isHabitsExpanded) {
-                  setIsCalendarExpanded(false)
-                  setIsDailyPlanExpanded(false)
-                }
-              }}
-              className={cn(
-                "p-3 rounded-2xl border transition-all",
-                isHabitsExpanded 
-                  ? "bg-amber-500 border-amber-500" 
-                  : "bg-white/5 border-white/5 hover:bg-white/10"
-              )}
-            >
-              <ListChecks className={cn("w-5 h-5", isHabitsExpanded ? "text-black" : "text-white/40")} />
-            </button>
+            </AnimatePresence>
+          )
+        })}
 
-            <button 
-              onClick={() => {
-                setIsDailyPlanExpanded(!isDailyPlanExpanded)
-                if (!isDailyPlanExpanded) {
-                  setIsCalendarExpanded(false)
-                  setIsHabitsExpanded(false)
-                }
-              }}
-              className={cn(
-                "p-3 rounded-2xl border transition-all",
-                isDailyPlanExpanded 
-                  ? "bg-amber-500 border-amber-500" 
-                  : "bg-white/5 border-white/5 hover:bg-white/10"
-              )}
-            >
-              <Target className={cn("w-5 h-5", isDailyPlanExpanded ? "text-black" : "text-white/40")} />
-            </button>
+        {/* РЕАЛЬНЫЕ ВИДЖЕТЫ ВНИЗУ - без анимации движения */}
+        <div className="mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MemoizedWaterCard 
+              value={trackerData.waterIntake} 
+              goal={trackerData.waterGoal} 
+              onUpdate={(val) => handleMetricUpdate('waterIntake', val)} 
+            />
+            <MemoizedStepsCard 
+              steps={trackerData.steps} 
+              goal={trackerData.stepsGoal} 
+              onUpdate={(val) => handleMetricUpdate('steps', val)} 
+            />
           </div>
-
-          {/* Mobile Calendar Expansion */}
-          <AnimatePresence>
-            {isCalendarExpanded && (
-              <motion.div 
-                key="mobile-calendar"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={springConfig}
-                className="md:hidden mb-6"
-              >
-                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Calendar className="w-5 h-5 text-amber-400" />
-                    <h3 className="text-lg font-bold">Календарь</h3>
-                  </div>
-                  <div className="grid grid-cols-7 gap-2">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <div key={i} className="aspect-square bg-white/5 rounded-xl flex items-center justify-center text-xs">
-                        {i + 1}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Mobile Daily Plan Expansion */}
-          <AnimatePresence>
-            {isDailyPlanExpanded && (
-              <motion.div 
-                key="mobile-daily-plan"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={springConfig}
-                className="md:hidden mb-6"
-              >
-                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <Target className="w-5 h-5 text-emerald-400" />
-                    <h3 className="text-lg font-bold">План на день</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {['Вода: 1500/2000 мл', 'Шаги: 8000/10000', 'Сон: 7/8 ч'].map((item, i) => (
-                      <div key={i} className="p-3 bg-white/5 rounded-xl text-sm">{item}</div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Mobile Habits Expansion */}
-          <AnimatePresence>
-            {isHabitsExpanded && (
-              <motion.div 
-                key="mobile-habits"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={springConfig}
-                className="md:hidden mb-6"
-              >
-                <div className="p-6 rounded-[2rem] border border-white/5 bg-[#121214]/40 backdrop-blur-xl">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <ListChecks className="w-5 h-5 text-amber-400" />
-                    <h3 className="text-lg font-bold">Привычки</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <AnimatePresence mode="popLayout">
-                      {habits.map((habit) => (
-                        <HabitItem
-                          key={habit.id}
-                          title={habit.title}
-                          completed={habit.completed}
-                          onToggle={() => {
-                            setHabits(habits.map(h => 
-                              h.id === habit.id ? { ...h, completed: !h.completed } : h
-                            ))
-                          }}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <WidgetCard title="Вода" value={1500} goal={2000} icon={Droplets} color="blue" />
-            <WidgetCard title="Шаги" value={8543} goal={10000} icon={Footprints} color="red" />
-            <WidgetCard title="Кофеин" value={200} goal={400} icon={Coffee} color="amber" />
-            <WidgetCard title="Сон" value={7.5} goal={8} icon={Moon} color="indigo" />
-            <WidgetCard title="Вода" value={1800} goal={2000} icon={Droplets} color="blue" />
-            <WidgetCard title="Шаги" value={12000} goal={10000} icon={Footprints} color="red" />
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <MemoizedWeightCard 
+              value={trackerData.weight} 
+              goalWeight={trackerData.weightGoal}
+              onUpdate={(val) => handleMetricUpdate('weight', val)} 
+            />
+            <MemoizedCaffeineCard 
+              value={trackerData.caffeineIntake} 
+              goal={trackerData.caffeineGoal} 
+              onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} 
+            />
+            <MemoizedSleepCard 
+              hours={trackerData.sleepHours} 
+              goal={trackerData.sleepGoal} 
+              onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
+            />
+            <MemoizedMoodEnergyCard 
+              mood={trackerData.mood} 
+              energy={trackerData.energyLevel} 
+              onMoodUpdate={(val) => handleMetricUpdate('mood', val)} 
+              onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
+            />
           </div>
-
-          <div className="mt-8 p-6 rounded-[2rem] bg-zinc-900/50 border border-white/10">
-            <h3 className="text-sm font-black uppercase tracking-widest text-amber-500 mb-4">Инструкции</h3>
-            <ul className="space-y-2 text-sm text-white/60">
-              <li>• Протестируй кнопки раскрытия (календарь, привычки, план)</li>
-              <li>• Проверь плавность смещения виджетов вниз</li>
-              <li>• Кликай по привычкам - проверь анимацию</li>
-              <li>• Все лагает? - начинаем удалять эффекты по одному</li>
-              <li>• Всё плавно? - переносим решение в основной проект</li>
-            </ul>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <MemoizedNotesCard 
+              value={trackerData.notes} 
+              onUpdate={(val) => handleMetricUpdate('notes', val)} 
+            />
+            <MemoizedGoalsSummaryCard data={trackerData} />
           </div>
-
         </div>
+
+
+
       </div>
-    </MotionConfig>
+    </div>
   )
 }

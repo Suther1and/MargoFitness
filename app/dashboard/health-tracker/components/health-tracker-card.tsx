@@ -29,8 +29,7 @@ export function HealthTrackerCard({
   rightAction
 }: HealthTrackerCardProps) {
   return (
-    <motion.div 
-      layout="position"
+    <div 
       className={cn(
         "relative h-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl transition-all duration-500 hover:border-white/10 group",
         containerClassName
@@ -77,7 +76,7 @@ export function HealthTrackerCard({
           {children}
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
