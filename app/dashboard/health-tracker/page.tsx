@@ -132,7 +132,7 @@ function HealthTrackerContent() {
               <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
             </div>
 
-            <header className="mb-8 md:mb-12">
+            <header className="mb-8 md:mb-12 lg:mb-6">
               {/* Mobile: Dialog календарь с анимированным заголовком */}
               <div className="flex flex-col lg:hidden">
                 <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
@@ -202,7 +202,7 @@ function HealthTrackerContent() {
               </div>
 
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
-              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full min-h-[95px] px-4 md:px-8 mb-4">
+              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
                 <div className="w-full">
                   {activeTab === 'settings' ? (
                     <div className="max-w-5xl mx-auto w-full">

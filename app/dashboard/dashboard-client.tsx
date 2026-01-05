@@ -800,7 +800,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
       <div className="relative w-full">
         <div className="px-4 md:px-8 pb-12">
               {/* Header */}
-              <div className="mb-8 md:mb-12">
+              <div className="mb-8 md:mb-12 lg:mb-6">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
                   {/* Left side - Title */}
                   <div className="flex-1">
@@ -815,7 +815,7 @@ export default function DashboardClient({ profile, bonusStats }: DashboardClient
                       </div>
                     </div>
                     
-                    <div className="xl:mt-6">
+                    <div className="xl:mt-2">
                       <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white font-oswald uppercase">
                         Личный кабинет
                       </h1>
