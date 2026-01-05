@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../hooks/use-habits'
+import { useIsMobile } from '@/lib/hooks/use-is-mobile'
 import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../types'
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ interface HabitCardProps {
   habit: Habit
   isEditing: boolean
   isAnyEditing: boolean
+  isMobile: boolean
   editForm: { title: string; frequency: HabitFrequency; time: HabitTime } | null
   setEditForm: (form: { title: string; frequency: HabitFrequency; time: HabitTime } | null) => void
   startEditing: (habit: Habit) => void
@@ -33,30 +35,22 @@ interface HabitCardProps {
   deleteHabit: (id: string) => void
 }
 
-function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit }: HabitCardProps) {
+function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit }: HabitCardProps) {
   const config = TIME_CONFIG[habit.time]
   const Icon = config.icon
 
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout="size"
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
+        layout={!isMobile}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{
-          layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.2 },
-          height: {
-            duration: 0.3,
-            ease: [0.4, 0, 0.2, 1]
-          },
-          exit: {
-            duration: 0.2,
-            ease: [0.4, 0, 1, 1]
-          }
+          layout: !isMobile ? { duration: 0.3, ease: [0.4, 0, 0.2, 1] } : undefined,
+          opacity: { duration: 0.2 }
         }}
-        style={{ overflow: 'hidden', contain: 'paint layout' }}
+        style={{ contain: 'paint layout' }}
         className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
         <div className="flex flex-col gap-6 md:gap-3">
@@ -191,13 +185,14 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
 
   return (
     <motion.div
-      layout
+      layout={!isMobile}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+        layout: !isMobile ? { duration: 0.3, ease: [0.4, 0, 0.2, 1] } : undefined,
         opacity: { duration: 0.2 },
+        y: { duration: 0.3 },
         scale: { duration: 0.2 }
       }}
       className={cn(
@@ -274,6 +269,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
 
 export function HabitsSection() {
   const { habits, isLoaded, addHabit, updateHabit, deleteHabit } = useHabits()
+  const isMobile = useIsMobile(768)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
   
@@ -611,6 +607,7 @@ export function HabitsSection() {
                             habit={habit}
                             isEditing={editingId === habit.id}
                             isAnyEditing={editingId !== null}
+                            isMobile={isMobile}
                             editForm={editForm}
                             setEditForm={setEditForm}
                             startEditing={startEditing}
@@ -650,6 +647,7 @@ export function HabitsSection() {
                       habit={habit}
                       isEditing={editingId === habit.id}
                       isAnyEditing={editingId !== null}
+                      isMobile={isMobile}
                       editForm={editForm}
                       setEditForm={setEditForm}
                       startEditing={startEditing}
