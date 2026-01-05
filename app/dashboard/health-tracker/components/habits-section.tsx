@@ -52,13 +52,11 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
       initial={false}
       transition={{
         layout: { 
-          type: "spring", 
-          stiffness: 120, 
-          damping: 24,
-          mass: 1
+          duration: 0.5, 
+          ease: [0.16, 1, 0.3, 1] 
         }
       }}
-      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
+      style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
       className={cn(
         "group relative rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
         isEditing 
@@ -74,20 +72,23 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
           <motion.div
             key="edit"
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ 
+              opacity: 1, 
+              height: 'auto',
+              transition: {
+                height: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                opacity: { duration: 0.3, delay: 0.2 }
+              }
+            }}
             exit={{ 
               opacity: 0,
               height: 0,
               transition: { 
-                opacity: { duration: 0.3 },
-                height: { duration: 0.45, ease: [0.4, 0, 0.2, 1] } 
+                height: { duration: 0.4, ease: [0.7, 0, 0.84, 0] },
+                opacity: { duration: 0.15 }
               } 
             }}
-            transition={{
-              height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-              opacity: { duration: 0.4, delay: 0.1 }
-            }}
-            className="flex flex-col gap-6 md:gap-3 overflow-hidden"
+            className="w-full flex flex-col gap-6 md:gap-3 overflow-hidden"
           >
             <div className="space-y-1.5 md:space-y-1">
               <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
@@ -217,13 +218,24 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
         ) : (
           <motion.div
             key="view"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: 1, 
+              height: 'auto',
+              transition: {
+                height: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                opacity: { duration: 0.3, delay: 0.2 }
+              }
+            }}
             exit={{ 
               opacity: 0,
-              transition: { duration: 0.3 }
+              height: 0,
+              transition: { 
+                height: { duration: 0.4, ease: [0.7, 0, 0.84, 0] },
+                opacity: { duration: 0.15 }
+              }
             }}
-            className="flex items-center justify-between"
+            className="w-full flex items-center justify-between overflow-hidden"
           >
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <div className={cn(
