@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
+import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -107,113 +107,12 @@ function HealthTrackerContent() {
         transition={{ duration: 0.3 }}
       >
         {mounted && (
-          <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
+            <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
             {/* Ambient BG - Desktop only */}
             <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
               <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
             </div>
-
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-10">
-              <div className="flex items-center justify-between w-full md:w-auto">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 mb-2">
-                      <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                          V3.0 Beta
-                      </div>
-                      <div className="h-px w-8 bg-white/10" />
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                          <Activity className="w-3 h-3" />
-                          Live
-                      </span>
-                  </div>
-                  <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
-                    Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
-                  </h1>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
-                <div className="flex items-center gap-2 flex-1 md:hidden">
-                    <div className="bg-white/5 border border-white/5 rounded-2xl p-1.5 flex items-center gap-2 flex-1">
-                      <WeekNavigator 
-                        selectedDate={selectedDate} 
-                        onDateChange={setSelectedDate} 
-                        minimal={true} 
-                        isExpanded={isCalendarExpanded}
-                        disableViewSwitch={true}
-                        daysCount={1}
-                        onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-                      />
-                      <div className="flex-1 px-1">
-                        <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
-                          {format(selectedDate, 'EEEE', { locale: ru })}
-                        </div>
-                        <div className="text-sm font-bold text-white leading-none">
-                          {format(selectedDate, 'd MMMM', { locale: ru })}
-                        </div>
-                      </div>
-                    </div>
-                </div>
-
-                <div className="hidden md:flex items-center gap-2">
-                    <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
-                        <Share2 className="w-5 h-5 text-white/40 group-hover:text-white" />
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('settings')}
-                      className={cn(
-                        "p-3 md:p-4 rounded-2xl border transition-all group",
-                        activeTab === 'settings' 
-                          ? "bg-amber-500 border-amber-500 text-black" 
-                          : "bg-white/5 border-white/5 hover:bg-white/10 text-white/40 hover:text-white"
-                      )}
-                    >
-                        <Settings className="w-5 h-5" />
-                    </button>
-                </div>
-              </div>
-            </header>
-
-            {isFirstVisit && !dismissed && activeTab !== 'settings' && (
-              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 mt-6">
-                <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 md:backdrop-blur-xl">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white mb-1 text-lg">Настрой виджеты для отслеживания</h3>
-                      <p className="text-sm text-white/60">Выбери метрики здоровья, которые хочешь контролировать</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => setActiveTab('settings')}
-                        className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 font-medium transition-all active:scale-95 whitespace-nowrap"
-                      >
-                        Настроить
-                      </button>
-                      <button onClick={() => setDismissed(true)} className="p-2 text-white/40 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            <AnimatePresence initial={false} onExitComplete={() => setIsAnimating(false)}>
-              {isCalendarExpanded && (
-                <motion.div 
-                  key="mobile-calendar"
-                  onAnimationStart={() => setIsAnimating(true)}
-                  onAnimationComplete={() => setIsAnimating(false)}
-                  initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                  animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                  exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                  className="overflow-hidden lg:hidden"
-                >
-                  <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl">
-                    <WeekNavigator selectedDate={selectedDate} onDateChange={(date) => { setSelectedDate(date); setIsCalendarExpanded(false); }} minimal={true} isExpanded={true} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <AnimatePresence 
               mode="wait"
@@ -222,47 +121,230 @@ function HealthTrackerContent() {
                 setIsAnimating(false)
               }}
             >
-              {activeTab === 'goals' && (
-                <motion.div key="goals" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="lg:hidden mb-24">
-                  <GoalsSummaryCard data={data} />
-                </motion.div>
-              )}
-
-              {activeTab === 'habits' && (
-                <motion.div key="habits" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="lg:hidden mb-24">
-                  <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
-                </motion.div>
-              )}
-
-              {activeTab === 'stats' && (
-                <motion.div key="stats" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="lg:hidden mb-24 min-h-[50vh] flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-[2.5rem] border border-white/5">
-                  <BarChart3 className="w-12 h-12 text-amber-500/40 mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">Статистика скоро</h3>
-                  <p className="text-white/40 text-sm">Мы работаем над детальными графиками вашего прогресса</p>
-                </motion.div>
-              )}
-
-              {activeTab === 'overview' && (
-                <motion.div key="overview" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="lg:hidden mb-24">
-                  <div className="flex flex-col gap-6">
-                    <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                    <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                    <div className="grid grid-cols-2 gap-4">
-                        <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                        <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                        <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                        <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+              {activeTab !== 'settings' ? (
+                <motion.div
+                  key="main-content"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full"
+                >
+                  <header className="flex flex-col gap-6 mb-8 md:mb-10">
+                    <div className="flex flex-col gap-4">
+                      <motion.div whileHover={{ x: -4 }}>
+                        <Link 
+                          href="/dashboard"
+                          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em]">назад в ЛК</span>
+                        </Link>
+                      </motion.div>
+                      <h1 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tighter flex items-center gap-4 transition-colors duration-500">
+                        Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
+                      </h1>
                     </div>
-                    <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                    <AchievementsCard />
-                    <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                    <DailyPhotosCard photos={data.dailyPhotos} />
-                  </div>
-                </motion.div>
-              )}
 
-              {activeTab === 'settings' && (
-                <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="mb-24">
+                    <div className="flex items-center justify-between md:justify-start gap-2 md:gap-3">
+                      <div className="flex items-center gap-2 flex-1 md:flex-none">
+                          <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
+                            <div className="flex items-center p-0.5 flex-1">
+                              <WeekNavigator 
+                                selectedDate={selectedDate} 
+                                onDateChange={setSelectedDate} 
+                                minimal={true} 
+                                isExpanded={isCalendarExpanded}
+                                disableViewSwitch={true}
+                                daysCount={1}
+                                onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                              />
+                              <div className="flex-1 px-2 md:px-4 pr-3 border-l border-white/5 ml-1 py-1">
+                                <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
+                                  {format(selectedDate, 'EEEE', { locale: ru })}
+                                </div>
+                                <div className="text-sm font-bold text-white leading-none">
+                                  {format(selectedDate, 'd MMMM', { locale: ru })}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+                    </div>
+                  </header>
+
+                  {isFirstVisit && !dismissed && (
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 mb-6">
+                      <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 md:backdrop-blur-xl">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-white mb-1 text-lg">Настрой виджеты для отслеживания</h3>
+                            <p className="text-sm text-white/60">Выбери метрики здоровья, которые хочешь контролировать</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => setActiveTab('settings')}
+                              className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 font-medium transition-all active:scale-95 whitespace-nowrap"
+                            >
+                              Настроить
+                            </button>
+                            <button onClick={() => setDismissed(true)} className="p-2 text-white/40 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <AnimatePresence initial={false} onExitComplete={() => setIsAnimating(false)}>
+                    {isCalendarExpanded && (
+                      <motion.div 
+                        key="mobile-calendar"
+                        onAnimationStart={() => setIsAnimating(true)}
+                        onAnimationComplete={() => setIsAnimating(false)}
+                        initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                        animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+                        exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+                        className="overflow-hidden lg:hidden"
+                      >
+                        <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl">
+                          <WeekNavigator selectedDate={selectedDate} onDateChange={(date) => { setSelectedDate(date); setIsCalendarExpanded(false); }} minimal={true} isExpanded={true} />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="lg:hidden mb-24">
+                    <AnimatePresence mode="wait">
+                      {activeTab === 'goals' && (
+                        <motion.div 
+                          key="goals-mobile" 
+                          initial={{ opacity: 0, y: 20 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          exit={{ opacity: 0 }} 
+                          transition={{ duration: 0.15 }}
+                        >
+                          <GoalsSummaryCard data={data} />
+                        </motion.div>
+                      )}
+                      {activeTab === 'habits' && (
+                        <motion.div 
+                          key="habits-mobile" 
+                          initial={{ opacity: 0, y: 20 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          exit={{ opacity: 0 }} 
+                          transition={{ duration: 0.15 }}
+                        >
+                          <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
+                        </motion.div>
+                      )}
+                      {activeTab === 'stats' && (
+                        <motion.div 
+                          key="stats-mobile" 
+                          initial={{ opacity: 0, y: 20 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          exit={{ opacity: 0 }} 
+                          transition={{ duration: 0.15 }}
+                        >
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-[2.5rem] border border-white/5">
+                            <BarChart3 className="w-12 h-12 text-amber-500/40 mb-4" />
+                            <h3 className="text-xl font-bold text-white mb-2">Статистика скоро</h3>
+                            <p className="text-white/40 text-sm">Мы работаем над детальными графиками вашего прогресса</p>
+                          </div>
+                        </motion.div>
+                      )}
+                      {activeTab === 'overview' && (
+                        <motion.div 
+                          key="overview-mobile" 
+                          initial={{ opacity: 0, y: 20 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          exit={{ opacity: 0 }} 
+                          transition={{ duration: 0.15 }}
+                        >
+                          <div className="flex flex-col gap-6">
+                            <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                            <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                                <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                                <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                                <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                            </div>
+                            <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                            <AchievementsCard />
+                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                            <DailyPhotosCard photos={data.dailyPhotos} />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <LayoutGroup id="tracker-layout">
+                    <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+                      <motion.div layout className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+                        <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                        <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                        <div className="grid grid-cols-2 gap-4">
+                            <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                            <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                            <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                            <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                        </div>
+                        <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                      </motion.div>
+
+                      <motion.div layout className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
+                        <div className="hidden lg:block"><HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} /></div>
+                        <AchievementsCard />
+                        <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                        <DailyPhotosCard photos={data.dailyPhotos} />
+                      </motion.div>
+
+                      <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
+                        <div className="hidden lg:block">
+                            <HealthTrackerCard 
+                              className="p-4" 
+                              title="Календарь" 
+                              subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
+                              icon={Calendar} 
+                              iconColor="text-amber-500" 
+                              iconBg="bg-amber-500/10"
+                              rightAction={
+                                <button 
+                                  onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
+                                >
+                                  <motion.div
+                                    animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                  >
+                                    <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-white" />
+                                  </motion.div>
+                                </button>
+                              }
+                            >
+                                <WeekNavigator 
+                                  selectedDate={selectedDate} 
+                                  onDateChange={setSelectedDate} 
+                                  minimal={true} 
+                                  isExpanded={isCalendarExpanded} 
+                                />
+                            </HealthTrackerCard>
+                        </div>
+                        <div className="hidden lg:block"><GoalsSummaryCard data={data} /></div>
+                      </motion.div>
+                    </div>
+                  </LayoutGroup>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="settings-content" 
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, y: -10 }} 
+                  transition={{ duration: 0.2 }}
+                  className="w-full mb-24"
+                >
                   <SettingsTab onBack={() => setActiveTab('overview')} />
                 </motion.div>
               )}

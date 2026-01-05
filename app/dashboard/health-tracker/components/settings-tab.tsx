@@ -150,9 +150,9 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
         </div>
 
         {/* BMI Panel */}
-        <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[68px] w-full md:w-auto md:min-w-[420px]">
-          <div className="flex items-center p-1 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
-            <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
+        <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px]">
+          <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
+            <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -166,7 +166,7 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
               </div>
             </div>
-            <div className="flex flex-col px-2 md:px-4 py-2 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
+            <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -180,7 +180,7 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
               </div>
             </div>
-            <div className="flex flex-col px-2 md:px-4 py-2 flex-1 md:flex-none md:w-[100px] min-w-0">
+            <div className="flex flex-col px-2 md:px-4 py-1 flex-1 md:flex-none md:w-[100px] min-w-0">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -197,7 +197,7 @@ export default function SettingsTab({ onBack }: SettingsTabProps) {
           </div>
 
           <div className={cn(
-            "px-3 md:px-4 py-2 flex flex-col transition-all duration-500 flex-[1.2] md:flex-none md:w-[115px] min-w-0 relative",
+            "px-3 md:px-4 py-1.5 flex flex-col transition-all duration-500 flex-[1.2] md:flex-none md:w-[115px] min-w-0 relative",
             bmiValue ? "bg-white/[0.05]" : "bg-transparent"
           )}>
             {bmiValue ? (
