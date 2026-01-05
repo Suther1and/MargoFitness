@@ -192,8 +192,8 @@ function HealthTrackerContent() {
                 </div>
               </div>
 
-              {/* Desktop: Простой статичный заголовок */}
-              <div className="hidden lg:block">
+              {/* Desktop: Простой статичный заголовок с кнопками */}
+              <div className="hidden lg:flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
@@ -208,6 +208,21 @@ function HealthTrackerContent() {
                   <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none">
                     Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
                   </h1>
+                </div>
+
+                {/* Desktop Action Buttons */}
+                <div className="flex items-center gap-2">
+                  <button 
+                    className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                  >
+                    <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('settings')}
+                    className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                  >
+                    <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
+                  </button>
                 </div>
               </div>
             </header>
