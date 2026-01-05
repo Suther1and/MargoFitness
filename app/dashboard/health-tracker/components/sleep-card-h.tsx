@@ -28,14 +28,15 @@ export function SleepCardH({ hours, goal, onUpdate }: SleepCardHProps) {
   return (
     <div
       className={cn(
-        'relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[180px] flex flex-col px-4 md:px-6 pt-4 pb-6 backdrop-blur-2xl',
+        'relative group overflow-hidden rounded-[2rem] border transition-colors duration-500 h-[180px] flex flex-col px-4 md:px-6 pt-4 pb-6 md:backdrop-blur-2xl',
         isDone ? 'border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/40' : 'border-white/10 bg-zinc-900/50 hover:border-indigo-500/20'
       )}
+      style={{ contain: 'paint' }}
     >
       {/* Фоновое свечение */}
       <div
         className={cn(
-          'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-[80px] rounded-full pointer-events-none transition-colors duration-1000',
+          'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-[80px] rounded-full pointer-events-none transition-colors duration-1000 hidden md:block',
           isDone ? 'bg-emerald-500/10' : 'bg-indigo-500/10'
         )}
       />

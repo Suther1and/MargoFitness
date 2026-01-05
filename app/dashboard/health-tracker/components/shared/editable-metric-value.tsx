@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { TYPOGRAPHY } from '../../constants'
 
@@ -62,8 +61,7 @@ export function EditableMetricValue({
   }
 
   return (
-    <motion.div
-      layout="position"
+    <div
       onClick={onEdit}
       className="flex items-baseline cursor-pointer hover:opacity-80 transition-opacity"
     >
@@ -75,7 +73,7 @@ export function EditableMetricValue({
           {unit}
         </span>
       )}
-    </motion.div>
+    </div>
   )
 }
 

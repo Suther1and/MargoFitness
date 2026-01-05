@@ -81,9 +81,9 @@ export function NutritionCardH({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl p-5 md:p-6 hover:border-violet-500/20 transition-all duration-500 h-[180px] md:h-[210px]">
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl p-5 md:p-6 hover:border-violet-500/20 transition-colors duration-500 h-[180px] md:h-[210px]">
       {/* Background Ambient */}
-      <div className="absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none -z-10 hidden md:block" />
       
       <div className="flex flex-row gap-6 md:gap-8 h-full">
         {/* Левая часть: Кольцо калорий и Добавление */}
@@ -161,10 +161,10 @@ export function NutritionCardH({
                       <div key={n.label} className="flex items-center gap-0.5">
                         <button 
                           onClick={() => onUpdate('caloriesGoal', n.val)} 
-                          className={cn(
-                            "flex flex-col items-center px-2 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-all min-w-[42px] md:min-w-[50px]",
-                            caloriesGoal === n.val ? "bg-white/10 border border-white/10 shadow-lg" : "hover:bg-white/5 border border-transparent"
-                          )}
+                            className={cn(
+                              "flex flex-col items-center px-2 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-colors min-w-[42px] md:min-w-[50px]",
+                              caloriesGoal === n.val ? "bg-white/10 border border-white/10 shadow-lg" : "hover:bg-white/5 border border-transparent"
+                            )}
                         >
                             <span className={cn("text-[14px] md:text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
                             <span className="text-[6px] md:text-[7px] text-white/20 uppercase font-bold mt-1 tracking-tighter">{n.label}</span>
@@ -199,14 +199,14 @@ export function NutritionCardH({
                     key={item.rating}
                     onClick={() => onUpdate('foodQuality', item.rating)}
                     className={cn(
-                      "flex-1 py-2 md:py-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center",
+                      "flex-1 py-2 md:py-2.5 rounded-xl border transition-colors duration-300 flex items-center justify-center",
                       isActive 
                         ? "bg-white/10 border-white/20 scale-105 shadow-lg" 
                         : "bg-white/5 border-white/5 opacity-30 hover:opacity-100 hover:bg-white/[0.07]"
                     )}
                   >
                     <item.icon className={cn(
-                        "w-[18px] h-[18px] md:w-5 md:h-5 transition-all duration-300",
+                        "w-[18px] h-[18px] md:w-5 md:h-5 transition-colors duration-300",
                         isActive ? item.color : "text-white"
                     )} />
                   </button>

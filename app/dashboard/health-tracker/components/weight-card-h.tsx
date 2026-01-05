@@ -33,7 +33,7 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
   const changeColor = weekChange < 0 ? (isGoalToLose ? 'text-emerald-400' : 'text-red-400') : isGoalToLose ? 'text-red-400' : 'text-emerald-400'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-all duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-colors duration-500 h-[180px]" style={{ contain: 'paint' }}>
       <div className="relative flex flex-col h-full justify-between">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

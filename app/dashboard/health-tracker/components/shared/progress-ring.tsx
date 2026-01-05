@@ -43,7 +43,7 @@ export function ProgressRing({
       <motion.div
         {...(isDone ? ANIMATIONS.glowPulse : {})}
         className={cn(
-          'absolute inset-2 blur-[24px] rounded-full transition-colors duration-1000',
+          'absolute inset-2 blur-[24px] rounded-full transition-colors duration-1000 hidden md:block',
           currentGlowColor
         )}
       />
@@ -71,10 +71,11 @@ export function ProgressRing({
           initial={{ strokeDasharray: config.circumference, strokeDashoffset: config.circumference }}
           animate={{ strokeDashoffset: config.circumference - (config.circumference * percentage) / 100 }}
           transition={{ duration: 1.5, ease: 'circOut' }}
+          className="md:[filter:drop-shadow(0_0_8px_rgba(0,0,0,0.4))]"
           style={{
-            filter: isDone
+            filter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : (isDone
               ? `drop-shadow(0 0 12px ${achievedColor}80)`
-              : `drop-shadow(0 0 8px ${color}66)`,
+              : `drop-shadow(0 0 8px ${color}66)`),
           }}
         />
       </svg>

@@ -37,11 +37,12 @@ export function MetricCardWrapper({
         isDone && 'shadow-[0_0_20px_rgba(16,185,129,0.1)]',
         className
       )}
+      style={{ contain: 'paint' }}
     >
       {/* Background glow */}
       <div
         className={cn(
-          'absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000',
+          'absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000 hidden md:block',
           isDone ? doneGlowColor : glowColor
         )}
       />

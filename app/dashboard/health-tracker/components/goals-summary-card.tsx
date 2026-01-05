@@ -19,7 +19,7 @@ export function GoalsSummaryCard({ data }: GoalsSummaryCardProps) {
   const completedCount = goals.filter(g => g.current >= g.goal).length
 
   return (
-    <div className="rounded-[2.5rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl p-6 hover:border-white/10 transition-all duration-300">
+    <div className="rounded-[2.5rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl p-6 hover:border-white/10 transition-colors duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -59,7 +59,7 @@ export function GoalsSummaryCard({ data }: GoalsSummaryCardProps) {
               </div>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div 
-                  className={cn("h-full transition-all duration-1000", isDone ? "bg-emerald-500" : "bg-white/10")}
+                  className={cn("h-full transition-[width,background-color] duration-1000", isDone ? "bg-emerald-500" : "bg-white/10")}
                   style={{ width: `${perc}%` }}
                 />
               </div>

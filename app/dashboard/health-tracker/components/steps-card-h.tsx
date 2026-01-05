@@ -32,14 +32,14 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
 
   return (
     <div className={cn(
-      "relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[120px] backdrop-blur-2xl px-6 pt-2 md:pt-3 pb-5",
+      "relative group overflow-hidden rounded-[2rem] border transition-colors duration-500 h-[120px] md:backdrop-blur-2xl px-6 pt-2 md:pt-3 pb-5",
       isDone 
         ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
         : "border-white/10 bg-zinc-900/50 hover:border-red-500/20"
-    )}>
+    )} style={{ contain: 'paint' }}>
       {/* Фоновое свечение */}
       <div className={cn(
-        "absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000",
+        "absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000 hidden md:block",
         isDone ? "bg-emerald-500/10" : "bg-red-500/5"
       )} />
 

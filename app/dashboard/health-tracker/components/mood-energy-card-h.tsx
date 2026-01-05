@@ -22,7 +22,7 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
   ]
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-2xl hover:border-white/20 transition-all duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl hover:border-white/20 transition-colors duration-500 h-[180px]" style={{ contain: 'paint' }}>
       <div className="flex flex-col h-full md:px-6 md:pt-4 md:pb-6 md:justify-between px-2 py-4 md:p-0">
         
         {/* Mood Section - Адаптация для мобильных */}
@@ -42,14 +42,14 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
                   key={m.rating}
                   onClick={() => onMoodUpdate(m.rating)}
                   className={cn(
-                    "flex-1 py-1.5 md:py-2 rounded-xl transition-all duration-300 flex items-center justify-center",
+                    "flex-1 py-1.5 md:py-2 rounded-xl transition-colors duration-300 flex items-center justify-center",
                     isActive 
                       ? "bg-transparent md:bg-white/10 border-0 md:border md:border-white/20 shadow-lg scale-110 md:scale-105" 
                       : "bg-transparent md:bg-white/5 border-0 md:border md:border-white/5 opacity-30 active:opacity-100"
                   )}
                 >
                   <m.icon className={cn(
-                    "w-7 h-7 md:w-5 md:h-5 transition-all duration-300", 
+                    "w-7 h-7 md:w-5 md:h-5 transition-colors duration-300", 
                     isActive ? m.color : "text-white"
                   )} />
                 </button>
@@ -77,7 +77,7 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
                         key={val}
                         onClick={() => onEnergyUpdate(val)}
                         className={cn(
-                            "flex-1 rounded-[4px] transition-all duration-300 active:scale-95",
+                            "flex-1 rounded-[4px] transition-colors duration-300 active:scale-95",
                             energy >= val 
                                 ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" 
                                 : "bg-white/5 hover:bg-white/10"

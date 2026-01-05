@@ -47,7 +47,7 @@ export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
   return (
     <div
       className={cn(
-        'relative group overflow-hidden rounded-[2rem] border transition-all duration-700 h-[110px] md:h-[120px]',
+        'relative group overflow-hidden rounded-[2rem] border transition-colors duration-500 h-[110px] md:h-[120px]',
         isDone
           ? 'border-emerald-500/30 bg-zinc-900/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
           : 'border-white/10 bg-zinc-900/50 hover:border-blue-500/20'
@@ -68,7 +68,7 @@ export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
           />
           <div
             className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all duration-500',
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors duration-500',
               isDone ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-white/5 border-white/10'
             )}
           >
