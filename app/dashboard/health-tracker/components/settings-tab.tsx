@@ -294,9 +294,9 @@ export default function SettingsTab({
         </div>
 
         {/* BMI Panel on Desktop only */}
-        <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[60px] min-w-[420px]">
+        <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]">
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
-            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px]">
+            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px]">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -310,7 +310,7 @@ export default function SettingsTab({
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
               </div>
             </div>
-            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px]">
+            <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px]">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -324,7 +324,7 @@ export default function SettingsTab({
                 <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
               </div>
             </div>
-            <div className="flex flex-col px-4 py-1 w-[100px]">
+            <div className="flex flex-col px-4 py-0.5 w-[100px]">
               <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
               <div className="flex items-baseline gap-0.5">
                 <input
@@ -341,7 +341,7 @@ export default function SettingsTab({
           </div>
 
           <div className={cn(
-            "px-4 py-1.5 flex flex-col transition-all duration-500 w-[115px] relative",
+            "px-4 py-1 flex flex-col transition-all duration-500 w-[115px] relative",
             bmiValue ? "bg-white/[0.05]" : "bg-transparent"
           )}>
             {bmiValue ? (
@@ -363,8 +363,8 @@ export default function SettingsTab({
                 <div className="absolute right-0 top-0">
                   <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
                     <DialogTrigger asChild>
-                      <button className="p-2 text-white/40 hover:text-white transition-all focus:outline-none">
-                        <Info className="w-4 h-4" />
+                      <button className="p-1.5 text-white/40 hover:text-white transition-all focus:outline-none">
+                        <Info className="w-3.5 h-3.5" />
                       </button>
                     </DialogTrigger>
                     <DialogContent className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl">
