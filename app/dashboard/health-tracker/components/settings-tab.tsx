@@ -297,7 +297,7 @@ export default function SettingsTab({
         <div className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]">
           <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
             <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px] justify-center">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Рост</label>
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5">Рост</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -311,7 +311,7 @@ export default function SettingsTab({
               </div>
             </div>
             <div className="flex flex-col px-4 py-0.5 border-r border-white/5 w-[100px] justify-center">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Вес</label>
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5">Вес</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -325,7 +325,7 @@ export default function SettingsTab({
               </div>
             </div>
             <div className="flex flex-col px-4 py-0.5 w-[100px] justify-center">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Возраст</label>
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5">Возраст</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
