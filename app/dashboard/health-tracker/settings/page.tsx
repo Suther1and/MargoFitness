@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Target, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium } from 'lucide-react'
+import { Home, BarChart3, ListChecks, Target, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Settings as SettingsIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
@@ -46,6 +46,13 @@ export default function TrackerSettingsPage() {
   useEffect(() => {
     setLocalSettings(settings)
   }, [settings])
+
+  // Автосохранение при изменении локальных настроек
+  useEffect(() => {
+    if (mounted) {
+      saveSettings(localSettings)
+    }
+  }, [localSettings, mounted, saveSettings])
 
   const handleToggle = (widgetId: WidgetId) => {
     setLocalSettings(prev => ({
@@ -325,19 +332,7 @@ export default function TrackerSettingsPage() {
             </button>
           </div>
 
-          {/* Кнопка сохранения для десктопа */}
-          <button
-            onClick={handleSave}
-            className={cn(
-              "hidden md:flex items-center gap-2 px-6 h-full rounded-xl border transition-all duration-300 group font-black text-[10px] uppercase tracking-[0.2em]",
-              activeTab === 'widgets'
-                ? "bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-[#09090b] border-green-500/20 hover:border-green-500"
-                : "bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-[#09090b] border-amber-500/20 hover:border-amber-500"
-            )}
-          >
-            Сохранить настройки
-            <ChevronLeft className="w-3.5 h-3.5 rotate-180 transition-transform group-hover:translate-x-0.5" />
-          </button>
+          {/* Кнопка сохранения удалена (теперь автосохранение) */}
         </div>
       </div>
 
@@ -567,20 +562,41 @@ export default function TrackerSettingsPage() {
         </AnimatePresence>
       </main>
 
-      {/* Floating Save Button for Mobile */}
-      <div className="fixed bottom-8 left-0 right-0 z-[60] px-4 md:hidden">
-        <button
-          onClick={handleSave}
-          className={cn(
-            "w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95",
-            activeTab === 'widgets'
-              ? "bg-green-500 hover:bg-green-400 text-black shadow-green-500/30"
-              : "bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/30"
-          )}
-        >
-          <Activity className="w-4 h-4" />
-          Сохранить настройки
-        </button>
+      {/* Mobile Bottom Navigation - Floating Safari-style */}
+      <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
+        <div className="flex items-center justify-around p-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <Link 
+            href="/dashboard/health-tracker"
+            className="flex items-center justify-center w-12 h-12 rounded-full text-white/40 transition-all duration-300"
+          >
+            <Home className="w-5 h-5" />
+          </Link>
+          
+          <Link 
+            href="/dashboard/health-tracker?tab=stats"
+            className="flex items-center justify-center w-12 h-12 rounded-full text-white/40 transition-all duration-300"
+          >
+            <BarChart3 className="w-5 h-5" />
+          </Link>
+          
+          <Link 
+            href="/dashboard/health-tracker?tab=habits"
+            className="flex items-center justify-center w-12 h-12 rounded-full text-white/40 transition-all duration-300"
+          >
+            <ListChecks className="w-5 h-5" />
+          </Link>
+          
+          <Link 
+            href="/dashboard/health-tracker?tab=goals"
+            className="flex items-center justify-center w-12 h-12 rounded-full text-white/40 transition-all duration-300"
+          >
+            <Target className="w-5 h-5" />
+          </Link>
+
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500 text-black shadow-lg shadow-amber-500/30 transition-all duration-300">
+            <SettingsIcon className="w-5 h-5" />
+          </div>
+        </div>
       </div>
     </div>
   )

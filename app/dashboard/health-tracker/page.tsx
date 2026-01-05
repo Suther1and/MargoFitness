@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -28,6 +29,14 @@ import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 
 export default function HealthTrackerPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
+      <HealthTrackerContent />
+    </Suspense>
+  )
+}
+
+function HealthTrackerContent() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals'>('overview')
@@ -36,11 +45,20 @@ export default function HealthTrackerPage() {
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab')
+
   const { isFirstVisit } = useTrackerSettings()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (tabParam && ['overview', 'stats', 'habits', 'goals'].includes(tabParam)) {
+      setActiveTab(tabParam as any)
+    }
+  }, [tabParam])
 
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
     setData(prev => ({ ...prev, [metric]: value }))
