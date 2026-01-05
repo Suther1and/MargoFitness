@@ -40,15 +40,13 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout="position"
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
+        layout
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{
-          layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.2 },
-          scale: { duration: 0.3 },
-          exit: { duration: 0.2 }
+          layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+          opacity: { duration: 0.2 }
         }}
         className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
@@ -184,13 +182,14 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
 
   return (
     <motion.div
-      layout="position"
+      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-        exit: { duration: 0.2 }
+        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+        opacity: { duration: 0.2 },
+        scale: { duration: 0.2 }
       }}
       className={cn(
         "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
