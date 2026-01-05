@@ -31,6 +31,7 @@ export default function HealthTrackerPage() {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDailyPlanExpanded, setIsDailyPlanExpanded] = useState(false)
   const [isHabitsExpanded, setIsHabitsExpanded] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
@@ -52,7 +53,18 @@ export default function HealthTrackerPage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-20">
+    <div className={cn(
+      "min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-20",
+      isAnimating && "is-animating"
+    )}>
+      <style jsx global>{`
+        .is-animating * {
+          box-shadow: none !important;
+          text-shadow: none !important;
+          filter: none !important;
+          backdrop-filter: none !important;
+        }
+      `}</style>
       {/* Ambient BG - Desktop only */}
       <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
@@ -186,26 +198,38 @@ export default function HealthTrackerPage() {
         )}
 
         {/* Mobile Calendar Expansion */}
-        <AnimatePresence>
+        <AnimatePresence 
+          initial={false}
+          onExitComplete={() => setIsAnimating(false)}
+        >
           {isCalendarExpanded && (
             <motion.div 
               key="mobile-calendar"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ height: 0, opacity: 0, marginBottom: 0 }}
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
                 marginBottom: 24,
-                transition: { type: 'spring', duration: 0.4, bounce: 0 }
+                transition: {
+                  height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.25, delay: 0.1 }
+                }
               }}
               exit={{ 
                 height: 0, 
                 opacity: 0, 
                 marginBottom: 0,
-                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+                transition: {
+                  height: { duration: 0.35, ease: [0.4, 0, 1, 1] },
+                  opacity: { duration: 0.2 }
+                }
               }}
               className="overflow-hidden lg:hidden transform-gpu"
+              style={{ willChange: 'height, opacity' }}
             >
-              <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl">
+              <div className="p-4 rounded-[2rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl">
                 <WeekNavigator 
                   selectedDate={selectedDate} 
                   onDateChange={(date) => {
@@ -221,24 +245,36 @@ export default function HealthTrackerPage() {
         </AnimatePresence>
 
         {/* Mobile Daily Plan Expansion */}
-        <AnimatePresence>
+        <AnimatePresence 
+          initial={false}
+          onExitComplete={() => setIsAnimating(false)}
+        >
           {isDailyPlanExpanded && (
             <motion.div 
               key="mobile-daily-plan"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ height: 0, opacity: 0, marginBottom: 0 }}
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
                 marginBottom: 24,
-                transition: { type: 'spring', duration: 0.4, bounce: 0 }
+                transition: {
+                  height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.25, delay: 0.1 }
+                }
               }}
               exit={{ 
                 height: 0, 
                 opacity: 0, 
                 marginBottom: 0,
-                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+                transition: {
+                  height: { duration: 0.35, ease: [0.4, 0, 1, 1] },
+                  opacity: { duration: 0.2 }
+                }
               }}
               className="overflow-hidden lg:hidden transform-gpu"
+              style={{ willChange: 'height, opacity' }}
             >
               <GoalsSummaryCard data={data} />
             </motion.div>
@@ -246,24 +282,36 @@ export default function HealthTrackerPage() {
         </AnimatePresence>
 
         {/* Mobile Habits Expansion */}
-        <AnimatePresence>
+        <AnimatePresence 
+          initial={false}
+          onExitComplete={() => setIsAnimating(false)}
+        >
           {isHabitsExpanded && (
             <motion.div 
               key="mobile-habits"
+              onAnimationStart={() => setIsAnimating(true)}
+              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ height: 0, opacity: 0, marginBottom: 0 }}
               animate={{ 
                 height: 'auto', 
                 opacity: 1,
                 marginBottom: 24,
-                transition: { type: 'spring', duration: 0.4, bounce: 0 }
+                transition: {
+                  height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.25, delay: 0.1 }
+                }
               }}
               exit={{ 
                 height: 0, 
                 opacity: 0, 
                 marginBottom: 0,
-                transition: { duration: 0.25, ease: [0.4, 0, 1, 1] }
+                transition: {
+                  height: { duration: 0.35, ease: [0.4, 0, 1, 1] },
+                  opacity: { duration: 0.2 }
+                }
               }}
               className="overflow-hidden lg:hidden transform-gpu"
+              style={{ willChange: 'height, opacity' }}
             >
               <HabitsCard 
                 habits={data.habits} 
@@ -276,7 +324,19 @@ export default function HealthTrackerPage() {
         </AnimatePresence>
 
         {/* Main Grid - 12 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div 
+          className={cn(
+            "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start transition-opacity duration-300",
+            isAnimating && "pointer-events-none opacity-90"
+          )}
+          style={{ 
+            contain: 'layout paint',
+            transform: 'translateZ(0)',
+            willChange: isAnimating ? 'transform' : 'auto',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden'
+          }}
+        >
           
           {/* Column 1 & 2 (Combined for metrics logic) */}
           <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
