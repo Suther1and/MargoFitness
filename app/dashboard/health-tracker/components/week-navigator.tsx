@@ -14,6 +14,7 @@ interface WeekNavigatorProps {
   minimal?: boolean
   isExpanded?: boolean
   daysCount?: 1 | 3 | 7
+  disableViewSwitch?: boolean
 }
 
 export function WeekNavigator({ 
@@ -23,7 +24,8 @@ export function WeekNavigator({
   showDate = true,
   minimal = false,
   isExpanded = false,
-  daysCount = 7
+  daysCount = 7,
+  disableViewSwitch = false
 }: WeekNavigatorProps) {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   
@@ -51,7 +53,7 @@ export function WeekNavigator({
         )}
       >
         <AnimatePresence mode="wait">
-          {!isExpanded || onCalendarClick ? (
+          {!isExpanded || disableViewSwitch ? (
             <motion.div
               key="week"
               initial={{ opacity: 0, height: 0 }}

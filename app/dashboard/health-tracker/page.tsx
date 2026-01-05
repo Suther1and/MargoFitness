@@ -138,6 +138,7 @@ function HealthTrackerContent() {
                         onDateChange={setSelectedDate} 
                         minimal={true} 
                         isExpanded={isCalendarExpanded}
+                        disableViewSwitch={true}
                         daysCount={1}
                         onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
                       />
@@ -289,13 +290,25 @@ function HealthTrackerContent() {
                           icon={Calendar} 
                           iconColor="text-amber-500" 
                           iconBg="bg-amber-500/10"
+                          rightAction={
+                            <button 
+                              onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
+                            >
+                              <motion.div
+                                animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                              >
+                                <ChevronDown className="w-4 h-4 text-white/40 group-hover:text-white" />
+                              </motion.div>
+                            </button>
+                          }
                         >
                             <WeekNavigator 
                               selectedDate={selectedDate} 
                               onDateChange={setSelectedDate} 
                               minimal={true} 
                               isExpanded={isCalendarExpanded} 
-                              onCalendarClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
                             />
                         </HealthTrackerCard>
                     </div>
