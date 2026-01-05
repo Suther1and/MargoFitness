@@ -127,7 +127,7 @@ function HealthTrackerContent() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.25 }}
                   className="w-full"
                 >
                   <header className="flex flex-col gap-6 mb-8 md:mb-10">
@@ -221,7 +221,7 @@ function HealthTrackerContent() {
                           initial={{ opacity: 0, y: 20 }} 
                           animate={{ opacity: 1, y: 0 }} 
                           exit={{ opacity: 0 }} 
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <GoalsSummaryCard data={data} />
                         </motion.div>
@@ -232,7 +232,7 @@ function HealthTrackerContent() {
                           initial={{ opacity: 0, y: 20 }} 
                           animate={{ opacity: 1, y: 0 }} 
                           exit={{ opacity: 0 }} 
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
                         </motion.div>
@@ -243,7 +243,7 @@ function HealthTrackerContent() {
                           initial={{ opacity: 0, y: 20 }} 
                           animate={{ opacity: 1, y: 0 }} 
                           exit={{ opacity: 0 }} 
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-[2.5rem] border border-white/5">
                             <BarChart3 className="w-12 h-12 text-amber-500/40 mb-4" />
@@ -258,7 +258,7 @@ function HealthTrackerContent() {
                           initial={{ opacity: 0, y: 20 }} 
                           animate={{ opacity: 1, y: 0 }} 
                           exit={{ opacity: 0 }} 
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <div className="flex flex-col gap-6">
                             <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
@@ -342,7 +342,7 @@ function HealthTrackerContent() {
                   initial={{ opacity: 0, y: 10 }} 
                   animate={{ opacity: 1, y: 0 }} 
                   exit={{ opacity: 0, y: -10 }} 
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.25 }}
                   className="w-full mb-24"
                 >
                   <SettingsTab onBack={() => setActiveTab('overview')} />
@@ -414,20 +414,20 @@ function HealthTrackerContent() {
 
       {/* Mobile Bottom Navigation - Stable UI */}
       <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md mobile-nav-container">
-        <div className="flex items-center justify-around p-1.5 rounded-full border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-          <button onClick={() => setActiveTab('overview')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+        <div className="flex items-center justify-around p-2 rounded-[2rem] border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-[60px]">
+          <button onClick={() => setActiveTab('overview')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Home className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('stats')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'stats' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => setActiveTab('stats')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'stats' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <BarChart3 className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('habits')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'habits' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => setActiveTab('habits')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'habits' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <ListChecks className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('goals')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'goals' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => setActiveTab('goals')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'goals' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Target className="w-5 h-5" />
           </button>
-          <button onClick={() => setActiveTab('settings')} className={cn("flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300", activeTab === 'settings' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+          <button onClick={() => setActiveTab('settings')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'settings' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Settings className="w-5 h-5" />
           </button>
         </div>
