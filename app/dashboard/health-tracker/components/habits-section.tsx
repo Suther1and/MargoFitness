@@ -50,7 +50,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
       layout
       initial={false}
       transition={{
-        layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
+        layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] }
       }}
       style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout', overflow: 'hidden' }}
       className={cn(
@@ -63,7 +63,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
         isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
     >
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="popLayout" initial={false}>
         {isEditing && editForm ? (
           <motion.div
             key="edit"
@@ -205,7 +205,10 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
             key="view"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ 
+              opacity: 0,
+              transition: { duration: 0.15, ease: [0.4, 0, 1, 1] }
+            }}
             className="flex items-center justify-between"
           >
             <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -272,7 +275,6 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
       </AnimatePresence>
     </motion.div>
   )
-}
 }
 
 export function HabitsSection() {
