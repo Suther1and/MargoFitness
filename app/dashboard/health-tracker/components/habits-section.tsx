@@ -40,14 +40,23 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
   if (isEditing && editForm) {
     return (
       <motion.div
-        layout
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        layout="size"
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        exit={{ opacity: 0, height: 0 }}
         transition={{
           layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.2 }
+          opacity: { duration: 0.2 },
+          height: {
+            duration: 0.3,
+            ease: [0.4, 0, 0.2, 1]
+          },
+          exit: {
+            duration: 0.2,
+            ease: [0.4, 0, 1, 1]
+          }
         }}
+        style={{ overflow: 'hidden', contain: 'paint layout' }}
         className="bg-white/[0.02] border border-amber-500/20 rounded-[2rem] px-4 py-4 md:px-5 md:py-3 shadow-xl"
       >
         <div className="flex flex-col gap-6 md:gap-3">
@@ -192,13 +201,13 @@ function HabitCard({ habit, isEditing, isAnyEditing, editForm, setEditForm, star
         scale: { duration: 0.2 }
       }}
       className={cn(
-        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
+        "group relative flex items-center justify-between p-4 rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
         habit.enabled 
           ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10" 
           : "border-white/5 bg-white/[0.01] opacity-40 grayscale",
         isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
-      style={{ contain: 'paint' }}
+      style={{ contain: 'paint layout' }}
     >
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className={cn(
