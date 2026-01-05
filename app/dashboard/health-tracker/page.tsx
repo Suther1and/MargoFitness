@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, Suspense, useMemo } from 'react'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Share2, Settings, Activity, ChevronDown, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
@@ -68,13 +68,17 @@ function HealthTrackerContent() {
     handleMetricUpdate('mood', val)
   }
 
-  if (!mounted) return null
+  if (!mounted) return <div className="min-h-screen bg-[#09090b]" />
 
   return (
-    <div className={cn(
-      "min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20",
-      isAnimating && "is-animating"
-    )}>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={cn(
+        "min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20",
+        isAnimating && "is-animating"
+      )}
+    >
       <style jsx global>{`
         @media (max-width: 767px) {
           .is-animating * {
@@ -246,6 +250,7 @@ function HealthTrackerContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
               className="lg:hidden mb-24"
             >
               <GoalsSummaryCard data={data} />
@@ -258,6 +263,7 @@ function HealthTrackerContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
               className="lg:hidden mb-24"
             >
               <HabitsCard 
@@ -275,6 +281,7 @@ function HealthTrackerContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
               className="lg:hidden mb-24 min-h-[50vh] flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-[2.5rem] border border-white/5"
             >
               <BarChart3 className="w-12 h-12 text-amber-500/40 mb-4" />
@@ -286,142 +293,189 @@ function HealthTrackerContent() {
           {activeTab === 'overview' && (
             <motion.div
               key="mobile-overview"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="lg:hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden mb-24"
             >
-              {/* Content will be handled by the main grid visibility logic below */}
+              <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 gap-6">
+                    <WaterCardH 
+                        value={data.waterIntake} 
+                        goal={data.waterGoal} 
+                        onUpdate={(val) => handleMetricUpdate('waterIntake', val)} 
+                    />
+                    <StepsCardH 
+                        steps={data.steps} 
+                        goal={data.stepsGoal} 
+                        onUpdate={(val) => handleMetricUpdate('steps', val)} 
+                    />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                    <WeightCardH 
+                        value={data.weight} 
+                        goalWeight={data.weightGoal}
+                        onUpdate={(val) => handleMetricUpdate('weight', val)} 
+                    />
+                    <CaffeineCardH 
+                        value={data.caffeineIntake} 
+                        goal={data.caffeineGoal} 
+                        onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} 
+                    />
+                    <SleepCardH 
+                        hours={data.sleepHours} 
+                        goal={data.sleepGoal} 
+                        onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
+                    />
+                    <MoodEnergyCardH 
+                        mood={data.mood} 
+                        energy={data.energyLevel} 
+                        onMoodUpdate={(val) => handleMoodUpdate(val)} 
+                        onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
+                    />
+                </div>
+                
+                <div className="grid grid-cols-1 gap-4">
+                    <NutritionCardH 
+                        calories={data.calories} 
+                        caloriesGoal={data.caloriesGoal}
+                        foodQuality={data.foodQuality}
+                        weight={data.weight}
+                        height={data.height}
+                        age={data.age}
+                        gender={data.gender}
+                        onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
+                    />
+                </div>
+
+                <AchievementsCard />
+                
+                <NotesCard 
+                    value={data.notes} 
+                    onUpdate={(val) => handleMetricUpdate('notes', val)} 
+                />
+
+                <DailyPhotosCard photos={data.dailyPhotos} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Main Grid - 12 Columns */}
-        <div 
-          className={cn(
-            "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start main-grid-container",
-            activeTab !== 'overview' && "hidden lg:grid"
-          )}
-          style={{ 
-            contain: 'layout paint',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden'
-          }}
-        >
-          
-          {/* Column 1 & 2 (Combined for metrics logic) */}
-          <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-            <div className="grid grid-cols-1 gap-6">
-                <WaterCardH 
-                    value={data.waterIntake} 
-                    goal={data.waterGoal} 
-                    onUpdate={(val) => handleMetricUpdate('waterIntake', val)} 
-                />
-                <StepsCardH 
-                    steps={data.steps} 
-                    goal={data.stepsGoal} 
-                    onUpdate={(val) => handleMetricUpdate('steps', val)} 
-                />
-            </div>
+        <LayoutGroup id="tracker-layout">
+          {/* Main Grid - Desktop Only */}
+          <div 
+            className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container"
+            style={{ 
+              contain: 'layout paint',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
+          >
             
-            <div className="grid grid-cols-2 gap-4">
-                <WeightCardH 
-                    value={data.weight} 
-                    goalWeight={data.weightGoal}
-                    onUpdate={(val) => handleMetricUpdate('weight', val)} 
-                />
-                <CaffeineCardH 
-                    value={data.caffeineIntake} 
-                    goal={data.caffeineGoal} 
-                    onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} 
-                />
-                <SleepCardH 
-                    hours={data.sleepHours} 
-                    goal={data.sleepGoal} 
-                    onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
-                />
-                <MoodEnergyCardH 
-                    mood={data.mood} 
-                    energy={data.energyLevel} 
-                    onMoodUpdate={(val) => handleMoodUpdate(val)} 
-                    onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
-                />
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4">
-                <NutritionCardH 
-                    calories={data.calories} 
-                    caloriesGoal={data.caloriesGoal}
-                    foodQuality={data.foodQuality}
-                    weight={data.weight}
-                    height={data.height}
-                    age={data.age}
-                    gender={data.gender}
-                    onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
-                />
-            </div>
-          </div>
+            {/* Column 1 & 2 (Combined for metrics logic) */}
+            <motion.div layout className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+              <div className="grid grid-cols-1 gap-6">
+                  <WaterCardH 
+                      value={data.waterIntake} 
+                      goal={data.waterGoal} 
+                      onUpdate={(val) => handleMetricUpdate('waterIntake', val)} 
+                  />
+                  <StepsCardH 
+                      steps={data.steps} 
+                      goal={data.stepsGoal} 
+                      onUpdate={(val) => handleMetricUpdate('steps', val)} 
+                  />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                  <WeightCardH 
+                      value={data.weight} 
+                      goalWeight={data.weightGoal}
+                      onUpdate={(val) => handleMetricUpdate('weight', val)} 
+                  />
+                  <CaffeineCardH 
+                      value={data.caffeineIntake} 
+                      goal={data.caffeineGoal} 
+                      onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} 
+                  />
+                  <SleepCardH 
+                      hours={data.sleepHours} 
+                      goal={data.sleepGoal} 
+                      onUpdate={(val) => handleMetricUpdate('sleepHours', val)} 
+                  />
+                  <MoodEnergyCardH 
+                      mood={data.mood} 
+                      energy={data.energyLevel} 
+                      onMoodUpdate={(val) => handleMoodUpdate(val)} 
+                      onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} 
+                  />
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                  <NutritionCardH 
+                      calories={data.calories} 
+                      caloriesGoal={data.caloriesGoal}
+                      foodQuality={data.foodQuality}
+                      weight={data.weight}
+                      height={data.height}
+                      age={data.age}
+                      gender={data.gender}
+                      onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
+                  />
+              </div>
+            </motion.div>
 
-          {/* Column 3: Focus Area (Habits + Notes) */}
-          <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-            {/* Habits - Desktop only, mobile has button */}
-            <div className="hidden lg:block">
-              <HabitsCard 
-                  habits={data.habits} 
-                  onToggle={(id) => {
-                      handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
-                  }} 
+            {/* Column 3: Focus Area (Habits + Notes) */}
+            <motion.div layout className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
+              <div className="hidden lg:block">
+                <HabitsCard 
+                    habits={data.habits} 
+                    onToggle={(id) => {
+                        handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))
+                    }} 
+                />
+              </div>
+              
+              <AchievementsCard />
+
+              <NotesCard 
+                  value={data.notes} 
+                  onUpdate={(val) => handleMetricUpdate('notes', val)} 
               />
-            </div>
-            
-            <div className="lg:hidden flex flex-col gap-6">
-                <AchievementsCard />
-            </div>
 
-            <NotesCard 
-                value={data.notes} 
-                onUpdate={(val) => handleMetricUpdate('notes', val)} 
-            />
+              <DailyPhotosCard photos={data.dailyPhotos} />
+            </motion.div>
 
-            <div className="lg:hidden flex flex-col gap-6">
-                <DailyPhotosCard photos={data.dailyPhotos} />
-            </div>
+            {/* Column 4: Info & Progress (Desktop Right) */}
+            <motion.div layout className="lg:col-span-3 space-y-6 order-1 lg:order-3">
+              <div className="hidden lg:block">
+                  <HealthTrackerCard 
+                      className="p-4" 
+                      title="Календарь" 
+                      subtitle={format(selectedDate, 'LLLL', { locale: ru })}
+                      icon={Calendar} iconColor="text-amber-500" iconBg="bg-amber-500/10"
+                      rightAction={
+                          <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
+                              <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
+                                  <ChevronDown className="w-4 h-4 text-white/40" />
+                              </motion.div>
+                          </button>
+                      }
+                  >
+                      <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={isCalendarExpanded} />
+                  </HealthTrackerCard>
+              </div>
+
+              <div className="hidden lg:block">
+                <GoalsSummaryCard data={data} />
+              </div>
+            </motion.div>
+
           </div>
-
-          {/* Column 4: Info & Progress (Desktop Right) */}
-          <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
-            {/* Calendar (Desktop Only) */}
-            <div className="hidden lg:block">
-                <HealthTrackerCard 
-                    className="p-4" 
-                    title="Календарь" 
-                    subtitle={format(selectedDate, 'LLLL', { locale: ru })}
-                    icon={Calendar} iconColor="text-amber-500" iconBg="bg-amber-500/10"
-                    rightAction={
-                        <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
-                            <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                                <ChevronDown className="w-4 h-4 text-white/40" />
-                            </motion.div>
-                        </button>
-                    }
-                >
-                    <WeekNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} minimal={true} isExpanded={isCalendarExpanded} />
-                </HealthTrackerCard>
-            </div>
-
-            {/* Plan on Day - Desktop only, mobile has button */}
-            <div className="hidden lg:block">
-              <GoalsSummaryCard data={data} />
-            </div>
-            
-            <div className="hidden lg:flex flex-col gap-6">
-                <AchievementsCard />
-                <DailyPhotosCard photos={data.dailyPhotos} />
-            </div>
-          </div>
-
-        </div>
+        </LayoutGroup>
       </div>
 
       {/* Mobile Bottom Navigation - Floating Safari-style */}
@@ -475,6 +529,6 @@ function HealthTrackerContent() {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

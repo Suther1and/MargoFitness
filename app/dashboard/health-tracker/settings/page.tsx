@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Home, BarChart3, ListChecks, Target, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Activity, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Settings as SettingsIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
@@ -105,11 +105,6 @@ export default function TrackerSettingsPage() {
     }))
   }
 
-  const handleSave = () => {
-    saveSettings(localSettings)
-    router.push('/dashboard/health-tracker')
-  }
-
   const calculateBMI = () => {
     const { height, weight } = localSettings.userParams
     if (height && weight) {
@@ -131,16 +126,20 @@ export default function TrackerSettingsPage() {
   const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null
 
   // Группировка виджетов
-  const widgetGroups = [
+  const widgetGroups = useMemo(() => [
     { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
     { name: 'Питание и баланс', icon: Apple, widgets: ['water', 'caffeine', 'nutrition'] },
     { name: 'Тело', icon: Scale, widgets: ['weight', 'photos', 'notes'] }
-  ]
+  ], [])
 
-  if (!mounted) return null
+  if (!mounted) return <div className="min-h-screen bg-[#09090b]" />
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-[#09090b] text-white selection:bg-green-500/30 font-sans pb-20"
+    >
       {/* Ambient BG - Desktop only */}
       <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className={cn(
@@ -290,7 +289,7 @@ export default function TrackerSettingsPage() {
         </div>
       </header>
 
-      {/* Табы и Кнопка сохранения */}
+      {/* Табы */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 mt-2">
         <div className="flex items-center justify-between p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px]">
           <div className="flex h-full gap-1 w-full md:w-auto">
@@ -331,8 +330,6 @@ export default function TrackerSettingsPage() {
               <span className="relative z-10">Привычки</span>
             </button>
           </div>
-
-          {/* Кнопка сохранения удалена (теперь автосохранение) */}
         </div>
       </div>
 
@@ -345,7 +342,7 @@ export default function TrackerSettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="space-y-10"
             >
               {widgetGroups.map((group) => {
@@ -366,9 +363,8 @@ export default function TrackerSettingsPage() {
                         const Icon = ICON_MAP[id]
                         
                         return (
-                          <motion.div
+                          <div
                             key={id}
-                            layout
                             onClick={() => handleToggle(id)}
                             className={cn(
                               "group relative overflow-hidden rounded-[2.5rem] border transition-all duration-300 cursor-pointer",
@@ -540,7 +536,7 @@ export default function TrackerSettingsPage() {
                                 </div>
                               )}
                             </div>
-                          </motion.div>
+                          </div>
                         )
                       })}
                     </div>
@@ -554,7 +550,7 @@ export default function TrackerSettingsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
             >
               <HabitsSection />
             </motion.div>
@@ -598,6 +594,6 @@ export default function TrackerSettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
