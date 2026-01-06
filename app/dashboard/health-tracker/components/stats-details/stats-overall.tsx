@@ -263,12 +263,9 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="w-px h-8 bg-white/10" />
-                <div className="text-right">
-                  <div className="text-lg font-black text-indigo-400 leading-none tabular-nums">95%</div>
-                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Цель</div>
-                </div>
+              <div className="text-right shrink-0">
+                <div className="text-lg font-black text-indigo-400 leading-none tabular-nums">95%</div>
+                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Цель</div>
               </div>
             </div>
           </motion.div>
@@ -291,12 +288,9 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="w-px h-8 bg-white/10" />
-                <div className="text-right">
-                  <div className="text-lg font-black text-amber-600 leading-none tabular-nums">2.1</div>
-                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Среднее</div>
-                </div>
+              <div className="text-right shrink-0">
+                <div className="text-lg font-black text-amber-600 leading-none tabular-nums">2.1</div>
+                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Среднее</div>
               </div>
             </div>
           </motion.div>
@@ -332,57 +326,71 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         </motion.div>
       )}
 
-      {/* Настроение и Энергия - Горизонтальная редизайн */}
+      {/* Настроение и Энергия - В одну строку */}
       {settings.widgets.mood?.enabled && (
-        <motion.div 
-          variants={item}
-          onClick={() => onNavigate?.('mood')}
-          className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-pink-500/20 transition-all active:scale-[0.98] group"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="p-2.5 rounded-xl bg-pink-500/10 border border-pink-500/20 group-hover:scale-110 transition-transform duration-500">
-                <Smile className="w-5 h-5 text-pink-400" />
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div 
+            variants={item}
+            onClick={() => onNavigate?.('mood')}
+            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-pink-500/20 transition-all active:scale-[0.98] group"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-pink-500/10 border border-pink-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Smile className="w-4 h-4 text-pink-400" />
+                </div>
+                <div>
+                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Настроение</div>
+                  <div className="text-lg font-black text-white tracking-tight uppercase leading-none">Отличное</div>
+                </div>
               </div>
-              <div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Состояние</div>
-                <div className="text-lg font-black text-white tracking-tight uppercase leading-none">Отличное</div>
-              </div>
-            </div>
 
-            <div className="flex-1 max-w-[140px] flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest whitespace-nowrap">Энергия</span>
-                <span className="text-[10px] font-black text-orange-400 tracking-tight tabular-nums">7.8/10</span>
-              </div>
-              <div className="flex gap-0.5 h-1.5">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={cn(
-                      "flex-1 rounded-[1px]", 
-                      i < 8 ? "bg-gradient-to-t from-orange-600 to-orange-400" : "bg-white/5"
-                    )} 
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/10" />
-              <div className="flex gap-1">
+              <div className="flex gap-1 shrink-0">
                 {[Meh, Smile, Laugh].map((Icon, i) => (
                   <div key={i} className={cn(
-                    "w-9 h-9 rounded-xl flex items-center justify-center border transition-all",
+                    "w-7 h-7 rounded-lg flex items-center justify-center border transition-all",
                     i === 2 ? "bg-pink-500/20 border-pink-500/30" : "bg-white/5 border-white/5 opacity-20"
                   )}>
-                    <Icon className={cn("w-4 h-4", i === 2 ? "text-pink-400" : "text-white")} />
+                    <Icon className={cn("w-3.5 h-3.5", i === 2 ? "text-pink-400" : "text-white")} />
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          <motion.div 
+            variants={item}
+            onClick={() => onNavigate?.('mood')}
+            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-orange-500/20 transition-all active:scale-[0.98] group"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Zap className="w-4 h-4 text-orange-400" />
+                </div>
+                <div>
+                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Энергия</div>
+                  <div className="flex gap-0.5 h-2 mt-1.5">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={cn(
+                          "w-1.5 rounded-[1px]", 
+                          i < 8 ? "bg-gradient-to-t from-orange-600 to-orange-400" : "bg-white/5"
+                        )} 
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <div className="text-lg font-black text-orange-400 leading-none tabular-nums">7.8</div>
+                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">/10</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* Фото и Заметки - Нижние компактные блоки */}
@@ -425,6 +433,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 </div>
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Заметки</span>
               </div>
+              <span className="text-[10px] font-bold text-white/30 uppercase">12</span>
             </div>
             <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
               <p className="text-[10px] text-white/50 leading-relaxed line-clamp-2">{MOCK_LAST_NOTE.content}</p>
