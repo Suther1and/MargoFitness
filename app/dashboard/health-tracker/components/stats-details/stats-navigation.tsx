@@ -47,13 +47,19 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
+          const buttonCount = visibleButtons.length
+          
+          // Сохраняем квадратную форму при любом количестве кнопок
+          const heightClass = buttonCount >= 8 ? "aspect-square" : "h-[54px]"
+          const iconSize = buttonCount >= 8 ? "w-5 h-5" : "w-6 h-6"
 
           return (
             <button
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex-1 max-w-[54px] flex items-center justify-center h-[54px] rounded-2xl transition-all duration-300",
+                "relative flex-1 max-w-[54px] flex items-center justify-center rounded-2xl transition-all duration-300",
+                heightClass,
                 isActive
                   ? "bg-white/10 border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
@@ -61,7 +67,8 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
             >
               {/* Иконка */}
               <Icon className={cn(
-                "w-6 h-6 transition-colors duration-300",
+                iconSize,
+                "transition-colors duration-300",
                 isActive ? button.color : "text-white/40"
               )} />
             </button>
