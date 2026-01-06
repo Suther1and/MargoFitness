@@ -38,6 +38,7 @@ import { HabitsCard } from './components/habits-card'
 import { AchievementsCard } from './components/achievements-card'
 import { HealthTrackerCard } from './components/health-tracker-card'
 import { WeekNavigator } from './components/week-navigator'
+import StatsTab from './components/stats-tab'
 
 import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
@@ -399,11 +400,7 @@ function HealthTrackerContent() {
                         exit={{ opacity: 0 }} 
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-[2.5rem] border border-white/5">
-                          <BarChart3 className="w-12 h-12 text-amber-500/40 mb-4" />
-                          <h3 className="text-xl font-bold text-white mb-2">Статистика скоро</h3>
-                          <p className="text-white/40 text-sm">Мы работаем над детальными графиками вашего прогресса</p>
-                        </div>
+                        <StatsTab />
                       </motion.div>
                     )}
                     {activeTab === 'overview' && (
@@ -446,9 +443,16 @@ function HealthTrackerContent() {
                   </div>
                 )}
 
+                {/* Desktop Statistics */}
+                {activeTab === 'stats' && (
+                  <div className="hidden lg:block max-w-5xl mx-auto">
+                    <StatsTab />
+                  </div>
+                )}
+
                 <div className={cn(
                   "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",
-                  activeTab === 'settings' && "lg:hidden"
+                  (activeTab === 'settings' || activeTab === 'stats') && "lg:hidden"
                 )} style={{ contain: 'layout paint' }}>
                   <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
                     <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />

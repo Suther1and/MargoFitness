@@ -3,6 +3,46 @@ export type MoodRating = 1 | 2 | 3 | 4 | 5;
 // Типы для настроек трекера
 export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
 
+// Типы для статистики
+export type StatsView = 'overall' | WidgetId;
+
+export interface StatsPeriodData {
+  period: '7d' | '30d' | '6m' | 'year';
+  startDate: Date;
+  endDate: Date;
+}
+
+// Типы для моковых данных статистики
+export interface DayMetrics {
+  water?: number;
+  steps?: number;
+  sleep?: number;
+  sleepQuality?: number;
+  caffeine?: number;
+  weight?: number;
+  energy?: number;
+  mood?: MoodRating;
+  calories?: number;
+  protein?: number;
+  fats?: number;
+  carbs?: number;
+}
+
+export interface NoteWithContext {
+  id: string;
+  date: string;
+  content: string;
+  mood?: MoodRating;
+  dayMetrics: DayMetrics;
+}
+
+export interface PhotoEntry {
+  id: string;
+  date: string;
+  url: string;
+  weight: number;
+}
+
 export interface WidgetSettings {
   enabled: boolean;
   goal: number | null;
