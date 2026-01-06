@@ -109,6 +109,7 @@ function ChartTooltipContent({
     indicator?: "line" | "dot" | "dashed"
     nameKey?: string
     labelKey?: string
+    payload?: any[]
   }) {
   const { config } = useChart()
 
@@ -244,6 +245,7 @@ function ChartLegendContent({
   React.ComponentProps<"div"> & {
     hideIcon?: boolean
     nameKey?: string
+    payload?: any[]
   }) {
   const { config } = useChart()
 

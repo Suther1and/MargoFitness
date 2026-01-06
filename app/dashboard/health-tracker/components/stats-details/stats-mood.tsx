@@ -62,7 +62,7 @@ export function StatsMood({ period }: StatsMoodProps) {
         </div>
 
         <div className="space-y-2">
-          {MOOD_ICONS.reverse().map((mood) => {
+          {[...MOOD_ICONS].reverse().map((mood) => {
             const count = moodCounts[mood.rating] || 0
             const percent = (count / MOOD_DATA.length) * 100
             const Icon = mood.icon
