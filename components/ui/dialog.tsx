@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
+const DialogContext = React.createContext<{ open: boolean }>({ open: false })
+
 // Константы
 const BLUR_ANIMATION_DURATION = 200
 const BLUR_Z_INDEX = 48
@@ -163,7 +165,11 @@ function Dialog({
     }
   }, [props.open, props.onOpenChange])
   
-  return <DialogPrimitive.Root data-slot="dialog" modal={false} {...props} />
+  return (
+    <DialogContext.Provider value={{ open: props.open || false }}>
+      <DialogPrimitive.Root data-slot="dialog" modal={false} {...props} />
+    </DialogContext.Provider>
+  )
 }
 
 function DialogTrigger({
@@ -188,26 +194,30 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  const { open } = React.useContext(DialogContext)
+  
   return (
-    <AnimatePresence mode="wait">
-      <DialogPrimitive.Overlay
-        data-slot="dialog-overlay"
-        asChild
-        forceMount
-        {...props}
-      >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          className={cn(
-            "fixed inset-0 z-[49] bg-transparent",
-            className
-          )}
-        />
-      </DialogPrimitive.Overlay>
-    </AnimatePresence>
+    <DialogPrimitive.Overlay
+      data-slot="dialog-overlay"
+      asChild
+      forceMount
+      {...props}
+    >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className={cn(
+              "fixed inset-0 z-[49] bg-black/40 backdrop-blur-[2px]",
+              className
+            )}
+          />
+        )}
+      </AnimatePresence>
+    </DialogPrimitive.Overlay>
   )
 }
 
@@ -222,54 +232,58 @@ function DialogContent({
   variant?: "default" | "bottom"
 }) {
   const isBottom = variant === "bottom"
+  const { open } = React.useContext(DialogContext)
   
   return (
-    <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay className="z-[45]" />
-      <AnimatePresence mode="wait">
-        <DialogPrimitive.Content
-          data-slot="dialog-content"
-          data-dialog-content="true"
-          asChild
-          forceMount
-          {...props}
-        >
-          <motion.div
-            initial={isBottom ? { y: "100%", opacity: 0 } : { opacity: 0, scale: 0.9 }}
-            animate={isBottom ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
-            exit={isBottom ? { y: "100%", opacity: 0 } : { opacity: 0, scale: 0.9 }}
-            transition={{
-              duration: 0.3,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className={cn(
-              "bg-background fixed z-[60] grid w-full gap-4 border shadow-lg outline-none",
-              isBottom 
-                ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none" 
-                : "top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] max-w-[calc(100%-2rem)] rounded-lg p-6 sm:max-w-lg",
-              className
-            )}
+    <AnimatePresence>
+      {open && (
+        <DialogPortal forceMount>
+          <DialogOverlay className="z-[45]" />
+          <DialogPrimitive.Content
+            data-slot="dialog-content"
+            asChild
+            forceMount
+            {...props}
           >
-            {isBottom && (
-              <div className="mx-auto w-12 h-1.5 rounded-full bg-white/10 mb-2" />
-            )}
-            {children}
-            {showCloseButton && (
-              <DialogPrimitive.Close
-                data-slot="dialog-close"
-                className={cn(
-                  "ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-0 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-                  isBottom ? "top-6 right-6" : "top-4 right-4"
-                )}
-              >
-                <XIcon />
-                <span className="sr-only">Close</span>
-              </DialogPrimitive.Close>
-            )}
-          </motion.div>
-        </DialogPrimitive.Content>
-      </AnimatePresence>
-    </DialogPortal>
+            <motion.div
+              initial={isBottom ? { y: "100%" } : { opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={isBottom ? { y: "100%" } : { opacity: 0, scale: 0.95 }}
+              transition={{
+                type: "spring",
+                damping: 25,
+                stiffness: 220,
+                mass: 0.8
+              }}
+              className={cn(
+                "bg-background fixed z-[60] grid w-full gap-4 border shadow-lg outline-none",
+                isBottom 
+                  ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none" 
+                  : "top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[calc(100%-2rem)] rounded-lg p-6 sm:max-w-lg",
+                className
+              )}
+            >
+              {isBottom && (
+                <div className="mx-auto w-12 h-1.5 rounded-full bg-white/10 mb-2" />
+              )}
+              {children}
+              {showCloseButton && (
+                <DialogPrimitive.Close
+                  data-slot="dialog-close"
+                  className={cn(
+                    "ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-0 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                    isBottom ? "top-6 right-6" : "top-4 right-4"
+                  )}
+                >
+                  <XIcon />
+                  <span className="sr-only">Close</span>
+                </DialogPrimitive.Close>
+              )}
+            </motion.div>
+          </DialogPrimitive.Content>
+        </DialogPortal>
+      )}
+    </AnimatePresence>
   )
 }
 

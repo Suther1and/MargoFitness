@@ -137,7 +137,7 @@ function HealthTrackerContent() {
               <div className="flex flex-col lg:hidden">
                 <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
                   <DialogTrigger asChild>
-                    <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1">
+                    <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none">
                       <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
                         {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
                       </span>
