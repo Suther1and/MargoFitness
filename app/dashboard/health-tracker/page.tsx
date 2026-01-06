@@ -64,7 +64,7 @@ function HealthTrackerContent() {
   const today = new Date()
   const [statsPeriodType, setStatsPeriodType] = useState<PeriodType>('7d')
   const [statsDateRange, setStatsDateRange] = useState<DateRange>({ 
-    start: subDays(today, 6), 
+    start: subDays(today, 7), 
     end: today 
   })
   const [isStatsPeriodOpen, setIsStatsPeriodOpen] = useState(false)
@@ -115,7 +115,7 @@ function HealthTrackerContent() {
   }, [tabParam])
 
   const getStatsPeriodLabel = () => {
-    const days = differenceInDays(statsDateRange.end, statsDateRange.start) + 1
+    const days = differenceInDays(statsDateRange.end, statsDateRange.start)
     const startStr = format(statsDateRange.start, 'd MMM', { locale: ru })
     const endStr = format(statsDateRange.end, 'd MMM', { locale: ru })
     
@@ -210,6 +210,7 @@ function HealthTrackerContent() {
                   onClose={() => setIsStatsPeriodOpen(false)}
                   onPeriodSelect={handleStatsPeriodSelect}
                   currentPeriodType={statsPeriodType}
+                  currentDateRange={statsDateRange}
                 />
 
                 <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">

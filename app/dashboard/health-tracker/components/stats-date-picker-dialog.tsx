@@ -14,6 +14,7 @@ interface StatsDatePickerDialogProps {
   onClose: () => void
   onPeriodSelect: (periodType: PeriodType, dateRange: DateRange) => void
   currentPeriodType: PeriodType
+  currentDateRange: DateRange
 }
 
 const PERIOD_BUTTONS = [
@@ -27,7 +28,8 @@ export function StatsDatePickerDialog({
   isOpen, 
   onClose, 
   onPeriodSelect,
-  currentPeriodType 
+  currentPeriodType,
+  currentDateRange
 }: StatsDatePickerDialogProps) {
   const [viewDate, setViewDate] = useState(new Date())
   const [selectedStart, setSelectedStart] = useState<Date | null>(null)
@@ -36,12 +38,13 @@ export function StatsDatePickerDialog({
 
   useEffect(() => {
     if (isOpen) {
-      setViewDate(new Date())
-      setSelectedStart(null)
-      setSelectedEnd(null)
+      // Показываем текущий выбранный период
+      setViewDate(currentDateRange.end)
+      setSelectedStart(currentDateRange.start)
+      setSelectedEnd(currentDateRange.end)
       setActivePeriod(currentPeriodType)
     }
-  }, [isOpen, currentPeriodType])
+  }, [isOpen, currentPeriodType, currentDateRange])
 
   const monthStart = startOfMonth(viewDate)
   const monthEnd = endOfMonth(viewDate)
@@ -56,10 +59,10 @@ export function StatsDatePickerDialog({
 
     switch (periodId) {
       case '7d':
-        start = subDays(today, 6)
+        start = subDays(today, 7)
         break
       case '30d':
-        start = subDays(today, 29)
+        start = subDays(today, 30)
         break
       case '6m':
         start = subMonths(today, 6)
@@ -128,17 +131,17 @@ export function StatsDatePickerDialog({
           {/* Кнопки быстрого выбора периода */}
           <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 backdrop-blur-md">
             {PERIOD_BUTTONS.map((period) => (
-              <button
+                <button
                 key={period.id}
                 onClick={() => handlePeriodClick(period.id)}
                 className={cn(
                   "relative flex-1 px-2 py-1.5 text-[9px] font-black uppercase tracking-widest transition-colors duration-200 rounded-[1.5rem]",
-                  activePeriod === period.id && !selectedStart
+                  activePeriod === period.id && activePeriod !== 'custom'
                     ? "text-black" 
                     : "text-white/40 hover:text-white/60"
                 )}
               >
-                {activePeriod === period.id && !selectedStart && (
+                {activePeriod === period.id && activePeriod !== 'custom' && (
                   <motion.div
                     layoutId="activePeriodPicker"
                     className="absolute inset-0 bg-sky-500 rounded-[1.5rem] shadow-[0_0_20px_rgba(14,165,233,0.4)]"
@@ -201,7 +204,7 @@ export function StatsDatePickerDialog({
                         : inRange
                         ? "bg-sky-500/20 text-white"
                         : "hover:bg-white/5",
-                      !isCurrentMonth && "opacity-30"
+                      !isCurrentMonth && !isSelected && !inRange && "opacity-30"
                     )}
                   >
                     {isEnd ? (
