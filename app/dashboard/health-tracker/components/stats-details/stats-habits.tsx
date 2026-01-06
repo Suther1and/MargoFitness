@@ -253,7 +253,3 @@ export function StatsHabits({ period }: StatsHabitsProps) {
   )
 }
 
-    </motion.div>
-  )
-}
-
