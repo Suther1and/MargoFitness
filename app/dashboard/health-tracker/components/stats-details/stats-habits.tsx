@@ -17,10 +17,10 @@ interface StatsHabitsProps {
 
 // Моковые данные для привычек
 const HABIT_STATS = [
-  { name: "Креатин 5г", completed: 28, total: 30, streak: 12, trend: "+5%" },
-  { name: "Вакуум живота", completed: 22, total: 30, streak: 5, trend: "-2%" },
-  { name: "Без сахара", completed: 29, total: 30, streak: 21, trend: "+10%" },
-  { name: "Чтение 20 мин", completed: 18, total: 30, streak: 3, trend: "0%" },
+  { name: "Креатин 5г", completed: 28, total: 30, streak: 12 },
+  { name: "Вакуум живота", completed: 22, total: 30, streak: 5 },
+  { name: "Без сахара", completed: 29, total: 30, streak: 21 },
+  { name: "Чтение 20 мин", completed: 18, total: 30, streak: 3 },
 ]
 
 const WEEKLY_COMPLETION = [
@@ -33,6 +33,14 @@ const WEEKLY_COMPLETION = [
   { day: "Вс", value: 75 },
 ]
 
+// Добавляем моковые данные для тепловой карты
+const getHeatmapData = (period: string) => {
+  if (period === '7d') return Array.from({ length: 7 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
+  if (period === '30d') return Array.from({ length: 30 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
+  if (period === '180d') return Array.from({ length: 26 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
+  return Array.from({ length: 12 }, (_, i) => ({ value: Math.random() * 100, label: `M${i + 1}` }))
+}
+
 const chartConfig = {
   value: {
     label: "Выполнение",
@@ -42,7 +50,7 @@ const chartConfig = {
 
 export function StatsHabits({ period }: StatsHabitsProps) {
   const avgCompletion = Math.round(WEEKLY_COMPLETION.reduce((acc, d) => acc + d.value, 0) / WEEKLY_COMPLETION.length)
-  const bestDay = WEEKLY_COMPLETION.reduce((max, d) => d.value > max.value ? d : max, WEEKLY_COMPLETION[0])
+  const heatmapData = getHeatmapData(period)
 
   const container = {
     hidden: { opacity: 0 },
@@ -119,7 +127,40 @@ export function StatsHabits({ period }: StatsHabitsProps) {
         </div>
       </motion.div>
 
-      {/* Топ привычек */}
+      {/* Тепловая карта */}
+      <motion.div variants={item}>
+        <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <Calendar className="w-5 h-5 text-amber-500" />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Активность</span>
+          </div>
+          
+          <div className={cn(
+            "grid gap-2",
+            period === '7d' ? "grid-cols-7" : 
+            period === '30d' ? "grid-cols-10" : 
+            "grid-cols-13"
+          )}>
+            {heatmapData.map((data, i) => (
+              <div 
+                key={i}
+                className="aspect-square rounded-sm md:rounded-md transition-colors"
+                style={{ 
+                  backgroundColor: data.value > 80 ? 'rgba(245,158,11,1)' : 
+                                   data.value > 50 ? 'rgba(245,158,11,0.6)' : 
+                                   data.value > 20 ? 'rgba(245,158,11,0.3)' : 
+                                   'rgba(255,255,255,0.03)'
+                }}
+                title={`${Math.round(data.value)}%`}
+              />
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Список привычек */}
       <motion.div variants={item} className="grid grid-cols-1 gap-4">
         <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
           <div className="flex items-center gap-3 mb-6">
@@ -133,7 +174,7 @@ export function StatsHabits({ period }: StatsHabitsProps) {
             {HABIT_STATS.map((habit, i) => (
               <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors group">
                 <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 rounded-full bg-amber-500/20 group-hover:bg-amber-500 transition-colors" />
+                  <div className="w-2 h-10 rounded-full bg-amber-500/10 group-hover:bg-amber-500 transition-all duration-300" />
                   <div>
                     <div className="text-sm font-black text-white uppercase tracking-tight">{habit.name}</div>
                     <div className="flex items-center gap-2 mt-1">
@@ -146,12 +187,6 @@ export function StatsHabits({ period }: StatsHabitsProps) {
                   <div className="text-lg font-black text-white tabular-nums">
                     {Math.round((habit.completed / habit.total) * 100)}%
                   </div>
-                  <div className={cn(
-                    "text-[9px] font-bold uppercase",
-                    habit.trend.startsWith('+') ? "text-emerald-400" : habit.trend.startsWith('-') ? "text-red-400" : "text-white/20"
-                  )}>
-                    {habit.trend}
-                  </div>
                 </div>
               </div>
             ))}
@@ -161,7 +196,7 @@ export function StatsHabits({ period }: StatsHabitsProps) {
 
       {/* Ключевые метрики дисциплины */}
       <motion.div variants={item} className="grid grid-cols-2 gap-4">
-        <div className="p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5">
+        <div className="col-span-2 p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-amber-500" />
             <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Лучший стрик</span>
@@ -182,8 +217,21 @@ export function StatsHabits({ period }: StatsHabitsProps) {
           <div className="text-3xl font-black text-white tabular-nums leading-none mb-2">
             156
           </div>
-          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-tight">
             Задач за период
+          </div>
+        </div>
+
+        <div className="p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5">
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="w-4 h-4 text-blue-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Всего привычек</span>
+          </div>
+          <div className="text-3xl font-black text-white tabular-nums leading-none mb-2">
+            12
+          </div>
+          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-tight">
+            Отслеживалось
           </div>
         </div>
       </motion.div>
@@ -194,13 +242,17 @@ export function StatsHabits({ period }: StatsHabitsProps) {
           <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
             <Award className="w-5 h-5 text-amber-500" />
           </div>
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">AI Insight</span>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Рекомендация</span>
         </div>
         <p className="text-sm text-white/70 leading-relaxed font-medium">
-          Ваша дисциплина в выходные падает на <span className="text-amber-500 font-black">25%</span>. 
+          Ваша дисциплина в выходные обычно ниже на 25%. 
           Попробуйте перенести сложные привычки на утреннее время в субботу и воскресенье, чтобы повысить стабильность.
         </p>
       </motion.div>
+    </motion.div>
+  )
+}
+
     </motion.div>
   )
 }
