@@ -86,9 +86,8 @@ export default function StatsTab() {
             exit="exit"
             onAnimationStart={() => setIsAnimating(true)}
             onAnimationComplete={() => {
-              // Добавляем небольшую задержку перед снятием режима оптимизации,
-              // чтобы избежать резкого мерцания при возврате тяжелых стилей
-              setTimeout(() => setIsAnimating(false), 50)
+              // Увеличиваем задержку для полной стабилизации слоев браузером
+              setTimeout(() => setIsAnimating(false), 100)
             }}
             transition={{
               x: { type: "spring", stiffness: 400, damping: 35 },
@@ -101,7 +100,7 @@ export default function StatsTab() {
                 scale: { duration: 0.1 }
               }
             }}
-            className="will-change-[transform,opacity] transform-gpu gpu-accelerated"
+            className="will-change-[transform,opacity] transform-gpu"
           >
             {getContent()}
           </motion.div>

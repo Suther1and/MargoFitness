@@ -55,14 +55,14 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-4 pb-4 contain-layout contain-paint"
+      className="space-y-4 pb-4 contain-paint"
     >
       {/* Дисциплина - Эталонный блок */}
       {settings.widgets.habits?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('habits')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-amber-500/20 transition-[border-color,transform] duration-300 active:scale-[0.98] group transform-gpu gpu-accelerated"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-amber-500/20 transition-[border-color,transform] duration-300 active:scale-[0.98] group transform-gpu"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
