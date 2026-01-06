@@ -110,6 +110,11 @@ function ChartTooltipContent({
     nameKey?: string
     labelKey?: string
     payload?: any[]
+    label?: any
+    labelFormatter?: any
+    labelClassName?: string
+    formatter?: any
+    color?: string
   }) {
   const { config } = useChart()
 
@@ -246,6 +251,7 @@ function ChartLegendContent({
     hideIcon?: boolean
     nameKey?: string
     payload?: any[]
+    verticalAlign?: string
   }) {
   const { config } = useChart()
 
