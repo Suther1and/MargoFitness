@@ -16,22 +16,39 @@ import { StatsNotes } from "./stats-details/stats-notes"
 import { StatsPhotos } from "./stats-details/stats-photos"
 import { StatsHabits } from "./stats-details/stats-habits"
 import { useTrackerSettings } from "../hooks/use-tracker-settings"
-import { StatsView, PeriodType, DateRange } from "../types"
+import { StatsView, PeriodType, DateRange, DailyMetrics } from "../types"
+import { useIsMobile } from "@/lib/hooks/use-is-mobile"
+import { DesktopStatsDashboard } from "./stats-details/desktop-stats-dashboard"
 
 interface StatsTabProps {
   periodType: PeriodType
   dateRange: DateRange
+  data: DailyMetrics
+  onPeriodSelect: (periodType: PeriodType, dateRange: DateRange) => void
 }
 
-export default function StatsTab({ periodType, dateRange }: StatsTabProps) {
+export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }: StatsTabProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
   const [isAnimating, setIsAnimating] = useState(false)
   const { settings } = useTrackerSettings()
+  const isMobile = useIsMobile(1024)
 
   // Для обратной совместимости со старым форматом period
   const getLegacyPeriod = () => {
     if (periodType === '1y') return 'year'
     return periodType
+  }
+
+  if (!isMobile) {
+    return (
+      <DesktopStatsDashboard 
+        period={getLegacyPeriod()} 
+        data={data} 
+        onPeriodSelect={onPeriodSelect}
+        currentPeriodType={periodType}
+        currentDateRange={dateRange}
+      />
+    )
   }
 
   // Определяем, какой компонент рендерить

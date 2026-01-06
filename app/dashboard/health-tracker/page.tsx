@@ -43,6 +43,11 @@ import StatsTab from './components/stats-tab'
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function HealthTrackerPage() {
   return (
@@ -68,6 +73,7 @@ function HealthTrackerContent() {
     end: today 
   })
   const [isStatsPeriodOpen, setIsStatsPeriodOpen] = useState(false)
+  const [isStatsPeriodDropdownOpen, setIsStatsPeriodDropdownOpen] = useState(false)
 
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
     (tabParam as any) || 'overview'
@@ -293,26 +299,7 @@ function HealthTrackerContent() {
                           </motion.h1>
                         </div>
 
-                        {activeTab === 'stats' && (
-                          <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="mt-9"
-                          >
-                            <button 
-                              onClick={() => setIsStatsPeriodOpen(true)}
-                              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
-                            >
-                              <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] leading-none mb-1">Период анализа</span>
-                                <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{getStatsPeriodLabel()}</span>
-                              </div>
-                              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <CalendarDays className="w-5 h-5 text-blue-500" />
-                              </div>
-                            </button>
-                          </motion.div>
-                        )}
+                        {/* Период удален отсюда для десктопа в режиме статистики, так как он теперь в сайдбаре */}
                       </div>
                     </div>
                   ) : (
@@ -519,8 +506,13 @@ function HealthTrackerContent() {
 
                 {/* Desktop Statistics */}
                 {activeTab === 'stats' && (
-                  <div className="hidden lg:block max-w-5xl mx-auto">
-                    <StatsTab periodType={statsPeriodType} dateRange={statsDateRange} />
+                  <div className="hidden lg:block w-full">
+                    <StatsTab 
+                      periodType={statsPeriodType} 
+                      dateRange={statsDateRange} 
+                      data={data} 
+                      onPeriodSelect={handleStatsPeriodSelect}
+                    />
                   </div>
                 )}
 

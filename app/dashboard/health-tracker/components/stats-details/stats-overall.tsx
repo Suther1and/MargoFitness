@@ -11,6 +11,7 @@ import Image from "next/image"
 interface StatsOverallProps {
   period: string
   onNavigate?: (view: StatsView) => void
+  layout?: 'column' | 'grid'
 }
 
 const MOCK_PHOTOS = [
@@ -25,7 +26,7 @@ const MOCK_LAST_NOTE = {
   mood: 5
 }
 
-export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
+export function StatsOverall({ period, onNavigate, layout = 'column' }: StatsOverallProps) {
   const { settings } = useTrackerSettings()
   
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
@@ -55,7 +56,10 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-4 pb-4 contain-paint"
+      className={cn(
+        "pb-4 contain-paint",
+        layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"
+      )}
     >
       {/* Дисциплина - Эталонный блок */}
       {settings.widgets.habits?.enabled && (
