@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -76,6 +76,13 @@ export function StatsDatePickerDialog({
   }
 
   const handleDayClick = (day: Date) => {
+    // Проверяем клик на галочку (вторую выбранную дату) - подтверждение
+    if (selectedEnd && isSameDay(day, selectedEnd)) {
+      onPeriodSelect('custom', { start: selectedStart!, end: selectedEnd })
+      onClose()
+      return
+    }
+    
     if (!selectedStart || selectedEnd) {
       // Первый клик или начало нового выбора
       setSelectedStart(day)
@@ -86,14 +93,14 @@ export function StatsDatePickerDialog({
       const start = day < selectedStart ? day : selectedStart
       const end = day < selectedStart ? selectedStart : day
       
-      onPeriodSelect('custom', { start, end })
-      onClose()
+      setSelectedStart(start)
+      setSelectedEnd(end)
     }
   }
 
   const isInRange = (day: Date) => {
     if (!selectedStart || !selectedEnd) return false
-    return day >= selectedStart && day <= selectedEnd
+    return day > selectedStart && day < selectedEnd
   }
 
   const isRangeStart = (day: Date) => {
@@ -110,22 +117,22 @@ export function StatsDatePickerDialog({
         variant="bottom" 
         className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10"
       >
-        <DialogHeader className="p-6 pb-4 border-b border-white/5">
-          <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
-            <Calendar className="w-5 h-5 text-sky-500" />
+        <DialogHeader className="p-4 pb-3 border-b border-white/5">
+          <DialogTitle className="text-lg font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-2.5">
+            <Calendar className="w-4.5 h-4.5 text-sky-500" />
             Выберите период
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 pb-8 space-y-4">
+        <div className="p-3 pb-6 space-y-3">
           {/* Кнопки быстрого выбора периода */}
-          <div className="flex bg-white/[0.03] p-1.5 rounded-[2rem] border border-white/5 backdrop-blur-md">
+          <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 backdrop-blur-md">
             {PERIOD_BUTTONS.map((period) => (
               <button
                 key={period.id}
                 onClick={() => handlePeriodClick(period.id)}
                 className={cn(
-                  "relative flex-1 px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors duration-200 rounded-[1.5rem]",
+                  "relative flex-1 px-2 py-1.5 text-[9px] font-black uppercase tracking-widest transition-colors duration-200 rounded-[1.5rem]",
                   activePeriod === period.id && !selectedStart
                     ? "text-black" 
                     : "text-white/40 hover:text-white/60"
@@ -144,23 +151,23 @@ export function StatsDatePickerDialog({
           </div>
 
           {/* Заголовок месяца с навигацией */}
-          <div className="flex items-center justify-between px-2 py-2">
+          <div className="flex items-center justify-between px-2 py-1">
             <button
               onClick={() => setViewDate(subMonths(viewDate, 1))}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-white/60" />
+              <ChevronLeft className="w-3.5 h-3.5 text-white/60" />
             </button>
             
-            <span className="text-sm font-black uppercase tracking-wider text-white">
+            <span className="text-xs font-black uppercase tracking-wider text-white">
               {format(viewDate, 'LLLL yyyy', { locale: ru })}
             </span>
 
             <button
               onClick={() => setViewDate(addMonths(viewDate, 1))}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-white/60" />
+              <ChevronRight className="w-3.5 h-3.5 text-white/60" />
             </button>
           </div>
 
@@ -170,19 +177,18 @@ export function StatsDatePickerDialog({
               {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d, i) => (
                 <div 
                   key={`${d}-${i}`} 
-                  className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest"
+                  className="text-[8px] font-black text-white/20 text-center pb-1.5 uppercase tracking-widest"
                 >
                   {d}
                 </div>
               ))}
               {monthDays.map((day, index) => {
-                const isSelected = (selectedStart && isSameDay(day, selectedStart)) || 
-                                 (selectedEnd && isSameDay(day, selectedEnd))
+                const isStart = isRangeStart(day)
+                const isEnd = isRangeEnd(day)
+                const isSelected = isStart || isEnd
                 const isToday = isSameDay(day, new Date())
                 const isCurrentMonth = isSameMonth(day, viewDate)
-                const inRange = selectedStart && !selectedEnd && isInRange(day)
-                const rangeStart = isRangeStart(day)
-                const rangeEnd = isRangeEnd(day)
+                const inRange = isInRange(day)
                 
                 return (
                   <button
@@ -198,18 +204,22 @@ export function StatsDatePickerDialog({
                       !isCurrentMonth && "opacity-30"
                     )}
                   >
-                    <span className={cn(
-                      "text-[13px] font-black",
-                      isSelected 
-                        ? "text-black" 
-                        : isCurrentMonth 
-                        ? "text-white" 
-                        : "text-white/40"
-                    )}>
-                      {format(day, 'd')}
-                    </span>
+                    {isEnd ? (
+                      <Check className="w-4 h-4 text-black font-black" strokeWidth={3.5} />
+                    ) : (
+                      <span className={cn(
+                        "text-xs font-black",
+                        isSelected 
+                          ? "text-black" 
+                          : isCurrentMonth 
+                          ? "text-white" 
+                          : "text-white/40"
+                      )}>
+                        {format(day, 'd')}
+                      </span>
+                    )}
                     {!isSelected && isToday && (
-                      <div className="absolute bottom-1.5 flex gap-0.5">
+                      <div className="absolute bottom-1 flex gap-0.5">
                         <div className="w-1 h-1 rounded-full bg-sky-500" />
                       </div>
                     )}
