@@ -31,17 +31,32 @@ export default function StatsTab() {
       enter: (direction: number) => ({
         x: direction > 0 ? 20 : -20,
         opacity: 0,
-        scale: 0.98
+        scale: 0.98,
+        transition: {
+          x: { type: "spring", stiffness: 400, damping: 35 },
+          opacity: { duration: 0.15 },
+          scale: { duration: 0.15 }
+        }
       }),
       center: {
         x: 0,
         opacity: 1,
-        scale: 1
+        scale: 1,
+        transition: {
+          x: { type: "spring", stiffness: 400, damping: 35 },
+          opacity: { duration: 0.15 },
+          scale: { duration: 0.15 }
+        }
       },
       exit: (direction: number) => ({
         x: direction < 0 ? 20 : -20,
         opacity: 0,
-        scale: 0.98
+        scale: 0.98,
+        transition: {
+          x: { duration: 0.1, ease: "easeIn" },
+          opacity: { duration: 0.1 },
+          scale: { duration: 0.1 }
+        }
       })
     }
 
@@ -88,17 +103,6 @@ export default function StatsTab() {
             onAnimationComplete={() => {
               // Увеличиваем задержку для полной стабилизации слоев браузером
               setTimeout(() => setIsAnimating(false), 100)
-            }}
-            transition={{
-              x: { type: "spring", stiffness: 400, damping: 35 },
-              opacity: { duration: 0.15 },
-              scale: { duration: 0.15 },
-              // Асимметричный выход
-              exit: {
-                x: { duration: 0.1, ease: "easeIn" },
-                opacity: { duration: 0.1 },
-                scale: { duration: 0.1 }
-              }
             }}
             className="will-change-[transform,opacity] transform-gpu"
           >
