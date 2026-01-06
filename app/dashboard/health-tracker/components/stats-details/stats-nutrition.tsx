@@ -73,8 +73,8 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
         <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <Utensils className="w-4 h-4 text-emerald-400" />
+              <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <Utensils className="w-4 h-4 text-violet-400" />
               </div>
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-white">Калории</h3>
@@ -85,7 +85,7 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
               <div className="text-2xl font-black text-white tabular-nums">
                 {avgCalories}
               </div>
-              <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+              <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">
                 ккал/день
               </div>
             </div>
@@ -145,8 +145,8 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-violet-400" />
           </div>
           <div>
             <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
@@ -157,21 +157,21 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
         <div className="space-y-3">
           {/* Главная метрика */}
           {avgCalories >= goal * 0.95 && avgCalories <= goal * 1.05 ? (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
               <div className="flex gap-3">
                 <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                    <Award className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-violet-400" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-emerald-400 font-bold mb-1.5">🎯 Точное попадание в цель!</p>
+                  <p className="text-sm text-violet-400 font-bold mb-1.5">🎯 Точное попадание в цель!</p>
                   <p className="text-xs text-white/70 leading-relaxed mb-2">
                     Среднее потребление <span className="font-bold text-white">{avgCalories} ккал</span> соответствует 
                     вашей цели. Отличный контроль питания!
                   </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                    <span className="text-[10px] font-bold text-violet-300 uppercase tracking-wider">
                       Продолжайте в том же духе
                     </span>
                   </div>
@@ -232,8 +232,8 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Стабильность</span>
+                <TrendingUp className="w-4 h-4 text-violet-400" />
+                <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">Стабильность</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {(() => {
@@ -261,7 +261,7 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
                   const deviation = Math.abs(avgCalories - goal)
                   const deviationPercent = ((deviation / goal) * 100).toFixed(0)
                   return deviation <= 100 ? (
-                    <>Идеально! Отклонение всего <span className="font-bold text-emerald-400">{deviation} ккал</span> ({deviationPercent}%).</>
+                    <>Идеально! Отклонение всего <span className="font-bold text-violet-400">{deviation} ккал</span> ({deviationPercent}%).</>
                   ) : deviation <= 300 ? (
                     <>Отклонение <span className="font-bold text-white">{deviation} ккал</span> ({deviationPercent}%) — можно скорректировать.</>
                   ) : (
@@ -275,8 +275,8 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
           {/* Анализ дней */}
           <div className="p-4 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-2 mb-3">
-              <Utensils className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Анализ по дням</span>
+              <Utensils className="w-4 h-4 text-violet-400" />
+              <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">Анализ по дням</span>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
@@ -304,10 +304,10 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
           </div>
 
           {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
             <div className="flex items-center gap-2 mb-3">
-              <Utensils className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Рекомендации</span>
+              <Utensils className="w-4 h-4 text-violet-400" />
+              <span className="text-xs font-bold text-violet-300 uppercase tracking-wider">Рекомендации</span>
             </div>
             <div className="space-y-2">
               {avgCalories < goal * 0.95 && (

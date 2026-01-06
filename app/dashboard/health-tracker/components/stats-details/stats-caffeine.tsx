@@ -113,8 +113,8 @@ export function StatsCaffeine({ period }: StatsCaffeineProps) {
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-orange-400" />
+          <div className="w-10 h-10 rounded-xl bg-amber-600/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-amber-600" />
           </div>
           <div>
             <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>

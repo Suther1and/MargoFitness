@@ -95,8 +95,8 @@ export function StatsSteps({ period }: StatsStepsProps) {
         <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-white/5 flex items-center justify-center">
-                <Footprints className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-white/5 flex items-center justify-center">
+                <Footprints className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-tight">Динамика шагов</h3>
@@ -183,7 +183,7 @@ export function StatsSteps({ period }: StatsStepsProps) {
                         <p className="text-xs font-bold text-white/60 mb-2">{data.date}</p>
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <Footprints className="w-3.5 h-3.5 text-blue-400" />
+                            <Footprints className="w-3.5 h-3.5 text-red-500" />
                             <span className="text-sm font-bold text-white">{data.value.toLocaleString()}</span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -229,8 +229,8 @@ export function StatsSteps({ period }: StatsStepsProps) {
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-blue-400" />
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-red-500" />
           </div>
           <div>
             <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
@@ -287,39 +287,50 @@ export function StatsSteps({ period }: StatsStepsProps) {
             </div>
           )}
 
-          {/* Анализ тренда */}
+          {/* Дополнительные метрики */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                {parseFloat(trend) > 0 ? (
-                  <>
-                    <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Растущий тренд</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="w-4 h-4 text-orange-400" />
-                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Падающий тренд</span>
-                  </>
-                )}
+                <MapPin className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Дистанция</span>
               </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {parseFloat(trend) > 0 
-                  ? `Активность выросла на ${Math.abs(parseFloat(trend))}% во второй половине недели. Отлично!`
-                  : `Активность снизилась на ${Math.abs(parseFloat(trend))}% к концу недели. Уделите внимание выходным.`
-                }
-              </p>
+              <div className="space-y-1">
+                <p className="text-[11px] text-white/60">
+                  Всего пройдено: <span className="font-bold text-white">{totalDistance.toFixed(1)} км</span>
+                </p>
+                <p className="text-[11px] text-white/60">
+                  В среднем: <span className="font-bold text-white">{avgDistance} км/день</span>
+                </p>
+                <p className="text-[10px] text-white/40 mt-1">
+                  {parseFloat(avgDistance) >= 8 
+                    ? "Превосходно! Рекомендованная норма достигнута."
+                    : parseFloat(avgDistance) >= 5
+                    ? "Хорошо! Можно добавить еще немного."
+                    : "Старайтесь увеличить дистанцию до 5-8 км/день."}
+                </p>
+              </div>
             </div>
 
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-4 h-4 text-orange-400" />
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Сожжено калорий</span>
+                <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Энергия</span>
               </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                За неделю вы сожгли <span className="font-bold text-white">{totalCalories}</span> ккал при ходьбе.
-                Это эквивалент <span className="font-bold text-white">{Math.round(totalCalories / 500)}</span> тренировок!
-              </p>
+              <div className="space-y-1">
+                <p className="text-[11px] text-white/60">
+                  Всего сожжено: <span className="font-bold text-white">{totalCalories} ккал</span>
+                </p>
+                <p className="text-[11px] text-white/60">
+                  В среднем: <span className="font-bold text-white">{avgCalories} ккал/день</span>
+                </p>
+                <p className="text-[10px] text-white/40 mt-1">
+                  {avgCalories >= 400 
+                    ? "Отличное сжигание калорий!"
+                    : avgCalories >= 300
+                    ? "Хорошая активность, продолжайте!"
+                    : "Увеличьте активность для лучших результатов."}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -343,10 +354,10 @@ export function StatsSteps({ period }: StatsStepsProps) {
           </div>
 
           {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
             <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Цель на следующую неделю</span>
+              <Target className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Цель на следующую неделю</span>
             </div>
             <div className="space-y-2">
               {achievementRate < 50 && (

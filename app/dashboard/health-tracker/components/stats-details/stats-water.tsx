@@ -75,8 +75,8 @@ export function StatsWater({ period }: StatsWaterProps) {
         <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                <Droplets className="w-5 h-5 text-cyan-400" />
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <Droplets className="w-5 h-5 text-blue-400" />
               </div>
               <div>
                 <h3 className="text-base font-black uppercase tracking-tight text-white">Гидрация</h3>
@@ -137,8 +137,8 @@ export function StatsWater({ period }: StatsWaterProps) {
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-cyan-400" />
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-blue-400" />
           </div>
           <div>
             <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
@@ -149,20 +149,20 @@ export function StatsWater({ period }: StatsWaterProps) {
         <div className="space-y-3">
           {/* Главная метрика */}
           {avgDaily >= goal ? (
-            <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
               <div className="flex gap-3">
                 <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                    <Award className="w-4 h-4 text-cyan-400" />
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-blue-400" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-cyan-400 font-bold mb-1.5">💧 Отличная гидратация!</p>
+                  <p className="text-sm text-blue-400 font-bold mb-1.5">💧 Отличная гидратация!</p>
                   <p className="text-xs text-white/70 leading-relaxed mb-2">
                     Вы превышаете дневную норму. Правильный уровень гидратации улучшает метаболизм и общее самочувствие!
                   </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">
                       +{avgDaily - goal} мл сверх нормы
                     </span>
                   </div>
@@ -198,8 +198,8 @@ export function StatsWater({ period }: StatsWaterProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Ваша норма</span>
+                <Zap className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Ваша норма</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 Для веса {userWeight} кг рекомендуется <span className="font-bold text-white">{minWaterRecommended}-{maxWaterRecommended} мл</span> в день. 
@@ -228,7 +228,7 @@ export function StatsWater({ period }: StatsWaterProps) {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-white/60">Всего за неделю:</span>
-                <span className="font-bold text-cyan-400">{totalWaterLiters} литров</span>
+                <span className="font-bold text-blue-400">{totalWaterLiters} литров</span>
               </div>
               {daysFailed > 0 && (
                 <p className="text-[11px] text-white/50 mt-2 pt-2 border-t border-white/10">
@@ -239,10 +239,10 @@ export function StatsWater({ period }: StatsWaterProps) {
           </div>
 
           {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
             <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">Улучшите результат</span>
+              <Target className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Улучшите результат</span>
             </div>
             <div className="space-y-2">
               {achievementRate < 50 && (
