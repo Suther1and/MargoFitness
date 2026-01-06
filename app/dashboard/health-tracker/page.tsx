@@ -252,40 +252,67 @@ function HealthTrackerContent() {
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
               <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
                 <div className="w-full">
-                  {activeTab === 'settings' ? (
+                  {activeTab === 'settings' || activeTab === 'stats' ? (
                     <div className="max-w-5xl mx-auto w-full">
-                      <div className="flex flex-col">
-                        <div className="h-8 mb-1">
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-col">
+                          <div className="h-8 mb-1">
+                            <motion.div 
+                              initial={{ opacity: 0 }} 
+                              animate={{ opacity: 1 }} 
+                              transition={{ duration: 0.2 }}
+                            >
+                              <button 
+                                onClick={() => setActiveTab('overview')}
+                                className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
+                              </button>
+                            </motion.div>
+                          </div>
+                          
+                          <motion.h1 
+                            layoutId="header-title"
+                            className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
+                            transition={{ 
+                              type: "spring", 
+                              stiffness: 220, 
+                              damping: 28,
+                              mass: 1
+                            }}
+                          >
+                            {activeTab === 'settings' ? (
+                              <>Настройки <span className={cn(
+                                "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
+                                settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
+                              )}>трекера</span></>
+                            ) : (
+                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
+                            )}
+                          </motion.h1>
+                        </div>
+
+                        {activeTab === 'stats' && (
                           <motion.div 
-                            initial={{ opacity: 0 }} 
-                            animate={{ opacity: 1 }} 
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="mt-9"
                           >
                             <button 
-                              onClick={() => setActiveTab('overview')}
-                              className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
+                              onClick={() => setIsStatsPeriodOpen(true)}
+                              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
                             >
-                              <ChevronLeft className="w-4 h-4" />
-                              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
+                              <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] leading-none mb-1">Период анализа</span>
+                                <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{getStatsPeriodLabel()}</span>
+                              </div>
+                              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <CalendarDays className="w-5 h-5 text-blue-500" />
+                              </div>
                             </button>
                           </motion.div>
-                        </div>
-                        
-                        <motion.h1 
-                          layoutId="header-title"
-                          className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
-                          transition={{ 
-                            type: "spring", 
-                            stiffness: 220, 
-                            damping: 28,
-                            mass: 1
-                          }}
-                        >
-                          Настройки <span className={cn(
-                            "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
-                            settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
-                          )}>трекера</span>
-                        </motion.h1>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -329,7 +356,10 @@ function HealthTrackerContent() {
                         animate={{ opacity: 1 }}
                         className="flex items-center gap-2 mt-9"
                       >
-                        <button className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group">
+                        <button 
+                          onClick={() => setActiveTab('stats')}
+                          className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                        >
                           <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
                         </button>
                         <button 

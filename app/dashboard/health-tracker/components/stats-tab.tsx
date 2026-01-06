@@ -125,7 +125,7 @@ export default function StatsTab({ periodType, dateRange }: StatsTabProps) {
   }
 
   return (
-    <div className={cn("space-y-4 pb-20", isAnimating && "is-animating")}>
+    <div className={cn("space-y-4 pb-24 md:pb-10", isAnimating && "is-animating")}>
       {/* Навигация между виджетами */}
       <StatsNavigation
         activeView={activeView}

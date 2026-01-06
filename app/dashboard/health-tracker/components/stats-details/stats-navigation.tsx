@@ -43,8 +43,8 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
 
   return (
     <div className="relative mb-6">
-      {/* Контейнер - кнопки выровнены по левому краю */}
-      <div className="flex gap-2 pb-2">
+      {/* Контейнер - кнопки выровнены по левому краю на мобилках и по центру на десктопе */}
+      <div className="flex items-center justify-start md:justify-center gap-2 pb-2 overflow-x-auto no-scrollbar md:overflow-visible">
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
