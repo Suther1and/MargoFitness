@@ -93,8 +93,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
             <div className="flex -space-x-1.5">
               {[1, 2, 3].map(i => (
-                <div key={i} className="w-5 h-5 rounded-full border-2 border-[#121214] bg-white/5 flex items-center justify-center">
-                  <div className="w-0.5 h-0.5 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-[#121214] bg-white/5 flex items-center justify-center">
+                  <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
                 </div>
               ))}
             </div>
@@ -143,16 +143,16 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               initial={{ height: 0 }}
               animate={{ height: "90%" }}
               transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-              className="absolute bottom-0 left-0 right-0 bg-cyan-500/5 pointer-events-none"
+              className="absolute bottom-0 left-0 right-0 bg-blue-500/5 pointer-events-none"
             />
             
             <div className="relative z-10 flex flex-col h-full justify-between gap-4">
               <div className="flex items-start justify-between">
-                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
-                  <Droplets className="w-4 h-4 text-cyan-400" />
+                <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Droplets className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-white tabular-nums tracking-tight">2.3 <span className="text-[10px] text-cyan-400/60 font-black">Л</span></div>
+                  <div className="text-2xl font-black text-white tabular-nums tracking-tight">2.3 <span className="text-[10px] text-blue-400/60 font-black">Л</span></div>
                   <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">Среднее</div>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               <div>
                 <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Вода</div>
                 <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-xs font-black text-cyan-400">90%</span>
+                  <span className="text-xs font-black text-blue-400">90%</span>
                   <span className="text-[8px] font-bold text-white/20 uppercase tracking-tighter">от цели</span>
                 </div>
               </div>
@@ -177,8 +177,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           >
             <div className="flex flex-col h-full justify-between gap-4">
               <div className="flex items-start justify-between">
-                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover:scale-110 transition-transform duration-500">
-                  <Scale className="w-4 h-4 text-amber-500" />
+                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Scale className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -210,8 +210,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 group-hover:scale-110 transition-transform duration-500">
-                <Footprints className="w-5 h-5 text-blue-400" />
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 group-hover:scale-110 transition-transform duration-500">
+                <Footprints className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <div className="text-xl font-black text-white tabular-nums tracking-tight">9,043</div>
@@ -220,15 +220,15 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-lg font-black text-blue-400 leading-none tabular-nums">112%</div>
+                <div className="text-lg font-black text-red-500 leading-none tabular-nums">112%</div>
                 <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">От цели</div>
               </div>
-              <div className="w-1.5 h-8 bg-blue-500/10 rounded-full overflow-hidden">
+              <div className="w-1.5 h-8 bg-red-500/10 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ height: 0 }}
                   animate={{ height: "70%" }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className="w-full bg-blue-400 rounded-full"
+                  className="w-full bg-red-500 rounded-full"
                 />
               </div>
             </div>
@@ -292,19 +292,19 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         </motion.div>
       )}
 
-      {/* Дисциплина - Переработанная версия */}
+      {/* Дисциплина - Исправленная версия */}
       <motion.div
         variants={item}
         onClick={() => onNavigate?.('habits')}
-        className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 active:scale-[0.98] group"
+        className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-5 cursor-pointer hover:border-white/10 active:scale-[0.98] group"
       >
-        <div className="flex items-center justify-between gap-6">
-          <div className="flex items-center gap-6">
-            <div className="relative w-20 h-20 shrink-0">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-white/5" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
                 <motion.circle 
-                  cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" 
+                  cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" 
                   strokeDasharray="264" 
                   initial={{ strokeDashoffset: 264 }}
                   animate={{ strokeDashoffset: 264 * (1 - 0.75) }}
@@ -314,24 +314,24 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-black text-white tracking-tighter">75%</span>
+                <span className="text-base font-black text-white tracking-tighter">75%</span>
               </div>
             </div>
             
             <div>
               <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Дисциплина</div>
-              <div className="text-2xl font-black text-white tracking-tight uppercase leading-none">Стабильность</div>
+              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Стабильность</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="w-px h-12 bg-white/5" />
+          <div className="flex items-center gap-4">
+            <div className="w-px h-10 bg-white/5" />
             <div className="text-right">
               <div className="flex items-center gap-2 justify-end mb-1">
-                <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
-                <span className="text-3xl font-black text-white tabular-nums tracking-tighter">12</span>
+                <Flame className="w-5 h-5 text-orange-500 animate-pulse" />
+                <span className="text-2xl font-black text-white tabular-nums tracking-tighter">12</span>
               </div>
-              <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.1em] whitespace-nowrap">Лучший стрик</div>
+              <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.1em] whitespace-nowrap">Лучший стрик</div>
             </div>
           </div>
         </div>
@@ -424,7 +424,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
 
           <div className="flex items-center justify-around px-2 py-1 bg-white/[0.02] rounded-2xl border border-white/5">
             {[
-              { label: 'Шаги', val: '12.4k', color: 'text-emerald-400' },
+              { label: 'Шаги', val: '12.4k', color: 'text-red-500' },
               { label: 'Вода', val: '2.8л', color: 'text-blue-400' },
               { label: 'Сон', val: '8.5ч', color: 'text-indigo-400' }
             ].map((stat, i) => (
