@@ -42,37 +42,35 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
 
   return (
     <div className="relative mb-6">
-      {/* Скроллящийся контейнер */}
-      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory scroll-smooth">
+      {/* Контейнер без скролла - все кнопки в одну строку */}
+      <div className="flex gap-2 pb-2">
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
+          const buttonCount = visibleButtons.length
+          
+          // Динамический размер в зависимости от количества кнопок
+          const buttonSize = buttonCount <= 6 ? "h-[52px]" : buttonCount <= 8 ? "h-[48px]" : "h-[44px]"
+          const iconSize = buttonCount <= 6 ? "w-6 h-6" : buttonCount <= 8 ? "w-5 h-5" : "w-4.5 h-4.5"
 
           return (
             <button
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex items-center justify-center min-w-[56px] h-[56px] rounded-2xl transition-all duration-300 snap-center flex-shrink-0",
+                "relative flex-1 flex items-center justify-center rounded-2xl transition-all duration-300",
+                buttonSize,
                 isActive
-                  ? "bg-white/10 border-2 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                  ? "bg-white/10 border-2 border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.1)] shadow-inner ring-2 ring-white/20 ring-offset-2 ring-offset-black"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
               )}
             >
               {/* Иконка */}
               <Icon className={cn(
-                "w-6 h-6 transition-colors duration-300",
+                iconSize,
+                "transition-colors duration-300",
                 isActive ? button.color : "text-white/40"
               )} />
-
-              {/* Индикатор активности */}
-              {isActive && (
-                <motion.div
-                  layoutId="activeIndicator"
-                  className="absolute inset-0 rounded-2xl border-2 border-white/30"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
             </button>
           )
         })}

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar, Smile } from "lucide-react"
+import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar, Smile, Utensils } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { StatsView } from "../../types"
@@ -202,6 +202,39 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           )
         })}
       </motion.div>
+
+      {/* Калории и Качество питания - горизонтальная карточка */}
+      {settings.widgets.nutrition.enabled && (
+        <motion.div 
+          variants={item} 
+          onClick={() => onNavigate?.('nutrition')}
+          className="relative overflow-hidden rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 cursor-pointer hover:bg-emerald-500/15 transition-all active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+                <Utensils className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">Калории</div>
+                <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Среднее за период</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-black text-white tabular-nums leading-none">2,050</div>
+              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">ккал/день</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">Качество питания</span>
+            <div className="flex items-center gap-1">
+              <span className="text-2xl">😊</span>
+              <span className="text-sm font-black text-emerald-400">4.2/5</span>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Настроение и Энергия - двуцветная горизонтальная карточка */}
       {settings.widgets.mood.enabled && (
