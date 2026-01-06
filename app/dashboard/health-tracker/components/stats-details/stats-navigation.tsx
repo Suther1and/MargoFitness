@@ -57,11 +57,15 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
           if (buttonCount >= 10) {
             sizeClass = "w-[42px] h-[42px]"
             iconSize = "w-5 h-5"
-            roundedClass = "rounded-xl"  // Меньше радиус для маленьких кнопок
+            roundedClass = "rounded-lg"  // Еще меньше радиус для 10+ кнопок
+          } else if (buttonCount >= 9) {
+            sizeClass = "w-[44px] h-[44px]"
+            iconSize = "w-5 h-5"
+            roundedClass = "rounded-lg"  // Меньше радиус для 9 кнопок
           } else if (buttonCount >= 8) {
             sizeClass = "w-[44px] h-[44px]"
             iconSize = "w-5 h-5"
-            roundedClass = "rounded-xl"  // Меньше радиус для маленьких кнопок
+            roundedClass = "rounded-xl"  // Средний радиус для 8 кнопок (оптимально)
           } else if (buttonCount >= 6) {
             sizeClass = "w-[48px] h-[48px]"
             iconSize = "w-6 h-6"

@@ -203,36 +203,39 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         })}
       </motion.div>
 
-      {/* Калории и Качество питания - горизонтальная карточка */}
+      {/* Калории - одноколоночная карточка */}
       {settings.widgets.nutrition.enabled && (
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('nutrition')}
           className="relative overflow-hidden rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 cursor-pointer hover:bg-emerald-500/15 transition-all active:scale-[0.98]"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-                <Utensils className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div>
-                <div className="text-sm font-black text-white">Калории</div>
-                <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Среднее за период</div>
-              </div>
+          {/* Иконка и тренд */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+              <Utensils className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums leading-none">2,050</div>
-              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">ккал/день</div>
+            {/* Смайлик качества питания */}
+            <span className="text-3xl">🍎</span>
+          </div>
+
+          {/* Значение */}
+          <div className="space-y-1">
+            <div className="text-2xl font-black text-white leading-none tabular-nums">
+              2,050
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                Калории
+              </div>
+              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
+                ккал/день
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">Качество питания</span>
-            <div className="flex items-center gap-1">
-              <span className="text-2xl">😊</span>
-              <span className="text-sm font-black text-emerald-400">4.2/5</span>
-            </div>
-          </div>
+          {/* Декоративный градиент */}
+          <div className="absolute bottom-0 right-0 w-20 h-20 opacity-20 blur-2xl bg-emerald-500/10" />
         </motion.div>
       )}
 
