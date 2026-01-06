@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { StatsHeader } from "./stats-header"
 import { StatsNavigation } from "./stats-details/stats-navigation"
 import { StatsOverall } from "./stats-details/stats-overall"
 import { StatsWater } from "./stats-details/stats-water"
@@ -17,13 +16,23 @@ import { StatsNotes } from "./stats-details/stats-notes"
 import { StatsPhotos } from "./stats-details/stats-photos"
 import { StatsHabits } from "./stats-details/stats-habits"
 import { useTrackerSettings } from "../hooks/use-tracker-settings"
-import { StatsView } from "../types"
+import { StatsView, PeriodType, DateRange } from "../types"
 
-export default function StatsTab() {
-  const [activePeriod, setActivePeriod] = useState('7d')
+interface StatsTabProps {
+  periodType: PeriodType
+  dateRange: DateRange
+}
+
+export default function StatsTab({ periodType, dateRange }: StatsTabProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
   const [isAnimating, setIsAnimating] = useState(false)
   const { settings } = useTrackerSettings()
+
+  // Для обратной совместимости со старым форматом period
+  const getLegacyPeriod = () => {
+    if (periodType === '1y') return 'year'
+    return periodType
+  }
 
   // Определяем, какой компонент рендерить
   const renderContent = () => {
@@ -61,31 +70,33 @@ export default function StatsTab() {
     }
 
     const getContent = () => {
+      const period = getLegacyPeriod()
+      
       switch (activeView) {
         case 'overall':
-          return <StatsOverall key="overall" period={activePeriod} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={period} onNavigate={setActiveView} />
         case 'habits':
-          return <StatsHabits key="habits" period={activePeriod} />
+          return <StatsHabits key="habits" period={period} />
         case 'water':
-          return <StatsWater key="water" period={activePeriod} />
+          return <StatsWater key="water" period={period} />
         case 'steps':
-          return <StatsSteps key="steps" period={activePeriod} />
+          return <StatsSteps key="steps" period={period} />
         case 'weight':
-          return <StatsWeight key="weight" period={activePeriod} />
+          return <StatsWeight key="weight" period={period} />
         case 'caffeine':
-          return <StatsCaffeine key="caffeine" period={activePeriod} />
+          return <StatsCaffeine key="caffeine" period={period} />
         case 'sleep':
-          return <StatsSleep key="sleep" period={activePeriod} />
+          return <StatsSleep key="sleep" period={period} />
         case 'mood':
-          return <StatsMood key="mood" period={activePeriod} />
+          return <StatsMood key="mood" period={period} />
         case 'nutrition':
-          return <StatsNutrition key="nutrition" period={activePeriod} />
+          return <StatsNutrition key="nutrition" period={period} />
         case 'notes':
-          return <StatsNotes key="notes" period={activePeriod} />
+          return <StatsNotes key="notes" period={period} />
         case 'photos':
-          return <StatsPhotos key="photos" period={activePeriod} />
+          return <StatsPhotos key="photos" period={period} />
         default:
-          return <StatsOverall key="overall" period={activePeriod} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={period} onNavigate={setActiveView} />
       }
     }
 
@@ -115,13 +126,6 @@ export default function StatsTab() {
 
   return (
     <div className={cn("space-y-4 pb-20", isAnimating && "is-animating")}>
-      {/* Header с выбором периода */}
-      <StatsHeader 
-        activePeriod={activePeriod} 
-        onPeriodChange={setActivePeriod} 
-        onCalendarClick={() => {}} 
-      />
-
       {/* Навигация между виджетами */}
       <StatsNavigation
         activeView={activeView}

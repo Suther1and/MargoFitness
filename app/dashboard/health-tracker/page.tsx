@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays } from 'lucide-react'
-import { format, isSameDay } from 'date-fns'
+import { format, isSameDay, subDays, subMonths, subYears } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 
@@ -40,8 +40,9 @@ import { HealthTrackerCard } from './components/health-tracker-card'
 import { WeekNavigator } from './components/week-navigator'
 import StatsTab from './components/stats-tab'
 
-import { MOCK_DATA, DailyMetrics, MoodRating } from './types'
+import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
+import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
 
 export default function HealthTrackerPage() {
   return (
@@ -58,6 +59,15 @@ function HealthTrackerContent() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  
+  // State для статистики
+  const today = new Date()
+  const [statsPeriodType, setStatsPeriodType] = useState<PeriodType>('7d')
+  const [statsDateRange, setStatsDateRange] = useState<DateRange>({ 
+    start: subDays(today, 6), 
+    end: today 
+  })
+  const [isStatsPeriodOpen, setIsStatsPeriodOpen] = useState(false)
 
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
     (tabParam as any) || 'overview'
@@ -104,6 +114,24 @@ function HealthTrackerContent() {
     }
   }, [tabParam])
 
+  const getStatsPeriodLabel = () => {
+    if (statsPeriodType === 'custom') {
+      const startStr = format(statsDateRange.start, 'd MMM', { locale: ru })
+      const endStr = format(statsDateRange.end, 'd MMM', { locale: ru })
+      return `${startStr} - ${endStr}`
+    }
+    if (statsPeriodType === '7d') return "7 дней"
+    if (statsPeriodType === '30d') return "30 дней"
+    if (statsPeriodType === '6m') return "6 месяцев"
+    if (statsPeriodType === '1y') return "1 год"
+    return "7 дней"
+  }
+
+  const handleStatsPeriodSelect = (newPeriodType: PeriodType, newDateRange: DateRange) => {
+    setStatsPeriodType(newPeriodType)
+    setStatsDateRange(newDateRange)
+  }
+
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
     setData(prev => ({ ...prev, [metric]: value }))
   }
@@ -139,15 +167,26 @@ function HealthTrackerContent() {
             <header className="mb-8 md:mb-12 lg:mb-6">
               {/* Mobile: Dialog календарь с анимированным заголовком */}
               <div className="flex flex-col lg:hidden">
-                <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
-                  <DialogTrigger asChild>
-                    <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none">
-                      <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
-                        {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
-                      </span>
-                      <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
-                    </button>
-                  </DialogTrigger>
+                {activeTab === 'stats' ? (
+                  <button 
+                    onClick={() => setIsStatsPeriodOpen(true)}
+                    className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none"
+                  >
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
+                      {getStatsPeriodLabel()}
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform" />
+                  </button>
+                ) : (
+                  <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
+                    <DialogTrigger asChild>
+                      <button className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none">
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
+                          {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
+                        </span>
+                        <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
+                      </button>
+                    </DialogTrigger>
                   <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10">
                     <DialogHeader className="p-6 pb-2 border-b border-white/5">
                       <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
@@ -168,6 +207,15 @@ function HealthTrackerContent() {
                     </div>
                   </DialogContent>
                 </Dialog>
+                )}
+                
+                {/* Dialog выбора периода для статистики */}
+                <StatsDatePickerDialog
+                  isOpen={isStatsPeriodOpen}
+                  onClose={() => setIsStatsPeriodOpen(false)}
+                  onPeriodSelect={handleStatsPeriodSelect}
+                  currentPeriodType={statsPeriodType}
+                />
 
                 <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
                   <AnimatePresence mode="popLayout">
@@ -400,7 +448,7 @@ function HealthTrackerContent() {
                         exit={{ opacity: 0 }} 
                         transition={{ duration: 0.2 }}
                       >
-                        <StatsTab />
+                        <StatsTab periodType={statsPeriodType} dateRange={statsDateRange} />
                       </motion.div>
                     )}
                     {activeTab === 'overview' && (
@@ -446,7 +494,7 @@ function HealthTrackerContent() {
                 {/* Desktop Statistics */}
                 {activeTab === 'stats' && (
                   <div className="hidden lg:block max-w-5xl mx-auto">
-                    <StatsTab />
+                    <StatsTab periodType={statsPeriodType} dateRange={statsDateRange} />
                   </div>
                 )}
 

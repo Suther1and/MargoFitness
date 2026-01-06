@@ -6,6 +6,13 @@ export type WidgetId = 'habits' | 'water' | 'steps' | 'weight' | 'caffeine' | 's
 // Типы для статистики
 export type StatsView = 'overall' | 'habits' | WidgetId;
 
+export type PeriodType = '7d' | '30d' | '6m' | '1y' | 'custom';
+
+export interface DateRange {
+  start: Date;
+  end: Date;
+}
+
 export interface StatsPeriodData {
   period: '7d' | '30d' | '6m' | 'year';
   startDate: Date;
