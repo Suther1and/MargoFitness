@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar } from "lucide-react"
+import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar, Smile } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { StatsView } from "../../types"
@@ -106,7 +106,11 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
 
       {/* Вода - горизонтальная карточка */}
       {settings.widgets.water.enabled && (
-        <motion.div variants={item} className="relative overflow-hidden rounded-2xl bg-cyan-500/10 border border-cyan-500/20 p-4">
+        <motion.div 
+          variants={item} 
+          onClick={() => onNavigate?.('water')}
+          className="relative overflow-hidden rounded-2xl bg-cyan-500/10 border border-cyan-500/20 p-4 cursor-pointer hover:bg-cyan-500/15 transition-all active:scale-[0.98]"
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
@@ -152,8 +156,9 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             <motion.div
               key={insight.id}
               variants={item}
+              onClick={() => onNavigate?.(insight.id as StatsView)}
               className={cn(
-                "relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]",
+                "relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                 insight.bgColor,
                 insight.borderColor
               )}
@@ -197,6 +202,48 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           )
         })}
       </motion.div>
+
+      {/* Настроение и Энергия - двуцветная горизонтальная карточка */}
+      {settings.widgets.mood.enabled && (
+        <motion.div variants={item} className="relative overflow-hidden rounded-2xl border border-white/10 h-24 flex">
+          {/* Левая часть - Настроение */}
+          <div 
+            onClick={() => onNavigate?.('mood')}
+            className="flex-1 relative bg-gradient-to-br from-pink-500/20 to-purple-500/20 p-4 flex flex-col justify-between cursor-pointer hover:from-pink-500/25 hover:to-purple-500/25 transition-all active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-pink-500/20 border border-pink-500/30">
+                <Smile className="w-4 h-4 text-pink-400" />
+              </div>
+              <div className="text-[10px] font-black text-white/60 uppercase tracking-wider">Настроение</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white tabular-nums leading-none">4.2</div>
+              <div className="text-[9px] font-bold text-pink-400 uppercase tracking-wider mt-1">из 5</div>
+            </div>
+          </div>
+
+          {/* Разделитель */}
+          <div className="w-px bg-white/10" />
+
+          {/* Правая часть - Энергия */}
+          <div 
+            onClick={() => onNavigate?.('mood')}
+            className="flex-1 relative bg-gradient-to-br from-orange-500/20 to-amber-500/20 p-4 flex flex-col justify-between cursor-pointer hover:from-orange-500/25 hover:to-amber-500/25 transition-all active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30">
+                <Zap className="w-4 h-4 text-orange-400" />
+              </div>
+              <div className="text-[10px] font-black text-white/60 uppercase tracking-wider">Энергия</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white tabular-nums leading-none">7.5</div>
+              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-wider mt-1">из 10</div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Лучший день недели */}
       <motion.div variants={item} className="rounded-2xl bg-white/5 border border-white/5 p-5">
