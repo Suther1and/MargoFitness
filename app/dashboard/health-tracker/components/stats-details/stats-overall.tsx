@@ -29,7 +29,6 @@ interface Insight {
 const MOCK_INSIGHTS: Insight[] = [
   { id: 'weight', label: 'Вес', value: '72.4 кг', subValue: '-1.8 кг', change: -1.8, trend: 'down', icon: Scale, color: 'text-amber-500', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20' },
   { id: 'steps', label: 'Шаги', value: '9,043', subValue: 'в день', change: 12, trend: 'up', icon: Footprints, color: 'text-blue-500', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
-  { id: 'water', label: 'Гидрация', value: '98%', subValue: '+8%', change: 8, trend: 'up', icon: Droplets, color: 'text-cyan-400', bgColor: 'bg-cyan-400/10', borderColor: 'border-cyan-400/20' },
   { id: 'sleep', label: 'Сон', value: '7.6 ч', subValue: 'в день', change: 45, trend: 'up', icon: Moon, color: 'text-indigo-400', bgColor: 'bg-indigo-400/10', borderColor: 'border-indigo-400/20' },
 ]
 
@@ -104,6 +103,42 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           </div>
         </div>
       </motion.div>
+
+      {/* Вода - горизонтальная карточка */}
+      {settings.widgets.water.enabled && (
+        <motion.div variants={item} className="relative overflow-hidden rounded-2xl bg-cyan-500/10 border border-cyan-500/20 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
+                <Droplets className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">Вода</div>
+                <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Среднее за период</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-black text-white tabular-nums leading-none">2,250</div>
+              <div className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">мл/день</div>
+            </div>
+          </div>
+
+          {/* Прогресс бар */}
+          <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "90%" }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-400 rounded-full"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Цель: 2,500 мл</span>
+            <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">90%</span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Сетка инсайтов - разнообразные карточки */}
       <motion.div variants={item} className="grid grid-cols-2 gap-3">

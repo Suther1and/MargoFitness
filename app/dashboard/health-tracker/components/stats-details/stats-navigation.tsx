@@ -42,12 +42,8 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
 
   return (
     <div className="relative mb-6">
-      {/* Градиентные фейды по краям */}
-      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#09090b] to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#09090b] to-transparent z-10 pointer-events-none" />
-      
       {/* Скроллящийся контейнер */}
-      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory scroll-smooth px-1">
+      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory scroll-smooth">
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
@@ -57,7 +53,7 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex items-center justify-center min-w-[50px] h-[50px] rounded-2xl transition-all duration-300 snap-center flex-shrink-0",
+                "relative flex items-center justify-center min-w-[56px] h-[56px] rounded-2xl transition-all duration-300 snap-center flex-shrink-0",
                 isActive
                   ? "bg-white/10 border-2 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
@@ -65,7 +61,7 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
             >
               {/* Иконка */}
               <Icon className={cn(
-                "w-5 h-5 transition-colors duration-300",
+                "w-6 h-6 transition-colors duration-300",
                 isActive ? button.color : "text-white/40"
               )} />
 
