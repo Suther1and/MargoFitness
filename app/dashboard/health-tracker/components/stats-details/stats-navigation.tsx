@@ -42,8 +42,8 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
 
   return (
     <div className="relative mb-6">
-      {/* Контейнер - кнопки центрированы */}
-      <div className="flex gap-2 pb-2 justify-center">
+      {/* Контейнер - кнопки выровнены по левому краю */}
+      <div className="flex gap-2 pb-2">
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
@@ -52,13 +52,16 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
           // Фиксированные квадратные размеры в зависимости от количества кнопок
           let sizeClass = "w-[50px] h-[50px]"  // По умолчанию для малого количества
           let iconSize = "w-6 h-6"
+          let roundedClass = "rounded-2xl"  // По умолчанию
           
           if (buttonCount >= 10) {
             sizeClass = "w-[42px] h-[42px]"
             iconSize = "w-5 h-5"
+            roundedClass = "rounded-xl"  // Меньше радиус для маленьких кнопок
           } else if (buttonCount >= 8) {
             sizeClass = "w-[44px] h-[44px]"
             iconSize = "w-5 h-5"
+            roundedClass = "rounded-xl"  // Меньше радиус для маленьких кнопок
           } else if (buttonCount >= 6) {
             sizeClass = "w-[48px] h-[48px]"
             iconSize = "w-6 h-6"
@@ -69,8 +72,9 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex items-center justify-center rounded-2xl transition-all duration-300",
+                "relative flex items-center justify-center transition-all duration-300",
                 sizeClass,
+                roundedClass,
                 isActive
                   ? "bg-white/10 border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
