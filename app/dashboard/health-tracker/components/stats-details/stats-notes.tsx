@@ -115,10 +115,10 @@ export function StatsNotes({ period }: StatsNotesProps) {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <div
                           key={i}
-                          className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            i < note.mood ? "bg-amber-500" : "bg-white/10"
-                          )}
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              note.mood && i < note.mood ? "bg-amber-500" : "bg-white/10"
+                            )}
                         />
                       ))}
                     </div>

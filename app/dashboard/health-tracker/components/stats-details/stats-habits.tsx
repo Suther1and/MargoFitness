@@ -50,19 +50,29 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsHabits({ period }: StatsHabitsProps) {
-  const avgCompletion = Math.round(WEEKLY_COMPLETION.reduce((acc, d) => acc + d.value, 0) / WEEKLY_COMPLETION.length)
+  const avgCompletion = WEEKLY_COMPLETION.length > 0 
+    ? Math.round(WEEKLY_COMPLETION.reduce((acc, d) => acc + d.value, 0) / WEEKLY_COMPLETION.length)
+    : 0
   const heatmapData = getHeatmapData(period)
   
   // Расчет динамических метрик из данных
-  const bestHabit = HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
+  const bestHabit = HABIT_STATS.length > 0 
+    ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
+    : { name: "Привычки", streak: 0 }
   const totalTasks = HABIT_STATS.reduce((acc, h) => acc + h.total, 0)
   const completedTasks = HABIT_STATS.reduce((acc, h) => acc + h.completed, 0)
   const totalHabits = HABIT_STATS.length
   
   // Анализ выходных vs будни
-  const weekdayCompletion = WEEKLY_COMPLETION.slice(0, 5).reduce((acc, d) => acc + d.value, 0) / 5
-  const weekendCompletion = WEEKLY_COMPLETION.slice(5).reduce((acc, d) => acc + d.value, 0) / 2
-  const weekendDrop = Math.round(((weekdayCompletion - weekendCompletion) / weekdayCompletion) * 100)
+  const weekdayCompletion = WEEKLY_COMPLETION.slice(0, 5).length > 0
+    ? WEEKLY_COMPLETION.slice(0, 5).reduce((acc, d) => acc + d.value, 0) / Math.max(1, WEEKLY_COMPLETION.slice(0, 5).length)
+    : 0
+  const weekendCompletion = WEEKLY_COMPLETION.slice(5).length > 0
+    ? WEEKLY_COMPLETION.slice(5).reduce((acc, d) => acc + d.value, 0) / Math.max(1, WEEKLY_COMPLETION.slice(5).length)
+    : 0
+  const weekendDrop = weekdayCompletion > 0 
+    ? Math.round(((weekdayCompletion - weekendCompletion) / weekdayCompletion) * 100)
+    : 0
 
   const container = {
     hidden: { opacity: 0 },

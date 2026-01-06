@@ -10,6 +10,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
+import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 
 interface StatsWaterProps {
   period: string
@@ -34,16 +35,17 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsWater({ period }: StatsWaterProps) {
+  const { settings } = useTrackerSettings()
   const totalWaterMl = WATER_DATA.reduce((acc, day) => acc + day.value, 0)
   const totalWaterLiters = (totalWaterMl / 1000).toFixed(1)
   const avgDaily = Math.round(totalWaterMl / WATER_DATA.length)
-  const goal = 2500
-  const daysAchieved = WATER_DATA.filter(day => day.value >= day.goal).length
+  const goal = settings.widgets.water?.goal || 2500
+  const daysAchieved = WATER_DATA.filter(day => day.value >= (day.goal || goal)).length
   const daysFailed = WATER_DATA.length - daysAchieved
   const achievementRate = Math.round((daysAchieved / WATER_DATA.length) * 100)
   
   // Расчет рекомендуемой нормы на основе среднего веса
-  const userWeight = 72 // TODO: получать из профиля пользователя
+  const userWeight = settings.userParams.weight || 72
   const minWaterRecommended = userWeight * 30
   const maxWaterRecommended = userWeight * 40
   const trainingExtraWater = 600 // среднее значение 500-700

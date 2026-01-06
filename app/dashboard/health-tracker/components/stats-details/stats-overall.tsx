@@ -29,7 +29,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
   const { settings } = useTrackerSettings()
   
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
-  const bmiCategory = getBMICategory(Number(bmiValue))
+  const bmiInfo = bmiValue ? getBMICategory(Number(bmiValue)) : null
 
   if (!settings?.widgets) {
     return null

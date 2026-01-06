@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
 import { cn } from "@/lib/utils"
+import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 
 interface StatsWeightProps {
   period: string
@@ -30,16 +31,19 @@ const EXTENDED_WEIGHT_DATA = [
 ]
 
 export function StatsWeight({ period }: StatsWeightProps) {
+  const { settings } = useTrackerSettings()
   const dataToShow = period === '7d' ? WEIGHT_DATA : EXTENDED_WEIGHT_DATA
   
+  if (dataToShow.length === 0) return null
+
   const currentWeight = dataToShow[dataToShow.length - 1].weight
   const startWeight = dataToShow[0].weight
   const weightChange = currentWeight - startWeight
-  const goalWeight = 70.0
+  const goalWeight = settings.widgets.weight?.goal || 70.0
   const remainingToGoal = currentWeight - goalWeight
 
   // Расчет BMI
-  const height = 170 // см
+  const height = settings.userParams.height || 170 // см
   const bmi = (currentWeight / Math.pow(height / 100, 2)).toFixed(1)
   const startBmi = (startWeight / Math.pow(height / 100, 2)).toFixed(1)
 
