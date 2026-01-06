@@ -494,12 +494,14 @@ export default function SettingsTab({
                                   )}
                                   {widget.enabled && <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest">{config.goalUnit}</span>}
                                 </div>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); if (!widget.enabled) handleToggle(id); else handleToggleInPlan(id); }}
-                                  className={cn("w-[42px] h-[42px] rounded-xl flex items-center justify-center border shrink-0 transition-all", widget.enabled ? widget.inDailyPlan ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-white/5 border-white/10 text-white/10" : "bg-white/[0.03] border-white/5 text-white/5")}
-                                >
-                                  <Target className="w-4.5 h-4.5" strokeWidth={2.25} />
-                                </button>
+                                {id !== 'weight' && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); if (!widget.enabled) handleToggle(id); else handleToggleInPlan(id); }}
+                                    className={cn("w-[42px] h-[42px] rounded-xl flex items-center justify-center border shrink-0 transition-all", widget.enabled ? widget.inDailyPlan ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-white/5 border-white/10 text-white/10" : "bg-white/[0.03] border-white/5 text-white/5")}
+                                  >
+                                    <Target className="w-4.5 h-4.5" strokeWidth={2.25} />
+                                  </button>
+                                )}
                               </div>
                             )}
                             {!config.hasGoal && (
@@ -525,9 +527,10 @@ export default function SettingsTab({
                                   </div>
                                 )}
                                 {id === 'notes' && (
-                                  <div className={cn("space-y-1.5", widget.enabled ? "opacity-20" : "opacity-5")}>
-                                    <div className="h-1.5 bg-white rounded-full w-full" />
-                                    <div className="h-1.5 bg-white rounded-full w-[80%]" />
+                                  <div className={cn("flex flex-col items-start gap-1.5", widget.enabled ? "opacity-30" : "opacity-10")}>
+                                    <div className="h-1 bg-white rounded-full w-12" />
+                                    <div className="h-1 bg-white rounded-full w-24" />
+                                    <div className="h-1 bg-white rounded-full w-36" />
                                   </div>
                                 )}
                               </div>
