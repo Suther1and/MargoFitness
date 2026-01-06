@@ -458,7 +458,7 @@ export default function SettingsTab({
                           )}
                         >
                           <div className={cn("relative z-10 p-5 md:px-6 md:py-5 flex flex-col h-full min-h-[145px] md:min-h-[120px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
-                            <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start justify-between mb-4 relative">
                               <div className="flex items-center gap-3">
                                 <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center border shrink-0", widget.enabled ? "bg-green-500/20 border-green-500/20 text-green-400" : "bg-white/5 border-white/5 text-white/20")}>
                                   <Icon className="w-5 h-5" strokeWidth={2.25} />
@@ -468,7 +468,12 @@ export default function SettingsTab({
                                   <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">{config.description}</p>
                                 </div>
                               </div>
-                              <div className={cn("w-1.5 h-1.5 rounded-full", widget.enabled ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse" : "bg-white/10")} />
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full shrink-0", 
+                                widget.enabled ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse" : "bg-white/10",
+                                "md:static md:inset-auto md:translate-x-0 md:translate-y-0",
+                                "absolute top-[12px] right-[21px] -translate-x-[-50%] z-20"
+                              )} />
                             </div>
                             {config.hasGoal && (
                               <div className="mt-auto flex items-end gap-2.5">
