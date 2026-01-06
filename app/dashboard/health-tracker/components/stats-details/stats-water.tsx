@@ -204,7 +204,3 @@ export function StatsWater({ period }: StatsWaterProps) {
   )
 }
 
-    </motion.div>
-  )
-}
-
