@@ -264,7 +264,7 @@ function DialogContent({
               }}
               className={cn(
                 "bg-[#121214] fixed z-[60] grid w-full gap-4 border shadow-lg outline-none pointer-events-auto", 
-                "md:bg-background/95 md:backdrop-blur-2xl", 
+                "md:bg-[#121214]/95 md:backdrop-blur-2xl", 
                 isBottom 
                   ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none border-t border-x border-white/10" 
                   : "top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[calc(100%-2rem)] rounded-lg p-6 sm:max-w-lg",

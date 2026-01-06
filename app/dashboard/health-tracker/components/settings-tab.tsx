@@ -223,7 +223,7 @@ export default function SettingsTab({
                         <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm md:backdrop-blur-xl">
+                    <DialogContent className="bg-zinc-900/95 md:bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl">
                       <DialogHeader>
                         <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Что такое ИМТ?</DialogTitle>
                         <DialogDescription className="text-white/60 text-sm pt-2 font-medium">
@@ -383,7 +383,7 @@ export default function SettingsTab({
                       </button>
                     </DialogTrigger>
                     <DialogContent 
-                      className="bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl"
+                      className="bg-zinc-900/95 md:bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl"
                       onOpenAutoFocus={(e) => e.preventDefault()}
                     >
                       <DialogHeader>
