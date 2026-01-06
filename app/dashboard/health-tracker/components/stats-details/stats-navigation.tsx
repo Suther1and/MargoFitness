@@ -42,24 +42,35 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
 
   return (
     <div className="relative mb-6">
-      {/* Контейнер без скролла - все кнопки в одну строку */}
-      <div className="flex gap-2 pb-2">
+      {/* Контейнер - кнопки центрированы */}
+      <div className="flex gap-2 pb-2 justify-center">
         {visibleButtons.map((button) => {
           const Icon = button.icon
           const isActive = activeView === button.id
           const buttonCount = visibleButtons.length
           
-          // Сохраняем квадратную форму при любом количестве кнопок
-          const heightClass = buttonCount >= 8 ? "aspect-square" : "h-[54px]"
-          const iconSize = buttonCount >= 8 ? "w-5 h-5" : "w-6 h-6"
+          // Фиксированные квадратные размеры в зависимости от количества кнопок
+          let sizeClass = "w-[50px] h-[50px]"  // По умолчанию для малого количества
+          let iconSize = "w-6 h-6"
+          
+          if (buttonCount >= 10) {
+            sizeClass = "w-[42px] h-[42px]"
+            iconSize = "w-5 h-5"
+          } else if (buttonCount >= 8) {
+            sizeClass = "w-[44px] h-[44px]"
+            iconSize = "w-5 h-5"
+          } else if (buttonCount >= 6) {
+            sizeClass = "w-[48px] h-[48px]"
+            iconSize = "w-6 h-6"
+          }
 
           return (
             <button
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex-1 max-w-[54px] flex items-center justify-center rounded-2xl transition-all duration-300",
-                heightClass,
+                "relative flex items-center justify-center rounded-2xl transition-all duration-300",
+                sizeClass,
                 isActive
                   ? "bg-white/10 border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
