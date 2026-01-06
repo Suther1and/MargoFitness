@@ -316,84 +316,77 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
             </div>
           )}
 
-          {/* Анализ БЖУ */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Баланс макронутриентов</span>
+          {/* Анализ динамики */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Стабильность</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {(() => {
+                  const maxDay = CALORIES_DATA.reduce((max, d) => d.calories > max.calories ? d : max)
+                  const minDay = CALORIES_DATA.reduce((min, d) => d.calories < min.calories ? d : min)
+                  const variation = maxDay.calories - minDay.calories
+                  return variation <= 300 ? (
+                    <>Отличная стабильность! Разница между днями всего <span className="font-bold text-white">{variation} ккал</span>.</>
+                  ) : variation <= 500 ? (
+                    <>Неплохая стабильность. Разброс <span className="font-bold text-white">{variation} ккал</span> — это норма.</>
+                  ) : (
+                    <>Большой разброс <span className="font-bold text-white">{variation} ккал</span>. Старайтесь питаться стабильнее.</>
+                  )
+                })()}
+              </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400" />
-                  <span className="text-white/60">Белки:</span>
-                </div>
-                <span className="font-bold text-white">{avgProtein}г {avgProtein >= 120 ? '✅' : avgProtein >= 100 ? '⚠️' : '❌'}</span>
+
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Отклонение от цели</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-400" />
-                  <span className="text-white/60">Жиры:</span>
-                </div>
-                <span className="font-bold text-white">{avgFats}г {avgFats >= 60 && avgFats <= 80 ? '✅' : '⚠️'}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-white/60">Углеводы:</span>
-                </div>
-                <span className="font-bold text-white">{avgCarbs}г {avgCarbs >= 150 && avgCarbs <= 250 ? '✅' : '⚠️'}</span>
-              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {(() => {
+                  const deviation = Math.abs(avgCalories - goal)
+                  const deviationPercent = ((deviation / goal) * 100).toFixed(0)
+                  return deviation <= 100 ? (
+                    <>Идеально! Отклонение всего <span className="font-bold text-emerald-400">{deviation} ккал</span> ({deviationPercent}%).</>
+                  ) : deviation <= 300 ? (
+                    <>Отклонение <span className="font-bold text-white">{deviation} ккал</span> ({deviationPercent}%) — можно скорректировать.</>
+                  ) : (
+                    <>Отклонение <span className="font-bold text-orange-400">{deviation} ккал</span> ({deviationPercent}%) — требует внимания.</>
+                  )
+                })()}
+              </p>
             </div>
           </div>
 
-          {/* Детальный анализ макросов */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Scale className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Белки</span>
-              </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {avgProtein >= 120 ? (
-                  <>Отлично! <span className="font-bold text-white">{avgProtein}г</span> — достаточно для роста мышц.</>
-                ) : avgProtein >= 100 ? (
-                  <>Норма. <span className="font-bold text-white">{avgProtein}г</span> — можно добавить еще 20г.</>
-                ) : (
-                  <>Мало. <span className="font-bold text-white">{avgProtein}г</span> — нужно минимум 100г.</>
-                )}
-              </p>
+          {/* Анализ дней */}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-2 mb-3">
+              <Utensils className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Анализ по дням</span>
             </div>
-
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Utensils className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Жиры</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-white/60">Самый сытный день:</span>
+                <span className="font-bold text-white">
+                  {(() => {
+                    const maxDay = CALORIES_DATA.reduce((max, d) => d.calories > max.calories ? d : max)
+                    return `${maxDay.date} — ${maxDay.calories} ккал`
+                  })()}
+                </span>
               </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {avgFats >= 60 && avgFats <= 80 ? (
-                  <>Идеально! <span className="font-bold text-white">{avgFats}г</span> — баланс для гормонов.</>
-                ) : avgFats < 60 ? (
-                  <>Маловато. <span className="font-bold text-white">{avgFats}г</span> — нужно 60-80г.</>
-                ) : (
-                  <>Многовато. <span className="font-bold text-white">{avgFats}г</span> — снизьте до 60-80г.</>
-                )}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Углеводы</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-white/60">Самый легкий день:</span>
+                <span className="font-bold text-white">
+                  {(() => {
+                    const minDay = CALORIES_DATA.reduce((min, d) => d.calories < min.calories ? d : min)
+                    return `${minDay.date} — ${minDay.calories} ккал`
+                  })()}
+                </span>
               </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {avgCarbs >= 150 && avgCarbs <= 250 ? (
-                  <>Отлично! <span className="font-bold text-white">{avgCarbs}г</span> — энергии хватает.</>
-                ) : avgCarbs < 150 ? (
-                  <>Маловато. <span className="font-bold text-white">{avgCarbs}г</span> — нужно 150-250г.</>
-                ) : (
-                  <>Многовато. <span className="font-bold text-white">{avgCarbs}г</span> — для похудения снизьте.</>
-                )}
+              <p className="text-[11px] text-white/50 mt-2 pt-2 border-t border-white/10">
+                💡 Совет: Стабильность калорий важнее их точного количества. Старайтесь держать ±200 ккал от цели.
               </p>
             </div>
           </div>
@@ -405,30 +398,41 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
               <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Рекомендации</span>
             </div>
             <div className="space-y-2">
-              {avgProtein < 120 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Добавьте <span className="font-bold text-white">{120 - avgProtein}г белка</span> в день: 
-                  яйца на завтрак, курица/рыба на обед и ужин.
-                </p>
-              )}
               {avgCalories < goal * 0.95 && (
                 <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Увеличьте порции на <span className="font-bold text-white">{Math.round((goal - avgCalories) * 0.2)}г</span> или 
-                  добавьте перекус (орехи, фрукты).
+                  🎯 Не хватает <span className="font-bold text-white">{goal - avgCalories} ккал</span> в день. 
+                  Добавьте перекус (орехи, авокадо, сыр) или увеличьте порции на <span className="font-bold text-white">15-20%</span>.
                 </p>
               )}
-              {avgCalories > goal * 1.05 && (
+              {avgCalories > goal * 1.05 && (() => {
+                const maxDay = CALORIES_DATA.reduce((max, d) => d.calories > max.calories ? d : max)
+                return (
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    🎯 Превышение <span className="font-bold text-white">{avgCalories - goal} ккал</span> в день. 
+                    Обратите внимание на <span className="font-bold text-white">{maxDay.date}</span> ({maxDay.calories} ккал) — уменьшите порции или замените калорийные блюда.
+                  </p>
+                )
+              })()}
+              {avgCalories >= goal * 0.95 && avgCalories <= goal * 1.05 && (
                 <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Уменьшите порции на <span className="font-bold text-white">15-20%</span> или 
-                  замените сладости на фрукты.
+                  🎯 Идеальный контроль калорий! Поддерживайте <span className="font-bold text-white">разнообразие</span> продуктов: 
+                  белки, овощи, полезные жиры, сложные углеводы.
                 </p>
               )}
-              {avgCalories >= goal * 0.95 && avgCalories <= goal * 1.05 && avgProtein >= 120 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Идеальное питание! Поддерживайте <span className="font-bold text-white">разнообразие</span> продуктов 
-                  и следите за витаминами.
-                </p>
-              )}
+              {(() => {
+                const maxDay = CALORIES_DATA.reduce((max, d) => d.calories > max.calories ? d : max)
+                const minDay = CALORIES_DATA.reduce((min, d) => d.calories < min.calories ? d : min)
+                const variation = maxDay.calories - minDay.calories
+                return variation > 500 && (
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    🎯 Большой разброс калорий ({variation} ккал). Планируйте меню заранее, 
+                    чтобы <span className="font-bold text-white">стабилизировать</span> питание.
+                  </p>
+                )
+              })()}
+              <p className="text-xs text-white/70 leading-relaxed pt-2 border-t border-white/10">
+                💡 Для точного контроля рекомендуем взвешивать порции и вести дневник питания первые 2 недели.
+              </p>
             </div>
           </div>
         </div>
