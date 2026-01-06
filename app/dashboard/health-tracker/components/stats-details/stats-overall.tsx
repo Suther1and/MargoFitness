@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Frown, Meh, Laugh, Zap } from "lucide-react"
+import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Frown, Meh, Laugh, Zap, Moon, Coffee } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { calculateBMI, getBMICategory } from "../../utils/bmi-utils"
@@ -91,7 +91,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/5" />
+              <div className="w-px h-10 bg-white/10" />
               <div className="text-right">
                 <div className="flex items-center gap-1.5 justify-end mb-1">
                   <Flame className="w-5 h-5 text-amber-500 animate-pulse" />
@@ -151,7 +151,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/5" />
+              <div className="w-px h-10 bg-white/10" />
               <div className="text-right">
                 <div className="text-2xl font-black text-red-500 leading-none tabular-nums">112%</div>
                 <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">От цели</div>
@@ -187,7 +187,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/5" />
+              <div className="w-px h-10 bg-white/10" />
               <div className="text-right">
                 <div className="text-2xl font-black text-blue-400 leading-none tabular-nums">85%</div>
                 <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">Цель достигнута</div>
@@ -231,7 +231,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/5" />
+              <div className="w-px h-10 bg-white/10" />
               <div className="text-right">
                 <div className="flex items-center gap-1 justify-end">
                   <TrendingDown className="w-4 h-4 text-emerald-400" />
@@ -243,6 +243,65 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           </div>
         </motion.div>
       )}
+
+      {/* Сон и Кофеин - В одну строку */}
+      <div className="grid grid-cols-2 gap-4">
+        {settings.widgets.sleep?.enabled && (
+          <motion.div
+            variants={item}
+            onClick={() => onNavigate?.('sleep')}
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-indigo-500/20 active:scale-[0.98] cursor-pointer group"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Moon className="w-4 h-4 text-indigo-400" />
+                </div>
+                <div>
+                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Сон</div>
+                  <div className="text-lg font-black text-white tabular-nums tracking-tight">7.6<span className="text-xs text-white/40 font-bold ml-1">ч</span></div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-right">
+                  <div className="text-lg font-black text-indigo-400 leading-none tabular-nums">95%</div>
+                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Цель</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {settings.widgets.caffeine?.enabled && (
+          <motion.div
+            variants={item}
+            onClick={() => onNavigate?.('caffeine')}
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-amber-600/20 active:scale-[0.98] cursor-pointer group"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-amber-600/10 border border-amber-600/20 group-hover:scale-110 transition-transform duration-500">
+                  <Coffee className="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Кофеин</div>
+                  <div className="text-lg font-black text-white tabular-nums tracking-tight">2<span className="text-xs text-white/40 font-bold ml-1">чашки</span></div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-right">
+                  <div className="text-lg font-black text-amber-600 leading-none tabular-nums">2.1</div>
+                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Среднее</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {/* Питание - Горизонтальная исправленная */}
       {settings.widgets.nutrition?.enabled && (
@@ -262,20 +321,11 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-6 shrink-0">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="w-px h-10 bg-white/10" />
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Баланс</span>
-              </div>
-              
-              <div className="w-px h-10 bg-white/5" />
-              
-              <div className="text-right">
-                <div className="flex items-center justify-end gap-1.5 mb-1">
-                  <div className={cn("w-1.5 h-1.5 rounded-full", bmiCategory?.bgColor || "bg-emerald-500")} />
-                  <span className="text-xl font-black text-white leading-none tracking-tight">{bmiValue || "24.2"}</span>
-                </div>
-                <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Индекс массы</div>
+                <span className="text-xs font-black text-emerald-400 uppercase tracking-wider">Баланс</span>
               </div>
             </div>
           </div>
@@ -295,15 +345,15 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 <Smile className="w-5 h-5 text-pink-400" />
               </div>
               <div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Состояние</div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Состояние</div>
                 <div className="text-lg font-black text-white tracking-tight uppercase leading-none">Отличное</div>
               </div>
             </div>
 
-            <div className="flex-1 max-w-[140px] flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Энергия</span>
-                <span className="text-[10px] font-black text-orange-400 tracking-tight">7.8/10</span>
+            <div className="flex-1 max-w-[140px] flex flex-col gap-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest whitespace-nowrap">Энергия</span>
+                <span className="text-[10px] font-black text-orange-400 tracking-tight tabular-nums">7.8/10</span>
               </div>
               <div className="flex gap-0.5 h-1.5">
                 {Array.from({ length: 10 }).map((_, i) => (
@@ -319,7 +369,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
 
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-px h-10 bg-white/5" />
+              <div className="w-px h-10 bg-white/10" />
               <div className="flex gap-1">
                 {[Meh, Smile, Laugh].map((Icon, i) => (
                   <div key={i} className={cn(
