@@ -10,6 +10,7 @@ import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS } from '../types'
 import { HabitsSection } from './habits-section'
 import { WeekNavigator } from './week-navigator'
+import { calculateBMI, getBMICategory, calculateCalorieNorms } from '../utils/bmi-utils'
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { Label } from '@/components/ui/label'
 
 const ICON_MAP: Record<string, any> = {
   water: Droplets,
@@ -29,6 +31,82 @@ const ICON_MAP: Record<string, any> = {
   nutrition: Utensils,
   photos: Camera,
   notes: NotebookText,
+}
+
+function BmiInfoDialog({ bmiValue, bmiCategory, calorieNorms }: { 
+  bmiValue: string | null, 
+  bmiCategory: any, 
+  calorieNorms: any 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
+      <DialogTrigger asChild>
+        <button className="p-1.5 md:p-2 text-white/40 hover:text-white transition-all focus:outline-none">
+          <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="bg-[#121214] border-white/10 text-white rounded-[2rem] max-w-sm overflow-hidden p-0 gap-0">
+        <div className="p-6 pb-4">
+          <DialogHeader>
+            <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Твой результат</DialogTitle>
+          </DialogHeader>
+
+          <div className="mt-6 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Индекс массы тела</span>
+              <div className="flex items-center gap-3">
+                <span className="text-5xl font-oswald font-black leading-none">{bmiValue}</span>
+                <div className={cn("px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider", bmiCategory?.color, "bg-white/5")}>
+                  {bmiCategory?.label}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <p className="mt-4 text-xs text-white/40 leading-relaxed font-medium">
+            {bmiCategory?.description}
+          </p>
+        </div>
+
+        <div className="bg-white/[0.02] border-t border-white/5 p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Utensils className="w-3.5 h-3.5 text-green-500/50" />
+            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Рекомендации по калориям</span>
+          </div>
+
+          {!calorieNorms ? (
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Укажи возраст для расчета</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5">Похудение</span>
+                <span className="text-lg font-oswald font-black text-emerald-400 leading-none">{calorieNorms.loss}</span>
+                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
+              </div>
+              <div className="flex flex-col p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                <span className="text-[7px] font-black text-violet-400/40 uppercase tracking-widest mb-1.5">Баланс</span>
+                <span className="text-lg font-oswald font-black text-violet-400 leading-none">{calorieNorms.maintain}</span>
+                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
+              </div>
+              <div className="flex flex-col p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5">Набор</span>
+                <span className="text-lg font-oswald font-black text-orange-400 leading-none">{calorieNorms.gain}</span>
+                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
+              </div>
+            </div>
+          )}
+          
+          <p className="text-[9px] text-white/20 italic text-center">
+            *Расчет по формуле Миффлина-Сан Жеора для умеренной активности
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 interface SettingsTabProps {
@@ -54,7 +132,6 @@ export default function SettingsTab({
 }: SettingsTabProps) {
   const { settings, saveSettings } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
-  const [isBmiInfoOpen, setIsBmiInfoOpen] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
 
   // Синхронизация с настройками
@@ -107,36 +184,29 @@ export default function SettingsTab({
     }))
   }
 
-  const handleParamChange = (param: 'height' | 'weight' | 'age', value: string) => {
-    const filtered = value.replace(/[^\d.]/g, '').slice(0, 3)
+  const handleParamChange = (param: 'height' | 'weight' | 'age' | 'gender', value: any) => {
+    let finalValue = value;
+    if (param !== 'gender') {
+      finalValue = value.replace(/[^\d.]/g, '').slice(0, 3)
+      finalValue = finalValue ? parseFloat(finalValue) : null
+    }
+    
     setLocalSettings(prev => ({
       ...prev,
       userParams: {
         ...prev.userParams,
-        [param]: filtered ? parseFloat(filtered) : null,
+        [param]: finalValue,
       }
     }))
   }
 
-  const calculateBMI = () => {
-    const { height, weight } = localSettings.userParams
-    if (height && weight) {
-      const heightInMeters = height / 100
-      const bmi = weight / (heightInMeters * heightInMeters)
-      return bmi.toFixed(1)
-    }
-    return null
-  }
-
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { label: 'Дефицит веса', color: 'text-blue-400', description: 'Твой вес ниже нормы. Рекомендуется проконсультироваться с врачом для коррекции питания.' }
-    if (bmi < 25) return { label: 'Норма', color: 'text-green-400', description: 'Поздравляю! Твой вес находится в идеальном диапазоне для твоего роста.' }
-    if (bmi < 30) return { label: 'Лишний вес', color: 'text-amber-400', description: 'Твой вес немного выше нормы. Это может быть поводом обратить внимание на активность и питание.' }
-    return { label: 'Ожирение', color: 'text-red-400', description: 'Твой ИМТ указывает на избыточный вес. Рекомендуется обсудить план действий со специалистом.' }
-  }
-
-  const bmiValue = calculateBMI()
+  const bmiValue = calculateBMI(localSettings.userParams.height, localSettings.userParams.weight)
   const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null
+  const calorieNorms = calculateCalorieNorms(
+    localSettings.userParams.weight,
+    localSettings.userParams.height,
+    localSettings.userParams.age
+  )
 
   const widgetGroups = useMemo(() => [
     { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
@@ -150,10 +220,11 @@ export default function SettingsTab({
       isAnimating && "is-animating"
     )}>
       {/* BMI Panel - Hidden on Desktop (moved to header) */}
-      <div className="flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl h-[60px] w-full md:w-auto md:min-w-[420px] lg:hidden">
-          <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-[3] md:flex-1">
-            <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
+      <div className="flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl w-full lg:hidden">
+        <div className="flex items-stretch h-[60px] border-b border-white/5">
+          <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">
+            <div className="flex flex-col px-3 py-1 border-r border-white/5 flex-1 min-w-0">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -161,13 +232,13 @@ export default function SettingsTab({
                   placeholder="---"
                   value={localSettings.userParams.height ?? ''}
                   onChange={(e) => handleParamChange('height', e.target.value)}
-                  className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
+                  className="w-full bg-transparent text-[22px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                 />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
+                <span className="text-[8px] font-bold text-white/10 uppercase shrink-0">см</span>
               </div>
             </div>
-            <div className="flex flex-col px-2 md:px-4 py-1 border-r border-white/5 flex-1 md:flex-none md:w-[100px] min-w-0">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
+            <div className="flex flex-col px-3 py-1 border-r border-white/5 flex-1 min-w-0">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Вес</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -175,13 +246,13 @@ export default function SettingsTab({
                   placeholder="---"
                   value={localSettings.userParams.weight ?? ''}
                   onChange={(e) => handleParamChange('weight', e.target.value)}
-                  className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
+                  className="w-full bg-transparent text-[22px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                 />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
+                <span className="text-[8px] font-bold text-white/10 uppercase shrink-0">кг</span>
               </div>
             </div>
-            <div className="flex flex-col px-2 md:px-4 py-1 flex-1 md:flex-none md:w-[100px] min-w-0">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
+            <div className="flex flex-col px-3 py-1 flex-1 min-w-0">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Возраст</label>
               <div className="flex items-baseline gap-0.5">
                 <input
                   type="text"
@@ -189,72 +260,42 @@ export default function SettingsTab({
                   placeholder="--"
                   value={localSettings.userParams.age ?? ''}
                   onChange={(e) => handleParamChange('age', e.target.value)}
-                  className="w-full bg-transparent text-[22px] md:text-[28px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
+                  className="w-full bg-transparent text-[22px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none min-w-0"
                 />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">лет</span>
+                <span className="text-[8px] font-bold text-white/10 uppercase shrink-0">лет</span>
               </div>
             </div>
           </div>
 
           <div className={cn(
-            "px-3 md:px-4 py-1.5 flex flex-col transition-all duration-500 flex-[1.2] md:flex-none md:w-[115px] min-w-0 relative",
+            "px-4 py-1.5 flex flex-col transition-all duration-500 w-[100px] relative",
             bmiValue ? "bg-white/[0.05]" : "bg-transparent"
           )}>
             {bmiValue ? (
               <>
-                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
-                <div className="flex items-center mt-auto pb-0.5 overflow-hidden">
-                  <div className="flex items-center gap-1 min-w-0">
-                    <span className="text-[26px] md:text-[34px] font-oswald font-black text-white leading-none tracking-tighter shrink-0">
-                      {bmiValue}
-                    </span>
-                    <div className={cn("w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse mt-1 shrink-0", 
-                      bmiCategory?.color === 'text-blue-400' && 'bg-blue-400',
-                      bmiCategory?.color === 'text-green-400' && 'bg-green-400',
-                      bmiCategory?.color === 'text-amber-400' && 'bg-amber-400',
-                      bmiCategory?.color === 'text-red-400' && 'bg-red-400'
-                    )} />
-                  </div>
+                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">ИМТ</span>
+                <div className="flex items-center mt-auto pb-0.5">
+                  <span className="text-[28px] font-oswald font-black text-white leading-none tracking-tighter shrink-0">
+                    {bmiValue}
+                  </span>
+                  <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse ml-1.5 mt-1", bmiCategory?.bgColor)} />
                 </div>
                 <div className="absolute right-0 top-0">
-                  <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen}>
-                    <DialogTrigger asChild>
-                      <button className="p-1.5 md:p-2 text-white/40 hover:text-white transition-all focus:outline-none">
-                        <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-zinc-900/95 md:bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl">
-                      <DialogHeader>
-                        <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Что такое ИМТ?</DialogTitle>
-                        <DialogDescription className="text-white/60 text-sm pt-2 font-medium">
-                          Индекс массы тела (ИМТ) — оценка соответствия массы человека его росту.
-                          <br /><br />
-                          Формула: вес (кг) / рост² (м).
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
-                        <div className="flex justify-between items-baseline">
-                          <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Результат</span>
-                          <span className={cn("text-2xl font-oswald font-black", bmiCategory?.color)}>{bmiValue}</span>
-                        </div>
-                        <div className={cn("text-xs font-bold uppercase tracking-wider", bmiCategory?.color)}>
-                          {bmiCategory?.label}
-                        </div>
-                        <p className="text-xs text-white/40 leading-relaxed font-medium">
-                          {bmiCategory?.description}
-                        </p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <BmiInfoDialog 
+                    bmiValue={bmiValue} 
+                    bmiCategory={bmiCategory} 
+                    calorieNorms={calorieNorms} 
+                  />
                 </div>
               </>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-tight text-center">Заполни данные</span>
+                <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-tight text-center">Данные</span>
               </div>
             )}
           </div>
         </div>
+      </div>
 
       {/* Sub-Tabs with BMI Panel on Desktop */}
       <div className="flex items-center justify-between gap-4 w-full">
@@ -298,123 +339,84 @@ export default function SettingsTab({
         {/* BMI Panel on Desktop only */}
         <div 
           onClick={(e) => e.stopPropagation()}
-          className="hidden lg:flex items-stretch bg-white/[0.03] rounded-xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl h-[54px] min-w-[420px]"
+          className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl min-w-[420px]"
         >
-          <div className="flex items-center p-0.5 border-r border-white/5 bg-white/[0.02] flex-1">
-            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Рост</label>
-              <div className="flex items-baseline gap-0.5 pb-0.5">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="---"
-                  value={localSettings.userParams.height ?? ''}
-                  onChange={(e) => handleParamChange('height', e.target.value)}
-                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
-                  style={{ lineHeight: '24px' }}
-                />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
+          <div className="flex items-stretch h-[54px]">
+            <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">
+              <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
+                <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Рост</label>
+                <div className="flex items-baseline gap-0.5 pb-0.5">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="---"
+                    value={localSettings.userParams.height ?? ''}
+                    onChange={(e) => handleParamChange('height', e.target.value)}
+                    className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
+                    style={{ lineHeight: '24px' }}
+                  />
+                  <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">см</span>
+                </div>
+              </div>
+              <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
+                <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Вес</label>
+                <div className="flex items-baseline gap-0.5 pb-0.5">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="---"
+                    value={localSettings.userParams.weight ?? ''}
+                    onChange={(e) => handleParamChange('weight', e.target.value)}
+                    className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
+                    style={{ lineHeight: '24px' }}
+                  />
+                  <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
+                </div>
+              </div>
+              <div className="flex flex-col px-4 py-1 w-[100px] justify-end">
+                <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Возраст</label>
+                <div className="flex items-baseline gap-0.5 pb-0.5">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="--"
+                    value={localSettings.userParams.age ?? ''}
+                    onChange={(e) => handleParamChange('age', e.target.value)}
+                    className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
+                    style={{ lineHeight: '24px' }}
+                  />
+                  <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">лет</span>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Вес</label>
-              <div className="flex items-baseline gap-0.5 pb-0.5">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="---"
-                  value={localSettings.userParams.weight ?? ''}
-                  onChange={(e) => handleParamChange('weight', e.target.value)}
-                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
-                  style={{ lineHeight: '24px' }}
-                />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">кг</span>
-              </div>
-            </div>
-            <div className="flex flex-col px-4 py-1 w-[100px] justify-end">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Возраст</label>
-              <div className="flex items-baseline gap-0.5 pb-0.5">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="--"
-                  value={localSettings.userParams.age ?? ''}
-                  onChange={(e) => handleParamChange('age', e.target.value)}
-                  className="w-full bg-transparent text-[24px] font-oswald font-black text-white focus:outline-none placeholder:text-white/5 leading-none h-[24px]"
-                  style={{ lineHeight: '24px' }}
-                />
-                <span className="text-[9px] font-bold text-white/10 uppercase shrink-0">лет</span>
-              </div>
-            </div>
-          </div>
 
-          <div className={cn(
-            "px-4 py-1 flex flex-col transition-all duration-500 w-[115px] relative justify-end",
-            bmiValue ? "bg-white/[0.05]" : "bg-transparent"
-          )}>
-            {bmiValue ? (
-              <>
-                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Твой ИМТ</span>
-                <div className="flex items-center pb-0.5">
-                  <div className="flex items-center gap-1">
+            <div className={cn(
+              "px-4 py-1 flex flex-col transition-all duration-500 w-[100px] relative justify-end",
+              bmiValue ? "bg-white/[0.05]" : "bg-transparent"
+            )}>
+              {bmiValue ? (
+                <>
+                  <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">ИМТ</span>
+                  <div className="flex items-center pb-0.5">
                     <span className="text-[30px] font-oswald font-black text-white leading-none tracking-tighter h-[30px]" style={{ lineHeight: '30px' }}>
                       {bmiValue}
                     </span>
-                    <div className={cn("w-2 h-2 rounded-full animate-pulse mt-1", 
-                      bmiCategory?.color === 'text-blue-400' && 'bg-blue-400',
-                      bmiCategory?.color === 'text-green-400' && 'bg-green-400',
-                      bmiCategory?.color === 'text-amber-400' && 'bg-amber-400',
-                      bmiCategory?.color === 'text-red-400' && 'bg-red-400'
-                    )} />
+                    <div className={cn("w-2 h-2 rounded-full animate-pulse ml-2 mt-1", bmiCategory?.bgColor)} />
                   </div>
+                  <div className="absolute right-0 top-0">
+                    <BmiInfoDialog 
+                      bmiValue={bmiValue} 
+                      bmiCategory={bmiCategory} 
+                      calorieNorms={calorieNorms} 
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-[8px] font-black text-white/20 uppercase tracking-widest leading-tight text-center">Заполни данные</span>
                 </div>
-                <div className="absolute right-0 top-0" onClick={(e) => e.stopPropagation()}>
-                  <Dialog open={isBmiInfoOpen} onOpenChange={setIsBmiInfoOpen} modal={true}>
-                    <DialogTrigger asChild>
-                      <button 
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        className="p-1.5 text-white/40 hover:text-white transition-all focus:outline-none"
-                      >
-                        <Info className="w-3.5 h-3.5" />
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent 
-                      className="bg-zinc-900/95 md:bg-zinc-900/95 border-white/10 text-white rounded-2xl max-w-sm backdrop-blur-xl"
-                      onOpenAutoFocus={(e) => e.preventDefault()}
-                    >
-                      <DialogHeader>
-                        <DialogTitle className="font-oswald font-black text-2xl uppercase tracking-tight">Что такое ИМТ?</DialogTitle>
-                        <DialogDescription className="text-white/60 text-sm pt-2 font-medium">
-                          Индекс массы тела (ИМТ) — оценка соответствия массы человека его росту.
-                          <br /><br />
-                          Формула: вес (кг) / рост² (м).
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
-                        <div className="flex justify-between items-baseline">
-                          <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Результат</span>
-                          <span className={cn("text-2xl font-oswald font-black", bmiCategory?.color)}>{bmiValue}</span>
-                        </div>
-                        <div className={cn("text-xs font-bold uppercase tracking-wider", bmiCategory?.color)}>
-                          {bmiCategory?.label}
-                        </div>
-                        <p className="text-xs text-white/40 leading-relaxed font-medium">
-                          {bmiCategory?.description}
-                        </p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-tight text-center">Заполни данные</span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

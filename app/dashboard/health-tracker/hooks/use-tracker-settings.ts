@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS: TrackerSettings = {
     height: null,
     weight: null,
     age: null,
+    gender: null,
   },
 }
 

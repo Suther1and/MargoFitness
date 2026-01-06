@@ -67,7 +67,7 @@ function HealthTrackerContent() {
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
-  const { isFirstVisit } = useTrackerSettings()
+  const { settings, isFirstVisit } = useTrackerSettings()
 
   // Detect desktop
   useEffect(() => {
@@ -76,6 +76,19 @@ function HealthTrackerContent() {
     window.addEventListener('resize', checkDesktop)
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
+
+  // Синхронизируем параметры пользователя из настроек в данные для отображения
+  useEffect(() => {
+    if (settings.userParams) {
+      setData(prev => ({
+        ...prev,
+        weight: settings.userParams.weight ?? prev.weight,
+        height: settings.userParams.height ?? prev.height,
+        age: settings.userParams.age ?? prev.age,
+        gender: settings.userParams.gender ?? prev.gender,
+      }))
+    }
+  }, [settings.userParams])
 
   useEffect(() => {
     setMounted(true)

@@ -13,6 +13,7 @@ export interface UserParameters {
   height: number | null;
   weight: number | null;
   age: number | null;
+  gender: 'male' | 'female' | null;
 }
 
 export interface TrackerSettings {

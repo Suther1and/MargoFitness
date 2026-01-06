@@ -112,11 +112,11 @@ function Dialog({
       requestAnimationFrame(() => {
         if (blur.parentElement) {
           const isMobile = window.innerWidth < 768
-          if (!isMobile) {
-            blur.style.backdropFilter = 'blur(8px)'
-            ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
-          }
-          blur.style.background = isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)'
+          const blurValue = isMobile ? '12px' : '8px'
+          blur.style.backdropFilter = `blur(${blurValue})`
+          ;(blur.style as any).webkitBackdropFilter = `blur(${blurValue})`
+          
+          blur.style.background = isMobile ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.3)'
         }
       })
     } else if (!props.open && isOpenRef.current) {
@@ -214,7 +214,7 @@ function DialogOverlay({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "fixed inset-0 z-[49] bg-black/20", 
+              "fixed inset-0 z-[49] bg-black/40 backdrop-blur-[8px]", 
               "md:backdrop-blur-[2px] md:bg-black/40", 
               className
             )}

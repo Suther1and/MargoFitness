@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react'
 import { useEditableValue, useGoalProgress } from '../hooks'
 import { ProgressRing } from './shared'
 import { ANIMATIONS } from '../constants'
+import { calculateBMI, getBMICategory, calculateCalorieNorms } from '../utils/bmi-utils'
 
 interface NutritionCardHProps {
   calories: number
@@ -36,33 +37,11 @@ export function NutritionCardH({
     min: 0,
   })
 
-  // Расчет ИМТ
-  const bmi = useMemo(() => {
-    if (!height || !weight) return 0
-    const heightM = height / 100
-    return parseFloat((weight / (heightM * heightM)).toFixed(1))
-  }, [weight, height])
-
-  const bmiCategory = useMemo(() => {
-    if (bmi < 18.5) return { label: 'Дефицит', color: 'text-blue-400' }
-    if (bmi < 25) return { label: 'Норма', color: 'text-emerald-400' }
-    if (bmi < 30) return { label: 'Избыток', color: 'text-yellow-400' }
-    return { label: 'Ожирение', color: 'text-red-400' }
-  }, [bmi])
-
-  // Расчет норм калорий (Mifflin-St Jeor)
-  const norms = useMemo(() => {
-    const bmr = gender === 'female' 
-      ? (10 * weight) + (6.25 * height) - (5 * age) - 161
-      : (10 * weight) + (6.25 * height) - (5 * age) + 5
-    
-    const maintain = Math.round(bmr * 1.375) // Умеренная активность
-    return {
-      loss: Math.round(maintain * 0.8),
-      maintain,
-      gain: Math.round(maintain * 1.1)
-    }
-  }, [weight, height, age, gender])
+  // Используем общие утилиты для расчета
+  const bmiValue = calculateBMI(height, weight)
+  const bmi = bmiValue ? parseFloat(bmiValue) : 0
+  const bmiCategory = getBMICategory(bmi)
+  const norms = calculateCalorieNorms(weight, height, age)
 
   const foodItems = [
     { rating: 1, icon: Hamburger, label: 'Много лишнего', color: 'text-red-400' },
@@ -153,7 +132,7 @@ export function NutritionCardH({
             <div className="space-y-1.5 flex-1 flex flex-col items-end">
                 <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Суточные нормы</span>
                 <div className="flex items-center gap-0.5">
-                    {[
+                    {norms ? [
                       { label: 'Сброс', val: norms.loss, color: 'text-emerald-400' },
                       { label: 'Норма', val: norms.maintain, color: 'text-violet-400' },
                       { label: 'Набор', val: norms.gain, color: 'text-orange-400' }
@@ -171,7 +150,9 @@ export function NutritionCardH({
                         </button>
                         {i < 2 && <div className="w-px h-4 md:h-5 bg-white/5 mx-0.5" />}
                       </div>
-                    ))}
+                    )) : (
+                      <span className="text-[8px] font-bold text-white/10 uppercase italic pr-1">Укажите данные в настройках</span>
+                    )}
                 </div>
             </div>
           </div>
