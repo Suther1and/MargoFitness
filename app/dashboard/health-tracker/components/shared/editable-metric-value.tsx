@@ -41,17 +41,14 @@ export function EditableMetricValue({
   const sizeClass = TYPOGRAPHY.value[size]
   const displayValue = format ? format(value) : value
   
+  // Синхронное определение направления для мгновенной реакции анимации
+  const [prev, setPrev] = useState(value)
   const [direction, setDirection] = useState<1 | -1>(1)
-  const prevValue = useRef(value)
 
-  useEffect(() => {
-    if (value > prevValue.current) {
-      setDirection(1)
-    } else if (value < prevValue.current) {
-      setDirection(-1)
-    }
-    prevValue.current = value
-  }, [value])
+  if (value !== prev) {
+    setDirection(value > prev ? 1 : -1)
+    setPrev(value)
+  }
 
   if (isEditing) {
     return (
