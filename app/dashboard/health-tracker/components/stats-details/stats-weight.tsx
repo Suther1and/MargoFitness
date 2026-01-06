@@ -188,44 +188,194 @@ export function StatsWeight({ period }: StatsWeightProps) {
         </div>
       </motion.div>
 
-      {/* Рекомендации */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <Award className="w-4 h-4 text-amber-400" />
+      {/* Персональные инсайты */}
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-amber-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Рекомендации</span>
+          <div>
+            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
+            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ прогресса</p>
+          </div>
         </div>
 
         <div className="space-y-3">
-          <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-            <div className="mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            </div>
-            <p className="text-sm text-white/70 font-medium">
-              Отличная динамика! Продолжайте в том же темпе для достижения цели.
-            </p>
-          </div>
-
-          <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-            <div className="mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            </div>
-            <p className="text-sm text-white/70 font-medium">
-              Здоровая потеря веса составляет 0.5-1 кг в неделю. Вы в норме!
-            </p>
-          </div>
-
-          {remainingToGoal < 3 && (
-            <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-              <div className="mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          {/* Главная метрика */}
+          {weightChange < 0 && parseFloat(avgWeeklyLoss) >= 0.5 && parseFloat(avgWeeklyLoss) <= 1 ? (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                    <TrendingDown className="w-4 h-4 text-emerald-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-emerald-400 font-bold mb-1.5">⭐ Идеальная динамика!</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Вы теряете <span className="font-bold text-white">{avgWeeklyLoss} кг в неделю</span> — 
+                    это оптимальный темп! Потеря веса <span className="font-bold text-white">{Math.abs(weightChange).toFixed(1)} кг</span> за период.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                      Здоровый темп похудения
+                    </span>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-white/70 font-medium">
-                Вы близки к цели! Не забывайте о важности поддержания результата.
+            </div>
+          ) : weightChange < 0 && parseFloat(avgWeeklyLoss) > 1 ? (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-amber-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-amber-300 font-bold mb-1.5">⚠️ Слишком быстрая потеря</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Вы теряете <span className="font-bold text-white">{avgWeeklyLoss} кг в неделю</span>. 
+                    Рекомендуется замедлить темп до 0.5-1 кг для сохранения здоровья.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <Scale className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                      Увеличьте калорийность
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : weightChange < 0 ? (
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                    <TrendingDown className="w-4 h-4 text-blue-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-blue-300 font-bold mb-1.5">Медленный прогресс</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Вы теряете <span className="font-bold text-white">{avgWeeklyLoss} кг в неделю</span>. 
+                    Можно немного увеличить дефицит калорий для ускорения результата.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <Target className="w-3 h-3 text-blue-400" />
+                    <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">
+                      Оптимизируйте питание
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-orange-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-orange-300 font-bold mb-1.5">Вес увеличился</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Прибавка <span className="font-bold text-white">+{Math.abs(weightChange).toFixed(1)} кг</span>. 
+                    Пересмотрите питание и добавьте активность.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <Target className="w-3 h-3 text-orange-400" />
+                    <span className="text-[10px] font-bold text-orange-300 uppercase tracking-wider">
+                      Создайте дефицит калорий
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Анализ BMI и цели */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Ваш BMI</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                Текущий BMI: <span className="font-bold text-white">{bmi}</span>. 
+                {parseFloat(bmi) < 18.5 ? ' Ниже нормы — набирайте вес.' :
+                 parseFloat(bmi) > 24.9 ? ' Выше нормы — продолжайте худеть.' :
+                 ' В пределах нормы (18.5-24.9)!'}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">До цели</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                Осталось <span className="font-bold text-white">{remainingToGoal.toFixed(1)} кг</span> до целевого веса 
+                <span className="font-bold text-purple-400"> {goalWeight} кг</span>.
+              </p>
+            </div>
+          </div>
+
+          {/* Прогноз */}
+          {weeksToGoal > 0 && weightChange < 0 && (
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Прогноз</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                При текущем темпе вы достигнете цели через 
+                <span className="font-bold text-white"> {weeksToGoal} {weeksToGoal === 1 ? 'неделю' : weeksToGoal < 5 ? 'недели' : 'недель'}</span>.
+                {weeksToGoal > 12 && ' Рекомендуем немного увеличить дефицит калорий.'}
               </p>
             </div>
           )}
+
+          {/* Практические советы */}
+          <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Award className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Рекомендации</span>
+            </div>
+            <div className="space-y-2">
+              {remainingToGoal < 3 && weightChange < 0 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Вы близки к цели! Начните планировать <span className="font-bold text-white">стратегию поддержания</span> веса. 
+                  Постепенно увеличивайте калорийность до уровня поддержки.
+                </p>
+              )}
+              {parseFloat(avgWeeklyLoss) >= 0.5 && parseFloat(avgWeeklyLoss) <= 1 && weightChange < 0 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Продолжайте в том же темпе! Ваш дефицит калорий идеален. 
+                  Не забывайте о <span className="font-bold text-white">силовых тренировках</span> для сохранения мышц.
+                </p>
+              )}
+              {parseFloat(avgWeeklyLoss) > 1 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Замедлите темп! Добавьте <span className="font-bold text-white">200-300 ккал</span> в день. 
+                  Быстрая потеря веса может привести к потере мышечной массы.
+                </p>
+              )}
+              {parseFloat(avgWeeklyLoss) < 0.5 && weightChange < 0 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Увеличьте активность или снизьте калорийность на <span className="font-bold text-white">200-300 ккал</span>. 
+                  Рекомендуем добавить кардио 3-4 раза в неделю.
+                </p>
+              )}
+              {weightChange >= 0 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Пересмотрите питание. Создайте дефицит <span className="font-bold text-white">300-500 ккал</span> в день 
+                  через питание и активность для начала похудения.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </motion.div>
     </motion.div>

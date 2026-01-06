@@ -230,32 +230,206 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
         </div>
       </motion.div>
 
-      {/* Рекомендации */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-blue-500/10 to-purple-500/20 border border-white/10">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-            <Award className="w-4 h-4 text-emerald-400" />
+      {/* Персональные инсайты */}
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-emerald-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Рекомендации</span>
+          <div>
+            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
+            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ питания</p>
+          </div>
         </div>
 
         <div className="space-y-3">
-          <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-            <div className="mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          {/* Главная метрика */}
+          {avgCalories >= goal * 0.95 && avgCalories <= goal * 1.05 ? (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-emerald-400 font-bold mb-1.5">🎯 Точное попадание в цель!</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Среднее потребление <span className="font-bold text-white">{avgCalories} ккал</span> соответствует 
+                    вашей цели. Отличный контроль питания!
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                      Продолжайте в том же духе
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-white/70 font-medium">
-              Ваш средний калораж немного ниже цели. Это может замедлить прогресс.
-            </p>
+          ) : avgCalories < goal * 0.95 ? (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                    <Scale className="w-4 h-4 text-amber-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-amber-300 font-bold mb-1.5">⚠️ Дефицит калорий</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Среднее <span className="font-bold text-white">{avgCalories} ккал</span> на 
+                    <span className="font-bold text-white"> {goal - avgCalories} ккал</span> ниже цели. 
+                    Это может замедлить метаболизм.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <Utensils className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                      Добавьте калорий
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-orange-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-orange-300 font-bold mb-1.5">⚠️ Превышение калорий</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Среднее <span className="font-bold text-white">{avgCalories} ккал</span> на 
+                    <span className="font-bold text-white"> {avgCalories - goal} ккал</span> выше цели. 
+                    Это может замедлить похудение.
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <Target className="w-3 h-3 text-orange-400" />
+                    <span className="text-[10px] font-bold text-orange-300 uppercase tracking-wider">
+                      Скорректируйте порции
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Анализ БЖУ */}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Баланс макронутриентов</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-400" />
+                  <span className="text-white/60">Белки:</span>
+                </div>
+                <span className="font-bold text-white">{avgProtein}г {avgProtein >= 120 ? '✅' : avgProtein >= 100 ? '⚠️' : '❌'}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="text-white/60">Жиры:</span>
+                </div>
+                <span className="font-bold text-white">{avgFats}г {avgFats >= 60 && avgFats <= 80 ? '✅' : '⚠️'}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-white/60">Углеводы:</span>
+                </div>
+                <span className="font-bold text-white">{avgCarbs}г {avgCarbs >= 150 && avgCarbs <= 250 ? '✅' : '⚠️'}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-            <div className="mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          {/* Детальный анализ макросов */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Scale className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Белки</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {avgProtein >= 120 ? (
+                  <>Отлично! <span className="font-bold text-white">{avgProtein}г</span> — достаточно для роста мышц.</>
+                ) : avgProtein >= 100 ? (
+                  <>Норма. <span className="font-bold text-white">{avgProtein}г</span> — можно добавить еще 20г.</>
+                ) : (
+                  <>Мало. <span className="font-bold text-white">{avgProtein}г</span> — нужно минимум 100г.</>
+                )}
+              </p>
             </div>
-            <p className="text-sm text-white/70 font-medium">
-              Баланс БЖУ хороший. Продолжайте следить за достаточным количеством белка.
-            </p>
+
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Utensils className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Жиры</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {avgFats >= 60 && avgFats <= 80 ? (
+                  <>Идеально! <span className="font-bold text-white">{avgFats}г</span> — баланс для гормонов.</>
+                ) : avgFats < 60 ? (
+                  <>Маловато. <span className="font-bold text-white">{avgFats}г</span> — нужно 60-80г.</>
+                ) : (
+                  <>Многовато. <span className="font-bold text-white">{avgFats}г</span> — снизьте до 60-80г.</>
+                )}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Углеводы</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {avgCarbs >= 150 && avgCarbs <= 250 ? (
+                  <>Отлично! <span className="font-bold text-white">{avgCarbs}г</span> — энергии хватает.</>
+                ) : avgCarbs < 150 ? (
+                  <>Маловато. <span className="font-bold text-white">{avgCarbs}г</span> — нужно 150-250г.</>
+                ) : (
+                  <>Многовато. <span className="font-bold text-white">{avgCarbs}г</span> — для похудения снизьте.</>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Практические советы */}
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Utensils className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Рекомендации</span>
+            </div>
+            <div className="space-y-2">
+              {avgProtein < 120 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Добавьте <span className="font-bold text-white">{120 - avgProtein}г белка</span> в день: 
+                  яйца на завтрак, курица/рыба на обед и ужин.
+                </p>
+              )}
+              {avgCalories < goal * 0.95 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Увеличьте порции на <span className="font-bold text-white">{Math.round((goal - avgCalories) * 0.2)}г</span> или 
+                  добавьте перекус (орехи, фрукты).
+                </p>
+              )}
+              {avgCalories > goal * 1.05 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Уменьшите порции на <span className="font-bold text-white">15-20%</span> или 
+                  замените сладости на фрукты.
+                </p>
+              )}
+              {avgCalories >= goal * 0.95 && avgCalories <= goal * 1.05 && avgProtein >= 120 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Идеальное питание! Поддерживайте <span className="font-bold text-white">разнообразие</span> продуктов 
+                  и следите за витаминами.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>

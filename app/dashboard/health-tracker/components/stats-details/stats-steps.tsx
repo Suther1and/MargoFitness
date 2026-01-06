@@ -1,8 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Footprints, TrendingUp, TrendingDown, Target, Award, Flame } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer } from "recharts"
+import { Footprints, TrendingUp, TrendingDown, Target, Award, Flame, MapPin, Clock } from "lucide-react"
+import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, ReferenceLine, ComposedChart, Cell } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
@@ -16,15 +16,15 @@ interface StatsStepsProps {
   period: string
 }
 
-// Моковые данные
+// Моковые данные с расширенной информацией
 const STEPS_DATA = [
-  { date: "Пн", value: 8400, day: "monday" },
-  { date: "Вт", value: 10200, day: "tuesday" },
-  { date: "Ср", value: 7600, day: "wednesday" },
-  { date: "Чт", value: 9100, day: "thursday" },
-  { date: "Пт", value: 12400, day: "friday" },
-  { date: "Сб", value: 6200, day: "saturday" },
-  { date: "Вс", value: 8800, day: "sunday" },
+  { date: "Пн", value: 8400, goal: 10000, calories: 336, distance: 6.7, time: 84 },
+  { date: "Вт", value: 10200, goal: 10000, calories: 408, distance: 8.2, time: 102 },
+  { date: "Ср", value: 7600, goal: 10000, calories: 304, distance: 6.1, time: 76 },
+  { date: "Чт", value: 9100, goal: 10000, calories: 364, distance: 7.3, time: 91 },
+  { date: "Пт", value: 12400, goal: 10000, calories: 496, distance: 9.9, time: 124 },
+  { date: "Сб", value: 6200, goal: 10000, calories: 248, distance: 5.0, time: 62 },
+  { date: "Вс", value: 8800, goal: 10000, calories: 352, distance: 7.0, time: 88 },
 ]
 
 // Тепловая карта по дням недели (средние значения за несколько недель)
@@ -53,6 +53,20 @@ export function StatsSteps({ period }: StatsStepsProps) {
   const worstDay = STEPS_DATA.reduce((min, day) => day.value < min.value ? day : min, STEPS_DATA[0])
   const daysAchieved = STEPS_DATA.filter(day => day.value >= goal).length
   const achievementRate = Math.round((daysAchieved / STEPS_DATA.length) * 100)
+  
+  // Дополнительные метрики
+  const totalCalories = STEPS_DATA.reduce((acc, day) => acc + day.calories, 0)
+  const totalDistance = STEPS_DATA.reduce((acc, day) => acc + day.distance, 0)
+  const totalTime = STEPS_DATA.reduce((acc, day) => acc + day.time, 0)
+  const avgCalories = Math.round(totalCalories / STEPS_DATA.length)
+  const avgDistance = (totalDistance / STEPS_DATA.length).toFixed(1)
+  
+  // Тренд (сравнение первой и второй половины недели)
+  const firstHalf = STEPS_DATA.slice(0, Math.ceil(STEPS_DATA.length / 2))
+  const secondHalf = STEPS_DATA.slice(Math.ceil(STEPS_DATA.length / 2))
+  const avgFirstHalf = firstHalf.reduce((acc, d) => acc + d.value, 0) / firstHalf.length
+  const avgSecondHalf = secondHalf.reduce((acc, d) => acc + d.value, 0) / secondHalf.length
+  const trend = ((avgSecondHalf - avgFirstHalf) / avgFirstHalf * 100).toFixed(1)
 
   const container = {
     hidden: { opacity: 0 },
@@ -78,33 +92,62 @@ export function StatsSteps({ period }: StatsStepsProps) {
     >
       {/* Главный график */}
       <motion.div variants={item}>
-        <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
+        <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-white/5 flex items-center justify-center">
                 <Footprints className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-base font-black uppercase tracking-tight text-white">Активность</h3>
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Шаги за период</p>
+                <h3 className="text-base font-bold text-white uppercase tracking-tight">Динамика шагов</h3>
+                <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
+                  {period === '7d' ? 'Последние 7 дней' : 'Последние 30 дней'}
+                </p>
               </div>
             </div>
             <div className="text-right">
               <div className="text-3xl font-black text-white tabular-nums leading-none">
-                {avgDaily.toLocaleString()} <span className="text-sm text-white/30 font-medium uppercase">шагов</span>
+                {avgDaily.toLocaleString()}
+              </div>
+              <div className="flex items-center justify-end gap-1 mt-1">
+                {parseFloat(trend) > 0 ? (
+                  <>
+                    <TrendingUp className="w-3 h-3 text-emerald-400" />
+                    <span className="text-xs font-bold text-emerald-400">+{trend}%</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="w-3 h-3 text-orange-400" />
+                    <span className="text-xs font-bold text-orange-400">{trend}%</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           <ChartContainer config={chartConfig} className="h-[220px] w-full">
-            <BarChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+            <ComposedChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
               <defs>
-                <linearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.2} />
+                <linearGradient id="successBar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.3} />
+                </linearGradient>
+                <linearGradient id="warningBar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.3} />
+                </linearGradient>
+                <linearGradient id="dangerBar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+              
+              <CartesianGrid 
+                vertical={false} 
+                strokeDasharray="3 3" 
+                stroke="rgba(255,255,255,0.03)"
+              />
+              
               <XAxis
                 dataKey="date"
                 tickLine={false}
@@ -114,106 +157,170 @@ export function StatsSteps({ period }: StatsStepsProps) {
                 fontSize={10}
                 fontWeight="bold"
               />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
+              
+              {/* Линия цели */}
+              <ReferenceLine 
+                y={goal} 
+                stroke="#3b82f6" 
+                strokeDasharray="5 5" 
+                strokeWidth={1.5}
+                label={{ 
+                  value: `Цель`, 
+                  position: 'right',
+                  fill: '#3b82f6',
+                  fontSize: 10,
+                  fontWeight: 'bold'
+                }}
               />
+              
+              <ChartTooltip
+                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload
+                    return (
+                      <div className="bg-black/90 border border-white/20 rounded-xl p-3 backdrop-blur-xl">
+                        <p className="text-xs font-bold text-white/60 mb-2">{data.date}</p>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <Footprints className="w-3.5 h-3.5 text-blue-400" />
+                            <span className="text-sm font-bold text-white">{data.value.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Flame className="w-3.5 h-3.5 text-orange-400" />
+                            <span className="text-xs text-white/80">{data.calories} ккал</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-xs text-white/80">{data.distance} км</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3.5 h-3.5 text-purple-400" />
+                            <span className="text-xs text-white/80">{data.time} мин</span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
+              
               <Bar
                 dataKey="value"
-                fill="url(#stepsGradient)"
                 radius={[6, 6, 0, 0]}
                 maxBarSize={32}
-              />
-            </BarChart>
+              >
+                {STEPS_DATA.map((entry, index) => {
+                  const fillColor = entry.value >= goal 
+                    ? "url(#successBar)" 
+                    : entry.value >= goal * 0.7 
+                    ? "url(#warningBar)" 
+                    : "url(#dangerBar)"
+                  
+                  return <Cell key={`cell-${index}`} fill={fillColor} />
+                })}
+              </Bar>
+            </ComposedChart>
           </ChartContainer>
         </div>
       </motion.div>
 
       {/* Ключевые метрики */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-4">
+      <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Footprints, label: 'Среднее', val: avgDaily.toLocaleString(), sub: 'Шагов/день', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-          { icon: Flame, label: 'Всего', val: (totalSteps / 1000).toFixed(1), unit: 'k', sub: `За ${period === '7d' ? '7' : '30'} дней`, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-          { icon: TrendingUp, label: 'Лучший', val: bestDay.value.toLocaleString(), sub: bestDay.date, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-          { icon: TrendingDown, label: 'Худший', val: worstDay.value.toLocaleString(), sub: worstDay.date, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' }
+          { 
+            icon: Flame, 
+            label: 'Калории', 
+            value: avgCalories,
+            unit: 'ккал',
+            subtitle: 'в среднем/день',
+            color: 'text-orange-400', 
+            bg: 'bg-orange-500/10'
+          },
+          { 
+            icon: MapPin, 
+            label: 'Дистанция', 
+            value: avgDistance,
+            unit: 'км',
+            subtitle: 'в среднем/день',
+            color: 'text-emerald-400', 
+            bg: 'bg-emerald-500/10'
+          },
+          { 
+            icon: Clock, 
+            label: 'Время', 
+            value: Math.round(totalTime / STEPS_DATA.length),
+            unit: 'мин',
+            subtitle: 'активности/день',
+            color: 'text-purple-400', 
+            bg: 'bg-purple-500/10'
+          },
+          { 
+            icon: Target, 
+            label: 'Выполнено', 
+            value: daysAchieved,
+            unit: `/${STEPS_DATA.length}`,
+            subtitle: achievementRate + '% цели',
+            color: achievementRate >= 80 ? 'text-emerald-400' : achievementRate >= 50 ? 'text-blue-400' : 'text-amber-400',
+            bg: achievementRate >= 80 ? 'bg-emerald-500/10' : achievementRate >= 50 ? 'bg-blue-500/10' : 'bg-amber-500/10'
+          }
         ].map((m, i) => (
-          <div key={i} className={cn("p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5", m.bg, m.border)}>
-            <div className="flex items-center gap-2 mb-3">
+          <div 
+            key={i} 
+            className={cn(
+              "p-5 rounded-[2rem] bg-[#121214]/60 border border-white/10",
+              m.bg
+            )}
+          >
+            <div className="flex items-center gap-2 mb-4">
               <m.icon className={cn("w-4 h-4", m.color)} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{m.label}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{m.label}</span>
             </div>
-            <div className="text-3xl font-black text-white tabular-nums leading-none mb-2">
-              {m.val}{m.unit && <span className="text-sm text-white/30 font-medium">{m.unit}</span>}
+            
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-3xl font-black text-white tabular-nums leading-none">
+                {m.value}
+              </span>
+              <span className="text-sm text-white/40 font-bold">{m.unit}</span>
             </div>
-            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-              {m.sub}
-            </div>
+            
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">
+              {m.subtitle}
+            </p>
           </div>
         ))}
       </motion.div>
 
-      {/* Прогресс к цели */}
-      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <Target className="w-5 h-5 text-blue-400" />
-          </div>
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Achievement</span>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white/60 font-medium">Дней с выполнением</span>
-            <span className="text-lg font-black text-white">{daysAchieved} / {STEPS_DATA.length}</span>
-          </div>
-
-          {/* Прогресс бар */}
-          <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${achievementRate}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white/60 font-medium">Процент выполнения</span>
-            <span className={cn(
-              "text-lg font-black tabular-nums",
-              achievementRate >= 80 ? "text-emerald-400" : achievementRate >= 50 ? "text-blue-400" : "text-amber-400"
-            )}>
-              {achievementRate}%
-            </span>
-          </div>
-        </div>
-      </motion.div>
 
       {/* Тепловая карта по дням недели */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
-            <Flame className="w-4 h-4 text-purple-400" />
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-white/5 flex items-center justify-center">
+            <Flame className="w-5 h-5 text-purple-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Паттерн активности</span>
+          <div>
+            <h4 className="text-base font-bold text-white uppercase tracking-tight">Паттерн активности</h4>
+            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Средние значения по дням</p>
+          </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {HEATMAP_DATA.map((day) => (
             <div key={day.day} className="flex items-center gap-3">
               <span className="text-xs font-bold text-white/60 w-8">{day.day}</span>
               
-              <div className="flex-1 relative h-8 bg-white/5 rounded-lg overflow-hidden">
+              <div className="flex-1 relative h-8 bg-white/5 rounded-lg overflow-hidden border border-white/5">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(day.percent, 100)}%` }}
                   transition={{ duration: 0.8, delay: HEATMAP_DATA.indexOf(day) * 0.1 }}
                   className={cn(
                     "absolute inset-y-0 left-0 rounded-lg",
-                    day.percent >= 100 ? "bg-gradient-to-r from-emerald-500 to-emerald-400" :
-                    day.percent >= 80 ? "bg-gradient-to-r from-blue-500 to-blue-400" :
-                    day.percent >= 60 ? "bg-gradient-to-r from-amber-500 to-amber-400" :
-                    "bg-gradient-to-r from-orange-500 to-orange-400"
+                    day.percent >= 100 ? "bg-gradient-to-r from-emerald-500/60 to-emerald-400/40" :
+                    day.percent >= 80 ? "bg-gradient-to-r from-blue-500/60 to-blue-400/40" :
+                    day.percent >= 60 ? "bg-gradient-to-r from-amber-500/60 to-amber-400/40" :
+                    "bg-gradient-to-r from-orange-500/60 to-orange-400/40"
                   )}
                 />
                 
@@ -237,76 +344,162 @@ export function StatsSteps({ period }: StatsStepsProps) {
           ))}
         </div>
 
-        <div className="mt-4 p-3 rounded-xl bg-white/5">
+        <div className="mt-5 p-3 rounded-xl bg-white/5 border border-white/5">
           <p className="text-xs text-white/60 font-medium">
             💡 Пятница — самый активный день недели, а выходные требуют внимания
           </p>
         </div>
       </motion.div>
 
-      {/* Рекомендации */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-emerald-500/20 border border-white/10">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-xl bg-blue-500/20 border border-blue-500/30">
-            <Award className="w-4 h-4 text-blue-400" />
+      {/* Персональные инсайты */}
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-white/5 flex items-center justify-center">
+            <Award className="w-5 h-5 text-blue-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Рекомендации</span>
+          <div>
+            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
+            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">На основе вашей активности</p>
+          </div>
         </div>
 
         <div className="space-y-3">
-          {avgDaily >= goal && (
-            <div className="flex gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          {/* Главная метрика */}
+          {avgDaily >= goal ? (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-emerald-400 font-bold mb-1.5">🎉 Превосходная активность!</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    Вы превышаете дневную цель на <span className="font-bold text-white">{((avgDaily - goal) / goal * 100).toFixed(0)}%</span>. 
+                    Это выдающийся результат!
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                      +{(avgDaily - goal).toLocaleString()} шагов сверх нормы
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-emerald-400 font-black mb-1">Отлично!</p>
-                <p className="text-xs text-white/60">
-                  Вы превышаете дневную цель. Отличный уровень активности!
-                </p>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-amber-300 font-bold mb-1.5">Потенциал для роста</p>
+                  <p className="text-xs text-white/70 leading-relaxed mb-2">
+                    До цели осталось <span className="font-bold text-white">{(goal - avgDaily).toLocaleString()}</span> шагов в день. 
+                    Это всего <span className="font-bold text-amber-300">{Math.round((goal - avgDaily) / 100) * 10}</span> минут ходьбы!
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <MapPin className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                      ≈ {((goal - avgDaily) * 0.0008).toFixed(1)} км до цели
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {avgDaily < goal && (
-            <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-              <div className="mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          {/* Анализ тренда */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                {parseFloat(trend) > 0 ? (
+                  <>
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Растущий тренд</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="w-4 h-4 text-orange-400" />
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Падающий тренд</span>
+                  </>
+                )}
               </div>
-              <div>
-                <p className="text-sm text-white font-medium mb-1">Увеличьте активность</p>
-                <p className="text-xs text-white/60">
-                  Вам нужно еще {(goal - avgDaily).toLocaleString()} шагов в день для достижения цели.
-                </p>
-              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {parseFloat(trend) > 0 
+                  ? `Активность выросла на ${Math.abs(parseFloat(trend))}% во второй половине недели. Отлично!`
+                  : `Активность снизилась на ${Math.abs(parseFloat(trend))}% к концу недели. Уделите внимание выходным.`
+                }
+              </p>
             </div>
-          )}
 
-          <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-            <div className="mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-white font-medium mb-1">Польза для здоровья</p>
-              <p className="text-xs text-white/60">
-                10,000 шагов в день снижают риск сердечно-сосудистых заболеваний и улучшают общее самочувствие.
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-4 h-4 text-orange-400" />
+                <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Сожжено калорий</span>
+              </div>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                За неделю вы сожгли <span className="font-bold text-white">{totalCalories}</span> ккал при ходьбе.
+                Это эквивалент <span className="font-bold text-white">{Math.round(totalCalories / 500)}</span> тренировок!
               </p>
             </div>
           </div>
 
-          {worstDay.value < goal * 0.6 && (
-            <div className="flex gap-3 p-3 rounded-xl bg-white/5">
-              <div className="mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+          {/* Анализ лучших/худших дней */}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-white/60">Самый активный:</span>
+                <span className="font-bold text-emerald-400">{bestDay.date} — {bestDay.value.toLocaleString()} шагов</span>
               </div>
-              <div>
-                <p className="text-sm text-white font-medium mb-1">Внимание к выходным</p>
-                <p className="text-xs text-white/60">
-                  Активность в выходные значительно ниже. Попробуйте запланировать прогулку или активность.
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-white/60">Требует внимания:</span>
+                <span className="font-bold text-orange-400">{worstDay.date} — {worstDay.value.toLocaleString()} шагов</span>
+              </div>
+              {worstDay.value < goal * 0.7 && (
+                <p className="text-[11px] text-white/50 mt-2 pt-2 border-t border-white/10">
+                  💡 Совет: Запланируйте активность на {worstDay.date}, чтобы выровнять недельную статистику
                 </p>
-              </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Практические советы */}
+          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Цель на следующую неделю</span>
+            </div>
+            <div className="space-y-2">
+              {achievementRate < 50 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Начните с малого: добавьте <span className="font-bold text-white">2000 шагов</span> к текущему среднему. 
+                  Короткие прогулки 3 раза в день помогут достичь цели.
+                </p>
+              )}
+              {achievementRate >= 50 && achievementRate < 80 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Вы близки к успеху! Увеличьте активность в самые слабые дни на <span className="font-bold text-white">1500 шагов</span>, 
+                  чтобы достичь 80% выполнения цели.
+                </p>
+              )}
+              {achievementRate >= 80 && avgDaily < goal * 1.2 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Отличный результат! Попробуйте новую цель: <span className="font-bold text-white">12,000 шагов</span> в день 
+                  для максимальной пользы здоровью.
+                </p>
+              )}
+              {avgDaily >= goal * 1.2 && (
+                <p className="text-xs text-white/70 leading-relaxed">
+                  🎯 Вы превзошли все ожидания! Поддерживайте текущий уровень и добавьте силовые упражнения 
+                  для комплексного подхода к здоровью.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </motion.div>
     </motion.div>
