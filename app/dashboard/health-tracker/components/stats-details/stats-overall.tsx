@@ -55,14 +55,14 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-4 pb-4"
+      className="space-y-4 pb-4 contain-layout contain-paint"
     >
       {/* Дисциплина - Эталонный блок */}
       {settings.widgets.habits?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('habits')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-amber-500/20 active:scale-[0.98] group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-amber-500/20 transition-[border-color,transform] duration-300 active:scale-[0.98] group transform-gpu gpu-accelerated"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
@@ -109,7 +109,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('steps')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-red-500/20 active:scale-[0.98] group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-[border-color,transform] duration-300 hover:border-red-500/20 active:scale-[0.98] group transform-gpu"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
@@ -166,7 +166,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('water')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-blue-500/20 transition-all duration-300 active:scale-[0.98] group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-blue-500/20 transition-[border-color,transform] duration-300 active:scale-[0.98] group transform-gpu"
         >
           <motion.div 
             initial={{ width: 0 }}
@@ -202,7 +202,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('weight')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-emerald-500/20 active:scale-[0.98] cursor-pointer group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-[border-color,transform] duration-300 hover:border-emerald-500/20 active:scale-[0.98] cursor-pointer group transform-gpu"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
@@ -250,7 +250,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('sleep')}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-indigo-500/20 active:scale-[0.98] cursor-pointer group"
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-[border-color,transform] duration-300 hover:border-indigo-500/20 active:scale-[0.98] cursor-pointer group transform-gpu"
           >
             <motion.div 
               initial={{ width: 0 }}
@@ -281,7 +281,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('caffeine')}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-amber-600/20 active:scale-[0.98] cursor-pointer group"
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-[border-color,transform] duration-300 hover:border-amber-600/20 active:scale-[0.98] cursor-pointer group transform-gpu"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
@@ -303,7 +303,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('nutrition')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-violet-500/20 transition-all active:scale-[0.98] group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-violet-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
@@ -336,7 +336,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div 
             variants={item}
             onClick={() => onNavigate?.('mood')}
-            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-pink-500/20 transition-all active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-pink-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
@@ -355,7 +355,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div 
             variants={item}
             onClick={() => onNavigate?.('mood')}
-            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-orange-500/20 transition-all active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-orange-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
@@ -390,7 +390,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('photos')}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-violet-500/20 transition-all active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-violet-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('notes')}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-sky-500/20 transition-all active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-sky-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">

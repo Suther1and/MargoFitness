@@ -76,7 +76,7 @@ export default function StatsTab() {
 
     return (
       <div className={cn("relative", isAnimating && "is-animating")}>
-        <AnimatePresence mode="wait" custom={1} onExitComplete={() => setIsAnimating(false)}>
+        <AnimatePresence mode="wait" custom={1}>
           <motion.div
             key={activeView}
             custom={1}
@@ -85,7 +85,11 @@ export default function StatsTab() {
             animate="center"
             exit="exit"
             onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => setIsAnimating(false)}
+            onAnimationComplete={() => {
+              // Добавляем небольшую задержку перед снятием режима оптимизации,
+              // чтобы избежать резкого мерцания при возврате тяжелых стилей
+              setTimeout(() => setIsAnimating(false), 50)
+            }}
             transition={{
               x: { type: "spring", stiffness: 400, damping: 35 },
               opacity: { duration: 0.15 },
@@ -97,7 +101,7 @@ export default function StatsTab() {
                 scale: { duration: 0.1 }
               }
             }}
-            className="will-change-transform transform-gpu"
+            className="will-change-[transform,opacity] transform-gpu gpu-accelerated"
           >
             {getContent()}
           </motion.div>
