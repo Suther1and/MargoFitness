@@ -172,7 +172,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             initial={{ width: 0 }}
             animate={{ width: "85%" }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className="absolute inset-y-0 left-0 bg-blue-500/5 pointer-events-none border-r border-blue-500/10"
+            className="absolute inset-y-0 left-0 bg-blue-500/10 pointer-events-none border-r border-blue-500/5"
           />
           
           <div className="relative z-10 flex items-center justify-between gap-4">
@@ -252,7 +252,14 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             onClick={() => onNavigate?.('sleep')}
             className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 transition-all duration-300 hover:border-indigo-500/20 active:scale-[0.98] cursor-pointer group"
           >
-            <div className="flex items-center justify-between gap-3">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: "95%" }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="absolute inset-y-0 left-0 bg-indigo-500/10 pointer-events-none border-r border-indigo-500/5"
+            />
+            
+            <div className="relative z-10 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
                   <Moon className="w-4 h-4 text-indigo-400" />
@@ -265,7 +272,6 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
 
               <div className="text-right shrink-0">
                 <div className="text-lg font-black text-indigo-400 leading-none tabular-nums">95%</div>
-                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Цель</div>
               </div>
             </div>
           </motion.div>
@@ -284,13 +290,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 </div>
                 <div>
                   <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Кофеин</div>
-                  <div className="text-lg font-black text-white tabular-nums tracking-tight">2<span className="text-xs text-white/40 font-bold ml-1">чашки</span></div>
+                  <div className="text-lg font-black text-white tabular-nums tracking-tight">2.1<span className="text-xs text-white/40 font-bold ml-1">среднее</span></div>
                 </div>
-              </div>
-
-              <div className="text-right shrink-0">
-                <div className="text-lg font-black text-amber-600 leading-none tabular-nums">2.1</div>
-                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">Среднее</div>
               </div>
             </div>
           </motion.div>
@@ -311,7 +312,10 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               </div>
               <div>
                 <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Питание</div>
-                <div className="text-xl font-black text-white tabular-nums tracking-tight">2,050<span className="text-sm text-white/20 font-bold ml-1 uppercase">ккал</span></div>
+                <div className="text-xl font-black text-white tabular-nums tracking-tight">
+                  2,050
+                  <span className="text-sm text-white/50 font-bold ml-1 uppercase">/ {settings.widgets.nutrition?.goal || 2200} ккал</span>
+                </div>
               </div>
             </div>
 
@@ -334,26 +338,16 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             onClick={() => onNavigate?.('mood')}
             className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-pink-500/20 transition-all active:scale-[0.98] group"
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-pink-500/10 border border-pink-500/20 group-hover:scale-110 transition-transform duration-500">
                   <Smile className="w-4 h-4 text-pink-400" />
                 </div>
-                <div>
-                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Настроение</div>
-                  <div className="text-lg font-black text-white tracking-tight uppercase leading-none">Отличное</div>
-                </div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Настроение</div>
               </div>
-
-              <div className="flex gap-1 shrink-0">
-                {[Meh, Smile, Laugh].map((Icon, i) => (
-                  <div key={i} className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center border transition-all",
-                    i === 2 ? "bg-pink-500/20 border-pink-500/30" : "bg-white/5 border-white/5 opacity-20"
-                  )}>
-                    <Icon className={cn("w-3.5 h-3.5", i === 2 ? "text-pink-400" : "text-white")} />
-                  </div>
-                ))}
+              <div className="flex items-baseline gap-2">
+                <div className="text-xl font-black text-white tracking-tight uppercase">Отличное</div>
+                <Laugh className="w-5 h-5 text-pink-400 animate-pulse" />
               </div>
             </div>
           </motion.div>
@@ -363,30 +357,27 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             onClick={() => onNavigate?.('mood')}
             className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121214]/60 p-5 cursor-pointer hover:border-orange-500/20 transition-all active:scale-[0.98] group"
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition-transform duration-500">
                   <Zap className="w-4 h-4 text-orange-400" />
                 </div>
-                <div>
-                  <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5">Энергия</div>
-                  <div className="flex gap-0.5 h-2 mt-1.5">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div 
-                        key={i} 
-                        className={cn(
-                          "w-1.5 rounded-[1px]", 
-                          i < 8 ? "bg-gradient-to-t from-orange-600 to-orange-400" : "bg-white/5"
-                        )} 
-                      />
-                    ))}
-                  </div>
-                </div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Энергия</div>
               </div>
-
-              <div className="text-right shrink-0">
-                <div className="text-lg font-black text-orange-400 leading-none tabular-nums">7.8</div>
-                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-0.5">/10</div>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-black text-orange-400 tabular-nums">7.8<span className="text-[10px] text-white/20 ml-1">/10</span></div>
+                <div className="flex gap-1 h-3 items-end">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={cn(
+                        "w-1.5 rounded-full", 
+                        i < 4 ? "bg-orange-500" : "bg-white/5",
+                        i === 0 ? "h-1" : i === 1 ? "h-2" : i === 2 ? "h-3" : i === 3 ? "h-2.5" : "h-1.5"
+                      )} 
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>

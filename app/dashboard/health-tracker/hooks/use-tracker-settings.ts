@@ -9,6 +9,7 @@ const VISITED_KEY = 'health_tracker_visited'
 // Настройки по умолчанию
 const DEFAULT_SETTINGS: TrackerSettings = {
   widgets: {
+    habits: { enabled: true, goal: null, inDailyPlan: true },
     water: { enabled: false, goal: null, inDailyPlan: false },
     steps: { enabled: false, goal: null, inDailyPlan: false },
     weight: { enabled: false, goal: null, inDailyPlan: false },

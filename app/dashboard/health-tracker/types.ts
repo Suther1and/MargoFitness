@@ -1,7 +1,7 @@
 export type MoodRating = 1 | 2 | 3 | 4 | 5;
 
 // Типы для настроек трекера
-export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
+export type WidgetId = 'habits' | 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
 
 // Типы для статистики
 export type StatsView = 'overall' | 'habits' | WidgetId;
@@ -73,6 +73,13 @@ export interface WidgetConfig {
 }
 
 export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
+  habits: {
+    id: 'habits',
+    name: 'Привычки',
+    icon: 'flame',
+    hasGoal: false,
+    description: 'Отслеживай выполнение ежедневных привычек'
+  },
   water: {
     id: 'water',
     name: 'Вода',
