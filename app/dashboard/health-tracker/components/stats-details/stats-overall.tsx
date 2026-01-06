@@ -31,6 +31,10 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
   const bmiCategory = getBMICategory(Number(bmiValue))
 
+  if (!settings?.widgets) {
+    return null
+  }
+
   const container = {
     hidden: { opacity: 0 },
     show: {
