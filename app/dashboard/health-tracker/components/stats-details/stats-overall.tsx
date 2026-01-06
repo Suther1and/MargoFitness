@@ -93,8 +93,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             </div>
             <div className="flex -space-x-1.5">
               {[1, 2, 3].map(i => (
-                <div key={i} className="w-6 h-6 rounded-full border-2 border-[#121214] bg-white/5 flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                <div key={i} className="w-6 h-6 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ animationDelay: `${i * 0.2}s` }} />
                 </div>
               ))}
             </div>
@@ -292,14 +292,14 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         </motion.div>
       )}
 
-      {/* Дисциплина - Исправленная версия */}
+      {/* Дисциплина - Исправленная версия с защитой от переполнения */}
       <motion.div
         variants={item}
         onClick={() => onNavigate?.('habits')}
         className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-5 cursor-pointer hover:border-white/10 active:scale-[0.98] group"
       >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-16 h-16 shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
@@ -318,18 +318,18 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               </div>
             </div>
             
-            <div>
-              <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Дисциплина</div>
-              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Стабильность</div>
+            <div className="min-w-0">
+              <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 truncate">Дисциплина</div>
+              <div className="text-lg font-black text-white tracking-tight uppercase leading-none truncate">Стабильность</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-px h-10 bg-white/5" />
             <div className="text-right">
-              <div className="flex items-center gap-2 justify-end mb-1">
+              <div className="flex items-center gap-1.5 justify-end mb-1">
                 <Flame className="w-5 h-5 text-orange-500 animate-pulse" />
-                <span className="text-2xl font-black text-white tabular-nums tracking-tighter">12</span>
+                <span className="text-2xl font-black text-white tabular-nums tracking-tight">12</span>
               </div>
               <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.1em] whitespace-nowrap">Лучший стрик</div>
             </div>
