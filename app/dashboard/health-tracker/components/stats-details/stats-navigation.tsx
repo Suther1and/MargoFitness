@@ -57,30 +57,17 @@ export function StatsNavigation({ activeView, onViewChange }: StatsNavigationPro
               key={button.id}
               onClick={() => onViewChange(button.id)}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1.5 min-w-[70px] h-[70px] rounded-2xl transition-all duration-300 snap-center flex-shrink-0",
+                "relative flex items-center justify-center min-w-[50px] h-[50px] rounded-2xl transition-all duration-300 snap-center flex-shrink-0",
                 isActive
                   ? "bg-white/10 border-2 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                   : "bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
               )}
             >
               {/* Иконка */}
-              <div className={cn(
-                "transition-all duration-300",
-                isActive ? "scale-110" : "scale-100"
-              )}>
-                <Icon className={cn(
-                  "w-6 h-6 transition-colors duration-300",
-                  isActive ? button.color : "text-white/40"
-                )} />
-              </div>
-
-              {/* Текст */}
-              <span className={cn(
-                "text-[9px] font-black uppercase tracking-wider transition-colors duration-300",
-                isActive ? "text-white" : "text-white/40"
-              )}>
-                {button.label}
-              </span>
+              <Icon className={cn(
+                "w-5 h-5 transition-colors duration-300",
+                isActive ? button.color : "text-white/40"
+              )} />
 
               {/* Индикатор активности */}
               {isActive && (

@@ -13,11 +13,24 @@ interface StatsOverallProps {
 }
 
 // Моковые данные для демонстрации
-const MOCK_INSIGHTS = [
-  { id: 'weight', label: 'Вес', value: '-1.8 кг', change: -1.8, trend: 'down', icon: Scale, color: 'text-amber-500', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20' },
-  { id: 'steps', label: 'Шаги', value: '+12%', change: 12, trend: 'up', icon: Footprints, color: 'text-blue-500', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
-  { id: 'water', label: 'Гидрация', value: '98%', change: 8, trend: 'up', icon: Droplets, color: 'text-cyan-400', bgColor: 'bg-cyan-400/10', borderColor: 'border-cyan-400/20' },
-  { id: 'sleep', label: 'Сон', value: '+45 мин', change: 45, trend: 'up', icon: Moon, color: 'text-indigo-400', bgColor: 'bg-indigo-400/10', borderColor: 'border-indigo-400/20' },
+interface Insight {
+  id: string
+  label: string
+  value: string
+  subValue?: string
+  change: number
+  trend: string
+  icon: any
+  color: string
+  bgColor: string
+  borderColor: string
+}
+
+const MOCK_INSIGHTS: Insight[] = [
+  { id: 'weight', label: 'Вес', value: '72.4 кг', subValue: '-1.8 кг', change: -1.8, trend: 'down', icon: Scale, color: 'text-amber-500', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20' },
+  { id: 'steps', label: 'Шаги', value: '9,043', subValue: 'в день', change: 12, trend: 'up', icon: Footprints, color: 'text-blue-500', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
+  { id: 'water', label: 'Гидрация', value: '98%', subValue: '+8%', change: 8, trend: 'up', icon: Droplets, color: 'text-cyan-400', bgColor: 'bg-cyan-400/10', borderColor: 'border-cyan-400/20' },
+  { id: 'sleep', label: 'Сон', value: '7.6 ч', subValue: 'в день', change: 45, trend: 'up', icon: Moon, color: 'text-indigo-400', bgColor: 'bg-indigo-400/10', borderColor: 'border-indigo-400/20' },
 ]
 
 const MOCK_PHOTOS = [
@@ -64,38 +77,29 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       className="space-y-6"
     >
       {/* Hero Section - Ключевые достижения */}
-      <motion.div variants={item} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 via-purple-500/10 to-blue-500/20 border border-white/10 p-6">
+      <motion.div variants={item} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/20 via-purple-500/10 to-blue-500/20 border border-white/10 p-4">
         {/* Декоративные элементы */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/20 rounded-full blur-3xl" />
         
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <Trophy className="w-5 h-5 text-amber-400" />
+            <div className="p-1.5 rounded-xl bg-amber-500/20 border border-amber-500/30">
+              <Trophy className="w-4 h-4 text-amber-400" />
             </div>
-            <span className="text-xs font-black uppercase tracking-widest text-white/60">Итоги периода</span>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-4xl font-black text-white leading-none">
-              Отличная работа!
-            </div>
-            <p className="text-sm text-white/60 font-medium max-w-sm">
-              За последние {period === '7d' ? '7 дней' : period === '30d' ? '30 дней' : period} вы значительно улучшили свои показатели
-            </p>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Итоги периода</span>
           </div>
 
           {/* Быстрая статистика */}
-          <div className="flex items-center gap-6 pt-2">
-            <div className="space-y-1">
-              <div className="text-2xl font-black text-white tabular-nums">-1.8 <span className="text-sm text-white/40">кг</span></div>
-              <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Динамика веса</div>
+          <div className="flex items-center gap-4">
+            <div className="space-y-0.5">
+              <div className="text-2xl font-black text-white tabular-nums leading-none">-1.8 <span className="text-sm text-white/40">кг</span></div>
+              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Динамика веса</div>
             </div>
-            <div className="w-px h-12 bg-white/10" />
-            <div className="space-y-1">
-              <div className="text-2xl font-black text-white tabular-nums">94 <span className="text-sm text-white/40">%</span></div>
-              <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Выполнение целей</div>
+            <div className="w-px h-10 bg-white/10" />
+            <div className="space-y-0.5">
+              <div className="text-2xl font-black text-white tabular-nums leading-none">94 <span className="text-sm text-white/40">%</span></div>
+              <div className="text-[9px] font-bold text-blue-400 uppercase tracking-wider">Выполнение целей</div>
             </div>
           </div>
         </div>
@@ -140,8 +144,15 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 <div className="text-2xl font-black text-white leading-none tabular-nums">
                   {insight.value}
                 </div>
-                <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                  {insight.label}
+                <div className="flex items-center justify-between">
+                  <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                    {insight.label}
+                  </div>
+                  {insight.subValue && (
+                    <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
+                      {insight.subValue}
+                    </div>
+                  )}
                 </div>
               </div>
 
