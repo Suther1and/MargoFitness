@@ -40,14 +40,15 @@ export const getBMICategory = (bmi: number) => {
 export const calculateCalorieNorms = (
   weight: number | null, 
   height: number | null, 
-  age: number | null
+  age: number | null,
+  activityLevel: number = 1.375
 ): CalorieNorms | null => {
   if (!weight || !height || !age) return null;
 
-  // Формула Миффлина-Сан Жеора для женщин (по умолчанию)
+  // Формула Миффлина-Сан Жеора для женщин
   const bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
   
-  const maintain = Math.round(bmr * 1.375); // Умеренная активность
+  const maintain = Math.round(bmr * activityLevel);
   return {
     loss: Math.round(maintain * 0.8),
     maintain,

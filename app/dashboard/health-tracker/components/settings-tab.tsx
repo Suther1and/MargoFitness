@@ -33,12 +33,24 @@ const ICON_MAP: Record<string, any> = {
   notes: NotebookText,
 }
 
-function BmiInfoDialog({ bmiValue, bmiCategory, calorieNorms }: { 
+function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: { 
   bmiValue: string | null, 
   bmiCategory: any, 
-  calorieNorms: any 
+  userParams: any 
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activityLevel, setActivityLevel] = useState(1.55);
+
+  const calorieNorms = useMemo(() => 
+    calculateCalorieNorms(userParams.weight, userParams.height, userParams.age, activityLevel),
+    [userParams, activityLevel]
+  );
+
+  const activityOptions = [
+    { label: 'Низкая', value: 1.375, desc: 'Легкие прогулки или 1 тренировка в неделю' },
+    { label: 'Средняя', value: 1.55, desc: 'Тренировки 2-3 раза в неделю' },
+    { label: 'Высокая', value: 1.725, desc: 'Более 3 интенсивных тренировок в неделю' }
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
@@ -70,38 +82,105 @@ function BmiInfoDialog({ bmiValue, bmiCategory, calorieNorms }: {
           </p>
         </div>
 
-        <div className="bg-white/[0.02] border-t border-white/5 p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Utensils className="w-3.5 h-3.5 text-green-500/50" />
-            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Рекомендации по калориям</span>
-          </div>
+        <div className="bg-white/[0.02] border-t border-white/5 p-6 pt-5 space-y-5">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Уровень активности</span>
+              <div className="flex bg-black/40 rounded-xl p-1 gap-1 border border-white/5 relative">
+                {activityOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setActivityLevel(opt.value)}
+                    className={cn(
+                      "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors relative",
+                      activityLevel === opt.value 
+                        ? opt.value === 1.375 ? "text-blue-400" : opt.value === 1.55 ? "text-amber-400" : "text-red-400"
+                        : "text-white/20 hover:text-white/40"
+                    )}
+                  >
+                    {activityLevel === opt.value && (
+                      <motion.div
+                        layoutId="activity-bg"
+                        className={cn(
+                          "absolute inset-0 rounded-md border border-white/10 shadow-lg",
+                          opt.value === 1.375 
+                            ? "bg-blue-500/10 border-blue-500/20" 
+                            : opt.value === 1.55 
+                              ? "bg-amber-500/10 border-amber-500/20" 
+                              : "bg-red-500/10 border-red-500/20"
+                        )}
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-[9px] text-white/30 font-medium italic px-1">
+                — {activityOptions.find(o => o.value === activityLevel)?.desc}
+              </p>
+            </div>
 
-          {!calorieNorms ? (
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Укажи возраст для расчета</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              <div className="flex flex-col p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5">Похудение</span>
-                <span className="text-lg font-oswald font-black text-emerald-400 leading-none">{calorieNorms.loss}</span>
-                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
+            {!calorieNorms ? (
+              <div className="bg-white/5 rounded-xl p-3 text-center">
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Укажи возраст для расчета</p>
               </div>
-              <div className="flex flex-col p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                <span className="text-[7px] font-black text-violet-400/40 uppercase tracking-widest mb-1.5">Баланс</span>
-                <span className="text-lg font-oswald font-black text-violet-400 leading-none">{calorieNorms.maintain}</span>
-                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
+            ) : (
+              <div className="flex items-center justify-between bg-white/[0.03] rounded-2xl p-3.5 border border-white/5">
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-[7px] font-black text-emerald-400/40 uppercase tracking-widest mb-0.5">Похудение</span>
+                  <div className="flex items-baseline gap-0.5 overflow-hidden">
+                    <motion.span
+                      key={calorieNorms.loss}
+                      initial={{ opacity: 0.3, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.1, ease: "easeOut" }}
+                      className="text-xl font-oswald font-black text-emerald-400"
+                    >
+                      {calorieNorms.loss}
+                    </motion.span>
+                    <span className="text-[8px] font-bold text-emerald-400/20 uppercase">ккал</span>
+                  </div>
+                </div>
+                <div className="w-px h-6 bg-white/5" />
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-[7px] font-black text-violet-400/40 uppercase tracking-widest mb-0.5">Баланс</span>
+                  <div className="flex items-baseline gap-0.5 overflow-hidden">
+                    <motion.span
+                      key={calorieNorms.maintain}
+                      initial={{ opacity: 0.3, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.1, ease: "easeOut" }}
+                      className="text-xl font-oswald font-black text-violet-400"
+                    >
+                      {calorieNorms.maintain}
+                    </motion.span>
+                    <span className="text-[8px] font-bold text-violet-400/20 uppercase">ккал</span>
+                  </div>
+                </div>
+                <div className="w-px h-6 bg-white/5" />
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-[7px] font-black text-orange-400/40 uppercase tracking-widest mb-0.5">Набор</span>
+                  <div className="flex items-baseline gap-0.5 overflow-hidden">
+                    <motion.span
+                      key={calorieNorms.gain}
+                      initial={{ opacity: 0.3, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.1, ease: "easeOut" }}
+                      className="text-xl font-oswald font-black text-orange-400"
+                    >
+                      {calorieNorms.gain}
+                    </motion.span>
+                    <span className="text-[8px] font-bold text-orange-400/20 uppercase">ккал</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5">Набор</span>
-                <span className="text-lg font-oswald font-black text-orange-400 leading-none">{calorieNorms.gain}</span>
-                <span className="text-[7px] font-bold text-white/10 uppercase mt-1">ккал</span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
           
-          <p className="text-[9px] text-white/20 italic text-center">
-            *Расчет по формуле Миффлина-Сан Жеора для умеренной активности
+          <p className="text-[10px] text-white/20 italic text-center pt-3 border-t border-white/5 px-2">
+            *Индивидуальный расчет по формуле Миффлина-Сан Жеора
+            <span className="hidden sm:inline"> (BMR + коэффициент PAL)</span>
           </p>
         </div>
       </DialogContent>
@@ -284,7 +363,7 @@ export default function SettingsTab({
                   <BmiInfoDialog 
                     bmiValue={bmiValue} 
                     bmiCategory={bmiCategory} 
-                    calorieNorms={calorieNorms} 
+                    userParams={localSettings.userParams} 
                   />
                 </div>
               </>
@@ -404,11 +483,11 @@ export default function SettingsTab({
                     <div className={cn("w-2 h-2 rounded-full animate-pulse ml-2 mt-1", bmiCategory?.bgColor)} />
                   </div>
                   <div className="absolute right-0 top-0">
-                    <BmiInfoDialog 
-                      bmiValue={bmiValue} 
-                      bmiCategory={bmiCategory} 
-                      calorieNorms={calorieNorms} 
-                    />
+                  <BmiInfoDialog 
+                    bmiValue={bmiValue} 
+                    bmiCategory={bmiCategory} 
+                    userParams={localSettings.userParams} 
+                  />
                   </div>
                 </>
               ) : (
