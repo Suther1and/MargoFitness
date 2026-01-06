@@ -118,9 +118,9 @@ export function StatsDatePickerDialog({
 
   const Content = (
     <div className={cn(
-      "overflow-hidden border-white/10",
+      "overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10",
       standalone 
-        ? "w-full border-none bg-[#121214]/95 backdrop-blur-2xl" 
+        ? "w-full border-none" 
         : "sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x"
     )}>
       <div className="p-4 pb-3 border-b border-white/5 text-center">
@@ -242,7 +242,7 @@ export function StatsDatePickerDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent variant="bottom" className="p-0 overflow-hidden border-none outline-none">
+      <DialogContent variant="bottom" className="bg-transparent p-0 overflow-hidden border-none outline-none">
         <DialogTitle className="sr-only">Выберите период анализа</DialogTitle>
         {Content}
       </DialogContent>
