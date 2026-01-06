@@ -126,7 +126,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         </div>
       </motion.div>
 
-      {/* Вода - Вертикальная карточка */}
+      {/* Вода и Вес - Сетка 2x2 */}
       <div className="grid grid-cols-2 gap-4">
         {settings.widgets.water.enabled && (
           <motion.div 
@@ -134,24 +134,26 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             onClick={() => onNavigate?.('water')}
             className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 transition-all duration-300 active:scale-[0.98] group"
           >
-            <div className="flex flex-col h-full justify-between gap-6">
+            <div className="flex flex-col h-full justify-between gap-4">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
+                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
                   <Droplets className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-white tabular-nums">2.3</div>
-                  <div className="text-[9px] font-bold text-cyan-400 uppercase">л/день</div>
+                  <div className="text-2xl font-black text-white tabular-nums tracking-tight">2.3 <span className="text-[10px] text-cyan-400/60 font-black">Л</span></div>
+                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">Среднее</div>
                 </div>
               </div>
               
               <div>
-                <div className="text-sm font-black text-white uppercase tracking-tight mb-1">Вода</div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-500 w-[90%] rounded-full" />
-                  </div>
-                  <span className="text-[10px] font-black text-cyan-400">90%</span>
+                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Вода</div>
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: "90%" }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className="h-full bg-cyan-500 rounded-full"
+                  />
                 </div>
               </div>
             </div>
@@ -165,20 +167,20 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             onClick={() => onNavigate?.('weight')}
             className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 transition-all duration-300 hover:border-white/10 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
           >
-            <div className="flex flex-col h-full justify-between gap-6">
+            <div className="flex flex-col h-full justify-between gap-4">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover:scale-110 transition-transform duration-500">
+                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover:scale-110 transition-transform duration-500">
                   <Scale className="w-5 h-5 text-amber-500" />
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-black text-emerald-400 leading-none tabular-nums">-1.8</div>
-                  <div className="text-[9px] font-bold text-white/20 uppercase mt-1">кг</div>
+                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">КГ / {period === '7d' ? 'НЕД' : 'МЕС'}</div>
                 </div>
               </div>
 
               <div>
-                <div className="text-2xl font-black text-white tabular-nums leading-none">72.4</div>
-                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Текущий вес</div>
+                <div className="text-2xl font-black text-white tabular-nums leading-none tracking-tight">72.4</div>
+                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-2">Текущий вес</div>
               </div>
             </div>
           </motion.div>
@@ -198,13 +200,13 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                 <Footprints className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-2xl font-black text-white tabular-nums">9,043</div>
-                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Шагов в день</div>
+                <div className="text-2xl font-black text-white tabular-nums tracking-tight">9,043</div>
+                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-1">Среднее шагов в день</div>
               </div>
             </div>
             <div className="text-right">
               <div className="text-xl font-black text-blue-400 leading-none tabular-nums">112%</div>
-              <div className="text-[9px] font-bold text-white/20 uppercase mt-1">от цели</div>
+              <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">От цели</div>
             </div>
           </div>
         </motion.div>
@@ -225,66 +227,79 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Питание</span>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-white tabular-nums">2,050</span>
-              <span className="text-[10px] font-black text-white/20 uppercase ml-1">ккал</span>
+              <span className="text-2xl font-black text-white tabular-nums tracking-tight">2,050</span>
+              <span className="text-[9px] font-black text-white/20 uppercase ml-1">ккал / ср.</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 space-y-3">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1 rounded bg-violet-500/10">
-                    <Apple className="w-3 h-3 text-violet-400" />
+                    <Apple className="w-3.5 h-3.5 text-violet-400" />
                   </div>
-                  <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Качество</span>
+                  <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.1em]">Качество еды</span>
                 </div>
-                <span className="text-[9px] font-bold text-emerald-400 uppercase">Чистое питание</span>
+                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Чистое питание</span>
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 {[Frown, Annoyed, Meh, Apple, Salad].map((Icon, i) => (
-                  <div key={i} className={cn("flex-1 h-8 rounded-lg flex items-center justify-center border transition-colors", i === 3 ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5 opacity-20")}>
+                  <div key={i} className={cn("flex-1 h-9 rounded-xl flex items-center justify-center border transition-all duration-500", i === 3 ? "bg-emerald-500/10 border-emerald-500/20" : "bg-white/5 border-white/5 opacity-20")}>
                     <Icon className={cn("w-4 h-4", i === 3 ? "text-emerald-400" : "text-white")} />
                   </div>
                 ))}
               </div>
             </div>
             <div className="w-px h-16 bg-white/5" />
-            <div className="text-center px-2">
-              <div className="text-xl font-black text-white leading-none">24.2</div>
-              <div className="text-[8px] font-bold text-white/20 uppercase mt-1">ИМТ</div>
+            <div className="text-center min-w-[60px]">
+              <div className="text-2xl font-black text-white leading-none tracking-tight">24.2</div>
+              <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mt-2">ИМТ</div>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Дисциплина - Компактная версия */}
+      {/* Дисциплина - Переработанная версия */}
       <motion.div
         variants={item}
         onClick={() => onNavigate?.('habits')}
         className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 transition-all active:scale-[0.98] group"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-              <Flame className="w-6 h-6 text-orange-500" />
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="relative w-16 h-16 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
+                <motion.circle 
+                  cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" 
+                  strokeDasharray="264" 
+                  initial={{ strokeDashoffset: 264 }}
+                  animate={{ strokeDashoffset: 264 * (1 - 0.75) }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  className="text-orange-500" 
+                  strokeLinecap="round" 
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-black text-white">75%</span>
+              </div>
             </div>
+            
             <div>
-              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Дисциплина</div>
-              <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1.5">75% выполнение</div>
+              <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Дисциплина</div>
+              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Выполнение</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <div className="w-px h-10 bg-white/5" />
             <div className="text-right">
-              <div className="text-xl font-black text-white leading-none">12</div>
-              <div className="text-[8px] font-bold text-orange-500/50 uppercase mt-1">Стрик</div>
-            </div>
-            <div className="relative w-10 h-10">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" className="text-white/5" />
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" strokeDasharray="264" strokeDashoffset="66" className="text-orange-500" strokeLinecap="round" />
-              </svg>
+              <div className="flex items-center gap-2 justify-end mb-1">
+                <Flame className="w-4 h-4 text-orange-500" />
+                <span className="text-2xl font-black text-white tabular-nums tracking-tight">12</span>
+              </div>
+              <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Лучший стрик</div>
             </div>
           </div>
         </div>
@@ -293,36 +308,55 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       {/* Настроение и Энергия - Соответствует виджету */}
       {settings.widgets.mood.enabled && (
         <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/60 p-6">
-          <div className="flex flex-col gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                  <Smile className="w-3.5 h-3.5 text-yellow-400" />
+          <div className="flex flex-col gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                    <Smile className="w-3.5 h-3.5 text-yellow-400" />
+                  </div>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Настроение</span>
                 </div>
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Настроение</span>
+                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Отличное / ср.</span>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-2">
                 {[Frown, Annoyed, Meh, Smile, Laugh].map((Icon, i) => (
-                  <div key={i} className={cn("flex-1 py-3 rounded-xl flex items-center justify-center transition-colors", i === 3 ? "bg-white/10 border-white/20" : "bg-white/5 opacity-20")}>
+                  <div key={i} className={cn(
+                    "flex-1 py-3.5 rounded-[1.25rem] flex items-center justify-center transition-all duration-500 border",
+                    i === 3 
+                      ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                      : "bg-white/[0.02] border-white/5 opacity-20"
+                  )}>
                     <Icon className={cn("w-6 h-6", i === 3 ? "text-emerald-400" : "text-white")} />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
                     <Zap className="w-3.5 h-3.5 text-orange-400" />
                   </div>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Энергия</span>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Энергия</span>
                 </div>
-                <span className="text-[10px] font-bold text-orange-400/60 tabular-nums">7/10</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-black text-white tracking-tight">7.2</span>
+                  <span className="text-[10px] font-black text-white/20">/ 10</span>
+                </div>
               </div>
-              <div className="flex gap-1 h-4">
+              <div className="flex gap-1.5 h-5">
                 {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className={cn("flex-1 rounded-[2px]", i < 7 ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.3)]" : "bg-white/5")} />
+                  <div 
+                    key={i} 
+                    className={cn(
+                      "flex-1 rounded-[3px] transition-all duration-700", 
+                      i < 7 
+                        ? "bg-gradient-to-t from-orange-600 to-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.2)]" 
+                        : "bg-white/5"
+                    )} 
+                  />
                 ))}
               </div>
             </div>
@@ -330,32 +364,36 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         </motion.div>
       )}
 
-      {/* Peak Performance - Компактный список */}
-      <motion.div variants={item} className="rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
-              <Zap className="w-5 h-5 text-purple-400" />
+      {/* Peak Performance - Компактный блок-награда */}
+      <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-purple-500/[0.07] via-[#121214] to-blue-500/[0.07] border border-white/5 p-7 group">
+        <div className="absolute top-0 left-0 w-full h-full bg-white/[0.01] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="flex items-center gap-5">
+            <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)] group-hover:scale-110 transition-transform duration-500">
+              <Trophy className="w-7 h-7 text-purple-400" />
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Peak performance</span>
+            <div>
+              <div className="text-[10px] font-black text-purple-400/60 uppercase tracking-[0.4em] mb-1">Peak day</div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-black text-white uppercase tracking-tight">Пятница</span>
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">18 Янв</span>
+              </div>
+            </div>
           </div>
-          <div className="text-right">
-            <div className="text-sm font-black text-white uppercase">Пятница</div>
-            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">18 января</div>
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between px-2">
-          {[
-            { label: 'Шаги', val: '12.4k', color: 'text-emerald-400' },
-            { label: 'Вода', val: '2.8л', color: 'text-blue-400' },
-            { label: 'Сон', val: '8.5ч', color: 'text-indigo-400' }
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className={cn("text-lg font-black", stat.color)}>{stat.val}</div>
-              <div className="text-[8px] font-bold text-white/20 uppercase tracking-wider mt-0.5">{stat.label}</div>
-            </div>
-          ))}
+          <div className="flex items-center gap-10 md:px-4">
+            {[
+              { label: 'Шаги', val: '12.4k', color: 'text-emerald-400' },
+              { label: 'Вода', val: '2.8л', color: 'text-blue-400' },
+              { label: 'Сон', val: '8.5ч', color: 'text-indigo-400' }
+            ].map((stat, i) => (
+              <div key={i} className="text-center group/stat">
+                <div className={cn("text-xl font-black transition-transform group-hover/stat:scale-110 duration-300", stat.color)}>{stat.val}</div>
+                <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mt-1.5">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </motion.div>
 
