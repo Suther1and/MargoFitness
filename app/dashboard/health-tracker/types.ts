@@ -4,7 +4,7 @@ export type MoodRating = 1 | 2 | 3 | 4 | 5;
 export type WidgetId = 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
 
 // Типы для статистики
-export type StatsView = 'overall' | WidgetId;
+export type StatsView = 'overall' | 'habits' | WidgetId;
 
 export interface StatsPeriodData {
   period: '7d' | '30d' | '6m' | 'year';

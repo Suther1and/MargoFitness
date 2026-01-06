@@ -269,4 +269,13 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Оптимизация производительности при активной анимации */
+  .is-animating * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+    transition-duration: 0ms !important;
+  }
 }

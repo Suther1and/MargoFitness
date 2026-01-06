@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 import { StatsHeader } from "./stats-header"
 import { StatsNavigation } from "./stats-details/stats-navigation"
 import { StatsOverall } from "./stats-details/stats-overall"
@@ -14,28 +15,33 @@ import { StatsMood } from "./stats-details/stats-mood"
 import { StatsNutrition } from "./stats-details/stats-nutrition"
 import { StatsNotes } from "./stats-details/stats-notes"
 import { StatsPhotos } from "./stats-details/stats-photos"
+import { StatsHabits } from "./stats-details/stats-habits"
 import { useTrackerSettings } from "../hooks/use-tracker-settings"
 import { StatsView } from "../types"
 
 export default function StatsTab() {
   const [activePeriod, setActivePeriod] = useState('7d')
   const [activeView, setActiveView] = useState<StatsView>('overall')
+  const [isAnimating, setIsAnimating] = useState(false)
   const { settings } = useTrackerSettings()
 
   // Определяем, какой компонент рендерить
   const renderContent = () => {
     const contentVariants = {
       enter: (direction: number) => ({
-        x: direction > 0 ? 300 : -300,
-        opacity: 0
+        x: direction > 0 ? 20 : -20,
+        opacity: 0,
+        scale: 0.98
       }),
       center: {
         x: 0,
-        opacity: 1
+        opacity: 1,
+        scale: 1
       },
       exit: (direction: number) => ({
-        x: direction < 0 ? 300 : -300,
-        opacity: 0
+        x: direction < 0 ? 20 : -20,
+        opacity: 0,
+        scale: 0.98
       })
     }
 
@@ -43,6 +49,8 @@ export default function StatsTab() {
       switch (activeView) {
         case 'overall':
           return <StatsOverall key="overall" period={activePeriod} onNavigate={setActiveView} />
+        case 'habits':
+          return <StatsHabits key="habits" period={activePeriod} />
         case 'water':
           return <StatsWater key="water" period={activePeriod} />
         case 'steps':
@@ -67,27 +75,39 @@ export default function StatsTab() {
     }
 
     return (
-      <AnimatePresence mode="wait" custom={1}>
-        <motion.div
-          key={activeView}
-          custom={1}
-          variants={contentVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: { type: "spring", stiffness: 300, damping: 30 },
-            opacity: { duration: 0.2 }
-          }}
-        >
-          {getContent()}
-        </motion.div>
-      </AnimatePresence>
+      <div className={cn("relative", isAnimating && "is-animating")}>
+        <AnimatePresence mode="wait" custom={1} onExitComplete={() => setIsAnimating(false)}>
+          <motion.div
+            key={activeView}
+            custom={1}
+            variants={contentVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            onAnimationStart={() => setIsAnimating(true)}
+            onAnimationComplete={() => setIsAnimating(false)}
+            transition={{
+              x: { type: "spring", stiffness: 400, damping: 35 },
+              opacity: { duration: 0.15 },
+              scale: { duration: 0.15 },
+              // Асимметричный выход
+              exit: {
+                x: { duration: 0.1, ease: "easeIn" },
+                opacity: { duration: 0.1 },
+                scale: { duration: 0.1 }
+              }
+            }}
+            className="will-change-transform transform-gpu"
+          >
+            {getContent()}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-4 pb-20">
+    <div className={cn("space-y-4 pb-20", isAnimating && "is-animating")}>
       {/* Header с выбором периода */}
       <StatsHeader 
         activePeriod={activePeriod} 

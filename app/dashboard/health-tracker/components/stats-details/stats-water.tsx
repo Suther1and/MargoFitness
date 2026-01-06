@@ -80,20 +80,20 @@ export function StatsWater({ period }: StatsWaterProps) {
     >
       {/* Главный график */}
       <motion.div variants={item}>
-        <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <Droplets className="w-4 h-4 text-cyan-400" />
+        <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <Droplets className="w-5 h-5 text-cyan-400" />
               </div>
               <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-white">Гидрация</h3>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Потребление воды</p>
+                <h3 className="text-base font-black uppercase tracking-tight text-white">Гидрация</h3>
+                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Потребление воды</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums">
-                {avgDaily} <span className="text-xs text-white/40">мл/день</span>
+              <div className="text-3xl font-black text-white tabular-nums leading-none">
+                {avgDaily} <span className="text-sm text-white/30 font-medium">мл/день</span>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@ export function StatsWater({ period }: StatsWaterProps) {
                   <stop
                     offset="5%"
                     stopColor="#0ea5e9"
-                    stopOpacity={0.3}
+                    stopOpacity={0.2}
                   />
                   <stop
                     offset="95%"
@@ -122,12 +122,12 @@ export function StatsWater({ period }: StatsWaterProps) {
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
               <XAxis
                 dataKey="date"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={12}
                 stroke="rgba(255,255,255,0.2)"
                 fontSize={10}
                 fontWeight="bold"
@@ -148,80 +148,44 @@ export function StatsWater({ period }: StatsWaterProps) {
                   r: 4,
                   fill: "#0ea5e9",
                   strokeWidth: 2,
-                  stroke: "#09090b",
+                  stroke: "#121214",
                 }}
               />
             </AreaChart>
           </ChartContainer>
-        </Card>
+        </div>
       </motion.div>
 
       {/* Ключевые метрики */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
-        {/* Среднее в день */}
-        <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Droplets className="w-4 h-4 text-cyan-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-cyan-400/60">Среднее</span>
+      <motion.div variants={item} className="grid grid-cols-2 gap-4">
+        {[
+          { icon: Droplets, label: 'Среднее', val: avgDaily, unit: 'мл', sub: 'В день', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
+          { icon: TrendingUp, label: 'Лучший', val: bestDay.value, unit: 'мл', sub: bestDay.date, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+          { icon: Zap, label: 'Серия', val: currentStreak, unit: 'дней', sub: 'Без пропусков', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+          { icon: Target, label: 'Цель', val: achievementRate, unit: '%', sub: `${daysAchieved}/${WATER_DATA.length} дней`, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' }
+        ].map((m, i) => (
+          <div key={i} className={cn("p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5", m.bg, m.border)}>
+            <div className="flex items-center gap-2 mb-3">
+              <m.icon className={cn("w-4 h-4", m.color)} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{m.label}</span>
+            </div>
+            <div className="text-3xl font-black text-white tabular-nums leading-none mb-2">
+              {m.val} <span className="text-sm text-white/30 font-medium">{m.unit}</span>
+            </div>
+            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+              {m.sub}
+            </div>
           </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {avgDaily} <span className="text-sm text-white/40">мл</span>
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-            В день
-          </div>
-        </div>
-
-        {/* Лучший день */}
-        <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-blue-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-blue-400/60">Лучший день</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {bestDay.value} <span className="text-sm text-white/40">мл</span>
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-blue-400 uppercase tracking-wider">
-            {bestDay.date}
-          </div>
-        </div>
-
-        {/* Streak */}
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-4 h-4 text-emerald-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400/60">Серия</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {currentStreak} <span className="text-sm text-white/40">дней</span>
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-            Выполнение цели
-          </div>
-        </div>
-
-        {/* % Выполнения */}
-        <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-purple-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-purple-400/60">Достижение</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {achievementRate}<span className="text-sm text-white/40">%</span>
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-purple-400 uppercase tracking-wider">
-            {daysAchieved} из {WATER_DATA.length} дней
-          </div>
-        </div>
+        ))}
       </motion.div>
 
-      {/* Прогресс к цели - круговая диаграмма */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-            <Target className="w-4 h-4 text-cyan-400" />
+      {/* Прогресс к цели */}
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+            <Target className="w-5 h-5 text-cyan-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Прогресс к цели</span>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Efficiency</span>
         </div>
 
         <div className="flex items-center gap-6">

@@ -78,23 +78,20 @@ export function StatsSteps({ period }: StatsStepsProps) {
     >
       {/* Главный график */}
       <motion.div variants={item}>
-        <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Footprints className="w-4 h-4 text-blue-400" />
+        <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <Footprints className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-white">Активность</h3>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Шаги за период</p>
+                <h3 className="text-base font-black uppercase tracking-tight text-white">Активность</h3>
+                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Шаги за период</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums">
-                {avgDaily.toLocaleString()}
-              </div>
-              <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
-                в день
+              <div className="text-3xl font-black text-white tabular-nums leading-none">
+                {avgDaily.toLocaleString()} <span className="text-sm text-white/30 font-medium uppercase">шагов</span>
               </div>
             </div>
           </div>
@@ -103,16 +100,16 @@ export function StatsSteps({ period }: StatsStepsProps) {
             <BarChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5} />
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
               <XAxis
                 dataKey="date"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={12}
                 stroke="rgba(255,255,255,0.2)"
                 fontSize={10}
                 fontWeight="bold"
@@ -124,80 +121,44 @@ export function StatsSteps({ period }: StatsStepsProps) {
               <Bar
                 dataKey="value"
                 fill="url(#stepsGradient)"
-                radius={[8, 8, 0, 0]}
-                maxBarSize={40}
+                radius={[6, 6, 0, 0]}
+                maxBarSize={32}
               />
             </BarChart>
           </ChartContainer>
-        </Card>
+        </div>
       </motion.div>
 
       {/* Ключевые метрики */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
-        {/* Среднее */}
-        <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Footprints className="w-4 h-4 text-blue-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-blue-400/60">Среднее</span>
+      <motion.div variants={item} className="grid grid-cols-2 gap-4">
+        {[
+          { icon: Footprints, label: 'Среднее', val: avgDaily.toLocaleString(), sub: 'Шагов/день', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+          { icon: Flame, label: 'Всего', val: (totalSteps / 1000).toFixed(1), unit: 'k', sub: `За ${period === '7d' ? '7' : '30'} дней`, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+          { icon: TrendingUp, label: 'Лучший', val: bestDay.value.toLocaleString(), sub: bestDay.date, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+          { icon: TrendingDown, label: 'Худший', val: worstDay.value.toLocaleString(), sub: worstDay.date, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' }
+        ].map((m, i) => (
+          <div key={i} className={cn("p-6 rounded-[2rem] bg-[#121214]/60 border border-white/5", m.bg, m.border)}>
+            <div className="flex items-center gap-2 mb-3">
+              <m.icon className={cn("w-4 h-4", m.color)} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{m.label}</span>
+            </div>
+            <div className="text-3xl font-black text-white tabular-nums leading-none mb-2">
+              {m.val}{m.unit && <span className="text-sm text-white/30 font-medium">{m.unit}</span>}
+            </div>
+            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+              {m.sub}
+            </div>
           </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {avgDaily.toLocaleString()}
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-            Шагов/день
-          </div>
-        </div>
-
-        {/* Всего */}
-        <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Flame className="w-4 h-4 text-purple-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-purple-400/60">Всего</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {(totalSteps / 1000).toFixed(1)}k
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-            За {period === '7d' ? '7' : '30'} дней
-          </div>
-        </div>
-
-        {/* Лучший день */}
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400/60">Лучший</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {bestDay.value.toLocaleString()}
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-            {bestDay.date}
-          </div>
-        </div>
-
-        {/* Худший день */}
-        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingDown className="w-4 h-4 text-orange-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-orange-400/60">Худший</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {worstDay.value.toLocaleString()}
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-orange-400 uppercase tracking-wider">
-            {worstDay.date}
-          </div>
-        </div>
+        ))}
       </motion.div>
 
       {/* Прогресс к цели */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <Target className="w-4 h-4 text-blue-400" />
+      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Target className="w-5 h-5 text-blue-400" />
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Выполнение цели</span>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Achievement</span>
         </div>
 
         <div className="space-y-3">

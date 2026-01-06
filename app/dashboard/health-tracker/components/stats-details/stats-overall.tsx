@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar, Smile, Utensils } from "lucide-react"
+import { TrendingDown, TrendingUp, Zap, Scale, Droplets, Footprints, Moon, Camera, NotebookText, ArrowRight, Trophy, Calendar, Smile, Utensils, Flame, Frown, Meh, Laugh, Annoyed, Soup, Pizza, Hamburger, Apple, Salad, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { StatsView } from "../../types"
@@ -73,243 +73,289 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6"
+      className="space-y-6 pb-4"
     >
-      {/* Hero Section - Ключевые достижения */}
-      <motion.div variants={item} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/20 via-purple-500/10 to-blue-500/20 border border-white/10 p-4">
-        {/* Декоративные элементы */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/20 rounded-full blur-3xl" />
+      {/* Hero Section - AI Insights */}
+      <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-8 group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[100px] opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
         
-        <div className="relative z-10 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <Trophy className="w-4 h-4 text-amber-400" />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                <Zap className="w-5 h-5 text-amber-500" />
+              </div>
+              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white/40">Smart Analytics</span>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Итоги периода</span>
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-[#121214] bg-white/5 flex items-center justify-center">
+                  <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Быстрая статистика */}
-          <div className="flex items-center gap-4">
-            <div className="space-y-0.5">
-              <div className="text-2xl font-black text-white tabular-nums leading-none">-1.8 <span className="text-sm text-white/40">кг</span></div>
-              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Динамика веса</div>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">
+              Ваш прогресс <span className="text-amber-500">ускорился</span> на этой неделе
+            </h2>
+            <p className="text-sm text-white/50 leading-relaxed font-medium max-w-[90%]">
+              Вы достигли целей по шагам 5 дней из 7. Средний вес снизился на <span className="text-emerald-400 font-black">1.8 кг</span>. 
+              Это лучший результат за последние 30 дней. Продолжайте в том же темпе!
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6 pt-2">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Стрик целей</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black text-white">12</span>
+                <span className="text-[10px] font-black text-amber-500 uppercase">дней</span>
+              </div>
             </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="space-y-0.5">
-              <div className="text-2xl font-black text-white tabular-nums leading-none">94 <span className="text-sm text-white/40">%</span></div>
-              <div className="text-[9px] font-bold text-blue-400 uppercase tracking-wider">Выполнение целей</div>
+            <div className="w-px h-8 bg-white/5" />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Эффективность</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black text-white">94</span>
+                <span className="text-[10px] font-black text-blue-400 uppercase">%</span>
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Вода - горизонтальная карточка */}
-      {settings.widgets.water.enabled && (
-        <motion.div 
-          variants={item} 
-          onClick={() => onNavigate?.('water')}
-          className="relative overflow-hidden rounded-2xl bg-cyan-500/10 border border-cyan-500/20 p-4 cursor-pointer hover:bg-cyan-500/15 transition-all active:scale-[0.98]"
+      {/* Вода - Вертикальная карточка */}
+      <div className="grid grid-cols-2 gap-4">
+        {settings.widgets.water.enabled && (
+          <motion.div 
+            variants={item} 
+            onClick={() => onNavigate?.('water')}
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 transition-all duration-300 active:scale-[0.98] group"
+          >
+            <div className="flex flex-col h-full justify-between gap-6">
+              <div className="flex items-start justify-between">
+                <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Droplets className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-black text-white tabular-nums">2.3</div>
+                  <div className="text-[9px] font-bold text-cyan-400 uppercase">л/день</div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-sm font-black text-white uppercase tracking-tight mb-1">Вода</div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-cyan-500 w-[90%] rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-black text-cyan-400">90%</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Вес - Вертикальная карточка */}
+        {settings.widgets.weight.enabled && (
+          <motion.div
+            variants={item}
+            onClick={() => onNavigate?.('weight')}
+            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 transition-all duration-300 hover:border-white/10 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
+          >
+            <div className="flex flex-col h-full justify-between gap-6">
+              <div className="flex items-start justify-between">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <Scale className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-black text-emerald-400 leading-none tabular-nums">-1.8</div>
+                  <div className="text-[9px] font-bold text-white/20 uppercase mt-1">кг</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-2xl font-black text-white tabular-nums leading-none">72.4</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Текущий вес</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Шаги - Горизонтальная карточка */}
+      {settings.widgets.steps.enabled && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('steps')}
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 transition-all duration-300 hover:border-white/10 active:scale-[0.98] cursor-pointer group"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
-                <Droplets className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+                <Footprints className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-sm font-black text-white">Вода</div>
-                <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Среднее за период</div>
+                <div className="text-2xl font-black text-white tabular-nums">9,043</div>
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Шагов в день</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums leading-none">2,250</div>
-              <div className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">мл/день</div>
+              <div className="text-xl font-black text-blue-400 leading-none tabular-nums">112%</div>
+              <div className="text-[9px] font-bold text-white/20 uppercase mt-1">от цели</div>
             </div>
-          </div>
-
-          {/* Прогресс бар */}
-          <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "90%" }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-400 rounded-full"
-            />
-          </div>
-          
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Цель: 2,500 мл</span>
-            <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">90%</span>
           </div>
         </motion.div>
       )}
 
-      {/* Сетка инсайтов - разнообразные карточки */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
-        {visibleInsights.map((insight, index) => {
-          const Icon = insight.icon
-          const isPositive = insight.change > 0 && insight.id !== 'weight'
-          const isNegative = insight.change < 0 && insight.id !== 'weight'
-          const isWeightLoss = insight.id === 'weight' && insight.change < 0
-
-          return (
-            <motion.div
-              key={insight.id}
-              variants={item}
-              onClick={() => onNavigate?.(insight.id as StatsView)}
-              className={cn(
-                "relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
-                insight.bgColor,
-                insight.borderColor
-              )}
-            >
-              {/* Иконка и тренд */}
-              <div className="flex items-start justify-between mb-3">
-                <div className={cn("p-2 rounded-xl", insight.bgColor, insight.borderColor, "border")}>
-                  <Icon className={cn("w-4 h-4", insight.color)} />
-                </div>
-                {insight.trend === 'up' && (isPositive || isWeightLoss) && (
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                )}
-                {insight.trend === 'down' && (isNegative && insight.id !== 'weight') && (
-                  <TrendingDown className="w-4 h-4 text-red-400" />
-                )}
-                {insight.id === 'weight' && insight.trend === 'down' && (
-                  <TrendingDown className="w-4 h-4 text-emerald-400" />
-                )}
-              </div>
-
-              {/* Значение */}
-              <div className="space-y-1">
-                <div className="text-2xl font-black text-white leading-none tabular-nums">
-                  {insight.value}
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                    {insight.label}
-                  </div>
-                  {insight.subValue && (
-                    <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
-                      {insight.subValue}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Декоративный градиент */}
-              <div className={cn("absolute bottom-0 right-0 w-20 h-20 opacity-20 blur-2xl", insight.bgColor)} />
-            </motion.div>
-          )
-        })}
-      </motion.div>
-
-      {/* Калории - одноколоночная карточка */}
+      {/* Питание - Соответствует виджету трекера */}
       {settings.widgets.nutrition.enabled && (
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('nutrition')}
-          className="relative overflow-hidden rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 cursor-pointer hover:bg-emerald-500/15 transition-all active:scale-[0.98]"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 transition-all active:scale-[0.98] group"
         >
-          {/* Иконка и тренд */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-              <Utensils className="w-4 h-4 text-emerald-400" />
-            </div>
-            {/* Смайлик качества питания */}
-            <span className="text-3xl">🍎</span>
-          </div>
-
-          {/* Значение */}
-          <div className="space-y-1">
-            <div className="text-2xl font-black text-white leading-none tabular-nums">
-              2,050
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                Калории
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                <Utensils className="w-4 h-4 text-violet-400" />
               </div>
-              <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
-                ккал/день
-              </div>
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Питание</span>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-black text-white tabular-nums">2,050</span>
+              <span className="text-[10px] font-black text-white/20 uppercase ml-1">ккал</span>
             </div>
           </div>
 
-          {/* Декоративный градиент */}
-          <div className="absolute bottom-0 right-0 w-20 h-20 opacity-20 blur-2xl bg-emerald-500/10" />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded bg-violet-500/10">
+                    <Apple className="w-3 h-3 text-violet-400" />
+                  </div>
+                  <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Качество</span>
+                </div>
+                <span className="text-[9px] font-bold text-emerald-400 uppercase">Чистое питание</span>
+              </div>
+              <div className="flex gap-1">
+                {[Frown, Annoyed, Meh, Apple, Salad].map((Icon, i) => (
+                  <div key={i} className={cn("flex-1 h-8 rounded-lg flex items-center justify-center border transition-colors", i === 3 ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5 opacity-20")}>
+                    <Icon className={cn("w-4 h-4", i === 3 ? "text-emerald-400" : "text-white")} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="w-px h-16 bg-white/5" />
+            <div className="text-center px-2">
+              <div className="text-xl font-black text-white leading-none">24.2</div>
+              <div className="text-[8px] font-bold text-white/20 uppercase mt-1">ИМТ</div>
+            </div>
+          </div>
         </motion.div>
       )}
 
-      {/* Настроение и Энергия - двуцветная горизонтальная карточка */}
+      {/* Дисциплина - Компактная версия */}
+      <motion.div
+        variants={item}
+        onClick={() => onNavigate?.('habits')}
+        className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 cursor-pointer hover:border-white/10 transition-all active:scale-[0.98] group"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+              <Flame className="w-6 h-6 text-orange-500" />
+            </div>
+            <div>
+              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Дисциплина</div>
+              <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1.5">75% выполнение</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-xl font-black text-white leading-none">12</div>
+              <div className="text-[8px] font-bold text-orange-500/50 uppercase mt-1">Стрик</div>
+            </div>
+            <div className="relative w-10 h-10">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" className="text-white/5" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" strokeDasharray="264" strokeDashoffset="66" className="text-orange-500" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Настроение и Энергия - Соответствует виджету */}
       {settings.widgets.mood.enabled && (
-        <motion.div variants={item} className="relative overflow-hidden rounded-2xl border border-white/10 h-24 flex">
-          {/* Левая часть - Настроение */}
-          <div 
-            onClick={() => onNavigate?.('mood')}
-            className="flex-1 relative bg-gradient-to-br from-pink-500/20 to-purple-500/20 p-4 flex flex-col justify-between cursor-pointer hover:from-pink-500/25 hover:to-purple-500/25 transition-all active:scale-[0.98]"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-pink-500/20 border border-pink-500/30">
-                <Smile className="w-4 h-4 text-pink-400" />
+        <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/60 p-6">
+          <div className="flex flex-col gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                  <Smile className="w-3.5 h-3.5 text-yellow-400" />
+                </div>
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Настроение</span>
               </div>
-              <div className="text-[10px] font-black text-white/60 uppercase tracking-wider">Настроение</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-white tabular-nums leading-none">4.2</div>
-              <div className="text-[9px] font-bold text-pink-400 uppercase tracking-wider mt-1">из 5</div>
-            </div>
-          </div>
-
-          {/* Разделитель */}
-          <div className="w-px bg-white/10" />
-
-          {/* Правая часть - Энергия */}
-          <div 
-            onClick={() => onNavigate?.('mood')}
-            className="flex-1 relative bg-gradient-to-br from-orange-500/20 to-amber-500/20 p-4 flex flex-col justify-between cursor-pointer hover:from-orange-500/25 hover:to-amber-500/25 transition-all active:scale-[0.98]"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30">
-                <Zap className="w-4 h-4 text-orange-400" />
+              <div className="flex gap-1.5">
+                {[Frown, Annoyed, Meh, Smile, Laugh].map((Icon, i) => (
+                  <div key={i} className={cn("flex-1 py-3 rounded-xl flex items-center justify-center transition-colors", i === 3 ? "bg-white/10 border-white/20" : "bg-white/5 opacity-20")}>
+                    <Icon className={cn("w-6 h-6", i === 3 ? "text-emerald-400" : "text-white")} />
+                  </div>
+                ))}
               </div>
-              <div className="text-[10px] font-black text-white/60 uppercase tracking-wider">Энергия</div>
             </div>
-            <div>
-              <div className="text-3xl font-black text-white tabular-nums leading-none">7.5</div>
-              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-wider mt-1">из 10</div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <Zap className="w-3.5 h-3.5 text-orange-400" />
+                  </div>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Энергия</span>
+                </div>
+                <span className="text-[10px] font-bold text-orange-400/60 tabular-nums">7/10</span>
+              </div>
+              <div className="flex gap-1 h-4">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className={cn("flex-1 rounded-[2px]", i < 7 ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.3)]" : "bg-white/5")} />
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Лучший день недели */}
-      <motion.div variants={item} className="rounded-2xl bg-white/5 border border-white/5 p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
-            <Zap className="w-4 h-4 text-purple-400" />
+      {/* Peak Performance - Компактный список */}
+      <motion.div variants={item} className="rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
+              <Zap className="w-5 h-5 text-purple-400" />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Peak performance</span>
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/60">Лучший день</span>
+          <div className="text-right">
+            <div className="text-sm font-black text-white uppercase">Пятница</div>
+            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">18 января</div>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">Пятница</span>
-            <span className="text-sm text-white/40 font-medium">18 января</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-              <div className="text-sm font-black text-emerald-400">12.4k</div>
-              <div className="text-[8px] font-bold text-white/30 uppercase tracking-wider">Шагов</div>
+        <div className="flex items-center justify-between px-2">
+          {[
+            { label: 'Шаги', val: '12.4k', color: 'text-emerald-400' },
+            { label: 'Вода', val: '2.8л', color: 'text-blue-400' },
+            { label: 'Сон', val: '8.5ч', color: 'text-indigo-400' }
+          ].map((stat, i) => (
+            <div key={i} className="text-center">
+              <div className={cn("text-lg font-black", stat.color)}>{stat.val}</div>
+              <div className="text-[8px] font-bold text-white/20 uppercase tracking-wider mt-0.5">{stat.label}</div>
             </div>
-            <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-              <div className="text-sm font-black text-blue-400">2.8л</div>
-              <div className="text-[8px] font-bold text-white/30 uppercase tracking-wider">Воды</div>
-            </div>
-            <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-              <div className="text-sm font-black text-indigo-400">8.5ч</div>
-              <div className="text-[8px] font-bold text-white/30 uppercase tracking-wider">Сна</div>
-            </div>
-          </div>
+          ))}
         </div>
       </motion.div>
 
