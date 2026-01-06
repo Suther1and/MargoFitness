@@ -39,6 +39,7 @@ interface SettingsTabProps {
   setIsCalendarExpanded: (expanded: boolean) => void;
   activeSubTab: 'widgets' | 'habits';
   setActiveSubTab: (tab: 'widgets' | 'habits') => void;
+  isMobile?: boolean;
 }
 
 export default function SettingsTab({ 
@@ -48,7 +49,8 @@ export default function SettingsTab({
   isCalendarExpanded,
   setIsCalendarExpanded,
   activeSubTab,
-  setActiveSubTab
+  setActiveSubTab,
+  isMobile
 }: SettingsTabProps) {
   const { settings, saveSettings } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
@@ -267,7 +269,7 @@ export default function SettingsTab({
             >
               {activeSubTab === 'widgets' && (
                 <motion.div 
-                  layoutId="activeSubTab" 
+                  layoutId={isMobile ? "activeSubTab-mobile" : "activeSubTab"} 
                   className="absolute inset-0 bg-green-500 rounded-xl -z-10" 
                   transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
                 />
@@ -283,7 +285,7 @@ export default function SettingsTab({
             >
               {activeSubTab === 'habits' && (
                 <motion.div 
-                  layoutId="activeSubTab" 
+                  layoutId={isMobile ? "activeSubTab-mobile" : "activeSubTab"} 
                   className="absolute inset-0 bg-amber-500 rounded-xl -z-10" 
                   transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
                 />

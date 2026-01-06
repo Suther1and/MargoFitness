@@ -355,6 +355,7 @@ function HealthTrackerContent() {
                           setIsCalendarExpanded={setIsCalendarExpanded}
                           activeSubTab={settingsSubTab}
                           setActiveSubTab={setSettingsSubTab}
+                          isMobile={true}
                         />
                       </motion.div>
                     )}
@@ -437,6 +438,7 @@ function HealthTrackerContent() {
                       setIsCalendarExpanded={setIsCalendarExpanded}
                       activeSubTab={settingsSubTab}
                       setActiveSubTab={setSettingsSubTab}
+                      isMobile={false}
                     />
                   </div>
                 )}
