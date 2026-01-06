@@ -123,7 +123,7 @@ export function StatsDatePickerDialog({
     )}>
       <div className="p-4 pb-3 border-b border-white/5 text-center">
         <h3 className="text-lg font-oswald font-black uppercase tracking-wider flex items-center justify-center gap-2.5 text-white">
-          <Calendar className="w-4.5 h-4.5 text-amber-500" />
+          <Calendar className="w-4.5 h-4.5 text-sky-500" />
           Выберите период
         </h3>
       </div>
@@ -145,7 +145,7 @@ export function StatsDatePickerDialog({
               {activePeriod === period.id && activePeriod !== 'custom' && (
                 <motion.div
                   layoutId="activePeriodPicker"
-                  className="absolute inset-0 bg-amber-500 rounded-[1.5rem] shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                  className="absolute inset-0 bg-sky-500 rounded-[1.5rem] shadow-[0_0_20px_rgba(14,165,233,0.4)]"
                   transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                 />
               )}
@@ -201,9 +201,9 @@ export function StatsDatePickerDialog({
                   className={cn(
                     "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
                     isSelected 
-                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" 
+                      ? "bg-sky-500 text-black shadow-lg shadow-sky-500/30" 
                       : inRange
-                      ? "bg-amber-500/20 text-white"
+                      ? "bg-sky-500/20 text-white"
                       : "hover:bg-white/5",
                     !isCurrentMonth && !isSelected && !inRange && "opacity-30"
                   )}
@@ -224,7 +224,7 @@ export function StatsDatePickerDialog({
                   )}
                   {!isSelected && isToday && (
                     <div className="absolute bottom-1 flex gap-0.5">
-                      <div className="w-1 h-1 rounded-full bg-amber-500" />
+                      <div className="w-1 h-1 rounded-full bg-sky-500" />
                     </div>
                   )}
                 </button>
@@ -241,6 +241,7 @@ export function StatsDatePickerDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent variant="bottom" className="p-0 overflow-hidden bg-transparent border-none outline-none">
+        <DialogTitle className="sr-only">Выберите период анализа</DialogTitle>
         {Content}
       </DialogContent>
     </Dialog>

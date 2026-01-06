@@ -145,8 +145,8 @@ export function DesktopStatsDashboard({
           title="Период анализа" 
           subtitle={format(currentDateRange.start, 'd MMM', { locale: ru }) + ' — ' + format(currentDateRange.end, 'd MMM', { locale: ru })} 
           icon={CalendarIcon} 
-          iconColor="text-amber-500" 
-          iconBg="bg-amber-500/10"
+          iconColor="text-sky-500" 
+          iconBg="bg-sky-500/10"
           rightAction={
             <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2 -mr-2">
               <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
@@ -232,28 +232,28 @@ function StatsSidebarCalendar({
       default: return
     }
     onPeriodSelect(periodId, { start, end })
-    setIsExpanded(false) // Сворачиваем при выборе готового периода
+    // НЕ закрываем календарь автоматически
   }
 
   const handleDayClick = (day: Date) => {
+    // Если кликнули на галочку (конечную дату) - закрываем календарь
     if (selectedEnd && isSameDay(day, selectedEnd)) {
       onPeriodSelect('custom', { start: selectedStart!, end: selectedEnd })
-      setIsExpanded(false) // Сворачиваем при подтверждении выбора
+      setIsExpanded(false)
       return
     }
     
+    // Выбор начальной даты
     if (!selectedStart || selectedEnd) {
       setSelectedStart(day)
       setSelectedEnd(null)
     } else {
+      // Выбор конечной даты (не закрываем, ждем клика на галочку)
       const start = day < selectedStart ? day : selectedStart
       const end = day < selectedStart ? selectedStart : day
       setSelectedStart(start)
       setSelectedEnd(end)
-      // Здесь мы не закрываем сразу, чтобы пользователь мог нажать на галочку (selectedEnd) для подтверждения
-      // Но для удобства можно закрывать если это "поведение как на мобильном"
       onPeriodSelect('custom', { start, end })
-      setIsExpanded(false)
     }
   }
 
@@ -283,7 +283,7 @@ function StatsSidebarCalendar({
                     {currentPeriodType === period.id && (
                       <motion.div
                         layoutId="activePeriodPickerSidebar"
-                        className="absolute inset-0 bg-amber-500 rounded-lg shadow-lg shadow-amber-500/30"
+                        className="absolute inset-0 bg-sky-500 rounded-lg shadow-lg shadow-sky-500/30"
                         transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                       />
                     )}
@@ -323,14 +323,14 @@ function StatsSidebarCalendar({
                       onClick={() => handleDayClick(day)}
                       className={cn(
                         "relative aspect-square rounded-lg flex items-center justify-center text-[12px] font-black transition-all",
-                        (isStart || isEnd) ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" : 
-                        inRange ? "bg-amber-500/20 text-amber-400" : "hover:bg-white/5",
+                        (isStart || isEnd) ? "bg-sky-500 text-black shadow-lg shadow-sky-500/20" : 
+                        inRange ? "bg-sky-500/20 text-sky-400" : "hover:bg-white/5",
                         !isCurrentMonth && "opacity-20"
                       )}
                     >
                       {isEnd ? <Check className="w-4 h-4" strokeWidth={3.5} /> : format(day, 'd')}
                       {!isStart && !isEnd && isToday && (
-                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-500/50" />
+                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-sky-500/50" />
                       )}
                     </button>
                   )
