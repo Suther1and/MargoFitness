@@ -111,9 +111,12 @@ function Dialog({
       
       requestAnimationFrame(() => {
         if (blur.parentElement) {
-          blur.style.backdropFilter = 'blur(8px)'
-          ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
-          blur.style.background = 'rgba(0, 0, 0, 0.3)'
+          const isMobile = window.innerWidth < 768
+          if (!isMobile) {
+            blur.style.backdropFilter = 'blur(8px)'
+            ;(blur.style as any).webkitBackdropFilter = 'blur(8px)'
+          }
+          blur.style.background = isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)'
         }
       })
     } else if (!props.open && isOpenRef.current) {
@@ -211,7 +214,8 @@ function DialogOverlay({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "fixed inset-0 z-[49] bg-black/40 backdrop-blur-[2px]",
+              "fixed inset-0 z-[49] bg-black/20", 
+              "md:backdrop-blur-[2px] md:bg-black/40", 
               className
             )}
           />
@@ -235,7 +239,7 @@ function DialogContent({
   const { open } = React.useContext(DialogContext)
   
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
         <DialogPortal forceMount>
           <DialogOverlay className="z-[45]" />
@@ -249,16 +253,20 @@ function DialogContent({
               initial={isBottom ? { y: "100%" } : { opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={isBottom ? { y: "100%" } : { opacity: 0, scale: 0.95 }}
-              transition={{
+              transition={isBottom && !open ? {
+                duration: 0.2,
+                ease: [0.4, 0, 1, 1] 
+              } : {
                 type: "spring",
-                damping: 25,
-                stiffness: 220,
+                damping: 30,
+                stiffness: 300,
                 mass: 0.8
               }}
               className={cn(
-                "bg-background fixed z-[60] grid w-full gap-4 border shadow-lg outline-none",
+                "bg-[#121214] fixed z-[60] grid w-full gap-4 border shadow-lg outline-none pointer-events-auto", 
+                "md:bg-background/95 md:backdrop-blur-2xl", 
                 isBottom 
-                  ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none" 
+                  ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none border-t border-x border-white/10" 
                   : "top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[calc(100%-2rem)] rounded-lg p-6 sm:max-w-lg",
                 className
               )}

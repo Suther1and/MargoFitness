@@ -56,6 +56,8 @@ function HealthTrackerContent() {
 
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
     (tabParam as any) || 'overview'
   )
@@ -64,7 +66,6 @@ function HealthTrackerContent() {
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
 
   const { isFirstVisit } = useTrackerSettings()
 
@@ -98,23 +99,12 @@ function HealthTrackerContent() {
   }
 
   return (
-    <div className={cn(
-      "min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20",
-      isAnimating && "is-animating"
-    )}>
+    <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20">
       <style jsx global>{`
         @media (max-width: 767px) {
-          .is-animating *:not(.mobile-nav-container):not(.mobile-nav-container *) {
-            box-shadow: none !important;
-            text-shadow: none !important;
-            filter: none !important;
-            backdrop-filter: none !important;
-          }
-          
           .is-animating .main-grid-container {
             opacity: 0.9 !important;
             pointer-events: none !important;
-            will-change: transform !important;
           }
         }
       `}</style>
