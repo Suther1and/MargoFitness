@@ -58,7 +58,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       className="space-y-4 pb-4"
     >
       {/* Дисциплина - Эталонный блок */}
-      {settings.widgets.habits.enabled && (
+      {settings.widgets.habits?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('habits')}
@@ -105,7 +105,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Шаги - Горизонтальная карточка */}
-      {settings.widgets.steps.enabled && (
+      {settings.widgets.steps?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('steps')}
@@ -162,7 +162,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Вода - Горизонтальная с заливкой */}
-      {settings.widgets.water.enabled && (
+      {settings.widgets.water?.enabled && (
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('water')}
@@ -198,7 +198,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Вес - Горизонтальная */}
-      {settings.widgets.weight.enabled && (
+      {settings.widgets.weight?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('weight')}
@@ -245,7 +245,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Питание - Горизонтальная исправленная */}
-      {settings.widgets.nutrition.enabled && (
+      {settings.widgets.nutrition?.enabled && (
         <motion.div 
           variants={item} 
           onClick={() => onNavigate?.('nutrition')}
@@ -283,7 +283,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Настроение и Энергия - Горизонтальная редизайн */}
-      {settings.widgets.mood.enabled && (
+      {settings.widgets.mood?.enabled && (
         <motion.div 
           variants={item}
           onClick={() => onNavigate?.('mood')}
@@ -337,7 +337,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
 
       {/* Фото и Заметки - Нижние компактные блоки */}
       <div className="grid grid-cols-2 gap-4">
-        {settings.widgets.photos.enabled && (
+        {settings.widgets.photos?.enabled && (
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('photos')}
@@ -362,7 +362,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
           </motion.div>
         )}
 
-        {settings.widgets.notes.enabled && (
+        {settings.widgets.notes?.enabled && (
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('notes')}
