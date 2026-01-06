@@ -240,7 +240,7 @@ export function StatsDatePickerDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent variant="bottom" className="p-0 overflow-hidden bg-transparent border-none outline-none">
+      <DialogContent variant="bottom" className="p-0 overflow-hidden !bg-transparent border-none outline-none">
         <DialogTitle className="sr-only">Выберите период анализа</DialogTitle>
         {Content}
       </DialogContent>
