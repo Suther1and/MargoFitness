@@ -110,58 +110,6 @@ export function StatsCaffeine({ period }: StatsCaffeineProps) {
         </Card>
       </motion.div>
 
-      {/* Метрики */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
-        <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Coffee className="w-4 h-4 text-orange-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-orange-400/60">Среднее</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {avgDaily}
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
-            Чашек/день
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-emerald-400" />
-            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400/60">Без кофеина</span>
-          </div>
-          <div className="text-3xl font-black text-white tabular-nums">
-            {daysWithoutCaffeine}
-          </div>
-          <div className="mt-2 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-            {daysWithoutCaffeine === 1 ? 'День' : 'Дня'}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Влияние на сон */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-            <Moon className="w-4 h-4 text-indigo-400" />
-          </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Влияние на сон</span>
-        </div>
-
-        <div className="space-y-3">
-          <div className="p-3 rounded-xl bg-white/5">
-            <p className="text-sm text-white/70 font-medium">
-              В дни с высоким потреблением кофеина (3+ чашки) качество сна снижается в среднем на 15%
-            </p>
-          </div>
-          <div className="p-3 rounded-xl bg-white/5">
-            <p className="text-sm text-white/70 font-medium">
-              Рекомендуется не употреблять кофеин за 6-8 часов до сна
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
