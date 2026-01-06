@@ -173,8 +173,8 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                   <Scale className="w-5 h-5 text-amber-500" />
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-black text-emerald-400 leading-none tabular-nums">-1.8</div>
-                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">КГ / {period === '7d' ? 'НЕД' : 'МЕС'}</div>
+                  <div className="text-2xl font-black text-emerald-400 leading-none tabular-nums tracking-tighter">-1.8</div>
+                  <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1.5">кг за неделю</div>
                 </div>
               </div>
 
@@ -192,7 +192,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('steps')}
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 transition-all duration-300 hover:border-white/10 active:scale-[0.98] cursor-pointer group"
+          className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/5 p-6 transition-all duration-300 hover:border-white/10 active:scale-[0.98] group"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -201,7 +201,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
               </div>
               <div>
                 <div className="text-2xl font-black text-white tabular-nums tracking-tight">9,043</div>
-                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-1">Среднее шагов в день</div>
+                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-1">Среднее <span className="text-white/20">/ +12% к пр. периоду</span></div>
               </div>
             </div>
             <div className="text-right">
@@ -241,11 +241,16 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                   </div>
                   <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.1em]">Качество еды</span>
                 </div>
-                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Чистое питание</span>
+                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest animate-pulse">Чистое питание</span>
               </div>
               <div className="flex gap-1.5">
                 {[Frown, Annoyed, Meh, Apple, Salad].map((Icon, i) => (
-                  <div key={i} className={cn("flex-1 h-9 rounded-xl flex items-center justify-center border transition-all duration-500", i === 3 ? "bg-emerald-500/10 border-emerald-500/20" : "bg-white/5 border-white/5 opacity-20")}>
+                  <div key={i} className={cn(
+                    "flex-1 h-9 rounded-xl flex items-center justify-center border transition-all duration-500", 
+                    i === 3 
+                      ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                      : "bg-white/5 border-white/5 opacity-20"
+                  )}>
                     <Icon className={cn("w-4 h-4", i === 3 ? "text-emerald-400" : "text-white")} />
                   </div>
                 ))}
@@ -281,14 +286,14 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
                   strokeLinecap="round" 
                 />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-black text-white">75%</span>
+            <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-base font-black text-white tracking-tighter">75%</span>
               </div>
             </div>
             
             <div>
               <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Дисциплина</div>
-              <div className="text-xl font-black text-white tracking-tight uppercase leading-none">Выполнение</div>
+              <div className="text-lg font-black text-white tracking-tight uppercase leading-none">Стабильность</div>
             </div>
           </div>
 
@@ -296,7 +301,7 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
             <div className="w-px h-10 bg-white/5" />
             <div className="text-right">
               <div className="flex items-center gap-2 justify-end mb-1">
-                <Flame className="w-4 h-4 text-orange-500" />
+                <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
                 <span className="text-2xl font-black text-white tabular-nums tracking-tight">12</span>
               </div>
               <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Лучший стрик</div>
@@ -365,19 +370,19 @@ export function StatsOverall({ period, onNavigate }: StatsOverallProps) {
       )}
 
       {/* Peak Performance - Компактный блок-награда */}
-      <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-purple-500/[0.07] via-[#121214] to-blue-500/[0.07] border border-white/5 p-7 group">
-        <div className="absolute top-0 left-0 w-full h-full bg-white/[0.01] pointer-events-none" />
+      <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-purple-600/20 via-[#121214] to-blue-600/10 border border-white/5 p-7 group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div className="flex items-center gap-5">
-            <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)] group-hover:scale-110 transition-transform duration-500">
-              <Trophy className="w-7 h-7 text-purple-400" />
+            <div className="p-4 rounded-2xl bg-purple-500/20 border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
+              <Trophy className="w-8 h-8 text-purple-400" />
             </div>
             <div>
-              <div className="text-[10px] font-black text-purple-400/60 uppercase tracking-[0.4em] mb-1">Peak day</div>
+              <div className="text-[10px] font-black text-purple-400 uppercase tracking-[0.4em] mb-1">Peak day</div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-white uppercase tracking-tight">Пятница</span>
-                <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">18 Янв</span>
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Абсолютный рекорд</span>
               </div>
             </div>
           </div>
