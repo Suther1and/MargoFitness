@@ -67,7 +67,7 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
     <HealthTrackerCard
       title="Привычки"
       subtitle={`${completedCount}/${totalCount}`}
-      icon={ListChecks}
+      icon={Flame}
       iconColor="text-amber-500"
       iconBg="bg-amber-500/10"
       className="gap-3"

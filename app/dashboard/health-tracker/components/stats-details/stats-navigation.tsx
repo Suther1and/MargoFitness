@@ -20,14 +20,14 @@ interface NavButton {
 
 const NAV_BUTTONS: NavButton[] = [
   { id: 'overall', label: 'Общая', icon: BarChart3, color: 'text-purple-400' },
-  { id: 'habits', label: 'Привычки', icon: Flame, color: 'text-orange-500' },
+  { id: 'habits', label: 'Привычки', icon: Flame, color: 'text-amber-500' },
   { id: 'water', label: 'Вода', icon: Droplets, color: 'text-blue-400' },
-  { id: 'steps', label: 'Шаги', icon: Footprints, color: 'text-cyan-400' },
-  { id: 'weight', label: 'Вес', icon: Scale, color: 'text-amber-500' },
-  { id: 'caffeine', label: 'Кофеин', icon: Coffee, color: 'text-orange-400' },
+  { id: 'steps', label: 'Шаги', icon: Footprints, color: 'text-red-500' },
+  { id: 'weight', label: 'Вес', icon: Scale, color: 'text-emerald-400' },
+  { id: 'caffeine', label: 'Кофеин', icon: Coffee, color: 'text-amber-600' },
   { id: 'sleep', label: 'Сон', icon: Moon, color: 'text-indigo-400' },
   { id: 'mood', label: 'Настроение', icon: Smile, color: 'text-pink-400' },
-  { id: 'nutrition', label: 'Питание', icon: Utensils, color: 'text-emerald-400' },
+  { id: 'nutrition', label: 'Питание', icon: Utensils, color: 'text-violet-400' },
   { id: 'notes', label: 'Заметки', icon: NotebookText, color: 'text-sky-400' },
   { id: 'photos', label: 'Фото', icon: Camera, color: 'text-violet-400' },
 ]
