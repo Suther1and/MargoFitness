@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { StatsHeader } from "./stats-header"
 import { StatsNavigation } from "./stats-details/stats-navigation"
@@ -27,13 +27,13 @@ export default function StatsTab() {
 
   // Определяем, какой компонент рендерить
   const renderContent = () => {
-    const contentVariants = {
+    const contentVariants: Variants = {
       enter: (direction: number) => ({
         x: direction > 0 ? 20 : -20,
         opacity: 0,
         scale: 0.98,
         transition: {
-          x: { type: "spring", stiffness: 400, damping: 35 },
+          x: { type: "spring" as const, stiffness: 400, damping: 35 },
           opacity: { duration: 0.15 },
           scale: { duration: 0.15 }
         }
@@ -43,7 +43,7 @@ export default function StatsTab() {
         opacity: 1,
         scale: 1,
         transition: {
-          x: { type: "spring", stiffness: 400, damping: 35 },
+          x: { type: "spring" as const, stiffness: 400, damping: 35 },
           opacity: { duration: 0.15 },
           scale: { duration: 0.15 }
         }
@@ -53,7 +53,7 @@ export default function StatsTab() {
         opacity: 0,
         scale: 0.98,
         transition: {
-          x: { duration: 0.1, ease: "easeIn" },
+          x: { duration: 0.1, ease: "easeIn" as const },
           opacity: { duration: 0.1 },
           scale: { duration: 0.1 }
         }
