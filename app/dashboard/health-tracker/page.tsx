@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays } from 'lucide-react'
-import { format, isSameDay, subDays, subMonths, subYears } from 'date-fns'
+import { format, isSameDay, subDays, subMonths, subYears, differenceInDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 
@@ -115,16 +115,11 @@ function HealthTrackerContent() {
   }, [tabParam])
 
   const getStatsPeriodLabel = () => {
-    if (statsPeriodType === 'custom') {
-      const startStr = format(statsDateRange.start, 'd MMM', { locale: ru })
-      const endStr = format(statsDateRange.end, 'd MMM', { locale: ru })
-      return `${startStr} - ${endStr}`
-    }
-    if (statsPeriodType === '7d') return "7 дней"
-    if (statsPeriodType === '30d') return "30 дней"
-    if (statsPeriodType === '6m') return "6 месяцев"
-    if (statsPeriodType === '1y') return "1 год"
-    return "7 дней"
+    const days = differenceInDays(statsDateRange.end, statsDateRange.start) + 1
+    const startStr = format(statsDateRange.start, 'd MMM', { locale: ru })
+    const endStr = format(statsDateRange.end, 'd MMM', { locale: ru })
+    
+    return `${days} дней, ${startStr} - ${endStr}`
   }
 
   const handleStatsPeriodSelect = (newPeriodType: PeriodType, newDateRange: DateRange) => {
