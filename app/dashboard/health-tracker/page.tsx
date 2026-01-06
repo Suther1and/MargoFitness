@@ -170,7 +170,7 @@ function HealthTrackerContent() {
                     <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
                       {getStatsPeriodLabel()}
                     </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform" />
+                    <ChevronDown className="w-3.5 h-3.5 text-white/60 group-hover:text-white/80 transition-colors -mt-0.5" />
                   </button>
                 ) : (
                   <Dialog open={isCalendarExpanded && !isDesktop} onOpenChange={setIsCalendarExpanded}>
@@ -179,7 +179,7 @@ function HealthTrackerContent() {
                         <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
                           {format(selectedDate, 'EEEE, d MMMM', { locale: ru })}
                         </span>
-                        <ChevronDown className={cn("w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-transform", isCalendarExpanded && "rotate-180")} />
+                        <ChevronDown className={cn("w-3.5 h-3.5 text-white/60 group-hover:text-white/80 transition-transform -mt-0.5", isCalendarExpanded && "rotate-180")} />
                       </button>
                     </DialogTrigger>
                   <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10">
@@ -525,7 +525,7 @@ function HealthTrackerContent() {
                       rightAction={
                         <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
                           <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                            <ChevronDown className="w-4 h-4 text-white/40" />
+                            <ChevronDown className="w-4 h-4 text-white/60 hover:text-white/80 transition-colors" />
                           </motion.div>
                         </button>
                       }
