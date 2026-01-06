@@ -38,7 +38,8 @@ const getHeatmapData = (period: string) => {
   if (period === '7d') return Array.from({ length: 7 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
   if (period === '30d') return Array.from({ length: 30 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
   if (period === '180d') return Array.from({ length: 26 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
-  return Array.from({ length: 12 }, (_, i) => ({ value: Math.random() * 100, label: `M${i + 1}` }))
+  if (period === '360d') return Array.from({ length: 52 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
+  return Array.from({ length: 52 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
 }
 
 const chartConfig = {
@@ -85,98 +86,109 @@ export function StatsHabits({ period }: StatsHabitsProps) {
       animate="show"
       className="space-y-6"
     >
-      {/* Главный график - выполнение по дням */}
+      {/* Объединенный блок: График + Тепловая карта */}
       <motion.div variants={item}>
-        <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
+        <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
+          {/* Заголовок с показателем */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
                 <Flame className="w-5 h-5 text-amber-500" />
               </div>
               <div>
-                <h3 className="text-base font-black uppercase tracking-tight text-white">Дисциплина</h3>
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Выполнение привычек</p>
+                <h3 className="text-base font-bold text-white uppercase tracking-tight">Дисциплина</h3>
+                <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
+                  {period === '7d' ? 'Последние 7 дней' : 
+                   period === '30d' ? 'Последние 30 дней' : 
+                   period === '180d' ? 'Последние 6 месяцев' : 
+                   'Последний год'}
+                </p>
               </div>
             </div>
             <div className="text-right">
               <div className="text-3xl font-black text-white tabular-nums leading-none">
                 {avgCompletion}<span className="text-sm text-white/30 font-medium">%</span>
               </div>
+              <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-1">
+                Средний процент
+              </p>
             </div>
           </div>
 
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <BarChart data={WEEKLY_COMPLETION} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-              <XAxis
-                dataKey="day"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={12}
-                stroke="rgba(255,255,255,0.2)"
-                fontSize={10}
-                fontWeight="bold"
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="value"
-                radius={[6, 6, 0, 0]}
-                maxBarSize={32}
-              >
-                {WEEKLY_COMPLETION.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.value >= 90 ? "#f59e0b" : entry.value >= 70 ? "rgba(245,158,11,0.6)" : "rgba(245,158,11,0.3)"} 
+          {/* График для 7 дней */}
+          {period === '7d' && (
+            <div className="mb-6">
+              <ChartContainer config={chartConfig} className="h-[180px] w-full">
+                <BarChart data={WEEKLY_COMPLETION} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    stroke="rgba(255,255,255,0.2)"
+                    fontSize={10}
+                    fontWeight="bold"
                   />
-                ))}
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </div>
-      </motion.div>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Bar
+                    dataKey="value"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={32}
+                  >
+                    {WEEKLY_COMPLETION.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.value >= 90 ? "#f59e0b" : entry.value >= 70 ? "rgba(245,158,11,0.6)" : "rgba(245,158,11,0.3)"} 
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            </div>
+          )}
 
-      {/* Тепловая карта */}
-      <motion.div variants={item}>
-        <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Calendar className="w-5 h-5 text-amber-500" />
-              </div>
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Активность</span>
-            </div>
-            {/* Микро-легенда */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[8px] font-bold text-white/20 uppercase">Min</span>
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-[2px] bg-white/5" />
-                <div className="w-2 h-2 rounded-[2px] bg-amber-500/30" />
-                <div className="w-2 h-2 rounded-[2px] bg-amber-500/60" />
-                <div className="w-2 h-2 rounded-[2px] bg-amber-500" />
-              </div>
-              <span className="text-[8px] font-bold text-white/20 uppercase">Max</span>
-            </div>
-          </div>
-          
+          {/* Тепловая карта активности */}
           <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white/60 uppercase tracking-wider">
+                {period === '7d' ? 'Недельная активность' : 
+                 period === '30d' ? 'Месячная активность' : 
+                 period === '180d' ? 'Активность за 6 месяцев' : 
+                 'Годовая активность'}
+              </span>
+              {/* Легенда */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[8px] font-bold text-white/20 uppercase">Min</span>
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 rounded-[2px] bg-white/5" />
+                  <div className="w-2 h-2 rounded-[2px] bg-amber-500/30" />
+                  <div className="w-2 h-2 rounded-[2px] bg-amber-500/60" />
+                  <div className="w-2 h-2 rounded-[2px] bg-amber-500" />
+                </div>
+                <span className="text-[8px] font-bold text-white/20 uppercase">Max</span>
+              </div>
+            </div>
+
             <div className={cn(
               "grid gap-2",
               period === '7d' ? "grid-cols-7" : 
               period === '30d' ? "grid-cols-10" : 
-              "grid-cols-13"
+              period === '180d' ? "grid-cols-13" :
+              "grid-cols-15"
             )}>
               {heatmapData.map((data, i) => (
                 <div 
                   key={i}
-                  className="aspect-square rounded-sm md:rounded-md transition-colors"
+                  className="aspect-square rounded-sm md:rounded-md transition-colors hover:scale-110 cursor-pointer"
                   style={{ 
-                    backgroundColor: data.value > 80 ? 'rgba(245,158,11,1)' : 
-                                     data.value > 50 ? 'rgba(245,158,11,0.6)' : 
-                                     data.value > 20 ? 'rgba(245,158,11,0.3)' : 
-                                     'rgba(255,255,255,0.03)'
+                    backgroundColor: data.value > 80 ? 'rgba(245,158,11,0.8)' : 
+                                     data.value > 50 ? 'rgba(245,158,11,0.5)' : 
+                                     data.value > 20 ? 'rgba(245,158,11,0.25)' : 
+                                     'rgba(255,255,255,0.05)'
                   }}
                   title={`${Math.round(data.value)}%`}
                 />
@@ -228,66 +240,6 @@ export function StatsHabits({ period }: StatsHabitsProps) {
           </div>
         </div>
       </motion.div>
-
-      {/* Ключевые метрики дисциплины */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-4">
-        {/* Лучший стрик */}
-        <div className="p-5 rounded-[2rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Лучший стрик</span>
-          </div>
-          <div className="text-2xl font-black text-white tabular-nums leading-none mb-1.5">
-            {bestHabit.streak} <span className="text-xs text-white/30 font-medium">дн.</span>
-          </div>
-          <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest truncate">
-            {bestHabit.name}
-          </div>
-        </div>
-
-        {/* Процент выполнения */}
-        <div className="p-5 rounded-[2rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-3.5 h-3.5 text-orange-500" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Процент</span>
-          </div>
-          <div className="text-2xl font-black text-white tabular-nums leading-none mb-1.5">
-            {Math.round((completedTasks / totalTasks) * 100)}<span className="text-xs text-white/30 font-medium">%</span>
-          </div>
-          <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-            {completedTasks} / {totalTasks} задач
-          </div>
-        </div>
-
-        {/* Всего задач */}
-        <div className="p-5 rounded-[2rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Выполнено</span>
-          </div>
-          <div className="text-2xl font-black text-white tabular-nums leading-none mb-1.5">
-            {completedTasks}
-          </div>
-          <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-            Всего за период
-          </div>
-        </div>
-
-        {/* Всего привычек */}
-        <div className="p-5 rounded-[2rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center gap-2 mb-3">
-            <Target className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Привычки</span>
-          </div>
-          <div className="text-2xl font-black text-white tabular-nums leading-none mb-1.5">
-            {totalHabits}
-          </div>
-          <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-            Активных целей
-          </div>
-        </div>
-      </motion.div>
-
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
