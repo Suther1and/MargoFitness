@@ -1,11 +1,11 @@
 'use client'
 
 import { Coffee, AlertCircle, Zap, Plus, Minus } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
-import { MetricButton } from './shared'
-import { COLORS, ANIMATIONS } from '../constants'
+import { MetricButton, EditableMetricValue } from './shared'
+import { COLORS } from '../constants'
 
 interface CaffeineCardHProps {
   value: number
@@ -15,7 +15,16 @@ interface CaffeineCardHProps {
 
 export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
   const { isOverLimit } = useGoalProgress({ current: value, goal })
-  const { localValue, handleIncrement, handleDecrement } = useEditableValue(value, { onUpdate, step: 1, min: 0 })
+  const { 
+    localValue, 
+    isEditing,
+    handleIncrement, 
+    handleDecrement,
+    handleEdit,
+    handleChange,
+    handleBlur,
+    handleKeyDown
+  } = useEditableValue(value, { onUpdate, step: 1, min: 0 })
 
   const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-600'
 
@@ -35,7 +44,7 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Кофеин</span>
           </div>
           <div className={cn('hidden md:flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/5', accentColor)}>
-            <span className="text-[10px] font-bold">{Math.round((localValue / goal) * 100)}%</span>
+            <span className="text-[10px] font-bold">{goal > 0 ? Math.round((localValue / goal) * 100) : 0}%</span>
           </div>
         </div>
 
@@ -43,15 +52,16 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
           <MetricButton icon={Minus} onClick={handleDecrement} size="small" iconClassName="text-white/40" />
 
           <div className="flex items-baseline justify-center flex-1 min-w-0">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={localValue}
-                {...ANIMATIONS.valueChange}
-                className={cn('text-3xl md:text-5xl font-black font-oswald tracking-tighter truncate', isOverLimit ? 'text-red-500' : 'text-white')}
-              >
-                {localValue}
-              </motion.span>
-            </AnimatePresence>
+            <EditableMetricValue
+              value={localValue}
+              isEditing={isEditing}
+              onEdit={handleEdit}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              className={cn('text-3xl md:text-5xl font-black font-oswald tracking-tighter', isOverLimit ? 'text-red-500' : 'text-white')}
+              inputClassName="text-center text-3xl md:text-5xl w-16 md:w-24"
+            />
             <span className="ml-0.5 md:ml-1 text-[8px] md:text-[10px] font-bold text-white/20 uppercase tracking-tighter whitespace-nowrap">/ {goal}</span>
           </div>
 
