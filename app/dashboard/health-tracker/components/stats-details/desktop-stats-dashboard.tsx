@@ -8,7 +8,7 @@ import {
   ChevronRight, BarChart3, Activity, ChevronLeft, Calendar as CalendarIcon, 
   ChevronDown, Check, Sparkles
 } from "lucide-react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears } from "date-fns"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
@@ -143,7 +143,14 @@ export function DesktopStatsDashboard({
         <HealthTrackerCard 
           className="p-5" 
           title="Период анализа" 
-          subtitle={format(currentDateRange.start, 'd MMM', { locale: ru }) + ' — ' + format(currentDateRange.end, 'd MMM', { locale: ru })} 
+          subtitle={
+            <div className="flex flex-col">
+              <span>{format(currentDateRange.start, 'd MMM', { locale: ru }) + ' — ' + format(currentDateRange.end, 'd MMM', { locale: ru })}</span>
+              <span className="text-[9px] text-sky-500/60 font-black tracking-widest mt-0.5">
+                {differenceInDays(currentDateRange.end, currentDateRange.start)} ДНЕЙ
+              </span>
+            </div>
+          } 
           icon={CalendarIcon} 
           iconColor="text-sky-500" 
           iconBg="bg-sky-500/10"
@@ -163,23 +170,6 @@ export function DesktopStatsDashboard({
             onPeriodSelect={onPeriodSelect}
           />
         </HealthTrackerCard>
-
-        {/* Блок персональных инсайтов - TODO: вынести из компонентов */}
-        <div className="p-5 rounded-[2.5rem] bg-[#121214]/40 border border-white/5 relative overflow-hidden">
-          <div className="flex items-start gap-4">
-            <div className="p-2.5 rounded-xl shrink-0 bg-purple-400/10">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-            </div>
-            <div className="space-y-1.5">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">
-                Персональные инсайты
-              </h4>
-              <p className="text-xs text-white/40 leading-relaxed font-medium">
-                Инсайты для раздела «{visibleItems.find(i => i.id === activeView)?.label}»
-              </p>
-            </div>
-          </div>
-        </div>
       </aside>
     </div>
   )

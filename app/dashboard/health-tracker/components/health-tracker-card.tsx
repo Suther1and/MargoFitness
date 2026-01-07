@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 interface HealthTrackerCardProps {
   children: ReactNode
   title?: string
-  subtitle?: string
+  subtitle?: ReactNode
   icon?: LucideIcon
   iconColor?: string
   iconBg?: string
@@ -60,7 +60,7 @@ export function HealthTrackerCard({
               {title && (
                 <div>
                   <h3 className="text-lg font-bold text-white tracking-tight uppercase leading-none">{title}</h3>
-                  {subtitle && <p className="text-[10px] text-white/40 font-medium uppercase tracking-[0.1em] mt-1">{subtitle}</p>}
+                  {subtitle && <div className="text-[10px] text-white/40 font-medium uppercase tracking-[0.1em] mt-1">{subtitle}</div>}
                 </div>
               )}
             </div>
