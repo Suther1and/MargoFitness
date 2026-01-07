@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { FileText, Edit3 } from 'lucide-react'
 import { useRef, useEffect } from 'react'
 
