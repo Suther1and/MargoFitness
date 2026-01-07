@@ -246,7 +246,7 @@ function HealthTrackerContent() {
   }
 
   // Показываем загрузку пока данные не готовы
-  if (!isSettingsLoaded || !isHabitsLoaded) {
+  if (!isSettingsLoaded || !isHabitsLoaded || isDiaryLoading) {
     return (
       <div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center">
         <div className="text-center">

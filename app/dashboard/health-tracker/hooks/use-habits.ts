@@ -20,9 +20,9 @@ export function useHabits() {
     getUserId()
   }, [])
 
-  // Query для загрузки привычек
+  // Query для загрузки привычек (отдельный queryKey чтобы не конфликтовать с settings)
   const { data: habitsData, isLoading } = useQuery({
-    queryKey: ['diary-settings', userId],
+    queryKey: ['diary-habits', userId],
     queryFn: async () => {
       if (!userId) return null
       const result = await getDiarySettings(userId)
@@ -33,10 +33,6 @@ export function useHabits() {
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
-    select: (data: any) => {
-      // Извлекаем только habits из settings
-      return data?.habits || data || []
-    }
   })
 
   // Mutation для обновления привычек
@@ -47,24 +43,19 @@ export function useHabits() {
     },
     onMutate: async (newHabits) => {
       // Optimistic update
-      await queryClient.cancelQueries({ queryKey: ['diary-settings', userId] })
+      await queryClient.cancelQueries({ queryKey: ['diary-habits', userId] })
       
-      const previous = queryClient.getQueryData(['diary-settings', userId])
+      const previous = queryClient.getQueryData(['diary-habits', userId])
       
       // Обновляем кэш
-      queryClient.setQueryData(['diary-settings', userId], (old: any) => {
-        if (old && typeof old === 'object' && 'habits' in old) {
-          return { ...old, habits: newHabits }
-        }
-        return newHabits
-      })
+      queryClient.setQueryData(['diary-habits', userId], newHabits)
       
       return { previous }
     },
     onError: (err, newHabits, context) => {
       // Откат при ошибке
       if (context?.previous) {
-        queryClient.setQueryData(['diary-settings', userId], context.previous)
+        queryClient.setQueryData(['diary-habits', userId], context.previous)
       }
     },
   })
@@ -95,7 +86,7 @@ export function useHabits() {
 
   return {
     habits,
-    isLoaded: !isLoading,
+    isLoaded: !!userId && !isLoading && habitsData !== undefined,
     addHabit,
     updateHabit,
     deleteHabit

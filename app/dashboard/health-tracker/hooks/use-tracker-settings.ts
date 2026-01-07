@@ -220,7 +220,7 @@ export function useTrackerSettings() {
   return {
     settings,
     isFirstVisit,
-    isLoaded: !isLoading,
+    isLoaded: !!userId && !isLoading && !!settingsData,
     saveSettings,
     toggleWidget,
     updateGoal,
