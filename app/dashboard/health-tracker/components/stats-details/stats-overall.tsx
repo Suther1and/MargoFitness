@@ -1,14 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3, Settings, Sparkles } from "lucide-react"
+import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Zap, Moon, Coffee, ChevronRight, BarChart3, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { useHabits } from "../../hooks/use-habits"
 import { calculateBMI } from "../../utils/bmi-utils"
 import { StatsView, DailyMetrics } from "../../types"
 import Image from "next/image"
-import Link from "next/link"
 
 interface StatsOverallProps {
   period: string

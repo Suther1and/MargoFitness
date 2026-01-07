@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   TrendingDown, Scale, Droplets, Footprints, Camera, 
   NotebookText, Smile, Utensils, Flame, Zap, Moon, Coffee,
-  ChevronRight, BarChart3, Activity, ChevronLeft, Calendar as CalendarIcon, 
-  ChevronDown, Check, Sparkles
+  ChevronRight, BarChart3, ChevronLeft, Calendar as CalendarIcon, 
+  ChevronDown, Check
 } from "lucide-react"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
