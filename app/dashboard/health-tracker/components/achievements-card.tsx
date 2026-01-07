@@ -106,9 +106,9 @@ export function AchievementsCard() {
                   </p>
                 </div>
               ) : (
-                recentAchievements.map((achievement) => (
+                recentAchievements.map((achievement, idx) => (
                   <motion.div
-                    key={achievement.id}
+                    key={achievement.unlockedAt ? `${achievement.unlockedAt}-${idx}` : idx}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="group relative flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all"
