@@ -1,10 +1,11 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
+import debounce from 'lodash.debounce'
 import { createClient } from '@/lib/supabase/client'
 import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
-import { useState, useEffect, useCallback } from 'react'
 
 const VISITED_KEY = 'health_tracker_visited'
 
