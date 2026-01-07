@@ -10,9 +10,12 @@ interface MetricCardWrapperProps {
   isDone?: boolean
   baseColor?: string
   doneColor?: string
+  hoverColor?: string
   className?: string
   glowColor?: string
   doneGlowColor?: string
+  padding?: string
+  noPadding?: boolean
 }
 
 export function MetricCardWrapper({
@@ -21,20 +24,26 @@ export function MetricCardWrapper({
   isDone = false,
   baseColor = 'border-white/10',
   doneColor = 'border-emerald-500/30',
+  hoverColor,
   className,
   glowColor = 'bg-white/5',
   doneGlowColor = 'bg-emerald-500/10',
+  padding,
+  noPadding = false,
 }: MetricCardWrapperProps) {
+  const paddingClass = noPadding ? '' : (padding || SIZES.card.padding)
+  
   return (
     <div
       className={cn(
         CARD_STYLES.base,
         CARD_STYLES.background,
         SIZES.card.borderRadius,
-        SIZES.card.padding,
+        paddingClass,
         height,
         isDone ? doneColor : baseColor,
         isDone && 'shadow-[0_0_20px_rgba(16,185,129,0.1)]',
+        !isDone && hoverColor,
         className
       )}
       style={{ contain: 'paint' }}

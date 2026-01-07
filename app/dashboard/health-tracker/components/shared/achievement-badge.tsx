@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, LucideIcon } from 'lucide-react'
+import { LucideIcon, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ANIMATIONS, SIZES } from '../../constants'
 

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { PROGRESS_RING, SIZES, ANIMATIONS } from '../../constants'
+import { useState, useEffect } from 'react'
 
 interface ProgressRingProps {
   percentage: number
@@ -29,13 +30,21 @@ export function ProgressRing({
 }: ProgressRingProps) {
   const config = size === 'small' ? PROGRESS_RING.small : PROGRESS_RING.medium
   const sizeClass = SIZES.progressRing[size]
+  const [isMobile, setIsMobile] = useState(true)
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768)
+  }, [])
 
   const strokeColor = isDone ? achievedColor : color
+  const currentGlowColor = isDone ? achievedGlowColor : (glowColor || 'bg-blue-500/15')
   
-  // Определяем цвета свечения
-  const currentGlowColor = isDone 
-    ? achievedGlowColor 
-    : (glowColor || 'bg-blue-500/15')
+  // Drop shadow для SVG (только десктоп)
+  const dropShadow = isMobile 
+    ? 'none'
+    : isDone
+      ? `drop-shadow(0 0 12px ${achievedColor}80)`
+      : `drop-shadow(0 0 8px ${color}66)`
 
   return (
     <div className={cn('relative flex-shrink-0 flex items-center justify-center', sizeClass, className)}>
@@ -71,12 +80,7 @@ export function ProgressRing({
           initial={{ strokeDasharray: config.circumference, strokeDashoffset: config.circumference }}
           animate={{ strokeDashoffset: config.circumference - (config.circumference * percentage) / 100 }}
           transition={{ duration: 1.5, ease: 'circOut' }}
-          className="md:[filter:drop-shadow(0_0_8px_rgba(0,0,0,0.4))]"
-          style={{
-            filter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : (isDone
-              ? `drop-shadow(0 0 12px ${achievedColor}80)`
-              : `drop-shadow(0 0 8px ${color}66)`),
-          }}
+          style={{ filter: dropShadow }}
         />
       </svg>
 
