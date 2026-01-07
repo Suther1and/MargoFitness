@@ -43,6 +43,8 @@ import { AchievementUnlockedToast, useAchievementNotifications } from './compone
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { useHabits } from './hooks/use-habits'
+import { getStatsPeriodLabel } from './utils/date-formatters'
+import { hasActiveMainWidgets } from './utils/widget-helpers'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
@@ -85,8 +87,7 @@ function HealthTrackerContent() {
   const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
 
   // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
-  const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
-  const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+  const hasMainWidgets = hasActiveMainWidgets(settings)
 
   // Фоновая проверка достижений при загрузке страницы
   useEffect(() => {
@@ -181,14 +182,6 @@ function HealthTrackerContent() {
     }
   }, [tabParam])
 
-  const getStatsPeriodLabel = () => {
-    const days = differenceInDays(statsDateRange.end, statsDateRange.start)
-    const startStr = format(statsDateRange.start, 'd MMM', { locale: ru })
-    const endStr = format(statsDateRange.end, 'd MMM', { locale: ru })
-    
-    return `${days} дней, ${startStr} - ${endStr}`
-  }
-
   const handleStatsPeriodSelect = (newPeriodType: PeriodType, newDateRange: DateRange) => {
     setStatsPeriodType(newPeriodType)
     setStatsDateRange(newDateRange)
@@ -237,7 +230,7 @@ function HealthTrackerContent() {
                     className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none"
                   >
                     <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
-                      {getStatsPeriodLabel()}
+                      {getStatsPeriodLabel(statsDateRange)}
                     </span>
                     <ChevronDown className="w-3.5 h-3.5 text-white/60 group-hover:text-white/80 transition-colors -mt-0.5" />
                   </button>
