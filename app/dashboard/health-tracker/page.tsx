@@ -512,7 +512,7 @@ function HealthTrackerContent() {
                 )}
 
                 <div className="lg:hidden mb-24">
-                  {/* Мобильная версия - условный рендер для оптимизации */}
+                  {/* Мобильная версия - условный рендер для оптимизации, кроме Stats */}
                   {activeTab === 'settings' && (
                     <SettingsTab 
                       onBack={() => setActiveTab('overview')} 
@@ -525,6 +525,16 @@ function HealthTrackerContent() {
                       isMobile={true}
                     />
                   )}
+                  
+                  {/* Stats с display:none для сохранения кэша */}
+                  <div style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
+                    <StatsTab 
+                      periodType={statsPeriodType} 
+                      dateRange={statsDateRange} 
+                      data={data} 
+                      onPeriodSelect={handleStatsPeriodSelect}
+                    />
+                  </div>
                   
                   {activeTab === 'goals' && (
                     <div className="flex flex-col gap-6">
@@ -635,17 +645,15 @@ function HealthTrackerContent() {
                   </div>
                 )}
 
-                {/* Desktop Statistics */}
-                {activeTab === 'stats' && (
-                  <div className="hidden lg:block w-full">
-                    <StatsTab 
-                      periodType={statsPeriodType} 
-                      dateRange={statsDateRange} 
-                      data={data} 
-                      onPeriodSelect={handleStatsPeriodSelect}
-                    />
-                  </div>
-                )}
+                {/* Desktop Statistics - display:none для сохранения кэша */}
+                <div className="hidden lg:block w-full" style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
+                  <StatsTab 
+                    periodType={statsPeriodType} 
+                    dateRange={statsDateRange} 
+                    data={data} 
+                    onPeriodSelect={handleStatsPeriodSelect}
+                  />
+                </div>
 
                 <div className={cn(
                   "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",

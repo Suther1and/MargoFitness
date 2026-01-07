@@ -89,13 +89,13 @@ export function useHealthDiary({ selectedDate }: UseHealthDiaryOptions) {
         clearTimeout(updateTimerRef.current)
       }
 
-      // Устанавливаем новый таймер
+      // Устанавливаем новый таймер (300ms для быстрой реакции)
       updateTimerRef.current = setTimeout(() => {
         const dataToSave = pendingUpdatesRef.current
         pendingUpdatesRef.current = {}
         
         saveMutation.mutate(dataToSave)
-      }, 500) // 500ms debounce
+      }, 300) // 300ms debounce - баланс между батчингом и скоростью
     }
   }, [saveMutation])
 
@@ -228,10 +228,29 @@ export function useHealthDiary({ selectedDate }: UseHealthDiaryOptions) {
 
   // Сохранение перед уходом
   useEffect(() => {
+    // Сохранение при закрытии/обновлении страницы
+    const handleBeforeUnload = () => {
+      if (Object.keys(pendingUpdatesRef.current).length > 0) {
+        forceSave()
+      }
+    }
+
+    // Сохранение при потере фокуса (переключение вкладки)
+    const handleVisibilityChange = () => {
+      if (document.hidden && Object.keys(pendingUpdatesRef.current).length > 0) {
+        forceSave()
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       forceSave()
     }
-  }, [])
+  }, [userId, dateStr])
 
   // Save status
   const saveStatus: SaveStatus = saveMutation.isPending
