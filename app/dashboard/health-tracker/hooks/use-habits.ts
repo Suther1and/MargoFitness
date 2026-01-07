@@ -27,11 +27,52 @@ export function useHabits() {
     setIsLoaded(true)
   }, [])
 
+  // Слушаем изменения привычек (из того же окна и других вкладок)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          setHabits(JSON.parse(e.newValue))
+        } catch (error) {
+          console.error('Error parsing habits:', error)
+        }
+      }
+    }
+
+    const handleCustomStorageChange = (e: CustomEvent) => {
+      if (e.detail?.key === STORAGE_KEY && e.detail?.value) {
+        try {
+          setHabits(JSON.parse(e.detail.value))
+        } catch (error) {
+          console.error('Error parsing habits:', error)
+        }
+      }
+    }
+
+    // Слушаем изменения из других вкладок
+    window.addEventListener('storage', handleStorageChange)
+    // Слушаем изменения из того же окна
+    window.addEventListener('habits-changed' as any, handleCustomStorageChange as any)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('habits-changed' as any, handleCustomStorageChange as any)
+    }
+  }, [])
+
   // Сохранение в localStorage
   const saveHabits = useCallback((newHabits: Habit[]) => {
     if (typeof window === 'undefined') return
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHabits))
+    const serialized = JSON.stringify(newHabits)
+    localStorage.setItem(STORAGE_KEY, serialized)
     setHabits(newHabits)
+    
+    // Отправляем событие для синхронизации в том же окне
+    window.dispatchEvent(new CustomEvent('habits-changed', {
+      detail: { key: STORAGE_KEY, value: serialized }
+    }))
   }, [])
 
   // Добавить привычку

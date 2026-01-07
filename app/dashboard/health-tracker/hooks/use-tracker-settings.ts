@@ -69,15 +69,80 @@ export function useTrackerSettings() {
     setIsLoaded(true)
   }, [])
 
+  // Слушаем изменения настроек (из того же окна и других вкладок)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue) as TrackerSettings
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            widgets: {
+              ...DEFAULT_SETTINGS.widgets,
+              ...parsed.widgets
+            },
+            userParams: {
+              ...DEFAULT_SETTINGS.userParams,
+              ...(parsed.userParams || {})
+            }
+          })
+        } catch (error) {
+          console.error('Ошибка парсинга настроек трекера:', error)
+        }
+      }
+    }
+
+    const handleCustomStorageChange = (e: CustomEvent) => {
+      if (e.detail?.key === STORAGE_KEY && e.detail?.value) {
+        try {
+          const parsed = JSON.parse(e.detail.value) as TrackerSettings
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            widgets: {
+              ...DEFAULT_SETTINGS.widgets,
+              ...parsed.widgets
+            },
+            userParams: {
+              ...DEFAULT_SETTINGS.userParams,
+              ...(parsed.userParams || {})
+            }
+          })
+        } catch (error) {
+          console.error('Ошибка парсинга настроек трекера:', error)
+        }
+      }
+    }
+
+    // Слушаем изменения из других вкладок
+    window.addEventListener('storage', handleStorageChange)
+    // Слушаем изменения из того же окна
+    window.addEventListener('tracker-settings-changed' as any, handleCustomStorageChange as any)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('tracker-settings-changed' as any, handleCustomStorageChange as any)
+    }
+  }, [])
+
   // Сохранение настроек в localStorage
   const saveSettings = useCallback((newSettings: TrackerSettings) => {
     if (typeof window === 'undefined') return
 
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings))
+      const serialized = JSON.stringify(newSettings)
+      localStorage.setItem(STORAGE_KEY, serialized)
       localStorage.setItem(VISITED_KEY, 'true')
       setSettings(newSettings)
       setIsFirstVisit(false)
+      
+      // Отправляем событие для синхронизации в том же окне
+      window.dispatchEvent(new CustomEvent('tracker-settings-changed', {
+        detail: { key: STORAGE_KEY, value: serialized }
+      }))
     } catch (error) {
       console.error('Ошибка сохранения настроек трекера:', error)
     }
