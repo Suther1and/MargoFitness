@@ -1,11 +1,10 @@
 'use client'
 
-import { Footprints, Flame, MapPin, Plus, Minus, Trophy } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useMemo } from 'react'
+import { Footprints, Flame, MapPin, Plus, Minus } from 'lucide-react'
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
-import { MetricButton, EditableMetricValue, ProgressRing } from './shared'
+import { MetricButton, EditableMetricValue, ProgressRing, AchievementBadge } from './shared'
 import { COLORS } from '../constants'
 
 interface StepsCardHProps {
@@ -46,21 +45,15 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
       {/* DESKTOP VERSION - UNTOUCHED */}
       <div className="hidden md:grid relative grid-cols-[1.2fr_auto_1fr_0.8fr] items-center h-full gap-0">
         <div className="flex flex-col h-full justify-between">
-          <div className="flex items-center gap-2 pt-1">
-            <AnimatePresence mode="wait">
-              {isDone ? (
-                <motion.div key="trophy" initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} className="p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
-                  <Trophy className="w-3.5 h-3.5 text-emerald-400" />
-                </motion.div>
-              ) : (
-                <motion.div key="feet" initial={{ scale: 0 }} animate={{ scale: 1 }} className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <Footprints className="w-3.5 h-3.5 text-red-500" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500", isDone ? "text-emerald-400/60" : "text-white/40")}>
-              {isDone ? "ЦЕЛЬ ДОСТИГНУТА" : "АКТИВНОСТЬ"}
-            </span>
+          <div className="pt-1">
+            <AchievementBadge
+              isDone={isDone}
+              icon={Footprints}
+              doneText="ЦЕЛЬ ДОСТИГНУТА"
+              progressText="АКТИВНОСТЬ"
+              iconColor="text-red-500"
+              iconBg="bg-red-500/10"
+            />
           </div>
 
           <div className="flex items-center gap-3 mb-1">
@@ -132,13 +125,15 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
       <div className="flex md:hidden relative items-center h-full justify-between gap-1">
         {/* Left: Info & Main Controls */}
         <div className="flex flex-col h-full justify-between py-1 flex-1 min-w-0">
-          <div className="flex items-center gap-2 pt-0">
-            <div className={cn("p-1.5 rounded-lg border", isDone ? "bg-emerald-500/20 border-emerald-500/30" : "bg-red-500/10 border-red-500/20")}>
-              <Footprints className={cn("w-3.5 h-3.5", isDone ? "text-emerald-400" : "text-red-500")} />
-            </div>
-            <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500", isDone ? "text-emerald-400/60" : "text-white/40")}>
-              {isDone ? "ГОТОВО" : "АКТИВНОСТЬ"}
-            </span>
+          <div className="pt-0">
+            <AchievementBadge
+              isDone={isDone}
+              icon={Footprints}
+              doneText="ГОТОВО"
+              progressText="АКТИВНОСТЬ"
+              iconColor="text-red-500"
+              iconBg="bg-red-500/10"
+            />
           </div>
 
           <div className="flex items-center gap-2 mb-0.5 mt-3">

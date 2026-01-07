@@ -1,11 +1,10 @@
 'use client'
 
-import { Droplets, Waves } from 'lucide-react'
+import { Droplets, Waves, Plus, Minus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
 import { MetricButton, EditableMetricValue, AchievementBadge } from './shared'
-import { Plus, Minus } from 'lucide-react'
 import { COLORS, ANIMATIONS } from '../constants'
 
 interface WaterCardHProps {

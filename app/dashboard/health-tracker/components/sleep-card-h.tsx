@@ -42,11 +42,15 @@ export function SleepCardH({ hours, goal, onUpdate }: SleepCardHProps) {
       />
 
       {/* Header */}
-      <div className="relative z-20 flex items-center gap-2 mb-2">
-        <div className={cn('p-1.5 rounded-lg border transition-colors duration-500', isDone ? 'bg-emerald-500/20 border-emerald-500/30' : `${COLORS.sleep.bg} ${COLORS.sleep.border}`)}>
-          <Moon className={cn('w-3.5 h-3.5 transition-colors duration-500', isDone ? 'text-emerald-400' : COLORS.sleep.primary)} />
-        </div>
-        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Сон</span>
+      <div className="relative z-20 mb-2">
+        <AchievementBadge
+          isDone={isDone}
+          icon={Moon}
+          doneText="ЦЕЛЬ ДОСТИГНУТА"
+          progressText="СОН"
+          iconColor={COLORS.sleep.primary}
+          iconBg={COLORS.sleep.bg}
+        />
       </div>
 
       {/* Кнопки в углах - только мобильная версия */}
