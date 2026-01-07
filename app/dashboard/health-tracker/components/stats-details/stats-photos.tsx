@@ -6,7 +6,7 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 interface StatsPhotosProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
 
 const PHOTOS_DATA = [
@@ -18,7 +18,7 @@ const PHOTOS_DATA = [
   { id: "6", date: "27 Дек 2025", url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=400&fit=crop", weight: 72.4 },
 ]
 
-export function StatsPhotos({ period }: StatsPhotosProps) {
+export function StatsPhotos({ dateRange }: StatsPhotosProps) {
   const firstPhoto = PHOTOS_DATA[PHOTOS_DATA.length - 1]
   const lastPhoto = PHOTOS_DATA[0]
   const weightChange = lastPhoto.weight - firstPhoto.weight
