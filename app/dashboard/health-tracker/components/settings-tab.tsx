@@ -213,54 +213,55 @@ export default function SettingsTab({
   const [localSettings, setLocalSettings] = useState(settings)
   const [isAnimating, setIsAnimating] = useState(false)
 
-  // Синхронизация с настройками
+  // Синхронизация с настройками только при внешних изменениях
   useEffect(() => {
     setLocalSettings(settings)
   }, [settings])
 
-  // Автосохранение при изменении локальных настроек
-  useEffect(() => {
-    saveSettings(localSettings)
-  }, [localSettings, saveSettings])
-
   const handleToggle = (widgetId: WidgetId) => {
-    setLocalSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...localSettings,
       widgets: {
-        ...prev.widgets,
+        ...localSettings.widgets,
         [widgetId]: {
-          ...prev.widgets[widgetId],
-          enabled: !prev.widgets[widgetId].enabled,
+          ...localSettings.widgets[widgetId],
+          enabled: !localSettings.widgets[widgetId].enabled,
         }
       }
-    }))
+    }
+    setLocalSettings(newSettings)
+    saveSettings(newSettings)
   }
 
   const handleGoalChange = (widgetId: WidgetId, value: string) => {
     const filtered = value.replace(/[^\d.]/g, '')
-    setLocalSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...localSettings,
       widgets: {
-        ...prev.widgets,
+        ...localSettings.widgets,
         [widgetId]: {
-          ...prev.widgets[widgetId],
+          ...localSettings.widgets[widgetId],
           goal: filtered ? parseFloat(filtered) : null,
         }
       }
-    }))
+    }
+    setLocalSettings(newSettings)
+    saveSettings(newSettings)
   }
 
   const handleToggleInPlan = (widgetId: WidgetId) => {
-    setLocalSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...localSettings,
       widgets: {
-        ...prev.widgets,
+        ...localSettings.widgets,
         [widgetId]: {
-          ...prev.widgets[widgetId],
-          inDailyPlan: !prev.widgets[widgetId].inDailyPlan,
+          ...localSettings.widgets[widgetId],
+          inDailyPlan: !localSettings.widgets[widgetId].inDailyPlan,
         }
       }
-    }))
+    }
+    setLocalSettings(newSettings)
+    saveSettings(newSettings)
   }
 
   const handleParamChange = (param: 'height' | 'weight' | 'age' | 'gender', value: any) => {
@@ -270,13 +271,15 @@ export default function SettingsTab({
       finalValue = finalValue ? parseFloat(finalValue) : null
     }
     
-    setLocalSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...localSettings,
       userParams: {
-        ...prev.userParams,
+        ...localSettings.userParams,
         [param]: finalValue,
       }
-    }))
+    }
+    setLocalSettings(newSettings)
+    saveSettings(newSettings)
   }
 
   const bmiValue = calculateBMI(localSettings.userParams.height, localSettings.userParams.weight)
