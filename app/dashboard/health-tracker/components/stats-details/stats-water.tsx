@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Droplets, TrendingUp, Target, Award, Zap } from "lucide-react"
+import { Droplets, TrendingUp, Target, Award, Zap, Flame } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import {
   ChartConfig,
