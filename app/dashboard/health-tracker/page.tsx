@@ -512,8 +512,8 @@ function HealthTrackerContent() {
                 )}
 
                 <div className="lg:hidden mb-24">
-                  {/* Рендерим все вкладки, но показываем только активную - так сохраняются данные и состояние */}
-                  <div style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
+                  {/* Мобильная версия - условный рендер для оптимизации */}
+                  {activeTab === 'settings' && (
                     <SettingsTab 
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
@@ -524,9 +524,9 @@ function HealthTrackerContent() {
                       setActiveSubTab={setSettingsSubTab}
                       isMobile={true}
                     />
-                  </div>
+                  )}
                   
-                  <div style={{ display: activeTab === 'goals' ? 'block' : 'none' }}>
+                  {activeTab === 'goals' && (
                     <div className="flex flex-col gap-6">
                       <GoalsSummaryCard 
                         data={data} 
@@ -541,9 +541,9 @@ function HealthTrackerContent() {
                         <DailyPhotosCard photos={data.dailyPhotos} />
                       )}
                     </div>
-                  </div>
+                  )}
                   
-                  <div style={{ display: activeTab === 'habits' ? 'block' : 'none' }}>
+                  {activeTab === 'habits' && (
                     <div className="flex flex-col gap-6">
                       <HabitsCard 
                         habits={data.habits} 
@@ -557,18 +557,18 @@ function HealthTrackerContent() {
                         <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
                       )}
                     </div>
-                  </div>
+                  )}
                   
-                  <div style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
+                  {activeTab === 'stats' && (
                     <StatsTab 
                       periodType={statsPeriodType} 
                       dateRange={statsDateRange} 
                       data={data}
                       onPeriodSelect={handleStatsPeriodSelect}
                     />
-                  </div>
+                  )}
                   
-                  <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
+                  {activeTab === 'overview' && (
                     <div className="flex flex-col gap-6">
                       {!hasMainWidgets ? (
                         <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
@@ -612,36 +612,39 @@ function HealthTrackerContent() {
                           </div>
                           {settings.widgets.nutrition?.enabled && (
                             <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                          )}
-                        </>
                       )}
-                    </div>
-                  </div>
+                    </>
+                  )}
+                </div>
                 </div>
 
                 {/* Desktop Settings - Limited Width Container */}
-                <div className="hidden lg:block max-w-5xl mx-auto" style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
-                  <SettingsTab 
-                    onBack={() => setActiveTab('overview')} 
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    isCalendarExpanded={isCalendarExpanded}
-                    setIsCalendarExpanded={setIsCalendarExpanded}
-                    activeSubTab={settingsSubTab}
-                    setActiveSubTab={setSettingsSubTab}
-                    isMobile={false}
-                  />
-                </div>
+                {activeTab === 'settings' && (
+                  <div className="hidden lg:block max-w-5xl mx-auto">
+                    <SettingsTab 
+                      onBack={() => setActiveTab('overview')} 
+                      selectedDate={selectedDate}
+                      onDateChange={setSelectedDate}
+                      isCalendarExpanded={isCalendarExpanded}
+                      setIsCalendarExpanded={setIsCalendarExpanded}
+                      activeSubTab={settingsSubTab}
+                      setActiveSubTab={setSettingsSubTab}
+                      isMobile={false}
+                    />
+                  </div>
+                )}
 
                 {/* Desktop Statistics */}
-                <div className="hidden lg:block w-full" style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
-                  <StatsTab 
-                    periodType={statsPeriodType} 
-                    dateRange={statsDateRange} 
-                    data={data} 
-                    onPeriodSelect={handleStatsPeriodSelect}
-                  />
-                </div>
+                {activeTab === 'stats' && (
+                  <div className="hidden lg:block w-full">
+                    <StatsTab 
+                      periodType={statsPeriodType} 
+                      dateRange={statsDateRange} 
+                      data={data} 
+                      onPeriodSelect={handleStatsPeriodSelect}
+                    />
+                  </div>
+                )}
 
                 <div className={cn(
                   "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",
