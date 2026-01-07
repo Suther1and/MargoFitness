@@ -205,7 +205,7 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className={cn(
-                    "text-sm md:text-[10px] font-bold",
+                    "text-xs md:text-[10px] font-bold",
                     status === 'danger' ? "text-red-400/60" :
                     status === 'warning' ? "text-amber-400/60" :
                     status === 'success' ? "text-emerald-400" :
@@ -215,11 +215,11 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
                   </span>
                   {isLimit && (
                     <>
-                      <span className="text-xs md:text-[9px] font-medium text-white/10">/</span>
-                      <span className="text-xs md:text-[9px] font-medium text-white/10">{g.goal}</span>
+                      <span className="text-[10px] md:text-[9px] font-medium text-white/10">/</span>
+                      <span className="text-[10px] md:text-[9px] font-medium text-white/10">{g.goal}</span>
                     </>
                   )}
-                  <span className="text-[10px] md:text-[8px] font-medium text-white/10">{g.unit}</span>
+                  <span className="text-[9px] md:text-[8px] font-medium text-white/10">{g.unit}</span>
                 </div>
               </div>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
