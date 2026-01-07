@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Coffee, AlertCircle, Zap, Plus, Minus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
