@@ -1,41 +1,61 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { getWeightStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsWeightProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
 
-// Моковые данные
-const WEIGHT_DATA = [
-  { date: "15 Дек", weight: 74.2 },
-  { date: "17 Дек", weight: 73.8 },
-  { date: "19 Дек", weight: 73.5 },
-  { date: "21 Дек", weight: 73.9 },
-  { date: "23 Дек", weight: 73.1 },
-  { date: "25 Дек", weight: 72.8 },
-  { date: "27 Дек", weight: 72.4 },
-]
-
-const EXTENDED_WEIGHT_DATA = [
-  ...WEIGHT_DATA,
-  { date: "29 Дек", weight: 72.1 },
-  { date: "31 Дек", weight: 71.9 },
-  { date: "02 Янв", weight: 71.6 },
-  { date: "04 Янв", weight: 71.4 },
-  { date: "06 Янв", weight: 71.2 },
-]
-
-export function StatsWeight({ period }: StatsWeightProps) {
+export function StatsWeight({ dateRange }: StatsWeightProps) {
   const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const dataToShow = period === '7d' ? WEIGHT_DATA : EXTENDED_WEIGHT_DATA
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   
-  // Показываем загрузку пока настройки не готовы
-  if (!isSettingsLoaded) {
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+        
+        const result = await getWeightStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          const chartData = result.data.map(entry => ({
+            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+            weight: entry.weight
+          }))
+          
+          setData(chartData)
+        }
+      } catch (err) {
+        console.error('Error loading weight stats:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    if (isSettingsLoaded) {
+      loadData()
+    }
+  }, [dateRange, isSettingsLoaded])
+  
+  // Показываем загрузку
+  if (!isSettingsLoaded || isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
@@ -46,10 +66,20 @@ export function StatsWeight({ period }: StatsWeightProps) {
     )
   }
   
-  if (dataToShow.length === 0) return null
+  if (data.length === 0) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <Scale className="w-16 h-16 text-white/20 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Нет данных о весе</h3>
+          <p className="text-white/40 text-sm">Начните отслеживать вес в трекере</p>
+        </div>
+      </div>
+    )
+  }
 
-  const currentWeight = dataToShow[dataToShow.length - 1].weight
-  const startWeight = dataToShow[0].weight
+  const currentWeight = data[data.length - 1].weight
+  const startWeight = data[0].weight
   const weightChange = currentWeight - startWeight
   const goalWeight = settings.widgets.weight?.goal || 70.0
   const remainingToGoal = currentWeight - goalWeight
@@ -60,8 +90,8 @@ export function StatsWeight({ period }: StatsWeightProps) {
   const startBmi = (startWeight / Math.pow(height / 100, 2)).toFixed(1)
 
   // Средняя потеря в неделю
-  const weeks = period === '7d' ? 1 : period === '30d' ? 4 : 12
-  const avgWeeklyLoss = Math.abs(weightChange / weeks).toFixed(2)
+  const weeksElapsed = data.length / 7
+  const avgWeeklyLoss = Math.abs(weightChange / weeksElapsed).toFixed(2)
 
   // Прогноз достижения цели
   const weeksToGoal = avgWeeklyLoss !== '0.00' ? Math.ceil(remainingToGoal / parseFloat(avgWeeklyLoss)) : 0
@@ -91,7 +121,7 @@ export function StatsWeight({ period }: StatsWeightProps) {
       <div className="space-y-6">
         {/* Главный график */}
         <motion.div variants={item}>
-          <WeightChart data={dataToShow} period={period === '7d' ? 'последние 7 дней' : period === '30d' ? 'последние 30 дней' : 'последние 6 месяцев'} />
+          <WeightChart data={data} period={`${data.length} дн.`} />
         </motion.div>
       </div>
 

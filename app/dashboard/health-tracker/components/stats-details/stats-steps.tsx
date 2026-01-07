@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Footprints, TrendingUp, TrendingDown, Target, Award, Flame, MapPin, Clock } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, ReferenceLine, ComposedChart, Cell } from "recharts"
@@ -11,32 +12,15 @@ import {
 } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { getStepsStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsStepsProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
-
-// Моковые данные с расширенной информацией
-const STEPS_DATA = [
-  { date: "Пн", value: 8400, goal: 10000, calories: 336, distance: 6.7, time: 84 },
-  { date: "Вт", value: 10200, goal: 10000, calories: 408, distance: 8.2, time: 102 },
-  { date: "Ср", value: 7600, goal: 10000, calories: 304, distance: 6.1, time: 76 },
-  { date: "Чт", value: 9100, goal: 10000, calories: 364, distance: 7.3, time: 91 },
-  { date: "Пт", value: 12400, goal: 10000, calories: 496, distance: 9.9, time: 124 },
-  { date: "Сб", value: 6200, goal: 10000, calories: 248, distance: 5.0, time: 62 },
-  { date: "Вс", value: 8800, goal: 10000, calories: 352, distance: 7.0, time: 88 },
-]
-
-// Тепловая карта по дням недели (средние значения за несколько недель)
-const HEATMAP_DATA = [
-  { day: "Пн", avg: 8200, percent: 82 },
-  { day: "Вт", avg: 9800, percent: 98 },
-  { day: "Ср", avg: 7400, percent: 74 },
-  { day: "Чт", avg: 9500, percent: 95 },
-  { day: "Пт", avg: 11200, percent: 112 },
-  { day: "Сб", avg: 6800, percent: 68 },
-  { day: "Вс", avg: 7900, percent: 79 },
-]
 
 const chartConfig = {
   value: {
@@ -45,25 +29,93 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function StatsSteps({ period }: StatsStepsProps) {
-  const totalSteps = STEPS_DATA.reduce((acc, day) => acc + day.value, 0)
-  const avgDaily = Math.round(totalSteps / STEPS_DATA.length)
-  const goal = 10000
-  const bestDay = STEPS_DATA.reduce((max, day) => day.value > max.value ? day : max, STEPS_DATA[0])
-  const worstDay = STEPS_DATA.reduce((min, day) => day.value < min.value ? day : min, STEPS_DATA[0])
-  const daysAchieved = STEPS_DATA.filter(day => day.value >= goal).length
-  const achievementRate = Math.round((daysAchieved / STEPS_DATA.length) * 100)
+export function StatsSteps({ dateRange }: StatsStepsProps) {
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+        
+        const result = await getStepsStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          // Преобразуем данные для графика
+          const chartData = result.data.map(entry => ({
+            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+            value: entry.steps || 0,
+            goal: settings.widgets.steps?.goal || 10000,
+            // Расчетные метрики
+            calories: Math.round((entry.steps || 0) * 0.04), // ~0.04 kcal за шаг
+            distance: ((entry.steps || 0) * 0.0008).toFixed(1), // ~0.8м за шаг = 0.0008 км
+            time: Math.round((entry.steps || 0) / 100) // ~100 шагов в минуту
+          }))
+          
+          setData(chartData)
+        }
+      } catch (err) {
+        console.error('Error loading steps stats:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    if (isSettingsLoaded) {
+      loadData()
+    }
+  }, [dateRange, isSettingsLoaded, settings.widgets.steps?.goal])
+  
+  // Показываем загрузку
+  if (!isSettingsLoaded || isLoading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка данных о шагах...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <Footprints className="w-16 h-16 text-white/20 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Нет данных о шагах</h3>
+          <p className="text-white/40 text-sm">Начните отслеживать шаги в трекере</p>
+        </div>
+      </div>
+    )
+  }
+  
+  const goal = settings.widgets.steps?.goal || 10000
+  const totalSteps = data.reduce((acc, day) => acc + day.value, 0)
+  const avgDaily = Math.round(totalSteps / data.length)
+  const bestDay = data.reduce((max, day) => day.value > max.value ? day : max, data[0])
+  const worstDay = data.reduce((min, day) => day.value < min.value ? day : min, data[0])
+  const daysAchieved = data.filter(day => day.value >= goal).length
+  const achievementRate = Math.round((daysAchieved / data.length) * 100)
   
   // Дополнительные метрики
-  const totalCalories = STEPS_DATA.reduce((acc, day) => acc + day.calories, 0)
-  const totalDistance = STEPS_DATA.reduce((acc, day) => acc + day.distance, 0)
-  const totalTime = STEPS_DATA.reduce((acc, day) => acc + day.time, 0)
-  const avgCalories = Math.round(totalCalories / STEPS_DATA.length)
-  const avgDistance = (totalDistance / STEPS_DATA.length).toFixed(1)
+  const totalCalories = data.reduce((acc, day) => acc + day.calories, 0)
+  const totalDistance = data.reduce((acc, day) => acc + parseFloat(day.distance), 0)
+  const totalTime = data.reduce((acc, day) => acc + day.time, 0)
+  const avgCalories = Math.round(totalCalories / data.length)
+  const avgDistance = (totalDistance / data.length).toFixed(1)
   
-  // Тренд (сравнение первой и второй половины недели)
-  const firstHalf = STEPS_DATA.slice(0, Math.ceil(STEPS_DATA.length / 2))
-  const secondHalf = STEPS_DATA.slice(Math.ceil(STEPS_DATA.length / 2))
+  // Тренд (сравнение первой и второй половины периода)
+  const firstHalf = data.slice(0, Math.ceil(data.length / 2))
+  const secondHalf = data.slice(Math.ceil(data.length / 2))
   const avgFirstHalf = firstHalf.reduce((acc, d) => acc + d.value, 0) / firstHalf.length
   const avgSecondHalf = secondHalf.reduce((acc, d) => acc + d.value, 0) / secondHalf.length
   const trend = ((avgSecondHalf - avgFirstHalf) / avgFirstHalf * 100).toFixed(1)
@@ -127,7 +179,7 @@ export function StatsSteps({ period }: StatsStepsProps) {
             </div>
 
             <ChartContainer config={chartConfig} className="h-[220px] w-full">
-              <ComposedChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+              <ComposedChart data={data} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="successBar" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
@@ -212,7 +264,7 @@ export function StatsSteps({ period }: StatsStepsProps) {
                   radius={[6, 6, 0, 0]}
                   maxBarSize={32}
                 >
-                  {STEPS_DATA.map((entry, index) => {
+                  {data.map((entry, index) => {
                     const fillColor = entry.value >= goal 
                       ? "url(#successBar)" 
                       : entry.value >= goal * 0.7 

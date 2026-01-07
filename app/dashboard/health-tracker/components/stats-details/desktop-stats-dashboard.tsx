@@ -73,16 +73,16 @@ export function DesktopStatsDashboard({
   const renderActiveContent = () => {
     switch (activeView) {
       case 'overall': return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
-      case 'habits': return <StatsHabits period={period} />
-      case 'water': return <StatsWater period={period} />
-      case 'steps': return <StatsSteps period={period} />
-      case 'weight': return <StatsWeight period={period} />
-      case 'caffeine': return <StatsCaffeine period={period} />
-      case 'sleep': return <StatsSleep period={period} />
-      case 'mood': return <StatsMood period={period} />
-      case 'nutrition': return <StatsNutrition period={period} />
-      case 'photos': return <StatsPhotos period={period} />
-      case 'notes': return <StatsNotes period={period} />
+      case 'habits': return <StatsHabits dateRange={currentDateRange} />
+      case 'water': return <StatsWater dateRange={currentDateRange} />
+      case 'steps': return <StatsSteps dateRange={currentDateRange} />
+      case 'weight': return <StatsWeight dateRange={currentDateRange} />
+      case 'caffeine': return <StatsCaffeine dateRange={currentDateRange} />
+      case 'sleep': return <StatsSleep dateRange={currentDateRange} />
+      case 'mood': return <StatsMood dateRange={currentDateRange} />
+      case 'nutrition': return <StatsNutrition dateRange={currentDateRange} />
+      case 'photos': return <StatsPhotos dateRange={currentDateRange} />
+      case 'notes': return <StatsNotes dateRange={currentDateRange} />
       default: return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
     }
   }
