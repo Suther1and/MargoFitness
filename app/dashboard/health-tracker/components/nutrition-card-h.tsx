@@ -200,4 +200,4 @@ export const NutritionCardH = memo(function NutritionCardH({
       </div>
     </div>
   )
-}
+})
