@@ -74,13 +74,13 @@ export async function getStatsForPeriod(
  * Получить статистику по воде
  */
 export async function getWaterStats(userId: string, dateRange: DateRange) {
-  const result = await getStatsForPeriod(userId, dateRange, ['water'])
+  const result = await getStatsForPeriod(userId, dateRange, ['waterIntake'])
   
   if (!result.success) return result
 
   const waterData = result.data.map(entry => ({
     date: entry.date,
-    water: entry.metrics?.water || 0
+    water: entry.metrics?.waterIntake || 0
   }))
 
   return { success: true, data: waterData }
@@ -122,13 +122,13 @@ export async function getWeightStats(userId: string, dateRange: DateRange) {
  * Получить статистику по кофеину
  */
 export async function getCaffeineStats(userId: string, dateRange: DateRange) {
-  const result = await getStatsForPeriod(userId, dateRange, ['caffeine'])
+  const result = await getStatsForPeriod(userId, dateRange, ['caffeineIntake'])
   
   if (!result.success) return result
 
   const caffeineData = result.data.map(entry => ({
     date: entry.date,
-    caffeine: entry.metrics?.caffeine || 0
+    caffeine: entry.metrics?.caffeineIntake || 0
   }))
 
   return { success: true, data: caffeineData }
@@ -138,13 +138,13 @@ export async function getCaffeineStats(userId: string, dateRange: DateRange) {
  * Получить статистику по сну
  */
 export async function getSleepStats(userId: string, dateRange: DateRange) {
-  const result = await getStatsForPeriod(userId, dateRange, ['sleep'])
+  const result = await getStatsForPeriod(userId, dateRange, ['sleepHours'])
   
   if (!result.success) return result
 
   const sleepData = result.data.map(entry => ({
     date: entry.date,
-    sleep: entry.metrics?.sleep || 0
+    hours: entry.metrics?.sleepHours || 0
   }))
 
   return { success: true, data: sleepData }
@@ -154,14 +154,14 @@ export async function getSleepStats(userId: string, dateRange: DateRange) {
  * Получить статистику по настроению
  */
 export async function getMoodStats(userId: string, dateRange: DateRange) {
-  const result = await getStatsForPeriod(userId, dateRange, ['mood', 'energy'])
+  const result = await getStatsForPeriod(userId, dateRange, ['mood', 'energyLevel'])
   
   if (!result.success) return result
 
   const moodData = result.data.map(entry => ({
     date: entry.date,
     mood: entry.metrics?.mood || null,
-    energy: entry.metrics?.energy || null
+    energy: entry.metrics?.energyLevel || null
   })).filter(entry => entry.mood !== null || entry.energy !== null)
 
   return { success: true, data: moodData }
