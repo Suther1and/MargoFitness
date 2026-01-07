@@ -12,6 +12,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDa
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { useHabits } from "../../hooks/use-habits"
 import { StatsView, WidgetId, PeriodType, DateRange } from "../../types"
 import { StatsOverall } from "./stats-overall"
 import { StatsWater } from "./stats-water"
@@ -57,11 +58,13 @@ export function DesktopStatsDashboard({
   currentDateRange
 }: DesktopStatsDashboardProps) {
   const { settings } = useTrackerSettings()
+  const { habits } = useHabits()
   const [activeView, setActiveView] = useState<StatsView>('overall')
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
 
   const visibleItems = NAV_ITEMS.filter(item => {
-    if (item.id === 'overall' || item.id === 'habits') return true
+    if (item.id === 'overall') return true
+    if (item.id === 'habits') return habits.length > 0
     return settings.widgets[item.id as WidgetId]?.enabled
   })
 

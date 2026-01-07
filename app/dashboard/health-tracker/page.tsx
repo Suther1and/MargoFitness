@@ -42,6 +42,7 @@ import StatsTab from './components/stats-tab'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
+import { useHabits } from './hooks/use-habits'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
 import {
   DropdownMenu,
@@ -85,6 +86,13 @@ function HealthTrackerContent() {
   const [dismissed, setDismissed] = useState(false)
 
   const { settings, isFirstVisit } = useTrackerSettings()
+  const { habits } = useHabits()
+
+  // Проверка наличия активных виджетов
+  const enabledWidgetsCount = Object.entries(settings.widgets)
+    .filter(([id, widget]) => widget.enabled && id !== 'habits')
+    .length
+  const hasAnyContent = enabledWidgetsCount > 0 || habits.length > 0
 
   // Detect desktop
   useEffect(() => {
@@ -448,8 +456,17 @@ function HealthTrackerContent() {
                         transition={{ duration: 0.2 }}
                       >
                         <div className="flex flex-col gap-6">
-                          <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
-                          <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                          <HabitsCard 
+                            habits={data.habits} 
+                            onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
+                            onNavigateToSettings={() => {
+                              setActiveTab('settings')
+                              setSettingsSubTab('habits')
+                            }}
+                          />
+                          {settings.widgets.notes?.enabled && (
+                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -472,17 +489,55 @@ function HealthTrackerContent() {
                         exit={{ opacity: 0 }} 
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="flex flex-col gap-6">
-                          <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                          <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                          <div className="grid grid-cols-2 gap-4">
-                              <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                              <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                              <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                              <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                        {!hasAnyContent ? (
+                          <div className="flex flex-col items-center justify-center py-16 px-6">
+                            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-6">
+                              <Settings className="w-10 h-10 text-green-400" />
+                            </div>
+                            <h3 className="text-2xl font-oswald font-black text-white mb-3 text-center uppercase tracking-tight">
+                              Настройте трекер
+                            </h3>
+                            <p className="text-sm text-white/50 text-center mb-8 max-w-[320px] leading-relaxed">
+                              Выберите метрики здоровья, которые хотите отслеживать для достижения своих целей
+                            </p>
+                            <button 
+                              onClick={() => {
+                                setActiveTab('settings')
+                                setSettingsSubTab('widgets')
+                              }}
+                              className="px-8 py-4 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+                            >
+                              <Settings className="w-5 h-5" />
+                              Выбрать виджеты
+                            </button>
                           </div>
-                          <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                        </div>
+                        ) : (
+                          <div className="flex flex-col gap-6">
+                            {settings.widgets.water?.enabled && (
+                              <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                            )}
+                            {settings.widgets.steps?.enabled && (
+                              <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
+                                {settings.widgets.weight?.enabled && (
+                                  <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                                )}
+                                {settings.widgets.caffeine?.enabled && (
+                                  <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                                )}
+                                {settings.widgets.sleep?.enabled && (
+                                  <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                                )}
+                                {settings.widgets.mood?.enabled && (
+                                  <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                                )}
+                            </div>
+                            {settings.widgets.nutrition?.enabled && (
+                              <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                            )}
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -520,21 +575,68 @@ function HealthTrackerContent() {
                   "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",
                   (activeTab === 'settings' || activeTab === 'stats') && "lg:hidden"
                 )} style={{ contain: 'layout paint' }}>
-                  <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-                    <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                    <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                    <div className="grid grid-cols-2 gap-4">
-                      <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                      <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                      <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                      <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                  {!hasAnyContent ? (
+                    <div className="col-span-12 flex flex-col items-center justify-center py-24 px-6">
+                      <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-8">
+                        <Settings className="w-12 h-12 text-green-400" />
+                      </div>
+                      <h3 className="text-4xl font-oswald font-black text-white mb-4 text-center uppercase tracking-tight">
+                        Настройте трекер
+                      </h3>
+                      <p className="text-base text-white/50 text-center mb-10 max-w-[480px] leading-relaxed">
+                        Выберите метрики здоровья, которые хотите отслеживать для достижения своих целей
+                      </p>
+                      <button 
+                        onClick={() => {
+                          setActiveTab('settings')
+                          setSettingsSubTab('widgets')
+                        }}
+                        className="px-10 py-5 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-base uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+                      >
+                        <Settings className="w-6 h-6" />
+                        Выбрать виджеты
+                      </button>
                     </div>
-                    <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                  ) : (
+                    <>
+                      <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+                    {settings.widgets.water?.enabled && (
+                      <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                    )}
+                    {settings.widgets.steps?.enabled && (
+                      <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                    )}
+                    <div className="grid grid-cols-2 gap-4">
+                      {settings.widgets.weight?.enabled && (
+                        <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                      )}
+                      {settings.widgets.caffeine?.enabled && (
+                        <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                      )}
+                      {settings.widgets.sleep?.enabled && (
+                        <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                      )}
+                      {settings.widgets.mood?.enabled && (
+                        <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                      )}
+                    </div>
+                    {settings.widgets.nutrition?.enabled && (
+                      <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                    )}
                   </div>
 
                   <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
-                    <HabitsCard habits={data.habits} onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} />
-                    <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                    <HabitsCard 
+                      habits={data.habits} 
+                      onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
+                      onNavigateToSettings={() => {
+                        setActiveTab('settings')
+                        setSettingsSubTab('habits')
+                      }}
+                    />
+                    {settings.widgets.notes?.enabled && (
+                      <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                    )}
                   </div>
 
                   <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
@@ -564,7 +666,9 @@ function HealthTrackerContent() {
                     <GoalsSummaryCard data={data} />
                     <AchievementsCard />
                     <DailyPhotosCard photos={data.dailyPhotos} />
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             </AnimatePresence>

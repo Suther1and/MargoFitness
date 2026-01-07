@@ -50,9 +50,10 @@ function HabitItem({ habit, onToggle }: HabitItemProps) {
 interface HabitsCardProps {
   habits: DailyHabit[]
   onToggle: (id: string) => void
+  onNavigateToSettings?: () => void
 }
 
-export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
+export function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCardProps) {
   const categories = {
     morning: { label: 'Утро', icon: Sun, color: 'text-amber-400' },
     afternoon: { label: 'День', icon: Calendar, color: 'text-blue-400' },
@@ -62,6 +63,37 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
 
   const completedCount = habits.filter(h => h.completed).length
   const totalCount = habits.length
+
+  // Плейсхолдер для пустого состояния
+  if (totalCount === 0) {
+    return (
+      <HealthTrackerCard
+        title="Привычки"
+        subtitle="Пусто"
+        icon={Flame}
+        iconColor="text-amber-500"
+        iconBg="bg-amber-500/10"
+        className="gap-3"
+      >
+        <div className="flex-1 flex flex-col items-center justify-center py-8 px-4">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+            <Flame className="w-8 h-8 text-amber-500/40" />
+          </div>
+          <h3 className="text-base font-black text-white/80 mb-2 text-center">Добавьте первую привычку</h3>
+          <p className="text-xs text-white/40 text-center mb-6 max-w-[280px]">
+            Начните отслеживать полезные привычки для достижения своих целей
+          </p>
+          <button 
+            onClick={onNavigateToSettings}
+            className="px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 hover:border-amber-500/40 text-amber-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Добавить привычку
+          </button>
+        </div>
+      </HealthTrackerCard>
+    )
+  }
 
   return (
     <HealthTrackerCard
@@ -102,7 +134,10 @@ export function HabitsCard({ habits, onToggle }: HabitsCardProps) {
         </div>
       </div>
 
-      <button className="mt-2 w-full py-3 rounded-xl border border-dashed border-white/10 hover:border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[10px] text-white/20 hover:text-white/40 font-bold uppercase tracking-widest group">
+      <button 
+        onClick={onNavigateToSettings}
+        className="mt-2 w-full py-3 rounded-xl border border-dashed border-white/10 hover:border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[10px] text-white/20 hover:text-white/40 font-bold uppercase tracking-widest group"
+      >
         <Plus className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
         Добавить привычку
       </button>

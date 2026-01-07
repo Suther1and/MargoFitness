@@ -5,6 +5,7 @@ import { BarChart3, Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, 
 import { cn } from "@/lib/utils"
 import { StatsView, WidgetId } from "../../types"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { useHabits } from "../../hooks/use-habits"
 
 interface StatsNavigationProps {
   activeView: StatsView
@@ -34,10 +35,12 @@ const NAV_BUTTONS: NavButton[] = [
 
 export function StatsNavigation({ activeView, onViewChange }: StatsNavigationProps) {
   const { settings } = useTrackerSettings()
+  const { habits } = useHabits()
 
-  // Фильтруем кнопки: "Общая" и "Привычки" всегда показываем, остальные по enabled
+  // Фильтруем кнопки: "Общая" всегда показываем, "Привычки" только если есть привычки, остальные по enabled
   const visibleButtons = NAV_BUTTONS.filter(button => {
-    if (button.id === 'overall' || button.id === 'habits') return true
+    if (button.id === 'overall') return true
+    if (button.id === 'habits') return habits.length > 0
     return settings.widgets[button.id as WidgetId]?.enabled
   })
 

@@ -1,12 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight } from "lucide-react"
+import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { useHabits } from "../../hooks/use-habits"
 import { calculateBMI } from "../../utils/bmi-utils"
 import { StatsView, DailyMetrics } from "../../types"
 import Image from "next/image"
+import Link from "next/link"
 
 interface StatsOverallProps {
   period: string
@@ -29,22 +31,53 @@ const MOCK_LAST_NOTE = {
 
 export function StatsOverall({ period, onNavigate, layout = 'column', data }: StatsOverallProps) {
   const { settings } = useTrackerSettings()
+  const { habits } = useHabits()
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
   
   if (!settings?.widgets) return null
 
+  // Проверка наличия активных виджетов
+  const enabledWidgetsCount = Object.entries(settings.widgets)
+    .filter(([id, widget]) => widget.enabled && id !== 'habits')
+    .length
+  const hasAnyContent = enabledWidgetsCount > 0 || habits.length > 0
+
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } }
   const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }
 
-  const renderMobileLayout = () => (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="space-y-4 pb-4 contain-paint"
-    >
-      {/* Дисциплина - Эталонный блок */}
-      {settings.widgets.habits?.enabled && (
+  const renderMobileLayout = () => {
+    if (!hasAnyContent) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 px-6">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-6">
+            <BarChart3 className="w-10 h-10 text-green-400" />
+          </div>
+          <h3 className="text-2xl font-oswald font-black text-white mb-3 text-center uppercase tracking-tight">
+            Выберите виджеты
+          </h3>
+          <p className="text-sm text-white/50 text-center mb-8 max-w-[320px] leading-relaxed">
+            Настройте метрики для отслеживания, чтобы увидеть статистику и прогресс
+          </p>
+          <Link 
+            href="/dashboard/health-tracker?tab=settings"
+            className="px-8 py-4 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+          >
+            <BarChart3 className="w-5 h-5" />
+            Настроить трекер
+          </Link>
+        </div>
+      )
+    }
+
+    return (
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-4 pb-4 contain-paint"
+      >
+        {/* Дисциплина - Эталонный блок */}
+        {habits.length > 0 && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('habits')}
@@ -418,18 +451,44 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
           </motion.div>
         )}
       </div>
-    </motion.div>
-  )
+      </motion.div>
+    )
+  }
 
-  const renderDesktopLayout = () => (
-    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-6 pb-10">
-      
-      {/* РЯД 1: Вес и Дисциплина (Высота 140px) */}
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('weight')}
-        className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
-      >
+  const renderDesktopLayout = () => {
+    if (!hasAnyContent) {
+      return (
+        <div className="flex flex-col items-center justify-center py-24 px-6">
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-8">
+            <BarChart3 className="w-12 h-12 text-green-400" />
+          </div>
+          <h3 className="text-4xl font-oswald font-black text-white mb-4 text-center uppercase tracking-tight">
+            Выберите виджеты
+          </h3>
+          <p className="text-base text-white/50 text-center mb-10 max-w-[480px] leading-relaxed">
+            Настройте метрики для отслеживания, чтобы увидеть статистику и прогресс
+          </p>
+          <Link 
+            href="/dashboard/health-tracker?tab=settings"
+            className="px-10 py-5 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-base uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+          >
+            <BarChart3 className="w-6 h-6" />
+            Настроить трекер
+          </Link>
+        </div>
+      )
+    }
+
+    return (
+      <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-6 pb-10">
+        
+        {/* РЯД 1: Вес и Дисциплина (Высота 140px) */}
+        {settings.widgets.weight?.enabled && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('weight')}
+          className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
+        >
         <div className="flex justify-between items-start relative z-10">
           <div>
             <div className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Анализ веса</div>
@@ -455,13 +514,15 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             <div className="text-xl font-black text-white tabular-nums">72.4</div>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      )}
 
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('habits')}
-        className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center"
-      >
+      {habits.length > 0 && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('habits')}
+          className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center"
+        >
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full relative z-10">
           <div className="relative w-20 h-20 shrink-0">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -494,14 +555,16 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             </div>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* РЯД 2: Форма (2) + Шаги (1) + Вода (1). Высота 280px */}
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('photos')}
-        className="col-span-2 h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
-      >
+      {settings.widgets.photos?.enabled && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('photos')}
+          className="col-span-2 h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Camera className="w-4 h-4" /></div>
@@ -527,10 +590,12 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             </div>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       <div className="col-span-1 space-y-4">
-        <div onClick={() => onNavigate?.('steps')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
+        {settings.widgets.steps?.enabled && (
+          <div onClick={() => onNavigate?.('steps')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
           <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500"><Footprints className="w-4 h-4" /></div>
@@ -547,9 +612,11 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">цель 10к</span>
             <span className="text-[10px] font-black text-red-500/60 tabular-nums">112%</span>
           </div>
-        </div>
+          </div>
+        )}
 
-        <div onClick={() => onNavigate?.('water')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
+        {settings.widgets.water?.enabled && (
+          <div onClick={() => onNavigate?.('water')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
           <motion.div initial={{ height: 0 }} animate={{ height: '85%' }} className="absolute bottom-0 left-0 right-0 bg-blue-500/[0.03] border-t border-blue-500/10 pointer-events-none" />
           <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
@@ -564,16 +631,18 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
           <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4 relative z-10">
             <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} className="h-full bg-blue-500 shadow-[0_0_8px_rgba(14,165,233,0.3)]" />
           </div>
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="col-span-1 space-y-4">
         {/* Питание (Адаптировано под 280px высоту, но с плотным наполнением) */}
-        <motion.div
-          variants={item}
-          onClick={() => onNavigate?.('nutrition')}
-          className="h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
-        >
+        {settings.widgets.nutrition?.enabled && (
+          <motion.div
+            variants={item}
+            onClick={() => onNavigate?.('nutrition')}
+            className="h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
+          >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Utensils className="w-4 h-4" /></div>
             <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Калории</div>
@@ -592,24 +661,28 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
               <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} className="h-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
             </div>
           </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
 
       {/* РЯД 3: Заметки (2) + Настроение (1) + Сон (1). Высота 140px */}
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('notes')}
-        className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-sky-500/20 transition-all group cursor-pointer relative overflow-hidden flex flex-col justify-between"
-      >
+      {settings.widgets.notes?.enabled && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('notes')}
+          className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-sky-500/20 transition-all group cursor-pointer relative overflow-hidden flex flex-col justify-between"
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]"><NotebookText className="w-4 h-4 text-sky-400" />Последние мысли</div>
           <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-sky-400" />
         </div>
         <p className="text-[11px] text-white/40 leading-relaxed italic line-clamp-2 border-l-2 border-sky-500/20 pl-4">"{MOCK_LAST_NOTE.content}"</p>
         <div className="text-[8px] font-black text-white/5 uppercase tracking-[0.2em]">Статистика заметок: 12 за неделю</div>
-      </motion.div>
+        </motion.div>
+      )}
 
-      <div onClick={() => onNavigate?.('mood')} className="col-span-1 h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
+      {settings.widgets.mood?.enabled && (
+        <div onClick={() => onNavigate?.('mood')} className="col-span-1 h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400"><Smile className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Состояние</div>
@@ -620,9 +693,11 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             <div key={i} className={cn("flex-1 rounded-full transition-all", i < 8 ? "bg-orange-500/60 h-full" : "bg-white/5 h-1.5")} />
           ))}
         </div>
-      </div>
+        </div>
+      )}
 
-      <div onClick={() => onNavigate?.('sleep')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between">
+      {settings.widgets.sleep?.enabled && (
+        <div onClick={() => onNavigate?.('sleep')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-400"><Moon className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Сон</div>
@@ -631,10 +706,12 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
           <div className="text-2xl font-black text-white tabular-nums">7.6<span className="text-xs ml-1 opacity-40 uppercase">ч</span></div>
           <div className="text-[9px] font-black text-indigo-400/60 uppercase tracking-widest mt-1">95% от цели</div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* РЯД 4: Кофе (1) + Декор (3) */}
-      <div onClick={() => onNavigate?.('caffeine')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between">
+      {settings.widgets.caffeine?.enabled && (
+        <div onClick={() => onNavigate?.('caffeine')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-amber-600/5 border border-amber-600/10 text-amber-600"><Coffee className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Кофе</div>
@@ -643,7 +720,8 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
           <div className="text-2xl font-black text-white tabular-nums">2.1</div>
           <div className="text-[9px] font-black text-amber-600/60 uppercase tracking-widest mt-1">Порции сегодня</div>
         </div>
-      </div>
+        </div>
+      )}
 
       <div className="col-span-3 h-[140px] bg-[#121214]/10 border border-white/[0.02] rounded-[1.5rem] p-6 flex items-center justify-between group overflow-hidden">
         <div className="max-w-md">
@@ -656,8 +734,9 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
         <Zap className="w-12 h-12 text-amber-500 opacity-10 group-hover:opacity-30 transition-opacity" />
       </div>
 
-    </motion.div>
-  )
+      </motion.div>
+    )
+  }
 
   return layout === 'grid' ? renderDesktopLayout() : renderMobileLayout()
 }
