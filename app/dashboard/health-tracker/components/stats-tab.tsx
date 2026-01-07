@@ -16,6 +16,7 @@ import { StatsNotes } from "./stats-details/stats-notes"
 import { StatsPhotos } from "./stats-details/stats-photos"
 import { StatsHabits } from "./stats-details/stats-habits"
 import { useTrackerSettings } from "../hooks/use-tracker-settings"
+import { useHabits } from "../hooks/use-habits"
 import { StatsView, PeriodType, DateRange, DailyMetrics } from "../types"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
 import { DesktopStatsDashboard } from "./stats-details/desktop-stats-dashboard"
@@ -31,7 +32,13 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
   const [activeView, setActiveView] = useState<StatsView>('overall')
   const [isAnimating, setIsAnimating] = useState(false)
   const { settings } = useTrackerSettings()
+  const { habits } = useHabits()
   const isMobile = useIsMobile(1024)
+
+  // Проверка наличия активных виджетов и привычек для показа навигации
+  const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
+  const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+  const hasAnyContent = hasMainWidgets || habits.length > 0
 
   // Для обратной совместимости со старым форматом period
   const getLegacyPeriod = () => {
@@ -143,11 +150,13 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
 
   return (
     <div className={cn("space-y-4 pb-24 md:pb-10", isAnimating && "is-animating")}>
-      {/* Навигация между виджетами */}
-      <StatsNavigation
-        activeView={activeView}
-        onViewChange={setActiveView}
-      />
+      {/* Навигация между виджетами - скрываем если на обзоре и нет контента */}
+      {(activeView !== 'overall' || hasAnyContent) && (
+        <StatsNavigation
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
+      )}
 
       {/* Динамический контент */}
       {renderContent()}
