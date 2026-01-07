@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, Clock } from "lucide-react"
+import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, Clock, PlusCircle } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, Cell } from "recharts"
 import {
   ChartConfig,
@@ -113,14 +113,25 @@ export function StatsHabits({ period }: StatsHabitsProps) {
 
   if (activeHabits.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-6">
-        <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-          <Flame className="w-10 h-10 text-amber-500/40" />
+      <div className="flex flex-col items-center justify-center py-16 px-6 rounded-[2.5rem] border border-white/10 bg-white/[0.02] relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-5">
+          <Flame className="w-7 h-7 text-amber-500/40" />
         </div>
-        <h3 className="text-lg font-bold text-white/80 mb-2">Нет активных привычек</h3>
-        <p className="text-sm text-white/40 text-center max-w-md">
-          Добавьте привычки в настройках трекера, чтобы увидеть статистику
+        <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Привычки не настроены</h3>
+        <p className="text-[12px] text-white/30 text-center mb-8 max-w-[240px] leading-relaxed font-medium">
+          Добавьте полезные привычки в настройках, чтобы отслеживать их выполнение и видеть здесь подробную аналитику
         </p>
+        <button 
+          onClick={() => {
+            // Переход в настройки можно сделать через window.location или пропс, но здесь проще оставить как есть
+            window.location.href = '/dashboard/health-tracker?tab=settings&subtab=habits'
+          }}
+          className="w-full max-w-[200px] py-4 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/30 text-amber-500 font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-3"
+        >
+          <PlusCircle className="w-4 h-4" />
+          Добавить привычки
+        </button>
       </div>
     )
   }
