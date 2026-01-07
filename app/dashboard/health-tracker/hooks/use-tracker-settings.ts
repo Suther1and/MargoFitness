@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { WidgetId, TrackerSettings, WidgetSettings, UserParameters, WIDGET_CONFIGS } from '../types'
+import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
 
 /**
  * Хук для управления настройками Health Tracker
