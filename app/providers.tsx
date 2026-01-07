@@ -22,8 +22,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         refetchOnWindowFocus: false,
         // Retry только один раз при ошибке
         retry: 1,
-        // Не показывать данные из кэша при ошибке
-        refetchOnMount: true,
+        // Использовать данные из кэша при монтировании (не перезагружать если данные свежие)
+        refetchOnMount: 'stale' as const,
       },
       mutations: {
         // Retry для мутаций отключен (чтобы не дублировать запросы)

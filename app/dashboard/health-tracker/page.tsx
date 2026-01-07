@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
@@ -17,10 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-// Ленивая загрузка тяжелых вкладок
-const SettingsTab = dynamic(() => import('./components/settings-tab'), {
-  loading: () => <div className="min-h-[50vh] flex items-center justify-center"><Activity className="w-8 h-8 text-amber-500 animate-spin" /></div>
-})
+// Импорт напрямую - убираем ленивую загрузку для лучшей производительности
+import SettingsTab from './components/settings-tab'
 
 // Новые компоненты
 import { WaterCardH } from './components/water-card-h'

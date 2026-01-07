@@ -133,10 +133,7 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
             animate="center"
             exit="exit"
             onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => {
-              // Увеличиваем задержку для полной стабилизации слоев браузером
-              setTimeout(() => setIsAnimating(false), 100)
-            }}
+            onAnimationComplete={() => setIsAnimating(false)}
             className="will-change-[transform,opacity] transform-gpu"
           >
             {getContent()}
