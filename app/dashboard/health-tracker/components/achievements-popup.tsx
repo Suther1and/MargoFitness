@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Award, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,6 +20,11 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
   const [achievements, setAchievements] = useState<AchievementWithStatus[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -57,9 +63,9 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
   const totalCount = achievements.length
   const percentage = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
+  const popupContent = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -256,5 +262,7 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
       </motion.div>
     </AnimatePresence>
   )
+
+  return createPortal(popupContent, document.body)
 }
 
