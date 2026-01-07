@@ -38,7 +38,7 @@ export function StatsPhotos({ period }: StatsPhotosProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6"
+      className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
       {/* Статистика изменений */}
       <motion.div variants={item} className="p-5 rounded-2xl bg-gradient-to-br from-violet-500/20 via-purple-500/10 to-pink-500/20 border border-white/10">

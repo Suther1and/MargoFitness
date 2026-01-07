@@ -52,7 +52,7 @@ export function StatsCaffeine({ period }: StatsCaffeineProps) {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6"
+      className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
       {/* График */}
       <motion.div variants={item}>
