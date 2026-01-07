@@ -13,12 +13,6 @@ export interface DateRange {
   end: Date;
 }
 
-export interface StatsPeriodData {
-  period: '7d' | '30d' | '6m' | 'year';
-  startDate: Date;
-  endDate: Date;
-}
-
 // Типы для моковых данных статистики
 export interface DayMetrics {
   water?: number;
