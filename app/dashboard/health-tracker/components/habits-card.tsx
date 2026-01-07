@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Clock, Sun, Moon, Calendar, ListChecks, PlusCircle, Flame } from 'lucide-react'
+import { Check, Clock, Sun, Moon, Calendar, ListChecks, PlusCircle, Flame, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DailyHabit } from '../types'
 import { HealthTrackerCard } from './health-tracker-card'
