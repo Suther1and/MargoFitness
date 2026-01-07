@@ -512,156 +512,8 @@ function HealthTrackerContent() {
                 )}
 
                 <div className="lg:hidden mb-24">
-                  <AnimatePresence 
-                    mode="wait"
-                    onExitComplete={() => window.scrollTo(0, 0)}
-                  >
-                    {activeTab === 'settings' && (
-                      <motion.div 
-                        key="settings-mobile" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0 }} 
-                        transition={{ duration: 0.2 }}
-                      >
-                        <SettingsTab 
-                          onBack={() => setActiveTab('overview')} 
-                          selectedDate={selectedDate}
-                          onDateChange={setSelectedDate}
-                          isCalendarExpanded={isCalendarExpanded}
-                          setIsCalendarExpanded={setIsCalendarExpanded}
-                          activeSubTab={settingsSubTab}
-                          setActiveSubTab={setSettingsSubTab}
-                          isMobile={true}
-                        />
-                      </motion.div>
-                    )}
-                    {activeTab === 'goals' && (
-                      <motion.div 
-                        key="goals-mobile" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0 }} 
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="flex flex-col gap-6">
-                          <GoalsSummaryCard 
-                            data={data} 
-                            settings={settings}
-                            onNavigateToSettings={() => {
-                              setActiveTab('settings')
-                              setSettingsSubTab('widgets')
-                            }}
-                          />
-                          <AchievementsCard />
-                          {settings.widgets.photos?.enabled && (
-                            <DailyPhotosCard photos={data.dailyPhotos} />
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                    {activeTab === 'habits' && (
-                      <motion.div 
-                        key="habits-mobile" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0 }} 
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="flex flex-col gap-6">
-                          <HabitsCard 
-                            habits={data.habits} 
-                            onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
-                            onNavigateToSettings={() => {
-                              setActiveTab('settings')
-                              setSettingsSubTab('habits')
-                            }}
-                          />
-                          {settings.widgets.notes?.enabled && (
-                            <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                    {activeTab === 'stats' && (
-                      <motion.div 
-                        key="stats-mobile" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0 }} 
-                        transition={{ duration: 0.2 }}
-                      >
-                        <StatsTab 
-                          periodType={statsPeriodType} 
-                          dateRange={statsDateRange} 
-                          data={data}
-                          onPeriodSelect={handleStatsPeriodSelect}
-                        />
-                      </motion.div>
-                    )}
-                    {activeTab === 'overview' && (
-                      <motion.div 
-                        key="overview-mobile" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0 }} 
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="flex flex-col gap-6">
-                          {!hasMainWidgets ? (
-                            <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
-                              <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
-                              <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-                                Выбери показатели здоровья, которые будем отслеживать
-                              </p>
-
-                              <button 
-                                onClick={() => {
-                                  setActiveTab('settings')
-                                  setSettingsSubTab('widgets')
-                                }}
-                                className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
-                              >
-                                <Settings className="w-4 h-4" />
-                                Выбрать виджеты
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              {settings.widgets.water?.enabled && (
-                                <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                              )}
-                              {settings.widgets.steps?.enabled && (
-                                <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                              )}
-                              <div className="grid grid-cols-2 gap-4">
-                                  {settings.widgets.weight?.enabled && (
-                                    <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
-                                  )}
-                                  {settings.widgets.caffeine?.enabled && (
-                                    <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                                  )}
-                                  {settings.widgets.sleep?.enabled && (
-                                    <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                                  )}
-                                  {settings.widgets.mood?.enabled && (
-                                    <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
-                                  )}
-                              </div>
-                              {settings.widgets.nutrition?.enabled && (
-                                <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Desktop Settings - Limited Width Container */}
-                {activeTab === 'settings' && (
-                  <div className="hidden lg:block max-w-5xl mx-auto">
+                  {/* Рендерим все вкладки, но показываем только активную - так сохраняются данные и состояние */}
+                  <div style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
                     <SettingsTab 
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
@@ -670,22 +522,126 @@ function HealthTrackerContent() {
                       setIsCalendarExpanded={setIsCalendarExpanded}
                       activeSubTab={settingsSubTab}
                       setActiveSubTab={setSettingsSubTab}
-                      isMobile={false}
+                      isMobile={true}
                     />
                   </div>
-                )}
-
-                {/* Desktop Statistics */}
-                {activeTab === 'stats' && (
-                  <div className="hidden lg:block w-full">
+                  
+                  <div style={{ display: activeTab === 'goals' ? 'block' : 'none' }}>
+                    <div className="flex flex-col gap-6">
+                      <GoalsSummaryCard 
+                        data={data} 
+                        settings={settings}
+                        onNavigateToSettings={() => {
+                          setActiveTab('settings')
+                          setSettingsSubTab('widgets')
+                        }}
+                      />
+                      <AchievementsCard />
+                      {settings.widgets.photos?.enabled && (
+                        <DailyPhotosCard photos={data.dailyPhotos} />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: activeTab === 'habits' ? 'block' : 'none' }}>
+                    <div className="flex flex-col gap-6">
+                      <HabitsCard 
+                        habits={data.habits} 
+                        onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
+                        onNavigateToSettings={() => {
+                          setActiveTab('settings')
+                          setSettingsSubTab('habits')
+                        }}
+                      />
+                      {settings.widgets.notes?.enabled && (
+                        <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
                     <StatsTab 
                       periodType={statsPeriodType} 
                       dateRange={statsDateRange} 
-                      data={data} 
+                      data={data}
                       onPeriodSelect={handleStatsPeriodSelect}
                     />
                   </div>
-                )}
+                  
+                  <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
+                    <div className="flex flex-col gap-6">
+                      {!hasMainWidgets ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                          <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
+                          <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+                            Выбери показатели здоровья, которые будем отслеживать
+                          </p>
+
+                          <button 
+                            onClick={() => {
+                              setActiveTab('settings')
+                              setSettingsSubTab('widgets')
+                            }}
+                            className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Выбрать виджеты
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {settings.widgets.water?.enabled && (
+                            <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                          )}
+                          {settings.widgets.steps?.enabled && (
+                            <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                          )}
+                          <div className="grid grid-cols-2 gap-4">
+                              {settings.widgets.weight?.enabled && (
+                                <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                              )}
+                              {settings.widgets.caffeine?.enabled && (
+                                <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                              )}
+                              {settings.widgets.sleep?.enabled && (
+                                <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                              )}
+                              {settings.widgets.mood?.enabled && (
+                                <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                              )}
+                          </div>
+                          {settings.widgets.nutrition?.enabled && (
+                            <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Settings - Limited Width Container */}
+                <div className={cn("hidden lg:block max-w-5xl mx-auto", activeTab !== 'settings' && 'lg:hidden')}>
+                  <SettingsTab 
+                    onBack={() => setActiveTab('overview')} 
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    isCalendarExpanded={isCalendarExpanded}
+                    setIsCalendarExpanded={setIsCalendarExpanded}
+                    activeSubTab={settingsSubTab}
+                    setActiveSubTab={setSettingsSubTab}
+                    isMobile={false}
+                  />
+                </div>
+
+                {/* Desktop Statistics */}
+                <div className={cn("hidden lg:block w-full", activeTab !== 'stats' && 'lg:hidden')}>
+                  <StatsTab 
+                    periodType={statsPeriodType} 
+                    dateRange={statsDateRange} 
+                    data={data} 
+                    onPeriodSelect={handleStatsPeriodSelect}
+                  />
+                </div>
 
                 <div className={cn(
                   "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",

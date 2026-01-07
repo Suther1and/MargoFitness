@@ -222,15 +222,17 @@ export default function SettingsTab({
   setActiveSubTab,
   isMobile
 }: SettingsTabProps) {
-  const { settings, saveSettings } = useTrackerSettings()
+  const { settings, saveSettings, isLoaded } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
   const [isAnimating, setIsAnimating] = useState(false)
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
 
   // Синхронизация с настройками только при внешних изменениях
   useEffect(() => {
-    setLocalSettings(settings)
-  }, [settings])
+    if (isLoaded) {
+      setLocalSettings(settings)
+    }
+  }, [settings, isLoaded])
 
   const handleToggle = (widgetId: WidgetId) => {
     const newSettings = {
