@@ -115,6 +115,25 @@ function HealthTrackerContent() {
     }
   }, [settings.userParams])
 
+  // Синхронизируем привычки из настроек в данные для отображения
+  useEffect(() => {
+    // Преобразуем Habit[] в DailyHabit[]
+    const dailyHabits = habits
+      .filter(h => h.enabled) // Показываем только активные привычки
+      .map(habit => ({
+        id: habit.id,
+        title: habit.title,
+        completed: false, // По умолчанию не выполнено (можно расширить для сохранения статуса)
+        streak: habit.streak,
+        category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
+      }))
+    
+    setData(prev => ({
+      ...prev,
+      habits: dailyHabits
+    }))
+  }, [habits])
+
   useEffect(() => {
     setMounted(true)
     if ('scrollRestoration' in window.history) {

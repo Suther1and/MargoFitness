@@ -10,18 +10,11 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
+import { useHabits } from "../../hooks/use-habits"
 
 interface StatsHabitsProps {
   period: string
 }
-
-// Моковые данные для привычек
-const HABIT_STATS = [
-  { name: "Креатин 5г", completed: 28, total: 30, streak: 12 },
-  { name: "Вакуум живота", completed: 22, total: 30, streak: 5 },
-  { name: "Без сахара", completed: 29, total: 30, streak: 21 },
-  { name: "Чтение 20 мин", completed: 18, total: 30, streak: 3 },
-]
 
 const WEEKLY_COMPLETION = [
   { day: "Пн", value: 85 },
@@ -50,6 +43,26 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsHabits({ period }: StatsHabitsProps) {
+  const { habits, isLoaded } = useHabits()
+  
+  // Фильтруем только активные привычки
+  const activeHabits = habits.filter(h => h.enabled)
+  
+  // Преобразуем привычки в формат для отображения статистики
+  const HABIT_STATS = activeHabits.map(habit => {
+    // Рассчитываем примерное выполнение на основе streak и частоты
+    const daysInPeriod = period === '7d' ? 7 : period === '30d' ? 30 : period === '180d' ? 180 : 365
+    const expectedDays = Math.min(daysInPeriod, Math.floor(daysInPeriod * habit.frequency / 7))
+    const completed = Math.min(habit.streak, expectedDays)
+    
+    return {
+      name: habit.title,
+      completed: completed,
+      total: expectedDays,
+      streak: habit.streak
+    }
+  })
+  
   const avgCompletion = WEEKLY_COMPLETION.length > 0 
     ? Math.round(WEEKLY_COMPLETION.reduce((acc, d) => acc + d.value, 0) / WEEKLY_COMPLETION.length)
     : 0
@@ -87,6 +100,29 @@ export function StatsHabits({ period }: StatsHabitsProps) {
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
+  }
+
+  // Показываем сообщение, если нет активных привычек
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-white/40 text-sm">Загрузка...</div>
+      </div>
+    )
+  }
+
+  if (activeHabits.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-6">
+        <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+          <Flame className="w-10 h-10 text-amber-500/40" />
+        </div>
+        <h3 className="text-lg font-bold text-white/80 mb-2">Нет активных привычек</h3>
+        <p className="text-sm text-white/40 text-center max-w-md">
+          Добавьте привычки в настройках трекера, чтобы увидеть статистику
+        </p>
+      </div>
+    )
   }
 
   return (

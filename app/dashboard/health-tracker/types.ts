@@ -283,10 +283,5 @@ export const MOCK_DATA: DailyMetrics = {
   height: 170,
   age: 28,
   gender: 'female',
-  habits: [
-    { id: "1", title: "Креатин 5г", completed: true, streak: 12, category: "morning" },
-    { id: "2", title: "Вакуум живота", completed: false, streak: 5, category: "morning" },
-    { id: "3", title: "Чтение 20 мин", completed: false, streak: 3, category: "evening" },
-    { id: "4", title: "Без сахара", completed: true, streak: 21, category: "anytime" },
-  ]
+  habits: [] // Привычки теперь берутся из настроек через useHabits()
 };
