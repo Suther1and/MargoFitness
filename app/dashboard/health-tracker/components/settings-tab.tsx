@@ -21,6 +21,19 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label'
 
+// Добавляем стили для анимации shake
+const shakeKeyframes = `
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+  .animate-shake {
+    animation: shake 0.5s;
+  }
+`
+
 const ICON_MAP: Record<string, any> = {
   water: Droplets,
   steps: Footprints,
@@ -212,6 +225,7 @@ export default function SettingsTab({
   const { settings, saveSettings } = useTrackerSettings()
   const [localSettings, setLocalSettings] = useState(settings)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
 
   // Синхронизация с настройками только при внешних изменениях
   useEffect(() => {
@@ -250,6 +264,26 @@ export default function SettingsTab({
   }
 
   const handleToggleInPlan = (widgetId: WidgetId) => {
+    const widget = localSettings.widgets[widgetId]
+    const config = WIDGET_CONFIGS[widgetId]
+    
+    // Проверяем, что если у виджета должна быть цель и мы хотим добавить в план, то цель должна быть указана
+    if (!widget.inDailyPlan && config.hasGoal && !widget.goal) {
+      // Показываем эффект встряхивания
+      setShakingWidget(widgetId)
+      setTimeout(() => setShakingWidget(null), 500)
+      
+      // Фокусируемся на поле ввода цели
+      setTimeout(() => {
+        const input = document.querySelector(`input[data-widget-id="${widgetId}"]`) as HTMLInputElement
+        if (input) {
+          input.focus()
+        }
+      }, 100)
+      
+      return
+    }
+    
     const newSettings = {
       ...localSettings,
       widgets: {
@@ -297,10 +331,12 @@ export default function SettingsTab({
   ], [])
 
   return (
-    <div className={cn(
-      "w-full space-y-6 pb-24",
-      isAnimating && "is-animating"
-    )}>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: shakeKeyframes }} />
+      <div className={cn(
+        "w-full space-y-6 pb-24",
+        isAnimating && "is-animating"
+      )}>
       {/* BMI Panel - Hidden on Desktop (moved to header) */}
       <div className="flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl w-full lg:hidden">
         <div className="flex items-stretch h-[60px] border-b border-white/5">
@@ -561,15 +597,21 @@ export default function SettingsTab({
                             </div>
                             {config.hasGoal && (
                               <div className="mt-auto flex items-end gap-2.5">
-                                <div className="relative flex-1" onClick={(e) => widget.enabled && e.stopPropagation()}>
+                                <div className={cn("relative flex-1", shakingWidget === id && "animate-shake")} onClick={(e) => widget.enabled && e.stopPropagation()}>
                                   {widget.enabled ? (
                                     <input
                                       type="text"
                                       inputMode="decimal"
+                                      data-widget-id={id}
                                       value={widget.goal ?? ''}
                                       onChange={(e) => handleGoalChange(id, e.target.value)}
                                       placeholder="Цель"
-                                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none focus:border-green-500/50 h-[42px]"
+                                      className={cn(
+                                        "w-full bg-white/5 border rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none h-[42px] transition-all",
+                                        shakingWidget === id 
+                                          ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                                          : "border-white/10 focus:border-green-500/50"
+                                      )}
                                     />
                                   ) : (
                                     <div className="w-full bg-white/[0.03] border border-white/5 rounded-xl h-[42px] flex items-center px-3.5 opacity-10 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleToggle(id); }}>
@@ -579,12 +621,31 @@ export default function SettingsTab({
                                   {widget.enabled && <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest">{config.goalUnit}</span>}
                                 </div>
                                 {id !== 'weight' && (
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); if (!widget.enabled) handleToggle(id); else handleToggleInPlan(id); }}
-                                    className={cn("w-[42px] h-[42px] rounded-xl flex items-center justify-center border shrink-0 transition-all", widget.enabled ? widget.inDailyPlan ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-white/5 border-white/10 text-white/10" : "bg-white/[0.03] border-white/5 text-white/5")}
-                                  >
-                                    <Target className="w-4.5 h-4.5" strokeWidth={2.25} />
-                                  </button>
+                                  <div className="relative group">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); if (!widget.enabled) handleToggle(id); else handleToggleInPlan(id); }}
+                                      className={cn(
+                                        "w-[42px] h-[42px] rounded-xl flex items-center justify-center border shrink-0 transition-all",
+                                        widget.enabled 
+                                          ? widget.inDailyPlan 
+                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20" 
+                                            : widget.goal
+                                              ? "bg-white/5 border-white/10 text-white/30 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400"
+                                              : "bg-white/[0.03] border-white/5 text-white/5 cursor-not-allowed"
+                                          : "bg-white/[0.03] border-white/5 text-white/5"
+                                      )}
+                                    >
+                                      <Target className="w-4.5 h-4.5" strokeWidth={2.25} />
+                                    </button>
+                                    {widget.enabled && !widget.goal && !widget.inDailyPlan && (
+                                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                        <div className="bg-amber-500/90 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg">
+                                          Укажите цель
+                                        </div>
+                                        <div className="w-2 h-2 bg-amber-500/90 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             )}
@@ -645,6 +706,7 @@ export default function SettingsTab({
         </AnimatePresence>
       </div>
     </div>
+    </>
   )
 }
 
