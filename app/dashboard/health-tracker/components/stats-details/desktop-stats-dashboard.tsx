@@ -68,7 +68,7 @@ export function DesktopStatsDashboard({
   // Контент для центральной панели
   const renderActiveContent = () => {
     switch (activeView) {
-      case 'overall': return <StatsOverall period={period} layout="grid" onNavigate={(view) => setActiveView(view)} />
+      case 'overall': return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
       case 'habits': return <StatsHabits period={period} />
       case 'water': return <StatsWater period={period} />
       case 'steps': return <StatsSteps period={period} />
@@ -79,7 +79,7 @@ export function DesktopStatsDashboard({
       case 'nutrition': return <StatsNutrition period={period} />
       case 'photos': return <StatsPhotos period={period} />
       case 'notes': return <StatsNotes period={period} />
-      default: return <StatsOverall period={period} layout="grid" onNavigate={(view) => setActiveView(view)} />
+      default: return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
     }
   }
 

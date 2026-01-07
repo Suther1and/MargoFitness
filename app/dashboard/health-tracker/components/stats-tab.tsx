@@ -91,7 +91,7 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
       
       switch (activeView) {
         case 'overall':
-          return <StatsOverall key="overall" period={period} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={period} data={data} onNavigate={setActiveView} />
         case 'habits':
           return <StatsHabits key="habits" period={period} />
         case 'water':
@@ -113,7 +113,7 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
         case 'photos':
           return <StatsPhotos key="photos" period={period} />
         default:
-          return <StatsOverall key="overall" period={period} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={period} data={data} onNavigate={setActiveView} />
       }
     }
 
