@@ -52,45 +52,47 @@ export function StatsMood({ period }: StatsMoodProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* Распределение настроения */}
-      <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-            <Smile className="w-4 h-4 text-emerald-400" />
+      <div className="space-y-6">
+        {/* Распределение настроения */}
+        <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <Smile className="w-4 h-4 text-emerald-400" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-widest text-white/80">Распределение</span>
           </div>
-          <span className="text-xs font-black uppercase tracking-widest text-white/80">Распределение</span>
-        </div>
 
-        <div className="space-y-2">
-          {[...MOOD_ICONS].reverse().map((mood) => {
-            const count = moodCounts[mood.rating] || 0
-            const percent = (count / MOOD_DATA.length) * 100
-            const Icon = mood.icon
+          <div className="space-y-2">
+            {[...MOOD_ICONS].reverse().map((mood) => {
+              const count = moodCounts[mood.rating] || 0
+              const percent = (count / MOOD_DATA.length) * 100
+              const Icon = mood.icon
 
-            return (
-              <div key={mood.rating} className="flex items-center gap-3">
-                <Icon className={cn("w-4 h-4 flex-shrink-0", mood.color)} />
-                <span className="text-xs text-white/60 w-20">{mood.label}</span>
-                <div className="flex-1 relative h-6 bg-white/5 rounded-lg overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percent}%` }}
-                    transition={{ duration: 0.8 }}
-                    className={cn("absolute inset-y-0 left-0 rounded-lg", 
-                      mood.rating >= 4 ? "bg-emerald-500/30" :
-                      mood.rating === 3 ? "bg-yellow-500/30" :
-                      "bg-orange-500/30"
-                    )}
-                  />
-                  <span className="absolute inset-0 flex items-center px-2 text-xs font-bold text-white">
-                    {count} {count === 1 ? 'день' : 'дня'}
-                  </span>
+              return (
+                <div key={mood.rating} className="flex items-center gap-3">
+                  <Icon className={cn("w-4 h-4 flex-shrink-0", mood.color)} />
+                  <span className="text-xs text-white/60 w-20">{mood.label}</span>
+                  <div className="flex-1 relative h-6 bg-white/5 rounded-lg overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percent}%` }}
+                      transition={{ duration: 0.8 }}
+                      className={cn("absolute inset-y-0 left-0 rounded-lg", 
+                        mood.rating >= 4 ? "bg-emerald-500/30" :
+                        mood.rating === 3 ? "bg-yellow-500/30" :
+                        "bg-orange-500/30"
+                      )}
+                    />
+                    <span className="absolute inset-0 flex items-center px-2 text-xs font-bold text-white">
+                      {count} {count === 1 ? 'день' : 'дня'}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
-      </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+      </div>
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">

@@ -72,69 +72,71 @@ export function StatsWater({ period }: StatsWaterProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* Главный график (AreaChart) */}
-      <motion.div variants={item}>
-        <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                <Droplets className="w-5 h-5 text-blue-400" />
+      <div className="space-y-6">
+        {/* Главный график (AreaChart) */}
+        <motion.div variants={item}>
+          <div className="bg-[#121214]/60 border border-white/5 rounded-[2.5rem] p-6 group">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                  <Droplets className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black uppercase tracking-tight text-white">Гидрация</h3>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Потребление воды</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-black uppercase tracking-tight text-white">Гидрация</h3>
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em]">Потребление воды</p>
+              <div className="text-right">
+                <div className="text-3xl font-black text-white tabular-nums leading-none">
+                  {avgDaily} <span className="text-sm text-white/30 font-medium">мл/день</span>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-black text-white tabular-nums leading-none">
-                {avgDaily} <span className="text-sm text-white/30 font-medium">мл/день</span>
-              </div>
-            </div>
-          </div>
 
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <AreaChart
-              data={WATER_DATA}
-              margin={{ left: -20, right: 12, top: 10, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="fillWater" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={12}
-                stroke="rgba(255,255,255,0.2)"
-                fontSize={10}
-                fontWeight="bold"
-              />
-              <YAxis hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel indicator="line" />}
-              />
-              <Area
-                dataKey="value"
-                type="natural"
-                fill="url(#fillWater)"
-                stroke="#0ea5e9"
-                strokeWidth={3}
-                dot={{
-                  r: 4,
-                  fill: "#0ea5e9",
-                  strokeWidth: 2,
-                  stroke: "#121214",
-                }}
-              />
-            </AreaChart>
-          </ChartContainer>
-        </div>
-      </motion.div>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <AreaChart
+                data={WATER_DATA}
+                margin={{ left: -20, right: 12, top: 10, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="fillWater" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={12}
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  fontWeight="bold"
+                />
+                <YAxis hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel indicator="line" />}
+                />
+                <Area
+                  dataKey="value"
+                  type="natural"
+                  fill="url(#fillWater)"
+                  stroke="#0ea5e9"
+                  strokeWidth={3}
+                  dot={{
+                    r: 4,
+                    fill: "#0ea5e9",
+                    strokeWidth: 2,
+                    stroke: "#121214",
+                  }}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">

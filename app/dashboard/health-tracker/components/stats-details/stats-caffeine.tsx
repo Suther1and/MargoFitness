@@ -54,61 +54,63 @@ export function StatsCaffeine({ period }: StatsCaffeineProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* График */}
-      <motion.div variants={item}>
-        <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                <Coffee className="w-4 h-4 text-orange-400" />
+      <div className="space-y-6">
+        {/* График */}
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <Coffee className="w-4 h-4 text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Кофеин</h3>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Потребление за период</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-white">Кофеин</h3>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Потребление за период</p>
+              <div className="text-right">
+                <div className="text-2xl font-black text-white tabular-nums">
+                  {avgDaily}
+                </div>
+                <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">
+                  чашек/день
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums">
-                {avgDaily}
-              </div>
-              <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">
-                чашек/день
-              </div>
-            </div>
-          </div>
 
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <BarChart data={CAFFEINE_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="caffeineGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.5} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                stroke="rgba(255,255,255,0.2)"
-                fontSize={10}
-                fontWeight="bold"
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="value"
-                fill="url(#caffeineGradient)"
-                radius={[8, 8, 0, 0]}
-                maxBarSize={40}
-              />
-            </BarChart>
-          </ChartContainer>
-        </Card>
-      </motion.div>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <BarChart data={CAFFEINE_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="caffeineGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  fontWeight="bold"
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="url(#caffeineGradient)"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={40}
+                />
+              </BarChart>
+            </ChartContainer>
+          </Card>
+        </motion.div>
+      </div>
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">

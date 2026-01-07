@@ -68,80 +68,83 @@ export function StatsNutrition({ period }: StatsNutritionProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* График калорий */}
-      <motion.div variants={item}>
-        <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                <Utensils className="w-4 h-4 text-violet-400" />
+      <div className="space-y-6">
+        {/* График калорий */}
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                  <Utensils className="w-4 h-4 text-violet-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Калории</h3>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Потребление за период</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-white">Калории</h3>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Потребление за период</p>
+              <div className="text-right">
+                <div className="text-2xl font-black text-white tabular-nums">
+                  {avgCalories}
+                </div>
+                <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">
+                  ккал/день
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-black text-white tabular-nums">
-                {avgCalories}
-              </div>
-              <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">
-                ккал/день
-              </div>
-            </div>
-          </div>
 
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <AreaChart
-              data={CALORIES_DATA}
-              margin={{
-                left: -20,
-                right: 12,
-                top: 10,
-                bottom: 0,
-              }}
-            >
-              <defs>
-                <linearGradient id="fillCalories" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                stroke="rgba(255,255,255,0.2)"
-                fontSize={10}
-                fontWeight="bold"
-              />
-              <YAxis hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel indicator="line" />}
-              />
-              <Area
-                dataKey="calories"
-                type="natural"
-                fill="url(#fillCalories)"
-                fillOpacity={1}
-                stroke="#10b981"
-                strokeWidth={3}
-                dot={{
-                  r: 4,
-                  fill: "#10b981",
-                  strokeWidth: 2,
-                  stroke: "#09090b",
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <AreaChart
+                data={CALORIES_DATA}
+                margin={{
+                  left: -20,
+                  right: 12,
+                  top: 10,
+                  bottom: 0,
                 }}
-              />
-            </AreaChart>
-          </ChartContainer>
-        </Card>
-      </motion.div>
+              >
+                <defs>
+                  <linearGradient id="fillCalories" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  fontWeight="bold"
+                />
+                <YAxis hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel indicator="line" />}
+                />
+                <Area
+                  dataKey="calories"
+                  type="natural"
+                  fill="url(#fillCalories)"
+                  fillOpacity={1}
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={{
+                    r: 4,
+                    fill: "#10b981",
+                    strokeWidth: 2,
+                    stroke: "#09090b",
+                  }}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </Card>
+        </motion.div>
 
-      {/* Баланс БЖУ */}
+        {/* Баланс БЖУ */}
+      </div>
+
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">

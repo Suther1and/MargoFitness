@@ -76,10 +76,12 @@ export function StatsWeight({ period }: StatsWeightProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* Главный график */}
-      <motion.div variants={item}>
-        <WeightChart data={dataToShow} period={period === '7d' ? 'последние 7 дней' : period === '30d' ? 'последние 30 дней' : 'последние 6 месяцев'} />
-      </motion.div>
+      <div className="space-y-6">
+        {/* Главный график */}
+        <motion.div variants={item}>
+          <WeightChart data={dataToShow} period={period === '7d' ? 'последние 7 дней' : period === '30d' ? 'последние 30 дней' : 'последние 6 месяцев'} />
+        </motion.div>
+      </div>
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">

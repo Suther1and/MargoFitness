@@ -91,7 +91,7 @@ export function DesktopStatsDashboard({
           <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em]">Категории</span>
         </div>
         
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1">
           {visibleItems.map((item) => {
             const isActive = activeView === item.id
             return (
@@ -99,7 +99,7 @@ export function DesktopStatsDashboard({
                 key={item.id}
                 onClick={() => setActiveView(item.id as StatsView)}
                 className={cn(
-                  "flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-500 group text-left border relative overflow-hidden active:scale-[0.98]",
+                  "flex items-center gap-3.5 px-4 py-2 rounded-2xl transition-all duration-500 group text-left border relative overflow-hidden active:scale-[0.98]",
                   isActive 
                     ? "bg-white/[0.08] border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.5)]" 
                     : "bg-transparent border-transparent hover:bg-white/[0.03] hover:border-white/5"

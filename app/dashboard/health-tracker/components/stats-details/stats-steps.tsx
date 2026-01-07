@@ -90,141 +90,143 @@ export function StatsSteps({ period }: StatsStepsProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* Главный график */}
-      <motion.div variants={item}>
-        <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-white/5 flex items-center justify-center">
-                <Footprints className="w-5 h-5 text-red-500" />
+      <div className="space-y-6">
+        {/* Главный график */}
+        <motion.div variants={item}>
+          <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-white/5 flex items-center justify-center">
+                  <Footprints className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white uppercase tracking-tight">Динамика шагов</h3>
+                  <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
+                    {period === '7d' ? 'Последние 7 дней' : 'Последние 30 дней'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-tight">Динамика шагов</h3>
-                <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
-                  {period === '7d' ? 'Последние 7 дней' : 'Последние 30 дней'}
-                </p>
+              <div className="text-right">
+                <div className="text-3xl font-black text-white tabular-nums leading-none">
+                  {avgDaily.toLocaleString()}
+                </div>
+                <div className="flex items-center justify-end gap-1 mt-1">
+                  {parseFloat(trend) > 0 ? (
+                    <>
+                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      <span className="text-xs font-bold text-emerald-400">+{trend}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="w-3 h-3 text-orange-400" />
+                      <span className="text-xs font-bold text-orange-400">{trend}%</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-black text-white tabular-nums leading-none">
-                {avgDaily.toLocaleString()}
-              </div>
-              <div className="flex items-center justify-end gap-1 mt-1">
-                {parseFloat(trend) > 0 ? (
-                  <>
-                    <TrendingUp className="w-3 h-3 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-400">+{trend}%</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="w-3 h-3 text-orange-400" />
-                    <span className="text-xs font-bold text-orange-400">{trend}%</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
 
-          <ChartContainer config={chartConfig} className="h-[220px] w-full">
-            <ComposedChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="successBar" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.3} />
-                </linearGradient>
-                <linearGradient id="warningBar" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.3} />
-                </linearGradient>
-                <linearGradient id="dangerBar" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3} />
-                </linearGradient>
-              </defs>
-              
-              <CartesianGrid 
-                vertical={false} 
-                strokeDasharray="3 3" 
-                stroke="rgba(255,255,255,0.03)"
-              />
-              
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={12}
-                stroke="rgba(255,255,255,0.2)"
-                fontSize={10}
-                fontWeight="bold"
-              />
-              
-              {/* Линия цели */}
-              <ReferenceLine 
-                y={goal} 
-                stroke="#3b82f6" 
-                strokeDasharray="5 5" 
-                strokeWidth={1.5}
-                label={{ 
-                  value: `Цель`, 
-                  position: 'right',
-                  fill: '#3b82f6',
-                  fontSize: 10,
-                  fontWeight: 'bold'
-                }}
-              />
-              
-              <ChartTooltip
-                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload
-                    return (
-                      <div className="bg-black/90 border border-white/20 rounded-xl p-3 backdrop-blur-xl">
-                        <p className="text-xs font-bold text-white/60 mb-2">{data.date}</p>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2">
-                            <Footprints className="w-3.5 h-3.5 text-red-500" />
-                            <span className="text-sm font-bold text-white">{data.value.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Flame className="w-3.5 h-3.5 text-orange-400" />
-                            <span className="text-xs text-white/80">{data.calories} ккал</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-xs text-white/80">{data.distance} км</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-purple-400" />
-                            <span className="text-xs text-white/80">{data.time} мин</span>
+            <ChartContainer config={chartConfig} className="h-[220px] w-full">
+              <ComposedChart data={STEPS_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="successBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.3} />
+                  </linearGradient>
+                  <linearGradient id="warningBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.3} />
+                  </linearGradient>
+                  <linearGradient id="dangerBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3} />
+                  </linearGradient>
+                </defs>
+                
+                <CartesianGrid 
+                  vertical={false} 
+                  strokeDasharray="3 3" 
+                  stroke="rgba(255,255,255,0.03)"
+                />
+                
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={12}
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  fontWeight="bold"
+                />
+                
+                {/* Линия цели */}
+                <ReferenceLine 
+                  y={goal} 
+                  stroke="#3b82f6" 
+                  strokeDasharray="5 5" 
+                  strokeWidth={1.5}
+                  label={{ 
+                    value: `Цель`, 
+                    position: 'right',
+                    fill: '#3b82f6',
+                    fontSize: 10,
+                    fontWeight: 'bold'
+                  }}
+                />
+                
+                <ChartTooltip
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload
+                      return (
+                        <div className="bg-black/90 border border-white/20 rounded-xl p-3 backdrop-blur-xl">
+                          <p className="text-xs font-bold text-white/60 mb-2">{data.date}</p>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <Footprints className="w-3.5 h-3.5 text-red-500" />
+                              <span className="text-sm font-bold text-white">{data.value.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Flame className="w-3.5 h-3.5 text-orange-400" />
+                              <span className="text-xs text-white/80">{data.calories} ккал</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-xs text-white/80">{data.distance} км</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-3.5 h-3.5 text-purple-400" />
+                              <span className="text-xs text-white/80">{data.time} мин</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )
-                  }
-                  return null
-                }}
-              />
-              
-              <Bar
-                dataKey="value"
-                radius={[6, 6, 0, 0]}
-                maxBarSize={32}
-              >
-                {STEPS_DATA.map((entry, index) => {
-                  const fillColor = entry.value >= goal 
-                    ? "url(#successBar)" 
-                    : entry.value >= goal * 0.7 
-                    ? "url(#warningBar)" 
-                    : "url(#dangerBar)"
-                  
-                  return <Cell key={`cell-${index}`} fill={fillColor} />
-                })}
-              </Bar>
-            </ComposedChart>
-          </ChartContainer>
-        </div>
-      </motion.div>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                
+                <Bar
+                  dataKey="value"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={32}
+                >
+                  {STEPS_DATA.map((entry, index) => {
+                    const fillColor = entry.value >= goal 
+                      ? "url(#successBar)" 
+                      : entry.value >= goal * 0.7 
+                      ? "url(#warningBar)" 
+                      : "url(#dangerBar)"
+                    
+                    return <Cell key={`cell-${index}`} fill={fillColor} />
+                  })}
+                </Bar>
+              </ComposedChart>
+            </ChartContainer>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">

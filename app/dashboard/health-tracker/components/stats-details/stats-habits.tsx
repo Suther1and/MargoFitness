@@ -96,162 +96,164 @@ export function StatsHabits({ period }: StatsHabitsProps) {
       animate="show"
       className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
     >
-      {/* Объединенный блок: График + Тепловая карта */}
-      <motion.div variants={item}>
-        <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
-          {/* Заголовок с показателем */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
-                <Flame className="w-5 h-5 text-amber-500" />
+      <div className="space-y-6">
+        {/* Объединенный блок: График + Тепловая карта */}
+        <motion.div variants={item}>
+          <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
+            {/* ... содержимое Дисциплины ... */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white uppercase tracking-tight">Дисциплина</h3>
+                  <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
+                    {period === '7d' ? 'Последние 7 дней' : 
+                     period === '30d' ? 'Последние 30 дней' : 
+                     period === '180d' ? 'Последние 6 месяцев' : 
+                     'Последний год'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-tight">Дисциплина</h3>
-                <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
-                  {period === '7d' ? 'Последние 7 дней' : 
-                   period === '30d' ? 'Последние 30 дней' : 
-                   period === '180d' ? 'Последние 6 месяцев' : 
-                   'Последний год'}
+              <div className="text-right">
+                <div className="text-3xl font-black text-white tabular-nums leading-none">
+                  {avgCompletion}<span className="text-sm text-white/30 font-medium">%</span>
+                </div>
+                <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-1">
+                  Средний процент
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-black text-white tabular-nums leading-none">
-                {avgCompletion}<span className="text-sm text-white/30 font-medium">%</span>
-              </div>
-              <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-1">
-                Средний процент
-              </p>
-            </div>
-          </div>
 
-          {/* График для 7 дней */}
-          {period === '7d' && (
-            <div className="mb-6">
-              <ChartContainer config={chartConfig} className="h-[180px] w-full">
-                <BarChart data={WEEKLY_COMPLETION} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                  <XAxis
-                    dataKey="day"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={12}
-                    stroke="rgba(255,255,255,0.2)"
-                    fontSize={10}
-                    fontWeight="bold"
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Bar
-                    dataKey="value"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
-                  >
-                    {WEEKLY_COMPLETION.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.value >= 90 ? "#f59e0b" : entry.value >= 70 ? "rgba(245,158,11,0.6)" : "rgba(245,158,11,0.3)"} 
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </div>
-          )}
-
-          {/* Тепловая карта активности */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white/60 uppercase tracking-wider">
-                {period === '7d' ? 'Недельная активность' : 
-                 period === '30d' ? 'Месячная активность' : 
-                 period === '180d' ? 'Активность за 6 месяцев' : 
-                 'Годовая активность'}
-              </span>
-              {/* Легенда */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-[8px] font-bold text-white/20 uppercase">Min</span>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-[2px] bg-white/5" />
-                  <div className="w-2 h-2 rounded-[2px] bg-amber-500/30" />
-                  <div className="w-2 h-2 rounded-[2px] bg-amber-500/60" />
-                  <div className="w-2 h-2 rounded-[2px] bg-amber-500" />
-                </div>
-                <span className="text-[8px] font-bold text-white/20 uppercase">Max</span>
-              </div>
-            </div>
-
-            <div className={cn(
-              "grid gap-2",
-              period === '7d' ? "grid-cols-7" : 
-              period === '30d' ? "grid-cols-10" : 
-              period === '180d' ? "grid-cols-13" :
-              "grid-cols-15"
-            )}>
-              {heatmapData.map((data, i) => (
-                <div 
-                  key={i}
-                  className="aspect-square rounded-sm md:rounded-md transition-colors hover:scale-110 cursor-pointer"
-                  style={{ 
-                    backgroundColor: data.value > 80 ? 'rgba(245,158,11,0.8)' : 
-                                     data.value > 50 ? 'rgba(245,158,11,0.5)' : 
-                                     data.value > 20 ? 'rgba(245,158,11,0.25)' : 
-                                     'rgba(255,255,255,0.05)'
-                  }}
-                  title={`${Math.round(data.value)}%`}
-                />
-              ))}
-            </div>
-
-            {/* Подписи для 7 дней */}
+            {/* График для 7 дней */}
             {period === '7d' && (
-              <div className="grid grid-cols-7 gap-2">
-                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
-                  <span key={day} className="text-[9px] font-black text-white/20 text-center uppercase">{day}</span>
-                ))}
+              <div className="mb-6">
+                <ChartContainer config={chartConfig} className="h-[180px] w-full">
+                  <BarChart data={WEEKLY_COMPLETION} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                    <XAxis
+                      dataKey="day"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={12}
+                      stroke="rgba(255,255,255,0.2)"
+                      fontSize={10}
+                      fontWeight="bold"
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar
+                      dataKey="value"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={32}
+                    >
+                      {WEEKLY_COMPLETION.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.value >= 90 ? "#f59e0b" : entry.value >= 70 ? "rgba(245,158,11,0.6)" : "rgba(245,158,11,0.3)"} 
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
               </div>
             )}
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Список привычек */}
-      <motion.div variants={item} className="grid grid-cols-1 gap-4">
-        <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
-              <TrendingUp className="w-5 h-5 text-orange-500" />
+            {/* Тепловая карта активности */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white/60 uppercase tracking-wider">
+                  {period === '7d' ? 'Недельная активность' : 
+                   period === '30d' ? 'Месячная активность' : 
+                   period === '180d' ? 'Активность за 6 месяцев' : 
+                   'Годовая активность'}
+                </span>
+                {/* Легенда */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[8px] font-bold text-white/20 uppercase">Min</span>
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-[2px] bg-white/5" />
+                    <div className="w-2 h-2 rounded-[2px] bg-amber-500/30" />
+                    <div className="w-2 h-2 rounded-[2px] bg-amber-500/60" />
+                    <div className="w-2 h-2 rounded-[2px] bg-amber-500" />
+                  </div>
+                  <span className="text-[8px] font-bold text-white/20 uppercase">Max</span>
+                </div>
+              </div>
+
+              <div className={cn(
+                "grid gap-2",
+                period === '7d' ? "grid-cols-7" : 
+                period === '30d' ? "grid-cols-10" : 
+                period === '180d' ? "grid-cols-13" :
+                "grid-cols-15"
+              )}>
+                {heatmapData.map((data, i) => (
+                  <div 
+                    key={i}
+                    className="aspect-square rounded-sm md:rounded-md transition-colors hover:scale-110 cursor-pointer"
+                    style={{ 
+                      backgroundColor: data.value > 80 ? 'rgba(245,158,11,0.8)' : 
+                                       data.value > 50 ? 'rgba(245,158,11,0.5)' : 
+                                       data.value > 20 ? 'rgba(245,158,11,0.25)' : 
+                                       'rgba(255,255,255,0.05)'
+                    }}
+                    title={`${Math.round(data.value)}%`}
+                  />
+                ))}
+              </div>
+
+              {/* Подписи для 7 дней */}
+              {period === '7d' && (
+                <div className="grid grid-cols-7 gap-2">
+                  {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+                    <span key={day} className="text-[9px] font-black text-white/20 text-center uppercase">{day}</span>
+                  ))}
+                </div>
+              )}
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Стабильность</span>
           </div>
+        </motion.div>
 
-          <div className="space-y-4">
-            {HABIT_STATS.map((habit, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors group">
-                <div className="flex items-center gap-4">
-                  <div className="w-2.5 h-10 rounded-full bg-amber-500/5 group-hover:bg-amber-500 transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0)] group-hover:shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
-                  <div>
-                    <div className="text-sm font-black text-white uppercase tracking-tight">{habit.name}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Flame className="w-3 h-3 text-orange-500" />
-                      <span className="text-[10px] font-bold text-white/30 uppercase">{habit.streak} дней серия</span>
+        {/* Список привычек (Стабильность) */}
+        <motion.div variants={item} className="grid grid-cols-1 gap-4">
+          <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                <TrendingUp className="w-5 h-5 text-orange-500" />
+              </div>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">Стабильность</span>
+            </div>
+
+            <div className="space-y-4">
+              {HABIT_STATS.map((habit, i) => (
+                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-2.5 h-10 rounded-full bg-amber-500/5 group-hover:bg-amber-500 transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0)] group-hover:shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
+                    <div>
+                      <div className="text-sm font-black text-white uppercase tracking-tight">{habit.name}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Flame className="w-3 h-3 text-orange-500" />
+                        <span className="text-[10px] font-bold text-white/30 uppercase">{habit.streak} дней серия</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-black text-white tabular-nums leading-none">
+                      {Math.round((habit.completed / habit.total) * 100)}%
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-black text-white tabular-nums leading-none">
-                    {Math.round((habit.completed / habit.total) * 100)}%
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
-      {/* Персональные инсайты */}
+      {/* Правая колонка: Персональные инсайты */}
       <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
