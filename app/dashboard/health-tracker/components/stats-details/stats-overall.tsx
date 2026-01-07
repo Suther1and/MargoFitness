@@ -441,166 +441,189 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
       variants={container}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-4 gap-6 pb-8 contain-paint"
+      className="grid grid-cols-4 gap-6 pb-10"
     >
-      {/* 1. Блок Трансформации (2x1) - Эстетичный и сбалансированный */}
+      {/* 1. Блок Трансформация (Вес) - Горизонтальный и строгий (2x1) */}
       {settings.widgets.weight?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('weight')}
-          className="col-span-2 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-7 cursor-pointer hover:border-emerald-500/20 transition-all group"
+          className="col-span-2 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
         >
-          {/* Декоративный фон */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/[0.02] blur-[40px] rounded-full pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-10">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 group-hover:scale-110 transition-transform duration-500">
-                  <Scale className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-0.5">Динамика веса</div>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tight">Трансформация</h3>
-                </div>
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <div className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-1">Анализ веса</div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tight">Трансформация</h3>
+            </div>
+            <div className="flex flex-col items-end">
+              <div className="text-3xl font-black text-emerald-400 tabular-nums leading-none">
+                -1.8 <span className="text-xs font-black opacity-40">КГ</span>
               </div>
-              
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]">
-                  <TrendingDown className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xl font-black text-emerald-400 tabular-nums">-1.8</span>
-                  <span className="text-[10px] font-black text-emerald-400/40 uppercase">кг</span>
-                </div>
-                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1.5">за выбранный период</div>
+              <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">за 7 дней</div>
+            </div>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 h-24 opacity-10 pointer-events-none">
+            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+              <path d="M0 35 Q 25 30, 50 20 T 100 5" fill="none" stroke="white" strokeWidth="1" />
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-12 mt-8 relative z-10 border-t border-white/5 pt-6">
+            <div className="flex-1">
+              <div className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1.5">Начало периода</div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black text-white/90 tabular-nums">74.2</span>
+                <span className="text-[10px] font-black text-white/20 uppercase">кг</span>
               </div>
             </div>
-
-            <div className="flex items-center justify-between px-4 relative">
-              <div className="flex flex-col">
-                <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1.5">Старт ({MOCK_PHOTOS[0].date})</div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black text-white tabular-nums tracking-tighter">{MOCK_PHOTOS[0].weight}</span>
-                  <span className="text-[11px] font-black text-white/20 uppercase">кг</span>
-                </div>
+            <div className="w-px h-8 bg-white/5" />
+            <div className="flex-1">
+              <div className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1.5">Текущий вес</div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black text-white tabular-nums">72.4</span>
+                <span className="text-[10px] font-black text-white/20 uppercase">кг</span>
               </div>
-
-              <div className="flex-1 px-12 relative flex items-center justify-center">
-                <div className="w-full h-px bg-white/5 relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent blur-[2px]" />
-                  <motion.div 
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" 
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end">
-                <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1.5 text-right">Финиш ({MOCK_PHOTOS[1].date})</div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black text-white tabular-nums tracking-tighter">{MOCK_PHOTOS[1].weight}</span>
-                  <span className="text-[11px] font-black text-white/20 uppercase">кг</span>
-                </div>
-              </div>
+            </div>
+            <div className="flex-1 text-right">
+              <div className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1.5">ИМТ</div>
+              <div className="text-xl font-black text-white/60 tabular-nums">{bmiValue}</div>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* 2. Привычки (1x1) - Как на мобилке (Circular) */}
+      {/* 2. Дисциплина (1x1) - Тонкое и профессиональное кольцо */}
       {settings.widgets.habits?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('habits')}
-          className="col-span-1 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-6 cursor-pointer hover:border-amber-500/20 transition-all group flex flex-col items-center justify-center"
+          className="col-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-amber-500/20 transition-all group flex flex-col items-center justify-center text-center"
         >
-          <div className="absolute top-3 left-6">
-            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Дисциплина</div>
+          <div className="absolute top-5 left-6">
+            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Стабильность</div>
           </div>
           
-          <div className="relative w-32 h-32 shrink-0 my-2">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
+          <div className="relative w-28 h-32 flex items-center justify-center">
+            <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/5" />
               <motion.circle 
-                cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" 
-                strokeDasharray="264" 
-                initial={{ strokeDashoffset: 264 }}
-                animate={{ strokeDashoffset: 264 * (1 - 0.75) }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
+                cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="4" 
+                strokeDasharray="289" 
+                initial={{ strokeDashoffset: 289 }}
+                animate={{ strokeDashoffset: 289 * (1 - 0.75) }}
                 className="text-amber-500" 
                 strokeLinecap="round" 
               />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-black text-white leading-none">75%</span>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl font-black text-white tabular-nums">75%</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-2 px-4 py-1.5 rounded-full bg-amber-500/5 border border-amber-500/10">
-            <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
-            <span className="text-lg font-black text-white tabular-nums leading-none">12</span>
-            <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">стрик</span>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-lg font-black text-white tabular-nums">12</span>
+            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">дней стрик</span>
           </div>
         </motion.div>
       )}
 
-      {/* 3. Питание (1x1) - Чистый */}
+      {/* 3. Питание (1x1) - Баланс и чистота */}
       {settings.widgets.nutrition?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('nutrition')}
-          className="col-span-1 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-6 cursor-pointer hover:border-violet-500/20 transition-all group"
+          className="col-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-              <Utensils className="w-4 h-4 text-violet-400" />
-            </div>
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Питание</span>
+          <div>
+            <div className="text-[10px] font-black text-violet-400 uppercase tracking-[0.3em] mb-1">Калории</div>
+            <h3 className="text-xl font-black text-white/40 uppercase tracking-tight">Среднее</h3>
           </div>
 
-          <div className="flex flex-col gap-1 mb-8">
+          <div className="my-4">
             <div className="flex items-baseline gap-1.5">
               <span className="text-4xl font-black text-white tabular-nums tracking-tighter">2,050</span>
-              <span className="text-[11px] font-black text-white/20 uppercase">ккал</span>
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">ккал</span>
             </div>
-            <div className="text-[9px] font-black text-white/10 uppercase tracking-widest">Цель: {settings.widgets.nutrition?.goal || 2200}</div>
           </div>
 
-          <div className="mt-auto flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} className="h-full bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.3)]" />
+          <div className="pt-4 border-t border-white/5">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Цель {settings.widgets.nutrition?.goal || 2200}</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">В норме</span>
             </div>
-            <div className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest leading-none">Норма</span>
+            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+              <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} className="h-full bg-violet-500" />
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* 4. Шаги (1x1) - Компактный */}
+      {/* 4. Прогресс Формы (2x1) */}
+      {settings.widgets.photos?.enabled && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('photos')}
+          className="col-span-2 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 group-hover:scale-110 transition-transform duration-500">
+                <Camera className="w-4 h-4 text-violet-400" />
+              </div>
+              <h4 className="text-lg font-black text-white uppercase tracking-tight">Прогресс формы</h4>
+            </div>
+            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">за 7 дней</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 h-[180px]">
+            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 group/photo flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20">
+                <Camera className="w-10 h-10 text-white/20 mb-2" />
+                <span className="text-[8px] font-black uppercase tracking-widest">Нет фото</span>
+              </div>
+              <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 backdrop-blur-md text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
+              <div className="absolute bottom-3 left-3 flex justify-between items-end w-[calc(100%-24px)]">
+                <span className="text-[9px] font-bold text-white/20 tabular-nums">31 дек</span>
+                <span className="text-[11px] font-black text-white/30 tabular-nums">74.2 кг</span>
+              </div>
+            </div>
+            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 group/photo flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30">
+                <Camera className="w-10 h-10 text-violet-500/20 mb-2" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-violet-500/40">Ожидание</span>
+              </div>
+              <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-500/20 backdrop-blur-md border border-emerald-500/20 text-[8px] font-black uppercase text-emerald-400 tracking-widest">После</div>
+              <div className="absolute bottom-3 left-3 flex justify-between items-end w-[calc(100%-24px)]">
+                <span className="text-[9px] font-bold text-white/20 tabular-nums">7 янв</span>
+                <span className="text-[11px] font-black text-white/30 tabular-nums">72.4 кг</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* 5. Шаги и Вода (1x1 каждый) - Квадратные и сбалансированные */}
       {settings.widgets.steps?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('steps')}
-          className="col-span-1 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-6 cursor-pointer hover:border-red-500/20 transition-all group flex flex-col"
+          className="col-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-red-500/20 transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.1)]">
-              <Footprints className="w-4 h-4 text-red-500" />
-            </div>
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Шаги</span>
+          <div>
+            <div className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] mb-1">Активность</div>
+            <h3 className="text-xl font-black text-white/40 uppercase tracking-tight">Шаги</h3>
           </div>
 
-          <div className="flex items-baseline gap-1.5 mb-1">
-            <span className="text-4xl font-black text-white tabular-nums tracking-tighter leading-none">11,200</span>
+          <div className="my-2">
+            <span className="text-4xl font-black text-white tabular-nums tracking-tighter">11,200</span>
           </div>
-          <div className="text-[9px] font-black text-white/10 uppercase tracking-widest mb-6">Среднее в день</div>
 
-          <div className="mt-auto space-y-2">
-            <div className="flex justify-between items-end">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Цель: 10,000</span>
-              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">5 / 7 дней</span>
+          <div className="pt-4 border-t border-white/5">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Цель 10к</span>
+              <span className="text-[10px] font-black text-red-500 tabular-nums">5 / 7</span>
             </div>
             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: '71%' }} className="h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]" />
@@ -609,30 +632,28 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
         </motion.div>
       )}
 
-      {/* 5. Вода (1x1) - Компактный */}
       {settings.widgets.water?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('water')}
-          className="col-span-1 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-6 cursor-pointer hover:border-blue-500/20 transition-all group flex flex-col"
+          className="col-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-blue-500/20 transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(14,165,233,0.1)]">
-              <Droplets className="w-4 h-4 text-blue-400" />
+          <div>
+            <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-1">Гидрация</div>
+            <h3 className="text-xl font-black text-white/40 uppercase tracking-tight">Вода</h3>
+          </div>
+
+          <div className="my-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-black text-white tabular-nums tracking-tighter">2.3</span>
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">л</span>
             </div>
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Вода</span>
           </div>
 
-          <div className="flex items-baseline gap-1.5 mb-1">
-            <span className="text-4xl font-black text-white tabular-nums tracking-tighter leading-none">2.3</span>
-            <span className="text-[11px] font-black text-white/20 uppercase">л</span>
-          </div>
-          <div className="text-[9px] font-black text-white/10 uppercase tracking-widest mb-6">Общий объем</div>
-
-          <div className="mt-auto space-y-2">
-            <div className="flex justify-between items-end">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Стабильность</span>
-              <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">85%</span>
+          <div className="pt-4 border-t border-white/5">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Стабильность</span>
+              <span className="text-[10px] font-black text-blue-400 tabular-nums">85%</span>
             </div>
             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} className="h-full bg-blue-500 shadow-[0_0_10px_rgba(14,165,233,0.3)]" />
@@ -641,115 +662,38 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
         </motion.div>
       )}
 
-      {/* 6. Прогресс Формы (2x1) - Широкий с заглушками */}
-      {settings.widgets.photos?.enabled && (
-        <motion.div
-          variants={item}
-          onClick={() => onNavigate?.('photos')}
-          className="col-span-2 relative overflow-hidden rounded-[2rem] bg-[#121214]/60 border border-white/10 p-7 cursor-pointer hover:border-violet-500/20 transition-all group"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 group-hover:scale-110 transition-transform duration-500">
-                <Camera className="w-5 h-5 text-violet-400" />
-              </div>
-              <h4 className="text-xl font-black text-white uppercase tracking-tight">Прогресс формы</h4>
-            </div>
-            <div className="px-3 py-1 rounded-lg bg-white/5 text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">период: {period === '1y' ? 'Год' : period === '30d' ? '30д' : '7д'}</div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-5 h-[180px]">
-            <div className="group/photo relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
-              {/* Плейсхолдер Старт */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 group-hover/photo:opacity-40 transition-opacity">
-                <Camera className="w-12 h-12 text-white/20 mb-2" />
-                <span className="text-[8px] font-black uppercase tracking-widest">Нет фото</span>
-              </div>
-              <div className="absolute top-4 left-4 px-2 py-1 rounded bg-black/40 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase text-white/60 tracking-widest">До</div>
-              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                <div className="text-[10px] font-bold text-white/20">31 дек</div>
-                <div className="text-sm font-black text-white/30 tracking-tight">74.2 <span className="text-[8px] font-black text-white/10 uppercase">кг</span></div>
-              </div>
-            </div>
-
-            <div className="group/photo relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
-              {/* Плейсхолдер Финиш */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 group-hover/photo:opacity-50 transition-opacity">
-                <Camera className="w-12 h-12 text-violet-500/20 mb-2" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-violet-500/40">Ожидание фото</span>
-              </div>
-              <div className="absolute top-4 right-4 px-2 py-1 rounded bg-emerald-500/20 backdrop-blur-md border border-emerald-500/20 text-[9px] font-black uppercase text-emerald-400 tracking-widest">После</div>
-              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                <div className="text-[10px] font-bold text-white/20">7 янв</div>
-                <div className="text-sm font-black text-white/30 tracking-tight">72.4 <span className="text-[8px] font-black text-white/10 uppercase">кг</span></div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* 7. Режим и Заметки (4x1) - Компактный нижний ряд */}
+      {/* 6. Нижний ряд: Режим (Сон/Кофе) и Заметки (4x1) */}
       <div className="col-span-4 grid grid-cols-4 gap-6">
-        {/* Сон и Кофе */}
-        <div className="col-span-1 flex flex-col gap-4">
-          <div onClick={() => onNavigate?.('sleep')} className="flex-1 bg-indigo-500/[0.03] border border-white/5 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-indigo-500/[0.06] transition-all group">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 group-hover:scale-110 transition-transform">
-                <Moon className="w-4 h-4 text-indigo-400" />
-              </div>
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Сон</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-black text-white tabular-nums">7.6</span>
-              <span className="text-[9px] font-black text-white/20 uppercase">ч</span>
-            </div>
+        <div className="col-span-1 grid grid-rows-2 gap-4">
+          <div onClick={() => onNavigate?.('sleep')} className="bg-[#121214]/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-white/[0.03] transition-all group cursor-pointer">
+            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Сон</span>
+            <span className="text-sm font-black text-indigo-400 tabular-nums">7.6ч</span>
           </div>
-          <div onClick={() => onNavigate?.('caffeine')} className="flex-1 bg-amber-600/[0.03] border border-white/5 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-amber-600/[0.06] transition-all group">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-600/10 border border-amber-600/20 group-hover:scale-110 transition-transform">
-                <Coffee className="w-4 h-4 text-amber-600" />
-              </div>
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Кофе</span>
-            </div>
-            <span className="text-lg font-black text-white tabular-nums">2.1</span>
+          <div onClick={() => onNavigate?.('caffeine')} className="bg-[#121214]/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-white/[0.03] transition-all group cursor-pointer">
+            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Кофе</span>
+            <span className="text-sm font-black text-amber-600 tabular-nums">2.1</span>
           </div>
         </div>
 
-        {/* Настроение */}
-        <div onClick={() => onNavigate?.('mood')} className="col-span-1 bg-pink-500/[0.03] border border-white/5 rounded-[2rem] p-5 flex flex-col items-center justify-center cursor-pointer hover:bg-pink-500/[0.06] transition-all group text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-pink-500/[0.01] blur-[30px]" />
-          <div className="relative z-10">
-            <Smile className="w-7 h-7 text-pink-400 mb-2.5 group-hover:scale-125 transition-transform duration-500" />
-            <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Настроение</div>
-            <div className="text-sm font-black text-white uppercase tracking-tight">Отличное</div>
-          </div>
+        <div onClick={() => onNavigate?.('mood')} className="col-span-1 bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 flex flex-col items-center justify-center hover:bg-white/[0.03] transition-all cursor-pointer group">
+          <Smile className="w-6 h-6 text-pink-400/40 group-hover:text-pink-400 transition-colors mb-2" />
+          <span className="text-xs font-black text-white/60 uppercase tracking-tight">Отличное</span>
         </div>
 
-        {/* Заметки */}
-        <div onClick={() => onNavigate?.('notes')} className="col-span-2 bg-[#121214]/40 border border-white/5 rounded-[2rem] p-6 cursor-pointer hover:border-sky-500/20 transition-all group relative overflow-hidden">
+        {/* Заметки (2 колонки) */}
+        <div onClick={() => onNavigate?.('notes')} className="col-span-2 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-sky-500/20 transition-all group cursor-pointer relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <NotebookText className="w-4 h-4 text-sky-400" />
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Последние мысли</span>
-            </div>
-            <div className="w-8 h-8 rounded-full border border-white/5 flex items-center justify-center group-hover:border-sky-500/20 transition-colors">
-              <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-sky-400" />
-            </div>
+            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Последние мысли</div>
+            <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-sky-400 transition-colors" />
           </div>
-          
-          <div className="relative">
-            <div className="absolute -left-3 top-0 bottom-0 w-[2px] bg-sky-500/20 rounded-full" />
-            <p className="text-[11px] text-white/50 leading-relaxed italic line-clamp-2 pl-2">
-              "{MOCK_LAST_NOTE.content}"
-            </p>
-          </div>
-          <div className="absolute bottom-4 right-7 text-[8px] font-black text-white/10 uppercase tracking-widest">12 записей за неделю</div>
+          <p className="text-[11px] text-white/40 leading-relaxed italic line-clamp-2 border-l-2 border-sky-500/20 pl-4">
+            "{MOCK_LAST_NOTE.content}"
+          </p>
+          <div className="absolute bottom-4 right-6 text-[8px] font-black text-white/5 uppercase tracking-widest">12 записей за неделю</div>
         </div>
       </div>
     </motion.div>
   )
-
-
 
   return layout === 'grid' ? renderDesktopLayout() : renderMobileLayout()
 }
