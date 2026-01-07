@@ -783,9 +783,10 @@ export interface Database {
     }
     Enums: {
       subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
-      bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment'
+      bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment' | 'achievement'
       referral_status: 'registered' | 'first_purchase_made'
       promo_discount_type: 'percent' | 'fixed_amount'
+      achievement_category: 'streaks' | 'metrics' | 'habits' | 'weight' | 'consistency' | 'workouts'
     }
     CompositeTypes: {
       [_ in never]: never
