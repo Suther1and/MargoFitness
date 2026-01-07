@@ -236,15 +236,6 @@ export interface DailyMetrics {
   gender?: 'male' | 'female';
   
   habits: DailyHabit[];
-  
-  // ВРЕМЕННО для совместимости (будут удалены)
-  protein?: number;
-  proteinGoal?: number;
-  fats?: number;
-  fatsGoal?: number;
-  carbs?: number;
-  carbsGoal?: number;
-  sleepQuality?: number;
 }
 
 export const MOCK_DATA: DailyMetrics = {
@@ -257,17 +248,10 @@ export const MOCK_DATA: DailyMetrics = {
   weightGoal: 70.0,
   sleepHours: 7.5,
   sleepGoal: 8.0,
-  sleepQuality: 85,
   mood: 4,
   energyLevel: 7,
   calories: 1850,
   caloriesGoal: 2200,
-  protein: 120,
-  proteinGoal: 150,
-  fats: 65,
-  fatsGoal: 70,
-  carbs: 190,
-  carbsGoal: 250,
   caffeineIntake: 2,
   caffeineGoal: 3,
   notes: "",

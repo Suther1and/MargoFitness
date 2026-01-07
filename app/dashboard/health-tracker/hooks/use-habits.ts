@@ -1,106 +1,75 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { Habit } from '../types'
+import { useState, useEffect, useCallback } from 'react'
 
-/**
- * Хук для управления привычками в Health Tracker
- * 
- * Управляет CRUD операциями над привычками и сохраняет их в Supabase
- * с optimistic updates для мгновенного отклика UI.
- */
 export function useHabits() {
-  const [habits, setHabits] = useState<Habit[]>([])
   const [userId, setUserId] = useState<string | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-  
-  // Таймер для debounced сохранения
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const pendingHabitsRef = useRef<Habit[] | null>(null)
+  const queryClient = useQueryClient()
 
-  // Загрузка привычек из БД
+  // Получаем userId
   useEffect(() => {
-    async function loadHabits() {
+    async function getUserId() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        setIsLoaded(true)
-        return
-      }
-      
-      setUserId(user.id)
-      
-      const result = await getDiarySettings(user.id)
-      
-      if (result.success && result.data) {
-        const dbHabits = (result.data.habits as any) || []
-        setHabits(dbHabits)
-      }
-      
-      setIsLoaded(true)
+      if (user) setUserId(user.id)
     }
-    
-    loadHabits()
+    getUserId()
   }, [])
 
-  // Функция debounced сохранения в БД
-  const scheduleSave = useCallback((newHabits: Habit[]) => {
-    pendingHabitsRef.current = newHabits
-    
-    // Очищаем предыдущий таймер
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
+  // Query для загрузки привычек
+  const { data: habitsData, isLoading } = useQuery({
+    queryKey: ['diary-settings', userId],
+    queryFn: async () => {
+      if (!userId) return null
+      const result = await getDiarySettings(userId)
+      if (result.success && result.data) {
+        return (result.data.habits as any) || []
+      }
+      return []
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+    select: (data: any) => {
+      // Извлекаем только habits из settings
+      return data?.habits || data || []
     }
-    
-    // Устанавливаем новый таймер
-    saveTimeoutRef.current = setTimeout(async () => {
-      if (!userId || !pendingHabitsRef.current) return
+  })
+
+  // Mutation для обновления привычек
+  const updateMutation = useMutation({
+    mutationFn: async (newHabits: Habit[]) => {
+      if (!userId) throw new Error('No user ID')
+      return await updateDiarySettings(userId, { habits: newHabits as any })
+    },
+    onMutate: async (newHabits) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['diary-settings', userId] })
       
-      await updateDiarySettings(userId, {
-        habits: pendingHabitsRef.current as any
+      const previous = queryClient.getQueryData(['diary-settings', userId])
+      
+      // Обновляем кэш
+      queryClient.setQueryData(['diary-settings', userId], (old: any) => {
+        if (old && typeof old === 'object' && 'habits' in old) {
+          return { ...old, habits: newHabits }
+        }
+        return newHabits
       })
       
-      pendingHabitsRef.current = null
-      saveTimeoutRef.current = null
-    }, 500)
-  }, [userId])
+      return { previous }
+    },
+    onError: (err, newHabits, context) => {
+      // Откат при ошибке
+      if (context?.previous) {
+        queryClient.setQueryData(['diary-settings', userId], context.previous)
+      }
+    },
+  })
 
-  // Принудительное сохранение
-  const forceSave = useCallback(async () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-      saveTimeoutRef.current = null
-    }
-    
-    if (userId && pendingHabitsRef.current) {
-      await updateDiarySettings(userId, {
-        habits: pendingHabitsRef.current as any
-      })
-      pendingHabitsRef.current = null
-    }
-  }, [userId])
-
-  // Принудительное сохранение перед уходом
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      forceSave()
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      forceSave()
-    }
-  }, [forceSave])
-
-  // Сохранение привычек (мгновенно в state + отложенно в БД)
-  const saveHabits = useCallback((newHabits: Habit[]) => {
-    setHabits(newHabits)
-    scheduleSave(newHabits)
-  }, [scheduleSave])
+  const habits: Habit[] = Array.isArray(habitsData) ? habitsData : []
 
   // Добавить привычку
   const addHabit = useCallback((habit: Omit<Habit, 'id' | 'streak' | 'createdAt'>) => {
@@ -110,23 +79,23 @@ export function useHabits() {
       streak: 0,
       createdAt: new Date().toISOString()
     }
-    saveHabits([...habits, newHabit])
-  }, [habits, saveHabits])
+    updateMutation.mutate([...habits, newHabit])
+  }, [habits, updateMutation])
 
   // Обновить привычку
   const updateHabit = useCallback((id: string, updates: Partial<Habit>) => {
     const updated = habits.map(h => h.id === id ? { ...h, ...updates } : h)
-    saveHabits(updated)
-  }, [habits, saveHabits])
+    updateMutation.mutate(updated)
+  }, [habits, updateMutation])
 
   // Удалить привычку
   const deleteHabit = useCallback((id: string) => {
-    saveHabits(habits.filter(h => h.id !== id))
-  }, [habits, saveHabits])
+    updateMutation.mutate(habits.filter(h => h.id !== id))
+  }, [habits, updateMutation])
 
   return {
     habits,
-    isLoaded,
+    isLoaded: !isLoading,
     addHabit,
     updateHabit,
     deleteHabit

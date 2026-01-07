@@ -1,19 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
+import { useState, useEffect, useCallback } from 'react'
 
-/**
- * Хук для управления настройками Health Tracker
- * 
- * Управляет состоянием виджетов (вкл/выкл, цели), параметрами пользователя
- * и сохраняет все в Supabase с optimistic updates.
- */
 const VISITED_KEY = 'health_tracker_visited'
 
-// Настройки по умолчанию
 const DEFAULT_SETTINGS: TrackerSettings = {
   widgets: {
     habits: { enabled: true, goal: null, inDailyPlan: true },
@@ -78,123 +72,78 @@ function appToDbSettings(appSettings: TrackerSettings) {
 }
 
 export function useTrackerSettings() {
-  const [settings, setSettings] = useState<TrackerSettings>(DEFAULT_SETTINGS)
   const [userId, setUserId] = useState<string | null>(null)
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
     if (typeof window === 'undefined') return false
     return !localStorage.getItem(VISITED_KEY)
   })
-  const [isLoaded, setIsLoaded] = useState(false)
-  
-  // Таймер для debounced сохранения
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const pendingSettingsRef = useRef<TrackerSettings | null>(null)
+  const queryClient = useQueryClient()
 
-  // Получаем userId и загружаем настройки
+  // Получаем userId
   useEffect(() => {
-    async function loadSettings() {
+    async function getUserId() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        setIsLoaded(true)
-        return
-      }
-      
-      setUserId(user.id)
-      
-      const result = await getDiarySettings(user.id)
-      
-      if (result.success && result.data) {
-        const appSettings = dbToAppSettings(result.data)
-        setSettings(appSettings)
-      }
-      
-      setIsLoaded(true)
+      if (user) setUserId(user.id)
     }
-    
-    loadSettings()
+    getUserId()
   }, [])
 
-  // Функция debounced сохранения в БД
-  const scheduleSave = useCallback((newSettings: TrackerSettings) => {
-    pendingSettingsRef.current = newSettings
-    
-    // Очищаем предыдущий таймер
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-    
-    // Устанавливаем новый таймер
-    saveTimeoutRef.current = setTimeout(async () => {
-      if (!userId || !pendingSettingsRef.current) return
-      
-      const dbSettings = appToDbSettings(pendingSettingsRef.current)
-      await updateDiarySettings(userId, dbSettings)
-      
-      pendingSettingsRef.current = null
-      saveTimeoutRef.current = null
-    }, 500) // Уменьшил до 500ms для более быстрого сохранения
-  }, [userId])
-
-  // Принудительное сохранение
-  const forceSave = useCallback(async () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-      saveTimeoutRef.current = null
-    }
-    
-    if (userId && pendingSettingsRef.current) {
-      const dbSettings = appToDbSettings(pendingSettingsRef.current)
-      await updateDiarySettings(userId, dbSettings)
-      pendingSettingsRef.current = null
-    }
-  }, [userId])
-
-  // Принудительное сохранение перед уходом
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-        if (userId && pendingSettingsRef.current) {
-          const dbSettings = appToDbSettings(pendingSettingsRef.current)
-          // Синхронный запрос для гарантии сохранения
-          navigator.sendBeacon(
-            '/api/diary/settings',
-            JSON.stringify({ userId, settings: dbSettings })
-          )
-        }
+  // Query для загрузки настроек
+  const { data: settingsData, isLoading } = useQuery({
+    queryKey: ['diary-settings', userId],
+    queryFn: async () => {
+      if (!userId) return null
+      const result = await getDiarySettings(userId)
+      if (result.success && result.data) {
+        return dbToAppSettings(result.data)
       }
-    }
+      return DEFAULT_SETTINGS
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  })
 
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      forceSave()
-    }
-  }, [userId, forceSave])
+  // Mutation для обновления настроек
+  const updateMutation = useMutation({
+    mutationFn: async (newSettings: TrackerSettings) => {
+      if (!userId) throw new Error('No user ID')
+      const dbSettings = appToDbSettings(newSettings)
+      return await updateDiarySettings(userId, dbSettings)
+    },
+    onMutate: async (newSettings) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['diary-settings', userId] })
+      const previous = queryClient.getQueryData(['diary-settings', userId])
+      queryClient.setQueryData(['diary-settings', userId], newSettings)
+      return { previous }
+    },
+    onError: (err, newSettings, context) => {
+      // Откат при ошибке
+      if (context?.previous) {
+        queryClient.setQueryData(['diary-settings', userId], context.previous)
+      }
+    },
+  })
 
-  // Универсальная функция обновления настроек
+  const settings = settingsData || DEFAULT_SETTINGS
+
+  // Универсальная функция обновления
   const updateSettings = useCallback((updater: (prev: TrackerSettings) => TrackerSettings) => {
-    setSettings(prev => {
-      const newSettings = updater(prev)
-      scheduleSave(newSettings)
-      return newSettings
-    })
-  }, [scheduleSave])
+    const newSettings = updater(settings)
+    updateMutation.mutate(newSettings)
+  }, [settings, updateMutation])
 
-  // Сохранение настроек (для внешнего использования)
+  // Сохранение настроек
   const saveSettings = useCallback((newSettings: TrackerSettings) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(VISITED_KEY, 'true')
       setIsFirstVisit(false)
     }
-    
-    setSettings(newSettings)
-    scheduleSave(newSettings)
-  }, [scheduleSave])
+    updateMutation.mutate(newSettings)
+  }, [updateMutation])
 
-  // Переключение виджета (вкл/выкл)
+  // Переключение виджета
   const toggleWidget = useCallback((widgetId: WidgetId) => {
     updateSettings(prev => ({
       ...prev,
@@ -208,7 +157,7 @@ export function useTrackerSettings() {
     }))
   }, [updateSettings])
 
-  // Обновление цели виджета
+  // Обновление цели
   const updateGoal = useCallback((widgetId: WidgetId, goal: number | null) => {
     updateSettings(prev => ({
       ...prev,
@@ -261,7 +210,7 @@ export function useTrackerSettings() {
     })
   }, [settings])
 
-  // Отметить визит вручную
+  // Отметить визит
   const markAsVisited = useCallback(() => {
     if (typeof window === 'undefined') return
     localStorage.setItem(VISITED_KEY, 'true')
@@ -271,7 +220,7 @@ export function useTrackerSettings() {
   return {
     settings,
     isFirstVisit,
-    isLoaded,
+    isLoaded: !isLoading,
     saveSettings,
     toggleWidget,
     updateGoal,

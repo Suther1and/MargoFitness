@@ -107,8 +107,8 @@ function HealthTrackerContent() {
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
-  const { settings, isFirstVisit } = useTrackerSettings()
-  const { habits } = useHabits()
+  const { settings, isFirstVisit, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const { habits, isLoaded: isHabitsLoaded } = useHabits()
   const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
   
   // Интеграция с Supabase через useHealthDiary
@@ -165,15 +165,6 @@ function HealthTrackerContent() {
     
     // Placeholder для фото
     dailyPhotos: [],
-    
-    // Временно оставляем для совместимости (удалим позже при чистке)
-    protein: 0,
-    proteinGoal: 0,
-    fats: 0,
-    fatsGoal: 0,
-    carbs: 0,
-    carbsGoal: 0,
-    sleepQuality: 0,
   }
 
   // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
@@ -252,6 +243,18 @@ function HealthTrackerContent() {
 
   const handleMoodUpdate = (val: MoodRating) => {
     handleMetricUpdate('mood', val)
+  }
+
+  // Показываем загрузку пока данные не готовы
+  if (!isSettingsLoaded || !isHabitsLoaded) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">Загрузка трекера...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
