@@ -96,149 +96,117 @@ export function StatsNotes({ period }: StatsNotesProps) {
           </div>
         </motion.div>
 
-        {/* Заметки с контекстом дня */}
-        <div className="space-y-4">
-          {NOTES_DATA.map((note) => (
-            <motion.div
-              key={note.id}
-              variants={item}
-              className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4"
-            >
-              {/* ... контент заметки ... */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black text-sky-400/60 uppercase tracking-wider">
-                      {note.date}
-                    </span>
-                    {note.mood && (
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <div
-                            key={i}
-                              className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                note.mood && i < note.mood ? "bg-amber-500" : "bg-white/10"
-                              )}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-sm text-white/80 leading-relaxed font-medium">
-                    {note.content}
-                  </p>
-                </div>
-              </div>
-
-              {/* Контекст дня - метрики */}
-              <div className="pt-3 border-t border-white/5">
-                <div className="text-[10px] font-black text-white/40 uppercase tracking-wider mb-3">
-                  Метрики дня
-                </div>
-
-                <div className="grid grid-cols-4 gap-2">
-                  {/* Вода */}
-                  {note.dayMetrics.water && (
-                    <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-                      <Droplets className="w-3 h-3 text-cyan-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.water}
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">мл</div>
-                    </div>
-                  )}
-
-                  {/* Шаги */}
-                  {note.dayMetrics.steps && (
-                    <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                      <Footprints className="w-3 h-3 text-blue-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {(note.dayMetrics.steps / 1000).toFixed(1)}k
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">шагов</div>
-                    </div>
-                  )}
-
-                  {/* Сон */}
-                  {note.dayMetrics.sleep && (
-                    <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                      <Moon className="w-3 h-3 text-indigo-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.sleep}
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">часов</div>
-                    </div>
-                  )}
-
-                  {/* Кофеин */}
-                  {note.dayMetrics.caffeine && (
-                    <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                      <Coffee className="w-3 h-3 text-orange-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.caffeine}
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">чашек</div>
-                    </div>
-                  )}
-
-                  {/* Вес */}
-                  {note.dayMetrics.weight && (
-                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <Scale className="w-3 h-3 text-amber-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.weight}
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">кг</div>
-                    </div>
-                  )}
-
-                  {/* Настроение */}
-                  {note.dayMetrics.mood && (
-                    <div className="p-2 rounded-xl bg-pink-500/10 border border-pink-500/20">
-                      <Smile className="w-3 h-3 text-pink-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.mood}/5
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">mood</div>
-                    </div>
-                  )}
-
-                  {/* Калории */}
-                  {note.dayMetrics.calories && (
-                    <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                      <Utensils className="w-3 h-3 text-emerald-400 mb-1" />
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.calories}
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">ккал</div>
-                    </div>
-                  )}
-
-                  {/* Энергия */}
-                  {note.dayMetrics.energy && (
-                    <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                      <div className="w-3 h-3 text-purple-400 mb-1 text-xs">⚡</div>
-                      <div className="text-xs font-black text-white tabular-nums">
-                        {note.dayMetrics.energy}/10
-                      </div>
-                      <div className="text-[8px] font-bold text-white/40 uppercase">энергия</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-6">
         {/* Инсайт */}
         <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
           <div className="text-xs text-white/60 font-medium">
             💡 Ваши заметки помогают отслеживать взаимосвязь между настроением и ежедневными метриками
           </div>
         </motion.div>
+
+        {/* Первая заметка */}
+        {NOTES_DATA.length > 0 && (
+          <motion.div
+            key={NOTES_DATA[0].id}
+            variants={item}
+            className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-black text-sky-400/60 uppercase tracking-wider">
+                    {NOTES_DATA[0].date}
+                  </span>
+                  {NOTES_DATA[0].mood && (
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              NOTES_DATA[0].mood && i < NOTES_DATA[0].mood ? "bg-amber-500" : "bg-white/10"
+                            )}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-white/80 leading-relaxed font-medium">
+                  {NOTES_DATA[0].content}
+                </p>
+              </div>
+            </div>
+
+            {/* Метрики первой заметки */}
+            <div className="pt-3 border-t border-white/5">
+              <div className="text-[10px] font-black text-white/40 uppercase tracking-wider mb-3">
+                Метрики дня
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {Object.entries(NOTES_DATA[0].dayMetrics).map(([key, val]) => (
+                  val && (
+                    <div key={key} className="p-2 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-xs font-black text-white tabular-nums">{val}</div>
+                      <div className="text-[8px] font-bold text-white/40 uppercase">{key}</div>
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        {/* Остальные заметки равномерно */}
+        {NOTES_DATA.slice(1).map((note) => (
+          <motion.div
+            key={note.id}
+            variants={item}
+            className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-black text-sky-400/60 uppercase tracking-wider">
+                    {note.date}
+                  </span>
+                  {note.mood && (
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              note.mood && i < note.mood ? "bg-amber-500" : "bg-white/10"
+                            )}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-white/80 leading-relaxed font-medium">
+                  {note.content}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-white/5">
+              <div className="text-[10px] font-black text-white/40 uppercase tracking-wider mb-3">
+                Метрики дня
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {Object.entries(note.dayMetrics).map(([key, val]) => (
+                  val && (
+                    <div key={key} className="p-2 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-xs font-black text-white tabular-nums">{val}</div>
+                      <div className="text-[8px] font-bold text-white/40 uppercase">{key}</div>
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   )

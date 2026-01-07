@@ -76,6 +76,40 @@ export function StatsPhotos({ period }: StatsPhotosProps) {
           </div>
         </motion.div>
 
+        {/* Временная линия */}
+        <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
+              <Scale className="w-4 h-4 text-purple-400" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-widest text-white/80">Динамика веса</span>
+          </div>
+
+          <div className="space-y-2">
+            {PHOTOS_DATA.slice().reverse().map((photo, index) => (
+              <div key={photo.id} className="flex items-center gap-3">
+                <div className="w-12 h-16 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
+                  <Image src={photo.url} alt="" width={48} height={64} className="object-cover w-full h-full" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs text-white/60 font-medium">{photo.date}</div>
+                  <div className="text-sm font-black text-white tabular-nums">{photo.weight} кг</div>
+                </div>
+                {index > 0 && (
+                  <div className={cn(
+                    "text-xs font-bold tabular-nums",
+                    photo.weight - PHOTOS_DATA[PHOTOS_DATA.length - index - 1].weight < 0 ? "text-emerald-400" : "text-amber-400"
+                  )}>
+                    {(photo.weight - PHOTOS_DATA[PHOTOS_DATA.length - index - 1].weight).toFixed(1)} кг
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="space-y-6">
         {/* Галерея фото */}
         <div className="grid grid-cols-2 gap-3">
           {PHOTOS_DATA.map((photo, index) => (
@@ -126,45 +160,6 @@ export function StatsPhotos({ period }: StatsPhotosProps) {
             </motion.div>
           ))}
         </div>
-
-        {/* Временная линия */}
-        <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
-              <Scale className="w-4 h-4 text-purple-400" />
-            </div>
-            <span className="text-xs font-black uppercase tracking-widest text-white/80">Динамика веса</span>
-          </div>
-
-          <div className="space-y-2">
-            {PHOTOS_DATA.slice().reverse().map((photo, index) => (
-              <div key={photo.id} className="flex items-center gap-3">
-                <div className="w-12 h-16 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
-                  <Image src={photo.url} alt="" width={48} height={64} className="object-cover w-full h-full" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-xs text-white/60 font-medium">{photo.date}</div>
-                  <div className="text-sm font-black text-white tabular-nums">{photo.weight} кг</div>
-                </div>
-                {index > 0 && (
-                  <div className={cn(
-                    "text-xs font-bold tabular-nums",
-                    photo.weight - PHOTOS_DATA[PHOTOS_DATA.length - index - 1].weight < 0 ? "text-emerald-400" : "text-amber-400"
-                  )}>
-                    {(photo.weight - PHOTOS_DATA[PHOTOS_DATA.length - index - 1].weight).toFixed(1)} кг
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="hidden lg:block">
-        {/* Пустая колонка справа для соответствия структуре, если инсайтов нет, 
-            но в этом файле инсайтов и так не было, была только статистика. 
-            Оставляем как есть, но оборачиваем в div, чтобы grid работал правильно.
-        */}
       </div>
     </motion.div>
   )
