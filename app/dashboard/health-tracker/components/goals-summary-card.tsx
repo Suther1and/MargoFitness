@@ -87,10 +87,16 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
     .map(getWidgetData)
     .filter(Boolean) as GoalData[]
 
-  // Подсчет выполненных целей с учетом типа
-  const completedCount = goals.filter(g => 
-    g.type === 'goal' ? g.current >= g.goal : g.current <= g.goal
-  ).length
+  // Подсчет выполненных целей (зеленых)
+  // Для целей: выполнено если достигнута
+  // Для лимитов: выполнено если НЕ превышена (может быть меньше или равна)
+  const completedCount = goals.filter(g => {
+    if (g.type === 'goal') {
+      return g.current >= g.goal // Достигнута или превышена
+    } else {
+      return g.current < g.goal // Строго меньше лимита (не на пределе)
+    }
+  }).length
 
   // Пустое состояние, если нет отслеживаемых виджетов
   if (goals.length === 0) {
@@ -141,62 +147,76 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
         {goals.map((g) => {
           const isLimit = g.type === 'limit'
           
-          // Для лимитов: выполнено если не превышен, для целей: выполнено если достигнута
-          const isDone = isLimit ? g.current <= g.goal : g.current >= g.goal
-          
           // Процент выполнения
           const perc = Math.min((g.current / g.goal) * 100, 100)
           
-          // Для лимитов определяем статус: в пределах нормы, близко к лимиту, превышен
-          const isExceeded = isLimit && g.current > g.goal
-          const isNearLimit = isLimit && !isExceeded && perc >= 80
+          // Определяем статус для визуализации
+          let status: 'success' | 'warning' | 'danger' | 'incomplete'
+          
+          if (isLimit) {
+            // Для лимитов: зеленый если в норме, янтарный на пределе, красный при превышении
+            if (g.current > g.goal) {
+              status = 'danger' // Превышен
+            } else if (perc >= 100) {
+              status = 'warning' // На пределе (ровно лимит)
+            } else {
+              status = 'success' // В пределах нормы
+            }
+          } else {
+            // Для целей: зеленый если достигнуто, серый если нет
+            status = g.current >= g.goal ? 'success' : 'incomplete'
+          }
+          
+          // Для подсчета выполненных целей
+          const isDone = status === 'success'
           
           return (
             <div key={g.label} className="group/item">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  {isLimit ? (
-                    // Для лимитов
-                    isExceeded ? (
-                      <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                    ) : (
-                      <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
-                    )
+                  {status === 'danger' ? (
+                    <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                  ) : status === 'warning' ? (
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+                  ) : status === 'success' ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                   ) : (
-                    // Для целей
-                    isDone ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                    ) : (
-                      <Circle className="w-3.5 h-3.5 text-white/20" />
-                    )
+                    <Circle className="w-3.5 h-3.5 text-white/20" />
                   )}
                   <span className={cn(
                     "text-xs font-bold transition-colors",
-                    isLimit 
-                      ? isExceeded 
-                        ? "text-red-400" 
-                        : "text-amber-400/80"
-                      : isDone 
-                        ? "text-white/80" 
-                        : "text-white/40"
+                    status === 'danger' ? "text-red-400" :
+                    status === 'warning' ? "text-amber-400" :
+                    status === 'success' ? "text-white/80" :
+                    "text-white/40"
                   )}>
                     {g.label}
                   </span>
                   {isLimit && (
-                    <span className="text-[9px] font-black text-amber-500/40 uppercase tracking-wider">
+                    <span className={cn(
+                      "text-[9px] font-black uppercase tracking-wider",
+                      status === 'danger' ? "text-red-500/40" :
+                      status === 'warning' ? "text-amber-500/40" :
+                      "text-emerald-500/30"
+                    )}>
                       Лимит
                     </span>
                   )}
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-[10px] font-bold text-white/20">
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    status === 'danger' ? "text-red-400/60" :
+                    status === 'warning' ? "text-amber-400/60" :
+                    "text-white/20"
+                  )}>
                     {g.current}
                   </span>
                   {isLimit && (
-                    <span className="text-[9px] font-medium text-white/10">/</span>
-                  )}
-                  {isLimit && (
-                    <span className="text-[9px] font-medium text-white/10">{g.goal}</span>
+                    <>
+                      <span className="text-[9px] font-medium text-white/10">/</span>
+                      <span className="text-[9px] font-medium text-white/10">{g.goal}</span>
+                    </>
                   )}
                   <span className="text-[8px] font-medium text-white/10">{g.unit}</span>
                 </div>
@@ -205,15 +225,10 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
                 <div 
                   className={cn(
                     "h-full transition-[width,background-color] duration-1000",
-                    isLimit 
-                      ? isExceeded 
-                        ? "bg-red-500" 
-                        : isNearLimit 
-                          ? "bg-amber-500" 
-                          : "bg-amber-500/60"
-                      : isDone 
-                        ? "bg-emerald-500" 
-                        : "bg-white/10"
+                    status === 'danger' ? "bg-red-500" :
+                    status === 'warning' ? "bg-amber-500" :
+                    status === 'success' ? "bg-emerald-500" :
+                    "bg-white/10"
                   )}
                   style={{ width: `${perc}%` }}
                 />
