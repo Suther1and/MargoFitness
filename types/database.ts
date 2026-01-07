@@ -19,6 +19,8 @@ export type PromoCode = Database['public']['Tables']['promo_codes']['Row']
 export type DiarySettings = Database['public']['Tables']['diary_settings']['Row']
 export type DiaryEntry = Database['public']['Tables']['diary_entries']['Row']
 export type ProgressPhoto = Database['public']['Tables']['progress_photos']['Row']
+export type Achievement = Database['public']['Tables']['achievements']['Row']
+export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
 
 // ============================================
 // Типы для вставки (Insert)
@@ -39,6 +41,8 @@ export type PromoCodeInsert = Database['public']['Tables']['promo_codes']['Inser
 export type DiarySettingsInsert = Database['public']['Tables']['diary_settings']['Insert']
 export type DiaryEntryInsert = Database['public']['Tables']['diary_entries']['Insert']
 export type ProgressPhotoInsert = Database['public']['Tables']['progress_photos']['Insert']
+export type AchievementInsert = Database['public']['Tables']['achievements']['Insert']
+export type UserAchievementInsert = Database['public']['Tables']['user_achievements']['Insert']
 
 // ============================================
 // Типы для обновления (Update)
@@ -59,6 +63,8 @@ export type PromoCodeUpdate = Database['public']['Tables']['promo_codes']['Updat
 export type DiarySettingsUpdate = Database['public']['Tables']['diary_settings']['Update']
 export type DiaryEntryUpdate = Database['public']['Tables']['diary_entries']['Update']
 export type ProgressPhotoUpdate = Database['public']['Tables']['progress_photos']['Update']
+export type AchievementUpdate = Database['public']['Tables']['achievements']['Update']
+export type UserAchievementUpdate = Database['public']['Tables']['user_achievements']['Update']
 
 // ============================================
 // ENUM типы
@@ -70,6 +76,7 @@ export type ProductType = 'subscription_tier' | 'one_time_pack'
 export type BonusTransactionType = Database['public']['Enums']['bonus_transaction_type']
 export type ReferralStatus = Database['public']['Enums']['referral_status']
 export type PromoDiscountType = Database['public']['Enums']['promo_discount_type']
+export type AchievementCategory = Database['public']['Enums']['achievement_category']
 
 // ============================================
 // Расширенные типы с дополнительной логикой
@@ -290,4 +297,39 @@ export function calculateLevelProgress(currentAmount: number, isReferral: boolea
     progress,
     remaining,
   }
+}
+
+// ============================================
+// Система достижений
+// ============================================
+
+/** Достижение с информацией о статусе разблокировки */
+export interface AchievementWithStatus extends Achievement {
+  isUnlocked: boolean
+  unlockedAt?: string | null
+}
+
+/** Достижение для UI с дополнительной информацией */
+export interface AchievementWithProgress extends AchievementWithStatus {
+  progress?: number // Прогресс в процентах (0-100)
+  currentValue?: number // Текущее значение для отображения
+  targetValue?: number // Целевое значение
+}
+
+/** Категории достижений с названиями для UI */
+export const ACHIEVEMENT_CATEGORIES = {
+  streaks: { label: 'Серии', icon: '🔥', color: 'text-orange-500' },
+  metrics: { label: 'Метрики', icon: '📊', color: 'text-blue-500' },
+  habits: { label: 'Привычки', icon: '✨', color: 'text-yellow-500' },
+  weight: { label: 'Вес', icon: '⚖️', color: 'text-purple-500' },
+  consistency: { label: 'Регулярность', icon: '📅', color: 'text-green-500' },
+  workouts: { label: 'Тренировки', icon: '🏋️', color: 'text-red-500' },
+} as const
+
+/** Статистика достижений пользователя */
+export interface AchievementStats {
+  total: number
+  unlocked: number
+  percentage: number
+  recentUnlocked: UserAchievement[]
 }

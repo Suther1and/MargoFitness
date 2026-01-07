@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, ProgressPhoto } from '@/types/database'
 import { revalidatePath } from 'next/cache'
+import { checkAndUnlockAchievements } from './achievements'
 
 /**
  * Вспомогательная функция для логирования ошибок
@@ -168,6 +169,11 @@ export async function upsertDiaryEntry(userId: string, date: string, metrics: an
 
     // Обновляем стрики
     await updateStreaks(userId, date)
+
+    // Проверяем достижения (фоново, не блокируем ответ)
+    checkAndUnlockAchievements(userId).catch(err => {
+      console.error('[Diary Action] Error checking achievements:', err)
+    })
 
     return { success: true, data: data as DiaryEntry }
   } catch (err: any) {

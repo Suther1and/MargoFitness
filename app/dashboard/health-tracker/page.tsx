@@ -39,6 +39,7 @@ import { AchievementsCard } from './components/achievements-card'
 import { HealthTrackerCard } from './components/health-tracker-card'
 import { WeekNavigator } from './components/week-navigator'
 import StatsTab from './components/stats-tab'
+import { AchievementUnlockedToast, useAchievementNotifications } from './components/achievement-unlocked-toast'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
@@ -49,6 +50,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
+import { createClient } from '@/lib/supabase/client'
 
 export default function HealthTrackerPage() {
   return (
@@ -87,10 +90,38 @@ function HealthTrackerContent() {
 
   const { settings, isFirstVisit } = useTrackerSettings()
   const { habits } = useHabits()
+  const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
 
   // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
   const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
   const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+
+  // Фоновая проверка достижений при загрузке страницы
+  useEffect(() => {
+    async function checkAchievements() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) return
+
+        const result = await checkAndUnlockAchievements(user.id)
+        
+        if (result.success && result.newAchievements && result.newAchievements.length > 0) {
+          // Показываем уведомления о новых достижениях
+          result.newAchievements.forEach(achievement => {
+            showAchievement(achievement)
+          })
+        }
+      } catch (err) {
+        console.error('Error checking achievements on load:', err)
+      }
+    }
+
+    if (mounted) {
+      checkAchievements()
+    }
+  }, [mounted])
 
   // Detect desktop
   useEffect(() => {
@@ -180,7 +211,9 @@ function HealthTrackerContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20">
+    <>
+      <AchievementUnlockedToast achievement={currentAchievement} onClose={clearCurrent} />
+      <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20">
       <style jsx global>{`
         @media (max-width: 767px) {
           .is-animating .main-grid-container {
@@ -721,6 +754,7 @@ function HealthTrackerContent() {
           </div>
         )}
       </motion.div>
+    </div>
 
       {/* Mobile Bottom Navigation - Stable UI */}
       <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md mobile-nav-container">
@@ -742,6 +776,6 @@ function HealthTrackerContent() {
           </button>
         </div>
       </div>
-    </div>
+    </>
   )
 }
