@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Utensils, Target, Scale } from "lucide-react"
+import { Utensils, Target, Award, Scale } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
 import {
   ChartConfig,

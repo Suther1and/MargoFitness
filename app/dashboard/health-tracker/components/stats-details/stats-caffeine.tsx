@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Coffee, Target, Award } from "lucide-react"
+import { Coffee, Target, Award, Moon } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import {
   ChartConfig,

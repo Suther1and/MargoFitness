@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Footprints, TrendingUp, Target, Award, Flame } from "lucide-react"
+import { Footprints, TrendingUp, Target, Award, Flame, MapPin } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, ReferenceLine, ComposedChart, Cell } from "recharts"
 import {
   ChartConfig,
