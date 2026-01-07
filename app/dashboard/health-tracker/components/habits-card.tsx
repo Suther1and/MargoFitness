@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Flame, Plus, Clock, Sun, Moon, Calendar, ListChecks } from 'lucide-react'
+import { Check, Flame, Plus, Clock, Sun, Moon, Calendar, ListChecks, PlusCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DailyHabit } from '../types'
 import { HealthTrackerCard } from './health-tracker-card'
@@ -67,31 +67,20 @@ export function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCar
   // Плейсхолдер для пустого состояния
   if (totalCount === 0) {
     return (
-      <HealthTrackerCard
-        title="Привычки"
-        subtitle="Пусто"
-        icon={Flame}
-        iconColor="text-amber-500"
-        iconBg="bg-amber-500/10"
-        className="gap-3"
-      >
-        <div className="flex-1 flex flex-col items-center justify-center py-8 px-4">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-            <Flame className="w-8 h-8 text-amber-500/40" />
-          </div>
-          <h3 className="text-base font-black text-white/80 mb-2 text-center">Добавьте первую привычку</h3>
-          <p className="text-xs text-white/40 text-center mb-6 max-w-[280px]">
-            Начните отслеживать полезные привычки для достижения своих целей
-          </p>
-          <button 
-            onClick={onNavigateToSettings}
-            className="px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 hover:border-amber-500/40 text-amber-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Добавить привычку
-          </button>
-        </div>
-      </HealthTrackerCard>
+      <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden h-full min-h-[340px]">
+        <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Ваши привычки</h3>
+        <p className="text-xs text-white/40 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+          Начните отслеживать полезные привычки для достижения своих целей
+        </p>
+
+        <button 
+          onClick={onNavigateToSettings}
+          className="w-full max-w-[220px] py-4 rounded-2xl bg-amber-500 text-black font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-amber-500/20 flex items-center justify-center gap-3 mb-2"
+        >
+          <PlusCircle className="w-4 h-4 text-black" />
+          Добавить привычку
+        </button>
+      </div>
     )
   }
 

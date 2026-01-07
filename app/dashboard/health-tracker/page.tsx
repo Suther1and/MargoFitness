@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays } from 'lucide-react'
+import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays, PlusCircle } from 'lucide-react'
 import { format, isSameDay, subDays, subMonths, subYears, differenceInDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -510,24 +510,20 @@ function HealthTrackerContent() {
                       >
                         <div className="flex flex-col gap-6">
                           {!hasMainWidgets ? (
-                            <div className="flex flex-col items-center justify-center py-16 px-6 rounded-[2rem] border border-white/10 bg-white/[0.02]">
-                              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-6">
-                                <Settings className="w-10 h-10 text-green-400" />
-                              </div>
-                              <h3 className="text-2xl font-oswald font-black text-white mb-3 text-center uppercase tracking-tight">
-                                Настройте виджеты
-                              </h3>
-                              <p className="text-sm text-white/50 text-center mb-8 max-w-[320px] leading-relaxed">
-                                Выберите метрики здоровья, которые хотите отслеживать для достижения своих целей
+                            <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                              <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настройте панель</h3>
+                              <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+                                Выберите показатели здоровья, которые важны для вас сегодня
                               </p>
+
                               <button 
                                 onClick={() => {
                                   setActiveTab('settings')
                                   setSettingsSubTab('widgets')
                                 }}
-                                className="px-8 py-4 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+                                className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
                               >
-                                <Settings className="w-5 h-5" />
+                                <Settings className="w-4 h-4" />
                                 Выбрать виджеты
                               </button>
                             </div>
@@ -599,22 +595,18 @@ function HealthTrackerContent() {
                   {/* Левая колонка: виджеты здоровья */}
                   <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
                     {!hasMainWidgets ? (
-                      <div className="flex flex-col items-center justify-center py-16 px-6 rounded-[2rem] border border-white/10 bg-white/[0.02]">
-                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-6">
-                          <Settings className="w-10 h-10 text-green-400" />
-                        </div>
-                        <h3 className="text-xl font-oswald font-black text-white mb-3 text-center uppercase tracking-tight">
-                          Настройте виджеты
-                        </h3>
-                        <p className="text-sm text-white/50 text-center mb-8 leading-relaxed">
-                          Выберите метрики здоровья для отслеживания
+                      <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                        <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настройте панель</h3>
+                        <p className="text-[12px] text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+                          Выберите показатели здоровья, которые важны для вас сегодня
                         </p>
+
                         <button 
                           onClick={() => {
                             setActiveTab('settings')
                             setSettingsSubTab('widgets')
                           }}
-                          className="px-6 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2"
+                          className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
                         >
                           <Settings className="w-4 h-4" />
                           Выбрать виджеты

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3 } from "lucide-react"
+import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3, Settings, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { useHabits } from "../../hooks/use-habits"
@@ -48,21 +48,17 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   const renderMobileLayout = () => {
     if (!hasAnyContent) {
       return (
-        <div className="flex flex-col items-center justify-center py-16 px-6">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-6">
-            <BarChart3 className="w-10 h-10 text-green-400" />
-          </div>
-          <h3 className="text-2xl font-oswald font-black text-white mb-3 text-center uppercase tracking-tight">
-            Выберите виджеты
-          </h3>
-          <p className="text-sm text-white/50 text-center mb-8 max-w-[320px] leading-relaxed">
-            Настройте метрики для отслеживания, чтобы увидеть статистику и прогресс
+        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden">
+          <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Аналитика пуста</h3>
+          <p className="text-xs text-white/40 text-center mb-8 max-w-[240px] leading-relaxed font-medium">
+            Настройте метрики и начните заполнять данные, чтобы увидеть свой прогресс
           </p>
+
           <Link 
             href="/dashboard/health-tracker?tab=settings"
-            className="px-8 py-4 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+            className="w-full max-w-[220px] py-4 rounded-2xl bg-purple-500 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-purple-500/20 flex items-center justify-center gap-3 mb-2"
           >
-            <BarChart3 className="w-5 h-5" />
+            <Settings className="w-4 h-4" />
             Настроить трекер
           </Link>
         </div>
@@ -458,21 +454,16 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   const renderDesktopLayout = () => {
     if (!hasAnyContent) {
       return (
-        <div className="flex flex-col items-center justify-center py-24 px-6">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center mb-8">
-            <BarChart3 className="w-12 h-12 text-green-400" />
-          </div>
-          <h3 className="text-4xl font-oswald font-black text-white mb-4 text-center uppercase tracking-tight">
-            Выберите виджеты
-          </h3>
-          <p className="text-base text-white/50 text-center mb-10 max-w-[480px] leading-relaxed">
-            Настройте метрики для отслеживания, чтобы увидеть статистику и прогресс
+        <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[400px]">
+          <h3 className="text-3xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">Аналитика пуста</h3>
+          <p className="text-base text-white/30 text-center mb-10 max-w-[400px] leading-relaxed font-medium">
+            Выберите метрики здоровья для отслеживания, чтобы увидеть подробную статистику и прогресс в этом разделе
           </p>
           <Link 
             href="/dashboard/health-tracker?tab=settings"
-            className="px-10 py-5 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 text-green-400 font-black text-base uppercase tracking-wider transition-all active:scale-95 flex items-center gap-3"
+            className="px-10 py-5 rounded-2xl bg-purple-500 text-white font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-purple-500/20 flex items-center gap-4"
           >
-            <BarChart3 className="w-6 h-6" />
+            <Settings className="w-5 h-5" />
             Настроить трекер
           </Link>
         </div>
