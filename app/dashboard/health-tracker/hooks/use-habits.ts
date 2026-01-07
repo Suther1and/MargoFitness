@@ -1,65 +1,24 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { Habit } from '../types'
 
 /**
- * Debounce функция
- */
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { flush: () => void } {
-  let timeout: NodeJS.Timeout | null = null
-  let lastArgs: any[] | null = null
-
-  const debouncedFn = function (...args: any[]) {
-    lastArgs = args
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      func(...lastArgs!)
-      timeout = null
-      lastArgs = null
-    }, wait)
-  } as T & { flush: () => void }
-
-  debouncedFn.flush = () => {
-    if (timeout) {
-      clearTimeout(timeout)
-      if (lastArgs) func(...lastArgs)
-      timeout = null
-      lastArgs = null
-    }
-  }
-
-  return debouncedFn
-}
-
-/**
  * Хук для управления привычками в Health Tracker
  * 
  * Управляет CRUD операциями над привычками и сохраняет их в Supabase
- * (в таблице diary_settings, поле habits).
- * 
- * @returns Массив привычек и методы для работы с ними
- * 
- * @example
- * ```tsx
- * const { habits, addHabit, updateHabit, deleteHabit } = useHabits()
- * 
- * // Добавить новую привычку
- * addHabit({ title: 'Зарядка', frequency: 7, time: 'morning', enabled: true })
- * 
- * // Обновить привычку
- * updateHabit('123', { streak: 5 })
- * ```
+ * с optimistic updates для мгновенного отклика UI.
  */
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  
+  // Таймер для debounced сохранения
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const pendingHabitsRef = useRef<Habit[] | null>(null)
 
   // Загрузка привычек из БД
   useEffect(() => {
@@ -87,39 +46,61 @@ export function useHabits() {
     loadHabits()
   }, [])
 
-  // Функция сохранения в БД
-  const saveToDb = useCallback(async (newHabits: Habit[]) => {
-    if (!userId) return
+  // Функция debounced сохранения в БД
+  const scheduleSave = useCallback((newHabits: Habit[]) => {
+    pendingHabitsRef.current = newHabits
     
-    await updateDiarySettings(userId, {
-      habits: newHabits as any
-    })
+    // Очищаем предыдущий таймер
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    
+    // Устанавливаем новый таймер
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (!userId || !pendingHabitsRef.current) return
+      
+      await updateDiarySettings(userId, {
+        habits: pendingHabitsRef.current as any
+      })
+      
+      pendingHabitsRef.current = null
+      saveTimeoutRef.current = null
+    }, 500)
   }, [userId])
 
-  // Debounced версия сохранения
-  const debouncedSave = useMemo(
-    () => debounce(saveToDb, 1000),
-    [saveToDb]
-  )
+  // Принудительное сохранение
+  const forceSave = useCallback(async () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+    
+    if (userId && pendingHabitsRef.current) {
+      await updateDiarySettings(userId, {
+        habits: pendingHabitsRef.current as any
+      })
+      pendingHabitsRef.current = null
+    }
+  }, [userId])
 
   // Принудительное сохранение перед уходом
   useEffect(() => {
     const handleBeforeUnload = () => {
-      debouncedSave.flush()
+      forceSave()
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
-      debouncedSave.flush()
+      forceSave()
     }
-  }, [debouncedSave])
+  }, [forceSave])
 
   // Сохранение привычек (мгновенно в state + отложенно в БД)
   const saveHabits = useCallback((newHabits: Habit[]) => {
     setHabits(newHabits)
-    debouncedSave(newHabits)
-  }, [debouncedSave])
+    scheduleSave(newHabits)
+  }, [scheduleSave])
 
   // Добавить привычку
   const addHabit = useCallback((habit: Omit<Habit, 'id' | 'streak' | 'createdAt'>) => {

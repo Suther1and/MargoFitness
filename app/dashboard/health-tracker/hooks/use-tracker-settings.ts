@@ -1,60 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
 
 /**
- * Debounce функция
- */
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { flush: () => void } {
-  let timeout: NodeJS.Timeout | null = null
-  let lastArgs: any[] | null = null
-
-  const debouncedFn = function (...args: any[]) {
-    lastArgs = args
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      func(...lastArgs!)
-      timeout = null
-      lastArgs = null
-    }, wait)
-  } as T & { flush: () => void }
-
-  debouncedFn.flush = () => {
-    if (timeout) {
-      clearTimeout(timeout)
-      if (lastArgs) func(...lastArgs)
-      timeout = null
-      lastArgs = null
-    }
-  }
-
-  return debouncedFn
-}
-
-/**
  * Хук для управления настройками Health Tracker
  * 
  * Управляет состоянием виджетов (вкл/выкл, цели), параметрами пользователя
- * (рост, вес, возраст, пол) и сохраняет все в Supabase с debounce.
- * 
- * @returns Объект с настройками и методами для их изменения
- * 
- * @example
- * ```tsx
- * const { settings, toggleWidget, updateGoal } = useTrackerSettings()
- * 
- * // Включить виджет воды
- * toggleWidget('water')
- * 
- * // Установить цель по воде
- * updateGoal('water', 2500)
- * ```
+ * и сохраняет все в Supabase с optimistic updates.
  */
 const VISITED_KEY = 'health_tracker_visited'
 
@@ -84,7 +39,6 @@ const DEFAULT_SETTINGS: TrackerSettings = {
 function dbToAppSettings(dbData: any): TrackerSettings {
   const widgets: any = {}
   
-  // Преобразуем массивы и объекты БД в структуру виджетов
   const enabledWidgets = dbData.enabled_widgets || []
   const widgetGoals = dbData.widget_goals || {}
   const widgetsInPlan = dbData.widgets_in_daily_plan || []
@@ -131,6 +85,10 @@ export function useTrackerSettings() {
     return !localStorage.getItem(VISITED_KEY)
   })
   const [isLoaded, setIsLoaded] = useState(false)
+  
+  // Таймер для debounced сохранения
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const pendingSettingsRef = useRef<TrackerSettings | null>(null)
 
   // Получаем userId и загружаем настройки
   useEffect(() => {
@@ -158,21 +116,74 @@ export function useTrackerSettings() {
     loadSettings()
   }, [])
 
-  // Функция сохранения в БД
-  const saveToDb = useCallback(async (newSettings: TrackerSettings) => {
-    if (!userId) return
+  // Функция debounced сохранения в БД
+  const scheduleSave = useCallback((newSettings: TrackerSettings) => {
+    pendingSettingsRef.current = newSettings
     
-    const dbSettings = appToDbSettings(newSettings)
-    await updateDiarySettings(userId, dbSettings)
+    // Очищаем предыдущий таймер
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+    
+    // Устанавливаем новый таймер
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (!userId || !pendingSettingsRef.current) return
+      
+      const dbSettings = appToDbSettings(pendingSettingsRef.current)
+      await updateDiarySettings(userId, dbSettings)
+      
+      pendingSettingsRef.current = null
+      saveTimeoutRef.current = null
+    }, 500) // Уменьшил до 500ms для более быстрого сохранения
   }, [userId])
 
-  // Debounced версия сохранения (1 сек после последнего изменения)
-  const debouncedSave = useMemo(
-    () => debounce(saveToDb, 1000),
-    [saveToDb]
-  )
+  // Принудительное сохранение
+  const forceSave = useCallback(async () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+    
+    if (userId && pendingSettingsRef.current) {
+      const dbSettings = appToDbSettings(pendingSettingsRef.current)
+      await updateDiarySettings(userId, dbSettings)
+      pendingSettingsRef.current = null
+    }
+  }, [userId])
 
-  // Сохранение настроек (мгновенно в state + отложенно в БД)
+  // Принудительное сохранение перед уходом
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        if (userId && pendingSettingsRef.current) {
+          const dbSettings = appToDbSettings(pendingSettingsRef.current)
+          // Синхронный запрос для гарантии сохранения
+          navigator.sendBeacon(
+            '/api/diary/settings',
+            JSON.stringify({ userId, settings: dbSettings })
+          )
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      forceSave()
+    }
+  }, [userId, forceSave])
+
+  // Универсальная функция обновления настроек
+  const updateSettings = useCallback((updater: (prev: TrackerSettings) => TrackerSettings) => {
+    setSettings(prev => {
+      const newSettings = updater(prev)
+      scheduleSave(newSettings)
+      return newSettings
+    })
+  }, [scheduleSave])
+
+  // Сохранение настроек (для внешнего использования)
   const saveSettings = useCallback((newSettings: TrackerSettings) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(VISITED_KEY, 'true')
@@ -180,93 +191,63 @@ export function useTrackerSettings() {
     }
     
     setSettings(newSettings)
-    debouncedSave(newSettings)
-  }, [debouncedSave])
-
-  // Принудительное сохранение перед уходом
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      debouncedSave.flush()
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      debouncedSave.flush()
-    }
-  }, [debouncedSave])
+    scheduleSave(newSettings)
+  }, [scheduleSave])
 
   // Переключение виджета (вкл/выкл)
   const toggleWidget = useCallback((widgetId: WidgetId) => {
-    setSettings(prev => {
-      const currentEnabled = prev.widgets[widgetId].enabled
-      const newSettings = {
-        ...prev,
-        widgets: {
-          ...prev.widgets,
-          [widgetId]: {
-            ...prev.widgets[widgetId],
-            enabled: !currentEnabled,
-          },
+    updateSettings(prev => ({
+      ...prev,
+      widgets: {
+        ...prev.widgets,
+        [widgetId]: {
+          ...prev.widgets[widgetId],
+          enabled: !prev.widgets[widgetId].enabled,
         },
-      }
-      debouncedSave(newSettings)
-      return newSettings
-    })
-  }, [debouncedSave])
+      },
+    }))
+  }, [updateSettings])
 
   // Обновление цели виджета
   const updateGoal = useCallback((widgetId: WidgetId, goal: number | null) => {
-    setSettings(prev => {
-      const newSettings = {
-        ...prev,
-        widgets: {
-          ...prev.widgets,
-          [widgetId]: {
-            ...prev.widgets[widgetId],
-            goal,
-          },
+    updateSettings(prev => ({
+      ...prev,
+      widgets: {
+        ...prev.widgets,
+        [widgetId]: {
+          ...prev.widgets[widgetId],
+          goal,
         },
-      }
-      debouncedSave(newSettings)
-      return newSettings
-    })
-  }, [debouncedSave])
+      },
+    }))
+  }, [updateSettings])
 
   // Переключение "в план на день"
   const toggleInDailyPlan = useCallback((widgetId: WidgetId) => {
-    setSettings(prev => {
-      const newSettings = {
-        ...prev,
-        widgets: {
-          ...prev.widgets,
-          [widgetId]: {
-            ...prev.widgets[widgetId],
-            inDailyPlan: !prev.widgets[widgetId].inDailyPlan,
-          },
+    updateSettings(prev => ({
+      ...prev,
+      widgets: {
+        ...prev.widgets,
+        [widgetId]: {
+          ...prev.widgets[widgetId],
+          inDailyPlan: !prev.widgets[widgetId].inDailyPlan,
         },
-      }
-      debouncedSave(newSettings)
-      return newSettings
-    })
-  }, [debouncedSave])
+      },
+    }))
+  }, [updateSettings])
 
   // Обновление параметров пользователя
   const updateUserParams = useCallback((params: Partial<UserParameters>) => {
-    setSettings(prev => {
-      const newSettings = {
-        ...prev,
-        userParams: {
-          ...prev.userParams,
-          ...params,
-        },
-      }
-      debouncedSave(newSettings)
-      return newSettings
-    })
-  }, [debouncedSave])
+    updateSettings(prev => ({
+      ...prev,
+      userParams: {
+        ...prev.userParams,
+        ...params,
+      },
+    }))
+  }, [updateSettings])
 
-  // Получение отсортированного списка виджетов (активные наверху)
+  // Получение отсортированного списка виджетов
   const getSortedWidgets = useCallback(() => {
     const widgetIds = Object.keys(WIDGET_CONFIGS) as WidgetId[]
     
@@ -274,14 +255,13 @@ export function useTrackerSettings() {
       const aEnabled = settings.widgets[a].enabled
       const bEnabled = settings.widgets[b].enabled
       
-      // Активные виджеты наверху
       if (aEnabled && !bEnabled) return -1
       if (!aEnabled && bEnabled) return 1
       return 0
     })
   }, [settings])
 
-  // Отметить визит вручную (для баннера)
+  // Отметить визит вручную
   const markAsVisited = useCallback(() => {
     if (typeof window === 'undefined') return
     localStorage.setItem(VISITED_KEY, 'true')
