@@ -552,7 +552,12 @@ function HealthTrackerContent() {
                         exit={{ opacity: 0 }} 
                         transition={{ duration: 0.2 }}
                       >
-                        <StatsTab periodType={statsPeriodType} dateRange={statsDateRange} />
+                        <StatsTab 
+                          periodType={statsPeriodType} 
+                          dateRange={statsDateRange} 
+                          data={data}
+                          onPeriodSelect={handleStatsPeriodSelect}
+                        />
                       </motion.div>
                     )}
                     {activeTab === 'overview' && (
