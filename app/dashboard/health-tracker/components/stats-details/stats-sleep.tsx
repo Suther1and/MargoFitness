@@ -1,334 +1,165 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Moon, Target, Award } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ReferenceLine, Cell } from "recharts"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine } from "recharts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { getSleepStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsSleepProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
 
-const SLEEP_DATA = [
-  { date: "Пн", hours: 7.2 },
-  { date: "Вт", hours: 8.1 },
-  { date: "Ср", hours: 6.8 },
-  { date: "Чт", hours: 7.5 },
-  { date: "Пт", hours: 7.8 },
-  { date: "Сб", hours: 8.5 },
-  { date: "Вс", hours: 7.3 },
-]
+const chartConfig = { value: { label: "Часы сна", color: "#6366f1" } } satisfies ChartConfig
 
-const chartConfig = {
-  hours: {
-    label: "Часы сна",
-    color: "#818cf8",
-  },
-} satisfies ChartConfig
-
-export function StatsSleep({ period }: StatsSleepProps) {
-  const avgHours = (SLEEP_DATA.reduce((acc, day) => acc + day.hours, 0) / SLEEP_DATA.length).toFixed(1)
-  const goal = 8.0
-  const bestSleep = SLEEP_DATA.reduce((max, day) => day.hours > max.hours ? day : max, SLEEP_DATA[0])
-  const worstSleep = SLEEP_DATA.reduce((min, day) => day.hours < min.hours ? day : min, SLEEP_DATA[0])
-  const daysWithGoodSleep = SLEEP_DATA.filter(day => day.hours >= 7).length
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+export function StatsSleep({ dateRange }: StatsSleepProps) {
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+        
+        const result = await getSleepStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          const chartData = result.data.map(entry => ({
+            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+            hours: entry.hours || 0
+          }))
+          
+          setData(chartData)
+        }
+      } catch (err) {
+        console.error('Error loading sleep stats:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    if (isSettingsLoaded) {
+      loadData()
+    }
+  }, [dateRange, isSettingsLoaded])
+  
+  if (!isSettingsLoaded || isLoading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-indigo-400/20 border-t-indigo-400 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка данных о сне...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <Moon className="w-16 h-16 text-white/20 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Нет данных о сне</h3>
+          <p className="text-white/40 text-sm">Начните отслеживать сон в трекере</p>
+        </div>
+      </div>
+    )
   }
 
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  }
+  const avgHours = (data.reduce((acc, day) => acc + day.hours, 0) / data.length).toFixed(1)
+  const goal = settings.widgets.sleep?.goal || 8
+  const bestSleep = data.reduce((max, day) => day.hours > max.hours ? day : max, data[0])
+  const worstSleep = data.reduce((min, day) => day.hours < min.hours ? day : min, data[0])
+  const daysWithGoodSleep = data.filter(day => day.hours >= 7).length
+
+  const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } }
+  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
-    >
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
       <div className="space-y-6">
-        {/* График */}
         <motion.div variants={item}>
-          <div className="bg-[#121214]/60 border border-white/10 rounded-[2.5rem] p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-white/5 flex items-center justify-center">
-                  <Moon className="w-5 h-5 text-indigo-400" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-tight">Сон</h3>
-                  <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
-                    {daysWithGoodSleep}/{SLEEP_DATA.length} дней с хорошим сном (7+ ч)
-                  </p>
-                </div>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-400/10 border border-indigo-400/20 flex items-center justify-center shrink-0">
+                <Moon className="w-5 h-5 text-indigo-400" />
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-black text-white tabular-nums leading-none">
-                  {avgHours}<span className="text-sm text-white/30 font-medium">ч</span>
-                </div>
-                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mt-1 whitespace-nowrap">
-                  Средн.
-                </p>
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-wide text-white/90">Сон</h3>
+                <p className="text-[10px] text-white/40 uppercase tracking-[0.1em]">За выбранный период</p>
               </div>
             </div>
 
-            <ChartContainer config={chartConfig} className="h-[200px] w-full">
-              <BarChart data={SLEEP_DATA} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={12}
-                  stroke="rgba(255,255,255,0.2)"
-                  fontSize={10}
-                  fontWeight="bold"
-                />
-                <YAxis hide domain={[0, 10]} />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent 
-                    formatter={(value) => [`${value} часов`, 'Сон']}
-                  />}
-                />
-                <ReferenceLine 
-                  y={goal} 
-                  stroke="rgba(129, 140, 248, 0.3)" 
-                  strokeDasharray="5 5"
-                  label={{ value: 'Цель', position: 'right', fill: 'rgba(255,255,255,0.4)', fontSize: 10 }}
-                />
-                <Bar
-                  dataKey="hours"
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={36}
-                >
-                  {SLEEP_DATA.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={
-                        entry.hours >= 8 ? "#818cf8" : 
-                        entry.hours >= 7 ? "rgba(129, 140, 248, 0.6)" : 
-                        entry.hours >= 6 ? "rgba(251, 191, 36, 0.6)" :
-                        "rgba(239, 68, 68, 0.6)"
-                      } 
-                    />
-                  ))}
-                </Bar>
+            <ChartContainer config={chartConfig} className="h-[240px] w-full">
+              <BarChart data={data} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 700 }} />
+                <ReferenceLine y={goal} stroke="#6366f1" strokeDasharray="3 3" strokeOpacity={0.3} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="hours" fill="#6366f1" radius={[8, 8, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ChartContainer>
-
-            {/* Легенда */}
-            <div className="mt-4 flex items-center justify-center gap-4 text-[10px]">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[#818cf8]" />
-                <span className="text-white/60 font-medium">≥8ч (отлично)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[rgba(129,140,248,0.6)]" />
-                <span className="text-white/60 font-medium">7-8ч (хорошо)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[rgba(251,191,36,0.6)]" />
-                <span className="text-white/60 font-medium">6-7ч (мало)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[rgba(239,68,68,0.6)]" />
-                <span className="text-white/60 font-medium">&lt;6ч (недостаток)</span>
-              </div>
-            </div>
-          </div>
+          </Card>
         </motion.div>
       </div>
 
-      {/* Персональные инсайты */}
-      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-indigo-400" />
-          </div>
-          <div>
-            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
-            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ сна</p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {/* Главная метрика */}
-          {parseFloat(avgHours) >= 8 ? (
-            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
-                    <Award className="w-4 h-4 text-indigo-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-indigo-400 font-bold mb-1.5">⭐ Идеально!</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Вы спите <span className="font-bold text-white">{avgHours} часов</span> — это оптимальная продолжительность
-                    для полноценного восстановления организма и отличного самочувствия.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-                    <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">
-                      Продолжайте в том же духе
-                    </span>
-                  </div>
+      <div className="space-y-4">
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="w-8 h-8 text-indigo-400" />
+                <div>
+                  <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Среднее</div>
+                  <div className="text-2xl font-black text-white tracking-tight tabular-nums">{avgHours}<span className="text-sm text-white/40">ч</span></div>
                 </div>
               </div>
             </div>
-          ) : parseFloat(avgHours) >= 7 ? (
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                    <Moon className="w-4 h-4 text-purple-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-purple-300 font-bold mb-1.5">Хорошо, но можно лучше</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Спите <span className="font-bold text-white">{avgHours} ч</span> — это нормально, но для полноценного
-                    восстановления рекомендуется <span className="font-bold text-white">8+ часов</span>.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                    <Target className="w-3 h-3 text-purple-400" />
-                    <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">
-                      Добавьте {(goal - parseFloat(avgHours)).toFixed(1)} ч
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : parseFloat(avgHours) >= 6 ? (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                    <Moon className="w-4 h-4 text-amber-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-amber-300 font-bold mb-1.5">⚠️ Мало спите</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Спите всего <span className="font-bold text-white">{avgHours} ч</span>. 
-                    Это может привести к усталости и снижению продуктивности. 
-                    Добавьте <span className="font-bold text-amber-300">{(goal - parseFloat(avgHours)).toFixed(1)} ч</span>.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <Target className="w-3 h-3 text-amber-400" />
-                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                      Ложитесь раньше
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                    <Moon className="w-4 h-4 text-red-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-red-300 font-bold mb-1.5">🚨 Критический недостаток сна</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Спите <span className="font-bold text-white">{avgHours} ч</span> — это значительно ниже нормы
-                    и негативно влияет на здоровье, иммунитет и когнитивные функции.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <Target className="w-3 h-3 text-red-400" />
-                    <span className="text-[10px] font-bold text-red-300 uppercase tracking-wider">
-                      Срочно увеличьте сон до {goal}ч
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </Card>
+        </motion.div>
 
-          {/* Анализ продолжительности */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Moon className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Продолжительность</span>
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Статистика</div>
+            <div className="space-y-2 text-xs text-white/60">
+              <div>Лучший день: <span className="font-bold text-white">{bestSleep.date}</span> — <span className="font-bold text-indigo-400">{bestSleep.hours}ч</span></div>
+              <div>Худший день: <span className="font-bold text-white">{worstSleep.date}</span> — <span className="font-bold text-amber-400">{worstSleep.hours}ч</span></div>
+              <div>Дней с хорошим сном (7+ч): <span className="font-bold text-white">{daysWithGoodSleep} из {data.length}</span></div>
             </div>
-            <p className="text-[11px] text-white/60 leading-relaxed">
-              {parseFloat(avgHours) >= 8 ? (
-                <>Оптимально! <span className="font-bold text-white">8+ часов</span> восстанавливают организм.</>
-              ) : parseFloat(avgHours) >= 7 ? (
-                <>Неплохо, но <span className="font-bold text-white">8 часов</span> — идеал для большинства.</>
-              ) : (
-                <>Критично мало. Нужно минимум <span className="font-bold text-white">7-8 часов</span> для восстановления.</>
-              )}
-            </p>
-          </div>
+          </Card>
+        </motion.div>
 
-          {/* Статистика */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Award className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Статистика</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[11px] text-white/60">
-                Лучший день: <span className="font-bold text-white">{bestSleep.date}</span> — 
-                <span className="font-bold text-indigo-400"> {bestSleep.hours}ч</span>
-              </p>
-              <p className="text-[11px] text-white/60">
-                Худший день: <span className="font-bold text-white">{worstSleep.date}</span> — 
-                <span className="font-bold text-amber-400"> {worstSleep.hours}ч</span>
-              </p>
-              <p className="text-[11px] text-white/60">
-                Дней с хорошим сном (7+ч): <span className="font-bold text-white">{daysWithGoodSleep} из {SLEEP_DATA.length}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Рекомендации</span>
-            </div>
-            <div className="space-y-2">
-              {parseFloat(avgHours) < 7 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Ложитесь на <span className="font-bold text-white">{Math.round((goal - parseFloat(avgHours)) * 60)} минут</span> раньше. 
-                  Установите будильник за час до сна для подготовки.
+        <motion.div variants={item}>
+          <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-500/20 backdrop-blur-xl p-5">
+            <div className="flex items-start gap-3">
+              <Award className="w-5 h-5 text-indigo-400 shrink-0 mt-1" />
+              <div>
+                <h4 className="text-sm font-bold text-white mb-1">Рекомендации</h4>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  {parseFloat(avgHours) >= 7 
+                    ? "Отличный сон! Продолжайте придерживаться режима для восстановления организма"
+                    : "Старайтесь спать минимум 7 часов для полноценного восстановления"}
                 </p>
-              )}
-              {parseFloat(avgHours) >= goal && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Идеальный режим! Поддерживайте <span className="font-bold text-white">постоянное время</span> отхода ко сну 
-                  даже в выходные для стабильного циркадного ритма.
-                </p>
-              )}
-              {parseFloat(avgHours) >= 7 && parseFloat(avgHours) < 8 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Для достижения идеала: <span className="font-bold text-white">темнота, тишина, 18-20°C</span> в комнате. 
-                  Проветривайте перед сном.
-                </p>
-              )}
-              <p className="text-xs text-white/70 leading-relaxed pt-2 border-t border-white/10">
-                💡 Избегайте экранов за <span className="font-bold text-white">1-2 часа</span> до сна. 
-                Синий свет подавляет мелатонин.
-              </p>
+              </div>
             </div>
-          </div>
-        </div>
-      </motion.div>
+          </Card>
+        </motion.div>
+      </div>
     </motion.div>
   )
 }
-

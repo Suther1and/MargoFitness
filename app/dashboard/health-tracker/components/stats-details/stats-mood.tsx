@@ -1,313 +1,165 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Smile, Frown, Meh, Laugh, Annoyed, Award } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Smile, Zap, TrendingUp, Award } from "lucide-react"
+import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card } from "@/components/ui/card"
+import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { getMoodStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsMoodProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
 
-const MOOD_DATA = [
-  { date: "Пн", mood: 4, energy: 7 },
-  { date: "Вт", mood: 5, energy: 8 },
-  { date: "Ср", mood: 3, energy: 6 },
-  { date: "Чт", mood: 4, energy: 7 },
-  { date: "Пт", mood: 5, energy: 9 },
-  { date: "Сб", mood: 4, energy: 7 },
-  { date: "Вс", mood: 3, energy: 6 },
-]
+const chartConfig = {
+  mood: { label: "Настроение", color: "#ec4899" },
+  energy: { label: "Энергия", color: "#f59e0b" }
+} satisfies ChartConfig
 
-const MOOD_ICONS = [
-  { rating: 1, icon: Frown, color: "text-red-400", label: "Плохое" },
-  { rating: 2, icon: Annoyed, color: "text-orange-400", label: "Так себе" },
-  { rating: 3, icon: Meh, color: "text-yellow-400", label: "Нормальное" },
-  { rating: 4, icon: Smile, color: "text-emerald-400", label: "Хорошее" },
-  { rating: 5, icon: Laugh, color: "text-pink-400", label: "Отличное" },
-]
-
-export function StatsMood({ period }: StatsMoodProps) {
-  const avgMood = (MOOD_DATA.reduce((acc, day) => acc + day.mood, 0) / MOOD_DATA.length).toFixed(1)
-  const avgEnergy = (MOOD_DATA.reduce((acc, day) => acc + day.energy, 0) / MOOD_DATA.length).toFixed(1)
-
-  const moodCounts = MOOD_DATA.reduce((acc, day) => {
-    acc[day.mood] = (acc[day.mood] || 0) + 1
-    return acc
-  }, {} as Record<number, number>)
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+export function StatsMood({ dateRange }: StatsMoodProps) {
+  const { isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+        
+        const result = await getMoodStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          const chartData = result.data.map(entry => ({
+            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+            mood: entry.mood || 0,
+            energy: entry.energy || 0
+          }))
+          
+          setData(chartData)
+        }
+      } catch (err) {
+        console.error('Error loading mood stats:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    if (isSettingsLoaded) {
+      loadData()
+    }
+  }, [dateRange, isSettingsLoaded])
+  
+  if (!isSettingsLoaded || isLoading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-pink-400/20 border-t-pink-400 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка данных о настроении...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <Smile className="w-16 h-16 text-white/20 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Нет данных о настроении</h3>
+          <p className="text-white/40 text-sm">Начните отслеживать настроение и энергию</p>
+        </div>
+      </div>
+    )
   }
 
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  }
+  const avgMood = (data.reduce((acc, d) => acc + d.mood, 0) / data.length).toFixed(1)
+  const avgEnergy = (data.reduce((acc, d) => acc + d.energy, 0) / data.length).toFixed(1)
+  
+  const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } }
+  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start"
-    >
-      <div className="space-y-6">
-        {/* Распределение настроения */}
-        <motion.div variants={item} className="p-5 rounded-2xl bg-white/5 border border-white/5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <Smile className="w-4 h-4 text-emerald-400" />
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div variants={item}>
+        <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-2xl bg-pink-400/10 border border-pink-400/20 flex items-center justify-center">
+              <Smile className="w-5 h-5 text-pink-400" />
             </div>
-            <span className="text-xs font-black uppercase tracking-widest text-white/80">Распределение</span>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wide text-white/90">Настроение и энергия</h3>
+              <p className="text-[10px] text-white/40 uppercase tracking-[0.1em]">За выбранный период</p>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            {[...MOOD_ICONS].reverse().map((mood) => {
-              const count = moodCounts[mood.rating] || 0
-              const percent = (count / MOOD_DATA.length) * 100
-              const Icon = mood.icon
+          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+            <LineChart data={data} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} />
+              <YAxis domain={[0, 10]} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Line type="monotone" dataKey="mood" stroke="#ec4899" strokeWidth={3} dot={{ fill: '#ec4899', r: 4 }} />
+              <Line type="monotone" dataKey="energy" stroke="#f59e0b" strokeWidth={3} dot={{ fill: '#f59e0b', r: 4 }} />
+            </LineChart>
+          </ChartContainer>
+        </Card>
+      </motion.div>
 
-              return (
-                <div key={mood.rating} className="flex items-center gap-3">
-                  <Icon className={cn("w-4 h-4 flex-shrink-0", mood.color)} />
-                  <span className="text-xs text-white/60 w-20">{mood.label}</span>
-                  <div className="flex-1 relative h-6 bg-white/5 rounded-lg overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percent}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={cn("absolute inset-y-0 left-0 rounded-lg", 
-                        mood.rating >= 4 ? "bg-emerald-500/30" :
-                        mood.rating === 3 ? "bg-yellow-500/30" :
-                        "bg-orange-500/30"
-                      )}
-                    />
-                    <span className="absolute inset-0 flex items-center px-2 text-xs font-bold text-white">
-                      {count} {count === 1 ? 'день' : 'дня'}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+      <div className="grid grid-cols-2 gap-4">
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center gap-3">
+              <Smile className="w-8 h-8 text-pink-400" />
+              <div>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Настроение</div>
+                <div className="text-2xl font-black text-white">{avgMood}<span className="text-sm text-white/40">/5</span></div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="bg-[#121214]/40 border-white/5 backdrop-blur-xl p-5">
+            <div className="flex items-center gap-3">
+              <Zap className="w-8 h-8 text-amber-400" />
+              <div>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Энергия</div>
+                <div className="text-2xl font-black text-white">{avgEnergy}<span className="text-sm text-white/40">/10</span></div>
+              </div>
+            </div>
+          </Card>
         </motion.div>
       </div>
 
-      {/* Персональные инсайты */}
-      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-pink-400" />
-          </div>
-          <div>
-            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
-            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ самочувствия</p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {/* Главная метрика */}
-          {parseFloat(avgMood) >= 4.5 && parseFloat(avgEnergy) >= 8 ? (
-            <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center">
-                    <Laugh className="w-4 h-4 text-pink-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-pink-400 font-bold mb-1.5">🌟 Отличное состояние!</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Настроение <span className="font-bold text-white">{avgMood}/5</span> и энергия 
-                    <span className="font-bold text-white"> {avgEnergy}/10</span> на высоте! 
-                    Вы в прекрасной форме.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                    <span className="text-[10px] font-bold text-pink-300 uppercase tracking-wider">
-                      Продолжайте в том же духе
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : parseFloat(avgMood) >= 3.5 && parseFloat(avgEnergy) >= 6.5 ? (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                    <Smile className="w-4 h-4 text-emerald-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-emerald-400 font-bold mb-1.5">😊 Хорошее самочувствие</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Настроение <span className="font-bold text-white">{avgMood}/5</span> и энергия 
-                    <span className="font-bold text-white"> {avgEnergy}/10</span> на хорошем уровне. 
-                    Стабильное состояние.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
-                      Поддерживайте баланс
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : parseFloat(avgMood) >= 3 ? (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                    <Meh className="w-4 h-4 text-amber-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-amber-300 font-bold mb-1.5">😐 Среднее состояние</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Настроение <span className="font-bold text-white">{avgMood}/5</span> и энергия 
-                    <span className="font-bold text-white"> {avgEnergy}/10</span>. 
-                    Есть потенциал для улучшения.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <Smile className="w-3 h-3 text-amber-400" />
-                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                      Добавьте активности
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
-                    <Frown className="w-4 h-4 text-orange-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-300 font-bold mb-1.5">😔 Низкое настроение</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Настроение <span className="font-bold text-white">{avgMood}/5</span> и энергия 
-                    <span className="font-bold text-white"> {avgEnergy}/10</span> ниже нормы. 
-                    Стоит обратить внимание.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <Award className="w-3 h-3 text-orange-400" />
-                    <span className="text-[10px] font-bold text-orange-300 uppercase tracking-wider">
-                      Позаботьтесь о себе
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Анализ настроения и энергии */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Smile className="w-4 h-4 text-pink-400" />
-                <span className="text-xs font-bold text-pink-400 uppercase tracking-wider">Настроение</span>
-              </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {parseFloat(avgMood) >= 4 ? (
-                  <>Отлично! <span className="font-bold text-white">{avgMood}/5</span> — позитивное состояние.</>
-                ) : parseFloat(avgMood) >= 3 ? (
-                  <>Норма. <span className="font-bold text-white">{avgMood}/5</span> — можно улучшить.</>
-                ) : (
-                  <>Низко. <span className="font-bold text-white">{avgMood}/5</span> — нужна поддержка.</>
-                )}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Энергия</span>
-              </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {parseFloat(avgEnergy) >= 8 ? (
-                  <>Высокая! <span className="font-bold text-white">{avgEnergy}/10</span> — отличная бодрость.</>
-                ) : parseFloat(avgEnergy) >= 6 ? (
-                  <>Норма. <span className="font-bold text-white">{avgEnergy}/10</span> — стабильный уровень.</>
-                ) : (
-                  <>Низкая. <span className="font-bold text-white">{avgEnergy}/10</span> — нужен отдых.</>
-                )}
+      <motion.div variants={item}>
+        <Card className="bg-gradient-to-br from-pink-500/10 to-purple-500/10 border-pink-500/20 backdrop-blur-xl p-5">
+          <div className="flex items-start gap-3">
+            <Award className="w-5 h-5 text-pink-400 shrink-0 mt-1" />
+            <div>
+              <h4 className="text-sm font-bold text-white mb-1">Анализ</h4>
+              <p className="text-xs text-white/60 leading-relaxed">
+                {parseFloat(avgMood) >= 4 && parseFloat(avgEnergy) >= 7
+                  ? "Отличные показатели! Вы в гармонии с собой"
+                  : parseFloat(avgMood) < 3 || parseFloat(avgEnergy) < 5
+                  ? "Возможно, стоит больше отдыхать и уделить внимание восстановлению"
+                  : "Хорошие показатели, продолжайте следить за самочувствием"}
               </p>
             </div>
           </div>
-
-          {/* Анализ распределения */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 mb-3">
-              <Smile className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Распределение дней</span>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">Отличных дней:</span>
-                <span className="font-bold text-pink-400">{moodCounts[5] || 0}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">Хороших дней:</span>
-                <span className="font-bold text-emerald-400">{moodCounts[4] || 0}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">Средних дней:</span>
-                <span className="font-bold text-yellow-400">{moodCounts[3] || 0}</span>
-              </div>
-              {(moodCounts[2] || 0) + (moodCounts[1] || 0) > 0 && (
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/60">Плохих дней:</span>
-                  <span className="font-bold text-orange-400">{(moodCounts[2] || 0) + (moodCounts[1] || 0)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/20">
-            <div className="flex items-center gap-2 mb-3">
-              <Award className="w-4 h-4 text-pink-400" />
-              <span className="text-xs font-bold text-pink-300 uppercase tracking-wider">Рекомендации</span>
-            </div>
-            <div className="space-y-2">
-              {parseFloat(avgMood) < 3 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Низкое настроение может быть связано со сном, питанием или стрессом. 
-                  Проверьте <span className="font-bold text-white">сон (8ч)</span> и 
-                  <span className="font-bold text-white"> активность</span>.
-                </p>
-              )}
-              {parseFloat(avgEnergy) < 6 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Низкая энергия: добавьте <span className="font-bold text-white">30 мин прогулки</span> утром, 
-                  проверьте уровень витамина D и железа.
-                </p>
-              )}
-              {parseFloat(avgMood) >= 4 && parseFloat(avgEnergy) >= 7 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Отличное состояние! Поддерживайте <span className="font-bold text-white">регулярность</span>: 
-                  сон, питание, активность, общение.
-                </p>
-              )}
-              {parseFloat(avgMood) >= 3 && parseFloat(avgMood) < 4 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Добавьте <span className="font-bold text-white">приятных активностей</span>: 
-                  хобби, встречи с друзьями, природа, музыка.
-                </p>
-              )}
-              <p className="text-xs text-white/70 leading-relaxed pt-2 border-t border-white/10">
-                💡 Настроение связано с физическим здоровьем. Следите за <span className="font-bold text-white">сном, 
-                питанием и движением</span> — это основа хорошего самочувствия.
-              </p>
-            </div>
-          </div>
-        </div>
+        </Card>
       </motion.div>
     </motion.div>
   )
 }
-

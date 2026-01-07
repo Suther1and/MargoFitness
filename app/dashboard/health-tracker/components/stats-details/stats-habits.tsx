@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, Clock, PlusCircle } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, Cell } from "recharts"
@@ -11,28 +12,13 @@ import {
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 import { useHabits } from "../../hooks/use-habits"
+import { getHabitsStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format, differenceInDays } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsHabitsProps {
-  period: string
-}
-
-const WEEKLY_COMPLETION = [
-  { day: "Пн", value: 85 },
-  { day: "Вт", value: 90 },
-  { day: "Ср", value: 70 },
-  { day: "Чт", value: 95 },
-  { day: "Пт", value: 100 },
-  { day: "Сб", value: 60 },
-  { day: "Вс", value: 75 },
-]
-
-// Добавляем моковые данные для тепловой карты
-const getHeatmapData = (period: string) => {
-  if (period === '7d') return Array.from({ length: 7 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
-  if (period === '30d') return Array.from({ length: 30 }, (_, i) => ({ value: Math.random() * 100, label: `${i + 1}` }))
-  if (period === '180d') return Array.from({ length: 26 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
-  if (period === '360d') return Array.from({ length: 52 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
-  return Array.from({ length: 52 }, (_, i) => ({ value: Math.random() * 100, label: `W${i + 1}` }))
+  dateRange: { start: Date; end: Date }
 }
 
 const chartConfig = {
@@ -42,8 +28,62 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function StatsHabits({ period }: StatsHabitsProps) {
+export function StatsHabits({ dateRange }: StatsHabitsProps) {
   const { habits, isLoaded } = useHabits()
+  const [completionData, setCompletionData] = useState<any[]>([])
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
+  
+  // Загружаем статистику по привычкам
+  useEffect(() => {
+    async function loadStats() {
+      setIsLoadingStats(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user || habits.length === 0) {
+          setIsLoadingStats(false)
+          return
+        }
+        
+        const result = await getHabitsStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          // Рассчитываем процент выполнения по дням
+          const stats = result.data.map(entry => {
+            const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
+            const total = habits.filter(h => h.enabled).length
+            return {
+              date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+              value: total > 0 ? Math.round((completed / total) * 100) : 0
+            }
+          })
+          
+          setCompletionData(stats)
+        }
+      } catch (err) {
+        console.error('Error loading habits stats:', err)
+      } finally {
+        setIsLoadingStats(false)
+      }
+    }
+    
+    if (isLoaded) {
+      loadStats()
+    }
+  }, [dateRange, habits, isLoaded])
+  
+  // Показываем загрузку
+  if (!isLoaded || isLoadingStats) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка статистики привычек...</p>
+        </div>
+      </div>
+    )
+  }
   
   // Фильтруем только активные привычки
   const activeHabits = habits.filter(h => h.enabled)
@@ -63,8 +103,8 @@ export function StatsHabits({ period }: StatsHabitsProps) {
     }
   })
   
-  const avgCompletion = WEEKLY_COMPLETION.length > 0 
-    ? Math.round(WEEKLY_COMPLETION.reduce((acc, d) => acc + d.value, 0) / WEEKLY_COMPLETION.length)
+  const avgCompletion = completionData.length > 0 
+    ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
     : 0
   const heatmapData = getHeatmapData(period)
   
@@ -77,11 +117,13 @@ export function StatsHabits({ period }: StatsHabitsProps) {
   const totalHabits = HABIT_STATS.length
   
   // Анализ выходных vs будни
-  const weekdayCompletion = WEEKLY_COMPLETION.slice(0, 5).length > 0
-    ? WEEKLY_COMPLETION.slice(0, 5).reduce((acc, d) => acc + d.value, 0) / Math.max(1, WEEKLY_COMPLETION.slice(0, 5).length)
+  // Разделяем на будни и выходные (примерное разделение)
+  const midpoint = Math.floor(completionData.length * 5/7)
+  const weekdayCompletion = completionData.slice(0, midpoint).length > 0
+    ? completionData.slice(0, midpoint).reduce((acc, d) => acc + d.value, 0) / completionData.slice(0, midpoint).length
     : 0
-  const weekendCompletion = WEEKLY_COMPLETION.slice(5).length > 0
-    ? WEEKLY_COMPLETION.slice(5).reduce((acc, d) => acc + d.value, 0) / Math.max(1, WEEKLY_COMPLETION.slice(5).length)
+  const weekendCompletion = completionData.slice(midpoint).length > 0
+    ? completionData.slice(midpoint).reduce((acc, d) => acc + d.value, 0) / completionData.slice(midpoint).length
     : 0
   const weekendDrop = weekdayCompletion > 0 
     ? Math.round(((weekdayCompletion - weekendCompletion) / weekdayCompletion) * 100)
@@ -177,7 +219,7 @@ export function StatsHabits({ period }: StatsHabitsProps) {
             {period === '7d' && (
               <div className="mb-6">
                 <ChartContainer config={chartConfig} className="h-[180px] w-full">
-                  <BarChart data={WEEKLY_COMPLETION} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
+                  <BarChart data={completionData} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
                     <XAxis
                       dataKey="day"
@@ -197,7 +239,7 @@ export function StatsHabits({ period }: StatsHabitsProps) {
                       radius={[6, 6, 0, 0]}
                       maxBarSize={32}
                     >
-                      {WEEKLY_COMPLETION.map((entry, index) => (
+                      {completionData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
                           fill={entry.value >= 90 ? "#f59e0b" : entry.value >= 70 ? "rgba(245,158,11,0.6)" : "rgba(245,158,11,0.3)"} 
