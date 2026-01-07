@@ -36,11 +36,10 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   
   if (!settings?.widgets) return null
 
-  // Проверка наличия активных виджетов
-  const enabledWidgetsCount = Object.entries(settings.widgets)
-    .filter(([id, widget]) => widget.enabled && id !== 'habits')
-    .length
-  const hasAnyContent = enabledWidgetsCount > 0 || habits.length > 0
+  // Проверка наличия активных виджетов (только основные метрики здоровья)
+  const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
+  const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+  const hasAnyContent = hasMainWidgets || habits.length > 0
 
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } }
   const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }

@@ -88,11 +88,10 @@ function HealthTrackerContent() {
   const { settings, isFirstVisit } = useTrackerSettings()
   const { habits } = useHabits()
 
-  // Проверка наличия активных виджетов
-  const enabledWidgetsCount = Object.entries(settings.widgets)
-    .filter(([id, widget]) => widget.enabled && id !== 'habits')
-    .length
-  const hasAnyContent = enabledWidgetsCount > 0 || habits.length > 0
+  // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
+  const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
+  const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+  const hasAnyContent = hasMainWidgets || habits.length > 0
 
   // Detect desktop
   useEffect(() => {
@@ -462,7 +461,9 @@ function HealthTrackerContent() {
                         <div className="flex flex-col gap-6">
                           <GoalsSummaryCard data={data} />
                           <AchievementsCard />
-                          <DailyPhotosCard photos={data.dailyPhotos} />
+                          {settings.widgets.photos?.enabled && (
+                            <DailyPhotosCard photos={data.dailyPhotos} />
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -684,7 +685,9 @@ function HealthTrackerContent() {
 
                     <GoalsSummaryCard data={data} />
                     <AchievementsCard />
-                    <DailyPhotosCard photos={data.dailyPhotos} />
+                    {settings.widgets.photos?.enabled && (
+                      <DailyPhotosCard photos={data.dailyPhotos} />
+                    )}
                       </div>
                     </>
                   )}
