@@ -187,9 +187,17 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
                       )}
                     >
                       {/* Reward Badge */}
-                      {achievement.reward_amount && achievement.isUnlocked && (
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-lg">
-                          <span className="text-[10px] font-bold text-amber-400">
+                      {achievement.reward_amount && (
+                        <div className={cn(
+                          "absolute top-2 right-2 px-2 py-1 rounded-lg",
+                          achievement.isUnlocked 
+                            ? "bg-amber-500/20 border border-amber-500/30"
+                            : "bg-white/5 border border-white/10"
+                        )}>
+                          <span className={cn(
+                            "text-[10px] font-bold",
+                            achievement.isUnlocked ? "text-amber-400" : "text-white/40"
+                          )}>
                             +{achievement.reward_amount} 👟
                           </span>
                         </div>
