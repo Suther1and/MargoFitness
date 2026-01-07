@@ -129,4 +129,4 @@ export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: Sl
       </div>
     </div>
   )
-}
+})
