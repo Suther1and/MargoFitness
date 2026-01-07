@@ -15,6 +15,7 @@ interface HealthTrackerCardProps {
   className?: string
   containerClassName?: string
   rightAction?: ReactNode
+  onClick?: () => void
 }
 
 export function HealthTrackerCard({
@@ -26,10 +27,12 @@ export function HealthTrackerCard({
   iconBg = "bg-white/5",
   className,
   containerClassName,
-  rightAction
+  rightAction,
+  onClick
 }: HealthTrackerCardProps) {
   return (
     <div 
+      onClick={onClick}
       className={cn(
         "relative h-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#121214]/90 md:bg-[#121214]/40 md:backdrop-blur-xl transition-colors duration-500 hover:border-white/10 group",
         containerClassName
