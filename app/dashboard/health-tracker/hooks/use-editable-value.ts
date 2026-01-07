@@ -2,6 +2,22 @@
 
 import { useState, useCallback } from 'react'
 
+/**
+ * Хук для управления редактируемыми числовыми значениями с инкрементом/декрементом
+ * 
+ * Используется в карточках метрик для удобного редактирования значений
+ * (вода, шаги, вес и т.д.) через кнопки +/- или прямой ввод.
+ * 
+ * @example
+ * ```tsx
+ * const { isEditing, localValue, handleIncrement, handleDecrement, handleEdit } = 
+ *   useEditableValue(waterIntake, { 
+ *     onUpdate: (val) => setWaterIntake(val), 
+ *     step: 250, 
+ *     min: 0 
+ *   })
+ * ```
+ */
 interface UseEditableValueOptions {
   onUpdate: (value: number) => void
   step?: number

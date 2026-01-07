@@ -50,6 +50,29 @@ import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
 
+/**
+ * Health Tracker - главная страница отслеживания здоровья
+ * 
+ * Комплексное приложение для мониторинга различных метрик здоровья:
+ * - Вода, шаги, вес, сон, кофеин, настроение, питание
+ * - Система привычек с трекингом
+ * - Статистика за произвольные периоды
+ * - Достижения и мотивация
+ * - Фото-прогресс и заметки
+ * 
+ * @features
+ * - Полностью адаптивный дизайн (мобильный/десктопный)
+ * - Настраиваемые виджеты метрик
+ * - Анимации и переходы на Framer Motion
+ * - Offline-first с localStorage
+ * - Готов к интеграции с Supabase
+ * 
+ * @architecture
+ * - Разделение UI: мобильный/десктопный рендеринг (намеренно)
+ * - State management: React hooks + custom hooks
+ * - Data layer: готов к async/await Supabase queries
+ * - Shared components: переиспользуемые UI элементы
+ */
 export default function HealthTrackerPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>

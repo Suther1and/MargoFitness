@@ -3,6 +3,26 @@
 import { useState, useEffect, useCallback } from 'react'
 import { WidgetId, TrackerSettings, WidgetSettings, UserParameters, WIDGET_CONFIGS } from '../types'
 
+/**
+ * Хук для управления настройками Health Tracker
+ * 
+ * Управляет состоянием виджетов (вкл/выкл, цели), параметрами пользователя
+ * (рост, вес, возраст, пол) и сохраняет все в localStorage с синхронизацией
+ * между вкладками браузера.
+ * 
+ * @returns Объект с настройками и методами для их изменения
+ * 
+ * @example
+ * ```tsx
+ * const { settings, toggleWidget, updateGoal } = useTrackerSettings()
+ * 
+ * // Включить виджет воды
+ * toggleWidget('water')
+ * 
+ * // Установить цель по воде
+ * updateGoal('water', 2500)
+ * ```
+ */
 const STORAGE_KEY = 'health_tracker_settings'
 const VISITED_KEY = 'health_tracker_visited'
 

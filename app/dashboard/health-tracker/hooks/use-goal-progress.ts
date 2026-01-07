@@ -2,6 +2,21 @@
 
 import { useMemo } from 'react'
 
+/**
+ * Хук для расчета прогресса выполнения цели
+ * 
+ * Вычисляет процент выполнения, статус достижения цели,
+ * остаток до цели и превышение лимита.
+ * 
+ * @example
+ * ```tsx
+ * const { percentage, isDone, remaining } = useGoalProgress({ 
+ *   current: 1500, 
+ *   goal: 2000 
+ * })
+ * // percentage: 75, isDone: false, remaining: 500
+ * ```
+ */
 interface UseGoalProgressOptions {
   current: number
   goal: number

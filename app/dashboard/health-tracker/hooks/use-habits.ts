@@ -3,6 +3,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Habit } from '../types'
 
+/**
+ * Хук для управления привычками в Health Tracker
+ * 
+ * Управляет CRUD операциями над привычками и сохраняет их в localStorage
+ * с синхронизацией между вкладками браузера.
+ * 
+ * @returns Массив привычек и методы для работы с ними
+ * 
+ * @example
+ * ```tsx
+ * const { habits, addHabit, updateHabit, deleteHabit } = useHabits()
+ * 
+ * // Добавить новую привычку
+ * addHabit({ title: 'Зарядка', frequency: 7, time: 'morning', enabled: true })
+ * 
+ * // Обновить привычку
+ * updateHabit('123', { streak: 5 })
+ * ```
+ */
 const STORAGE_KEY = 'health_tracker_habits'
 
 export function useHabits() {
