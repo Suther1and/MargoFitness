@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Circle, Target } from 'lucide-react'
+import { CheckCircle2, Circle, Target, ShieldCheck, AlertCircle } from 'lucide-react'
 import { DailyMetrics, TrackerSettings, WidgetId, WIDGET_CONFIGS } from '../types'
 import { cn } from '@/lib/utils'
 
@@ -10,6 +10,16 @@ interface GoalsSummaryCardProps {
   onNavigateToSettings?: () => void
 }
 
+type MetricType = 'goal' | 'limit' // goal = достижение, limit = ограничение
+
+interface GoalData {
+  label: string
+  current: number
+  goal: number
+  unit: string
+  type: MetricType
+}
+
 export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: GoalsSummaryCardProps) {
   // Собираем виджеты, которые добавлены в план на день
   const trackedWidgets = Object.entries(settings.widgets)
@@ -17,7 +27,7 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
     .map(([id]) => id as WidgetId)
 
   // Маппинг виджетов на их данные
-  const getWidgetData = (widgetId: WidgetId) => {
+  const getWidgetData = (widgetId: WidgetId): GoalData | null => {
     const config = WIDGET_CONFIGS[widgetId]
     switch (widgetId) {
       case 'water':
@@ -25,42 +35,48 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
           label: config.name, 
           current: data.waterIntake, 
           goal: settings.widgets.water.goal || data.waterGoal, 
-          unit: 'мл' 
+          unit: 'мл',
+          type: 'goal'
         }
       case 'steps':
         return { 
           label: config.name, 
           current: data.steps, 
           goal: settings.widgets.steps.goal || data.stepsGoal, 
-          unit: '' 
+          unit: '',
+          type: 'goal'
         }
       case 'sleep':
         return { 
           label: config.name, 
           current: data.sleepHours, 
           goal: settings.widgets.sleep.goal || data.sleepGoal, 
-          unit: 'ч' 
+          unit: 'ч',
+          type: 'goal'
         }
       case 'caffeine':
         return { 
           label: config.name, 
           current: data.caffeineIntake, 
           goal: settings.widgets.caffeine.goal || data.caffeineGoal, 
-          unit: 'шт' 
+          unit: 'шт',
+          type: 'limit' // Это лимит!
         }
       case 'nutrition':
         return { 
           label: 'Калории', 
           current: data.calories, 
           goal: settings.widgets.nutrition.goal || data.caloriesGoal, 
-          unit: 'ккал' 
+          unit: 'ккал',
+          type: 'limit' // Это лимит!
         }
       case 'weight':
         return { 
           label: config.name, 
           current: data.weight, 
           goal: settings.widgets.weight.goal || data.weightGoal || data.weight, 
-          unit: 'кг' 
+          unit: 'кг',
+          type: 'goal'
         }
       default:
         return null
@@ -69,9 +85,12 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
 
   const goals = trackedWidgets
     .map(getWidgetData)
-    .filter(Boolean) as Array<{ label: string; current: number; goal: number; unit: string }>
+    .filter(Boolean) as GoalData[]
 
-  const completedCount = goals.filter(g => g.current >= g.goal).length
+  // Подсчет выполненных целей с учетом типа
+  const completedCount = goals.filter(g => 
+    g.type === 'goal' ? g.current >= g.goal : g.current <= g.goal
+  ).length
 
   // Пустое состояние, если нет отслеживаемых виджетов
   if (goals.length === 0) {
@@ -120,32 +139,82 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
 
       <div className="space-y-3">
         {goals.map((g) => {
-          const isDone = g.current >= g.goal
+          const isLimit = g.type === 'limit'
+          
+          // Для лимитов: выполнено если не превышен, для целей: выполнено если достигнута
+          const isDone = isLimit ? g.current <= g.goal : g.current >= g.goal
+          
+          // Процент выполнения
           const perc = Math.min((g.current / g.goal) * 100, 100)
+          
+          // Для лимитов определяем статус: в пределах нормы, близко к лимиту, превышен
+          const isExceeded = isLimit && g.current > g.goal
+          const isNearLimit = isLimit && !isExceeded && perc >= 80
           
           return (
             <div key={g.label} className="group/item">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  {isDone ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  {isLimit ? (
+                    // Для лимитов
+                    isExceeded ? (
+                      <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                    ) : (
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+                    )
                   ) : (
-                    <Circle className="w-3.5 h-3.5 text-white/20" />
+                    // Для целей
+                    isDone ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    ) : (
+                      <Circle className="w-3.5 h-3.5 text-white/20" />
+                    )
                   )}
                   <span className={cn(
                     "text-xs font-bold transition-colors",
-                    isDone ? "text-white/80" : "text-white/40"
+                    isLimit 
+                      ? isExceeded 
+                        ? "text-red-400" 
+                        : "text-amber-400/80"
+                      : isDone 
+                        ? "text-white/80" 
+                        : "text-white/40"
                   )}>
                     {g.label}
                   </span>
+                  {isLimit && (
+                    <span className="text-[9px] font-black text-amber-500/40 uppercase tracking-wider">
+                      Лимит
+                    </span>
+                  )}
                 </div>
-                <span className="text-[10px] font-bold text-white/20">
-                    {g.current} <span className="text-[8px] font-medium opacity-50">{g.unit}</span>
-                </span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[10px] font-bold text-white/20">
+                    {g.current}
+                  </span>
+                  {isLimit && (
+                    <span className="text-[9px] font-medium text-white/10">/</span>
+                  )}
+                  {isLimit && (
+                    <span className="text-[9px] font-medium text-white/10">{g.goal}</span>
+                  )}
+                  <span className="text-[8px] font-medium text-white/10">{g.unit}</span>
+                </div>
               </div>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div 
-                  className={cn("h-full transition-[width,background-color] duration-1000", isDone ? "bg-emerald-500" : "bg-white/10")}
+                  className={cn(
+                    "h-full transition-[width,background-color] duration-1000",
+                    isLimit 
+                      ? isExceeded 
+                        ? "bg-red-500" 
+                        : isNearLimit 
+                          ? "bg-amber-500" 
+                          : "bg-amber-500/60"
+                      : isDone 
+                        ? "bg-emerald-500" 
+                        : "bg-white/10"
+                  )}
                   style={{ width: `${perc}%` }}
                 />
               </div>
