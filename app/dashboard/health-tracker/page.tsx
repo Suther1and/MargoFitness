@@ -132,6 +132,19 @@ function HealthTrackerContent() {
     }))
   }, [habits])
 
+  // Синхронизируем цели виджетов из настроек
+  useEffect(() => {
+    setData(prev => ({
+      ...prev,
+      waterGoal: settings.widgets.water.goal ?? prev.waterGoal,
+      stepsGoal: settings.widgets.steps.goal ?? prev.stepsGoal,
+      sleepGoal: settings.widgets.sleep.goal ?? prev.sleepGoal,
+      caffeineGoal: settings.widgets.caffeine.goal ?? prev.caffeineGoal,
+      caloriesGoal: settings.widgets.nutrition.goal ?? prev.caloriesGoal,
+      weightGoal: settings.widgets.weight.goal ?? prev.weightGoal,
+    }))
+  }, [settings.widgets])
+
   useEffect(() => {
     setMounted(true)
     if ('scrollRestoration' in window.history) {
@@ -458,7 +471,14 @@ function HealthTrackerContent() {
                         transition={{ duration: 0.2 }}
                       >
                         <div className="flex flex-col gap-6">
-                          <GoalsSummaryCard data={data} />
+                          <GoalsSummaryCard 
+                            data={data} 
+                            settings={settings}
+                            onNavigateToSettings={() => {
+                              setActiveTab('settings')
+                              setSettingsSubTab('widgets')
+                            }}
+                          />
                           <AchievementsCard />
                           {settings.widgets.photos?.enabled && (
                             <DailyPhotosCard photos={data.dailyPhotos} />
@@ -681,7 +701,14 @@ function HealthTrackerContent() {
                       />
                     </HealthTrackerCard>
 
-                    <GoalsSummaryCard data={data} />
+                    <GoalsSummaryCard 
+                      data={data} 
+                      settings={settings}
+                      onNavigateToSettings={() => {
+                        setActiveTab('settings')
+                        setSettingsSubTab('widgets')
+                      }}
+                    />
                     <AchievementsCard />
                     {settings.widgets.photos?.enabled && (
                       <DailyPhotosCard photos={data.dailyPhotos} />

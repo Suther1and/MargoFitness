@@ -1,22 +1,108 @@
 'use client'
 
 import { CheckCircle2, Circle, Target } from 'lucide-react'
-import { DailyMetrics } from '../types'
+import { DailyMetrics, TrackerSettings, WidgetId, WIDGET_CONFIGS } from '../types'
 import { cn } from '@/lib/utils'
 
 interface GoalsSummaryCardProps {
   data: DailyMetrics
+  settings: TrackerSettings
+  onNavigateToSettings?: () => void
 }
 
-export function GoalsSummaryCard({ data }: GoalsSummaryCardProps) {
-  const goals = [
-    { label: 'Вода', current: data.waterIntake, goal: data.waterGoal, unit: 'мл' },
-    { label: 'Шаги', current: data.steps, goal: data.stepsGoal, unit: '' },
-    { label: 'Сон', current: data.sleepHours, goal: data.sleepGoal, unit: 'ч' },
-    { label: 'Кал', current: data.calories, goal: data.caloriesGoal, unit: 'ккал' },
-  ]
+export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: GoalsSummaryCardProps) {
+  // Собираем виджеты, которые добавлены в план на день
+  const trackedWidgets = Object.entries(settings.widgets)
+    .filter(([id, widget]) => widget.inDailyPlan && widget.enabled && id !== 'habits')
+    .map(([id]) => id as WidgetId)
+
+  // Маппинг виджетов на их данные
+  const getWidgetData = (widgetId: WidgetId) => {
+    const config = WIDGET_CONFIGS[widgetId]
+    switch (widgetId) {
+      case 'water':
+        return { 
+          label: config.name, 
+          current: data.waterIntake, 
+          goal: settings.widgets.water.goal || data.waterGoal, 
+          unit: 'мл' 
+        }
+      case 'steps':
+        return { 
+          label: config.name, 
+          current: data.steps, 
+          goal: settings.widgets.steps.goal || data.stepsGoal, 
+          unit: '' 
+        }
+      case 'sleep':
+        return { 
+          label: config.name, 
+          current: data.sleepHours, 
+          goal: settings.widgets.sleep.goal || data.sleepGoal, 
+          unit: 'ч' 
+        }
+      case 'caffeine':
+        return { 
+          label: config.name, 
+          current: data.caffeineIntake, 
+          goal: settings.widgets.caffeine.goal || data.caffeineGoal, 
+          unit: 'шт' 
+        }
+      case 'nutrition':
+        return { 
+          label: 'Калории', 
+          current: data.calories, 
+          goal: settings.widgets.nutrition.goal || data.caloriesGoal, 
+          unit: 'ккал' 
+        }
+      case 'weight':
+        return { 
+          label: config.name, 
+          current: data.weight, 
+          goal: settings.widgets.weight.goal || data.weightGoal || data.weight, 
+          unit: 'кг' 
+        }
+      default:
+        return null
+    }
+  }
+
+  const goals = trackedWidgets
+    .map(getWidgetData)
+    .filter(Boolean) as Array<{ label: string; current: number; goal: number; unit: string }>
 
   const completedCount = goals.filter(g => g.current >= g.goal).length
+
+  // Пустое состояние, если нет отслеживаемых виджетов
+  if (goals.length === 0) {
+    return (
+      <div className="rounded-[2.5rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl p-6 hover:border-white/10 transition-colors duration-300">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+            <Target className="w-4 h-4 text-emerald-400" />
+          </div>
+          <h3 className="text-sm font-black text-white uppercase tracking-widest">План на день</h3>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center py-6 px-4">
+          <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3">
+            <Target className="w-7 h-7 text-emerald-500/40" />
+          </div>
+          <p className="text-xs text-white/40 text-center mb-4 leading-relaxed">
+            Нажми <Target className="w-3 h-3 inline-block mx-0.5 text-emerald-400" /> рядом с виджетом для добавления в план на день
+          </p>
+          {onNavigateToSettings && (
+            <button 
+              onClick={onNavigateToSettings}
+              className="px-4 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/40 text-emerald-400 font-bold text-xs uppercase tracking-wider transition-all active:scale-95"
+            >
+              Перейти в настройки
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-[2.5rem] border border-white/5 bg-[#121214]/95 md:bg-[#121214]/40 md:backdrop-blur-xl p-6 hover:border-white/10 transition-colors duration-300">
