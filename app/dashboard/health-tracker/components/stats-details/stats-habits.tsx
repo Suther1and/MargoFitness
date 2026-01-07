@@ -88,10 +88,12 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
   // Фильтруем только активные привычки
   const activeHabits = habits.filter(h => h.enabled)
   
+  // Рассчитываем количество дней в периоде
+  const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
+  
   // Преобразуем привычки в формат для отображения статистики
   const HABIT_STATS = activeHabits.map(habit => {
     // Рассчитываем примерное выполнение на основе streak и частоты
-    const daysInPeriod = period === '7d' ? 7 : period === '30d' ? 30 : period === '180d' ? 180 : 365
     const expectedDays = Math.min(daysInPeriod, Math.floor(daysInPeriod * habit.frequency / 7))
     const completed = Math.min(habit.streak, expectedDays)
     
@@ -106,7 +108,6 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
   const avgCompletion = completionData.length > 0 
     ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
     : 0
-  const heatmapData = getHeatmapData(period)
   
   // Расчет динамических метрик из данных
   const bestHabit = HABIT_STATS.length > 0 
