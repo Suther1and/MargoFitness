@@ -42,6 +42,7 @@ import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { useHabits } from './hooks/use-habits'
 import { useStatsDateRange } from './hooks/use-stats-date-range'
 import { useHealthDiary } from './hooks/use-health-diary'
+import { usePrefetchStats } from './hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './utils/date-formatters'
 import { hasActiveMainWidgets } from './utils/widget-helpers'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
@@ -71,6 +72,8 @@ import { createClient } from '@/lib/supabase/client'
  * - Data layer: готов к async/await Supabase queries
  * - Shared components: переиспользуемые UI элементы
  */
+import { MetricCardSkeleton } from './components/metric-card-skeleton'
+
 export default function HealthTrackerPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
@@ -82,6 +85,16 @@ export default function HealthTrackerPage() {
 function HealthTrackerContent() {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
+
+  // Получаем userId один раз для всех хуков
+  const [userId, setUserId] = useState<string | null>(null)
+  
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUserId(data.user.id)
+    })
+  }, [])
 
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
@@ -104,8 +117,9 @@ function HealthTrackerContent() {
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
-  const { settings, isFirstVisit, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const { habits, isLoaded: isHabitsLoaded } = useHabits()
+  // Все хуки получают userId и загружаются параллельно
+  const { settings, isFirstVisit, isLoaded: isSettingsLoaded } = useTrackerSettings(userId)
+  const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
   const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
   
   // Интеграция с Supabase через useHealthDiary
@@ -119,7 +133,15 @@ function HealthTrackerContent() {
     updateNotes,
     toggleHabit: toggleHabitCompleted,
     forceSave
-  } = useHealthDiary({ selectedDate })
+  } = useHealthDiary({ userId, selectedDate })
+  
+  // Фоновая предзагрузка данных статистики - стартует параллельно
+  usePrefetchStats({
+    userId,
+    dateRange: statsDateRange,
+    enabled: !!userId, // Только проверка userId
+    settings
+  })
   
   // Объединяем данные из БД с настройками для отображения
   const data: DailyMetrics = {
@@ -214,11 +236,6 @@ function HealthTrackerContent() {
       setActiveTab(tabParam as any)
     }
   }, [tabParam])
-  
-  // Принудительное сохранение при смене даты
-  useEffect(() => {
-    forceSave()
-  }, [selectedDate, forceSave])
 
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
     // Проверяем, является ли это метрикой из БД или локальным состоянием
@@ -242,17 +259,8 @@ function HealthTrackerContent() {
     handleMetricUpdate('mood', val)
   }
 
-  // Показываем загрузку пока данные не готовы
-  if (!isSettingsLoaded || !isHabitsLoaded || isDiaryLoading) {
-    return (
-      <div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/60">Загрузка трекера...</p>
-        </div>
-      </div>
-    )
-  }
+  // Прогрессивный рендеринг: показываем UI сразу, данные появляются по мере загрузки
+  const isLoading = !isSettingsLoaded || !isHabitsLoaded || isDiaryLoading
 
   return (
     <>
@@ -512,7 +520,6 @@ function HealthTrackerContent() {
                 )}
 
                 <div className="lg:hidden mb-24">
-                  {/* Мобильная версия - условный рендер для оптимизации, кроме Stats */}
                   {activeTab === 'settings' && (
                     <SettingsTab 
                       onBack={() => setActiveTab('overview')} 
@@ -526,15 +533,15 @@ function HealthTrackerContent() {
                     />
                   )}
                   
-                  {/* Stats с display:none для сохранения кэша */}
-                  <div style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
+                  {activeTab === 'stats' && (
                     <StatsTab 
+                      userId={userId}
                       periodType={statsPeriodType} 
                       dateRange={statsDateRange} 
                       data={data} 
                       onPeriodSelect={handleStatsPeriodSelect}
                     />
-                  </div>
+                  )}
                   
                   {activeTab === 'goals' && (
                     <div className="flex flex-col gap-6">
@@ -567,15 +574,6 @@ function HealthTrackerContent() {
                         <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
                       )}
                     </div>
-                  )}
-                  
-                  {activeTab === 'stats' && (
-                    <StatsTab 
-                      periodType={statsPeriodType} 
-                      dateRange={statsDateRange} 
-                      data={data}
-                      onPeriodSelect={handleStatsPeriodSelect}
-                    />
                   )}
                   
                   {activeTab === 'overview' && (
@@ -629,10 +627,10 @@ function HealthTrackerContent() {
                   )}
                 </div>
 
-                {/* Desktop Settings - Limited Width Container */}
                 {activeTab === 'settings' && (
                   <div className="hidden lg:block max-w-5xl mx-auto">
                     <SettingsTab 
+                      userId={userId}
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
                       onDateChange={setSelectedDate}
@@ -645,22 +643,22 @@ function HealthTrackerContent() {
                   </div>
                 )}
 
-                {/* Desktop Statistics - display:none для сохранения кэша */}
-                <div className="hidden lg:block w-full" style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
-                  <StatsTab 
-                    periodType={statsPeriodType} 
-                    dateRange={statsDateRange} 
-                    data={data} 
-                    onPeriodSelect={handleStatsPeriodSelect}
-                  />
-                </div>
+                {activeTab === 'stats' && (
+                  <div className="hidden lg:block w-full">
+                    <StatsTab 
+                      userId={userId}
+                      periodType={statsPeriodType} 
+                      dateRange={statsDateRange} 
+                      data={data} 
+                      onPeriodSelect={handleStatsPeriodSelect}
+                    />
+                  </div>
+                )}
 
-                <div className={cn(
-                  "hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container",
-                  (activeTab === 'settings' || activeTab === 'stats') && "lg:hidden"
-                )} style={{ contain: 'layout paint' }}>
-                  {/* Левая колонка: виджеты здоровья */}
-                  <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+                {activeTab === 'overview' && (
+                  <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+                    {/* Левая колонка: виджеты здоровья */}
+                    <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
                     {!hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
@@ -762,6 +760,7 @@ function HealthTrackerContent() {
                     )}
                   </div>
                 </div>
+                )}
               </motion.div>
             </AnimatePresence>
 

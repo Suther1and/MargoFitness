@@ -13,7 +13,7 @@ interface CaffeineCardHProps {
   onUpdate: (val: number) => void
 }
 
-export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
+export const CaffeineCardH = memo(function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
   const { isOverLimit } = useGoalProgress({ current: value, goal })
   const { 
     localValue, 
@@ -105,4 +105,4 @@ export function CaffeineCardH({ value, goal, onUpdate }: CaffeineCardHProps) {
       </div>
     </div>
   )
-}
+})

@@ -202,6 +202,7 @@ function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: {
 }
 
 interface SettingsTabProps {
+  userId: string | null;
   onBack?: () => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
@@ -213,6 +214,7 @@ interface SettingsTabProps {
 }
 
 export default function SettingsTab({ 
+  userId,
   onBack,
   selectedDate,
   onDateChange,
@@ -222,26 +224,38 @@ export default function SettingsTab({
   setActiveSubTab,
   isMobile
 }: SettingsTabProps) {
-  const { settings, saveSettings, isLoaded } = useTrackerSettings()
-  const [localSettings, setLocalSettings] = useState(settings)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const { settings, saveSettings, isLoaded } = useTrackerSettings(userId)
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Инициализация только при первой загрузке, затем синхронизация только при внешних изменениях
-  useEffect(() => {
-    if (isLoaded && !isInitialized) {
-      setLocalSettings(settings)
-      setIsInitialized(true)
-    } else if (isLoaded && isInitialized) {
-      // Синхронизация только если настройки реально изменились извне
-      // (не из-за наших локальных изменений)
-      const hasExternalChanges = JSON.stringify(settings) !== JSON.stringify(localSettings)
-      if (hasExternalChanges) {
-        setLocalSettings(settings)
-      }
-    }
-  }, [settings, isLoaded])
+  // ВАЖНО: все хуки должны вызываться до любых условных return
+  const widgetGroups = useMemo(() => [
+    { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
+    { name: 'Питание и баланс', icon: Apple, widgets: ['water', 'caffeine', 'nutrition'] },
+    { name: 'Тело', icon: Scale, widgets: ['weight', 'photos', 'notes'] }
+  ], [])
+
+  // Используем settings напрямую из React Query - нет дублирования состояния
+  const localSettings = settings
+
+  const bmiValue = calculateBMI(localSettings.userParams.height, localSettings.userParams.weight)
+  const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null
+  const calorieNorms = calculateCalorieNorms(
+    localSettings.userParams.weight,
+    localSettings.userParams.height,
+    localSettings.userParams.age
+  )
+
+  // Показываем загрузку пока настройки не загружены (после всех хуков)
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">Загрузка настроек...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleToggle = (widgetId: WidgetId) => {
     const newSettings = {
@@ -254,7 +268,6 @@ export default function SettingsTab({
         }
       }
     }
-    setLocalSettings(newSettings)
     saveSettings(newSettings)
   }
 
@@ -270,7 +283,6 @@ export default function SettingsTab({
         }
       }
     }
-    setLocalSettings(newSettings)
     saveSettings(newSettings)
   }
 
@@ -305,7 +317,6 @@ export default function SettingsTab({
         }
       }
     }
-    setLocalSettings(newSettings)
     saveSettings(newSettings)
   }
 
@@ -323,31 +334,13 @@ export default function SettingsTab({
         [param]: finalValue,
       }
     }
-    setLocalSettings(newSettings)
     saveSettings(newSettings)
   }
-
-  const bmiValue = calculateBMI(localSettings.userParams.height, localSettings.userParams.weight)
-  const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null
-  const calorieNorms = calculateCalorieNorms(
-    localSettings.userParams.weight,
-    localSettings.userParams.height,
-    localSettings.userParams.age
-  )
-
-  const widgetGroups = useMemo(() => [
-    { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
-    { name: 'Питание и баланс', icon: Apple, widgets: ['water', 'caffeine', 'nutrition'] },
-    { name: 'Тело', icon: Scale, widgets: ['weight', 'photos', 'notes'] }
-  ], [])
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: shakeKeyframes }} />
-      <div className={cn(
-        "w-full space-y-6 pb-24",
-        isAnimating && "is-animating"
-      )}>
+      <div className="w-full space-y-6 pb-24">
       {/* BMI Panel - Hidden on Desktop (moved to header) */}
       <div className="flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl w-full lg:hidden">
         <div className="flex items-stretch h-[60px] border-b border-white/5">
@@ -556,8 +549,6 @@ export default function SettingsTab({
           {activeSubTab === 'widgets' ? (
             <motion.div
               key="widgets"
-              onAnimationStart={() => setIsAnimating(true)}
-              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -703,8 +694,6 @@ export default function SettingsTab({
           ) : (
             <motion.div
               key="habits"
-              onAnimationStart={() => setIsAnimating(true)}
-              onAnimationComplete={() => setIsAnimating(false)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}

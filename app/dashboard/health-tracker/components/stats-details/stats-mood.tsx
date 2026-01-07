@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Smile, Zap, TrendingUp, Award } from "lucide-react"
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts"
@@ -22,46 +23,38 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsMood({ dateRange }: StatsMoodProps) {
-  const { isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const [data, setData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getMoodStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          const chartData = result.data.map(entry => ({
-            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-            mood: entry.mood || 0,
-            energy: entry.energy || 0
-          }))
-          
-          setData(chartData)
-        }
-      } catch (err) {
-        console.error('Error loading mood stats:', err)
-      } finally {
-        setIsLoading(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'mood', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getMoodStats(userId, dateRange)
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const data = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    if (isSettingsLoaded) {
-      loadData()
-    }
-  }, [dateRange, isSettingsLoaded])
+    return rawData.data.map(entry => ({
+      date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+      mood: entry.mood || 0,
+      energy: entry.energy || 0
+    }))
+  }, [rawData])
   
-  if (!isSettingsLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

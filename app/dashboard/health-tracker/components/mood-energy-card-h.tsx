@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Smile, Zap, Frown, Meh, Laugh, Annoyed } from 'lucide-react'
 import { MoodRating } from '../types'
 import { cn } from '@/lib/utils'
@@ -11,7 +12,7 @@ interface MoodEnergyCardHProps {
   onEnergyUpdate: (energy: number) => void
 }
 
-export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: MoodEnergyCardHProps) {
+export const MoodEnergyCardH = memo(function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: MoodEnergyCardHProps) {
   // Расширенная шкала из 5 настроений
   const moods: { rating: MoodRating, icon: any, color: string }[] = [
     { rating: 1, icon: Frown, color: 'text-red-400' },
@@ -90,4 +91,4 @@ export function MoodEnergyCardH({ mood, energy, onMoodUpdate, onEnergyUpdate }: 
       </div>
     </div>
   )
-}
+})

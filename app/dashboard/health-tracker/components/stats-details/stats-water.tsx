@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Droplets, TrendingUp, Target, Award, Zap, Flame, AlertCircle } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
@@ -29,42 +30,37 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsWater({ dateRange }: StatsWaterProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const [data, setData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  
+  const { settings } = useTrackerSettings()
+  const [userId, setUserId] = useState<string | null>(null)
+
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getWaterStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          // Преобразуем данные для графика
-          const chartData = result.data.map(entry => ({
-            date: format(new Date(entry.date), 'dd MMM', { locale: ru }),
-            value: entry.water || 0,
-            goal: settings.widgets.water?.goal || 2500
-          }))
-          setData(chartData)
-        }
-      } catch (error) {
-        console.error('Error loading water stats:', error)
-      } finally {
-        setIsLoading(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'water', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getWaterStats(userId, dateRange)
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const data = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    loadData()
-  }, [dateRange, settings.widgets.water?.goal])
+    return rawData.data.map(entry => ({
+      date: format(new Date(entry.date), 'dd MMM', { locale: ru }),
+      value: entry.water || 0,
+      goal: settings.widgets.water?.goal || 2500
+    }))
+  }, [rawData, settings.widgets.water?.goal])
   
   if (isLoading) {
     return (

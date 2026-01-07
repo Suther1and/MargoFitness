@@ -27,11 +27,10 @@ interface StatsTabProps {
   onPeriodSelect: (periodType: PeriodType, dateRange: DateRange) => void
 }
 
-export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }: StatsTabProps) {
+export default function StatsTab({ userId, periodType, dateRange, data, onPeriodSelect }: StatsTabProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
-  const [isAnimating, setIsAnimating] = useState(false)
-  const { settings } = useTrackerSettings()
-  const { habits } = useHabits()
+  const { settings } = useTrackerSettings(userId)
+  const { habits } = useHabits(null)
   const isMobile = useIsMobile(1024)
 
   // Проверка наличия активных виджетов и привычек для показа навигации
@@ -57,50 +56,46 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
     )
   }
 
-  // Определяем, какой компонент рендерить (используем display:none для сохранения кэша)
+  // Условный рендеринг - только активный таб в DOM
   const renderContent = () => {
-    return (
-      <div className={cn("relative", isAnimating && "is-animating")}>
-        {/* Все компоненты остаются в DOM, переключаем только видимость */}
-        <div style={{ display: activeView === 'overall' ? 'block' : 'none' }}>
-          <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
-        </div>
-        <div style={{ display: activeView === 'habits' ? 'block' : 'none' }}>
-          <StatsHabits dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'water' ? 'block' : 'none' }}>
-          <StatsWater dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'steps' ? 'block' : 'none' }}>
-          <StatsSteps dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'weight' ? 'block' : 'none' }}>
-          <StatsWeight dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'caffeine' ? 'block' : 'none' }}>
-          <StatsCaffeine dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'sleep' ? 'block' : 'none' }}>
-          <StatsSleep dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'mood' ? 'block' : 'none' }}>
-          <StatsMood dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'nutrition' ? 'block' : 'none' }}>
-          <StatsNutrition dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'notes' ? 'block' : 'none' }}>
-          <StatsNotes dateRange={dateRange} />
-        </div>
-        <div style={{ display: activeView === 'photos' ? 'block' : 'none' }}>
-          <StatsPhotos dateRange={dateRange} />
-        </div>
-      </div>
-    )
+    if (activeView === 'overall') {
+      return <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
+    }
+    if (activeView === 'habits') {
+      return <StatsHabits dateRange={dateRange} />
+    }
+    if (activeView === 'water') {
+      return <StatsWater dateRange={dateRange} />
+    }
+    if (activeView === 'steps') {
+      return <StatsSteps dateRange={dateRange} />
+    }
+    if (activeView === 'weight') {
+      return <StatsWeight dateRange={dateRange} />
+    }
+    if (activeView === 'caffeine') {
+      return <StatsCaffeine dateRange={dateRange} />
+    }
+    if (activeView === 'sleep') {
+      return <StatsSleep dateRange={dateRange} />
+    }
+    if (activeView === 'mood') {
+      return <StatsMood dateRange={dateRange} />
+    }
+    if (activeView === 'nutrition') {
+      return <StatsNutrition dateRange={dateRange} />
+    }
+    if (activeView === 'notes') {
+      return <StatsNotes dateRange={dateRange} />
+    }
+    if (activeView === 'photos') {
+      return <StatsPhotos dateRange={dateRange} />
+    }
+    return null
   }
 
   return (
-    <div className={cn("space-y-4 pb-24 md:pb-10", isAnimating && "is-animating")}>
+    <div className="space-y-4 pb-24 md:pb-10">
       {/* Навигация между виджетами - скрываем если на обзоре и нет контента */}
       {(activeView !== 'overall' || hasAnyContent) && (
         <StatsNavigation

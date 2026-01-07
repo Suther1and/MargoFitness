@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { FileText, Edit3 } from 'lucide-react'
 import { useRef, useEffect } from 'react'
 
@@ -8,7 +9,7 @@ interface NotesCardProps {
   onUpdate: (val: string) => void
 }
 
-export function NotesCard({ value, onUpdate }: NotesCardProps) {
+export const NotesCard = memo(function NotesCard({ value, onUpdate }: NotesCardProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -58,5 +59,5 @@ export function NotesCard({ value, onUpdate }: NotesCardProps) {
       </div>
     </div>
   )
-}
+})
 

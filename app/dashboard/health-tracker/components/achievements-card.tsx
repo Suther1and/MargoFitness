@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Trophy, Eye, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -12,7 +12,7 @@ import { AchievementWithStatus, AchievementStats } from '@/types/database'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
-export function AchievementsCard() {
+export const AchievementsCard = memo(function AchievementsCard() {
   const [recentAchievements, setRecentAchievements] = useState<AchievementWithStatus[]>([])
   const [stats, setStats] = useState<AchievementStats | null>(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
@@ -174,4 +174,4 @@ export function AchievementsCard() {
       <AchievementsPopup isOpen={isPopupOpen} onClose={handlePopupClose} />
     </>
   )
-}
+})

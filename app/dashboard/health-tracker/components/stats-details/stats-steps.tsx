@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Footprints, TrendingUp, TrendingDown, Target, Award, Flame, MapPin, Clock } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, ReferenceLine, ComposedChart, Cell } from "recharts"
@@ -30,52 +31,44 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsSteps({ dateRange }: StatsStepsProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const [data, setData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { settings } = useTrackerSettings()
+  const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getStepsStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          // Преобразуем данные для графика
-          const chartData = result.data.map(entry => ({
-            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-            value: entry.steps || 0,
-            goal: settings.widgets.steps?.goal || 10000,
-            // Расчетные метрики
-            calories: Math.round((entry.steps || 0) * 0.04), // ~0.04 kcal за шаг
-            distance: ((entry.steps || 0) * 0.0008).toFixed(1), // ~0.8м за шаг = 0.0008 км
-            time: Math.round((entry.steps || 0) / 100) // ~100 шагов в минуту
-          }))
-          
-          setData(chartData)
-        }
-      } catch (err) {
-        console.error('Error loading steps stats:', err)
-      } finally {
-        setIsLoading(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'steps', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getStepsStats(userId, dateRange)
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const data = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    if (isSettingsLoaded) {
-      loadData()
-    }
-  }, [dateRange, isSettingsLoaded, settings.widgets.steps?.goal])
+    return rawData.data.map(entry => ({
+      date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+      value: entry.steps || 0,
+      goal: settings.widgets.steps?.goal || 10000,
+      // Расчетные метрики
+      calories: Math.round((entry.steps || 0) * 0.04), // ~0.04 kcal за шаг
+      distance: ((entry.steps || 0) * 0.0008).toFixed(1), // ~0.8м за шаг = 0.0008 км
+      time: Math.round((entry.steps || 0) / 100) // ~100 шагов в минуту
+    }))
+  }, [rawData, settings.widgets.steps?.goal])
   
   // Показываем загрузку
-  if (!isSettingsLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

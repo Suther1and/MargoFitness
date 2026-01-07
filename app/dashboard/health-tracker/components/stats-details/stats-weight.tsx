@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
@@ -16,46 +17,39 @@ interface StatsWeightProps {
 }
 
 export function StatsWeight({ dateRange }: StatsWeightProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const [data, setData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { settings } = useTrackerSettings()
+  const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getWeightStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          const chartData = result.data.map(entry => ({
-            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-            weight: entry.weight
-          }))
-          
-          setData(chartData)
-        }
-      } catch (err) {
-        console.error('Error loading weight stats:', err)
-      } finally {
-        setIsLoading(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'weight', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getWeightStats(userId, dateRange)
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const data = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    if (isSettingsLoaded) {
-      loadData()
-    }
-  }, [dateRange, isSettingsLoaded])
+    return rawData.data.map(entry => ({
+      date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+      weight: entry.weight
+    }))
+  }, [rawData])
   
   // Показываем загрузку
-  if (!isSettingsLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

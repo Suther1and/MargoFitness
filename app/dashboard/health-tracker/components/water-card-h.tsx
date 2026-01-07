@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Droplets, Waves, Plus, Minus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -30,7 +31,7 @@ const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: bo
   )
 }
 
-export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
+export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
   const { percentage, isDone, remaining } = useGoalProgress({ current: value, goal })
   const {
     isEditing,
@@ -123,4 +124,4 @@ export function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
       </div>
     </div>
   )
-}
+})

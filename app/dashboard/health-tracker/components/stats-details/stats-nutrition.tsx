@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Utensils, Target, Award, TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine } from "recharts"
@@ -19,46 +20,39 @@ interface StatsNutritionProps {
 const chartConfig = { calories: { label: "Калории", color: "#8b5cf6" } } satisfies ChartConfig
 
 export function StatsNutrition({ dateRange }: StatsNutritionProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const [data, setData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { settings } = useTrackerSettings()
+  const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getNutritionStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          const chartData = result.data.map(entry => ({
-            date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-            calories: entry.calories || 0,
-            goal: settings.widgets.nutrition?.goal || 2000
-          }))
-          
-          setData(chartData)
-        }
-      } catch (err) {
-        console.error('Error loading nutrition stats:', err)
-      } finally {
-        setIsLoading(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'nutrition', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getNutritionStats(userId, dateRange)
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const data = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    if (isSettingsLoaded) {
-      loadData()
-    }
-  }, [dateRange, isSettingsLoaded, settings.widgets.nutrition?.goal])
+    return rawData.data.map(entry => ({
+      date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+      calories: entry.calories || 0,
+      goal: settings.widgets.nutrition?.goal || 2000
+    }))
+  }, [rawData, settings.widgets.nutrition?.goal])
   
-  if (!isSettingsLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

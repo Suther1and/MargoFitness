@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { CheckCircle2, Circle, Target, ShieldCheck, AlertCircle } from 'lucide-react'
 import { DailyMetrics, TrackerSettings, WidgetId, WIDGET_CONFIGS } from '../types'
 import { cn } from '@/lib/utils'
@@ -20,7 +21,7 @@ interface GoalData {
   type: MetricType
 }
 
-export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: GoalsSummaryCardProps) {
+export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings, onNavigateToSettings }: GoalsSummaryCardProps) {
   // Собираем виджеты, которые добавлены в план на день
   const trackedWidgets = Object.entries(settings.widgets)
     .filter(([id, widget]) => widget.inDailyPlan && widget.enabled && id !== 'habits')
@@ -240,5 +241,5 @@ export function GoalsSummaryCard({ data, settings, onNavigateToSettings }: Goals
       </div>
     </div>
   )
-}
+})
 

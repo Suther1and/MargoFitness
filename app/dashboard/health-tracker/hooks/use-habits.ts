@@ -6,19 +6,8 @@ import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { Habit } from '../types'
 import { useState, useEffect, useCallback } from 'react'
 
-export function useHabits() {
-  const [userId, setUserId] = useState<string | null>(null)
+export function useHabits(userId: string | null) {
   const queryClient = useQueryClient()
-
-  // Получаем userId
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserId(user.id)
-    }
-    getUserId()
-  }, [])
 
   // Query для загрузки привычек (отдельный queryKey чтобы не конфликтовать с settings)
   const { data: habitsData, isLoading } = useQuery({

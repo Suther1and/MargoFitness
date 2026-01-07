@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { useEffect, useState, useMemo, useRef } from 'react'
 
 interface UseHealthDiaryOptions {
+  userId: string | null
   selectedDate: Date
 }
 
@@ -19,24 +20,13 @@ export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
  * Использует optimistic updates для мгновенного отклика UI.
  * Данные кэшируются и переиспользуются между рендерами.
  */
-export function useHealthDiary({ selectedDate }: UseHealthDiaryOptions) {
-  const [userId, setUserId] = useState<string | null>(null)
+export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) {
   const queryClient = useQueryClient()
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
   
   // Debounce timer для батчинга обновлений
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null)
   const pendingUpdatesRef = useRef<any>({})
-
-  // Получаем userId
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserId(user.id)
-    }
-    getUserId()
-  }, [])
 
   // Query для загрузки данных дня
   const { data: entryData, isLoading } = useQuery({

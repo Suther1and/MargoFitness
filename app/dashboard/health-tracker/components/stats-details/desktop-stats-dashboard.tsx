@@ -56,8 +56,8 @@ export function DesktopStatsDashboard({
   currentPeriodType,
   currentDateRange
 }: DesktopStatsDashboardProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const { habits, isLoaded: isHabitsLoaded } = useHabits()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings(null)
+  const { habits, isLoaded: isHabitsLoaded } = useHabits(null)
   const [activeView, setActiveView] = useState<StatsView>('overall')
   
   // Пока данные загружаются, показываем скелетон для навигации
@@ -69,45 +69,42 @@ export function DesktopStatsDashboard({
     return settings.widgets[item.id as WidgetId]?.enabled
   })
 
-  // Рендерим все компоненты с display:none для сохранения состояния и кэша React Query
+  // Условный рендеринг - только активный компонент в DOM
   const renderStatsContent = () => {
-    return (
-      <>
-        <div style={{ display: activeView === 'overall' ? 'block' : 'none' }}>
-          <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
-        </div>
-        <div style={{ display: activeView === 'habits' ? 'block' : 'none' }}>
-          <StatsHabits dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'water' ? 'block' : 'none' }}>
-          <StatsWater dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'steps' ? 'block' : 'none' }}>
-          <StatsSteps dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'weight' ? 'block' : 'none' }}>
-          <StatsWeight dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'caffeine' ? 'block' : 'none' }}>
-          <StatsCaffeine dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'sleep' ? 'block' : 'none' }}>
-          <StatsSleep dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'mood' ? 'block' : 'none' }}>
-          <StatsMood dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'nutrition' ? 'block' : 'none' }}>
-          <StatsNutrition dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'photos' ? 'block' : 'none' }}>
-          <StatsPhotos dateRange={currentDateRange} />
-        </div>
-        <div style={{ display: activeView === 'notes' ? 'block' : 'none' }}>
-          <StatsNotes dateRange={currentDateRange} />
-        </div>
-      </>
-    )
+    if (activeView === 'overall') {
+      return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
+    }
+    if (activeView === 'habits') {
+      return <StatsHabits dateRange={currentDateRange} />
+    }
+    if (activeView === 'water') {
+      return <StatsWater dateRange={currentDateRange} />
+    }
+    if (activeView === 'steps') {
+      return <StatsSteps dateRange={currentDateRange} />
+    }
+    if (activeView === 'weight') {
+      return <StatsWeight dateRange={currentDateRange} />
+    }
+    if (activeView === 'caffeine') {
+      return <StatsCaffeine dateRange={currentDateRange} />
+    }
+    if (activeView === 'sleep') {
+      return <StatsSleep dateRange={currentDateRange} />
+    }
+    if (activeView === 'mood') {
+      return <StatsMood dateRange={currentDateRange} />
+    }
+    if (activeView === 'nutrition') {
+      return <StatsNutrition dateRange={currentDateRange} />
+    }
+    if (activeView === 'photos') {
+      return <StatsPhotos dateRange={currentDateRange} />
+    }
+    if (activeView === 'notes') {
+      return <StatsNotes dateRange={currentDateRange} />
+    }
+    return null
   }
 
   return (

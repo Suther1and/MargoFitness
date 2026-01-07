@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Moon, Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
@@ -12,7 +13,7 @@ interface SleepCardHProps {
   onUpdate: (val: number) => void
 }
 
-export function SleepCardH({ hours, goal, onUpdate }: SleepCardHProps) {
+export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: SleepCardHProps) {
   const { percentage, isDone } = useGoalProgress({ current: hours, goal })
   const {
     isEditing,

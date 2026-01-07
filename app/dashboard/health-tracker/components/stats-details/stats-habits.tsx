@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, Clock, PlusCircle } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, Cell } from "recharts"
@@ -30,51 +31,42 @@ const chartConfig = {
 
 export function StatsHabits({ dateRange }: StatsHabitsProps) {
   const { habits, isLoaded } = useHabits()
-  const [completionData, setCompletionData] = useState<any[]>([])
-  const [isLoadingStats, setIsLoadingStats] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
   
-  // Загружаем статистику по привычкам
   useEffect(() => {
-    async function loadStats() {
-      setIsLoadingStats(true)
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user || habits.length === 0) {
-          setIsLoadingStats(false)
-          return
-        }
-        
-        const result = await getHabitsStats(user.id, dateRange)
-        
-        if (result.success && result.data) {
-          // Рассчитываем процент выполнения по дням
-          const stats = result.data.map(entry => {
-            const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
-            const total = habits.filter(h => h.enabled).length
-            return {
-              date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-              value: total > 0 ? Math.round((completed / total) * 100) : 0
-            }
-          })
-          
-          setCompletionData(stats)
-        }
-      } catch (err) {
-        console.error('Error loading habits stats:', err)
-      } finally {
-        setIsLoadingStats(false)
-      }
+    async function getUserId() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
+    getUserId()
+  }, [])
+
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['stats', 'habits', userId, dateRange],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getHabitsStats(userId, dateRange)
+    },
+    enabled: !!userId && habits.length > 0,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const completionData = useMemo(() => {
+    if (!rawData?.success || !rawData.data) return []
     
-    if (isLoaded) {
-      loadStats()
-    }
-  }, [dateRange, habits, isLoaded])
+    return rawData.data.map(entry => {
+      const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
+      const total = habits.filter(h => h.enabled).length
+      return {
+        date: format(new Date(entry.date), 'd MMM', { locale: ru }),
+        value: total > 0 ? Math.round((completed / total) * 100) : 0
+      }
+    })
+  }, [rawData, habits])
   
   // Показываем загрузку
-  if (!isLoaded || isLoadingStats) {
+  if (!isLoaded || isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

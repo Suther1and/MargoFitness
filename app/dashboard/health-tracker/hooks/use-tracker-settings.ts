@@ -71,23 +71,12 @@ function appToDbSettings(appSettings: TrackerSettings) {
   }
 }
 
-export function useTrackerSettings() {
-  const [userId, setUserId] = useState<string | null>(null)
+export function useTrackerSettings(userId: string | null) {
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
     if (typeof window === 'undefined') return false
     return !localStorage.getItem(VISITED_KEY)
   })
   const queryClient = useQueryClient()
-
-  // Получаем userId
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserId(user.id)
-    }
-    getUserId()
-  }, [])
 
   // Query для загрузки настроек
   const { data: settingsData, isLoading } = useQuery({
@@ -128,20 +117,41 @@ export function useTrackerSettings() {
 
   const settings = settingsData || DEFAULT_SETTINGS
 
-  // Универсальная функция обновления
-  const updateSettings = useCallback((updater: (prev: TrackerSettings) => TrackerSettings) => {
-    const newSettings = updater(settings)
-    updateMutation.mutate(newSettings)
-  }, [settings, updateMutation])
+  // Debounced mutation для батчинга сохранений
+  const debouncedMutate = useMemo(() => 
+    debounce((newSettings: TrackerSettings) => {
+      updateMutation.mutate(newSettings)
+    }, 500)
+  , [updateMutation.mutate])
 
-  // Сохранение настроек
+  // Универсальная функция обновления с queryClient.getQueryData
+  const updateSettings = useCallback((updater: (prev: TrackerSettings) => TrackerSettings) => {
+    // Получаем текущее значение из кэша React Query
+    const currentSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
+    if (!currentSettings) return
+    
+    const newSettings = updater(currentSettings)
+    
+    // Оптимистичное обновление UI
+    queryClient.setQueryData(['diary-settings', userId], newSettings)
+    
+    // Отложенное сохранение в БД через debounce
+    debouncedMutate(newSettings)
+  }, [queryClient, userId, debouncedMutate])
+
+  // Сохранение настроек с debounce
   const saveSettings = useCallback((newSettings: TrackerSettings) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(VISITED_KEY, 'true')
       setIsFirstVisit(false)
     }
-    updateMutation.mutate(newSettings)
-  }, [updateMutation])
+    
+    // Мгновенное обновление UI
+    queryClient.setQueryData(['diary-settings', userId], newSettings)
+    
+    // Отложенное сохранение в БД
+    debouncedMutate(newSettings)
+  }, [userId, queryClient, debouncedMutate, setIsFirstVisit])
 
   // Переключение виджета
   const toggleWidget = useCallback((widgetId: WidgetId) => {
@@ -220,7 +230,7 @@ export function useTrackerSettings() {
   return {
     settings,
     isFirstVisit,
-    isLoaded: !!userId && !isLoading && !!settingsData,
+    isLoaded: !!userId && !isLoading,
     saveSettings,
     toggleWidget,
     updateGoal,

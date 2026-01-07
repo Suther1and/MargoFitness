@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Utensils, Info, Salad, Soup, Pizza, Hamburger, Apple, Check, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -20,7 +21,7 @@ interface NutritionCardHProps {
   onUpdate: (metric: string, val: any) => void
 }
 
-export function NutritionCardH({
+export const NutritionCardH = memo(function NutritionCardH({
   calories,
   caloriesGoal,
   foodQuality,

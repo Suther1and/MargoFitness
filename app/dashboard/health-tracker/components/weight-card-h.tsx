@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Scale, TrendingDown, TrendingUp, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMemo } from 'react'
@@ -14,7 +15,7 @@ interface WeightCardHProps {
   goalWeight?: number
 }
 
-export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
+export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
   const {
     isEditing,
     localValue,
@@ -95,4 +96,4 @@ export function WeightCardH({ value, onUpdate, goalWeight }: WeightCardHProps) {
       </div>
     </div>
   )
-}
+})

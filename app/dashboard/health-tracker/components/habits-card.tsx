@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Clock, Sun, Moon, Calendar, ListChecks, PlusCircle, Flame, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -53,7 +54,7 @@ interface HabitsCardProps {
   onNavigateToSettings?: () => void
 }
 
-export function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCardProps) {
+export const HabitsCard = memo(function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCardProps) {
   const categories = {
     morning: { label: 'Утро', icon: Sun, color: 'text-amber-400' },
     afternoon: { label: 'День', icon: Calendar, color: 'text-blue-400' },
@@ -132,4 +133,4 @@ export function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCar
       </button>
     </HealthTrackerCard>
   )
-}
+})

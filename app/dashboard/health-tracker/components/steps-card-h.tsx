@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Footprints, Flame, MapPin, Plus, Minus } from 'lucide-react'
 import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
@@ -13,7 +14,7 @@ interface StepsCardHProps {
   onUpdate: (val: number) => void
 }
 
-export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
+export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
   const { percentage, isDone } = useGoalProgress({ current: steps, goal })
   const {
     isEditing,
@@ -184,4 +185,4 @@ export function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
       </div>
     </div>
   )
-}
+})
