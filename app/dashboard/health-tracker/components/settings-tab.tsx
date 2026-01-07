@@ -226,11 +226,20 @@ export default function SettingsTab({
   const [localSettings, setLocalSettings] = useState(settings)
   const [isAnimating, setIsAnimating] = useState(false)
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Синхронизация с настройками только при внешних изменениях
+  // Инициализация только при первой загрузке, затем синхронизация только при внешних изменениях
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && !isInitialized) {
       setLocalSettings(settings)
+      setIsInitialized(true)
+    } else if (isLoaded && isInitialized) {
+      // Синхронизация только если настройки реально изменились извне
+      // (не из-за наших локальных изменений)
+      const hasExternalChanges = JSON.stringify(settings) !== JSON.stringify(localSettings)
+      if (hasExternalChanges) {
+        setLocalSettings(settings)
+      }
     }
   }, [settings, isLoaded])
 

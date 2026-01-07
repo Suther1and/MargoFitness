@@ -612,10 +612,11 @@ function HealthTrackerContent() {
                           </div>
                           {settings.widgets.nutrition?.enabled && (
                             <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                          )}
+                        </>
                       )}
-                    </>
+                    </div>
                   )}
-                </div>
                 </div>
 
                 {/* Desktop Settings - Limited Width Container */}
