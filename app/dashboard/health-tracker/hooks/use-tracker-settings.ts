@@ -117,6 +117,33 @@ export function useTrackerSettings() {
       }
     }
 
+    // Проверяем актуальное значение при монтировании
+    const checkCurrentValue = () => {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as TrackerSettings
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            widgets: {
+              ...DEFAULT_SETTINGS.widgets,
+              ...parsed.widgets
+            },
+            userParams: {
+              ...DEFAULT_SETTINGS.userParams,
+              ...(parsed.userParams || {})
+            }
+          })
+        } catch (error) {
+          console.error('Ошибка парсинга настроек трекера при монтировании:', error)
+        }
+      }
+    }
+
+    // Проверяем при монтировании
+    checkCurrentValue()
+
     // Слушаем изменения из других вкладок
     window.addEventListener('storage', handleStorageChange)
     // Слушаем изменения из того же окна

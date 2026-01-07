@@ -32,9 +32,10 @@ export function useHabits() {
     if (typeof window === 'undefined') return
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
+      if (e.key === STORAGE_KEY) {
         try {
-          setHabits(JSON.parse(e.newValue))
+          const newHabits = e.newValue ? JSON.parse(e.newValue) : []
+          setHabits(newHabits)
         } catch (error) {
           console.error('Error parsing habits:', error)
         }
@@ -42,14 +43,33 @@ export function useHabits() {
     }
 
     const handleCustomStorageChange = (e: CustomEvent) => {
-      if (e.detail?.key === STORAGE_KEY && e.detail?.value) {
+      if (e.detail?.key === STORAGE_KEY) {
         try {
-          setHabits(JSON.parse(e.detail.value))
+          const newHabits = e.detail?.value ? JSON.parse(e.detail.value) : []
+          setHabits(newHabits)
         } catch (error) {
           console.error('Error parsing habits:', error)
         }
       }
     }
+
+    // Проверяем актуальное значение при монтировании
+    const checkCurrentValue = () => {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored)
+          setHabits(parsed)
+        } catch (error) {
+          console.error('Error parsing habits on mount:', error)
+        }
+      } else {
+        setHabits([])
+      }
+    }
+
+    // Проверяем при монтировании
+    checkCurrentValue()
 
     // Слушаем изменения из других вкладок
     window.addEventListener('storage', handleStorageChange)
