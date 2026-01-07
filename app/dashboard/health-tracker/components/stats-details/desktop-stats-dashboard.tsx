@@ -56,11 +56,14 @@ export function DesktopStatsDashboard({
   currentPeriodType,
   currentDateRange
 }: DesktopStatsDashboardProps) {
-  const { settings } = useTrackerSettings()
-  const { habits } = useHabits()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const { habits, isLoaded: isHabitsLoaded } = useHabits()
   const [activeView, setActiveView] = useState<StatsView>('overall')
+  
+  // Пока данные загружаются, показываем скелетон для навигации
+  const isLoading = !isSettingsLoaded || !isHabitsLoaded
 
-  const visibleItems = NAV_ITEMS.filter(item => {
+  const visibleItems = isLoading ? [] : NAV_ITEMS.filter(item => {
     if (item.id === 'overall') return true
     if (item.id === 'habits') return habits.length > 0
     return settings.widgets[item.id as WidgetId]?.enabled
@@ -93,7 +96,21 @@ export function DesktopStatsDashboard({
         </div>
         
         <div className="flex flex-col gap-1">
-          {visibleItems.map((item) => {
+          {isLoading ? (
+            // Скелетон навигации при загрузке
+            <>
+              {[1, 2, 3].map((i) => (
+                <div 
+                  key={i}
+                  className="flex items-center gap-3.5 px-4 py-2 rounded-2xl bg-white/[0.03] border border-white/5"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-white/5 animate-pulse" />
+                  <div className="h-4 flex-1 bg-white/5 rounded animate-pulse" />
+                </div>
+              ))}
+            </>
+          ) : (
+            visibleItems.map((item) => {
             const isActive = activeView === item.id
             return (
               <button
@@ -119,7 +136,8 @@ export function DesktopStatsDashboard({
                 )}>{item.label}</span>
               </button>
             )
-          })}
+          })
+          )}
         </div>
       </aside>
 

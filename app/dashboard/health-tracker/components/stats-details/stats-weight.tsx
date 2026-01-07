@@ -31,8 +31,20 @@ const EXTENDED_WEIGHT_DATA = [
 ]
 
 export function StatsWeight({ period }: StatsWeightProps) {
-  const { settings } = useTrackerSettings()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
   const dataToShow = period === '7d' ? WEIGHT_DATA : EXTENDED_WEIGHT_DATA
+  
+  // Показываем загрузку пока настройки не готовы
+  if (!isSettingsLoaded) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка данных...</p>
+        </div>
+      </div>
+    )
+  }
   
   if (dataToShow.length === 0) return null
 

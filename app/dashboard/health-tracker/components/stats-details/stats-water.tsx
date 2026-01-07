@@ -29,7 +29,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsWater({ dateRange }: StatsWaterProps) {
-  const { settings } = useTrackerSettings()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   

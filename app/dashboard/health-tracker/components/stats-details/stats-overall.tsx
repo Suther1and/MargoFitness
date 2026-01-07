@@ -30,9 +30,21 @@ const MOCK_LAST_NOTE = {
 }
 
 export function StatsOverall({ period, onNavigate, layout = 'column', data }: StatsOverallProps) {
-  const { settings } = useTrackerSettings()
-  const { habits } = useHabits()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const { habits, isLoaded: isHabitsLoaded } = useHabits()
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
+  
+  // Показываем загрузку пока данные не готовы
+  if (!isSettingsLoaded || !isHabitsLoaded) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка статистики...</p>
+        </div>
+      </div>
+    )
+  }
   
   if (!settings?.widgets) return null
 

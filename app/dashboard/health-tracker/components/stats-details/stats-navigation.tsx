@@ -34,8 +34,25 @@ const NAV_BUTTONS: NavButton[] = [
 ]
 
 export function StatsNavigation({ activeView, onViewChange }: StatsNavigationProps) {
-  const { settings } = useTrackerSettings()
-  const { habits } = useHabits()
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
+  const { habits, isLoaded: isHabitsLoaded } = useHabits()
+  
+  // Не рендерим навигацию пока данные не загружены (избегаем layout shift)
+  if (!isSettingsLoaded || !isHabitsLoaded) {
+    return (
+      <div className="relative mb-6">
+        <div className="flex items-center justify-start md:justify-center gap-2 pb-2">
+          {/* Скелетон - показываем 3 заглушки */}
+          {[1, 2, 3].map((i) => (
+            <div 
+              key={i}
+              className="w-[54px] h-[54px] rounded-[1.5rem] bg-white/[0.03] border border-white/5 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   // Фильтруем кнопки: "Общая" всегда показываем, "Привычки" только если есть привычки, остальные по enabled
   const visibleButtons = NAV_BUTTONS.filter(button => {
