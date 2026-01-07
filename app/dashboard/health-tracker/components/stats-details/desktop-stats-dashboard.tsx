@@ -141,8 +141,7 @@ export function DesktopStatsDashboard({
                 )}>{item.label}</span>
               </button>
             )
-          })
-          )}
+          })}
         </div>
       </aside>
 
