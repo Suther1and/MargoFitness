@@ -591,33 +591,33 @@ function HealthTrackerContent() {
                         </>
                       ) : (
                         <>
-                          {!hasMainWidgets ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
-                          <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
-                          <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-                            Выбери показатели здоровья, которые будем отслеживать
-                          </p>
+                        {!hasMainWidgets ? (
+                          <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                            <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
+                            <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+                              Выбери показатели здоровья, которые будем отслеживать
+                            </p>
 
-                          <button 
-                            onClick={() => {
-                              setActiveTab('settings')
-                              setSettingsSubTab('widgets')
-                            }}
-                            className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
-                          >
-                            <Settings className="w-4 h-4" />
-                            Выбрать виджеты
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          {settings.widgets.water?.enabled && (
-                            <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                          )}
-                          {settings.widgets.steps?.enabled && (
-                            <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                          )}
-                          <div className="grid grid-cols-2 gap-4">
+                            <button 
+                              onClick={() => {
+                                setActiveTab('settings')
+                                setSettingsSubTab('widgets')
+                              }}
+                              className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
+                            >
+                              <Settings className="w-4 h-4" />
+                              Выбрать виджеты
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {settings.widgets.water?.enabled && (
+                              <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                            )}
+                            {settings.widgets.steps?.enabled && (
+                              <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
                               {settings.widgets.weight?.enabled && (
                                 <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
                               )}
@@ -631,9 +631,11 @@ function HealthTrackerContent() {
                                 <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
                               )}
                           </div>
-                          {settings.widgets.nutrition?.enabled && (
-                            <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                          )}
+                            {settings.widgets.nutrition?.enabled && (
+                              <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                            )}
+                          </>
+                        )}
                         </>
                       )}
                     </div>
