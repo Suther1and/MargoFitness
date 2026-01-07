@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Droplets, TrendingUp, Target, Award, Zap, Flame, AlertCircle } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
@@ -11,21 +12,14 @@ import {
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 import { useTrackerSettings } from "../../hooks/use-tracker-settings"
+import { getWaterStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 
 interface StatsWaterProps {
-  period: string
+  dateRange: { start: Date; end: Date }
 }
-
-// Моковые данные
-const WATER_DATA = [
-  { date: "Пн", value: 2100, goal: 2500 },
-  { date: "Вт", value: 2400, goal: 2500 },
-  { date: "Ср", value: 1800, goal: 2500 },
-  { date: "Чт", value: 2600, goal: 2500 },
-  { date: "Пт", value: 2200, goal: 2500 },
-  { date: "Сб", value: 2800, goal: 2500 },
-  { date: "Вс", value: 2500, goal: 2500 },
-]
 
 const chartConfig = {
   value: {
@@ -34,15 +28,69 @@ const chartConfig = {
   }
 } satisfies ChartConfig
 
-export function StatsWater({ period }: StatsWaterProps) {
+export function StatsWater({ dateRange }: StatsWaterProps) {
   const { settings } = useTrackerSettings()
-  const totalWaterMl = WATER_DATA.reduce((acc, day) => acc + day.value, 0)
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+        
+        const result = await getWaterStats(user.id, dateRange)
+        
+        if (result.success && result.data) {
+          // Преобразуем данные для графика
+          const chartData = result.data.map(entry => ({
+            date: format(new Date(entry.date), 'dd MMM', { locale: ru }),
+            value: entry.water || 0,
+            goal: settings.widgets.water?.goal || 2500
+          }))
+          setData(chartData)
+        }
+      } catch (error) {
+        console.error('Error loading water stats:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadData()
+  }, [dateRange, settings.widgets.water?.goal])
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-white/40">Загрузка...</div>
+      </div>
+    )
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+        <Droplets className="w-16 h-16 text-white/20 mb-4" />
+        <h3 className="text-xl font-bold text-white mb-2">Нет данных</h3>
+        <p className="text-white/40">Начните отслеживать потребление воды</p>
+      </div>
+    )
+  }
+  
+  const totalWaterMl = data.reduce((acc, day) => acc + day.value, 0)
   const totalWaterLiters = (totalWaterMl / 1000).toFixed(1)
-  const avgDaily = Math.round(totalWaterMl / WATER_DATA.length)
+  const avgDaily = Math.round(totalWaterMl / data.length)
   const goal = settings.widgets.water?.goal || 2500
-  const daysAchieved = WATER_DATA.filter(day => day.value >= (day.goal || goal)).length
-  const daysFailed = WATER_DATA.length - daysAchieved
-  const achievementRate = Math.round((daysAchieved / WATER_DATA.length) * 100)
+  const daysAchieved = data.filter(day => day.value >= (day.goal || goal)).length
+  const daysFailed = data.length - daysAchieved
+  const achievementRate = Math.round((daysAchieved / data.length) * 100)
   
   // Расчет рекомендуемой нормы на основе среднего веса
   const userWeight = settings.userParams.weight || 72
@@ -95,7 +143,7 @@ export function StatsWater({ period }: StatsWaterProps) {
 
             <ChartContainer config={chartConfig} className="h-[200px] w-full">
               <AreaChart
-                data={WATER_DATA}
+                data={data}
                 margin={{ left: -20, right: 12, top: 10, bottom: 0 }}
               >
                 <defs>
@@ -228,7 +276,7 @@ export function StatsWater({ period }: StatsWaterProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-white/60">Дней с выполнением нормы:</span>
-                <span className="font-bold text-white">{daysAchieved} / {WATER_DATA.length}</span>
+                <span className="font-bold text-white">{daysAchieved} / {data.length}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-white/60">Всего за неделю:</span>

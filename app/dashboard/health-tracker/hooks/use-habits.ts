@@ -1,13 +1,47 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { Habit } from '../types'
+
+/**
+ * Debounce функция
+ */
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { flush: () => void } {
+  let timeout: NodeJS.Timeout | null = null
+  let lastArgs: any[] | null = null
+
+  const debouncedFn = function (...args: any[]) {
+    lastArgs = args
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      func(...lastArgs!)
+      timeout = null
+      lastArgs = null
+    }, wait)
+  } as T & { flush: () => void }
+
+  debouncedFn.flush = () => {
+    if (timeout) {
+      clearTimeout(timeout)
+      if (lastArgs) func(...lastArgs)
+      timeout = null
+      lastArgs = null
+    }
+  }
+
+  return debouncedFn
+}
 
 /**
  * Хук для управления привычками в Health Tracker
  * 
- * Управляет CRUD операциями над привычками и сохраняет их в localStorage
- * с синхронизацией между вкладками браузера.
+ * Управляет CRUD операциями над привычками и сохраняет их в Supabase
+ * (в таблице diary_settings, поле habits).
  * 
  * @returns Массив привычек и методы для работы с ними
  * 
@@ -22,97 +56,70 @@ import { Habit } from '../types'
  * updateHabit('123', { streak: 5 })
  * ```
  */
-const STORAGE_KEY = 'health_tracker_habits'
-
 export function useHabits() {
-  const [habits, setHabits] = useState<Habit[]>(() => {
-    if (typeof window === 'undefined') return []
-    
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        return JSON.parse(stored)
-      } catch (error) {
-        console.error('Error parsing habits:', error)
-        return []
-      }
-    }
-    return []
-  })
+  const [habits, setHabits] = useState<Habit[]>([])
+  const [userId, setUserId] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Отмечаем загрузку после монтирования
+  // Загрузка привычек из БД
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
-
-  // Слушаем изменения привычек (из того же окна и других вкладок)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        try {
-          const newHabits = e.newValue ? JSON.parse(e.newValue) : []
-          setHabits(newHabits)
-        } catch (error) {
-          console.error('Error parsing habits:', error)
-        }
+    async function loadHabits() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setIsLoaded(true)
+        return
       }
-    }
-
-    const handleCustomStorageChange = (e: CustomEvent) => {
-      if (e.detail?.key === STORAGE_KEY) {
-        try {
-          const newHabits = e.detail?.value ? JSON.parse(e.detail.value) : []
-          setHabits(newHabits)
-        } catch (error) {
-          console.error('Error parsing habits:', error)
-        }
+      
+      setUserId(user.id)
+      
+      const result = await getDiarySettings(user.id)
+      
+      if (result.success && result.data) {
+        const dbHabits = (result.data.habits as any) || []
+        setHabits(dbHabits)
       }
+      
+      setIsLoaded(true)
     }
-
-    // Проверяем актуальное значение при монтировании
-    const checkCurrentValue = () => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          setHabits(parsed)
-        } catch (error) {
-          console.error('Error parsing habits on mount:', error)
-        }
-      } else {
-        setHabits([])
-      }
-    }
-
-    // Проверяем при монтировании
-    checkCurrentValue()
-
-    // Слушаем изменения из других вкладок
-    window.addEventListener('storage', handleStorageChange)
-    // Слушаем изменения из того же окна
-    window.addEventListener('habits-changed' as any, handleCustomStorageChange as any)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('habits-changed' as any, handleCustomStorageChange as any)
-    }
-  }, [])
-
-  // Сохранение в localStorage
-  const saveHabits = useCallback((newHabits: Habit[]) => {
-    if (typeof window === 'undefined') return
-    const serialized = JSON.stringify(newHabits)
-    localStorage.setItem(STORAGE_KEY, serialized)
-    setHabits(newHabits)
     
-    // Отправляем событие для синхронизации в том же окне
-    window.dispatchEvent(new CustomEvent('habits-changed', {
-      detail: { key: STORAGE_KEY, value: serialized }
-    }))
+    loadHabits()
   }, [])
+
+  // Функция сохранения в БД
+  const saveToDb = useCallback(async (newHabits: Habit[]) => {
+    if (!userId) return
+    
+    await updateDiarySettings(userId, {
+      habits: newHabits as any
+    })
+  }, [userId])
+
+  // Debounced версия сохранения
+  const debouncedSave = useMemo(
+    () => debounce(saveToDb, 1000),
+    [saveToDb]
+  )
+
+  // Принудительное сохранение перед уходом
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      debouncedSave.flush()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      debouncedSave.flush()
+    }
+  }, [debouncedSave])
+
+  // Сохранение привычек (мгновенно в state + отложенно в БД)
+  const saveHabits = useCallback((newHabits: Habit[]) => {
+    setHabits(newHabits)
+    debouncedSave(newHabits)
+  }, [debouncedSave])
 
   // Добавить привычку
   const addHabit = useCallback((habit: Omit<Habit, 'id' | 'streak' | 'createdAt'>) => {
@@ -144,4 +151,3 @@ export function useHabits() {
     deleteHabit
   }
 }
-

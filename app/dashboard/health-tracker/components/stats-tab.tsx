@@ -94,33 +94,31 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
     }
 
     const getContent = () => {
-      const period = getLegacyPeriod()
-      
       switch (activeView) {
         case 'overall':
-          return <StatsOverall key="overall" period={period} data={data} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
         case 'habits':
-          return <StatsHabits key="habits" period={period} />
+          return <StatsHabits key="habits" dateRange={dateRange} />
         case 'water':
-          return <StatsWater key="water" period={period} />
+          return <StatsWater key="water" dateRange={dateRange} />
         case 'steps':
-          return <StatsSteps key="steps" period={period} />
+          return <StatsSteps key="steps" dateRange={dateRange} />
         case 'weight':
-          return <StatsWeight key="weight" period={period} />
+          return <StatsWeight key="weight" dateRange={dateRange} />
         case 'caffeine':
-          return <StatsCaffeine key="caffeine" period={period} />
+          return <StatsCaffeine key="caffeine" dateRange={dateRange} />
         case 'sleep':
-          return <StatsSleep key="sleep" period={period} />
+          return <StatsSleep key="sleep" dateRange={dateRange} />
         case 'mood':
-          return <StatsMood key="mood" period={period} />
+          return <StatsMood key="mood" dateRange={dateRange} />
         case 'nutrition':
-          return <StatsNutrition key="nutrition" period={period} />
+          return <StatsNutrition key="nutrition" dateRange={dateRange} />
         case 'notes':
-          return <StatsNotes key="notes" period={period} />
+          return <StatsNotes key="notes" dateRange={dateRange} />
         case 'photos':
-          return <StatsPhotos key="photos" period={period} />
+          return <StatsPhotos key="photos" dateRange={dateRange} />
         default:
-          return <StatsOverall key="overall" period={period} data={data} onNavigate={setActiveView} />
+          return <StatsOverall key="overall" period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
       }
     }
 

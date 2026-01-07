@@ -44,6 +44,7 @@ import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './ty
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { useHabits } from './hooks/use-habits'
 import { useStatsDateRange } from './hooks/use-stats-date-range'
+import { useHealthDiary } from './hooks/use-health-diary'
 import { getStatsPeriodLabel } from './utils/date-formatters'
 import { hasActiveMainWidgets } from './utils/widget-helpers'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
@@ -103,13 +104,77 @@ function HealthTrackerContent() {
     (tabParam as any) || 'overview'
   )
   const [settingsSubTab, setSettingsSubTab] = useState<'widgets' | 'habits'>('widgets')
-  const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
   const { settings, isFirstVisit } = useTrackerSettings()
   const { habits } = useHabits()
   const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
+  
+  // Интеграция с Supabase через useHealthDiary
+  const { 
+    metrics, 
+    notes, 
+    habitsCompleted,
+    isLoading: isDiaryLoading,
+    saveStatus,
+    updateMetric,
+    updateNotes,
+    toggleHabit: toggleHabitCompleted,
+    forceSave
+  } = useHealthDiary({ selectedDate })
+  
+  // Объединяем данные из БД с настройками для отображения
+  const data: DailyMetrics = {
+    date: selectedDate,
+    // Metrics from DB
+    waterIntake: metrics.waterIntake || 0,
+    steps: metrics.steps || 0,
+    weight: metrics.weight || 0,
+    sleepHours: metrics.sleepHours || 0,
+    caffeineIntake: metrics.caffeineIntake || 0,
+    calories: metrics.calories || 0,
+    mood: metrics.mood || null,
+    energyLevel: metrics.energyLevel || 0,
+    foodQuality: metrics.foodQuality || null,
+    
+    // Goals from settings
+    waterGoal: settings.widgets.water.goal || 2500,
+    stepsGoal: settings.widgets.steps.goal || 10000,
+    weightGoal: settings.widgets.weight.goal || null,
+    sleepGoal: settings.widgets.sleep.goal || 8,
+    caffeineGoal: settings.widgets.caffeine.goal || 3,
+    caloriesGoal: settings.widgets.nutrition.goal || 2000,
+    
+    // User params from settings
+    height: settings.userParams.height || 170,
+    age: settings.userParams.age || 25,
+    gender: settings.userParams.gender || 'female',
+    
+    // Notes
+    notes: notes || '',
+    
+    // Habits - объединяем данные привычек с их статусом выполнения
+    habits: habits.filter(h => h.enabled).map(habit => ({
+      id: habit.id,
+      title: habit.title,
+      completed: habitsCompleted[habit.id] || false,
+      streak: habit.streak,
+      category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
+    })),
+    
+    // Placeholder для фото
+    dailyPhotos: [],
+    
+    // Временно оставляем для совместимости (удалим позже при чистке)
+    protein: 0,
+    proteinGoal: 0,
+    fats: 0,
+    fatsGoal: 0,
+    carbs: 0,
+    carbsGoal: 0,
+    sleepQuality: 0,
+  }
 
   // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
   const hasMainWidgets = hasActiveMainWidgets(settings)
@@ -149,51 +214,6 @@ function HealthTrackerContent() {
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // Синхронизируем параметры пользователя из настроек в данные для отображения
-  useEffect(() => {
-    if (settings.userParams) {
-      setData(prev => ({
-        ...prev,
-        weight: settings.userParams.weight ?? prev.weight,
-        height: settings.userParams.height ?? prev.height,
-        age: settings.userParams.age ?? prev.age,
-        gender: settings.userParams.gender ?? prev.gender,
-      }))
-    }
-  }, [settings.userParams])
-
-  // Синхронизируем привычки из настроек в данные для отображения
-  useEffect(() => {
-    // Преобразуем Habit[] в DailyHabit[]
-    const dailyHabits = habits
-      .filter(h => h.enabled) // Показываем только активные привычки
-      .map(habit => ({
-        id: habit.id,
-        title: habit.title,
-        completed: false, // По умолчанию не выполнено (можно расширить для сохранения статуса)
-        streak: habit.streak,
-        category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
-      }))
-    
-    setData(prev => ({
-      ...prev,
-      habits: dailyHabits
-    }))
-  }, [habits])
-
-  // Синхронизируем цели виджетов из настроек
-  useEffect(() => {
-    setData(prev => ({
-      ...prev,
-      waterGoal: settings.widgets.water.goal ?? prev.waterGoal,
-      stepsGoal: settings.widgets.steps.goal ?? prev.stepsGoal,
-      sleepGoal: settings.widgets.sleep.goal ?? prev.sleepGoal,
-      caffeineGoal: settings.widgets.caffeine.goal ?? prev.caffeineGoal,
-      caloriesGoal: settings.widgets.nutrition.goal ?? prev.caloriesGoal,
-      weightGoal: settings.widgets.weight.goal ?? prev.weightGoal,
-    }))
-  }, [settings.widgets])
-
   useEffect(() => {
     setMounted(true)
     if ('scrollRestoration' in window.history) {
@@ -206,9 +226,28 @@ function HealthTrackerContent() {
       setActiveTab(tabParam as any)
     }
   }, [tabParam])
+  
+  // Принудительное сохранение при смене даты
+  useEffect(() => {
+    forceSave()
+  }, [selectedDate, forceSave])
 
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
-    setData(prev => ({ ...prev, [metric]: value }))
+    // Проверяем, является ли это метрикой из БД или локальным состоянием
+    if (metric === 'habits') {
+      // Для привычек используем специальную логику
+      const updatedHabits = value as typeof data.habits
+      updatedHabits.forEach(habit => {
+        if (habit.completed !== habitsCompleted[habit.id]) {
+          toggleHabitCompleted(habit.id, habit.completed)
+        }
+      })
+    } else if (metric === 'notes') {
+      updateNotes(value)
+    } else {
+      // Для всех остальных метрик
+      updateMetric(metric, value)
+    }
   }
 
   const handleMoodUpdate = (val: MoodRating) => {

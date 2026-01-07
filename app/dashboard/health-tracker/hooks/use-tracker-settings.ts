@@ -1,14 +1,47 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
 import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
+
+/**
+ * Debounce функция
+ */
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { flush: () => void } {
+  let timeout: NodeJS.Timeout | null = null
+  let lastArgs: any[] | null = null
+
+  const debouncedFn = function (...args: any[]) {
+    lastArgs = args
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      func(...lastArgs!)
+      timeout = null
+      lastArgs = null
+    }, wait)
+  } as T & { flush: () => void }
+
+  debouncedFn.flush = () => {
+    if (timeout) {
+      clearTimeout(timeout)
+      if (lastArgs) func(...lastArgs)
+      timeout = null
+      lastArgs = null
+    }
+  }
+
+  return debouncedFn
+}
 
 /**
  * Хук для управления настройками Health Tracker
  * 
  * Управляет состоянием виджетов (вкл/выкл, цели), параметрами пользователя
- * (рост, вес, возраст, пол) и сохраняет все в localStorage с синхронизацией
- * между вкладками браузера.
+ * (рост, вес, возраст, пол) и сохраняет все в Supabase с debounce.
  * 
  * @returns Объект с настройками и методами для их изменения
  * 
@@ -23,7 +56,6 @@ import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../ty
  * updateGoal('water', 2500)
  * ```
  */
-const STORAGE_KEY = 'health_tracker_settings'
 const VISITED_KEY = 'health_tracker_visited'
 
 // Настройки по умолчанию
@@ -48,158 +80,127 @@ const DEFAULT_SETTINGS: TrackerSettings = {
   },
 }
 
-export function useTrackerSettings() {
-  const [settings, setSettings] = useState<TrackerSettings>(() => {
-    if (typeof window === 'undefined') return DEFAULT_SETTINGS
-
-    const storedSettings = localStorage.getItem(STORAGE_KEY)
-    if (storedSettings) {
-      try {
-        const parsed = JSON.parse(storedSettings) as TrackerSettings
-        // Мержим сохраненные настройки с дефолтными, чтобы добавить новые виджеты
-        return {
-          ...DEFAULT_SETTINGS,
-          ...parsed,
-          widgets: {
-            ...DEFAULT_SETTINGS.widgets,
-            ...parsed.widgets
-          },
-          userParams: {
-            ...DEFAULT_SETTINGS.userParams,
-            ...(parsed.userParams || {})
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка парсинга настроек трекера:', error)
-        return DEFAULT_SETTINGS
-      }
+// Преобразование из формата БД в формат приложения
+function dbToAppSettings(dbData: any): TrackerSettings {
+  const widgets: any = {}
+  
+  // Преобразуем массивы и объекты БД в структуру виджетов
+  const enabledWidgets = dbData.enabled_widgets || []
+  const widgetGoals = dbData.widget_goals || {}
+  const widgetsInPlan = dbData.widgets_in_daily_plan || []
+  
+  Object.keys(DEFAULT_SETTINGS.widgets).forEach(widgetId => {
+    widgets[widgetId] = {
+      enabled: enabledWidgets.includes(widgetId),
+      goal: widgetGoals[widgetId] || null,
+      inDailyPlan: widgetsInPlan.includes(widgetId)
     }
-    return DEFAULT_SETTINGS
   })
   
+  return {
+    widgets,
+    userParams: dbData.user_params || DEFAULT_SETTINGS.userParams
+  }
+}
+
+// Преобразование из формата приложения в формат БД
+function appToDbSettings(appSettings: TrackerSettings) {
+  const enabledWidgets: string[] = []
+  const widgetGoals: Record<string, number> = {}
+  const widgetsInPlan: string[] = []
+  
+  Object.entries(appSettings.widgets).forEach(([widgetId, widget]) => {
+    if (widget.enabled) enabledWidgets.push(widgetId)
+    if (widget.goal !== null) widgetGoals[widgetId] = widget.goal
+    if (widget.inDailyPlan) widgetsInPlan.push(widgetId)
+  })
+  
+  return {
+    enabled_widgets: enabledWidgets,
+    widget_goals: widgetGoals,
+    widgets_in_daily_plan: widgetsInPlan,
+    user_params: appSettings.userParams
+  }
+}
+
+export function useTrackerSettings() {
+  const [settings, setSettings] = useState<TrackerSettings>(DEFAULT_SETTINGS)
+  const [userId, setUserId] = useState<string | null>(null)
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
     if (typeof window === 'undefined') return false
     return !localStorage.getItem(VISITED_KEY)
   })
-  
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Отмечаем загрузку после монтирования
+  // Получаем userId и загружаем настройки
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
-
-  // Слушаем изменения настроек (из того же окна и других вкладок)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue) as TrackerSettings
-          setSettings({
-            ...DEFAULT_SETTINGS,
-            ...parsed,
-            widgets: {
-              ...DEFAULT_SETTINGS.widgets,
-              ...parsed.widgets
-            },
-            userParams: {
-              ...DEFAULT_SETTINGS.userParams,
-              ...(parsed.userParams || {})
-            }
-          })
-        } catch (error) {
-          console.error('Ошибка парсинга настроек трекера:', error)
-        }
-      }
-    }
-
-    const handleCustomStorageChange = (e: CustomEvent) => {
-      if (e.detail?.key === STORAGE_KEY && e.detail?.value) {
-        try {
-          const parsed = JSON.parse(e.detail.value) as TrackerSettings
-          setSettings({
-            ...DEFAULT_SETTINGS,
-            ...parsed,
-            widgets: {
-              ...DEFAULT_SETTINGS.widgets,
-              ...parsed.widgets
-            },
-            userParams: {
-              ...DEFAULT_SETTINGS.userParams,
-              ...(parsed.userParams || {})
-            }
-          })
-        } catch (error) {
-          console.error('Ошибка парсинга настроек трекера:', error)
-        }
-      }
-    }
-
-    // Проверяем актуальное значение при монтировании
-    const checkCurrentValue = () => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as TrackerSettings
-          setSettings({
-            ...DEFAULT_SETTINGS,
-            ...parsed,
-            widgets: {
-              ...DEFAULT_SETTINGS.widgets,
-              ...parsed.widgets
-            },
-            userParams: {
-              ...DEFAULT_SETTINGS.userParams,
-              ...(parsed.userParams || {})
-            }
-          })
-        } catch (error) {
-          console.error('Ошибка парсинга настроек трекера при монтировании:', error)
-        }
-      }
-    }
-
-    // Проверяем при монтировании
-    checkCurrentValue()
-
-    // Слушаем изменения из других вкладок
-    window.addEventListener('storage', handleStorageChange)
-    // Слушаем изменения из того же окна
-    window.addEventListener('tracker-settings-changed' as any, handleCustomStorageChange as any)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('tracker-settings-changed' as any, handleCustomStorageChange as any)
-    }
-  }, [])
-
-  // Сохранение настроек в localStorage
-  const saveSettings = useCallback((newSettings: TrackerSettings) => {
-    if (typeof window === 'undefined') return
-
-    try {
-      const serialized = JSON.stringify(newSettings)
-      localStorage.setItem(STORAGE_KEY, serialized)
-      localStorage.setItem(VISITED_KEY, 'true')
-      setSettings(newSettings)
-      setIsFirstVisit(false)
+    async function loadSettings() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
       
-      // Отправляем событие для синхронизации в том же окне
-      window.dispatchEvent(new CustomEvent('tracker-settings-changed', {
-        detail: { key: STORAGE_KEY, value: serialized }
-      }))
-    } catch (error) {
-      console.error('Ошибка сохранения настроек трекера:', error)
+      if (!user) {
+        setIsLoaded(true)
+        return
+      }
+      
+      setUserId(user.id)
+      
+      const result = await getDiarySettings(user.id)
+      
+      if (result.success && result.data) {
+        const appSettings = dbToAppSettings(result.data)
+        setSettings(appSettings)
+      }
+      
+      setIsLoaded(true)
     }
+    
+    loadSettings()
   }, [])
+
+  // Функция сохранения в БД
+  const saveToDb = useCallback(async (newSettings: TrackerSettings) => {
+    if (!userId) return
+    
+    const dbSettings = appToDbSettings(newSettings)
+    await updateDiarySettings(userId, dbSettings)
+  }, [userId])
+
+  // Debounced версия сохранения (1 сек после последнего изменения)
+  const debouncedSave = useMemo(
+    () => debounce(saveToDb, 1000),
+    [saveToDb]
+  )
+
+  // Сохранение настроек (мгновенно в state + отложенно в БД)
+  const saveSettings = useCallback((newSettings: TrackerSettings) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(VISITED_KEY, 'true')
+      setIsFirstVisit(false)
+    }
+    
+    setSettings(newSettings)
+    debouncedSave(newSettings)
+  }, [debouncedSave])
+
+  // Принудительное сохранение перед уходом
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      debouncedSave.flush()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      debouncedSave.flush()
+    }
+  }, [debouncedSave])
 
   // Переключение виджета (вкл/выкл)
   const toggleWidget = useCallback((widgetId: WidgetId) => {
     setSettings(prev => {
       const currentEnabled = prev.widgets[widgetId].enabled
-      return {
+      const newSettings = {
         ...prev,
         widgets: {
           ...prev.widgets,
@@ -209,47 +210,61 @@ export function useTrackerSettings() {
           },
         },
       }
+      debouncedSave(newSettings)
+      return newSettings
     })
-  }, [])
+  }, [debouncedSave])
 
   // Обновление цели виджета
   const updateGoal = useCallback((widgetId: WidgetId, goal: number | null) => {
-    setSettings(prev => ({
-      ...prev,
-      widgets: {
-        ...prev.widgets,
-        [widgetId]: {
-          ...prev.widgets[widgetId],
-          goal,
+    setSettings(prev => {
+      const newSettings = {
+        ...prev,
+        widgets: {
+          ...prev.widgets,
+          [widgetId]: {
+            ...prev.widgets[widgetId],
+            goal,
+          },
         },
-      },
-    }))
-  }, [])
+      }
+      debouncedSave(newSettings)
+      return newSettings
+    })
+  }, [debouncedSave])
 
   // Переключение "в план на день"
   const toggleInDailyPlan = useCallback((widgetId: WidgetId) => {
-    setSettings(prev => ({
-      ...prev,
-      widgets: {
-        ...prev.widgets,
-        [widgetId]: {
-          ...prev.widgets[widgetId],
-          inDailyPlan: !prev.widgets[widgetId].inDailyPlan,
+    setSettings(prev => {
+      const newSettings = {
+        ...prev,
+        widgets: {
+          ...prev.widgets,
+          [widgetId]: {
+            ...prev.widgets[widgetId],
+            inDailyPlan: !prev.widgets[widgetId].inDailyPlan,
+          },
         },
-      },
-    }))
-  }, [])
+      }
+      debouncedSave(newSettings)
+      return newSettings
+    })
+  }, [debouncedSave])
 
   // Обновление параметров пользователя
   const updateUserParams = useCallback((params: Partial<UserParameters>) => {
-    setSettings(prev => ({
-      ...prev,
-      userParams: {
-        ...prev.userParams,
-        ...params,
-      },
-    }))
-  }, [])
+    setSettings(prev => {
+      const newSettings = {
+        ...prev,
+        userParams: {
+          ...prev.userParams,
+          ...params,
+        },
+      }
+      debouncedSave(newSettings)
+      return newSettings
+    })
+  }, [debouncedSave])
 
   // Получение отсортированного списка виджетов (активные наверху)
   const getSortedWidgets = useCallback(() => {
@@ -286,4 +301,3 @@ export function useTrackerSettings() {
     markAsVisited,
   }
 }
-

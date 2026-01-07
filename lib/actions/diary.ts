@@ -37,7 +37,7 @@ export async function getDiarySettings(userId: string) {
       logError('Table Check (diary_settings)', tableCheckError, userId)
       // Если таблицы нет, код ошибки 42P01
       if (tableCheckError.code === '42P01') {
-        return { success: false, error: 'Таблица diary_settings не найдена. Пожалуйста, выполните SQL миграцию.' }
+        return { success: false, error: 'Таблица diary_settings не найдена. Пожалуйста, выполните SQL миграцию 022.' }
       }
     }
 
@@ -56,8 +56,11 @@ export async function getDiarySettings(userId: string) {
       console.log(`[Diary Action] No settings found for ${userId}, creating defaults...`)
       const defaultSettings: DiarySettingsInsert = {
         user_id: userId,
-        enabled_metrics: ['weight', 'steps', 'water', 'calories', 'mood'],
-        goals: {},
+        enabled_widgets: [],
+        widget_goals: {},
+        widgets_in_daily_plan: [],
+        user_params: { height: null, weight: null, age: null, gender: null },
+        habits: [],
         streaks: { current: 0, longest: 0, last_entry_date: null }
       }
 
@@ -83,12 +86,49 @@ export async function getDiarySettings(userId: string) {
 }
 
 /**
- * Обновить настройки дневника
+ * Обновить настройки дневника с поддержкой частичного обновления
  */
 export async function updateDiarySettings(userId: string, settings: DiarySettingsUpdate) {
   const supabase = await createClient()
 
   try {
+    // Сначала проверяем, существуют ли настройки
+    const { data: existing } = await supabase
+      .from('diary_settings')
+      .select('user_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    // Если настроек нет, создаем с дефолтными значениями
+    if (!existing) {
+      const defaultSettings: DiarySettingsInsert = {
+        user_id: userId,
+        enabled_widgets: [],
+        widget_goals: {},
+        widgets_in_daily_plan: [],
+        user_params: { height: null, weight: null, age: null, gender: null },
+        habits: [],
+        streaks: { current: 0, longest: 0, last_entry_date: null },
+        ...settings
+      }
+
+      const { data, error } = await supabase
+        .from('diary_settings')
+        .insert(defaultSettings)
+        .select()
+        .single()
+
+      if (error) {
+        logError('createDiarySettings', error, userId)
+        return { success: false, error: error.message }
+      }
+
+      revalidatePath('/dashboard')
+      revalidatePath('/dashboard/health-tracker')
+      return { success: true, data: data as DiarySettings }
+    }
+
+    // Обновляем существующие настройки
     const { data, error } = await supabase
       .from('diary_settings')
       .update(settings)
@@ -139,21 +179,59 @@ export async function getDiaryEntries(userId: string, startDate: string, endDate
 }
 
 /**
- * Сохранить или обновить запись в дневнике
+ * Получить запись дневника за конкретный день
  */
-export async function upsertDiaryEntry(userId: string, date: string, metrics: any, notes?: string) {
+export async function getDiaryEntry(userId: string, date: string) {
   const supabase = await createClient()
 
   try {
     const { data, error } = await supabase
       .from('diary_entries')
-      .upsert({
-        user_id: userId,
-        date,
-        metrics,
-        notes,
-        updated_at: new Date().toISOString()
-      }, {
+      .select('*')
+      .eq('user_id', userId)
+      .eq('date', date)
+      .maybeSingle()
+
+    if (error) {
+      logError('getDiaryEntry', error, userId)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data: data as DiaryEntry | null }
+  } catch (err: any) {
+    console.error('[Diary Action Unexpected] getDiaryEntry:', err)
+    return { success: false, error: err?.message || 'Internal Server Error' }
+  }
+}
+
+/**
+ * Сохранить или обновить запись в дневнике
+ */
+export async function upsertDiaryEntry(
+  userId: string, 
+  date: string, 
+  metrics: any, 
+  habitsCompleted?: any,
+  notes?: string,
+  photoUrls?: string[]
+) {
+  const supabase = await createClient()
+
+  try {
+    const entryData: any = {
+      user_id: userId,
+      date,
+      metrics,
+      updated_at: new Date().toISOString()
+    }
+
+    if (habitsCompleted !== undefined) entryData.habits_completed = habitsCompleted
+    if (notes !== undefined) entryData.notes = notes
+    if (photoUrls !== undefined) entryData.photo_urls = photoUrls
+
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .upsert(entryData, {
         onConflict: 'user_id,date'
       })
       .select()
@@ -167,8 +245,11 @@ export async function upsertDiaryEntry(userId: string, date: string, metrics: an
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/health-tracker')
 
-    // Обновляем стрики
-    await updateStreaks(userId, date)
+    // Обновляем стрики через SQL функцию
+    await supabase.rpc('update_diary_streaks', {
+      p_user_id: userId,
+      p_entry_date: date
+    })
 
     // Проверяем достижения (фоново, не блокируем ответ)
     checkAndUnlockAchievements(userId).catch(err => {
@@ -183,54 +264,7 @@ export async function upsertDiaryEntry(userId: string, date: string, metrics: an
 }
 
 /**
- * Обновление стриков пользователя
- */
-async function updateStreaks(userId: string, entryDate: string) {
-  const supabase = await createClient()
-  
-  try {
-    const { data: settings } = await supabase
-      .from('diary_settings')
-      .select('streaks')
-      .eq('user_id', userId)
-      .single()
-      
-    if (!settings) return
-
-    const streaks = (settings.streaks as any) || { current: 0, longest: 0, last_entry_date: null }
-    const lastDate = streaks.last_entry_date
-    
-    if (lastDate === entryDate) return
-    
-    const today = new Date(entryDate)
-    const yesterday = new Date(today)
-    yesterday.setDate(today.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
-    
-    let newCurrent = 1
-    if (lastDate === yesterdayStr) {
-      newCurrent = (streaks.current || 0) + 1
-    }
-    
-    const newLongest = Math.max(newCurrent, streaks.longest || 0)
-    
-    await supabase
-      .from('diary_settings')
-      .update({
-        streaks: {
-          current: newCurrent,
-          longest: newLongest,
-          last_entry_date: entryDate
-        }
-      })
-      .eq('user_id', userId)
-  } catch (err) {
-    console.error('[Diary Action Unexpected] updateStreaks:', err)
-  }
-}
-
-/**
- * Загрузка фото прогресса
+ * Загрузка фото прогресса (теперь сохраняем в diary_entries)
  */
 export async function uploadProgressPhoto(userId: string, date: string, formData: FormData) {
   const supabase = await createClient()
@@ -262,24 +296,40 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
       return { success: false, error: signedError.message }
     }
 
+    // Получаем текущую запись дня
+    const { data: entry } = await supabase
+      .from('diary_entries')
+      .select('photo_urls')
+      .eq('user_id', userId)
+      .eq('date', date)
+      .maybeSingle()
+
+    const currentPhotoUrls = entry?.photo_urls || []
+    const updatedPhotoUrls = [...currentPhotoUrls, signedData.signedUrl]
+
+    // Обновляем запись дня с новым фото
     const { data, error } = await supabase
-      .from('progress_photos')
-      .insert({
+      .from('diary_entries')
+      .upsert({
         user_id: userId,
         date,
-        image_url: signedData.signedUrl
+        photo_urls: updatedPhotoUrls,
+        metrics: entry?.metrics || {},
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,date'
       })
       .select()
       .single()
 
     if (error) {
-      logError('uploadProgressPhoto (db insert)', error, userId)
+      logError('uploadProgressPhoto (db update)', error, userId)
       return { success: false, error: error.message }
     }
 
     revalidatePath('/dashboard/health-tracker')
 
-    return { success: true, data: data as ProgressPhoto }
+    return { success: true, data: { url: signedData.signedUrl, entry: data } }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] uploadProgressPhoto:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -287,16 +337,17 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
 }
 
 /**
- * Получить фото прогресса
+ * Получить фото прогресса (из diary_entries)
  */
 export async function getProgressPhotos(userId: string) {
   const supabase = await createClient()
 
   try {
     const { data, error } = await supabase
-      .from('progress_photos')
-      .select('*')
+      .from('diary_entries')
+      .select('date, photo_urls')
       .eq('user_id', userId)
+      .not('photo_urls', 'is', null)
       .order('date', { ascending: false })
 
     if (error) {
@@ -304,7 +355,15 @@ export async function getProgressPhotos(userId: string) {
       return { success: false, error: error.message }
     }
 
-    return { success: true, data: data as ProgressPhoto[] }
+    // Преобразуем в плоский список фото с датами
+    const photos = data.flatMap(entry => 
+      (entry.photo_urls || []).map((url: string) => ({
+        date: entry.date,
+        url
+      }))
+    )
+
+    return { success: true, data: photos }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] getProgressPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -312,17 +371,17 @@ export async function getProgressPhotos(userId: string) {
 }
 
 /**
- * Удалить фото прогресса
+ * Удалить фото прогресса (из diary_entries)
  */
-export async function deleteProgressPhoto(userId: string, photoId: string, imageUrl: string) {
+export async function deleteProgressPhoto(userId: string, date: string, photoUrl: string) {
   const supabase = await createClient()
 
   try {
-    // Извлекаем путь из URL
+    // Извлекаем путь из URL для удаления из Storage
     let path = null
     try {
-      if (imageUrl.includes('progress-photos/')) {
-        path = imageUrl.split('progress-photos/')[1]?.split('?')[0]
+      if (photoUrl.includes('progress-photos/')) {
+        path = photoUrl.split('progress-photos/')[1]?.split('?')[0]
       }
     } catch (e) {}
 
@@ -332,11 +391,27 @@ export async function deleteProgressPhoto(userId: string, photoId: string, image
         .remove([path])
     }
 
-    const { error } = await supabase
-      .from('progress_photos')
-      .delete()
-      .eq('id', photoId)
+    // Получаем текущие фото записи
+    const { data: entry } = await supabase
+      .from('diary_entries')
+      .select('photo_urls')
       .eq('user_id', userId)
+      .eq('date', date)
+      .single()
+
+    if (!entry) {
+      return { success: false, error: 'Entry not found' }
+    }
+
+    // Удаляем URL из массива
+    const updatedPhotoUrls = (entry.photo_urls || []).filter((url: string) => url !== photoUrl)
+
+    // Обновляем запись
+    const { error } = await supabase
+      .from('diary_entries')
+      .update({ photo_urls: updatedPhotoUrls })
+      .eq('user_id', userId)
+      .eq('date', date)
 
     if (error) {
       logError('deleteProgressPhoto', error, userId)

@@ -214,21 +214,15 @@ export interface DailyMetrics {
   weightGoal?: number;
   sleepHours: number;
   sleepGoal: number;
-  sleepQuality: number; // 1-100
   
   // Состояние
   mood: MoodRating | null;
   energyLevel: number; // 1-10
   
-  // КБЖУ
+  // Питание
   calories: number;
   caloriesGoal: number;
-  protein: number;
-  proteinGoal: number;
-  fats: number;
-  fatsGoal: number;
-  carbs: number;
-  carbsGoal: number;
+  foodQuality: number | null; // 1-5
 
   // Дополнительно
   caffeineIntake: number; // порции/чашки
@@ -236,13 +230,21 @@ export interface DailyMetrics {
   notes: string;
   dailyPhotos: string[]; // URL миниатюр
   
-  // Новые поля
-  foodQuality: number | null; // 1-5
+  // Параметры пользователя
   height?: number; // см
   age?: number;
   gender?: 'male' | 'female';
   
   habits: DailyHabit[];
+  
+  // ВРЕМЕННО для совместимости (будут удалены)
+  protein?: number;
+  proteinGoal?: number;
+  fats?: number;
+  fatsGoal?: number;
+  carbs?: number;
+  carbsGoal?: number;
+  sleepQuality?: number;
 }
 
 export const MOCK_DATA: DailyMetrics = {
@@ -278,4 +280,6 @@ export const MOCK_DATA: DailyMetrics = {
   age: 28,
   gender: 'female',
   habits: [] // Привычки теперь берутся из настроек через useHabits()
-};
+}
+
+// MOCK_DATA теперь пустой - все данные загружаются из Supabase;
