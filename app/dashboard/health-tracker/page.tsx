@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect, Suspense, useMemo } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, Share2, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, CalendarDays, PlusCircle } from 'lucide-react'
-import { format, isSameDay, subDays, subMonths, subYears, differenceInDays } from 'date-fns'
+import { Calendar, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
+import { format, subDays, differenceInDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 
@@ -45,11 +44,6 @@ import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './ty
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { useHabits } from './hooks/use-habits'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
 
@@ -77,13 +71,11 @@ function HealthTrackerContent() {
     end: today 
   })
   const [isStatsPeriodOpen, setIsStatsPeriodOpen] = useState(false)
-  const [isStatsPeriodDropdownOpen, setIsStatsPeriodDropdownOpen] = useState(false)
 
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
     (tabParam as any) || 'overview'
   )
   const [settingsSubTab, setSettingsSubTab] = useState<'widgets' | 'habits'>('widgets')
-  const [isAnimating, setIsAnimating] = useState(false)
   const [data, setData] = useState<DailyMetrics>(MOCK_DATA)
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
@@ -435,10 +427,7 @@ function HealthTrackerContent() {
 
             <AnimatePresence 
               mode="wait"
-              onExitComplete={() => {
-                window.scrollTo(0, 0)
-                setIsAnimating(false)
-              }}
+              onExitComplete={() => window.scrollTo(0, 0)}
             >
               <motion.div
                 key={activeTab === 'settings' ? 'settings' : 'content'}
