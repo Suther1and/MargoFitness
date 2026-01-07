@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { StatsNavigation } from "./stats-details/stats-navigation"
 import { StatsOverall } from "./stats-details/stats-overall"
@@ -58,87 +57,44 @@ export default function StatsTab({ periodType, dateRange, data, onPeriodSelect }
     )
   }
 
-  // Определяем, какой компонент рендерить
+  // Определяем, какой компонент рендерить (используем display:none для сохранения кэша)
   const renderContent = () => {
-    const contentVariants: Variants = {
-      enter: (direction: number) => ({
-        x: direction > 0 ? 20 : -20,
-        opacity: 0,
-        scale: 0.98,
-        transition: {
-          x: { type: "spring" as const, stiffness: 400, damping: 35 },
-          opacity: { duration: 0.15 },
-          scale: { duration: 0.15 }
-        }
-      }),
-      center: {
-        x: 0,
-        opacity: 1,
-        scale: 1,
-        transition: {
-          x: { type: "spring" as const, stiffness: 400, damping: 35 },
-          opacity: { duration: 0.15 },
-          scale: { duration: 0.15 }
-        }
-      },
-      exit: (direction: number) => ({
-        x: direction < 0 ? 20 : -20,
-        opacity: 0,
-        scale: 0.98,
-        transition: {
-          x: { duration: 0.1, ease: "easeIn" as const },
-          opacity: { duration: 0.1 },
-          scale: { duration: 0.1 }
-        }
-      })
-    }
-
-    const getContent = () => {
-      switch (activeView) {
-        case 'overall':
-          return <StatsOverall key="overall" period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
-        case 'habits':
-          return <StatsHabits key="habits" dateRange={dateRange} />
-        case 'water':
-          return <StatsWater key="water" dateRange={dateRange} />
-        case 'steps':
-          return <StatsSteps key="steps" dateRange={dateRange} />
-        case 'weight':
-          return <StatsWeight key="weight" dateRange={dateRange} />
-        case 'caffeine':
-          return <StatsCaffeine key="caffeine" dateRange={dateRange} />
-        case 'sleep':
-          return <StatsSleep key="sleep" dateRange={dateRange} />
-        case 'mood':
-          return <StatsMood key="mood" dateRange={dateRange} />
-        case 'nutrition':
-          return <StatsNutrition key="nutrition" dateRange={dateRange} />
-        case 'notes':
-          return <StatsNotes key="notes" dateRange={dateRange} />
-        case 'photos':
-          return <StatsPhotos key="photos" dateRange={dateRange} />
-        default:
-          return <StatsOverall key="overall" period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
-      }
-    }
-
     return (
       <div className={cn("relative", isAnimating && "is-animating")}>
-        <AnimatePresence mode="wait" custom={1}>
-          <motion.div
-            key={activeView}
-            custom={1}
-            variants={contentVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            onAnimationStart={() => setIsAnimating(true)}
-            onAnimationComplete={() => setIsAnimating(false)}
-            className="will-change-[transform,opacity] transform-gpu"
-          >
-            {getContent()}
-          </motion.div>
-        </AnimatePresence>
+        {/* Все компоненты остаются в DOM, переключаем только видимость */}
+        <div style={{ display: activeView === 'overall' ? 'block' : 'none' }}>
+          <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
+        </div>
+        <div style={{ display: activeView === 'habits' ? 'block' : 'none' }}>
+          <StatsHabits dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'water' ? 'block' : 'none' }}>
+          <StatsWater dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'steps' ? 'block' : 'none' }}>
+          <StatsSteps dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'weight' ? 'block' : 'none' }}>
+          <StatsWeight dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'caffeine' ? 'block' : 'none' }}>
+          <StatsCaffeine dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'sleep' ? 'block' : 'none' }}>
+          <StatsSleep dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'mood' ? 'block' : 'none' }}>
+          <StatsMood dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'nutrition' ? 'block' : 'none' }}>
+          <StatsNutrition dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'notes' ? 'block' : 'none' }}>
+          <StatsNotes dateRange={dateRange} />
+        </div>
+        <div style={{ display: activeView === 'photos' ? 'block' : 'none' }}>
+          <StatsPhotos dateRange={dateRange} />
+        </div>
       </div>
     )
   }
