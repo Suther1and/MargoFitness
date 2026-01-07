@@ -48,10 +48,15 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   const renderMobileLayout = () => {
     if (!hasAnyContent) {
       return (
-        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden"
+        >
           <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Аналитика пуста</h3>
           <p className="text-xs text-white/40 text-center mb-8 max-w-[240px] leading-relaxed font-medium">
-            Настройте метрики и начните заполнять данные, чтобы увидеть свой прогресс
+            Настрой метрики и начни заполнять данные, чтобы увидеть свой прогресс
           </p>
 
           <Link 
@@ -61,7 +66,7 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             <Settings className="w-4 h-4" />
             Настроить трекер
           </Link>
-        </div>
+        </motion.div>
       )
     }
 
@@ -454,10 +459,15 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   const renderDesktopLayout = () => {
     if (!hasAnyContent) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[400px]">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center justify-center py-20 px-6 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[400px]"
+        >
           <h3 className="text-3xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">Аналитика пуста</h3>
           <p className="text-base text-white/30 text-center mb-10 max-w-[400px] leading-relaxed font-medium">
-            Выберите метрики здоровья для отслеживания, чтобы увидеть подробную статистику и прогресс в этом разделе
+            Выбери метрики здоровья для отслеживания, чтобы увидеть подробную статистику и прогресс в этом разделе
           </p>
           <Link 
             href="/dashboard/health-tracker?tab=settings"
@@ -466,7 +476,7 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
             <Settings className="w-5 h-5" />
             Настроить трекер
           </Link>
-        </div>
+        </motion.div>
       )
     }
 

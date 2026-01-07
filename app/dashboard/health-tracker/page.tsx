@@ -511,9 +511,9 @@ function HealthTrackerContent() {
                         <div className="flex flex-col gap-6">
                           {!hasMainWidgets ? (
                             <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
-                              <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настройте панель</h3>
+                              <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                               <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-                                Выберите показатели здоровья, которые важны для вас сегодня
+                                Выбери показатели здоровья, которые будем отслеживать
                               </p>
 
                               <button 
@@ -596,9 +596,9 @@ function HealthTrackerContent() {
                   <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
                     {!hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
-                        <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настройте панель</h3>
+                        <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                         <p className="text-[12px] text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-                          Выберите показатели здоровья, которые важны для вас сегодня
+                          Выбери показатели здоровья, которые будем отслеживать
                         </p>
 
                         <button 

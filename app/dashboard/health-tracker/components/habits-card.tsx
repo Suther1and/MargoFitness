@@ -68,9 +68,9 @@ export function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCar
   if (totalCount === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden h-full min-h-[340px]">
-        <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Ваши привычки</h3>
+        <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Твои привычки</h3>
         <p className="text-xs text-white/40 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-          Начните отслеживать полезные привычки для достижения своих целей
+          Начни отслеживать полезные привычки для достижения своих целей
         </p>
 
         <button 
