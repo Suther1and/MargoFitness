@@ -659,7 +659,17 @@ function HealthTrackerContent() {
                   <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
                     {/* Левая колонка: виджеты здоровья */}
                     <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-                    {!hasMainWidgets ? (
+                    {isLoading ? (
+                      // Скелетоны для desktop версии
+                      <>
+                        <MetricCardSkeleton />
+                        <MetricCardSkeleton />
+                        <div className="grid grid-cols-2 gap-4">
+                          <MetricCardSkeleton />
+                          <MetricCardSkeleton />
+                        </div>
+                      </>
+                    ) : !hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                         <p className="text-[12px] text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">

@@ -8,20 +8,20 @@ import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { getSleepStats } from "@/lib/actions/health-stats"
 import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { TrackerSettings } from "../../types"
 
 interface StatsSleepProps {
+  settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
 
 const chartConfig = { value: { label: "Часы сна", color: "#6366f1" } } satisfies ChartConfig
 
-export function StatsSleep({ dateRange }: StatsSleepProps) {
-  const { settings } = useTrackerSettings()
+export function StatsSleep({ settings, dateRange }: StatsSleepProps) {
   const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {

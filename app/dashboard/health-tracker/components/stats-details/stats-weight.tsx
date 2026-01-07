@@ -6,18 +6,18 @@ import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
 import { cn } from "@/lib/utils"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { getWeightStats } from "@/lib/actions/health-stats"
 import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { TrackerSettings } from "../../types"
 
 interface StatsWeightProps {
+  settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
 
-export function StatsWeight({ dateRange }: StatsWeightProps) {
-  const { settings } = useTrackerSettings()
+export function StatsWeight({ settings, dateRange }: StatsWeightProps) {
   const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {

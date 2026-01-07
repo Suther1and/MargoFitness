@@ -11,9 +11,7 @@ import {
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
-import { useHabits } from "../../hooks/use-habits"
-import { StatsView, WidgetId, PeriodType, DateRange } from "../../types"
+import { StatsView, WidgetId, PeriodType, DateRange, TrackerSettings, Habit } from "../../types"
 import { StatsOverall } from "./stats-overall"
 import { StatsWater } from "./stats-water"
 import { StatsSteps } from "./stats-steps"
@@ -28,6 +26,9 @@ import { StatsHabits } from "./stats-habits"
 import { DailyMetrics } from "../../types"
 
 interface DesktopStatsDashboardProps {
+  userId: string | null
+  settings: TrackerSettings
+  habits: Habit[]
   period: string
   data: DailyMetrics
   onPeriodSelect: (periodType: PeriodType, dateRange: DateRange) => void
@@ -50,20 +51,18 @@ const NAV_ITEMS = [
 ]
 
 export function DesktopStatsDashboard({ 
+  userId,
+  settings,
+  habits,
   period, 
   data, 
   onPeriodSelect,
   currentPeriodType,
   currentDateRange
 }: DesktopStatsDashboardProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings(null)
-  const { habits, isLoaded: isHabitsLoaded } = useHabits(null)
   const [activeView, setActiveView] = useState<StatsView>('overall')
   
-  // Пока данные загружаются, показываем скелетон для навигации
-  const isLoading = !isSettingsLoaded || !isHabitsLoaded
-
-  const visibleItems = isLoading ? [] : NAV_ITEMS.filter(item => {
+  const visibleItems = NAV_ITEMS.filter(item => {
     if (item.id === 'overall') return true
     if (item.id === 'habits') return habits.length > 0
     return settings.widgets[item.id as WidgetId]?.enabled
@@ -72,31 +71,31 @@ export function DesktopStatsDashboard({
   // Условный рендеринг - только активный компонент в DOM
   const renderStatsContent = () => {
     if (activeView === 'overall') {
-      return <StatsOverall period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
+      return <StatsOverall settings={settings} habits={habits} period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
     }
     if (activeView === 'habits') {
       return <StatsHabits dateRange={currentDateRange} />
     }
     if (activeView === 'water') {
-      return <StatsWater dateRange={currentDateRange} />
+      return <StatsWater settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'steps') {
-      return <StatsSteps dateRange={currentDateRange} />
+      return <StatsSteps settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'weight') {
-      return <StatsWeight dateRange={currentDateRange} />
+      return <StatsWeight settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'caffeine') {
-      return <StatsCaffeine dateRange={currentDateRange} />
+      return <StatsCaffeine settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'sleep') {
-      return <StatsSleep dateRange={currentDateRange} />
+      return <StatsSleep settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'mood') {
       return <StatsMood dateRange={currentDateRange} />
     }
     if (activeView === 'nutrition') {
-      return <StatsNutrition dateRange={currentDateRange} />
+      return <StatsNutrition settings={settings} dateRange={currentDateRange} />
     }
     if (activeView === 'photos') {
       return <StatsPhotos dateRange={currentDateRange} />
@@ -116,21 +115,7 @@ export function DesktopStatsDashboard({
         </div>
         
         <div className="flex flex-col gap-1">
-          {isLoading ? (
-            // Скелетон навигации при загрузке
-            <>
-              {[1, 2, 3].map((i) => (
-                <div 
-                  key={i}
-                  className="flex items-center gap-3.5 px-4 py-2 rounded-2xl bg-white/[0.03] border border-white/5"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-white/5 animate-pulse" />
-                  <div className="h-4 flex-1 bg-white/5 rounded animate-pulse" />
-                </div>
-              ))}
-            </>
-          ) : (
-            visibleItems.map((item) => {
+          {visibleItems.map((item) => {
             const isActive = activeView === item.id
             return (
               <button

@@ -19,8 +19,7 @@ interface StatsNutritionProps {
 
 const chartConfig = { calories: { label: "Калории", color: "#8b5cf6" } } satisfies ChartConfig
 
-export function StatsNutrition({ dateRange }: StatsNutritionProps) {
-  const { settings } = useTrackerSettings()
+export function StatsNutrition({ settings, dateRange }: StatsNutritionProps) {
   const [userId, setUserId] = useState<string | null>(null)
   
   useEffect(() => {

@@ -21,6 +21,7 @@ import { useIsMobile } from "@/lib/hooks/use-is-mobile"
 import { DesktopStatsDashboard } from "./stats-details/desktop-stats-dashboard"
 
 interface StatsTabProps {
+  userId: string | null
   periodType: PeriodType
   dateRange: DateRange
   data: DailyMetrics
@@ -30,7 +31,7 @@ interface StatsTabProps {
 export default function StatsTab({ userId, periodType, dateRange, data, onPeriodSelect }: StatsTabProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
   const { settings } = useTrackerSettings(userId)
-  const { habits } = useHabits(null)
+  const { habits } = useHabits(userId)
   const isMobile = useIsMobile(1024)
 
   // Проверка наличия активных виджетов и привычек для показа навигации
@@ -47,6 +48,9 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
   if (!isMobile) {
     return (
       <DesktopStatsDashboard 
+        userId={userId}
+        settings={settings}
+        habits={habits}
         period={getLegacyPeriod()} 
         data={data} 
         onPeriodSelect={onPeriodSelect}
