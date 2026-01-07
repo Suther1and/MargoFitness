@@ -154,7 +154,7 @@ export function StatsSteps({ dateRange }: StatsStepsProps) {
                 <div>
                   <h3 className="text-base font-bold text-white uppercase tracking-tight">Динамика шагов</h3>
                   <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
-                    {period === '7d' ? 'Последние 7 дней' : 'Последние 30 дней'}
+                    За выбранный период
                   </p>
                 </div>
               </div>

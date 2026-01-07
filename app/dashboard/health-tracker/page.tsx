@@ -620,7 +620,7 @@ function HealthTrackerContent() {
                 </div>
 
                 {/* Desktop Settings - Limited Width Container */}
-                <div className={cn("hidden lg:block max-w-5xl mx-auto", activeTab !== 'settings' && 'lg:hidden')}>
+                <div className="hidden lg:block max-w-5xl mx-auto" style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
                   <SettingsTab 
                     onBack={() => setActiveTab('overview')} 
                     selectedDate={selectedDate}
@@ -634,7 +634,7 @@ function HealthTrackerContent() {
                 </div>
 
                 {/* Desktop Statistics */}
-                <div className={cn("hidden lg:block w-full", activeTab !== 'stats' && 'lg:hidden')}>
+                <div className="hidden lg:block w-full" style={{ display: activeTab === 'stats' ? 'block' : 'none' }}>
                   <StatsTab 
                     periodType={statsPeriodType} 
                     dateRange={statsDateRange} 

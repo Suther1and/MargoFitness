@@ -109,7 +109,25 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
     ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
     : 0
   
-  // Расчет динамических метрик из данных
+  // Форматируем период для отображения
+  const periodLabel = daysInPeriod <= 7 ? 'Последние 7 дней' 
+    : daysInPeriod <= 30 ? 'Последние 30 дней'
+    : daysInPeriod <= 180 ? 'Последние 6 месяцев'
+    : 'Последний год'
+  
+  // Определяем количество колонок для heatmap
+  const heatmapCols = daysInPeriod <= 7 ? 'grid-cols-7'
+    : daysInPeriod <= 30 ? 'grid-cols-10'
+    : daysInPeriod <= 180 ? 'grid-cols-13'
+    : 'grid-cols-15'
+  
+  const showWeekLabels = daysInPeriod <= 7
+  
+  // Заглушка для heatmap (пока нет реальных данных по дням)
+  const heatmapData = Array.from({ length: Math.min(daysInPeriod, 50) }, (_, i) => ({
+    value: Math.random() * 100,
+    label: `${i + 1}`
+  }))
   const bestHabit = HABIT_STATS.length > 0 
     ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
     : { name: "Привычки", streak: 0 }
@@ -199,10 +217,7 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
                 <div>
                   <h3 className="text-base font-bold text-white uppercase tracking-tight">Дисциплина</h3>
                   <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">
-                    {period === '7d' ? 'Последние 7 дней' : 
-                     period === '30d' ? 'Последние 30 дней' : 
-                     period === '180d' ? 'Последние 6 месяцев' : 
-                     'Последний год'}
+                    {periodLabel}
                   </p>
                 </div>
               </div>
@@ -216,8 +231,8 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
               </div>
             </div>
 
-            {/* График для 7 дней */}
-            {period === '7d' && (
+            {/* График */}
+            {completionData.length > 0 && (
               <div className="mb-6">
                 <ChartContainer config={chartConfig} className="h-[180px] w-full">
                   <BarChart data={completionData} margin={{ left: -20, right: 12, top: 10, bottom: 0 }}>
@@ -256,10 +271,7 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white/60 uppercase tracking-wider">
-                  {period === '7d' ? 'Недельная активность' : 
-                   period === '30d' ? 'Месячная активность' : 
-                   period === '180d' ? 'Активность за 6 месяцев' : 
-                   'Годовая активность'}
+                  {periodLabel}
                 </span>
                 {/* Легенда */}
                 <div className="flex items-center gap-1.5">
@@ -274,13 +286,7 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
                 </div>
               </div>
 
-              <div className={cn(
-                "grid gap-2",
-                period === '7d' ? "grid-cols-7" : 
-                period === '30d' ? "grid-cols-10" : 
-                period === '180d' ? "grid-cols-13" :
-                "grid-cols-15"
-              )}>
+              <div className={cn("grid gap-2", heatmapCols)}>
                 {heatmapData.map((data, i) => (
                   <div 
                     key={i}
@@ -296,8 +302,8 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
                 ))}
               </div>
 
-              {/* Подписи для 7 дней */}
-              {period === '7d' && (
+              {/* Подписи для дней недели */}
+              {showWeekLabels && (
                 <div className="grid grid-cols-7 gap-2">
                   {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
                     <span key={day} className="text-[9px] font-black text-white/20 text-center uppercase">{day}</span>
