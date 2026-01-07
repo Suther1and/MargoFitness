@@ -8,6 +8,7 @@ import { useHabits } from "../../hooks/use-habits"
 import { calculateBMI } from "../../utils/bmi-utils"
 import { StatsView, DailyMetrics } from "../../types"
 import Image from "next/image"
+import Link from "next/link"
 
 interface StatsOverallProps {
   period: string
