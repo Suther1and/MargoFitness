@@ -15,6 +15,7 @@ import { MoodEnergyCardH } from '@/app/dashboard/health-tracker/components/mood-
 import { NotesCard } from '@/app/dashboard/health-tracker/components/notes-card'
 import { GoalsSummaryCard } from '@/app/dashboard/health-tracker/components/goals-summary-card'
 import { MOCK_DATA } from '@/app/dashboard/health-tracker/types'
+import { useTrackerSettings } from '@/app/dashboard/health-tracker/hooks/use-tracker-settings'
 
 // Мемоизированные версии виджетов
 const MemoizedWaterCard = React.memo(WaterCardH)
@@ -89,6 +90,7 @@ export default function AnimationTestRealWorld() {
     { id: '5', title: 'Медитация', completed: false },
   ])
   const [trackerData, setTrackerData] = useState(MOCK_DATA)
+  const { settings } = useTrackerSettings()
   
   const contentRef = useRef<HTMLDivElement>(null)
   const [contentHeight, setContentHeight] = useState(0)
@@ -243,7 +245,7 @@ export default function AnimationTestRealWorld() {
               value={trackerData.notes} 
               onUpdate={(val) => handleMetricUpdate('notes', val)} 
             />
-            <MemoizedGoalsSummaryCard data={trackerData} />
+            <MemoizedGoalsSummaryCard data={trackerData} settings={settings} />
           </div>
         </div>
       </div>
