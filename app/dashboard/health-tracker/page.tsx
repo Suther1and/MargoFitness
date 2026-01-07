@@ -43,6 +43,7 @@ import { AchievementUnlockedToast, useAchievementNotifications } from './compone
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
 import { useTrackerSettings } from './hooks/use-tracker-settings'
 import { useHabits } from './hooks/use-habits'
+import { useStatsDateRange } from './hooks/use-stats-date-range'
 import { getStatsPeriodLabel } from './utils/date-formatters'
 import { hasActiveMainWidgets } from './utils/widget-helpers'
 import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
@@ -65,14 +66,15 @@ function HealthTrackerContent() {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   
-  // State для статистики
-  const today = new Date()
-  const [statsPeriodType, setStatsPeriodType] = useState<PeriodType>('7d')
-  const [statsDateRange, setStatsDateRange] = useState<DateRange>({ 
-    start: subDays(today, 7), 
-    end: today 
-  })
-  const [isStatsPeriodOpen, setIsStatsPeriodOpen] = useState(false)
+  // State для статистики (объединен в хук)
+  const { 
+    periodType: statsPeriodType, 
+    dateRange: statsDateRange, 
+    isDialogOpen: isStatsPeriodOpen,
+    openDialog: openStatsPeriodDialog,
+    closeDialog: closeStatsPeriodDialog,
+    setPeriod: handleStatsPeriodSelect 
+  } = useStatsDateRange()
 
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
     (tabParam as any) || 'overview'
@@ -182,11 +184,6 @@ function HealthTrackerContent() {
     }
   }, [tabParam])
 
-  const handleStatsPeriodSelect = (newPeriodType: PeriodType, newDateRange: DateRange) => {
-    setStatsPeriodType(newPeriodType)
-    setStatsDateRange(newDateRange)
-  }
-
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
     setData(prev => ({ ...prev, [metric]: value }))
   }
@@ -226,7 +223,7 @@ function HealthTrackerContent() {
               <div className="flex flex-col lg:hidden">
                 {activeTab === 'stats' ? (
                   <button 
-                    onClick={() => setIsStatsPeriodOpen(true)}
+                    onClick={openStatsPeriodDialog}
                     className="flex items-center gap-1.5 group w-fit active:opacity-70 transition-all mb-1 outline-none focus:ring-0 focus:outline-none focus-visible:outline-none"
                   >
                     <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/90">
@@ -269,7 +266,7 @@ function HealthTrackerContent() {
                 {/* Dialog выбора периода для статистики */}
                 <StatsDatePickerDialog
                   isOpen={isStatsPeriodOpen}
-                  onClose={() => setIsStatsPeriodOpen(false)}
+                  onClose={closeStatsPeriodDialog}
                   onPeriodSelect={handleStatsPeriodSelect}
                   currentPeriodType={statsPeriodType}
                   currentDateRange={statsDateRange}
