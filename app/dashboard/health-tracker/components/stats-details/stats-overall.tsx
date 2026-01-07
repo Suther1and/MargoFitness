@@ -39,6 +39,7 @@ export function StatsOverall({ period, onNavigate, layout = 'column', data }: St
   // Проверка наличия активных виджетов (только основные метрики здоровья)
   const mainHealthWidgets = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
   const hasMainWidgets = mainHealthWidgets.some(id => settings.widgets[id as keyof typeof settings.widgets]?.enabled)
+  // В обзоре статистики показываем плейсхолдер только если нет ни виджетов, ни привычек
   const hasAnyContent = hasMainWidgets || habits.length > 0
 
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } }
