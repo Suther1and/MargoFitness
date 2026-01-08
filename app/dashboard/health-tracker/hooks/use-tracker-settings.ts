@@ -260,8 +260,9 @@ export function useTrackerSettings(userId: string | null) {
     const handleVisibilityChange = () => {
       if (document.hidden && pendingSettingsRef.current && userId) {
         // При потере фокуса отправляем обычным способом
-        updateMutation.mutate(pendingSettingsRef.current)
+        const settingsToSave = pendingSettingsRef.current
         pendingSettingsRef.current = null
+        updateMutation.mutate(settingsToSave)
       }
     }
 
@@ -273,10 +274,12 @@ export function useTrackerSettings(userId: string | null) {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // При размонтировании компонента сохраняем
       if (pendingSettingsRef.current && userId) {
-        updateMutation.mutate(pendingSettingsRef.current)
+        const settingsToSave = pendingSettingsRef.current
+        pendingSettingsRef.current = null
+        updateMutation.mutate(settingsToSave)
       }
     }
-  }, [userId, updateMutation])
+  }, [userId]) // Убрал updateMutation из зависимостей - он нестабильный!
 
   return {
     settings,

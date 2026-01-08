@@ -128,8 +128,9 @@ export function useHabits(userId: string | null) {
     const handleVisibilityChange = () => {
       if (document.hidden && pendingHabitsRef.current && userId) {
         // При потере фокуса отправляем обычным способом
-        updateMutation.mutate(pendingHabitsRef.current)
+        const habitsToSave = pendingHabitsRef.current
         pendingHabitsRef.current = null
+        updateMutation.mutate(habitsToSave)
       }
     }
 
@@ -141,10 +142,12 @@ export function useHabits(userId: string | null) {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // При размонтировании компонента сохраняем
       if (pendingHabitsRef.current && userId) {
-        updateMutation.mutate(pendingHabitsRef.current)
+        const habitsToSave = pendingHabitsRef.current
+        pendingHabitsRef.current = null
+        updateMutation.mutate(habitsToSave)
       }
     }
-  }, [userId, updateMutation])
+  }, [userId]) // Убрал updateMutation из зависимостей - он нестабильный!
 
   return {
     habits,
