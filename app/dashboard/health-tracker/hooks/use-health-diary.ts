@@ -113,12 +113,12 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     // Запланировать сохранение
     scheduleSave({
       metrics: {
-        ...(entryData?.metrics || {}),
+        ...(entryData?.metrics as Record<string, any> || {}),
         [field]: value
       },
       notes: entryData?.notes,
-      habitsCompleted: entryData?.habits_completed,
-      photoUrls: entryData?.photo_urls
+      habitsCompleted: (entryData as any)?.habits_completed,
+      photoUrls: (entryData as any)?.photo_urls
     })
   }
 
@@ -134,12 +134,12 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
     scheduleSave({
       metrics: {
-        ...(entryData?.metrics || {}),
+        ...(entryData?.metrics as Record<string, any> || {}),
         ...updates
       },
       notes: entryData?.notes,
-      habitsCompleted: entryData?.habits_completed,
-      photoUrls: entryData?.photo_urls
+      habitsCompleted: (entryData as any)?.habits_completed,
+      photoUrls: (entryData as any)?.photo_urls
     })
   }
 
@@ -151,10 +151,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     }))
 
     scheduleSave({
-      metrics: entryData?.metrics || {},
+      metrics: (entryData?.metrics as Record<string, any>) || {},
       notes: newNotes,
-      habitsCompleted: entryData?.habits_completed,
-      photoUrls: entryData?.photo_urls
+      habitsCompleted: (entryData as any)?.habits_completed,
+      photoUrls: (entryData as any)?.photo_urls
     })
   }
 
@@ -169,13 +169,13 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     }))
 
     scheduleSave({
-      metrics: entryData?.metrics || {},
+      metrics: (entryData?.metrics as Record<string, any>) || {},
       notes: entryData?.notes,
       habitsCompleted: {
-        ...(entryData?.habits_completed || {}),
+        ...((entryData as any)?.habits_completed || {}),
         [habitId]: completed
       },
-      photoUrls: entryData?.photo_urls
+      photoUrls: (entryData as any)?.photo_urls
     })
   }
 
@@ -187,10 +187,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     }))
 
     scheduleSave({
-      metrics: entryData?.metrics || {},
+      metrics: (entryData?.metrics as Record<string, any>) || {},
       notes: entryData?.notes,
-      habitsCompleted: entryData?.habits_completed,
-      photoUrls: [...(entryData?.photo_urls || []), url]
+      habitsCompleted: (entryData as any)?.habits_completed,
+      photoUrls: [...((entryData as any)?.photo_urls || []), url]
     })
   }
 
@@ -202,10 +202,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     }))
 
     scheduleSave({
-      metrics: entryData?.metrics || {},
+      metrics: (entryData?.metrics as Record<string, any>) || {},
       notes: entryData?.notes,
-      habitsCompleted: entryData?.habits_completed,
-      photoUrls: (entryData?.photo_urls || []).filter((u: string) => u !== url)
+      habitsCompleted: (entryData as any)?.habits_completed,
+      photoUrls: ((entryData as any)?.photo_urls || []).filter((u: string) => u !== url)
     })
   }
 
@@ -278,10 +278,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     : 'saved'
 
   return {
-    metrics: entryData?.metrics || {},
+    metrics: (entryData?.metrics as Record<string, any>) || {},
     notes: entryData?.notes || '',
-    photoUrls: entryData?.photo_urls || [],
-    habitsCompleted: entryData?.habits_completed || {},
+    photoUrls: (entryData as any)?.photo_urls || [],
+    habitsCompleted: (entryData as any)?.habits_completed || {},
     isLoading,
     saveStatus,
     updateMetric,

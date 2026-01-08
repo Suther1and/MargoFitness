@@ -45,7 +45,7 @@ export async function getStatsForPeriod(
     }
 
     // Если указаны конкретные метрики, фильтруем их
-    const processedData = data.map(entry => {
+    const processedData = data.map((entry: any) => {
       if (metrics && metrics.length > 0) {
         const filteredMetrics: any = {}
         metrics.forEach(metric => {

@@ -54,7 +54,8 @@ export async function getDiarySettings(userId: string) {
 
     if (!data) {
       console.log(`[Diary Action] No settings found for ${userId}, creating defaults...`)
-      const defaultSettings: DiarySettingsInsert = {
+      // Используем any так как типы из миграции 022 не совпадают с сгенерированными
+      const defaultSettings: any = {
         user_id: userId,
         enabled_widgets: [],
         widget_goals: {},
@@ -101,7 +102,8 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
 
     // Если настроек нет, создаем с дефолтными значениями
     if (!existing) {
-      const defaultSettings: DiarySettingsInsert = {
+      // Используем any так как типы из миграции 022 не совпадают с сгенерированными
+      const defaultSettings: any = {
         user_id: userId,
         enabled_widgets: [],
         widget_goals: {},
@@ -246,7 +248,7 @@ export async function upsertDiaryEntry(
     revalidatePath('/dashboard/health-tracker')
 
     // Обновляем стрики через SQL функцию
-    await supabase.rpc('update_diary_streaks', {
+    await (supabase as any).rpc('update_diary_streaks', {
       p_user_id: userId,
       p_entry_date: date
     })
@@ -299,12 +301,12 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
     // Получаем текущую запись дня
     const { data: entry } = await supabase
       .from('diary_entries')
-      .select('photo_urls')
+      .select('*')
       .eq('user_id', userId)
       .eq('date', date)
       .maybeSingle()
 
-    const currentPhotoUrls = entry?.photo_urls || []
+    const currentPhotoUrls = (entry as any)?.photo_urls || []
     const updatedPhotoUrls = [...currentPhotoUrls, signedData.signedUrl]
 
     // Обновляем запись дня с новым фото
@@ -314,9 +316,9 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
         user_id: userId,
         date,
         photo_urls: updatedPhotoUrls,
-        metrics: entry?.metrics || {},
+        metrics: (entry as any)?.metrics || {},
         updated_at: new Date().toISOString()
-      }, {
+      } as any, {
         onConflict: 'user_id,date'
       })
       .select()
@@ -356,7 +358,7 @@ export async function getProgressPhotos(userId: string) {
     }
 
     // Преобразуем в плоский список фото с датами
-    const photos = data.flatMap(entry => 
+    const photos = data.flatMap((entry: any) => 
       (entry.photo_urls || []).map((url: string) => ({
         date: entry.date,
         url
@@ -404,12 +406,12 @@ export async function deleteProgressPhoto(userId: string, date: string, photoUrl
     }
 
     // Удаляем URL из массива
-    const updatedPhotoUrls = (entry.photo_urls || []).filter((url: string) => url !== photoUrl)
+    const updatedPhotoUrls = ((entry as any).photo_urls || []).filter((url: string) => url !== photoUrl)
 
     // Обновляем запись
     const { error } = await supabase
       .from('diary_entries')
-      .update({ photo_urls: updatedPhotoUrls })
+      .update({ photo_urls: updatedPhotoUrls } as any)
       .eq('user_id', userId)
       .eq('date', date)
 

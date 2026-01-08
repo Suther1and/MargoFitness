@@ -104,7 +104,8 @@ export function useTrackerSettings(userId: string | null) {
     mutationFn: async (newSettings: TrackerSettings) => {
       if (!userId) throw new Error('No user ID')
       const dbSettings = appToDbSettings(newSettings)
-      return await updateDiarySettings(userId, dbSettings)
+      // Приводим к any так как поля из миграции 022 не в сгенерированных типах
+      return await updateDiarySettings(userId, dbSettings as any)
     },
     onMutate: async (newSettings) => {
       // Optimistic update

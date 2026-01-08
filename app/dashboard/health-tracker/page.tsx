@@ -160,7 +160,7 @@ function HealthTrackerContent() {
     // Goals from settings
     waterGoal: settings.widgets.water.goal || 2500,
     stepsGoal: settings.widgets.steps.goal || 10000,
-    weightGoal: settings.widgets.weight.goal || null,
+    weightGoal: settings.widgets.weight.goal || undefined,
     sleepGoal: settings.widgets.sleep.goal || 8,
     caffeineGoal: settings.widgets.caffeine.goal || 3,
     caloriesGoal: settings.widgets.nutrition.goal || 2000,
@@ -543,6 +543,7 @@ function HealthTrackerContent() {
                 <div className="lg:hidden mb-24">
                   {activeTab === 'settings' && (
                     <SettingsTab 
+                      userId={userId}
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
                       onDateChange={setSelectedDate}

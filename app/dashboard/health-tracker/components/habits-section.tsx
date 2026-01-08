@@ -51,7 +51,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
       layout
       initial={false}
       transition={{
-        layout: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+        layout: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const }
       }}
       style={{ ...GPU_ENHANCED_STYLE, contain: 'paint layout' }}
       className={cn(
@@ -640,7 +640,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                         height: 'auto', 
                         opacity: 1,
                         transition: {
-                          height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                          height: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const },
                           opacity: { duration: 0.3, delay: 0.1 }
                         }
                       }}
@@ -648,7 +648,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                         height: 0, 
                         opacity: 0,
                         transition: {
-                          height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                          height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as const },
                           opacity: { duration: 0.2 }
                         }
                       }}

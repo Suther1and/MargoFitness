@@ -22,7 +22,8 @@ export function useHabits(userId: string | null) {
       if (!userId) return null
       const result = await getDiarySettings(userId)
       if (result.success && result.data) {
-        return (result.data.habits as any) || []
+        // Приводим к any так как поле habits есть в БД но не в сгенерированных типах
+        return ((result.data as any).habits || []) as Habit[]
       }
       return []
     },
@@ -34,7 +35,8 @@ export function useHabits(userId: string | null) {
   const updateMutation = useMutation({
     mutationFn: async (newHabits: Habit[]) => {
       if (!userId) throw new Error('No user ID')
-      return await updateDiarySettings(userId, { habits: newHabits as any })
+      // Приводим к any так как поле habits есть в БД но не в сгенерированных типах
+      return await updateDiarySettings(userId, { habits: newHabits } as any)
     },
     onMutate: async (newHabits) => {
       // Optimistic update

@@ -41,7 +41,7 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
   const progressConfig = useMemo(() => ({
     initial: { width: 0 },
     animate: { width: `${progressPercentage}%` },
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const }
   }), [progressPercentage])
 
   return (

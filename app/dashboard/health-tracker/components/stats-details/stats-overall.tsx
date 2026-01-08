@@ -389,7 +389,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
                 <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Настроение</div>
               </div>
               <div className="flex items-baseline gap-2">
-                <div className="text-xl font-black text-white tracking-tight uppercase">{getMoodText(overviewData.mood.avgMood)}</div>
+                <div className="text-xl font-black text-white tracking-tight uppercase">{getMoodText(overviewData.mood?.avgMood)}</div>
                 <Laugh className="w-5 h-5 text-pink-400 animate-pulse" />
               </div>
             </div>
@@ -408,10 +408,10 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
                 <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Энергия</div>
               </div>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-black text-orange-400 tabular-nums">{overviewData.mood.avgEnergy || 0}<span className="text-[10px] text-white/20 ml-1">/10</span></div>
+                <div className="text-2xl font-black text-orange-400 tabular-nums">{overviewData.mood?.avgEnergy || 0}<span className="text-[10px] text-white/20 ml-1">/10</span></div>
                 <div className="flex gap-1 h-3 items-end">
                   {Array.from({ length: 5 }).map((_, i) => {
-                    const avgEnergy = overviewData.mood.avgEnergy || 0
+                    const avgEnergy = overviewData.mood?.avgEnergy || 0
                     const threshold = (i + 1) * 2
                     const isActive = avgEnergy >= threshold
                     return (
@@ -739,10 +739,10 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400"><Smile className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Состояние</div>
         </div>
-        <div className="text-xl font-black text-white uppercase tracking-tight">{getMoodText(overviewData.mood.avgMood)}</div>
+        <div className="text-xl font-black text-white uppercase tracking-tight">{getMoodText(overviewData.mood?.avgMood)}</div>
         <div className="flex gap-1 items-end h-4">
           {[...Array(10)].map((_, i) => {
-            const avgEnergy = overviewData.mood.avgEnergy || 0
+            const avgEnergy = overviewData.mood?.avgEnergy || 0
             const isActive = i < Math.round(avgEnergy)
             return (
               <div key={i} className={cn("flex-1 rounded-full transition-all", isActive ? "bg-orange-500/60 h-full" : "bg-white/5 h-1.5")} />
