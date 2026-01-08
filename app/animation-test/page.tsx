@@ -90,7 +90,7 @@ export default function AnimationTestRealWorld() {
     { id: '5', title: 'Медитация', completed: false },
   ])
   const [trackerData, setTrackerData] = useState(MOCK_DATA)
-  const { settings } = useTrackerSettings()
+  const { settings } = useTrackerSettings(null)
   
   const contentRef = useRef<HTMLDivElement>(null)
   const [contentHeight, setContentHeight] = useState(0)
