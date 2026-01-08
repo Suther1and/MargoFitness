@@ -59,13 +59,15 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       )
     },
     onSuccess: () => {
-      // Инвалидируем кеш статистики для обновления данных
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
-      // Принудительно перезапрашиваем активные запросы статистики
-      queryClient.refetchQueries({ 
-        queryKey: ['stats'], 
-        type: 'active' // Только активные (отображаемые) запросы
+      console.log('✅ Данные сохранены, обновляем статистику...')
+      
+      // Инвалидируем весь кеш статистики
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats'],
+        refetchType: 'active' // Перезапрашиваем активные
       })
+      
+      console.log('📊 Инвалидация статистики завершена')
     },
     onError: (error) => {
       console.error('Error saving diary entry:', error)
@@ -213,16 +215,27 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
   // Принудительное сохранение
   const forceSave = () => {
-    if (updateTimerRef.current) {
-      clearTimeout(updateTimerRef.current)
-      updateTimerRef.current = null
-    }
-    
-    if (Object.keys(pendingUpdatesRef.current).length > 0) {
-      const dataToSave = pendingUpdatesRef.current
-      pendingUpdatesRef.current = {}
-      saveMutation.mutate(dataToSave)
-    }
+    return new Promise<void>((resolve) => {
+      if (updateTimerRef.current) {
+        clearTimeout(updateTimerRef.current)
+        updateTimerRef.current = null
+      }
+      
+      if (Object.keys(pendingUpdatesRef.current).length > 0) {
+        const dataToSave = pendingUpdatesRef.current
+        pendingUpdatesRef.current = {}
+        console.log('💾 Принудительное сохранение данных:', dataToSave)
+        saveMutation.mutate(dataToSave, {
+          onSettled: () => {
+            console.log('✅ Сохранение завершено')
+            resolve()
+          }
+        })
+      } else {
+        console.log('ℹ️ Нет данных для сохранения')
+        resolve()
+      }
+    })
   }
 
   // Сохранение перед уходом
