@@ -276,8 +276,8 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
   )
 }
 
-export function HabitsSection() {
-  const { habits, isLoaded, addHabit, updateHabit, deleteHabit } = useHabits()
+export function HabitsSection({ userId }: { userId: string | null }) {
+  const { habits, isLoaded, addHabit, updateHabit, deleteHabit } = useHabits(userId)
   const isMobile = useIsMobile(768)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
