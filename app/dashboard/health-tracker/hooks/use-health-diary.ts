@@ -59,26 +59,11 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       )
     },
     onSuccess: () => {
-      console.log('✅ Данные сохранены в БД, обновляем статистику...')
-      
-      // Получаем все ключи из кэша для отладки
-      const queryCache = queryClient.getQueryCache()
-      const allQueries = queryCache.getAll()
-      const statsQueries = allQueries.filter(q => 
-        q.queryKey[0] === 'stats'
-      )
-      console.log('📦 Найдено запросов статистики в кэше:', statsQueries.length)
-      statsQueries.forEach(q => {
-        console.log('  - queryKey:', q.queryKey, 'state:', q.state.status)
-      })
-      
-      // Инвалидируем весь кеш статистики
+      // Инвалидируем кеш статистики для обновления данных
       queryClient.invalidateQueries({ 
         queryKey: ['stats'],
-        refetchType: 'active' // Перезапрашиваем активные
+        refetchType: 'active'
       })
-      
-      console.log('📊 Инвалидация статистики завершена')
     },
     onError: (error) => {
       console.error('Error saving diary entry:', error)
@@ -235,15 +220,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       if (Object.keys(pendingUpdatesRef.current).length > 0) {
         const dataToSave = pendingUpdatesRef.current
         pendingUpdatesRef.current = {}
-        console.log('💾 Принудительное сохранение данных:', dataToSave)
         saveMutation.mutate(dataToSave, {
-          onSettled: () => {
-            console.log('✅ Сохранение завершено')
-            resolve()
-          }
+          onSettled: () => resolve()
         })
       } else {
-        console.log('ℹ️ Нет данных для сохранения')
         resolve()
       }
     })
