@@ -628,7 +628,12 @@ function HealthTrackerContent() {
                             )}
                             <div className="grid grid-cols-2 gap-4">
                               {settings.widgets.weight?.enabled && (
-                                <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                                <WeightCardH 
+                                  value={data.weight} 
+                                  goalWeight={data.weightGoal} 
+                                  initialWeight={settings.userParams.weight || undefined}
+                                  onUpdate={(val) => handleMetricUpdate('weight', val)} 
+                                />
                               )}
                               {settings.widgets.caffeine?.enabled && (
                                 <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
@@ -709,7 +714,12 @@ function HealthTrackerContent() {
                     )}
                     <div className="grid grid-cols-2 gap-4">
                       {settings.widgets.weight?.enabled && (
-                        <WeightCardH value={data.weight} goalWeight={data.weightGoal} onUpdate={(val) => handleMetricUpdate('weight', val)} />
+                        <WeightCardH 
+                          value={data.weight} 
+                          goalWeight={data.weightGoal} 
+                          initialWeight={settings.userParams.weight || undefined}
+                          onUpdate={(val) => handleMetricUpdate('weight', val)} 
+                        />
                       )}
                       {settings.widgets.caffeine?.enabled && (
                         <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
