@@ -58,6 +58,11 @@ export function useHabits(userId: string | null) {
       pendingHabitsRef.current = null
       // Инвалидируем кеш статистики для обновления данных
       queryClient.invalidateQueries({ queryKey: ['stats'] })
+      // Принудительно перезапрашиваем активные запросы статистики
+      queryClient.refetchQueries({ 
+        queryKey: ['stats'], 
+        type: 'active' // Только активные (отображаемые) запросы
+      })
     }
   })
 

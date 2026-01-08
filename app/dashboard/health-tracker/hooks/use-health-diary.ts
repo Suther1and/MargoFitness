@@ -61,6 +61,11 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     onSuccess: () => {
       // Инвалидируем кеш статистики для обновления данных
       queryClient.invalidateQueries({ queryKey: ['stats'] })
+      // Принудительно перезапрашиваем активные запросы статистики
+      queryClient.refetchQueries({ 
+        queryKey: ['stats'], 
+        type: 'active' // Только активные (отображаемые) запросы
+      })
     },
     onError: (error) => {
       console.error('Error saving diary entry:', error)
