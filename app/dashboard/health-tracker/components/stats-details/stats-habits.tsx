@@ -70,7 +70,6 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   
   // Рассчитываем количество дней в периоде
   const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
-  const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
   
   // Преобразуем привычки в формат для отображения статистики
   const HABIT_STATS = activeHabits.map(habit => {
