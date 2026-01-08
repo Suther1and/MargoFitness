@@ -300,5 +300,5 @@ export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRan
       </motion.div>
     </motion.div>
   )
-}
+})
 
