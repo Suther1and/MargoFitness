@@ -1,34 +1,23 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
 import { cn } from "@/lib/utils"
 import { getWeightStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
 
 interface StatsWeightProps {
+  userId: string | null
   settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
 
-export function StatsWeight({ settings, dateRange }: StatsWeightProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRange }: StatsWeightProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'weight', userId, dateRange],
     queryFn: async () => {

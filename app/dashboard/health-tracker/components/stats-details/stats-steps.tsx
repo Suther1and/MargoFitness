@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Footprints, TrendingUp, TrendingDown, Target, Award, Flame, MapPin, Clock } from "lucide-react"
@@ -14,12 +14,12 @@ import {
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getStepsStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
 
 interface StatsStepsProps {
+  userId: string | null
   settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
@@ -31,18 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function StatsSteps({ settings, dateRange }: StatsStepsProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange }: StatsStepsProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'steps', userId, dateRange],
     queryFn: async () => {

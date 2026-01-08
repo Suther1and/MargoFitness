@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Moon, Target, Award } from "lucide-react"
@@ -9,30 +9,19 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getSleepStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
 
 interface StatsSleepProps {
+  userId: string | null
   settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
 
 const chartConfig = { value: { label: "Часы сна", color: "#6366f1" } } satisfies ChartConfig
 
-export function StatsSleep({ settings, dateRange }: StatsSleepProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange }: StatsSleepProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'sleep', userId, dateRange],
     queryFn: async () => {
@@ -156,4 +145,4 @@ export function StatsSleep({ settings, dateRange }: StatsSleepProps) {
       </div>
     </motion.div>
   )
-}
+})

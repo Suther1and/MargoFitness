@@ -354,15 +354,15 @@ function HealthTrackerContent() {
                 />
 
                 <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="wait">
                     <motion.h1 
                       key={activeTab}
                       initial={{ opacity: 0, y: 25 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -25 }}
                       transition={{ 
-                        duration: 0.85,
-                        ease: [0.22, 1, 0.36, 1] 
+                        duration: 0.3,
+                        ease: [0.4, 0, 0.2, 1] 
                       }}
                       className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter whitespace-nowrap leading-none absolute inset-0 flex items-center"
                     >

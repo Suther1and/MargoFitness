@@ -120,3 +120,4 @@ export function WeightChart({ data, period }: WeightChartProps) {
   )
 }
 
+

@@ -1,12 +1,12 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { Droplets, Waves, Plus, Minus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
 import { MetricButton, EditableMetricValue, AchievementBadge } from './shared'
-import { COLORS, ANIMATIONS } from '../constants'
+import { COLORS } from '../constants'
 
 interface WaterCardHProps {
   value: number
@@ -15,17 +15,23 @@ interface WaterCardHProps {
 }
 
 const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: boolean }) => {
+  const animationConfig = useMemo(() => ({
+    initial: { width: 0 },
+    animate: { width: `${percentage}%` },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+  }), [percentage])
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[2rem]">
       <motion.div
         className={cn(
-          'absolute inset-y-0 left-0 h-full transition-colors duration-1000',
+          'absolute inset-y-0 left-0 h-full',
           isDone
             ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-400/20 to-emerald-500/15'
             : 'bg-gradient-to-r from-blue-600/15 via-blue-500/20 to-blue-600/15'
         )}
-        {...ANIMATIONS.progressBar}
-        animate={{ width: `${percentage}%` }}
+        {...animationConfig}
+        layout
       />
     </div>
   )

@@ -1,19 +1,18 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Smile, Zap, TrendingUp, Award } from "lucide-react"
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { getMoodStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
 interface StatsMoodProps {
+  userId: string | null
   dateRange: { start: Date; end: Date }
 }
 
@@ -22,18 +21,7 @@ const chartConfig = {
   energy: { label: "Энергия", color: "#f59e0b" }
 } satisfies ChartConfig
 
-export function StatsMood({ dateRange }: StatsMoodProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsMood = memo(function StatsMood({ userId, dateRange }: StatsMoodProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'mood', userId, dateRange],
     queryFn: async () => {

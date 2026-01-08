@@ -1,13 +1,12 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { Scale, TrendingDown, TrendingUp, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useEditableValue } from '../hooks'
 import { MetricButton, EditableMetricValue } from './shared'
-import { COLORS, ANIMATIONS } from '../constants'
+import { COLORS } from '../constants'
 
 interface WeightCardHProps {
   value: number
@@ -32,6 +31,17 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
   const weekChange = localValue - weightHistory[0]
   const isGoalToLose = goalWeight ? goalWeight < localValue : weekChange < 0
   const changeColor = weekChange < 0 ? (isGoalToLose ? 'text-emerald-400' : 'text-red-400') : isGoalToLose ? 'text-red-400' : 'text-emerald-400'
+
+  const progressPercentage = useMemo(() => {
+    if (!goalWeight) return 0
+    return Math.min(100, (Math.abs(localValue - weightHistory[0]) / Math.abs(goalWeight - weightHistory[0])) * 100)
+  }, [localValue, goalWeight, weightHistory])
+
+  const progressConfig = useMemo(() => ({
+    initial: { width: 0 },
+    animate: { width: `${progressPercentage}%` },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+  }), [progressPercentage])
 
   return (
     <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-emerald-500/20 transition-colors duration-500 h-[180px]" style={{ contain: 'paint' }}>
@@ -84,10 +94,8 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
             </div>
             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
               <motion.div
-                {...ANIMATIONS.progressBar}
-                animate={{
-                  width: `${Math.min(100, (Math.abs(localValue - weightHistory[0]) / Math.abs(goalWeight - weightHistory[0])) * 100)}%`,
-                }}
+                {...progressConfig}
+                layout
                 className="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
               />
             </div>

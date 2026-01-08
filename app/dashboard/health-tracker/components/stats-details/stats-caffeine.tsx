@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Coffee, Target, Award, Moon } from "lucide-react"
@@ -14,12 +14,12 @@ import {
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getCaffeineStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
 
 interface StatsCaffeineProps {
+  userId: string | null
   settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
@@ -31,18 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function StatsCaffeine({ settings, dateRange }: StatsCaffeineProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dateRange }: StatsCaffeineProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'caffeine', userId, dateRange],
     queryFn: async () => {
@@ -194,4 +183,4 @@ export function StatsCaffeine({ settings, dateRange }: StatsCaffeineProps) {
       </div>
     </motion.div>
   )
-}
+})

@@ -1,36 +1,26 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Utensils, Target, Award, TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { getNutritionStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { TrackerSettings } from "../../types"
 
 interface StatsNutritionProps {
+  userId: string | null
+  settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
 
 const chartConfig = { calories: { label: "Калории", color: "#8b5cf6" } } satisfies ChartConfig
 
-export function StatsNutrition({ settings, dateRange }: StatsNutritionProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsNutrition = memo(function StatsNutrition({ userId, settings, dateRange }: StatsNutritionProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'nutrition', userId, dateRange],
     queryFn: async () => {
@@ -153,4 +143,4 @@ export function StatsNutrition({ settings, dateRange }: StatsNutritionProps) {
       </div>
     </motion.div>
   )
-}
+})

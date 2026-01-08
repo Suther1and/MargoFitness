@@ -116,3 +116,4 @@ import { WeightTrendChart, StepsBarChart } from './stats-visualizations'
 - Градиенты и glow эффекты
 - Rounded corners (xl, 2xl)
 
+

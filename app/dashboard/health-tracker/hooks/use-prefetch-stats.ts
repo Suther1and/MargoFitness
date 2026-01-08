@@ -11,7 +11,8 @@ import {
   getSleepStats,
   getMoodStats,
   getNutritionStats,
-  getHabitsStats
+  getHabitsStats,
+  getNotesStats
 } from '@/lib/actions/health-stats'
 import { DateRange, TrackerSettings } from '../types'
 
@@ -118,6 +119,15 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings }: UsePr
           queryClient.prefetchQuery({
             queryKey: ['stats', 'habits', userId, dateRange],
             queryFn: () => getHabitsStats(userId, dateRange),
+            staleTime: 5 * 60 * 1000,
+          })
+        )
+
+        // Предзагружаем заметки
+        prefetchPromises.push(
+          queryClient.prefetchQuery({
+            queryKey: ['notes-stats', userId, dateRange.start.toISOString(), dateRange.end.toISOString()],
+            queryFn: () => getNotesStats(userId, dateRange),
             staleTime: 5 * 60 * 1000,
           })
         )

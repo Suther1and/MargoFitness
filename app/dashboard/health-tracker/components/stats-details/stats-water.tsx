@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo, memo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Droplets, TrendingUp, Target, Award, Zap, Flame, AlertCircle } from "lucide-react"
@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 import { getWaterStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
 
 interface StatsWaterProps {
+  userId: string | null
   settings: TrackerSettings
   dateRange: { start: Date; end: Date }
 }
@@ -30,18 +30,7 @@ const chartConfig = {
   }
 } satisfies ChartConfig
 
-export function StatsWater({ settings, dateRange }: StatsWaterProps) {
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export const StatsWater = memo(function StatsWater({ userId, settings, dateRange }: StatsWaterProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'water', userId, dateRange],
     queryFn: async () => {
