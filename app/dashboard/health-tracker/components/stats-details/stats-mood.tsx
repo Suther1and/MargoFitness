@@ -143,4 +143,4 @@ export const StatsMood = memo(function StatsMood({ userId, dateRange }: StatsMoo
       </motion.div>
     </motion.div>
   )
-}
+})
