@@ -12,13 +12,13 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
-import { useHabits } from "../../hooks/use-habits"
 import { getHabitsStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
 
 interface StatsHabitsProps {
+  userId: string | null
+  habits: Habit[]
   dateRange: { start: Date; end: Date }
 }
 
@@ -29,19 +29,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function StatsHabits({ dateRange }: StatsHabitsProps) {
-  const { habits, isLoaded } = useHabits()
-  const [userId, setUserId] = useState<string | null>(null)
-  
-  useEffect(() => {
-    async function getUserId() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-    }
-    getUserId()
-  }, [])
-
+export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['stats', 'habits', userId, dateRange],
     queryFn: async () => {
@@ -66,7 +54,7 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
   }, [rawData, habits])
   
   // Показываем загрузку
-  if (!isLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
@@ -81,6 +69,7 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
   const activeHabits = habits.filter(h => h.enabled)
   
   // Рассчитываем количество дней в периоде
+  const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
   const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
   
   // Преобразуем привычки в формат для отображения статистики
@@ -152,18 +141,10 @@ export function StatsHabits({ dateRange }: StatsHabitsProps) {
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0     }
   }
 
   // Показываем сообщение, если нет активных привычек
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-white/40 text-sm">Загрузка...</div>
-      </div>
-    )
-  }
-
   if (activeHabits.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-6 rounded-[2.5rem] border border-white/10 bg-white/[0.02] relative overflow-hidden">

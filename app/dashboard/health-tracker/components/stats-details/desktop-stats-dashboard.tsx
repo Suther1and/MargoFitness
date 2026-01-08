@@ -74,34 +74,34 @@ export function DesktopStatsDashboard({
       return <StatsOverall settings={settings} habits={habits} period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
     }
     if (activeView === 'habits') {
-      return <StatsHabits dateRange={currentDateRange} />
+      return <StatsHabits dateRange={currentDateRange} userId={userId} habits={habits} />
     }
     if (activeView === 'water') {
-      return <StatsWater settings={settings} dateRange={currentDateRange} />
+      return <StatsWater settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'steps') {
-      return <StatsSteps settings={settings} dateRange={currentDateRange} />
+      return <StatsSteps settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'weight') {
-      return <StatsWeight settings={settings} dateRange={currentDateRange} />
+      return <StatsWeight settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'caffeine') {
-      return <StatsCaffeine settings={settings} dateRange={currentDateRange} />
+      return <StatsCaffeine settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'sleep') {
-      return <StatsSleep settings={settings} dateRange={currentDateRange} />
+      return <StatsSleep settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'mood') {
-      return <StatsMood dateRange={currentDateRange} />
+      return <StatsMood dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'nutrition') {
-      return <StatsNutrition settings={settings} dateRange={currentDateRange} />
+      return <StatsNutrition settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'photos') {
       return <StatsPhotos dateRange={currentDateRange} />
     }
     if (activeView === 'notes') {
-      return <StatsNotes dateRange={currentDateRange} />
+      return <StatsNotes dateRange={currentDateRange} userId={userId} />
     }
     return null
   }

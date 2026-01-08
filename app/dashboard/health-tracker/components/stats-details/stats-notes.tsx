@@ -4,36 +4,31 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { NotebookText, Calendar, Smile } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { useTrackerSettings } from "../../hooks/use-tracker-settings"
 import { getNotesStats } from "@/lib/actions/health-stats"
-import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
 interface StatsNotesProps {
+  userId: string | null
   dateRange: { start: Date; end: Date }
 }
 
 const moodEmojis = ['😢', '😕', '😐', '🙂', '😊']
 
-export function StatsNotes({ dateRange }: StatsNotesProps) {
-  const { isLoaded: isSettingsLoaded } = useTrackerSettings()
+export function StatsNotes({ userId, dateRange }: StatsNotesProps) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
   useEffect(() => {
     async function loadData() {
+      if (!userId) {
+        setIsLoading(false)
+        return
+      }
+      
       setIsLoading(true)
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
-        
-        const result = await getNotesStats(user.id, dateRange)
+        const result = await getNotesStats(userId, dateRange)
         
         if (result.success && result.data) {
           const notesData = result.data.map(entry => ({
@@ -51,12 +46,10 @@ export function StatsNotes({ dateRange }: StatsNotesProps) {
       }
     }
     
-    if (isSettingsLoaded) {
-      loadData()
-    }
-  }, [dateRange, isSettingsLoaded])
+    loadData()
+  }, [userId, dateRange])
   
-  if (!isSettingsLoaded || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">

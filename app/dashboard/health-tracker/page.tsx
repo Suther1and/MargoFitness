@@ -72,7 +72,6 @@ import { createClient } from '@/lib/supabase/client'
  * - Data layer: готов к async/await Supabase queries
  * - Shared components: переиспользуемые UI элементы
  */
-import { MetricCardSkeleton } from './components/metric-card-skeleton'
 
 export default function HealthTrackerPage() {
   return (
@@ -261,6 +260,18 @@ function HealthTrackerContent() {
 
   // Прогрессивный рендеринг: показываем UI сразу, данные появляются по мере загрузки
   const isLoading = !isSettingsLoaded || !isHabitsLoaded || isDiaryLoading
+
+  // Полноэкранный индикатор загрузки
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка трекера...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -578,20 +589,7 @@ function HealthTrackerContent() {
                   
                   {activeTab === 'overview' && (
                     <div className="space-y-6">
-                      {isLoading ? (
-                        // Скелетоны для мобильной версии
-                        <>
-                          <MetricCardSkeleton />
-                          <MetricCardSkeleton />
-                          <div className="grid grid-cols-2 gap-4">
-                            <MetricCardSkeleton />
-                            <MetricCardSkeleton />
-                          </div>
-                          <MetricCardSkeleton />
-                        </>
-                      ) : (
-                        <>
-                        {!hasMainWidgets ? (
+                      {!hasMainWidgets ? (
                           <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                             <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                             <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
@@ -636,8 +634,6 @@ function HealthTrackerContent() {
                             )}
                           </>
                         )}
-                        </>
-                      )}
                     </div>
                   )}
                 </div>
@@ -674,17 +670,7 @@ function HealthTrackerContent() {
                   <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
                     {/* Левая колонка: виджеты здоровья */}
                     <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
-                    {isLoading ? (
-                      // Скелетоны для desktop версии
-                      <>
-                        <MetricCardSkeleton />
-                        <MetricCardSkeleton />
-                        <div className="grid grid-cols-2 gap-4">
-                          <MetricCardSkeleton />
-                          <MetricCardSkeleton />
-                        </div>
-                      </>
-                    ) : !hasMainWidgets ? (
+                    {!hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                         <p className="text-[12px] text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">

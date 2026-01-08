@@ -63,34 +63,34 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
   // Условный рендеринг - только активный таб в DOM
   const renderContent = () => {
     if (activeView === 'overall') {
-      return <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} />
+      return <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} settings={settings} habits={habits} />
     }
     if (activeView === 'habits') {
-      return <StatsHabits dateRange={dateRange} />
+      return <StatsHabits dateRange={dateRange} userId={userId} habits={habits} />
     }
     if (activeView === 'water') {
-      return <StatsWater dateRange={dateRange} />
+      return <StatsWater dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'steps') {
-      return <StatsSteps dateRange={dateRange} />
+      return <StatsSteps dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'weight') {
-      return <StatsWeight dateRange={dateRange} />
+      return <StatsWeight dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'caffeine') {
-      return <StatsCaffeine dateRange={dateRange} />
+      return <StatsCaffeine dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'sleep') {
-      return <StatsSleep dateRange={dateRange} />
+      return <StatsSleep dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'mood') {
-      return <StatsMood dateRange={dateRange} />
+      return <StatsMood dateRange={dateRange} userId={userId} />
     }
     if (activeView === 'nutrition') {
-      return <StatsNutrition dateRange={dateRange} />
+      return <StatsNutrition dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'notes') {
-      return <StatsNotes dateRange={dateRange} />
+      return <StatsNotes dateRange={dateRange} userId={userId} />
     }
     if (activeView === 'photos') {
       return <StatsPhotos dateRange={dateRange} />
