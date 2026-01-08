@@ -46,9 +46,9 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
   })
 
   const data = useMemo(() => {
-    if (!rawData?.success || !rawData.data) return []
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
-    return rawData.data.map(entry => ({
+    return rawData.data.map((entry: any) => ({
       date: format(new Date(entry.date), 'dd MMM', { locale: ru }),
       value: entry.water || 0,
       goal: settings.widgets.water?.goal || 2500

@@ -47,9 +47,9 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
   })
 
   const data = useMemo(() => {
-    if (!rawData?.success || !rawData.data) return []
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
-    return rawData.data.map(entry => ({
+    return rawData.data.map((entry: any) => ({
       date: format(new Date(entry.date), 'd MMM', { locale: ru }),
       value: entry.caffeine || 0
     }))

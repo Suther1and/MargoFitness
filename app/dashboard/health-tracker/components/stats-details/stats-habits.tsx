@@ -46,9 +46,9 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   })
 
   const completionData = useMemo(() => {
-    if (!rawData?.success || !rawData.data) return []
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
-    return rawData.data.map(entry => {
+    return rawData.data.map((entry: any) => {
       const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
       const total = habits.filter(h => h.enabled).length
       return {

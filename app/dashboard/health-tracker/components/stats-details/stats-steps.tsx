@@ -47,9 +47,9 @@ export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange
   })
 
   const data = useMemo(() => {
-    if (!rawData?.success || !rawData.data) return []
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
-    return rawData.data.map(entry => ({
+    return rawData.data.map((entry: any) => ({
       date: format(new Date(entry.date), 'd MMM', { locale: ru }),
       value: entry.steps || 0,
       goal: settings.widgets.steps?.goal || 10000,

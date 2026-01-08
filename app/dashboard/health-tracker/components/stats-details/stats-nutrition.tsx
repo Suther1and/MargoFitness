@@ -36,9 +36,9 @@ export const StatsNutrition = memo(function StatsNutrition({ userId, settings, d
   })
 
   const data = useMemo(() => {
-    if (!rawData?.success || !rawData.data) return []
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
-    return rawData.data.map(entry => ({
+    return rawData.data.map((entry: any) => ({
       date: format(new Date(entry.date), 'd MMM', { locale: ru }),
       calories: entry.calories || 0,
       goal: settings.widgets.nutrition?.goal || 2000
