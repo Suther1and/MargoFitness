@@ -12,6 +12,8 @@ export function useHabits(userId: string | null) {
   
   // Ref для отслеживания pending привычек
   const pendingHabitsRef = useRef<Habit[] | null>(null)
+  // Ref для mutation функции
+  const mutationRef = useRef<((habits: Habit[]) => void) | null>(null)
 
   // Query для загрузки привычек (отдельный queryKey чтобы не конфликтовать с settings)
   const { data: habitsData, isLoading } = useQuery({
@@ -56,6 +58,9 @@ export function useHabits(userId: string | null) {
       pendingHabitsRef.current = null
     }
   })
+
+  // Обновляем ref при каждом рендере
+  mutationRef.current = updateMutation.mutate
 
   // Debounced mutation для батчинга изменений привычек
   const debouncedMutate = useMemo(() => 
@@ -126,11 +131,11 @@ export function useHabits(userId: string | null) {
     }
 
     const handleVisibilityChange = () => {
-      if (document.hidden && pendingHabitsRef.current && userId) {
+      if (document.hidden && pendingHabitsRef.current && userId && mutationRef.current) {
         // При потере фокуса отправляем обычным способом
         const habitsToSave = pendingHabitsRef.current
         pendingHabitsRef.current = null
-        updateMutation.mutate(habitsToSave)
+        mutationRef.current(habitsToSave)
       }
     }
 
@@ -141,13 +146,13 @@ export function useHabits(userId: string | null) {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // При размонтировании компонента сохраняем
-      if (pendingHabitsRef.current && userId) {
+      if (pendingHabitsRef.current && userId && mutationRef.current) {
         const habitsToSave = pendingHabitsRef.current
         pendingHabitsRef.current = null
-        updateMutation.mutate(habitsToSave)
+        mutationRef.current(habitsToSave)
       }
     }
-  }, [userId]) // Убрал updateMutation из зависимостей - он нестабильный!
+  }, [userId]) // Только userId в зависимостях, mutationRef используется через ref
 
   return {
     habits,

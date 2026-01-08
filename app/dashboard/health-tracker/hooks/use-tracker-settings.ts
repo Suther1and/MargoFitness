@@ -81,6 +81,8 @@ export function useTrackerSettings(userId: string | null) {
   
   // Ref для отслеживания pending настроек
   const pendingSettingsRef = useRef<TrackerSettings | null>(null)
+  // Ref для mutation функции
+  const mutationRef = useRef<((settings: TrackerSettings) => void) | null>(null)
 
   // Query для загрузки настроек
   const { data: settingsData, isLoading } = useQuery({
@@ -120,6 +122,9 @@ export function useTrackerSettings(userId: string | null) {
   })
 
   const settings = settingsData || DEFAULT_SETTINGS
+
+  // Обновляем ref при каждом рендере
+  mutationRef.current = updateMutation.mutate
 
   // Debounced mutation для батчинга сохранений
   const debouncedMutate = useMemo(() => 
@@ -258,11 +263,11 @@ export function useTrackerSettings(userId: string | null) {
     }
 
     const handleVisibilityChange = () => {
-      if (document.hidden && pendingSettingsRef.current && userId) {
+      if (document.hidden && pendingSettingsRef.current && userId && mutationRef.current) {
         // При потере фокуса отправляем обычным способом
         const settingsToSave = pendingSettingsRef.current
         pendingSettingsRef.current = null
-        updateMutation.mutate(settingsToSave)
+        mutationRef.current(settingsToSave)
       }
     }
 
@@ -273,13 +278,13 @@ export function useTrackerSettings(userId: string | null) {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // При размонтировании компонента сохраняем
-      if (pendingSettingsRef.current && userId) {
+      if (pendingSettingsRef.current && userId && mutationRef.current) {
         const settingsToSave = pendingSettingsRef.current
         pendingSettingsRef.current = null
-        updateMutation.mutate(settingsToSave)
+        mutationRef.current(settingsToSave)
       }
     }
-  }, [userId]) // Убрал updateMutation из зависимостей - он нестабильный!
+  }, [userId]) // Только userId в зависимостях, mutationRef используется через ref
 
   return {
     settings,
