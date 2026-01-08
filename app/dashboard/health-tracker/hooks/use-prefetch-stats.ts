@@ -47,10 +47,13 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
           // Создаем массив промисов для параллельной загрузки
           const prefetchPromises: Promise<void>[] = []
 
+          // Создаем стабильный ключ из dateRange
+          const dateRangeKey = `${dateRange.start.toISOString()}-${dateRange.end.toISOString()}`
+
           // Предзагружаем данные обзора (всегда)
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'overview', userId, dateRange, settings, habits],
+              queryKey: ['stats', 'overview', userId, dateRangeKey],
               queryFn: () => getOverviewStatsAggregated(userId, dateRange, settings, habits),
               staleTime: 30 * 1000, // 30 секунд
             })

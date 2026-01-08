@@ -21,8 +21,11 @@ export function useOverviewStats({
   settings, 
   habits 
 }: UseOverviewStatsOptions) {
+  // Создаем стабильный ключ из dateRange (сериализуем даты)
+  const dateRangeKey = `${dateRange.start.toISOString()}-${dateRange.end.toISOString()}`
+  
   const { data, isLoading, error } = useQuery({
-    queryKey: ['stats', 'overview', userId, dateRange, settings, habits],
+    queryKey: ['stats', 'overview', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
