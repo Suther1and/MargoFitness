@@ -41,7 +41,8 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
       return await getWaterStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

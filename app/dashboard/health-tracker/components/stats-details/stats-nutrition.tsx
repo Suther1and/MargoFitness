@@ -31,7 +31,8 @@ export const StatsNutrition = memo(function StatsNutrition({ userId, settings, d
       return await getNutritionStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

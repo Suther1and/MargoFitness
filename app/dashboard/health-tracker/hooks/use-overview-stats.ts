@@ -36,7 +36,8 @@ export function useOverviewStats({
       return result
     },
     enabled: !!userId,
-    staleTime: 30 * 1000, // 30 секунд - данные обновляются чаще
+    staleTime: 0, // Всегда считать данные устаревшими
+    refetchOnMount: 'always', // Всегда перезагружать при монтировании
   })
 
   console.log('📊 Overview stats state:', { isLoading, dataUpdatedAt: new Date(dataUpdatedAt), hasData: !!data })

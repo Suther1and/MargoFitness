@@ -33,7 +33,8 @@ export const StatsMood = memo(function StatsMood({ userId, dateRange }: StatsMoo
       return await getMoodStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

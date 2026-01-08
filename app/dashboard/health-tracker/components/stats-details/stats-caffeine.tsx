@@ -42,7 +42,8 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
       return await getCaffeineStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

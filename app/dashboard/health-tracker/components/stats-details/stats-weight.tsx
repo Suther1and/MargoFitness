@@ -28,7 +28,8 @@ export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRan
       return await getWeightStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

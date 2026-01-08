@@ -32,7 +32,8 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
       return await getSleepStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const data = useMemo(() => {

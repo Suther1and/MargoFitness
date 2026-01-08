@@ -42,7 +42,8 @@ export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange
       return await getStepsStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 30 * 1000, // 30 секунд
+    staleTime: 0, // Всегда считать устаревшими
+    refetchOnMount: 'always', // Всегда перезагружать
   })
 
   const data = useMemo(() => {

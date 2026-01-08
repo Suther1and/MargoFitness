@@ -41,7 +41,8 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
       return await getHabitsStats(userId, dateRange)
     },
     enabled: !!userId && habits.length > 0,
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const completionData = useMemo(() => {
