@@ -306,5 +306,5 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
       </motion.div>
     </motion.div>
   )
-}
+})
 
