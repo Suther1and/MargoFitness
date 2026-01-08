@@ -1,8 +1,8 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { Footprints, Flame, MapPin, Plus, Minus } from 'lucide-react'
-import { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useEditableValue, useGoalProgress } from '../hooks'
 import { MetricButton, EditableMetricValue, ProgressRing, AchievementBadge } from './shared'
