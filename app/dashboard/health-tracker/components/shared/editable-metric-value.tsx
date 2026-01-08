@@ -53,8 +53,10 @@ export function EditableMetricValue({
     const digitCount = valueStr.replace(/[^\d]/g, '').length
     
     if (digitCount >= 5) {
-      // Уменьшаем размер шрифта для 5+ цифр
       return cn(className, 'text-2xl md:text-3xl')
+    }
+    if (digitCount === 4) {
+      return cn(className, 'text-3xl md:text-4xl')
     }
     return className
   }

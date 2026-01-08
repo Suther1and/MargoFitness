@@ -111,6 +111,7 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
               unit="кг"
               step="0.1"
               format={(v) => v.toFixed(1)}
+              autoShrink={true}
               className={cn(
                 "text-4xl md:text-5xl font-black tracking-tight transition-colors duration-300",
                 isGoalReached ? "text-emerald-400" : "group-hover/value:text-emerald-400 text-white"
