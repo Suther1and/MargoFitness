@@ -58,6 +58,10 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         data.photoUrls
       )
     },
+    onSuccess: () => {
+      // Инвалидируем кеш статистики для обновления данных
+      queryClient.invalidateQueries({ queryKey: ['stats'] })
+    },
     onError: (error) => {
       console.error('Error saving diary entry:', error)
       // Не откатываем optimistic update - данные остаются в UI
