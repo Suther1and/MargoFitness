@@ -426,5 +426,5 @@ export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange
       </motion.div>
     </motion.div>
   )
-}
+})
 
