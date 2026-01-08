@@ -14,6 +14,49 @@ interface StepsCardHProps {
   onUpdate: (val: number) => void
 }
 
+const EnergyField = ({ isDone }: { isDone: boolean }) => {
+  const particles = useMemo(() => 
+    Array.from({ length: 15 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 1,
+      duration: Math.random() * 2 + 1,
+      delay: Math.random() * 2
+    })), [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          className={cn(
+            "absolute rounded-full",
+            isDone ? "bg-emerald-400" : "bg-red-500"
+          )}
+          style={{
+            left: `${p.x}%`,
+            bottom: `-10%`,
+            width: p.size,
+            height: p.size,
+          }}
+          animate={{
+            y: [0, -150],
+            opacity: [0, 1, 0],
+            scale: [1, 1.5, 0.5],
+          }}
+          transition={{
+            duration: p.duration,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: StepsCardHProps) {
   const { percentage, isDone } = useGoalProgress({ current: steps, goal })
   const {
@@ -38,6 +81,7 @@ export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: St
         ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
         : "border-white/10 bg-zinc-900/50 hover:border-red-500/20"
     )} style={{ contain: 'paint' }}>
+      <EnergyField isDone={isDone} />
       {/* Фоновое свечение */}
       <div className={cn(
         "absolute -top-24 -left-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none transition-colors duration-1000 hidden md:block",
