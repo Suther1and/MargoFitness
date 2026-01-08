@@ -10,10 +10,12 @@ import { Card } from "@/components/ui/card"
 import { getMoodStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { serializeDateRange } from "../../utils/query-utils"
+import { DateRange } from "../../types"
 
 interface StatsMoodProps {
   userId: string | null
-  dateRange: { start: Date; end: Date }
+  dateRange: DateRange
 }
 
 const chartConfig = {
@@ -22,14 +24,16 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export const StatsMood = memo(function StatsMood({ userId, dateRange }: StatsMoodProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'mood', userId, dateRange],
+    queryKey: ['stats', 'mood', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getMoodStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const data = useMemo(() => {

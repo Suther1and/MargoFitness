@@ -16,6 +16,7 @@ import {
   getOverviewStatsAggregated
 } from '@/lib/actions/health-stats'
 import { DateRange, TrackerSettings, Habit } from '../types'
+import { serializeDateRange } from '../utils/query-utils'
 
 interface UsePrefetchStatsOptions {
   userId: string | null
@@ -48,7 +49,7 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
           const prefetchPromises: Promise<void>[] = []
 
           // Создаем стабильный ключ из dateRange
-          const dateRangeKey = `${dateRange.start.toISOString()}-${dateRange.end.toISOString()}`
+          const dateRangeKey = serializeDateRange(dateRange)
 
           // Предзагружаем данные обзора (всегда)
           prefetchPromises.push(
@@ -63,9 +64,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('water')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'water', userId, dateRange],
+              queryKey: ['stats', 'water', userId, dateRangeKey],
               queryFn: () => getWaterStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000, // 5 минут
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -73,9 +74,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('steps')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'steps', userId, dateRange],
+              queryKey: ['stats', 'steps', userId, dateRangeKey],
               queryFn: () => getStepsStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -83,9 +84,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('weight')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'weight', userId, dateRange],
+              queryKey: ['stats', 'weight', userId, dateRangeKey],
               queryFn: () => getWeightStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -93,9 +94,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('caffeine')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'caffeine', userId, dateRange],
+              queryKey: ['stats', 'caffeine', userId, dateRangeKey],
               queryFn: () => getCaffeineStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -103,9 +104,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('sleep')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'sleep', userId, dateRange],
+              queryKey: ['stats', 'sleep', userId, dateRangeKey],
               queryFn: () => getSleepStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -113,9 +114,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('mood')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'mood', userId, dateRange],
+              queryKey: ['stats', 'mood', userId, dateRangeKey],
               queryFn: () => getMoodStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -123,9 +124,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         if (activeWidgets.includes('nutrition')) {
           prefetchPromises.push(
             queryClient.prefetchQuery({
-              queryKey: ['stats', 'nutrition', userId, dateRange],
+              queryKey: ['stats', 'nutrition', userId, dateRangeKey],
               queryFn: () => getNutritionStats(userId, dateRange),
-              staleTime: 5 * 60 * 1000,
+              staleTime: 30 * 1000,
             })
           )
         }
@@ -133,9 +134,9 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
         // Всегда предзагружаем статистику привычек (если есть привычки)
         prefetchPromises.push(
           queryClient.prefetchQuery({
-            queryKey: ['stats', 'habits', userId, dateRange],
+            queryKey: ['stats', 'habits', userId, dateRangeKey],
             queryFn: () => getHabitsStats(userId, dateRange),
-            staleTime: 5 * 60 * 1000,
+            staleTime: 30 * 1000,
           })
         )
 
@@ -144,7 +145,7 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
           queryClient.prefetchQuery({
             queryKey: ['notes-stats', userId, dateRange.start.toISOString(), dateRange.end.toISOString()],
             queryFn: () => getNotesStats(userId, dateRange),
-            staleTime: 5 * 60 * 1000,
+            staleTime: 30 * 1000,
           })
         )
 
@@ -164,4 +165,3 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings, habits 
     return () => clearTimeout(timer)
   }, [dateRange, enabled, userId, settings.widgets, habits, queryClient])
 }
-

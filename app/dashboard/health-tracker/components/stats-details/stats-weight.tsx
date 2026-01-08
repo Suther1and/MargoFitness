@@ -10,6 +10,7 @@ import { getWeightStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
+import { serializeDateRange } from "../../utils/query-utils"
 
 interface StatsWeightProps {
   userId: string | null
@@ -18,14 +19,16 @@ interface StatsWeightProps {
 }
 
 export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRange }: StatsWeightProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'weight', userId, dateRange],
+    queryKey: ['stats', 'weight', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getWeightStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const data = useMemo(() => {

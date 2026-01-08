@@ -16,6 +16,7 @@ import { getWaterStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
+import { serializeDateRange } from "../../utils/query-utils"
 
 interface StatsWaterProps {
   userId: string | null
@@ -31,14 +32,16 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export const StatsWater = memo(function StatsWater({ userId, settings, dateRange }: StatsWaterProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'water', userId, dateRange],
+    queryKey: ['stats', 'water', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getWaterStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const data = useMemo(() => {

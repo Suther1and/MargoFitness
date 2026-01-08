@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { getOverviewStatsAggregated } from '@/lib/actions/health-stats'
 import { DateRange, TrackerSettings, Habit, OverviewStats } from '../types'
+import { serializeDateRange } from '../utils/query-utils'
 
 interface UseOverviewStatsOptions {
   userId: string | null
@@ -21,8 +22,7 @@ export function useOverviewStats({
   settings, 
   habits 
 }: UseOverviewStatsOptions) {
-  // Создаем стабильный ключ из dateRange (сериализуем даты)
-  const dateRangeKey = `${dateRange.start.toISOString()}-${dateRange.end.toISOString()}`
+  const dateRangeKey = serializeDateRange(dateRange)
   
   const { data, isLoading, error } = useQuery({
     queryKey: ['stats', 'overview', userId, dateRangeKey],

@@ -17,6 +17,7 @@ import { getStepsStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
+import { serializeDateRange } from "../../utils/query-utils"
 
 interface StatsStepsProps {
   userId: string | null
@@ -32,14 +33,16 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange }: StatsStepsProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'steps', userId, dateRange],
+    queryKey: ['stats', 'steps', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getStepsStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 секунд
   })
 
   const data = useMemo(() => {

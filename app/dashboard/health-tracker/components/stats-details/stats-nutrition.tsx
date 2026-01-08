@@ -11,6 +11,7 @@ import { getNutritionStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
+import { serializeDateRange } from "../../utils/query-utils"
 
 interface StatsNutritionProps {
   userId: string | null
@@ -21,14 +22,16 @@ interface StatsNutritionProps {
 const chartConfig = { calories: { label: "Калории", color: "#8b5cf6" } } satisfies ChartConfig
 
 export const StatsNutrition = memo(function StatsNutrition({ userId, settings, dateRange }: StatsNutritionProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'nutrition', userId, dateRange],
+    queryKey: ['stats', 'nutrition', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getNutritionStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const data = useMemo(() => {

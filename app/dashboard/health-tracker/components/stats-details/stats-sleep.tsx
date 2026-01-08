@@ -12,6 +12,7 @@ import { getSleepStats } from "@/lib/actions/health-stats"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
+import { serializeDateRange } from "../../utils/query-utils"
 
 interface StatsSleepProps {
   userId: string | null
@@ -22,14 +23,16 @@ interface StatsSleepProps {
 const chartConfig = { value: { label: "Часы сна", color: "#6366f1" } } satisfies ChartConfig
 
 export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange }: StatsSleepProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'sleep', userId, dateRange],
+    queryKey: ['stats', 'sleep', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getSleepStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const data = useMemo(() => {

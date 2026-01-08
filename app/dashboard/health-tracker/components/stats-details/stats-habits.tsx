@@ -15,11 +15,13 @@ import { cn } from "@/lib/utils"
 import { getHabitsStats } from "@/lib/actions/health-stats"
 import { format, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
+import { serializeDateRange } from "../../utils/query-utils"
+import { Habit, DateRange } from "../../types"
 
 interface StatsHabitsProps {
   userId: string | null
   habits: Habit[]
-  dateRange: { start: Date; end: Date }
+  dateRange: DateRange
 }
 
 const chartConfig = {
@@ -30,14 +32,16 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
+  const dateRangeKey = serializeDateRange(dateRange)
+  
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['stats', 'habits', userId, dateRange],
+    queryKey: ['stats', 'habits', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getHabitsStats(userId, dateRange)
     },
     enabled: !!userId && habits.length > 0,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   const completionData = useMemo(() => {
