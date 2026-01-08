@@ -12,22 +12,24 @@ import {
   getMoodStats,
   getNutritionStats,
   getHabitsStats,
-  getNotesStats
+  getNotesStats,
+  getOverviewStatsAggregated
 } from '@/lib/actions/health-stats'
-import { DateRange, TrackerSettings } from '../types'
+import { DateRange, TrackerSettings, Habit } from '../types'
 
 interface UsePrefetchStatsOptions {
   userId: string | null
   dateRange: DateRange
   enabled: boolean
   settings: TrackerSettings
+  habits: Habit[]
 }
 
 /**
  * Хук для фоновой предзагрузки данных статистики
  * Загружает данные в кэш React Query сразу после инициализации трекера
  */
-export function usePrefetchStats({ userId, dateRange, enabled, settings }: UsePrefetchStatsOptions) {
+export function usePrefetchStats({ userId, dateRange, enabled, settings, habits }: UsePrefetchStatsOptions) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -42,6 +44,15 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings }: UsePr
 
         // Создаем массив промисов для параллельной загрузки
         const prefetchPromises: Promise<void>[] = []
+
+        // Предзагружаем данные обзора (всегда)
+        prefetchPromises.push(
+          queryClient.prefetchQuery({
+            queryKey: ['stats', 'overview', userId, dateRange, settings, habits],
+            queryFn: () => getOverviewStatsAggregated(userId, dateRange, settings, habits),
+            staleTime: 5 * 60 * 1000, // 5 минут
+          })
+        )
 
         // Предзагружаем данные только для активных виджетов
         if (activeWidgets.includes('water')) {
@@ -143,6 +154,6 @@ export function usePrefetchStats({ userId, dateRange, enabled, settings }: UsePr
 
     // Запускаем предзагрузку
     prefetchAllStats()
-  }, [dateRange, enabled, userId, settings.widgets, queryClient])
+  }, [dateRange, enabled, userId, settings.widgets, habits, queryClient])
 }
 

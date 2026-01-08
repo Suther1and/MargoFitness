@@ -139,7 +139,8 @@ function HealthTrackerContent() {
     userId,
     dateRange: statsDateRange,
     enabled: !!userId, // Только проверка userId
-    settings
+    settings,
+    habits
   })
   
   // Объединяем данные из БД с настройками для отображения
