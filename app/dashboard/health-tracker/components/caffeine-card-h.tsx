@@ -18,6 +18,7 @@ export const CaffeineCardH = memo(function CaffeineCardH({ value, goal, onUpdate
   const { isOverLimit } = useGoalProgress({ current: value, goal })
   const { 
     localValue, 
+    inputValue,
     isEditing,
     handleIncrement, 
     handleDecrement,
@@ -25,7 +26,7 @@ export const CaffeineCardH = memo(function CaffeineCardH({ value, goal, onUpdate
     handleChange,
     handleBlur,
     handleKeyDown
-  } = useEditableValue(value, { onUpdate, step: 1, min: 0 })
+  } = useEditableValue(value, { onUpdate, step: 1, min: 0, maxValue: 99, decimalPlaces: 0 })
 
   const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-600'
 
@@ -60,6 +61,7 @@ export const CaffeineCardH = memo(function CaffeineCardH({ value, goal, onUpdate
               onChange={handleChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
+              inputValue={inputValue}
               className={cn('text-3xl md:text-5xl font-black font-oswald tracking-tighter', isOverLimit ? 'text-red-500' : 'text-white')}
               inputClassName="text-center text-3xl md:text-5xl w-16 md:w-24"
             />

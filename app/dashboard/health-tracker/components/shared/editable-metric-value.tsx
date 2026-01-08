@@ -9,7 +9,7 @@ interface EditableMetricValueProps {
   value: number
   isEditing: boolean
   onEdit: () => void
-  onChange: (value: number) => void
+  onChange: (value: string) => void
   onBlur: () => void
   onKeyDown: (e: React.KeyboardEvent) => void
   unit?: string
@@ -20,6 +20,8 @@ interface EditableMetricValueProps {
   type?: 'number' | 'text'
   format?: (value: number) => string
   inputClassName?: string
+  inputValue?: string
+  autoShrink?: boolean // Авто-уменьшение шрифта для больших чисел
 }
 
 export function EditableMetricValue({
@@ -37,9 +39,25 @@ export function EditableMetricValue({
   type = 'number',
   format,
   inputClassName,
+  inputValue,
+  autoShrink = false,
 }: EditableMetricValueProps) {
   const sizeClass = TYPOGRAPHY.value[size]
   const displayValue = format ? format(value) : value
+  
+  // Динамическое уменьшение шрифта для больших чисел
+  const getDisplayClassName = () => {
+    if (!autoShrink) return className
+    
+    const valueStr = displayValue.toString()
+    const digitCount = valueStr.replace(/[^\d]/g, '').length
+    
+    if (digitCount >= 5) {
+      // Уменьшаем размер шрифта для 5+ цифр
+      return cn(className, 'text-2xl md:text-3xl')
+    }
+    return className
+  }
   
   const [prev, setPrev] = useState(value)
   const [direction, setDirection] = useState<1 | -1>(1)
@@ -65,8 +83,8 @@ export function EditableMetricValue({
           size === 'large' && 'w-24',
           size === 'xlarge' && 'w-28'
         )}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={inputValue !== undefined ? inputValue : value}
+        onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
       />
@@ -80,7 +98,7 @@ export function EditableMetricValue({
     >
       <div className="relative inline-block overflow-hidden h-fit">
         {/* Призрачный элемент для сохранения исходных размеров карточки */}
-        <span className={cn('opacity-0 tabular-nums leading-none pointer-events-none select-none', sizeClass, className)}>
+        <span className={cn('opacity-0 tabular-nums leading-none pointer-events-none select-none', sizeClass, getDisplayClassName())}>
           {displayValue}
         </span>
         
@@ -96,7 +114,7 @@ export function EditableMetricValue({
               damping: 35,
               mass: 0.5
             }}
-            className={cn('absolute inset-0 text-white tabular-nums leading-none flex items-center', sizeClass, className)}
+            className={cn('absolute inset-0 text-white tabular-nums leading-none flex items-center', sizeClass, getDisplayClassName())}
           >
             {displayValue}
           </motion.span>

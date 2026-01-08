@@ -19,13 +19,14 @@ export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: St
   const {
     isEditing,
     localValue,
+    inputValue,
     handleIncrement,
     handleDecrement,
     handleEdit,
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useEditableValue(steps, { onUpdate, step: 500, min: 0 })
+  } = useEditableValue(steps, { onUpdate, step: 500, min: 0, maxValue: 99999, decimalPlaces: 0 })
 
   const distance = useMemo(() => ((localValue * 0.65) / 1000).toFixed(2), [localValue])
   const calories = useMemo(() => Math.round(localValue * 0.038), [localValue])
@@ -67,7 +68,9 @@ export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: St
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
+                inputValue={inputValue}
                 format={(v) => v.toLocaleString()}
+                autoShrink={true}
                 className={cn("text-4xl font-black font-oswald tracking-tighter leading-none", isDone ? "text-emerald-400" : "text-white")}
                 inputClassName="text-center text-3xl w-24"
               />
@@ -147,7 +150,9 @@ export const StepsCardH = memo(function StepsCardH({ steps, goal, onUpdate }: St
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
+                inputValue={inputValue}
                 format={(v) => v.toLocaleString()}
+                autoShrink={true}
                 className={cn("text-3xl font-black font-oswald leading-none", isDone ? "text-emerald-400" : "text-white")}
                 inputClassName="text-center text-2xl w-20"
               />

@@ -18,13 +18,14 @@ export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: Sl
   const {
     isEditing,
     localValue,
+    inputValue,
     handleIncrement,
     handleDecrement,
     handleEdit,
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useEditableValue(hours, { onUpdate, step: 0.5, min: 0, max: 24 })
+  } = useEditableValue(hours, { onUpdate, step: 0.5, min: 0, max: 24, maxValue: 24, decimalPlaces: 2 })
 
   return (
     <div
@@ -84,9 +85,11 @@ export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: Sl
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
+                inputValue={inputValue}
                 unit="ч"
                 size="large"
                 step="0.5"
+                format={(v) => v.toFixed(1)}
                 className={cn('text-3xl md:text-5xl leading-none transition-colors duration-500', isDone ? 'text-emerald-400' : 'text-white')}
                 unitClassName={cn('text-xs md:text-sm leading-none ml-0.5 transition-colors duration-500', isDone ? 'text-emerald-400/40' : 'text-white/20')}
                 inputClassName="w-12 md:w-16 text-center text-2xl md:text-4xl"
@@ -116,9 +119,11 @@ export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: Sl
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
+                inputValue={inputValue}
                 unit="ч"
                 size="large"
                 step="0.5"
+                format={(v) => v.toFixed(1)}
                 className={cn('text-3xl leading-none transition-colors duration-500', isDone ? 'text-emerald-400' : 'text-white')}
                 unitClassName={cn('text-xs leading-none ml-0.5 transition-colors duration-500', isDone ? 'text-emerald-400/40' : 'text-white/20')}
                 inputClassName="w-12 text-center text-2xl"

@@ -18,13 +18,14 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
   const {
     isEditing,
     localValue,
+    inputValue,
     handleIncrement,
     handleDecrement,
     handleEdit,
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useEditableValue(value, { onUpdate, step: 0.1, min: 0 })
+  } = useEditableValue(value, { onUpdate, step: 0.1, min: 0, maxValue: 999.99, decimalPlaces: 2 })
 
   const weightHistory = useMemo(() => [72.1, 72.3, 72.7, 72.5, 72.6, 72.5, localValue], [localValue])
 
@@ -74,6 +75,7 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
               onChange={handleChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
+              inputValue={inputValue}
               unit="кг"
               step="0.1"
               format={(v) => v.toFixed(1)}

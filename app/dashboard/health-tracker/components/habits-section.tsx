@@ -281,6 +281,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   const isMobile = useIsMobile(768)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
+  const [limitWarning, setLimitWarning] = useState<string | null>(null)
   
   const [newHabit, setNewHabit] = useState<{
     title: string
@@ -317,9 +318,29 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     })
     return groups
   }, [habits])
+  
+  // Счётчики активных и неактивных привычек
+  const activeHabitsCount = habits.filter(h => h.enabled).length
+  const disabledHabitsCount = habits.filter(h => !h.enabled).length
+  const MAX_ACTIVE_HABITS = 15
+  const MAX_DISABLED_HABITS = 15
 
   const handleAdd = () => {
     if (newHabit.title.trim().length < 2) return
+    
+    // Проверка лимита активных привычек
+    if (newHabit.enabled && activeHabitsCount >= MAX_ACTIVE_HABITS) {
+      setLimitWarning('Достигнут лимит активных привычек (15)')
+      setTimeout(() => setLimitWarning(null), 3000)
+      return
+    }
+    
+    // Проверка лимита неактивных привычек
+    if (!newHabit.enabled && disabledHabitsCount >= MAX_DISABLED_HABITS) {
+      setLimitWarning('Достигнут лимит неактивных привычек (15)')
+      setTimeout(() => setLimitWarning(null), 3000)
+      return
+    }
     
     addHabit({
       title: newHabit.title.trim(),
@@ -359,6 +380,19 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   }
 
   const toggleHabitStatus = (id: string, enabled: boolean) => {
+    // Проверка лимитов перед переключением
+    if (enabled && activeHabitsCount >= MAX_ACTIVE_HABITS) {
+      setLimitWarning('Достигнут лимит активных привычек (15)')
+      setTimeout(() => setLimitWarning(null), 3000)
+      return
+    }
+    
+    if (!enabled && disabledHabitsCount >= MAX_DISABLED_HABITS) {
+      setLimitWarning('Достигнут лимит неактивных привычек (15)')
+      setTimeout(() => setLimitWarning(null), 3000)
+      return
+    }
+    
     updateHabit(id, { enabled })
   }
 
@@ -373,6 +407,18 @@ export function HabitsSection({ userId }: { userId: string | null }) {
 
   return (
     <div className="space-y-8">
+      {/* Предупреждение о лимите */}
+      {limitWarning && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold text-center"
+        >
+          {limitWarning}
+        </motion.div>
+      )}
+      
       {/* Quick Add Form */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">

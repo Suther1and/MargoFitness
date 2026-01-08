@@ -33,9 +33,11 @@ export const NutritionCardH = memo(function NutritionCardH({
 }: NutritionCardHProps) {
   const [mealInput, setMealInput] = useState('')
   const { percentage } = useGoalProgress({ current: calories, goal: caloriesGoal })
-  const { isEditing, localValue, handleEdit, handleChange, handleBlur, handleKeyDown } = useEditableValue(calories, {
+  const { isEditing, localValue, inputValue, handleEdit, handleChange, handleBlur, handleKeyDown } = useEditableValue(calories, {
     onUpdate: (val) => onUpdate('calories', val),
     min: 0,
+    maxValue: 9999,
+    decimalPlaces: 0,
   })
 
   // Используем общие утилиты для расчета
@@ -54,9 +56,18 @@ export const NutritionCardH = memo(function NutritionCardH({
 
   const handleAddMeal = () => {
     const val = parseInt(mealInput)
-    if (val) {
-      onUpdate('calories', localValue + val)
+    if (val && val > 0) {
+      const newTotal = Math.min(localValue + val, 9999)
+      onUpdate('calories', newTotal)
       setMealInput('')
+    }
+  }
+  
+  const handleMealInputChange = (value: string) => {
+    // Фильтр только целых чисел до 9999
+    const numValue = parseInt(value) || 0
+    if (numValue <= 9999) {
+      setMealInput(value)
     }
   }
 
@@ -81,8 +92,8 @@ export const NutritionCardH = memo(function NutritionCardH({
                   autoFocus
                   type="number"
                   className="w-16 bg-transparent text-center text-2xl md:text-3xl font-black text-white font-oswald outline-none"
-                  value={localValue}
-                  onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+                  value={inputValue}
+                  onChange={(e) => handleChange(e.target.value)}
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
                 />
@@ -101,7 +112,7 @@ export const NutritionCardH = memo(function NutritionCardH({
               placeholder="Добавить"
               className="flex-1 bg-transparent text-[16px] md:text-[11px] font-bold text-white outline-none placeholder:text-white/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none min-w-0 origin-left scale-[0.625] md:scale-100 w-[160%] md:w-full"
               value={mealInput}
-              onChange={(e) => setMealInput(e.target.value)}
+              onChange={(e) => handleMealInputChange(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddMeal()}
             />
             <AnimatePresence>

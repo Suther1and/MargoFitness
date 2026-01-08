@@ -42,13 +42,14 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
   const {
     isEditing,
     localValue,
+    inputValue,
     handleIncrement,
     handleDecrement,
     handleEdit,
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useEditableValue(value, { onUpdate, step: 250, min: 0 })
+  } = useEditableValue(value, { onUpdate, step: 250, min: 0, maxValue: 9999, decimalPlaces: 0 })
 
   return (
     <div
@@ -95,6 +96,7 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
+                inputValue={inputValue}
                 className="text-3xl md:text-4xl hover:text-blue-400"
                 inputClassName="text-left text-2xl md:text-4xl w-20 md:w-24"
               />
