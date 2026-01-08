@@ -37,6 +37,49 @@ const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: bo
   )
 }
 
+const BubblesField = ({ isDone }: { isDone: boolean }) => {
+  const bubbles = useMemo(() => 
+    Array.from({ length: 8 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      size: Math.random() * 4 + 2,
+      duration: Math.random() * 3 + 4,
+      delay: Math.random() * 5
+    })), [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+      {bubbles.map(b => (
+        <motion.div
+          key={b.id}
+          className={cn(
+            "absolute rounded-full border border-white/20",
+            isDone ? "bg-emerald-400/20" : "bg-blue-400/20"
+          )}
+          style={{
+            left: `${b.x}%`,
+            bottom: `-10%`,
+            width: b.size,
+            height: b.size,
+          }}
+          animate={{
+            y: [0, -140],
+            x: [0, Math.sin(b.id) * 20],
+            opacity: [0, 1, 0],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: b.duration,
+            repeat: Infinity,
+            delay: b.delay,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
   const { percentage, isDone, remaining } = useGoalProgress({ current: value, goal })
   const {
@@ -61,6 +104,7 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
       )}
     >
       <WaveBackground percentage={percentage} isDone={isDone} />
+      <BubblesField isDone={isDone} />
 
       <div className="relative z-10 flex flex-col h-full px-5 pt-3 pb-5">
         {/* Header */}

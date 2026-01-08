@@ -16,40 +16,40 @@ interface StepsCardHProps {
 
 const EnergyField = ({ isDone }: { isDone: boolean }) => {
   const particles = useMemo(() => 
-    Array.from({ length: 15 }).map((_, i) => ({
+    Array.from({ length: 12 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
-      y: Math.random() * 100,
       size: Math.random() * 2 + 1,
-      duration: Math.random() * 2 + 1,
-      delay: Math.random() * 2
+      duration: Math.random() * 4 + 3, // Замедляем: было 2+1, стало 4+3
+      delay: Math.random() * 5
     })), [])
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
       {particles.map(p => (
         <motion.div
           key={p.id}
           className={cn(
-            "absolute rounded-full",
+            "absolute rounded-full blur-[1px]",
             isDone ? "bg-emerald-400" : "bg-red-500"
           )}
           style={{
             left: `${p.x}%`,
-            bottom: `-10%`,
+            bottom: `-5%`,
             width: p.size,
             height: p.size,
           }}
           animate={{
-            y: [0, -150],
-            opacity: [0, 1, 0],
-            scale: [1, 1.5, 0.5],
+            y: [0, -180],
+            x: [0, (Math.random() - 0.5) * 30], // Добавляем небольшое отклонение по горизонтали
+            opacity: [0, 0.8, 0],
+            scale: [1, 1.2, 0.8],
           }}
           transition={{
             duration: p.duration,
             repeat: Infinity,
             delay: p.delay,
-            ease: "easeOut"
+            ease: "linear"
           }}
         />
       ))}
