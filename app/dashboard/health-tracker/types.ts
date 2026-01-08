@@ -267,3 +267,57 @@ export const MOCK_DATA: DailyMetrics = {
 }
 
 // MOCK_DATA теперь пустой - все данные загружаются из Supabase;
+
+// Типы для агрегированной статистики обзора
+export interface OverviewStats {
+  weight: {
+    start: number
+    current: number
+    change: number
+    period: string
+  } | null
+  habits: {
+    completionRate: number
+    bestStreak: number
+    habitName: string
+  } | null
+  steps: {
+    average: number
+    goal: number
+    percentage: number
+    daysWithData: number
+  } | null
+  water: {
+    average: number
+    goal: number
+    percentage: number
+    daysWithData: number
+  } | null
+  caffeine: {
+    average: number
+    daysWithData: number
+  } | null
+  sleep: {
+    average: number
+    goal: number
+    percentage: number
+    daysWithData: number
+  } | null
+  nutrition: {
+    avgCalories: number
+    avgQuality: number | null
+    goal: number
+  } | null
+  mood: {
+    avgMood: number | null
+    avgEnergy: number | null
+  } | null
+  notes: {
+    content: string
+    date: string
+    metricsSnapshot: any
+  } | null
+  photos: {
+    count: number
+  } | null
+}

@@ -63,7 +63,7 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
   // Условный рендеринг - только активный таб в DOM
   const renderContent = () => {
     if (activeView === 'overall') {
-      return <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} settings={settings} habits={habits} />
+      return <StatsOverall period={getLegacyPeriod()} data={data} onNavigate={setActiveView} settings={settings} habits={habits} dateRange={dateRange} userId={userId} />
     }
     if (activeView === 'habits') {
       return <StatsHabits dateRange={dateRange} userId={userId} habits={habits} />

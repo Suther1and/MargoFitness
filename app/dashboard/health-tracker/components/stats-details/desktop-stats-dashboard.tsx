@@ -71,7 +71,7 @@ export function DesktopStatsDashboard({
   // Условный рендеринг - только активный компонент в DOM
   const renderStatsContent = () => {
     if (activeView === 'overall') {
-      return <StatsOverall settings={settings} habits={habits} period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} />
+      return <StatsOverall settings={settings} habits={habits} period={period} layout="grid" data={data} onNavigate={(view) => setActiveView(view)} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'habits') {
       return <StatsHabits dateRange={currentDateRange} userId={userId} habits={habits} />
