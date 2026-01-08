@@ -28,7 +28,7 @@ export function useOverviewStats({
       return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут
+    staleTime: 30 * 1000, // 30 секунд - данные обновляются чаще
   })
 
   return {
