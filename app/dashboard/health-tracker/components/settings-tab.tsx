@@ -700,7 +700,7 @@ export default function SettingsTab({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-full"
             >
-              <HabitsSection />
+              <HabitsSection userId={userId} />
             </motion.div>
           )}
         </AnimatePresence>
