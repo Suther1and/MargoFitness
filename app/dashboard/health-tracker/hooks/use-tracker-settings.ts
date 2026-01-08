@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
 import debounce from 'lodash.debounce'
 import { createClient } from '@/lib/supabase/client'
@@ -78,6 +78,9 @@ export function useTrackerSettings(userId: string | null) {
     return !localStorage.getItem(VISITED_KEY)
   })
   const queryClient = useQueryClient()
+  
+  // Ref для отслеживания pending настроек
+  const pendingSettingsRef = useRef<TrackerSettings | null>(null)
 
   // Query для загрузки настроек
   const { data: settingsData, isLoading } = useQuery({
@@ -121,8 +124,15 @@ export function useTrackerSettings(userId: string | null) {
   // Debounced mutation для батчинга сохранений
   const debouncedMutate = useMemo(() => 
     debounce((newSettings: TrackerSettings) => {
+      pendingSettingsRef.current = newSettings
       updateMutation.mutate(newSettings)
-    }, 500)
+      // Очищаем после успешной отправки
+      setTimeout(() => {
+        if (pendingSettingsRef.current === newSettings) {
+          pendingSettingsRef.current = null
+        }
+      }, 100)
+    }, 1000) // Увеличен до 1000ms для лучшего батчинга
   , [updateMutation.mutate])
 
   // Универсальная функция обновления с queryClient.getQueryData
@@ -227,6 +237,46 @@ export function useTrackerSettings(userId: string | null) {
     localStorage.setItem(VISITED_KEY, 'true')
     setIsFirstVisit(false)
   }, [])
+
+  // Автосохранение при закрытии страницы
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (pendingSettingsRef.current && userId) {
+        const dataToSave = {
+          type: 'settings',
+          data: {
+            settings: appToDbSettings(pendingSettingsRef.current)
+          }
+        }
+        
+        // Используем sendBeacon для гарантированной отправки
+        const blob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json' })
+        navigator.sendBeacon('/api/diary/save-sync', blob)
+        
+        pendingSettingsRef.current = null
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && pendingSettingsRef.current && userId) {
+        // При потере фокуса отправляем обычным способом
+        updateMutation.mutate(pendingSettingsRef.current)
+        pendingSettingsRef.current = null
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      // При размонтировании компонента сохраняем
+      if (pendingSettingsRef.current && userId) {
+        updateMutation.mutate(pendingSettingsRef.current)
+      }
+    }
+  }, [userId, updateMutation])
 
   return {
     settings,

@@ -79,13 +79,13 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         clearTimeout(updateTimerRef.current)
       }
 
-      // Устанавливаем новый таймер (300ms для быстрой реакции)
+      // Устанавливаем новый таймер (1000ms для лучшего батчинга и производительности)
       updateTimerRef.current = setTimeout(() => {
         const dataToSave = pendingUpdatesRef.current
         pendingUpdatesRef.current = {}
         
         saveMutation.mutate(dataToSave)
-      }, 300) // 300ms debounce - баланс между батчингом и скоростью
+      }, 1000) // 1000ms debounce - оптимальный баланс для батчинга без лагов
     }
   }, [saveMutation])
 
@@ -218,10 +218,22 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
   // Сохранение перед уходом
   useEffect(() => {
-    // Сохранение при закрытии/обновлении страницы
-    const handleBeforeUnload = () => {
+    // Сохранение при закрытии/обновлении страницы через sendBeacon
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (Object.keys(pendingUpdatesRef.current).length > 0) {
-        forceSave()
+        const dataToSave = {
+          type: 'diary',
+          data: {
+            date: dateStr,
+            ...pendingUpdatesRef.current
+          }
+        }
+        
+        // Используем sendBeacon для гарантированной отправки
+        const blob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json' })
+        navigator.sendBeacon('/api/diary/save-sync', blob)
+        
+        pendingUpdatesRef.current = {}
       }
     }
 
@@ -238,6 +250,7 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+      // При размонтировании компонента сохраняем оставшиеся данные
       forceSave()
     }
   }, [userId, dateStr])
