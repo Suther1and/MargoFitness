@@ -24,15 +24,22 @@ export function useOverviewStats({
 }: UseOverviewStatsOptions) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data, isLoading, error } = useQuery({
+  console.log('🔍 useOverviewStats queryKey:', ['stats', 'overview', userId, dateRangeKey])
+  
+  const { data, isLoading, error, dataUpdatedAt } = useQuery({
     queryKey: ['stats', 'overview', userId, dateRangeKey],
     queryFn: async () => {
+      console.log('🔄 Загружаем данные обзора для периода:', dateRangeKey)
       if (!userId) return null
-      return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
+      const result = await getOverviewStatsAggregated(userId, dateRange, settings, habits)
+      console.log('✅ Данные обзора загружены:', result)
+      return result
     },
     enabled: !!userId,
     staleTime: 30 * 1000, // 30 секунд - данные обновляются чаще
   })
+
+  console.log('📊 Overview stats state:', { isLoading, dataUpdatedAt: new Date(dataUpdatedAt), hasData: !!data })
 
   return {
     data: data?.data as OverviewStats | null | undefined,

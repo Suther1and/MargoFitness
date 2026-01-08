@@ -59,7 +59,18 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       )
     },
     onSuccess: () => {
-      console.log('✅ Данные сохранены, обновляем статистику...')
+      console.log('✅ Данные сохранены в БД, обновляем статистику...')
+      
+      // Получаем все ключи из кэша для отладки
+      const queryCache = queryClient.getQueryCache()
+      const allQueries = queryCache.getAll()
+      const statsQueries = allQueries.filter(q => 
+        q.queryKey[0] === 'stats'
+      )
+      console.log('📦 Найдено запросов статистики в кэше:', statsQueries.length)
+      statsQueries.forEach(q => {
+        console.log('  - queryKey:', q.queryKey, 'state:', q.state.status)
+      })
       
       // Инвалидируем весь кеш статистики
       queryClient.invalidateQueries({ 
