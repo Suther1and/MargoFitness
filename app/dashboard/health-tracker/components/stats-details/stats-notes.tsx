@@ -30,8 +30,8 @@ export function StatsNotes({ userId, dateRange }: StatsNotesProps) {
       try {
         const result = await getNotesStats(userId, dateRange)
         
-        if (result.success && result.data) {
-          const notesData = result.data.map(entry => ({
+        if (result.success && result.data && Array.isArray(result.data)) {
+          const notesData = result.data.map((entry: any) => ({
             date: format(new Date(entry.date), 'd MMMM, EEEE', { locale: ru }),
             notes: entry.notes,
             mood: entry.mood
