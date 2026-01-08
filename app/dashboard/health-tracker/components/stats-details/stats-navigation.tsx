@@ -10,6 +10,7 @@ import { useHabits } from "../../hooks/use-habits"
 interface StatsNavigationProps {
   activeView: StatsView
   onViewChange: (view: StatsView) => void
+  userId: string | null
 }
 
 interface NavButton {
@@ -33,9 +34,9 @@ const NAV_BUTTONS: NavButton[] = [
   { id: 'photos', label: 'Фото', icon: Camera, color: 'text-violet-400' },
 ]
 
-export function StatsNavigation({ activeView, onViewChange }: StatsNavigationProps) {
-  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings()
-  const { habits, isLoaded: isHabitsLoaded } = useHabits()
+export function StatsNavigation({ activeView, onViewChange, userId }: StatsNavigationProps) {
+  const { settings, isLoaded: isSettingsLoaded } = useTrackerSettings(userId)
+  const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
   
   // Не рендерим навигацию пока данные не загружены (избегаем layout shift)
   if (!isSettingsLoaded || !isHabitsLoaded) {

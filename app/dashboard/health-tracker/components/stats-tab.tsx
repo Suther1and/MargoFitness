@@ -105,6 +105,7 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
         <StatsNavigation
           activeView={activeView}
           onViewChange={setActiveView}
+          userId={userId}
         />
       )}
 
