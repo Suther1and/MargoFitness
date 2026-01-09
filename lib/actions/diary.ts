@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, ProgressPhoto } from '@/types/database'
+import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, ProgressPhoto, PhotoType, WeeklyPhotoSet, getWeekKey, getWeekLabel, getCurrentWeekKey } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 import { checkAndUnlockAchievements } from './achievements'
 
@@ -266,16 +266,23 @@ export async function upsertDiaryEntry(
 }
 
 /**
- * Загрузка фото прогресса (теперь сохраняем в diary_entries)
+ * Загрузка фото прогресса с типом позы (недельная система)
  */
-export async function uploadProgressPhoto(userId: string, date: string, formData: FormData) {
+export async function uploadProgressPhoto(
+  userId: string, 
+  photoType: PhotoType, 
+  formData: FormData
+) {
   const supabase = await createClient()
   const file = formData.get('file') as File
   if (!file) return { success: false, error: 'No file provided' }
 
   try {
-    const fileName = `${userId}/${date}_${Date.now()}.jpg`
+    // Получаем week_key для текущей недели
+    const weekKey = getCurrentWeekKey()
+    const fileName = `${userId}/${weekKey}_${photoType}_${Date.now()}.jpg`
 
+    // Загружаем в storage
     const { error: uploadError } = await supabase.storage
       .from('progress-photos')
       .upload(fileName, file, {
@@ -288,34 +295,46 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
       return { success: false, error: uploadError.message }
     }
 
-    // Для приватного хранилища создаем подписанную ссылку на 1 год
+    // Создаем signed URL на 1 год
     const { data: signedData, error: signedError } = await supabase.storage
       .from('progress-photos')
-      .createSignedUrl(fileName, 31536000) // 1 year
+      .createSignedUrl(fileName, 31536000)
 
     if (signedError) {
       logError('uploadProgressPhoto (signedUrl)', signedError, userId)
       return { success: false, error: signedError.message }
     }
 
-    // Получаем текущую запись дня
+    // Получаем существующую запись за эту неделю
     const { data: entry } = await supabase
       .from('diary_entries')
       .select('*')
       .eq('user_id', userId)
-      .eq('date', date)
+      .eq('date', weekKey)
       .maybeSingle()
 
-    const currentPhotoUrls = (entry as any)?.photo_urls || []
-    const updatedPhotoUrls = [...currentPhotoUrls, signedData.signedUrl]
+    // Создаем структуру weekly_photos
+    const currentWeeklyPhotos = (entry as any)?.weekly_photos || { photos: {} }
+    const updatedWeeklyPhotos = {
+      ...currentWeeklyPhotos,
+      week_key: weekKey,
+      photos: {
+        ...currentWeeklyPhotos.photos,
+        [photoType]: {
+          url: signedData.signedUrl,
+          type: photoType,
+          uploaded_at: new Date().toISOString()
+        }
+      }
+    }
 
-    // Обновляем запись дня с новым фото
+    // Сохраняем в diary_entries с ключом = week_key (понедельник недели)
     const { data, error } = await supabase
       .from('diary_entries')
       .upsert({
         user_id: userId,
-        date,
-        photo_urls: updatedPhotoUrls,
+        date: weekKey,
+        weekly_photos: updatedWeeklyPhotos,
         metrics: (entry as any)?.metrics || {},
         updated_at: new Date().toISOString()
       } as any, {
@@ -331,7 +350,15 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
 
     revalidatePath('/dashboard/health-tracker')
 
-    return { success: true, data: { url: signedData.signedUrl, entry: data } }
+    return { 
+      success: true, 
+      data: { 
+        url: signedData.signedUrl, 
+        photoType, 
+        weekKey,
+        entry: data 
+      } 
+    }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] uploadProgressPhoto:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -339,17 +366,18 @@ export async function uploadProgressPhoto(userId: string, date: string, formData
 }
 
 /**
- * Получить фото прогресса (из diary_entries)
+ * Получить фото прогресса (недельная структура)
  */
 export async function getProgressPhotos(userId: string) {
   const supabase = await createClient()
 
   try {
+    // Получаем все записи с weekly_photos
     const { data, error } = await supabase
       .from('diary_entries')
-      .select('date, photo_urls, metrics')
+      .select('date, weekly_photos, metrics')
       .eq('user_id', userId)
-      .not('photo_urls', 'is', null)
+      .not('weekly_photos', 'is', null)
       .order('date', { ascending: false })
 
     if (error) {
@@ -357,16 +385,25 @@ export async function getProgressPhotos(userId: string) {
       return { success: false, error: error.message }
     }
 
-    // Преобразуем в плоский список фото с датами и весом
-    const photos = data.flatMap((entry: any) => 
-      (entry.photo_urls || []).map((url: string) => ({
-        date: entry.date,
-        url,
-        weight: entry.metrics?.weight || null
-      }))
-    )
+    // Преобразуем в WeeklyPhotoSet[]
+    const weeklyPhotoSets: WeeklyPhotoSet[] = data.map((entry: any) => {
+      const weeklyPhotos = entry.weekly_photos || {}
+      const photos = weeklyPhotos.photos || {}
+      
+      return {
+        week_key: entry.date,
+        week_label: getWeekLabel(entry.date),
+        photos: {
+          front: photos.front || undefined,
+          side: photos.side || undefined,
+          back: photos.back || undefined
+        },
+        weight: entry.metrics?.weight || undefined,
+        hasPhotos: !!(photos.front || photos.side || photos.back)
+      }
+    }).filter((set: WeeklyPhotoSet) => set.hasPhotos)
 
-    return { success: true, data: photos }
+    return { success: true, data: weeklyPhotoSets }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] getProgressPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -374,19 +411,106 @@ export async function getProgressPhotos(userId: string) {
 }
 
 /**
- * Удалить фото прогресса (из diary_entries)
+ * Получить фото за конкретную неделю
  */
-export async function deleteProgressPhoto(userId: string, date: string, photoUrl: string) {
+export async function getWeekPhotos(userId: string, weekKey: string) {
   const supabase = await createClient()
 
   try {
-    // Извлекаем путь из URL для удаления из Storage
+    const { data: entry, error } = await supabase
+      .from('diary_entries')
+      .select('date, weekly_photos, metrics')
+      .eq('user_id', userId)
+      .eq('date', weekKey)
+      .maybeSingle()
+
+    if (error) {
+      logError('getWeekPhotos', error, userId)
+      return { success: false, error: error.message }
+    }
+
+    if (!entry) {
+      return { 
+        success: true, 
+        data: {
+          week_key: weekKey,
+          week_label: getWeekLabel(weekKey),
+          photos: {},
+          hasPhotos: false
+        } 
+      }
+    }
+
+    const weeklyPhotos = (entry as any).weekly_photos || {}
+    const photos = weeklyPhotos.photos || {}
+
+    const weeklyPhotoSet: WeeklyPhotoSet = {
+      week_key: weekKey,
+      week_label: getWeekLabel(weekKey),
+      photos: {
+        front: photos.front || undefined,
+        side: photos.side || undefined,
+        back: photos.back || undefined
+      },
+      weight: (entry as any).metrics?.weight || undefined,
+      hasPhotos: !!(photos.front || photos.side || photos.back)
+    }
+
+    return { success: true, data: weeklyPhotoSet }
+  } catch (err: any) {
+    console.error('[Diary Action Unexpected] getWeekPhotos:', err)
+    return { success: false, error: err?.message || 'Internal Server Error' }
+  }
+}
+
+/**
+ * Получить фото текущей недели
+ */
+export async function getCurrentWeekPhotos(userId: string) {
+  const weekKey = getCurrentWeekKey()
+  return getWeekPhotos(userId, weekKey)
+}
+
+/**
+ * Удалить фото прогресса (недельная структура)
+ */
+export async function deleteProgressPhoto(
+  userId: string, 
+  weekKey: string, 
+  photoType: PhotoType
+) {
+  const supabase = await createClient()
+
+  try {
+    // Получаем текущую запись
+    const { data: entry } = await supabase
+      .from('diary_entries')
+      .select('weekly_photos')
+      .eq('user_id', userId)
+      .eq('date', weekKey)
+      .maybeSingle()
+
+    if (!entry) {
+      return { success: false, error: 'Entry not found' }
+    }
+
+    const weeklyPhotos = (entry as any).weekly_photos || {}
+    const photos = weeklyPhotos.photos || {}
+    const photoToDelete = photos[photoType]
+
+    if (!photoToDelete) {
+      return { success: false, error: 'Photo not found' }
+    }
+
+    // Удаляем из storage
     let path = null
     try {
-      if (photoUrl.includes('progress-photos/')) {
-        path = photoUrl.split('progress-photos/')[1]?.split('?')[0]
+      if (photoToDelete.url.includes('progress-photos/')) {
+        path = photoToDelete.url.split('progress-photos/')[1]?.split('?')[0]
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Error parsing photo path:', e)
+    }
 
     if (path) {
       await supabase.storage
@@ -394,27 +518,21 @@ export async function deleteProgressPhoto(userId: string, date: string, photoUrl
         .remove([path])
     }
 
-    // Получаем текущие фото записи
-    const { data: entry } = await supabase
-      .from('diary_entries')
-      .select('photo_urls')
-      .eq('user_id', userId)
-      .eq('date', date)
-      .single()
+    // Удаляем фото из структуры
+    const updatedPhotos = { ...photos }
+    delete updatedPhotos[photoType]
 
-    if (!entry) {
-      return { success: false, error: 'Entry not found' }
+    const updatedWeeklyPhotos = {
+      ...weeklyPhotos,
+      photos: updatedPhotos
     }
-
-    // Удаляем URL из массива
-    const updatedPhotoUrls = ((entry as any).photo_urls || []).filter((url: string) => url !== photoUrl)
 
     // Обновляем запись
     const { error } = await supabase
       .from('diary_entries')
-      .update({ photo_urls: updatedPhotoUrls } as any)
+      .update({ weekly_photos: updatedWeeklyPhotos } as any)
       .eq('user_id', userId)
-      .eq('date', date)
+      .eq('date', weekKey)
 
     if (error) {
       logError('deleteProgressPhoto', error, userId)
@@ -426,6 +544,124 @@ export async function deleteProgressPhoto(userId: string, date: string, photoUrl
     return { success: true }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] deleteProgressPhoto:', err)
+    return { success: false, error: err?.message || 'Internal Server Error' }
+  }
+}
+
+/**
+ * Заменить фото (удалить старое + загрузить новое)
+ */
+export async function updateProgressPhoto(
+  userId: string,
+  photoType: PhotoType,
+  formData: FormData
+) {
+  const weekKey = getCurrentWeekKey()
+  
+  // Сначала пытаемся удалить старое фото
+  await deleteProgressPhoto(userId, weekKey, photoType)
+  
+  // Затем загружаем новое
+  return uploadProgressPhoto(userId, photoType, formData)
+}
+
+/**
+ * Получить фото для сравнения (максимальный вес vs минимальный вес)
+ */
+export async function getComparisonPhotos(userId: string, startDate: string, endDate: string) {
+  const supabase = await createClient()
+
+  try {
+    // Получаем все записи за период с фото и весом
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .select('date, weekly_photos, metrics')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .not('weekly_photos', 'is', null)
+      .order('date', { ascending: true })
+
+    if (error) {
+      logError('getComparisonPhotos', error, userId)
+      return { success: false, error: error.message }
+    }
+
+    // Фильтруем записи с весом и хотя бы одним фото
+    const entriesWithWeight = data
+      .filter((entry: any) => {
+        const weight = entry.metrics?.weight
+        const photos = entry.weekly_photos?.photos || {}
+        const hasPhotos = !!(photos.front || photos.side || photos.back)
+        return weight && hasPhotos
+      })
+      .map((entry: any) => ({
+        weekKey: entry.date,
+        weight: entry.metrics.weight,
+        photos: entry.weekly_photos.photos
+      }))
+
+    if (entriesWithWeight.length < 2) {
+      return { 
+        success: true, 
+        data: null, 
+        message: 'Недостаточно данных для сравнения'
+      }
+    }
+
+    // Находим неделю с максимальным и минимальным весом
+    const maxWeightEntry = entriesWithWeight.reduce((max, entry) => 
+      entry.weight > max.weight ? entry : max
+    )
+    const minWeightEntry = entriesWithWeight.reduce((min, entry) => 
+      entry.weight < min.weight ? entry : min
+    )
+
+    // Проверяем разницу в весе
+    const weightDiff = maxWeightEntry.weight - minWeightEntry.weight
+    if (weightDiff < 1) {
+      return { 
+        success: true, 
+        data: null, 
+        message: 'Недостаточная разница в весе для сравнения'
+      }
+    }
+
+    // Выбираем приоритетное фото (front > side > back)
+    const getPhoto = (photos: any) => {
+      return photos.front || photos.side || photos.back || null
+    }
+
+    const beforePhoto = getPhoto(maxWeightEntry.photos)
+    const afterPhoto = getPhoto(minWeightEntry.photos)
+
+    if (!beforePhoto || !afterPhoto) {
+      return { 
+        success: true, 
+        data: null, 
+        message: 'Не удалось найти подходящие фото'
+      }
+    }
+
+    const comparisonData = {
+      before: {
+        photo: beforePhoto,
+        week_key: maxWeightEntry.weekKey,
+        week_label: getWeekLabel(maxWeightEntry.weekKey),
+        weight: maxWeightEntry.weight
+      },
+      after: {
+        photo: afterPhoto,
+        week_key: minWeightEntry.weekKey,
+        week_label: getWeekLabel(minWeightEntry.weekKey),
+        weight: minWeightEntry.weight
+      },
+      weightDifference: weightDiff
+    }
+
+    return { success: true, data: comparisonData }
+  } catch (err: any) {
+    console.error('[Diary Action Unexpected] getComparisonPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
   }
 }

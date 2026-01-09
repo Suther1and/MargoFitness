@@ -1,13 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3, Settings, Meh, Frown, SmilePlus } from "lucide-react"
+import { TrendingDown, Scale, Droplets, Footprints, Camera, NotebookText, Smile, Utensils, Flame, Laugh, Zap, Moon, Coffee, ChevronRight, BarChart3, Settings, Meh, Frown, SmilePlus, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { calculateBMI } from "../../utils/bmi-utils"
 import { StatsView, DailyMetrics, TrackerSettings, Habit, DateRange } from "../../types"
 import Image from "next/image"
 import Link from "next/link"
 import { useOverviewStats } from "../../hooks/use-overview-stats"
+import { useComparisonPhotos } from "../../hooks/use-progress-photos"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
@@ -25,6 +26,13 @@ interface StatsOverallProps {
 export function StatsOverall({ settings, habits, period, onNavigate, layout = 'column', data, dateRange, userId }: StatsOverallProps) {
   // Получаем агрегированные данные для обзора
   const { data: overviewData, isLoading } = useOverviewStats({ userId, dateRange, settings, habits })
+  
+  // Получаем фото для сравнения (макс вес vs мин вес)
+  const { comparisonData, isLoading: isLoadingComparison } = useComparisonPhotos(
+    userId,
+    format(dateRange.start, 'yyyy-MM-dd'),
+    format(dateRange.end, 'yyyy-MM-dd')
+  )
   
   const bmiValue = calculateBMI(settings.userParams.height, settings.userParams.weight)
   
@@ -445,13 +453,48 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
                 <div className="p-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
                   <Camera className="w-4 h-4 text-violet-400" />
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Фото</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Прогресс</span>
               </div>
-              <span className="text-[10px] font-bold text-white/30 uppercase">0</span>
+              {comparisonData && (
+                <span className="text-[9px] font-bold text-emerald-400 uppercase">
+                  -{comparisonData.weightDifference.toFixed(1)}кг
+                </span>
+              )}
             </div>
-            <div className="flex items-center justify-center h-20 rounded-2xl bg-white/5 border border-white/5">
-              <Camera className="w-8 h-8 text-white/10" />
-            </div>
+            
+            {isLoadingComparison ? (
+              <div className="flex items-center justify-center h-20 rounded-2xl bg-white/5 border border-white/5">
+                <div className="w-6 h-6 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin" />
+              </div>
+            ) : comparisonData ? (
+              <div className="flex items-center justify-center h-20 rounded-2xl bg-white/5 border border-white/5 overflow-hidden">
+                <div className="w-1/2 h-full relative">
+                  <Image
+                    src={comparisonData.before.photo.url}
+                    alt="Before"
+                    fill
+                    className="object-cover opacity-60"
+                    unoptimized
+                  />
+                </div>
+                <div className="absolute">
+                  <ArrowRight className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="w-1/2 h-full relative">
+                  <Image
+                    src={comparisonData.after.photo.url}
+                    alt="After"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-20 rounded-2xl bg-white/5 border border-white/5">
+                <Camera className="w-8 h-8 text-white/10" />
+              </div>
+            )}
           </motion.div>
         )}
       </div>
@@ -579,77 +622,90 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Camera className="w-4 h-4" /></div>
-              <h4 className="text-lg font-black text-white uppercase tracking-tight">Форма</h4>
+              <h4 className="text-lg font-black text-white uppercase tracking-tight">Прогресс</h4>
             </div>
-            {overviewData?.photos?.total && (
-              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                фото: {overviewData.photos.total}
+            {comparisonData && (
+              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                <TrendingDown className="w-3 h-3" />
+                {comparisonData.weightDifference.toFixed(1)} кг
               </span>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
-            {/* Первое фото (До) */}
-            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
-              {overviewData?.photos?.firstPhoto ? (
-                <>
-                  <Image
-                    src={overviewData.photos.firstPhoto.url}
-                    alt="Before"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                </>
-              ) : (
-                <Camera className="w-8 h-8 text-white/10" />
-              )}
-              <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
-              {overviewData?.photos?.firstPhoto && (
-                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
-                  <span className="text-[9px] font-bold text-white/60 tabular-nums">
-                    {format(new Date(overviewData.photos.firstPhoto.date), 'dd MMM', { locale: ru })}
-                  </span>
-                  {overviewData.photos.firstPhoto.weight && (
-                    <span className="text-[10px] font-black text-white/80 tracking-tight">
-                      {overviewData.photos.firstPhoto.weight} кг
-                    </span>
-                  )}
-                </div>
-              )}
+          
+          {isLoadingComparison ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="w-8 h-8 border-4 border-violet-500/20 border-t-violet-500 rounded-full animate-spin" />
             </div>
-            
-            {/* Последнее фото (После) */}
-            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center text-violet-500/20">
-              {overviewData?.photos?.lastPhoto ? (
-                <>
-                  <Image
-                    src={overviewData.photos.lastPhoto.url}
-                    alt="After"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                </>
-              ) : (
-                <Camera className="w-8 h-8" />
-              )}
-              <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-500/20 text-[8px] font-black uppercase text-emerald-400 tracking-widest">После</div>
-              {overviewData?.photos?.lastPhoto && (
-                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
-                  <span className="text-[9px] font-bold text-white/60 tabular-nums">
-                    {format(new Date(overviewData.photos.lastPhoto.date), 'dd MMM', { locale: ru })}
-                  </span>
-                  {overviewData.photos.lastPhoto.weight && (
-                    <span className="text-[10px] font-black text-white/80 tracking-tight">
-                      {overviewData.photos.lastPhoto.weight} кг
-                    </span>
-                  )}
+          ) : comparisonData ? (
+            <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
+              {/* Было (макс вес) */}
+              <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center group/photo">
+                <Image
+                  src={comparisonData.before.photo.url}
+                  alt="Before"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                
+                <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-red-500/20 backdrop-blur-sm border border-red-500/30">
+                  <span className="text-[9px] font-black uppercase text-red-300 tracking-widest">Было</span>
                 </div>
-              )}
+                
+                <div className="absolute bottom-3 left-3 right-3 z-10 space-y-1">
+                  <div className="text-[9px] font-bold text-white/60 tabular-nums">
+                    {comparisonData.before.week_label}
+                  </div>
+                  <div className="text-base font-black text-white tracking-tight">
+                    {comparisonData.before.weight.toFixed(1)} кг
+                  </div>
+                </div>
+              </div>
+              
+              {/* Стрелка */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                  <ArrowRight className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              
+              {/* Стало (мин вес) */}
+              <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center group/photo">
+                <Image
+                  src={comparisonData.after.photo.url}
+                  alt="After"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                
+                <div className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/30">
+                  <span className="text-[9px] font-black uppercase text-emerald-300 tracking-widest">Стало</span>
+                </div>
+                
+                <div className="absolute bottom-3 left-3 right-3 z-10 space-y-1">
+                  <div className="text-[9px] font-bold text-white/60 tabular-nums">
+                    {comparisonData.after.week_label}
+                  </div>
+                  <div className="text-base font-black text-white tracking-tight">
+                    {comparisonData.after.weight.toFixed(1)} кг
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+              <Camera className="w-12 h-12 text-white/10 mb-3" />
+              <p className="text-xs text-white/40">
+                Недостаточно данных для сравнения
+              </p>
+              <p className="text-[10px] text-white/30 mt-1">
+                Загрузите фото с разным весом
+              </p>
+            </div>
+          )}
         </motion.div>
       )}
 

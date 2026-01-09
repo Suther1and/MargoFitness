@@ -82,6 +82,46 @@ export type AchievementCategory = Database['public']['Enums']['achievement_categ
 // Расширенные типы с дополнительной логикой
 // ============================================
 
+/** Тип позы для фото прогресса */
+export type PhotoType = 'front' | 'side' | 'back'
+
+/** Фото с метаданными */
+export interface WeeklyPhoto {
+  url: string
+  type: PhotoType
+  uploaded_at: string
+}
+
+/** Набор фото за неделю */
+export interface WeeklyPhotoSet {
+  week_key: string // ISO формат понедельника недели "2026-01-06"
+  week_label: string // "6 - 12 января"
+  photos: {
+    front?: WeeklyPhoto
+    side?: WeeklyPhoto
+    back?: WeeklyPhoto
+  }
+  weight?: number // средний/последний вес за неделю
+  hasPhotos: boolean // есть ли хотя бы одно фото
+}
+
+/** Данные для сравнения фото */
+export interface PhotoComparisonData {
+  before: {
+    photo: WeeklyPhoto
+    week_key: string
+    week_label: string
+    weight: number
+  } | null
+  after: {
+    photo: WeeklyPhoto
+    week_key: string
+    week_label: string
+    weight: number
+  } | null
+  weightDifference: number
+}
+
 /** Тренировка с информацией о доступе */
 export interface WorkoutSessionWithAccess extends WorkoutSession {
   hasAccess: boolean
@@ -163,6 +203,42 @@ export function getCurrentWeekRange(): { start: Date; end: Date } {
   nextMonday.setDate(monday.getDate() + 7)
   
   return { start: monday, end: nextMonday }
+}
+
+/** Получить понедельник недели для заданной даты в формате ISO */
+export function getWeekKey(date: Date): string {
+  const dayOfWeek = date.getDay()
+  const monday = new Date(date)
+  monday.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  monday.setHours(0, 0, 0, 0)
+  
+  // Формат YYYY-MM-DD
+  return monday.toISOString().split('T')[0]
+}
+
+/** Получить ключ текущей недели */
+export function getCurrentWeekKey(): string {
+  return getWeekKey(new Date())
+}
+
+/** Получить человекочитаемый лейбл недели "6 - 12 января" */
+export function getWeekLabel(weekKey: string, locale: 'ru' | 'en' = 'ru'): string {
+  const monday = new Date(weekKey)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  
+  if (locale === 'ru') {
+    const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+    const startDay = monday.getDate()
+    const endDay = sunday.getDate()
+    const month = monthNames[sunday.getMonth()]
+    
+    return `${startDay} - ${endDay} ${month}`
+  }
+  
+  // English fallback
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+  return `${monday.toLocaleDateString('en', options)} - ${sunday.toLocaleDateString('en', options)}`
 }
 
 // ============================================
