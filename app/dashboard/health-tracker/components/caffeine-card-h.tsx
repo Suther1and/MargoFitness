@@ -31,7 +31,7 @@ export const CaffeineCardH = memo(function CaffeineCardH({ value, goal, onUpdate
   const accentColor = isOverLimit ? 'text-red-500' : 'text-amber-600'
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-600/20 transition-colors duration-500 h-[180px]">
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl px-4 md:px-6 pt-4 pb-6 hover:border-amber-600/20 transition-colors duration-500 min-h-[180px]">
       <div className="relative flex flex-col h-full justify-between">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

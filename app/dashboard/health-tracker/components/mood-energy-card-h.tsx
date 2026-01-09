@@ -23,7 +23,7 @@ export const MoodEnergyCardH = memo(function MoodEnergyCardH({ mood, energy, onM
   ]
 
   return (
-    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl hover:border-white/20 transition-colors duration-500 h-[180px]" style={{ contain: 'paint' }}>
+    <div className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl hover:border-white/20 transition-colors duration-500 min-h-[180px]" style={{ contain: 'paint' }}>
       <div className="flex flex-col h-full md:px-6 md:pt-4 md:pb-6 md:justify-between px-2 py-4 md:p-0">
         
         {/* Mood Section - Адаптация для мобильных */}

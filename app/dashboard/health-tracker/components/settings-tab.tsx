@@ -342,7 +342,7 @@ export default function SettingsTab({
       <div className="w-full space-y-6 pb-24">
       {/* BMI Panel - Hidden on Desktop (moved to header) */}
       <div className="flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl w-full lg:hidden">
-        <div className="flex items-stretch h-[60px] border-b border-white/5">
+        <div className="flex items-stretch min-h-[60px] border-b border-white/5">
           <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">
             <div className="flex flex-col px-3 py-1 border-r border-white/5 flex-1 min-w-0">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5">Рост</label>
@@ -420,7 +420,7 @@ export default function SettingsTab({
 
       {/* Sub-Tabs with BMI Panel on Desktop */}
       <div className="flex items-center justify-between gap-4 w-full">
-        <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md h-[54px] w-full lg:w-fit relative overflow-hidden">
+        <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md min-h-[54px] w-full lg:w-fit relative overflow-hidden">
           <div className="flex h-full gap-1 w-full lg:w-auto relative">
             <button
               onClick={() => setActiveSubTab('widgets')}
@@ -460,9 +460,9 @@ export default function SettingsTab({
         {/* BMI Panel on Desktop only */}
         <div 
           onClick={(e) => e.stopPropagation()}
-          className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl min-w-[420px]"
+          className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl min-w-[320px] xl:min-w-[420px]"
         >
-          <div className="flex items-stretch h-[54px]">
+          <div className="flex items-stretch min-h-[54px]">
             <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">
               <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
                 <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Рост</label>
@@ -612,14 +612,14 @@ export default function SettingsTab({
                                       onChange={(e) => handleGoalChange(id, e.target.value)}
                                       placeholder="Цель"
                                       className={cn(
-                                        "w-full bg-white/5 border rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none h-[42px] transition-all",
+                                        "w-full bg-white/5 border rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none min-h-[42px] transition-all",
                                         shakingWidget === id 
                                           ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
                                           : "border-white/10 focus:border-green-500/50"
                                       )}
                                     />
                                   ) : (
-                                    <div className="w-full bg-white/[0.03] border border-white/5 rounded-xl h-[42px] flex items-center px-3.5 opacity-10 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleToggle(id); }}>
+                                    <div className="w-full bg-white/[0.03] border border-white/5 rounded-xl min-h-[42px] flex items-center px-3.5 opacity-10 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleToggle(id); }}>
                                       <div className="w-10 h-3 bg-white/10 rounded animate-pulse" />
                                     </div>
                                   )}

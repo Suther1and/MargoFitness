@@ -22,7 +22,7 @@ const NAV_ITEMS = [
 
 export function DesktopNavigation({ activeTab, onTabChange }: DesktopNavigationProps) {
   return (
-    <aside className="w-32 shrink-0 sticky top-8 flex flex-col gap-2 relative" style={{ paddingLeft: 0, paddingRight: 0 }}>
+    <aside className="w-28 xl:w-32 shrink-0 sticky top-8 flex flex-col gap-2 relative" style={{ paddingLeft: 0, paddingRight: 0 }}>
       <div className="px-2 mb-3 text-left">
         <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em] block">Меню</span>
       </div>
@@ -71,7 +71,7 @@ export function DesktopNavigation({ activeTab, onTabChange }: DesktopNavigationP
       </div>
       
       {/* Элегантный разделитель - начинается с кнопок навигации */}
-      <div className="absolute right-[42px] top-[60px] bottom-0 flex items-center">
+      <div className="absolute right-[38px] xl:right-[42px] top-[60px] bottom-0 flex items-center">
         <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
         <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
       </div>

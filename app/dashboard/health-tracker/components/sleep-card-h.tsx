@@ -77,7 +77,7 @@ export const SleepCardH = memo(function SleepCardH({ hours, goal, onUpdate }: Sl
   return (
     <div
       className={cn(
-        'relative group overflow-hidden rounded-[2rem] border transition-all duration-500 h-[180px] flex flex-col md:backdrop-blur-2xl',
+        'relative group overflow-hidden rounded-[2rem] border transition-all duration-500 min-h-[180px] flex flex-col md:backdrop-blur-2xl',
         isDone 
           ? 'border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.05)]' 
           : 'border-white/10 bg-zinc-900/50 hover:border-indigo-500/20'

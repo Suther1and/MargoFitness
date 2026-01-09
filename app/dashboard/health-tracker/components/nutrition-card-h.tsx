@@ -72,7 +72,7 @@ export const NutritionCardH = memo(function NutritionCardH({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl p-5 md:p-6 hover:border-violet-500/20 transition-colors duration-500 h-[180px] md:h-[210px]">
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/50 md:backdrop-blur-2xl p-5 md:p-6 hover:border-violet-500/20 transition-colors duration-500 min-h-[180px] md:min-h-[210px]">
       {/* Background Ambient */}
       <div className="absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none -z-10 hidden md:block" />
       
@@ -106,7 +106,7 @@ export const NutritionCardH = memo(function NutritionCardH({
             </ProgressRing>
           </div>
 
-          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-full h-[30px] md:h-[34px] overflow-hidden">
+          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1 focus-within:border-violet-500/40 transition-all w-full min-h-[30px] md:min-h-[34px] overflow-hidden">
             <input
               type="number"
               placeholder="Добавить"

@@ -60,7 +60,7 @@ export const WeightCardH = memo(function WeightCardH({ value, onUpdate, goalWeig
 
   return (
     <div className={cn(
-      "relative group overflow-hidden rounded-[2rem] border transition-all duration-500 h-[180px]",
+      "relative group overflow-hidden rounded-[2rem] border transition-all duration-500 min-h-[180px]",
       isGoalReached 
         ? "border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.05)]" 
         : "border-white/10 bg-zinc-900/50 hover:border-emerald-500/20"

@@ -107,7 +107,7 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
   return (
     <div
       className={cn(
-        'relative group overflow-hidden rounded-[2rem] border transition-colors duration-500 h-[110px] md:h-[120px]',
+        'relative group overflow-hidden rounded-[2rem] border transition-colors duration-500 min-h-[110px] md:min-h-[120px]',
         isDone
           ? 'border-emerald-500/30 bg-zinc-900/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
           : 'border-white/10 bg-zinc-900/50 hover:border-blue-500/20'

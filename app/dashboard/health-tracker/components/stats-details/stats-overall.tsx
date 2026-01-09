@@ -491,7 +491,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
       <motion.div
         variants={item}
         onClick={() => onNavigate?.('weight')}
-        className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
+        className="col-span-2 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
       >
       <div className="flex justify-between items-start relative z-10">
         <div>
@@ -525,7 +525,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
       <motion.div
         variants={item}
         onClick={() => onNavigate?.('habits')}
-        className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center"
+        className="col-span-2 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center"
       >
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full relative z-10">
         <div className="relative w-20 h-20 shrink-0">
@@ -567,7 +567,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('photos')}
-          className="col-span-2 h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
+          className="col-span-2 min-h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
         >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -576,7 +576,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           </div>
           <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">период: 7д</span>
         </div>
-        <div className="grid grid-cols-2 gap-4 h-[180px] mt-4">
+        <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
           <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
             <Camera className="w-8 h-8 text-white/10" />
             <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
@@ -599,7 +599,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
 
       <div className="col-span-1 space-y-4">
         {overviewData?.steps && (
-          <div onClick={() => onNavigate?.('steps')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
+          <div onClick={() => onNavigate?.('steps')} className="min-h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
           <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500"><Footprints className="w-4 h-4" /></div>
@@ -620,7 +620,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
         )}
 
         {overviewData?.water && (
-          <div onClick={() => onNavigate?.('water')} className="h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
+          <div onClick={() => onNavigate?.('water')} className="min-h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
           <motion.div initial={{ height: 0 }} animate={{ height: `${Math.min(overviewData.water.percentage, 100)}%` }} className="absolute bottom-0 left-0 right-0 bg-blue-500/[0.03] border-t border-blue-500/10 pointer-events-none" />
           <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
@@ -645,7 +645,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           <motion.div
             variants={item}
             onClick={() => onNavigate?.('nutrition')}
-            className="h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
+            className="min-h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
           >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Utensils className="w-4 h-4" /></div>
@@ -673,7 +673,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
 
       {/* РЯД 3: Настроение (1) + Сон (1). Высота 140px */}
       {overviewData?.mood && (
-        <div onClick={() => onNavigate?.('mood')} className="col-span-1 h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
+        <div onClick={() => onNavigate?.('mood')} className="col-span-1 min-h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400"><Smile className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Состояние</div>
@@ -692,7 +692,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
       )}
 
       {overviewData?.sleep && (
-        <div onClick={() => onNavigate?.('sleep')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between">
+        <div onClick={() => onNavigate?.('sleep')} className="col-span-1 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-400"><Moon className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Сон</div>
@@ -706,7 +706,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
 
       {/* РЯД 4: Кофе (1) + Декор (3) */}
       {overviewData?.caffeine && (
-        <div onClick={() => onNavigate?.('caffeine')} className="col-span-1 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between">
+        <div onClick={() => onNavigate?.('caffeine')} className="col-span-1 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="p-2.5 rounded-xl bg-amber-600/5 border border-amber-600/10 text-amber-600"><Coffee className="w-4 h-4" /></div>
           <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Кофе</div>
@@ -718,7 +718,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
         </div>
       )}
 
-      <div className="col-span-3 h-[140px] bg-[#121214]/10 border border-white/[0.02] rounded-[1.5rem] p-6 flex items-center justify-between group overflow-hidden">
+      <div className="col-span-3 min-h-[140px] bg-[#121214]/10 border border-white/[0.02] rounded-[1.5rem] p-6 flex items-center justify-between group overflow-hidden">
         <div className="max-w-md">
           <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">Margo Fitness Analyzer</div>
           <div className="text-xs text-white/30 font-black uppercase leading-relaxed">

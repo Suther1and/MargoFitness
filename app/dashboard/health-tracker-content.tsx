@@ -331,7 +331,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         transition={{ duration: 0.3 }}
       >
         {mounted && (
-            <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
+            <div className="relative z-10 max-w-[1400px] xl:max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
             {/* Ambient BG - Desktop only */}
             <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px]" />
@@ -392,7 +392,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   currentDateRange={statsDateRange}
                 />
 
-                <div className="h-[40px] md:h-[60px] flex items-center relative overflow-hidden">
+                <div className="min-h-[40px] md:min-h-[60px] flex items-center relative overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.h1 
                       key={activeTab}
@@ -432,7 +432,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               </div>
 
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
-              <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
+              <div className="hidden lg:flex items-center max-w-[1400px] xl:max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
                 <div className="w-full">
                   {activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts' ? (
                     <div className="w-full">
@@ -999,7 +999,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
       {/* Mobile Bottom Navigation - Stable UI */}
       <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md mobile-nav-container">
-        <div className="flex items-center justify-around p-2 rounded-[2rem] border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-[60px]">
+        <div className="flex items-center justify-around p-2 rounded-[2rem] border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-h-[60px]">
           <button onClick={() => handleTabChange('overview')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Home className="w-5 h-5" />
           </button>
