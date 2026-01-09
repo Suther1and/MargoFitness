@@ -997,8 +997,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 </div>
               )}
             </div>
-              </motion.div>
-            </AnimatePresence>
 
           </div>
         )}
