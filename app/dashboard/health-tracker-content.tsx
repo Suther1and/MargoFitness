@@ -434,48 +434,73 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
               <div className="hidden lg:flex items-center max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
                 <div className="w-full">
-                  {activeTab === 'settings' || activeTab === 'stats' ? (
-                    <div className="max-w-5xl mx-auto w-full">
+                  {activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts' ? (
+                    <div className="w-full">
                       <div className="flex items-start justify-between">
                         <div className="flex flex-col">
-                          <div className="h-8 mb-1">
+                          <div className="h-8 mb-1 flex items-center">
                             <motion.div 
                               initial={{ opacity: 0 }} 
-                              animate={{ opacity: 1 }} 
+                              animate={{ opacity: 1 }}
                               transition={{ duration: 0.2 }}
+                              className="flex items-center gap-2"
                             >
-                              <button 
-                                onClick={() => setActiveTab('overview')}
-                                className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group w-fit"
-                              >
-                                <ChevronLeft className="w-4 h-4" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Назад к трекеру</span>
-                              </button>
+                              <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                                V3.0 Beta
+                              </div>
+                              <div className="h-px w-8 bg-white/10" />
+                              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                                <Activity className="w-3 h-3" />
+                                Live
+                              </span>
                             </motion.div>
                           </div>
                           
-                          <motion.h1 
-                            layoutId="header-title"
-                            className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
-                            transition={{ 
-                              type: "spring", 
-                              stiffness: 220, 
-                              damping: 28,
-                              mass: 1
-                            }}
-                          >
-                            {activeTab === 'settings' ? (
+                          <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap">
+                            {activeTab === 'settings' && (
                               <>Настройки <span className={cn(
                                 "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
                                 settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
                               )}>трекера</span></>
-                            ) : (
+                            )}
+                            {activeTab === 'stats' && (
                               <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
                             )}
-                          </motion.h1>
+                            {activeTab === 'bonuses' && (
+                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-600">Бонусы</span></>
+                            )}
+                            {activeTab === 'subscription' && (
+                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600">Подписка</span></>
+                            )}
+                            {activeTab === 'workouts' && (
+                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500">Тренировки</span></>
+                            )}
+                          </h1>
                         </div>
 
-                        {/* Период удален отсюда для десктопа в режиме статистики, так как он теперь в сайдбаре */}
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex items-center gap-3 mt-9"
+                        >
+                          {profile && (
+                            <>
+                              <CompactProfileCard 
+                                profile={profile}
+                                onEditClick={() => setProfileDialogOpen(true)}
+                              />
+                              <CompactSubscriptionCard 
+                                profile={profile}
+                                onRenewalClick={() => setRenewalModalOpen(true)}
+                                onUpgradeClick={() => setUpgradeModalOpen(true)}
+                              />
+                              <CompactBonusCard 
+                                bonusStats={bonusStats}
+                                profile={profile}
+                              />
+                            </>
+                          )}
+                        </motion.div>
                       </div>
                     </div>
                   ) : (
@@ -747,14 +772,20 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 )}
 
                 {activeTab === 'stats' && (
-                  <div className="hidden lg:block w-full">
-                    <StatsTab 
-                      userId={userId}
-                      periodType={statsPeriodType} 
-                      dateRange={statsDateRange} 
-                      data={data} 
-                      onPeriodSelect={handleStatsPeriodSelect}
+                  <div className="hidden lg:flex gap-6 w-full">
+                    <DesktopNavigation 
+                      activeTab={activeTab}
+                      onTabChange={(tab) => handleTabChange(tab as any)}
                     />
+                    <div className="flex-1">
+                      <StatsTab 
+                        userId={userId}
+                        periodType={statsPeriodType} 
+                        dateRange={statsDateRange} 
+                        data={data} 
+                        onPeriodSelect={handleStatsPeriodSelect}
+                      />
+                    </div>
                   </div>
                 )}
 
