@@ -39,24 +39,27 @@ const WaveBackground = ({ percentage, isDone, children }: { percentage: number; 
   )
 }
 
-const BubblesField = ({ isDone }: { isDone: boolean }) => {
+const BubblesField = ({ isDone, percentage }: { isDone: boolean; percentage: number }) => {
   const bubbles = useMemo(() => 
-    Array.from({ length: 25 }).map((_, i) => ({
+    Array.from({ length: 60 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
-      size: Math.random() * 4 + 1.5,
+      size: Math.random() * 3 + 1,
       duration: Math.random() * 3 + 3,
-      delay: Math.random() * 8
+      delay: Math.random() * 10
     })), [])
 
   return (
-    <div className="absolute inset-0 pointer-events-none opacity-40">
+    <div 
+      className="absolute inset-y-0 left-0 pointer-events-none opacity-40"
+      style={{ width: `${100 / (percentage || 1) * 100}%` }}
+    >
       {bubbles.map(b => (
         <motion.div
           key={b.id}
           className={cn(
-            "absolute rounded-full border border-white/20",
-            isDone ? "bg-emerald-400/20" : "bg-blue-400/20"
+            "absolute rounded-full border border-white/10",
+            isDone ? "bg-emerald-400/20" : "bg-blue-300/20"
           )}
           style={{
             left: `${b.x}%`,
@@ -66,9 +69,9 @@ const BubblesField = ({ isDone }: { isDone: boolean }) => {
           }}
           animate={{
             y: [0, -160],
-            x: [0, Math.sin(b.id) * 12],
-            opacity: [0, 1, 0.8, 0],
-            scale: [1, 1.4, 1],
+            x: [0, Math.sin(b.id + b.x) * 10],
+            opacity: [0, 0.8, 0.6, 0],
+            scale: [1, 1.3, 1],
           }}
           transition={{
             duration: b.duration,
@@ -106,7 +109,7 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
       )}
     >
       <WaveBackground percentage={percentage} isDone={isDone}>
-        <BubblesField isDone={isDone} />
+        <BubblesField isDone={isDone} percentage={percentage} />
       </WaveBackground>
 
       <div className="relative z-10 flex flex-col h-full px-5 pt-3 pb-5">
