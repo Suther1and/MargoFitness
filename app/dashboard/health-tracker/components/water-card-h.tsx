@@ -14,7 +14,7 @@ interface WaterCardHProps {
   onUpdate: (val: number) => void
 }
 
-const WaveBackground = ({ percentage, isDone, children }: { percentage: number; isDone: boolean; children?: React.ReactNode }) => {
+const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: boolean }) => {
   const animationConfig = useMemo(() => ({
     initial: { width: 0 },
     animate: { width: `${percentage}%` },
@@ -25,21 +25,19 @@ const WaveBackground = ({ percentage, isDone, children }: { percentage: number; 
     <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[2rem]">
       <motion.div
         className={cn(
-          'absolute inset-y-0 left-0 h-full overflow-hidden',
+          'absolute inset-y-0 left-0 h-full',
           isDone
             ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-400/20 to-emerald-500/15'
             : 'bg-gradient-to-r from-blue-600/15 via-blue-500/20 to-blue-600/15'
         )}
         {...animationConfig}
         layout
-      >
-        {children}
-      </motion.div>
+      />
     </div>
   )
 }
 
-const BubblesField = ({ isDone, percentage }: { isDone: boolean; percentage: number }) => {
+const BubblesField = memo(({ isDone, percentage }: { isDone: boolean; percentage: number }) => {
   const bubbles = useMemo(() => 
     Array.from({ length: 60 }).map((_, i) => ({
       id: i,
@@ -51,8 +49,11 @@ const BubblesField = ({ isDone, percentage }: { isDone: boolean; percentage: num
 
   return (
     <div 
-      className="absolute inset-y-0 left-0 pointer-events-none opacity-40"
-      style={{ width: `${100 / (percentage || 1) * 100}%` }}
+      className="absolute inset-0 pointer-events-none opacity-40 overflow-hidden rounded-[2rem]"
+      style={{ 
+        clipPath: `inset(0 ${100 - percentage}% 0 0)`,
+        transition: 'clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
     >
       {bubbles.map(b => (
         <motion.div
@@ -83,7 +84,7 @@ const BubblesField = ({ isDone, percentage }: { isDone: boolean; percentage: num
       ))}
     </div>
   )
-}
+})
 
 export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: WaterCardHProps) {
   const { percentage, isDone, remaining } = useGoalProgress({ current: value, goal })
@@ -108,9 +109,8 @@ export const WaterCardH = memo(function WaterCardH({ value, goal, onUpdate }: Wa
           : 'border-white/10 bg-zinc-900/50 hover:border-blue-500/20'
       )}
     >
-      <WaveBackground percentage={percentage} isDone={isDone}>
-        <BubblesField isDone={isDone} percentage={percentage} />
-      </WaveBackground>
+      <WaveBackground percentage={percentage} isDone={isDone} />
+      <BubblesField isDone={isDone} percentage={percentage} />
 
       <div className="relative z-10 flex flex-col h-full px-5 pt-3 pb-5">
         {/* Header */}
