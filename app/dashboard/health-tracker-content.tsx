@@ -656,11 +656,11 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   {activeTab === 'overview' && (
                   <div className="space-y-6">
                     {/* Tabs переключатель */}
-                    <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 mb-4">
+                    <div className="flex gap-2 p-2 bg-white/5 rounded-2xl border border-white/10 mb-4">
                       <button
                         onClick={() => setOverviewTab('widgets')}
                         className={cn(
-                          "flex-1 py-3 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          "flex-1 py-3.5 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'widgets'
                             ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
@@ -671,7 +671,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       <button
                         onClick={() => setOverviewTab('habits')}
                         className={cn(
-                          "flex-1 py-3 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          "flex-1 py-3.5 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'habits'
                             ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
