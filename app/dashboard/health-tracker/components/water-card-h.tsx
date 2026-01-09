@@ -41,12 +41,12 @@ const WaveBackground = ({ percentage, isDone, children }: { percentage: number; 
 
 const BubblesField = ({ isDone }: { isDone: boolean }) => {
   const bubbles = useMemo(() => 
-    Array.from({ length: 10 }).map((_, i) => ({
+    Array.from({ length: 25 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
-      size: Math.random() * 4 + 2,
-      duration: Math.random() * 3 + 4,
-      delay: Math.random() * 5
+      size: Math.random() * 4 + 1.5,
+      duration: Math.random() * 3 + 3,
+      delay: Math.random() * 8
     })), [])
 
   return (
@@ -60,15 +60,15 @@ const BubblesField = ({ isDone }: { isDone: boolean }) => {
           )}
           style={{
             left: `${b.x}%`,
-            bottom: `-10%`,
+            bottom: `-15%`,
             width: b.size,
             height: b.size,
           }}
           animate={{
-            y: [0, -140],
-            x: [0, Math.sin(b.id) * 15],
-            opacity: [0, 1, 0],
-            scale: [1, 1.3, 1],
+            y: [0, -160],
+            x: [0, Math.sin(b.id) * 12],
+            opacity: [0, 1, 0.8, 0],
+            scale: [1, 1.4, 1],
           }}
           transition={{
             duration: b.duration,
