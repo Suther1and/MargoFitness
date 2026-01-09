@@ -88,7 +88,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           </p>
 
           <Link 
-            href="/dashboard/health-tracker?tab=settings"
+            href="/dashboard?tab=settings"
             className="w-full max-w-[220px] py-4 rounded-2xl bg-purple-500 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-purple-500/20 flex items-center justify-center gap-3 mb-2"
           >
             <Settings className="w-4 h-4" />
@@ -473,7 +473,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
             Выбери метрики здоровья для отслеживания, чтобы увидеть подробную статистику и прогресс в этом разделе
           </p>
           <Link 
-            href="/dashboard/health-tracker?tab=settings"
+            href="/dashboard?tab=settings"
             className="px-10 py-5 rounded-2xl bg-purple-500 text-white font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-purple-500/20 flex items-center gap-4"
           >
             <Settings className="w-5 h-5" />

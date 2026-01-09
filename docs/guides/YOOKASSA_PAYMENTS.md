@@ -23,9 +23,11 @@
    - `vercel.json`: `"schedule": "0 0 * * *"`
 
 5. **Отображение карты в UI**
-   - `app/dashboard/dashboard-client.tsx`: блок "Привязанная карта"
+   - `app/dashboard/health-tracker/components/desktop-subscription-card.tsx`: карточка подписки на десктопе
+   - `app/dashboard/health-tracker/components/profile-tab.tsx`: вкладка профиля на мобильных
    - Показывается только если `payment_method_id` присутствует в профиле
    - Переключатель "Автоматическое продление"
+   - Модалки для продления и апгрейда: `SubscriptionRenewalModal`, `SubscriptionUpgradeModal`
 
 ## ⚠️ Ограничения тестового магазина ЮКассы
 

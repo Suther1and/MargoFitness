@@ -89,8 +89,92 @@ The system must distinguish between these user states:
 - `required_tier`: Integer (1, 2, or 3)
 - `linked_product_id`: UUID (nullable, for one-time packs)
 
-## 5. Tech Constraints
-- **Framework:** Next.js 15 (App Router).
-- **Styling:** Tailwind CSS.
-- **Language:** TypeScript.
-- **Database:** Supabase.
+## 5. Tech Stack & Architecture
+
+### Frontend
+- **Framework:** Next.js 15 (App Router) with TypeScript
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **State Management:** React hooks + custom hooks
+- **UI Components:** Radix UI primitives
+
+### Backend & Infrastructure
+- **Database:** Supabase (PostgreSQL)
+- **Auth:** Supabase Auth (Email, Telegram, Yandex, OAuth)
+- **Storage:** Supabase Storage (avatars, progress photos)
+- **Payments:** YooKassa (ЮKassa) with recurring payments
+- **Email:** Resend
+- **Video Hosting:** Kinescope
+
+### Key Features
+- ✅ Subscription management with 3 tiers (Basic, Pro, Elite)
+- ✅ One-time purchases for digital packs
+- ✅ **Health Tracker** - comprehensive health metrics tracking
+- ✅ Bonus system with referrals and cashback
+- ✅ Achievement system with gamification
+- ✅ Admin panel for user and content management
+- ✅ Automatic subscription renewal via Cron Jobs
+
+---
+
+## 6. Dashboard Architecture (Important!)
+
+**Route:** `/dashboard`
+
+### Structure:
+```
+/dashboard
+├── page.tsx                    # Server Component (data loading)
+├── health-tracker-content.tsx  # Client Component (UI + logic)
+├── bonuses/                    # Bonus system route
+└── health-tracker/             # Components module (NOT a route)
+    ├── components/
+    ├── hooks/
+    ├── types.ts
+    └── utils/
+```
+
+### Key Components:
+- **DesktopProfileCard** - User profile management
+- **DesktopSubscriptionCard** - Subscription management with auto-renewal
+- **DesktopBonusCard** - Bonus points and referral system
+- **ProfileTab** - Mobile version of profile management
+- **Health Tracker** - Comprehensive health metrics (water, steps, weight, sleep, mood, etc.)
+
+### Global Modals (in `/components`):
+- **ProfileEditDialog** - Edit user profile
+- **SubscriptionRenewalModal** - Renew subscription
+- **SubscriptionUpgradeModal** - Upgrade to higher tier
+
+**📚 See:** `docs/DASHBOARD_ARCHITECTURE.md` for detailed architecture guide
+
+---
+
+## 7. Documentation Structure
+
+### Main Guides
+- `DASHBOARD_ARCHITECTURE.md` - Dashboard architecture (for AI assistants)
+- `PROJECT_CONTEXT.MD` - This file, project overview
+
+### Feature Guides (`docs/guides/`)
+- `PAYMENT_SYSTEM.md` - Payment integration overview
+- `YOOKASSA_PAYMENTS.md` - Recurring payments setup
+- `BONUS_SYSTEM.md` - Referral and cashback system
+- `ACHIEVEMENTS_SYSTEM.md` - Gamification and achievements
+- `ACCESS_CONTROL_IMPLEMENTATION.md` - Role-based access control
+- `CONTENT_CREATION.md` - Creating workouts and content
+- `ADMIN_GUIDE.md` - Admin panel usage
+- `REFERRAL_SYSTEM.md` - Referral program implementation
+
+### Technical Docs
+- `HEALTH_TRACKER_INTEGRATION_DONE.md` - Health Tracker integration with DB
+- `HOW_TO_DEBUG.md` - Debugging guide
+- `DEPLOY.md` - Deployment instructions
+- `EMAIL_SETUP.md` - Email service configuration
+- `OAUTH_SETUP.md` - OAuth providers setup
+
+### Database
+- `database/migrations/` - All database migrations
+- `database/README.md` - Migration guide
+
+---

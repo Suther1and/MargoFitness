@@ -749,7 +749,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
               <div className="absolute -left-4 top-0 bottom-0 w-1 bg-cyan-500/20 rounded-full" />
               <div className="space-y-3">
                 <a 
-                  href="/dashboard/health-tracker" 
+                  href="/dashboard" 
                   className="block font-oswald font-black uppercase text-cyan-400 text-lg leading-none hover:text-cyan-300 transition-colors"
                 >
                   Выполняй запланированное

@@ -21,39 +21,39 @@ import { SubscriptionRenewalModal } from '@/components/subscription-renewal-moda
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 
 // Импорт напрямую - убираем ленивую загрузку для лучшей производительности
-import SettingsTab from './components/settings-tab'
+import SettingsTab from './health-tracker/components/settings-tab'
 
 // Новые компоненты
-import { WaterCardH } from './components/water-card-h'
-import { StepsCardH } from './components/steps-card-h'
-import { WeightCardH } from './components/weight-card-h'
-import { SleepCardH } from './components/sleep-card-h'
-import { NutritionCardH } from './components/nutrition-card-h'
-import { MoodEnergyCardH } from './components/mood-energy-card-h'
-import { CaffeineCardH } from './components/caffeine-card-h'
-import { GoalsSummaryCard } from './components/goals-summary-card'
-import { DailyPhotosCard } from './components/daily-photos-card'
-import { HabitsCard } from './components/habits-card'
-import { AchievementsCard } from './components/achievements-card'
-import { HealthTrackerCard } from './components/health-tracker-card'
-import { WeekNavigator } from './components/week-navigator'
-import StatsTab from './components/stats-tab'
-import { WorkoutsTab } from './components/workouts-tab'
-import { ProfileTab } from './components/profile-tab'
-import { DesktopProfileCard } from './components/desktop-profile-card'
-import { DesktopSubscriptionCard } from './components/desktop-subscription-card'
-import { DesktopBonusCard } from './components/desktop-bonus-card'
-import { AchievementUnlockedToast, useAchievementNotifications } from './components/achievement-unlocked-toast'
+import { WaterCardH } from './health-tracker/components/water-card-h'
+import { StepsCardH } from './health-tracker/components/steps-card-h'
+import { WeightCardH } from './health-tracker/components/weight-card-h'
+import { SleepCardH } from './health-tracker/components/sleep-card-h'
+import { NutritionCardH } from './health-tracker/components/nutrition-card-h'
+import { MoodEnergyCardH } from './health-tracker/components/mood-energy-card-h'
+import { CaffeineCardH } from './health-tracker/components/caffeine-card-h'
+import { GoalsSummaryCard } from './health-tracker/components/goals-summary-card'
+import { DailyPhotosCard } from './health-tracker/components/daily-photos-card'
+import { HabitsCard } from './health-tracker/components/habits-card'
+import { AchievementsCard } from './health-tracker/components/achievements-card'
+import { HealthTrackerCard } from './health-tracker/components/health-tracker-card'
+import { WeekNavigator } from './health-tracker/components/week-navigator'
+import StatsTab from './health-tracker/components/stats-tab'
+import { WorkoutsTab } from './health-tracker/components/workouts-tab'
+import { ProfileTab } from './health-tracker/components/profile-tab'
+import { DesktopProfileCard } from './health-tracker/components/desktop-profile-card'
+import { DesktopSubscriptionCard } from './health-tracker/components/desktop-subscription-card'
+import { DesktopBonusCard } from './health-tracker/components/desktop-bonus-card'
+import { AchievementUnlockedToast, useAchievementNotifications } from './health-tracker/components/achievement-unlocked-toast'
 
-import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
-import { useTrackerSettings } from './hooks/use-tracker-settings'
-import { useHabits } from './hooks/use-habits'
-import { useStatsDateRange } from './hooks/use-stats-date-range'
-import { useHealthDiary } from './hooks/use-health-diary'
-import { usePrefetchStats } from './hooks/use-prefetch-stats'
-import { getStatsPeriodLabel } from './utils/date-formatters'
-import { hasActiveMainWidgets } from './utils/widget-helpers'
-import { StatsDatePickerDialog } from './components/stats-date-picker-dialog'
+import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './health-tracker/types'
+import { useTrackerSettings } from './health-tracker/hooks/use-tracker-settings'
+import { useHabits } from './health-tracker/hooks/use-habits'
+import { useStatsDateRange } from './health-tracker/hooks/use-stats-date-range'
+import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
+import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
+import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
+import { hasActiveMainWidgets } from './health-tracker/utils/widget-helpers'
+import { StatsDatePickerDialog } from './health-tracker/components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
 
@@ -81,15 +81,7 @@ import { createClient } from '@/lib/supabase/client'
  * - Shared components: переиспользуемые UI элементы
  */
 
-export default function HealthTrackerPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
-      <HealthTrackerContent profile={null} bonusStats={null} />
-    </Suspense>
-  )
-}
-
-function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonusStats }: { profile: any | null, bonusStats: any | null }) {
+export function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonusStats }: { profile: any | null, bonusStats: any | null }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
 
@@ -108,14 +100,18 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id)
-        // Загрузить profile и bonusStats клиентски если нужно
-        import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
-        import('@/lib/actions/bonuses').then(m => m.getBonusStats(data.user.id)).then(result => {
-          if (result.success) setBonusStats(result.data)
-        })
+        // Обновляем profile и bonusStats если они пришли null (маловероятно)
+        if (!initialProfile) {
+          import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
+        }
+        if (!initialBonusStats) {
+          import('@/lib/actions/bonuses').then(m => m.getBonusStats(data.user.id)).then(result => {
+            if (result.success) setBonusStats(result.data)
+          })
+        }
       }
     })
-  }, [])
+  }, [initialProfile, initialBonusStats])
 
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
@@ -232,7 +228,7 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
     if (mounted) {
       checkAchievements()
     }
-  }, [mounted])
+  }, [mounted, showAchievement])
 
   // Detect desktop
   useEffect(() => {

@@ -65,8 +65,18 @@ app/
 │   ├── yookassa-widget.tsx  # Embedded виджет ЮКассы
 │   └── promo-input.tsx      # Поле для промокода
 ├── dashboard/
-│   ├── page.tsx             # Личный кабинет
-│   └── dashboard-client.tsx # Управление подпиской
+│   ├── page.tsx                    # Главная страница дашборда (серверный компонент)
+│   ├── health-tracker-content.tsx  # Health Tracker (клиентский компонент)
+│   └── health-tracker/
+│       └── components/
+│           ├── desktop-profile-card.tsx       # Карточка профиля (десктоп)
+│           ├── desktop-subscription-card.tsx  # Карточка подписки (десктоп)
+│           ├── desktop-bonus-card.tsx         # Карточка бонусов (десктоп)
+│           └── profile-tab.tsx                # Вкладка профиля (мобильная)
+├── components/
+│   ├── profile-edit-dialog.tsx           # Модалка редактирования профиля
+│   ├── subscription-renewal-modal.tsx    # Модалка продления подписки
+│   └── subscription-upgrade-modal.tsx    # Модалка апгрейда подписки
 └── admin/users/
     ├── page.tsx             # Список пользователей
     └── cancel-subscription-button.tsx # Кнопка отмены для админа

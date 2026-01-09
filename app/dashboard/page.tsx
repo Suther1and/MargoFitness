@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { getBonusStats } from '@/lib/actions/bonuses'
-import DashboardClient from './dashboard-client'
+import { HealthTrackerContent } from './health-tracker-content'
 
-export default async function DashboardNewPage() {
+export default async function DashboardPage() {
   const profile = await getCurrentProfile()
 
   if (!profile) {
@@ -13,5 +13,5 @@ export default async function DashboardNewPage() {
   const bonusStatsResult = await getBonusStats(profile.id)
   const bonusStats = bonusStatsResult.success ? (bonusStatsResult.data ?? null) : null
 
-  return <DashboardClient profile={profile} bonusStats={bonusStats} />
+  return <HealthTrackerContent profile={profile} bonusStats={bonusStats} />
 }
