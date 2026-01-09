@@ -854,16 +854,11 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               {activeTab === 'overview' && (
                 <div className="grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
                   {/* Левая навигация: фиксированная ширина */}
-                  <div className="col-span-1 relative" style={{ paddingTop: 0, paddingBottom: 0 }}>
+                  <div className="col-span-1" style={{ paddingTop: 0, paddingBottom: 0 }}>
                     <DesktopNavigation 
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    {/* Элегантный разделитель */}
-                    <div className="absolute right-0 top-0 bottom-0 flex items-center">
-                      <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-                      <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
-                    </div>
                   </div>
                   
                   <AnimatePresence mode="wait">
