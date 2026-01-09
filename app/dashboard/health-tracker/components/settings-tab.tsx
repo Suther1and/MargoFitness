@@ -420,7 +420,7 @@ export default function SettingsTab({
 
       {/* Sub-Tabs with BMI Panel on Desktop */}
       <div className="flex items-center justify-between gap-4 w-full">
-        <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md min-h-[54px] w-full lg:w-fit relative overflow-hidden">
+        <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg md:backdrop-blur-md min-h-[60px] w-full lg:w-fit relative overflow-hidden">
           <div className="flex h-full gap-1 w-full lg:w-auto relative">
             <button
               onClick={() => setActiveSubTab('widgets')}
@@ -462,7 +462,7 @@ export default function SettingsTab({
           onClick={(e) => e.stopPropagation()}
           className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl min-w-[320px] xl:min-w-[420px]"
         >
-          <div className="flex items-stretch min-h-[54px]">
+          <div className="flex items-stretch min-h-[60px]">
             <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">
               <div className="flex flex-col px-4 py-1 border-r border-white/5 w-[100px] justify-end">
                 <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Рост</label>
