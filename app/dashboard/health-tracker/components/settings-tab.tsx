@@ -229,9 +229,8 @@ export default function SettingsTab({
 
   // ВАЖНО: все хуки должны вызываться до любых условных return
   const widgetGroups = useMemo(() => [
-    { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
-    { name: 'Питание и баланс', icon: Apple, widgets: ['water', 'caffeine', 'nutrition'] },
-    { name: 'Тело', icon: Scale, widgets: ['weight', 'photos'] }
+    { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood', 'photos'] },
+    { name: 'Питание и тело', icon: Apple, widgets: ['water', 'caffeine', 'nutrition', 'weight'] }
   ], [])
 
   // Используем settings напрямую из React Query - нет дублирования состояния
@@ -562,7 +561,7 @@ export default function SettingsTab({
                 return (
                   <React.Fragment key={group.name}>
                     {/* Заголовок категории - растягивается на всю ширину */}
-                    <div className="lg:col-span-4 flex items-center gap-3 -mb-1">
+                    <div className="lg:col-span-4 flex items-center gap-3 mb-2 mt-4 first:mt-0">
                       <GroupIcon className="w-4 h-4 text-green-500/50" strokeWidth={2.5} />
                       <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 whitespace-nowrap">{group.name}</h2>
                       <div className="h-px bg-white/5 w-full" />
