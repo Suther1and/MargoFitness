@@ -618,7 +618,7 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                         className={cn(
                           "flex-1 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'widgets'
-                            ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-500/20"
+                            ? "bg-teal-500 text-black shadow-lg shadow-teal-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
                         )}
                       >
@@ -629,7 +629,7 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                         className={cn(
                           "flex-1 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'habits'
-                            ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-500/20"
+                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
                         )}
                       >

@@ -11,9 +11,9 @@ export function WorkoutsTab() {
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
 
   const tabs = [
-    { id: 'workouts' as WorkoutSubTab, label: 'Тренировки', icon: Dumbbell },
-    { id: 'materials' as WorkoutSubTab, label: 'Материалы', icon: BookOpen },
-    { id: 'intensives' as WorkoutSubTab, label: 'Интенсивы', icon: Zap },
+    { id: 'workouts' as WorkoutSubTab, label: 'Тренировки', icon: Dumbbell, color: 'bg-cyan-500', shadow: 'shadow-cyan-500/20' },
+    { id: 'materials' as WorkoutSubTab, label: 'Материалы', icon: BookOpen, color: 'bg-slate-400', shadow: 'shadow-slate-400/20' },
+    { id: 'intensives' as WorkoutSubTab, label: 'Интенсивы', icon: Zap, color: 'bg-orange-500', shadow: 'shadow-orange-500/20' },
   ]
 
   return (
@@ -29,7 +29,7 @@ export function WorkoutsTab() {
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                 activeSubTab === tab.id
-                  ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                  ? `${tab.color} text-black shadow-lg ${tab.shadow}`
                   : "text-white/40 hover:text-white/60 hover:bg-white/5"
               )}
             >
