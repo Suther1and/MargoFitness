@@ -44,7 +44,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
   const saveMutation = useMutation({
     mutationFn: async (data: {
       metrics: any
-      notes?: string
       habitsCompleted?: any
       photoUrls?: string[]
     }) => {
@@ -54,7 +53,7 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         dateStr,
         data.metrics,
         data.habitsCompleted,
-        data.notes,
+        undefined,
         data.photoUrls
       )
     },
@@ -116,7 +115,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         ...(entryData?.metrics as Record<string, any> || {}),
         [field]: value
       },
-      notes: entryData?.notes,
       habitsCompleted: (entryData as any)?.habits_completed,
       photoUrls: (entryData as any)?.photo_urls
     })
@@ -137,26 +135,11 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         ...(entryData?.metrics as Record<string, any> || {}),
         ...updates
       },
-      notes: entryData?.notes,
       habitsCompleted: (entryData as any)?.habits_completed,
       photoUrls: (entryData as any)?.photo_urls
     })
   }
 
-  // Обновление заметок
-  const updateNotes = (newNotes: string) => {
-    queryClient.setQueryData(['diary-entry', userId, dateStr], (old: any) => ({
-      ...old,
-      notes: newNotes
-    }))
-
-    scheduleSave({
-      metrics: (entryData?.metrics as Record<string, any>) || {},
-      notes: newNotes,
-      habitsCompleted: (entryData as any)?.habits_completed,
-      photoUrls: (entryData as any)?.photo_urls
-    })
-  }
 
   // Переключение привычки
   const toggleHabit = (habitId: string, completed: boolean) => {
@@ -170,7 +153,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
     scheduleSave({
       metrics: (entryData?.metrics as Record<string, any>) || {},
-      notes: entryData?.notes,
       habitsCompleted: {
         ...((entryData as any)?.habits_completed || {}),
         [habitId]: completed
@@ -188,7 +170,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
     scheduleSave({
       metrics: (entryData?.metrics as Record<string, any>) || {},
-      notes: entryData?.notes,
       habitsCompleted: (entryData as any)?.habits_completed,
       photoUrls: [...((entryData as any)?.photo_urls || []), url]
     })
@@ -203,7 +184,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
     scheduleSave({
       metrics: (entryData?.metrics as Record<string, any>) || {},
-      notes: entryData?.notes,
       habitsCompleted: (entryData as any)?.habits_completed,
       photoUrls: ((entryData as any)?.photo_urls || []).filter((u: string) => u !== url)
     })
@@ -279,14 +259,12 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
 
   return {
     metrics: (entryData?.metrics as Record<string, any>) || {},
-    notes: entryData?.notes || '',
     photoUrls: (entryData as any)?.photo_urls || [],
     habitsCompleted: (entryData as any)?.habits_completed || {},
     isLoading,
     saveStatus,
     updateMetric,
     updateMetrics,
-    updateNotes,
     toggleHabit,
     addPhotoUrl,
     removePhotoUrl,

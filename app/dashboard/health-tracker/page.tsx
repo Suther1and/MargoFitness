@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home } from 'lucide-react'
+import { Calendar, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, Dumbbell, User } from 'lucide-react'
 import { format, subDays, differenceInDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -28,13 +28,14 @@ import { NutritionCardH } from './components/nutrition-card-h'
 import { MoodEnergyCardH } from './components/mood-energy-card-h'
 import { CaffeineCardH } from './components/caffeine-card-h'
 import { GoalsSummaryCard } from './components/goals-summary-card'
-import { NotesCard } from './components/notes-card'
 import { DailyPhotosCard } from './components/daily-photos-card'
 import { HabitsCard } from './components/habits-card'
 import { AchievementsCard } from './components/achievements-card'
 import { HealthTrackerCard } from './components/health-tracker-card'
 import { WeekNavigator } from './components/week-navigator'
 import StatsTab from './components/stats-tab'
+import { WorkoutsTab } from './components/workouts-tab'
+import { ProfileTab } from './components/profile-tab'
 import { AchievementUnlockedToast, useAchievementNotifications } from './components/achievement-unlocked-toast'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
@@ -76,22 +77,31 @@ import { createClient } from '@/lib/supabase/client'
 export default function HealthTrackerPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
-      <HealthTrackerContent />
+      <HealthTrackerContent profile={null} bonusStats={null} />
     </Suspense>
   )
 }
 
-function HealthTrackerContent() {
+function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonusStats }: { profile: any | null, bonusStats: any | null }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
 
   // Получаем userId один раз для всех хуков
   const [userId, setUserId] = useState<string | null>(null)
+  const [profile, setProfile] = useState<any | null>(initialProfile)
+  const [bonusStats, setBonusStats] = useState<any | null>(initialBonusStats)
   
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUserId(data.user.id)
+      if (data.user) {
+        setUserId(data.user.id)
+        // Загрузить profile и bonusStats клиентски если нужно
+        import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
+        import('@/lib/actions/bonuses').then(m => m.getBonusStats(data.user.id)).then(result => {
+          if (result.success) setBonusStats(result.data)
+        })
+      }
     })
   }, [])
 
@@ -109,9 +119,10 @@ function HealthTrackerContent() {
     setPeriod: handleStatsPeriodSelect 
   } = useStatsDateRange()
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'habits' | 'goals' | 'settings'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings'>(
     (tabParam as any) || 'overview'
   )
+  const [overviewTab, setOverviewTab] = useState<'widgets' | 'habits'>('widgets')
   const [settingsSubTab, setSettingsSubTab] = useState<'widgets' | 'habits'>('widgets')
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
@@ -124,12 +135,10 @@ function HealthTrackerContent() {
   // Интеграция с Supabase через useHealthDiary
   const { 
     metrics, 
-    notes, 
     habitsCompleted,
     isLoading: isDiaryLoading,
     saveStatus,
     updateMetric,
-    updateNotes,
     toggleHabit: toggleHabitCompleted,
     forceSave
   } = useHealthDiary({ userId, selectedDate })
@@ -169,9 +178,6 @@ function HealthTrackerContent() {
     height: settings.userParams.height || 170,
     age: settings.userParams.age || 25,
     gender: settings.userParams.gender || 'female',
-    
-    // Notes
-    notes: notes || '',
     
     // Habits - объединяем данные привычек с их статусом выполнения
     habits: habits.filter(h => h.enabled).map(habit => ({
@@ -247,8 +253,6 @@ function HealthTrackerContent() {
           toggleHabitCompleted(habit.id, habit.completed)
         }
       })
-    } else if (metric === 'notes') {
-      updateNotes(value)
     } else {
       // Для всех остальных метрик
       updateMetric(metric, value)
@@ -260,7 +264,7 @@ function HealthTrackerContent() {
   }
 
   // Функция переключения табов с принудительным сохранением данных
-  const handleTabChange = async (tab: 'overview' | 'stats' | 'habits' | 'goals' | 'settings') => {
+  const handleTabChange = async (tab: 'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings') => {
     // Если переходим в статистику, принудительно сохраняем данные и ждем завершения
     if (tab === 'stats') {
       await forceSave()
@@ -382,11 +386,14 @@ function HealthTrackerContent() {
                       {activeTab === 'stats' && (
                         <>Моя<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
                       )}
-                      {activeTab === 'habits' && (
-                        <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-500 to-amber-500">Привычки</span></>
+                      {activeTab === 'workouts' && (
+                        <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-orange-600">Тренировки</span></>
                       )}
                       {activeTab === 'goals' && (
                         <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
+                      )}
+                      {activeTab === 'profile' && (
+                        <>Мой<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-600">Профиль</span></>
                       )}
                       {activeTab === 'settings' && (
                         <>Настройки<span className={cn(
@@ -565,6 +572,10 @@ function HealthTrackerContent() {
                     />
                   )}
                   
+                  {activeTab === 'workouts' && (
+                    <WorkoutsTab />
+                  )}
+                  
                   {activeTab === 'goals' && (
                     <div className="flex flex-col gap-6">
                       <GoalsSummaryCard 
@@ -582,8 +593,91 @@ function HealthTrackerContent() {
                     </div>
                   )}
                   
-                  {activeTab === 'habits' && (
-                    <div className="flex flex-col gap-6">
+                  {activeTab === 'profile' && profile && (
+                    <ProfileTab profile={profile} bonusStats={bonusStats} />
+                  )}
+                  
+                  {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Tabs переключатель */}
+                    <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10">
+                      <button
+                        onClick={() => setOverviewTab('widgets')}
+                        className={cn(
+                          "flex-1 py-3 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          overviewTab === 'widgets'
+                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                            : "text-white/40 hover:text-white/60 hover:bg-white/5"
+                        )}
+                      >
+                        Виджеты
+                      </button>
+                      <button
+                        onClick={() => setOverviewTab('habits')}
+                        className={cn(
+                          "flex-1 py-3 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          overviewTab === 'habits'
+                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                            : "text-white/40 hover:text-white/60 hover:bg-white/5"
+                        )}
+                      >
+                        Привычки
+                      </button>
+                    </div>
+
+                    {/* Контент в зависимости от выбранного таба */}
+                    {overviewTab === 'widgets' ? (
+                      !hasMainWidgets ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                          <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
+                          <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
+                            Выбери показатели здоровья, которые будем отслеживать
+                          </p>
+
+                          <button 
+                            onClick={() => {
+                              setActiveTab('settings')
+                              setSettingsSubTab('widgets')
+                            }}
+                            className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Выбрать виджеты
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {settings.widgets.water?.enabled && (
+                            <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
+                          )}
+                          {settings.widgets.steps?.enabled && (
+                            <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
+                          )}
+                          <div className="grid grid-cols-2 gap-4">
+                            {settings.widgets.weight?.enabled && (
+                              <WeightCardH 
+                                value={data.weight} 
+                                goalWeight={data.weightGoal} 
+                                initialWeight={settings.userParams.weight || undefined}
+                                onUpdate={(val) => handleMetricUpdate('weight', val)} 
+                              />
+                            )}
+                            {settings.widgets.caffeine?.enabled && (
+                              <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
+                            )}
+                            {settings.widgets.sleep?.enabled && (
+                              <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
+                            )}
+                            {settings.widgets.mood?.enabled && (
+                              <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
+                            )}
+                          </div>
+                          {settings.widgets.nutrition?.enabled && (
+                            <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                          )}
+                        </>
+                      )
+                    ) : (
                       <HabitsCard 
                         habits={data.habits} 
                         onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
@@ -592,66 +686,9 @@ function HealthTrackerContent() {
                           setSettingsSubTab('habits')
                         }}
                       />
-                      {settings.widgets.notes?.enabled && (
-                        <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                      )}
-                    </div>
-                  )}
-                  
-                  {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                      {!hasMainWidgets ? (
-                          <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
-                            <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
-                            <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
-                              Выбери показатели здоровья, которые будем отслеживать
-                            </p>
-
-                            <button 
-                              onClick={() => {
-                                setActiveTab('settings')
-                                setSettingsSubTab('widgets')
-                              }}
-                              className="w-full max-w-[200px] py-4 rounded-2xl bg-green-500 text-[#09090b] font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-green-500/20 flex items-center justify-center gap-3 mb-2"
-                            >
-                              <Settings className="w-4 h-4" />
-                              Выбрать виджеты
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            {settings.widgets.water?.enabled && (
-                              <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
-                            )}
-                            {settings.widgets.steps?.enabled && (
-                              <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
-                            )}
-                            <div className="grid grid-cols-2 gap-4">
-                              {settings.widgets.weight?.enabled && (
-                                <WeightCardH 
-                                  value={data.weight} 
-                                  goalWeight={data.weightGoal} 
-                                  initialWeight={settings.userParams.weight || undefined}
-                                  onUpdate={(val) => handleMetricUpdate('weight', val)} 
-                                />
-                              )}
-                              {settings.widgets.caffeine?.enabled && (
-                                <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
-                              )}
-                              {settings.widgets.sleep?.enabled && (
-                                <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
-                              )}
-                              {settings.widgets.mood?.enabled && (
-                                <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
-                              )}
-                          </div>
-                            {settings.widgets.nutrition?.enabled && (
-                              <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
-                            )}
-                          </>
-                        )}
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
                 </div>
 
                 {activeTab === 'settings' && (
@@ -748,9 +785,6 @@ function HealthTrackerContent() {
                         setSettingsSubTab('habits')
                       }}
                     />
-                    {settings.widgets.notes?.enabled && (
-                      <NotesCard value={data.notes} onUpdate={(val) => handleMetricUpdate('notes', val)} />
-                    )}
                   </div>
 
                   {/* Правая колонка: календарь, цели, достижения */}
@@ -810,11 +844,14 @@ function HealthTrackerContent() {
           <button onClick={() => handleTabChange('stats')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'stats' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <BarChart3 className="w-5 h-5" />
           </button>
-          <button onClick={() => handleTabChange('habits')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'habits' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
-            <ListChecks className="w-5 h-5" />
+          <button onClick={() => handleTabChange('workouts')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'workouts' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+            <Dumbbell className="w-5 h-5" />
           </button>
           <button onClick={() => handleTabChange('goals')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'goals' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Target className="w-5 h-5" />
+          </button>
+          <button onClick={() => handleTabChange('profile')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'profile' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
+            <User className="w-5 h-5" />
           </button>
           <button onClick={() => handleTabChange('settings')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'settings' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Settings className="w-5 h-5" />

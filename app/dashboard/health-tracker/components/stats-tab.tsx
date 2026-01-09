@@ -11,7 +11,6 @@ import { StatsCaffeine } from "./stats-details/stats-caffeine"
 import { StatsSleep } from "./stats-details/stats-sleep"
 import { StatsMood } from "./stats-details/stats-mood"
 import { StatsNutrition } from "./stats-details/stats-nutrition"
-import { StatsNotes } from "./stats-details/stats-notes"
 import { StatsPhotos } from "./stats-details/stats-photos"
 import { StatsHabits } from "./stats-details/stats-habits"
 import { useTrackerSettings } from "../hooks/use-tracker-settings"
@@ -88,9 +87,6 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
     }
     if (activeView === 'nutrition') {
       return <StatsNutrition dateRange={dateRange} userId={userId} settings={settings} />
-    }
-    if (activeView === 'notes') {
-      return <StatsNotes dateRange={dateRange} userId={userId} />
     }
     if (activeView === 'photos') {
       return <StatsPhotos dateRange={dateRange} />

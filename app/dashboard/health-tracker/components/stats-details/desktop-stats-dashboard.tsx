@@ -20,7 +20,6 @@ import { StatsSleep } from "./stats-sleep"
 import { StatsCaffeine } from "./stats-caffeine"
 import { StatsNutrition } from "./stats-nutrition"
 import { StatsMood } from "./stats-mood"
-import { StatsNotes } from "./stats-notes"
 import { StatsPhotos } from "./stats-photos"
 import { StatsHabits } from "./stats-habits"
 import { DailyMetrics } from "../../types"
@@ -47,7 +46,6 @@ const NAV_ITEMS = [
   { id: 'nutrition', label: 'Питание', icon: Utensils, color: 'text-violet-400', bg: 'bg-violet-400/10' },
   { id: 'mood', label: 'Настроение', icon: Smile, color: 'text-pink-400', bg: 'bg-pink-400/10' },
   { id: 'photos', label: 'Прогресс', icon: Camera, color: 'text-violet-400', bg: 'bg-violet-400/10' },
-  { id: 'notes', label: 'Заметки', icon: NotebookText, color: 'text-sky-400', bg: 'bg-sky-400/10' },
 ]
 
 export function DesktopStatsDashboard({ 
@@ -99,9 +97,6 @@ export function DesktopStatsDashboard({
     }
     if (activeView === 'photos') {
       return <StatsPhotos dateRange={currentDateRange} />
-    }
-    if (activeView === 'notes') {
-      return <StatsNotes dateRange={currentDateRange} userId={userId} />
     }
     return null
   }

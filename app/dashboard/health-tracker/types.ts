@@ -1,7 +1,7 @@
 export type MoodRating = 1 | 2 | 3 | 4 | 5;
 
 // Типы для настроек трекера
-export type WidgetId = 'habits' | 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos' | 'notes';
+export type WidgetId = 'habits' | 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos';
 
 // Типы для статистики
 export type StatsView = 'overall' | 'habits' | WidgetId;
@@ -154,13 +154,6 @@ export const WIDGET_CONFIGS: Record<WidgetId, WidgetConfig> = {
     icon: 'camera',
     hasGoal: false,
     description: 'Добавляй фото своего прогресса'
-  },
-  notes: {
-    id: 'notes',
-    name: 'Заметки',
-    icon: 'notebook-text',
-    hasGoal: false,
-    description: 'Записывай мысли и наблюдения'
   }
 };
 
@@ -227,7 +220,6 @@ export interface DailyMetrics {
   // Дополнительно
   caffeineIntake: number; // порции/чашки
   caffeineGoal: number;
-  notes: string;
   dailyPhotos: string[]; // URL миниатюр
   
   // Параметры пользователя
@@ -254,7 +246,6 @@ export const MOCK_DATA: DailyMetrics = {
   caloriesGoal: 2200,
   caffeineIntake: 2,
   caffeineGoal: 3,
-  notes: "",
   dailyPhotos: [
     "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&h=150&fit=crop"
@@ -311,11 +302,6 @@ export interface OverviewStats {
   mood: {
     avgMood: number | null
     avgEnergy: number | null
-  } | null
-  notes: {
-    content: string
-    date: string
-    metricsSnapshot: any
   } | null
   photos: {
     count: number

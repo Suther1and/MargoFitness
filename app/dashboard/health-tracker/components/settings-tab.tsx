@@ -231,7 +231,7 @@ export default function SettingsTab({
   const widgetGroups = useMemo(() => [
     { name: 'Активность', icon: Zap, widgets: ['steps', 'sleep', 'mood'] },
     { name: 'Питание и баланс', icon: Apple, widgets: ['water', 'caffeine', 'nutrition'] },
-    { name: 'Тело', icon: Scale, widgets: ['weight', 'photos', 'notes'] }
+    { name: 'Тело', icon: Scale, widgets: ['weight', 'photos'] }
   ], [])
 
   // Используем settings напрямую из React Query - нет дублирования состояния
@@ -671,13 +671,6 @@ export default function SettingsTab({
                                         </div>
                                       ))}
                                     </div>
-                                  </div>
-                                )}
-                                {id === 'notes' && (
-                                  <div className={cn("flex flex-col items-start gap-1.5", widget.enabled ? "opacity-30" : "opacity-10")}>
-                                    <div className="h-1 bg-white rounded-full w-12" />
-                                    <div className="h-1 bg-white rounded-full w-24" />
-                                    <div className="h-1 bg-white rounded-full w-36" />
                                   </div>
                                 )}
                               </div>

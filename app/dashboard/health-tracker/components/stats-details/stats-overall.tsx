@@ -454,44 +454,6 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
             </div>
           </motion.div>
         )}
-
-        {overviewData?.notes ? (
-          <motion.div
-            variants={item}
-            onClick={() => onNavigate?.('notes')}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5 cursor-pointer hover:border-sky-500/20 transition-[border-color,transform] active:scale-[0.98] group transform-gpu"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20">
-                  <NotebookText className="w-4 h-4 text-sky-400" />
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Заметки</span>
-              </div>
-              <span className="text-[10px] font-bold text-white/30 uppercase">{format(new Date(overviewData.notes.date), 'd MMM', { locale: ru })}</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-              <p className="text-[10px] text-white/50 leading-relaxed line-clamp-2">{overviewData.notes.content}</p>
-            </div>
-          </motion.div>
-        ) : settings.widgets.notes?.enabled && (
-          <motion.div
-            variants={item}
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-5"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20">
-                  <NotebookText className="w-4 h-4 text-sky-400" />
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Заметки</span>
-              </div>
-            </div>
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-              <p className="text-[10px] text-white/30 leading-relaxed text-center">Нет заметок за период</p>
-            </div>
-          </motion.div>
-        )}
       </div>
       </motion.div>
     )
@@ -709,30 +671,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
         )}
       </div>
 
-      {/* РЯД 3: Заметки (2) + Настроение (1) + Сон (1). Высота 140px */}
-      {overviewData?.notes ? (
-        <motion.div
-          variants={item}
-          onClick={() => onNavigate?.('notes')}
-          className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-sky-500/20 transition-all group cursor-pointer relative overflow-hidden flex flex-col justify-between"
-        >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]"><NotebookText className="w-4 h-4 text-sky-400" />Лучшая заметка</div>
-          <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-sky-400" />
-        </div>
-        <p className="text-[11px] text-white/40 leading-relaxed italic line-clamp-2 border-l-2 border-sky-500/20 pl-4">"{overviewData.notes.content}"</p>
-        <div className="text-[8px] font-black text-white/5 uppercase tracking-[0.2em]">{format(new Date(overviewData.notes.date), 'd MMM yyyy', { locale: ru })}</div>
-        </motion.div>
-      ) : settings.widgets.notes?.enabled && (
-        <motion.div
-          variants={item}
-          className="col-span-2 h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 relative overflow-hidden flex flex-col justify-center items-center"
-        >
-        <NotebookText className="w-8 h-8 text-white/10 mb-2" />
-        <p className="text-[10px] text-white/30">Нет заметок за период</p>
-        </motion.div>
-      )}
-
+      {/* РЯД 3: Настроение (1) + Сон (1). Высота 140px */}
       {overviewData?.mood && (
         <div onClick={() => onNavigate?.('mood')} className="col-span-1 h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
         <div className="flex justify-between items-start">
