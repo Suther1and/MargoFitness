@@ -71,7 +71,7 @@ export function DesktopNavigation({ activeTab, onTabChange }: DesktopNavigationP
       </div>
       
       {/* Элегантный разделитель - начинается с кнопок навигации */}
-      <div className="absolute right-0 top-[60px] bottom-0 flex items-center">
+      <div className="absolute right-[42px] top-[60px] bottom-0 flex items-center">
         <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
         <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
       </div>
