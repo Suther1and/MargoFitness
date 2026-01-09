@@ -484,169 +484,133 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
     }
 
     return (
-      <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-6 pb-10">
+      <motion.div 
+        variants={container} 
+        initial="hidden" 
+        animate="show" 
+        className="grid grid-cols-4 gap-6 pb-10"
+        style={{ gridAutoRows: '140px', gridAutoFlow: 'dense' }}
+      >
       
-      {/* РЯД 1: Вес и Дисциплина (Высота 140px) */}
+      {/* Вес - X2Y (2 колонки × 1 ряд = 140px) */}
       {overviewData?.weight && (
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('weight')}
-        className="col-span-2 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between"
-      >
-      <div className="flex justify-between items-start relative z-10">
-        <div>
-          <div className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Анализ веса</div>
-          <h3 className="text-xl font-black text-white uppercase tracking-tight">Трансформация</h3>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-black text-emerald-400 tabular-nums leading-none">{overviewData.weight.change > 0 ? '+' : ''}{overviewData.weight.change}<span className="text-[10px] ml-1 opacity-40 uppercase">кг</span></div>
-          <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">за {overviewData.weight.period}</div>
-        </div>
-      </div>
-      <div className="flex items-center justify-between px-6 relative z-10">
-        <div className="text-center">
-          <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Старт</div>
-          <div className="text-xl font-black text-white/90 tabular-nums">{overviewData.weight.start}</div>
-        </div>
-        <div className="flex-1 px-10 relative flex items-center justify-center">
-          <div className="w-full h-px bg-white/5 relative">
-            <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3, repeat: Infinity }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Текущий</div>
-          <div className="text-xl font-black text-white tabular-nums">{overviewData.weight.current}</div>
-        </div>
-      </div>
-      </motion.div>
-    )}
-
-    {overviewData?.habits && (
-      <motion.div
-        variants={item}
-        onClick={() => onNavigate?.('habits')}
-        className="col-span-2 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center"
-      >
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full relative z-10">
-        <div className="relative w-20 h-20 shrink-0">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
-            <motion.circle 
-              cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" 
-              strokeDasharray="264" 
-              initial={{ strokeDashoffset: 264 }}
-              animate={{ strokeDashoffset: 264 * (1 - overviewData.habits.completionRate / 100) }}
-              className="text-amber-500" 
-              strokeLinecap="round" 
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-lg font-black text-white">{overviewData.habits.completionRate}%</span>
-          </div>
-        </div>
-        <div className="min-w-0">
-          <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Дисциплина</div>
-          <div className="text-xl font-black text-white tracking-tight uppercase leading-none truncate">Стабильность</div>
-        </div>
-        <div className="flex items-center gap-4 shrink-0 px-2">
-          <div className="w-px h-10 bg-white/10" />
-          <div className="text-right">
-            <div className="flex items-center gap-2 justify-end">
-              <Flame className="w-6 h-6 text-amber-500 animate-pulse" />
-              <span className="text-3xl font-black text-white tabular-nums">{overviewData.habits.bestStreak}</span>
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('weight')}
+          className="col-span-2 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-emerald-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer"
+        >
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <div className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-1">Анализ веса</div>
+              <h3 className="text-xl font-black text-white uppercase tracking-tight">Трансформация</h3>
             </div>
-            <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">Стрик дней</div>
+            <div className="text-right">
+              <div className="text-2xl font-black text-emerald-400 tabular-nums leading-none">{overviewData.weight.change > 0 ? '+' : ''}{overviewData.weight.change}<span className="text-[10px] ml-1 opacity-40 uppercase">кг</span></div>
+              <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">за {overviewData.weight.period}</div>
+            </div>
           </div>
-        </div>
-      </div>
-      </motion.div>
-    )}
+          <div className="flex items-center justify-between px-6 relative z-10">
+            <div className="text-center">
+              <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Старт</div>
+              <div className="text-xl font-black text-white/90 tabular-nums">{overviewData.weight.start}</div>
+            </div>
+            <div className="flex-1 px-10 relative flex items-center justify-center">
+              <div className="w-full h-px bg-white/5 relative">
+                <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3, repeat: Infinity }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Текущий</div>
+              <div className="text-xl font-black text-white tabular-nums">{overviewData.weight.current}</div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
-      {/* РЯД 2: Форма (2) + Шаги (1) + Вода (1). Высота 280px */}
+      {/* Дисциплина - X2Y (2 колонки × 1 ряд = 140px) */}
+      {overviewData?.habits && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('habits')}
+          className="col-span-2 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-500/20 transition-all group relative overflow-hidden flex items-center cursor-pointer"
+        >
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full relative z-10">
+            <div className="relative w-20 h-20 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-white/5" />
+                <motion.circle 
+                  cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" 
+                  strokeDasharray="264" 
+                  initial={{ strokeDashoffset: 264 }}
+                  animate={{ strokeDashoffset: 264 * (1 - overviewData.habits.completionRate / 100) }}
+                  className="text-amber-500" 
+                  strokeLinecap="round" 
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-lg font-black text-white">{overviewData.habits.completionRate}%</span>
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Дисциплина</div>
+              <div className="text-xl font-black text-white tracking-tight uppercase leading-none truncate">Стабильность</div>
+            </div>
+            <div className="flex items-center gap-4 shrink-0 px-2">
+              <div className="w-px h-10 bg-white/10" />
+              <div className="text-right">
+                <div className="flex items-center gap-2 justify-end">
+                  <Flame className="w-6 h-6 text-amber-500 animate-pulse" />
+                  <span className="text-3xl font-black text-white tabular-nums">{overviewData.habits.bestStreak}</span>
+                </div>
+                <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">Стрик дней</div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Форма - 2X2Y (2 колонки × 2 ряда = 280px) */}
       {settings.widgets.photos?.enabled && (
         <motion.div
           variants={item}
           onClick={() => onNavigate?.('photos')}
-          className="col-span-2 min-h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
+          className="col-span-2 row-span-2 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between cursor-pointer"
         >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Camera className="w-4 h-4" /></div>
-            <h4 className="text-lg font-black text-white uppercase tracking-tight">Форма</h4>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Camera className="w-4 h-4" /></div>
+              <h4 className="text-lg font-black text-white uppercase tracking-tight">Форма</h4>
+            </div>
+            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">период: 7д</span>
           </div>
-          <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">период: 7д</span>
-        </div>
-        <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
-          <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
-            <Camera className="w-8 h-8 text-white/10" />
-            <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
-            <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-              <span className="text-[9px] font-bold text-white/20 tabular-nums">31 дек</span>
-              <span className="text-[10px] font-black text-white/30 tracking-tight">74.2 кг</span>
+          <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
+            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
+              <Camera className="w-8 h-8 text-white/10" />
+              <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
+              <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
+                <span className="text-[9px] font-bold text-white/20 tabular-nums">31 дек</span>
+                <span className="text-[10px] font-black text-white/30 tracking-tight">74.2 кг</span>
+              </div>
+            </div>
+            <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center text-violet-500/20">
+              <Camera className="w-8 h-8" />
+              <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-500/20 text-[8px] font-black uppercase text-emerald-400 tracking-widest">После</div>
+              <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
+                <span className="text-[9px] font-bold text-white/20 tabular-nums">7 янв</span>
+                <span className="text-[10px] font-black text-white/30 tracking-tight">72.4 кг</span>
+              </div>
             </div>
           </div>
-          <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center text-violet-500/20">
-            <Camera className="w-8 h-8" />
-            <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-500/20 text-[8px] font-black uppercase text-emerald-400 tracking-widest">После</div>
-            <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-              <span className="text-[9px] font-bold text-white/20 tabular-nums">7 янв</span>
-              <span className="text-[10px] font-black text-white/30 tracking-tight">72.4 кг</span>
-            </div>
-          </div>
-        </div>
         </motion.div>
       )}
 
-      <div className="col-span-1 space-y-4">
-        {overviewData?.steps && (
-          <div onClick={() => onNavigate?.('steps')} className="min-h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
-          <div className="flex justify-between items-start relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500"><Footprints className="w-4 h-4" /></div>
-              <div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-0.5">Шаги</div>
-                <div className="text-xl font-black text-white tabular-nums tracking-tight">{overviewData.steps.average.toLocaleString()}</div>
-              </div>
-            </div>
-          </div>
-          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4">
-            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(overviewData.steps.percentage, 100)}%` }} className="h-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">цель {(overviewData.steps.goal / 1000).toFixed(0)}к</span>
-            <span className="text-[10px] font-black text-red-500/60 tabular-nums">{overviewData.steps.percentage}%</span>
-          </div>
-          </div>
-        )}
-
-        {overviewData?.water && (
-          <div onClick={() => onNavigate?.('water')} className="min-h-[132px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer">
-          <motion.div initial={{ height: 0 }} animate={{ height: `${Math.min(overviewData.water.percentage, 100)}%` }} className="absolute bottom-0 left-0 right-0 bg-blue-500/[0.03] border-t border-blue-500/10 pointer-events-none" />
-          <div className="flex justify-between items-start relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400"><Droplets className="w-4 h-4" /></div>
-              <div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-0.5">Вода</div>
-                <div className="text-xl font-black text-white tabular-nums tracking-tight">{(overviewData.water.average / 1000).toFixed(1)}<span className="text-xs ml-1 opacity-40 uppercase">л</span></div>
-              </div>
-            </div>
-            <div className="text-lg font-black text-blue-400 tabular-nums">{overviewData.water.percentage}%</div>
-          </div>
-          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4 relative z-10">
-            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(overviewData.water.percentage, 100)}%` }} className="h-full bg-blue-500 shadow-[0_0_8px_rgba(14,165,233,0.3)]" />
-          </div>
-          </div>
-        )}
-      </div>
-
-      <div className="col-span-1 space-y-4">
-        {/* Питание (Адаптировано под 280px высоту, но с плотным наполнением) */}
-        {overviewData?.nutrition && (
-          <motion.div
-            variants={item}
-            onClick={() => onNavigate?.('nutrition')}
-            className="min-h-[280px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between"
-          >
+      {/* Питание - 2XY (1 колонка × 2 ряда = 280px) */}
+      {overviewData?.nutrition && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('nutrition')}
+          className="col-span-1 row-span-2 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-6 hover:border-violet-500/20 transition-all group flex flex-col justify-between cursor-pointer"
+        >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Utensils className="w-4 h-4" /></div>
             <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Калории</div>
@@ -667,67 +631,118 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
               <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(Math.round((overviewData.nutrition.avgCalories / overviewData.nutrition.goal) * 100), 100)}%` }} className="h-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
             </div>
           </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* РЯД 3: Настроение (1) + Сон (1). Высота 140px */}
-      {overviewData?.mood && (
-        <div onClick={() => onNavigate?.('mood')} className="col-span-1 min-h-[140px] bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between">
-        <div className="flex justify-between items-start">
-          <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400"><Smile className="w-4 h-4" /></div>
-          <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Состояние</div>
-        </div>
-        <div className="text-xl font-black text-white uppercase tracking-tight">{getMoodText(overviewData.mood?.avgMood)}</div>
-        <div className="flex gap-1 items-end h-4">
-          {[...Array(10)].map((_, i) => {
-            const avgEnergy = overviewData.mood?.avgEnergy || 0
-            const isActive = i < Math.round(avgEnergy)
-            return (
-              <div key={i} className={cn("flex-1 rounded-full transition-all", isActive ? "bg-orange-500/60 h-full" : "bg-white/5 h-1.5")} />
-            )
-          })}
-        </div>
-        </div>
+        </motion.div>
       )}
 
-      {overviewData?.sleep && (
-        <div onClick={() => onNavigate?.('sleep')} className="col-span-1 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between">
-        <div className="flex justify-between items-start">
-          <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-400"><Moon className="w-4 h-4" /></div>
-          <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Сон</div>
-        </div>
-        <div>
-          <div className="text-2xl font-black text-white tabular-nums">{overviewData.sleep.average}<span className="text-xs ml-1 opacity-40 uppercase">ч</span></div>
-          <div className="text-[9px] font-black text-indigo-400/60 uppercase tracking-widest mt-1">{overviewData.sleep.percentage}% от цели</div>
-        </div>
-        </div>
-      )}
-
-      {/* РЯД 4: Кофе (1) + Декор (3) */}
-      {overviewData?.caffeine && (
-        <div onClick={() => onNavigate?.('caffeine')} className="col-span-1 min-h-[140px] bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between">
-        <div className="flex justify-between items-start">
-          <div className="p-2.5 rounded-xl bg-amber-600/5 border border-amber-600/10 text-amber-600"><Coffee className="w-4 h-4" /></div>
-          <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Кофе</div>
-        </div>
-        <div>
-          <div className="text-2xl font-black text-white tabular-nums">{overviewData.caffeine.average}</div>
-          <div className="text-[9px] font-black text-amber-600/60 uppercase tracking-widest mt-1">Среднее за день</div>
-        </div>
-        </div>
-      )}
-
-      <div className="col-span-3 min-h-[140px] bg-[#121214]/10 border border-white/[0.02] rounded-[1.5rem] p-6 flex items-center justify-between group overflow-hidden">
-        <div className="max-w-md">
-          <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">Margo Fitness Analyzer</div>
-          <div className="text-xs text-white/30 font-black uppercase leading-relaxed">
-            Система анализирует ваши показатели в реальном времени.<br/>
-            Соблюдайте дисциплину для достижения максимального результата.
+      {/* Шаги - XY (1 колонка × 1 ряд = 140px) */}
+      {overviewData?.steps && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('steps')}
+          className="col-span-1 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-red-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer"
+        >
+          <div className="flex justify-between items-start relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500"><Footprints className="w-4 h-4" /></div>
+              <div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-0.5">Шаги</div>
+                <div className="text-xl font-black text-white tabular-nums tracking-tight">{overviewData.steps.average.toLocaleString()}</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <Zap className="w-12 h-12 text-amber-500 opacity-10 group-hover:opacity-30 transition-opacity" />
-      </div>
+          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(overviewData.steps.percentage, 100)}%` }} className="h-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]" />
+          </div>
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">цель {(overviewData.steps.goal / 1000).toFixed(0)}к</span>
+            <span className="text-[10px] font-black text-red-500/60 tabular-nums">{overviewData.steps.percentage}%</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Вода - XY (1 колонка × 1 ряд = 140px) */}
+      {overviewData?.water && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('water')}
+          className="col-span-1 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-blue-500/20 transition-all group relative overflow-hidden flex flex-col justify-between cursor-pointer"
+        >
+          <motion.div initial={{ height: 0 }} animate={{ height: `${Math.min(overviewData.water.percentage, 100)}%` }} className="absolute bottom-0 left-0 right-0 bg-blue-500/[0.03] border-t border-blue-500/10 pointer-events-none" />
+          <div className="flex justify-between items-start relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400"><Droplets className="w-4 h-4" /></div>
+              <div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-0.5">Вода</div>
+                <div className="text-xl font-black text-white tabular-nums tracking-tight">{(overviewData.water.average / 1000).toFixed(1)}<span className="text-xs ml-1 opacity-40 uppercase">л</span></div>
+              </div>
+            </div>
+            <div className="text-lg font-black text-blue-400 tabular-nums">{overviewData.water.percentage}%</div>
+          </div>
+          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4 relative z-10">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(overviewData.water.percentage, 100)}%` }} className="h-full bg-blue-500 shadow-[0_0_8px_rgba(14,165,233,0.3)]" />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Настроение - XY (1 колонка × 1 ряд = 140px) */}
+      {overviewData?.mood && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('mood')}
+          className="col-span-1 row-span-1 bg-[#121214]/40 border border-white/5 rounded-[1.5rem] p-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex flex-col justify-between"
+        >
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400"><Smile className="w-4 h-4" /></div>
+            <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Состояние</div>
+          </div>
+          <div className="text-xl font-black text-white uppercase tracking-tight">{getMoodText(overviewData.mood?.avgMood)}</div>
+          <div className="flex gap-1 items-end h-4">
+            {[...Array(10)].map((_, i) => {
+              const avgEnergy = overviewData.mood?.avgEnergy || 0
+              const isActive = i < Math.round(avgEnergy)
+              return (
+                <div key={i} className={cn("flex-1 rounded-full transition-all", isActive ? "bg-orange-500/60 h-full" : "bg-white/5 h-1.5")} />
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Сон - XY (1 колонка × 1 ряд = 140px) */}
+      {overviewData?.sleep && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('sleep')}
+          className="col-span-1 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-indigo-500/20 transition-all cursor-pointer group flex flex-col justify-between"
+        >
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-400"><Moon className="w-4 h-4" /></div>
+            <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Сон</div>
+          </div>
+          <div>
+            <div className="text-2xl font-black text-white tabular-nums">{overviewData.sleep.average}<span className="text-xs ml-1 opacity-40 uppercase">ч</span></div>
+            <div className="text-[9px] font-black text-indigo-400/60 uppercase tracking-widest mt-1">{overviewData.sleep.percentage}% от цели</div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Кофе - XY (1 колонка × 1 ряд = 140px) */}
+      {overviewData?.caffeine && (
+        <motion.div
+          variants={item}
+          onClick={() => onNavigate?.('caffeine')}
+          className="col-span-1 row-span-1 bg-[#121214]/60 border border-white/10 rounded-[1.5rem] p-5 hover:border-amber-600/20 transition-all cursor-pointer group flex flex-col justify-between"
+        >
+          <div className="flex justify-between items-start">
+            <div className="p-2.5 rounded-xl bg-amber-600/5 border border-amber-600/10 text-amber-600"><Coffee className="w-4 h-4" /></div>
+            <div className="text-[9px] font-black text-white/20 uppercase tracking-widest">Кофе</div>
+          </div>
+          <div>
+            <div className="text-2xl font-black text-white tabular-nums">{overviewData.caffeine.average}</div>
+            <div className="text-[9px] font-black text-amber-600/60 uppercase tracking-widest mt-1">Среднее за день</div>
+          </div>
+        </motion.div>
+      )}
 
       </motion.div>
     )

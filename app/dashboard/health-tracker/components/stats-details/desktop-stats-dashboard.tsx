@@ -4,8 +4,11 @@ import { useState } from "react"
 import { 
   Scale, Droplets, Footprints, Camera, 
   Smile, Utensils, Flame, Moon, Coffee,
-  BarChart3
+  BarChart3, Calendar, ChevronDown
 } from "lucide-react"
+import { motion } from "framer-motion"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { StatsView, WidgetId, PeriodType, DateRange, TrackerSettings, Habit } from "../../types"
 import { StatsOverall } from "./stats-overall"
@@ -19,6 +22,8 @@ import { StatsMood } from "./stats-mood"
 import { StatsPhotos } from "./stats-photos"
 import { StatsHabits } from "./stats-habits"
 import { DailyMetrics } from "../../types"
+import { StatsDatePickerDialog } from "../stats-date-picker-dialog"
+import { HealthTrackerCard } from "../health-tracker-card"
 
 interface DesktopStatsDashboardProps {
   userId: string | null
@@ -55,6 +60,7 @@ export function DesktopStatsDashboard({
   currentDateRange
 }: DesktopStatsDashboardProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   
   const visibleItems = NAV_ITEMS.filter(item => {
     if (item.id === 'overall') return true
@@ -129,9 +135,46 @@ export function DesktopStatsDashboard({
         })}
       </div>
 
-      {/* Основной контент */}
-      <div className="w-full">
-        {renderStatsContent()}
+      {/* Grid layout: Контент + Календарь справа */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Основной контент - занимает 9 колонок */}
+        <div className="col-span-9">
+          {renderStatsContent()}
+        </div>
+
+        {/* Календарь выбора периода - занимает 3 колонки */}
+        <div className="col-span-3">
+          <HealthTrackerCard
+            className="p-4"
+            title="Период"
+            subtitle={
+              currentPeriodType === '7d' ? '7 дней' :
+              currentPeriodType === '30d' ? '30 дней' :
+              currentPeriodType === '6m' ? '6 месяцев' :
+              currentPeriodType === '1y' ? '1 год' :
+              `${format(currentDateRange.start, 'd MMM', { locale: ru })} - ${format(currentDateRange.end, 'd MMM', { locale: ru })}`
+            }
+            icon={Calendar}
+            iconColor="text-sky-500"
+            iconBg="bg-sky-500/10"
+            rightAction={
+              <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
+                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
+                  <ChevronDown className="w-4 h-4 text-white/60 hover:text-white/80 transition-colors" />
+                </motion.div>
+              </button>
+            }
+          >
+            <StatsDatePickerDialog
+              isOpen={isCalendarExpanded}
+              onClose={() => setIsCalendarExpanded(false)}
+              onPeriodSelect={onPeriodSelect}
+              currentPeriodType={currentPeriodType}
+              currentDateRange={currentDateRange}
+              standalone={true}
+            />
+          </HealthTrackerCard>
+        </div>
       </div>
     </div>
   )
