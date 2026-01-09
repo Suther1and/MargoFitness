@@ -581,24 +581,73 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
               <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400"><Camera className="w-4 h-4" /></div>
               <h4 className="text-lg font-black text-white uppercase tracking-tight">Форма</h4>
             </div>
-            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">период: 7д</span>
+            {overviewData?.photos?.total && (
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                фото: {overviewData.photos.total}
+              </span>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4 min-h-[180px] mt-4">
+            {/* Первое фото (До) */}
             <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
-              <Camera className="w-8 h-8 text-white/10" />
+              {overviewData?.photos?.firstPhoto ? (
+                <>
+                  <Image
+                    src={overviewData.photos.firstPhoto.url}
+                    alt="Before"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                </>
+              ) : (
+                <Camera className="w-8 h-8 text-white/10" />
+              )}
               <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/40 text-[8px] font-black uppercase text-white/40 tracking-widest">До</div>
-              <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-                <span className="text-[9px] font-bold text-white/20 tabular-nums">31 дек</span>
-                <span className="text-[10px] font-black text-white/30 tracking-tight">74.2 кг</span>
-              </div>
+              {overviewData?.photos?.firstPhoto && (
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
+                  <span className="text-[9px] font-bold text-white/60 tabular-nums">
+                    {format(new Date(overviewData.photos.firstPhoto.date), 'dd MMM', { locale: ru })}
+                  </span>
+                  {overviewData.photos.firstPhoto.weight && (
+                    <span className="text-[10px] font-black text-white/80 tracking-tight">
+                      {overviewData.photos.firstPhoto.weight} кг
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
+            
+            {/* Последнее фото (После) */}
             <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center text-violet-500/20">
-              <Camera className="w-8 h-8" />
+              {overviewData?.photos?.lastPhoto ? (
+                <>
+                  <Image
+                    src={overviewData.photos.lastPhoto.url}
+                    alt="After"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                </>
+              ) : (
+                <Camera className="w-8 h-8" />
+              )}
               <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-500/20 text-[8px] font-black uppercase text-emerald-400 tracking-widest">После</div>
-              <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-                <span className="text-[9px] font-bold text-white/20 tabular-nums">7 янв</span>
-                <span className="text-[10px] font-black text-white/30 tracking-tight">72.4 кг</span>
-              </div>
+              {overviewData?.photos?.lastPhoto && (
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
+                  <span className="text-[9px] font-bold text-white/60 tabular-nums">
+                    {format(new Date(overviewData.photos.lastPhoto.date), 'dd MMM', { locale: ru })}
+                  </span>
+                  {overviewData.photos.lastPhoto.weight && (
+                    <span className="text-[10px] font-black text-white/80 tracking-tight">
+                      {overviewData.photos.lastPhoto.weight} кг
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

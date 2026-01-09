@@ -89,7 +89,7 @@ export default function StatsTab({ userId, periodType, dateRange, data, onPeriod
       return <StatsNutrition dateRange={dateRange} userId={userId} settings={settings} />
     }
     if (activeView === 'photos') {
-      return <StatsPhotos dateRange={dateRange} />
+      return <StatsPhotos dateRange={dateRange} userId={userId} />
     }
     return null
   }

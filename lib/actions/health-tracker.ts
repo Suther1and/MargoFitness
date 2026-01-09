@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, ProgressPhoto } from '@/types/database'
+import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -220,128 +220,5 @@ async function updateStreaks(userId: string, entryDate: string) {
       .eq('user_id', userId)
   } catch (err) {
     console.error('[Diary Action Unexpected] updateStreaks:', err)
-  }
-}
-
-/**
- * Загрузка фото прогресса
- */
-export async function uploadProgressPhoto(userId: string, date: string, formData: FormData) {
-  const supabase = await createClient()
-  const file = formData.get('file') as File
-  if (!file) return { success: false, error: 'No file provided' }
-
-  try {
-    const fileName = `${userId}/${date}_${Date.now()}.jpg`
-
-    const { error: uploadError } = await supabase.storage
-      .from('progress-photos')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true
-      })
-
-    if (uploadError) {
-      logError('uploadProgressPhoto (storage)', uploadError, userId)
-      return { success: false, error: uploadError.message }
-    }
-
-    // Для приватного хранилища создаем подписанную ссылку на 1 год
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from('progress-photos')
-      .createSignedUrl(fileName, 31536000) // 1 year
-
-    if (signedError) {
-      logError('uploadProgressPhoto (signedUrl)', signedError, userId)
-      return { success: false, error: signedError.message }
-    }
-
-    const { data, error } = await supabase
-      .from('progress_photos')
-      .insert({
-        user_id: userId,
-        date,
-        image_url: signedData.signedUrl
-      })
-      .select()
-      .single()
-
-    if (error) {
-      logError('uploadProgressPhoto (db insert)', error, userId)
-      return { success: false, error: error.message }
-    }
-
-    revalidatePath('/dashboard/health-tracker')
-
-    return { success: true, data: data as ProgressPhoto }
-  } catch (err: any) {
-    console.error('[Diary Action Unexpected] uploadProgressPhoto:', err)
-    return { success: false, error: err?.message || 'Internal Server Error' }
-  }
-}
-
-/**
- * Получить фото прогресса
- */
-export async function getProgressPhotos(userId: string) {
-  const supabase = await createClient()
-
-  try {
-    const { data, error } = await supabase
-      .from('progress_photos')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: false })
-
-    if (error) {
-      logError('getProgressPhotos', error, userId)
-      return { success: false, error: error.message }
-    }
-
-    return { success: true, data: data as ProgressPhoto[] }
-  } catch (err: any) {
-    console.error('[Diary Action Unexpected] getProgressPhotos:', err)
-    return { success: false, error: err?.message || 'Internal Server Error' }
-  }
-}
-
-/**
- * Удалить фото прогресса
- */
-export async function deleteProgressPhoto(userId: string, photoId: string, imageUrl: string) {
-  const supabase = await createClient()
-
-  try {
-    // Извлекаем путь из URL
-    let path = null
-    try {
-      if (imageUrl.includes('progress-photos/')) {
-        path = imageUrl.split('progress-photos/')[1]?.split('?')[0]
-      }
-    } catch (e) {}
-
-    if (path) {
-      await supabase.storage
-        .from('progress-photos')
-        .remove([path])
-    }
-
-    const { error } = await supabase
-      .from('progress_photos')
-      .delete()
-      .eq('id', photoId)
-      .eq('user_id', userId)
-
-    if (error) {
-      logError('deleteProgressPhoto', error, userId)
-      return { success: false, error: error.message }
-    }
-
-    revalidatePath('/dashboard/health-tracker')
-
-    return { success: true }
-  } catch (err: any) {
-    console.error('[Diary Action Unexpected] deleteProgressPhoto:', err)
-    return { success: false, error: err?.message || 'Internal Server Error' }
   }
 }

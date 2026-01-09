@@ -482,8 +482,29 @@ export async function getOverviewStatsAggregated(
   // ========== ФОТО ==========
   let photosStats = null
   if (settings.widgets.photos?.enabled) {
-    // Пока фото не реализовано, оставляем null
-    photosStats = null
+    const { getProgressPhotos } = await import('./diary')
+    const photosResult = await getProgressPhotos(userId)
+    
+    if (photosResult.success && photosResult.data && photosResult.data.length > 0) {
+      // Фильтруем фото по диапазону дат
+      const filteredPhotos = photosResult.data.filter((photo: any) => {
+        const photoDate = new Date(photo.date)
+        return photoDate >= dateRange.start && photoDate <= dateRange.end
+      })
+      
+      if (filteredPhotos.length > 0) {
+        // Сортируем по дате (старые первыми)
+        const sorted = filteredPhotos.sort((a: any, b: any) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+        )
+        
+        photosStats = {
+          total: filteredPhotos.length,
+          firstPhoto: sorted[0], // Самое старое фото
+          lastPhoto: sorted[sorted.length - 1] // Самое новое фото
+        }
+      }
+    }
   }
 
   return {

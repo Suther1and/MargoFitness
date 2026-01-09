@@ -347,7 +347,7 @@ export async function getProgressPhotos(userId: string) {
   try {
     const { data, error } = await supabase
       .from('diary_entries')
-      .select('date, photo_urls')
+      .select('date, photo_urls, metrics')
       .eq('user_id', userId)
       .not('photo_urls', 'is', null)
       .order('date', { ascending: false })
@@ -357,11 +357,12 @@ export async function getProgressPhotos(userId: string) {
       return { success: false, error: error.message }
     }
 
-    // Преобразуем в плоский список фото с датами
+    // Преобразуем в плоский список фото с датами и весом
     const photos = data.flatMap((entry: any) => 
       (entry.photo_urls || []).map((url: string) => ({
         date: entry.date,
-        url
+        url,
+        weight: entry.metrics?.weight || null
       }))
     )
 

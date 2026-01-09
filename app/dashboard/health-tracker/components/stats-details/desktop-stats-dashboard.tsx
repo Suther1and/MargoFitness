@@ -95,7 +95,7 @@ export function DesktopStatsDashboard({
       return <StatsNutrition settings={settings} dateRange={currentDateRange} userId={userId} />
     }
     if (activeView === 'photos') {
-      return <StatsPhotos dateRange={currentDateRange} />
+      return <StatsPhotos dateRange={currentDateRange} userId={userId} />
     }
     return null
   }

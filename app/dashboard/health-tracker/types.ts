@@ -304,6 +304,16 @@ export interface OverviewStats {
     avgEnergy: number | null
   } | null
   photos: {
-    count: number
+    total: number
+    firstPhoto: {
+      date: string
+      url: string
+      weight: number | null
+    } | null
+    lastPhoto: {
+      date: string
+      url: string
+      weight: number | null
+    } | null
   } | null
 }
