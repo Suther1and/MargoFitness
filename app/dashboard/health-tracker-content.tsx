@@ -749,148 +749,129 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 )}
                 </div>
 
-                {activeTab === 'settings' && (
-                  <div className="hidden lg:flex gap-6 w-full">
+            {/* Desktop Navigation - вне AnimatePresence, всегда на экране */}
+            <div className="hidden lg:block">
+              {(activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts') && (
+                <div className="flex gap-6 w-full">
+                  <DesktopNavigation 
+                    activeTab={activeTab}
+                    onTabChange={(tab) => handleTabChange(tab as any)}
+                  />
+                  <div className="flex-1">
+                    <AnimatePresence mode="wait">
+                      {activeTab === 'settings' && (
+                        <motion.div
+                          key="settings-content"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                          className="max-w-5xl mx-auto"
+                        >
+                          <SettingsTab 
+                            userId={userId}
+                            onBack={() => setActiveTab('overview')} 
+                            selectedDate={selectedDate}
+                            onDateChange={setSelectedDate}
+                            isCalendarExpanded={isCalendarExpanded}
+                            setIsCalendarExpanded={setIsCalendarExpanded}
+                            activeSubTab={settingsSubTab}
+                            setActiveSubTab={setSettingsSubTab}
+                            isMobile={false}
+                          />
+                        </motion.div>
+                      )}
+
+                      {activeTab === 'stats' && (
+                        <motion.div
+                          key="stats-content"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <StatsTab 
+                            userId={userId}
+                            periodType={statsPeriodType} 
+                            dateRange={statsDateRange} 
+                            data={data} 
+                            onPeriodSelect={handleStatsPeriodSelect}
+                          />
+                        </motion.div>
+                      )}
+
+                      {activeTab === 'bonuses' && (
+                        <motion.div
+                          key="bonuses-content"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <BonusesTab 
+                            bonusStats={bonusStats}
+                            referralStats={referralStats}
+                            referralLink={referralLink}
+                            userId={userId || ''}
+                          />
+                        </motion.div>
+                      )}
+
+                      {activeTab === 'subscription' && profile && (
+                        <motion.div
+                          key="subscription-content"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <SubscriptionTab 
+                            profile={profile}
+                            onRenewalClick={() => setRenewalModalOpen(true)}
+                            onUpgradeClick={() => setUpgradeModalOpen(true)}
+                          />
+                        </motion.div>
+                      )}
+
+                      {activeTab === 'workouts' && (
+                        <motion.div
+                          key="workouts-content"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <WorkoutsTab />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'overview' && (
+                <div className="grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+                  {/* Левая навигация: фиксированная ширина */}
+                  <div className="col-span-1 relative" style={{ paddingTop: 0, paddingBottom: 0 }}>
                     <DesktopNavigation 
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <motion.div
-                      key="settings-content"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1 max-w-5xl mx-auto"
-                    >
-                      <SettingsTab 
-                        userId={userId}
-                        onBack={() => setActiveTab('overview')} 
-                        selectedDate={selectedDate}
-                        onDateChange={setSelectedDate}
-                        isCalendarExpanded={isCalendarExpanded}
-                        setIsCalendarExpanded={setIsCalendarExpanded}
-                        activeSubTab={settingsSubTab}
-                        setActiveSubTab={setSettingsSubTab}
-                        isMobile={false}
-                      />
-                    </motion.div>
-                  </div>
-                )}
-
-                {activeTab === 'stats' && (
-                  <div className="hidden lg:flex gap-6 w-full">
-                    <DesktopNavigation 
-                      activeTab={activeTab}
-                      onTabChange={(tab) => handleTabChange(tab as any)}
-                    />
-                    <motion.div
-                      key="stats-content"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1"
-                    >
-                      <StatsTab 
-                        userId={userId}
-                        periodType={statsPeriodType} 
-                        dateRange={statsDateRange} 
-                        data={data} 
-                        onPeriodSelect={handleStatsPeriodSelect}
-                      />
-                    </motion.div>
-                  </div>
-                )}
-
-                {activeTab === 'bonuses' && (
-                  <div className="hidden lg:flex gap-6 w-full">
-                    <DesktopNavigation 
-                      activeTab={activeTab}
-                      onTabChange={(tab) => handleTabChange(tab as any)}
-                    />
-                    <motion.div
-                      key="bonuses-content"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1"
-                    >
-                      <BonusesTab 
-                        bonusStats={bonusStats}
-                        referralStats={referralStats}
-                        referralLink={referralLink}
-                        userId={userId || ''}
-                      />
-                    </motion.div>
-                  </div>
-                )}
-
-                {activeTab === 'subscription' && profile && (
-                  <div className="hidden lg:flex gap-6 w-full">
-                    <DesktopNavigation 
-                      activeTab={activeTab}
-                      onTabChange={(tab) => handleTabChange(tab as any)}
-                    />
-                    <motion.div
-                      key="subscription-content"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1"
-                    >
-                      <SubscriptionTab 
-                        profile={profile}
-                        onRenewalClick={() => setRenewalModalOpen(true)}
-                        onUpgradeClick={() => setUpgradeModalOpen(true)}
-                      />
-                    </motion.div>
-                  </div>
-                )}
-
-                {activeTab === 'workouts' && (
-                  <div className="hidden lg:flex gap-6 w-full">
-                    <DesktopNavigation 
-                      activeTab={activeTab}
-                      onTabChange={(tab) => handleTabChange(tab as any)}
-                    />
-                    <motion.div
-                      key="workouts-content"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1"
-                    >
-                      <WorkoutsTab />
-                    </motion.div>
-                  </div>
-                )}
-
-                {activeTab === 'overview' && (
-                  <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
-                    {/* Левая навигация: фиксированная ширина */}
-                    <div className="col-span-1 relative" style={{ paddingTop: 0, paddingBottom: 0 }}>
-                      <DesktopNavigation 
-                        activeTab={activeTab}
-                        onTabChange={(tab) => handleTabChange(tab as any)}
-                      />
-                      {/* Элегантный разделитель */}
-                      <div className="absolute right-0 top-0 bottom-0 flex items-center">
-                        <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-                        <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
-                      </div>
+                    {/* Элегантный разделитель */}
+                    <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                      <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+                      <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
                     </div>
-                    
+                  </div>
+                  
+                  <AnimatePresence mode="wait">
                     {/* Виджеты здоровья: 4/12 */}
                     <motion.div
                       key="overview-widgets"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                       className="lg:col-span-4 flex flex-col gap-6"
                     >
                     {!hasMainWidgets ? (
@@ -951,7 +932,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
+                    transition={{ duration: 0.2, delay: 0.05 }}
                     className="lg:col-span-4 flex flex-col gap-6"
                   >
                     <HabitsCard 
@@ -970,7 +951,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
                     className="lg:col-span-3 space-y-6"
                   >
                     <HealthTrackerCard 
@@ -1009,8 +990,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       <DailyPhotosCard photos={data.dailyPhotos} />
                     )}
                   </motion.div>
+                  </AnimatePresence>
                 </div>
-                )}
+              )}
+            </div>
               </motion.div>
             </AnimatePresence>
 
