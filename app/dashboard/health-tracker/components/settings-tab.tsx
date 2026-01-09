@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
@@ -555,22 +555,34 @@ export default function SettingsTab({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="settings-content-container w-full"
             >
-            {/* Объединенная сетка всех виджетов без группировки */}
+            {/* Единая сетка с заголовками категорий внутри */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-              {widgetGroups.flatMap(group => group.widgets).map(widgetId => {
-                const id = widgetId as WidgetId
-                const config = WIDGET_CONFIGS[id]
-                const widget = localSettings.widgets[id]
-                const Icon = ICON_MAP[id]
+              {widgetGroups.map((group, groupIndex) => {
+                const GroupIcon = group.icon
                 return (
-                  <div
-                    key={id}
-                    onClick={() => handleToggle(id)}
-                    className={cn(
-                      "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
-                      widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
-                    )}
-                  >
+                  <React.Fragment key={group.name}>
+                    {/* Заголовок категории - растягивается на всю ширину */}
+                    <div className="lg:col-span-4 flex items-center gap-3 mb-2 mt-4 first:mt-0">
+                      <GroupIcon className="w-4 h-4 text-green-500/50" strokeWidth={2.5} />
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 whitespace-nowrap">{group.name}</h2>
+                      <div className="h-px bg-white/5 w-full" />
+                    </div>
+                    
+                    {/* Карточки виджетов */}
+                    {group.widgets.map(widgetId => {
+                      const id = widgetId as WidgetId
+                      const config = WIDGET_CONFIGS[id]
+                      const widget = localSettings.widgets[id]
+                      const Icon = ICON_MAP[id]
+                      return (
+                        <div
+                          key={id}
+                          onClick={() => handleToggle(id)}
+                          className={cn(
+                            "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
+                            widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
+                          )}
+                        >
                           <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
                             <div className="flex items-start justify-between mb-3 relative">
                               <div className="flex items-center gap-3">
@@ -670,9 +682,11 @@ export default function SettingsTab({
                           </div>
                         </div>
                       )
-                    })
-                  }
-                </div>
+                    })}
+                  </React.Fragment>
+                )
+              })}
+            </div>
             </motion.div>
           ) : (
             <motion.div
