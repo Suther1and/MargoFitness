@@ -568,6 +568,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               </div>
             </header>
 
+            {/* Mobile версия с анимацией */}
             <AnimatePresence 
               mode="wait"
               onExitComplete={() => window.scrollTo(0, 0)}
@@ -578,7 +579,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
-                className="w-full"
+                className="w-full lg:hidden"
               >
                 {isFirstVisit && !dismissed && activeTab !== 'settings' && (
                   <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 mb-6">
@@ -602,7 +603,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   </motion.div>
                 )}
 
-                <div className="lg:hidden mb-24">
+                <div className="mb-24">
                   {activeTab === 'settings' && (
                     <SettingsTab 
                       userId={userId}
@@ -748,8 +749,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   </div>
                 )}
                 </div>
+              </motion.div>
+            </AnimatePresence>
 
-            {/* Desktop Navigation - вне AnimatePresence, всегда на экране */}
+            {/* Desktop версия БЕЗ общей анимации, навигация статична */}
             <div className="hidden lg:block">
               {(activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts') && (
                 <div className="flex gap-6 w-full">
@@ -762,10 +765,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       {activeTab === 'settings' && (
                         <motion.div
                           key="settings-content"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
                           className="max-w-5xl mx-auto"
                         >
                           <SettingsTab 
@@ -785,10 +788,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       {activeTab === 'stats' && (
                         <motion.div
                           key="stats-content"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
                         >
                           <StatsTab 
                             userId={userId}
@@ -803,10 +806,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       {activeTab === 'bonuses' && (
                         <motion.div
                           key="bonuses-content"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
                         >
                           <BonusesTab 
                             bonusStats={bonusStats}
@@ -820,10 +823,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       {activeTab === 'subscription' && profile && (
                         <motion.div
                           key="subscription-content"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
                         >
                           <SubscriptionTab 
                             profile={profile}
@@ -836,10 +839,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       {activeTab === 'workouts' && (
                         <motion.div
                           key="workouts-content"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
                         >
                           <WorkoutsTab />
                         </motion.div>
@@ -868,10 +871,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     {/* Виджеты здоровья: 4/12 */}
                     <motion.div
                       key="overview-widgets"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
                       className="lg:col-span-4 flex flex-col gap-6"
                     >
                     {!hasMainWidgets ? (
@@ -929,10 +932,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   {/* Привычки: 4/12 */}
                   <motion.div
                     key="overview-habits"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2, delay: 0.05 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
                     className="lg:col-span-4 flex flex-col gap-6"
                   >
                     <HabitsCard 
@@ -948,10 +951,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   {/* Календарь и цели: 3/12 */}
                   <motion.div
                     key="overview-calendar"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2, delay: 0.1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
                     className="lg:col-span-3 space-y-6"
                   >
                     <HealthTrackerCard 
