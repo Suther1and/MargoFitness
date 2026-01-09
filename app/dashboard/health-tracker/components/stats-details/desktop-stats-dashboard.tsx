@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import { 
   Scale, Droplets, Footprints, Camera, 
   Smile, Utensils, Flame, Moon, Coffee,
-  BarChart3, Calendar, ChevronDown
+  BarChart3, ChevronLeft, ChevronRight
 } from "lucide-react"
-import { motion } from "framer-motion"
-import { format } from "date-fns"
+import { format, startOfMonth, startOfWeek, addDays, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, subDays, subYears, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { StatsView, WidgetId, PeriodType, DateRange, TrackerSettings, Habit } from "../../types"
@@ -22,8 +22,6 @@ import { StatsMood } from "./stats-mood"
 import { StatsPhotos } from "./stats-photos"
 import { StatsHabits } from "./stats-habits"
 import { DailyMetrics } from "../../types"
-import { StatsDatePickerDialog } from "../stats-date-picker-dialog"
-import { HealthTrackerCard } from "../health-tracker-card"
 
 interface DesktopStatsDashboardProps {
   userId: string | null
@@ -60,7 +58,6 @@ export function DesktopStatsDashboard({
   currentDateRange
 }: DesktopStatsDashboardProps) {
   const [activeView, setActiveView] = useState<StatsView>('overall')
-  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   
   const visibleItems = NAV_ITEMS.filter(item => {
     if (item.id === 'overall') return true
@@ -144,36 +141,184 @@ export function DesktopStatsDashboard({
 
         {/* Календарь выбора периода - занимает 3 колонки */}
         <div className="col-span-3">
-          <HealthTrackerCard
-            className="p-4"
-            title="Период"
-            subtitle={
-              currentPeriodType === '7d' ? '7 дней' :
-              currentPeriodType === '30d' ? '30 дней' :
-              currentPeriodType === '6m' ? '6 месяцев' :
-              currentPeriodType === '1y' ? '1 год' :
-              `${format(currentDateRange.start, 'd MMM', { locale: ru })} - ${format(currentDateRange.end, 'd MMM', { locale: ru })}`
-            }
-            icon={Calendar}
-            iconColor="text-sky-500"
-            iconBg="bg-sky-500/10"
-            rightAction={
-              <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
-                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                  <ChevronDown className="w-4 h-4 text-white/60 hover:text-white/80 transition-colors" />
-                </motion.div>
+          <div className="space-y-8">
+            {/* Информация о периоде */}
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <motion.div 
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.6, 1, 0.6]
+                  }}
+                  transition={{ 
+                    duration: 2.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]" 
+                />
+                <span className="text-[10px] font-black text-sky-500 uppercase tracking-[0.3em]">Период анализа</span>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-2xl font-black text-white tracking-tighter leading-none">
+                  {format(currentDateRange.start, 'd MMM', { locale: ru })} 
+                  <span className="mx-1.5 text-white/10">—</span> 
+                  {format(currentDateRange.end, 'd MMM', { locale: ru })}
+                </div>
+                <div className="text-[10px] text-white/30 font-bold uppercase tracking-widest flex items-center gap-2">
+                  <span>{differenceInDays(currentDateRange.end, currentDateRange.start) + 1} дней выбрано</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Контейнер календаря */}
+            <div className="p-3 rounded-[2rem] bg-black/20 border border-white/5 backdrop-blur-md relative overflow-hidden group">
+              {/* Едва заметный внутренний градиент */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+              
+              <div className="relative z-10">
+                <StatsSidebarCalendar 
+                  currentPeriodType={currentPeriodType}
+                  currentDateRange={currentDateRange}
+                  onPeriodSelect={onPeriodSelect}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StatsSidebarCalendar({ 
+  currentPeriodType, 
+  currentDateRange,
+  onPeriodSelect
+}: { 
+  currentPeriodType: PeriodType,
+  currentDateRange: DateRange,
+  onPeriodSelect: (periodType: PeriodType, dateRange: DateRange) => void
+}) {
+  const [viewDate, setViewDate] = useState(new Date())
+  const [selectedStart, setSelectedStart] = useState<Date | null>(currentDateRange.start)
+  const [selectedEnd, setSelectedEnd] = useState<Date | null>(currentDateRange.end)
+
+  useEffect(() => {
+    setSelectedStart(currentDateRange.start)
+    setSelectedEnd(currentDateRange.end)
+    setViewDate(currentDateRange.end)
+  }, [currentDateRange])
+
+  const monthStart = startOfMonth(viewDate)
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
+  const monthDays = eachDayOfInterval({ start: calendarStart, end: addDays(calendarStart, 41) })
+
+  const PERIOD_BUTTONS = [
+    { id: '7d' as PeriodType, label: '7д' },
+    { id: '30d' as PeriodType, label: '30д' },
+    { id: '6m' as PeriodType, label: '6м' },
+    { id: '1y' as PeriodType, label: '1г' },
+  ]
+
+  const handlePeriodClick = (periodId: PeriodType) => {
+    const today = new Date()
+    let start: Date
+    let end: Date = today
+
+    switch (periodId) {
+      case '7d': start = subDays(today, 6); break
+      case '30d': start = subDays(today, 29); break
+      case '6m': start = subMonths(today, 6); break
+      case '1y': start = subYears(today, 1); break
+      default: return
+    }
+    onPeriodSelect(periodId, { start, end })
+  }
+
+  const handleDayClick = (day: Date) => {
+    if (!selectedStart || selectedEnd) {
+      setSelectedStart(day)
+      setSelectedEnd(null)
+    } else {
+      const start = day < selectedStart ? day : selectedStart
+      const end = day < selectedStart ? selectedStart : day
+      setSelectedStart(start)
+      setSelectedEnd(end)
+      onPeriodSelect('custom', { start, end })
+    }
+  }
+
+  return (
+    <div className="w-full">
+      <div className="space-y-5">
+        {/* Кнопки быстрого выбора */}
+        <div className="flex bg-white/[0.03] p-1 rounded-xl border border-white/5">
+          {PERIOD_BUTTONS.map((period) => (
+            <button
+              key={period.id}
+              onClick={() => handlePeriodClick(period.id)}
+              className={cn(
+                "relative flex-1 px-1 py-2 text-[10px] font-black uppercase tracking-wider transition-colors duration-200 rounded-lg",
+                currentPeriodType === period.id ? "text-black" : "text-white/40 hover:text-white/60"
+              )}
+            >
+              {currentPeriodType === period.id && (
+                <motion.div
+                  layoutId="activePeriodPickerSidebar"
+                  className="absolute inset-0 bg-sky-500 rounded-lg shadow-lg shadow-sky-500/30"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                />
+              )}
+              <span className="relative z-10">{period.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Навигация по месяцам */}
+        <div className="flex items-center justify-between px-1">
+          <button onClick={() => setViewDate(subMonths(viewDate, 1))} className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors">
+            <ChevronLeft className="w-4 h-4 text-white/40" />
+          </button>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">
+            {format(viewDate, 'LLLL yyyy', { locale: ru })}
+          </span>
+          <button onClick={() => setViewDate(addMonths(viewDate, 1))} className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors">
+            <ChevronRight className="w-4 h-4 text-white/40" />
+          </button>
+        </div>
+
+        {/* Сетка календаря */}
+        <div className="grid grid-cols-7 gap-1">
+          {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d) => (
+            <div key={d} className="text-[9px] font-black text-white/20 text-center uppercase pb-1 tracking-widest">{d}</div>
+          ))}
+          {monthDays.map((day, idx) => {
+            const isStart = selectedStart && isSameDay(day, selectedStart)
+            const isEnd = selectedEnd && isSameDay(day, selectedEnd)
+            const inRange = selectedStart && selectedEnd && day > selectedStart && day < selectedEnd
+            const isCurrentMonth = isSameMonth(day, viewDate)
+            const isToday = isSameDay(day, new Date())
+
+            return (
+              <button
+                key={idx}
+                onClick={() => handleDayClick(day)}
+                className={cn(
+                  "relative aspect-square rounded-lg flex items-center justify-center text-[12px] font-black transition-all",
+                  (isStart || isEnd) ? "bg-sky-500 text-black shadow-lg shadow-sky-500/20" : 
+                  inRange ? "bg-sky-500/20 text-sky-400" : "hover:bg-white/5",
+                  !isCurrentMonth && "opacity-20"
+                )}
+              >
+                {format(day, 'd')}
+                {!isStart && !isEnd && isToday && (
+                  <div className="absolute bottom-1 w-1 h-1 rounded-full bg-sky-500/50" />
+                )}
               </button>
-            }
-          >
-            <StatsDatePickerDialog
-              isOpen={isCalendarExpanded}
-              onClose={() => setIsCalendarExpanded(false)}
-              onPeriodSelect={onPeriodSelect}
-              currentPeriodType={currentPeriodType}
-              currentDateRange={currentDateRange}
-              standalone={true}
-            />
-          </HealthTrackerCard>
+            )
+          })}
         </div>
       </div>
     </div>
