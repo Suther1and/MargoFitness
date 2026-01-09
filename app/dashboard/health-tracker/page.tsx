@@ -399,7 +399,7 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                         <>Моя<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
                       )}
                       {activeTab === 'workouts' && (
-                        <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-orange-600">Тренировки</span></>
+                        <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500">Тренировки</span></>
                       )}
                       {activeTab === 'goals' && (
                         <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-emerald-400">Цели</span></>
@@ -618,7 +618,7 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                         className={cn(
                           "flex-1 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'widgets'
-                            ? "bg-teal-500 text-black shadow-lg shadow-teal-500/20"
+                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
                         )}
                       >
