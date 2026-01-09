@@ -43,6 +43,12 @@ import { ProfileTab } from './health-tracker/components/profile-tab'
 import { DesktopProfileCard } from './health-tracker/components/desktop-profile-card'
 import { DesktopSubscriptionCard } from './health-tracker/components/desktop-subscription-card'
 import { DesktopBonusCard } from './health-tracker/components/desktop-bonus-card'
+import { CompactProfileCard } from './health-tracker/components/compact-profile-card'
+import { CompactSubscriptionCard } from './health-tracker/components/compact-subscription-card'
+import { CompactBonusCard } from './health-tracker/components/compact-bonus-card'
+import { DesktopNavigation } from './health-tracker/components/desktop-navigation'
+import { BonusesTab } from './health-tracker/components/bonuses-tab'
+import { SubscriptionTab } from './health-tracker/components/subscription-tab'
 import { AchievementUnlockedToast, useAchievementNotifications } from './health-tracker/components/achievement-unlocked-toast'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './health-tracker/types'
@@ -89,6 +95,8 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [userId, setUserId] = useState<string | null>(null)
   const [profile, setProfile] = useState<any | null>(initialProfile)
   const [bonusStats, setBonusStats] = useState<any | null>(initialBonusStats)
+  const [referralStats, setReferralStats] = useState<any | null>(null)
+  const [referralLink, setReferralLink] = useState<string | null>(null)
   
   // State для модалок профиля (desktop)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
@@ -109,6 +117,15 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             if (result.success) setBonusStats(result.data)
           })
         }
+        // Загружаем данные рефералов для вкладки бонусов
+        import('@/lib/actions/referrals').then(m => {
+          m.getReferralStats(data.user.id).then(result => {
+            if (result.data) setReferralStats(result.data)
+          })
+          m.getReferralLink(data.user.id).then(result => {
+            if (result.link) setReferralLink(result.link)
+          })
+        })
       }
     })
   }, [initialProfile, initialBonusStats])
@@ -127,7 +144,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     setPeriod: handleStatsPeriodSelect 
   } = useStatsDateRange()
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings' | 'bonuses' | 'subscription'>(
     (tabParam as any) || 'overview'
   )
   const [overviewTab, setOverviewTab] = useState<'widgets' | 'habits'>('widgets')
@@ -500,20 +517,25 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 mt-9"
+                        className="flex items-center gap-3 mt-9"
                       >
-                        <button 
-                          onClick={() => handleTabChange('stats')}
-                          className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
-                        >
-                          <BarChart3 className="w-5 h-5 text-white/40 group-hover:text-white" />
-                        </button>
-                        <button 
-                          onClick={() => handleTabChange('settings')}
-                          className="p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
-                        >
-                          <Settings className="w-5 h-5 text-white/40 group-hover:text-white" />
-                        </button>
+                        {profile && (
+                          <>
+                            <CompactProfileCard 
+                              profile={profile}
+                              onEditClick={() => setProfileDialogOpen(true)}
+                            />
+                            <CompactSubscriptionCard 
+                              profile={profile}
+                              onRenewalClick={() => setRenewalModalOpen(true)}
+                              onUpgradeClick={() => setUpgradeModalOpen(true)}
+                            />
+                            <CompactBonusCard 
+                              bonusStats={bonusStats}
+                              profile={profile}
+                            />
+                          </>
+                        )}
                       </motion.div>
                     </div>
                   )}
@@ -703,18 +725,24 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 </div>
 
                 {activeTab === 'settings' && (
-                  <div className="hidden lg:block max-w-5xl mx-auto">
-                    <SettingsTab 
-                      userId={userId}
-                      onBack={() => setActiveTab('overview')} 
-                      selectedDate={selectedDate}
-                      onDateChange={setSelectedDate}
-                      isCalendarExpanded={isCalendarExpanded}
-                      setIsCalendarExpanded={setIsCalendarExpanded}
-                      activeSubTab={settingsSubTab}
-                      setActiveSubTab={setSettingsSubTab}
-                      isMobile={false}
+                  <div className="hidden lg:flex gap-6 w-full">
+                    <DesktopNavigation 
+                      activeTab={activeTab}
+                      onTabChange={(tab) => handleTabChange(tab as any)}
                     />
+                    <div className="flex-1 max-w-5xl mx-auto">
+                      <SettingsTab 
+                        userId={userId}
+                        onBack={() => setActiveTab('overview')} 
+                        selectedDate={selectedDate}
+                        onDateChange={setSelectedDate}
+                        isCalendarExpanded={isCalendarExpanded}
+                        setIsCalendarExpanded={setIsCalendarExpanded}
+                        activeSubTab={settingsSubTab}
+                        setActiveSubTab={setSettingsSubTab}
+                        isMobile={false}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -730,10 +758,68 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   </div>
                 )}
 
+                {activeTab === 'bonuses' && (
+                  <div className="hidden lg:flex gap-6 w-full">
+                    <DesktopNavigation 
+                      activeTab={activeTab}
+                      onTabChange={(tab) => handleTabChange(tab as any)}
+                    />
+                    <div className="flex-1">
+                      <BonusesTab 
+                        bonusStats={bonusStats}
+                        referralStats={referralStats}
+                        referralLink={referralLink}
+                        userId={userId || ''}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'subscription' && profile && (
+                  <div className="hidden lg:flex gap-6 w-full">
+                    <DesktopNavigation 
+                      activeTab={activeTab}
+                      onTabChange={(tab) => handleTabChange(tab as any)}
+                    />
+                    <div className="flex-1">
+                      <SubscriptionTab 
+                        profile={profile}
+                        onRenewalClick={() => setRenewalModalOpen(true)}
+                        onUpgradeClick={() => setUpgradeModalOpen(true)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'workouts' && (
+                  <div className="hidden lg:flex gap-6 w-full">
+                    <DesktopNavigation 
+                      activeTab={activeTab}
+                      onTabChange={(tab) => handleTabChange(tab as any)}
+                    />
+                    <div className="flex-1">
+                      <WorkoutsTab />
+                    </div>
+                  </div>
+                )}
+
                 {activeTab === 'overview' && (
                   <div className="hidden lg:grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
-                    {/* Левая колонка: виджеты здоровья */}
-                    <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
+                    {/* Левая навигация: фиксированная ширина */}
+                    <div className="col-span-1 relative" style={{ paddingTop: 0, paddingBottom: 0 }}>
+                      <DesktopNavigation 
+                        activeTab={activeTab}
+                        onTabChange={(tab) => handleTabChange(tab as any)}
+                      />
+                      {/* Элегантный разделитель */}
+                      <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                        <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+                        <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
+                      </div>
+                    </div>
+                    
+                    {/* Виджеты здоровья: 4/12 */}
+                    <div className="lg:col-span-4 flex flex-col gap-6">
                     {!hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
@@ -786,8 +872,8 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     )}
                   </div>
 
-                  {/* Средняя колонка: привычки */}
-                  <div className="lg:col-span-3 flex flex-col gap-6 order-3 lg:order-2">
+                  {/* Привычки: 4/12 */}
+                  <div className="lg:col-span-4 flex flex-col gap-6">
                     <HabitsCard 
                       habits={data.habits} 
                       onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
@@ -798,27 +884,8 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     />
                   </div>
 
-                  {/* Колонка профиля: профиль + подписка + бонусы */}
-                  {profile && (
-                    <div className="lg:col-span-2 flex flex-col gap-6 order-4 lg:order-3">
-                      <DesktopProfileCard 
-                        profile={profile} 
-                        onEditClick={() => setProfileDialogOpen(true)}
-                      />
-                      <DesktopSubscriptionCard 
-                        profile={profile}
-                        onRenewalClick={() => setRenewalModalOpen(true)}
-                        onUpgradeClick={() => setUpgradeModalOpen(true)}
-                      />
-                      <DesktopBonusCard 
-                        bonusStats={bonusStats}
-                        profile={profile}
-                      />
-                    </div>
-                  )}
-
-                  {/* Правая колонка: календарь, цели, достижения */}
-                  <div className="lg:col-span-3 space-y-6 order-1 lg:order-4">
+                  {/* Календарь и цели: 3/12 */}
+                  <div className="lg:col-span-3 space-y-6">
                     <HealthTrackerCard 
                       className="p-4" 
                       title="Календарь" 
