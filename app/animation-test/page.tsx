@@ -12,7 +12,6 @@ import { WeightCardH } from '@/app/dashboard/health-tracker/components/weight-ca
 import { SleepCardH } from '@/app/dashboard/health-tracker/components/sleep-card-h'
 import { CaffeineCardH } from '@/app/dashboard/health-tracker/components/caffeine-card-h'
 import { MoodEnergyCardH } from '@/app/dashboard/health-tracker/components/mood-energy-card-h'
-import { NotesCard } from '@/app/dashboard/health-tracker/components/notes-card'
 import { GoalsSummaryCard } from '@/app/dashboard/health-tracker/components/goals-summary-card'
 import { MOCK_DATA } from '@/app/dashboard/health-tracker/types'
 import { useTrackerSettings } from '@/app/dashboard/health-tracker/hooks/use-tracker-settings'
@@ -24,7 +23,6 @@ const MemoizedWeightCard = React.memo(WeightCardH)
 const MemoizedSleepCard = React.memo(SleepCardH)
 const MemoizedCaffeineCard = React.memo(CaffeineCardH)
 const MemoizedMoodEnergyCard = React.memo(MoodEnergyCardH)
-const MemoizedNotesCard = React.memo(NotesCard)
 const MemoizedGoalsSummaryCard = React.memo(GoalsSummaryCard)
 
 interface DailyHabit {
@@ -241,10 +239,6 @@ export default function AnimationTestRealWorld() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <MemoizedNotesCard 
-              value={trackerData.notes} 
-              onUpdate={(val) => handleMetricUpdate('notes', val)} 
-            />
             <MemoizedGoalsSummaryCard data={trackerData} settings={settings} />
           </div>
         </div>

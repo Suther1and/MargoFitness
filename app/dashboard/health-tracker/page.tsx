@@ -16,6 +16,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+import { ProfileEditDialog } from '@/components/profile-edit-dialog'
+import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
+import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
+
 // Импорт напрямую - убираем ленивую загрузку для лучшей производительности
 import SettingsTab from './components/settings-tab'
 
@@ -36,6 +40,9 @@ import { WeekNavigator } from './components/week-navigator'
 import StatsTab from './components/stats-tab'
 import { WorkoutsTab } from './components/workouts-tab'
 import { ProfileTab } from './components/profile-tab'
+import { DesktopProfileCard } from './components/desktop-profile-card'
+import { DesktopSubscriptionCard } from './components/desktop-subscription-card'
+import { DesktopBonusCard } from './components/desktop-bonus-card'
 import { AchievementUnlockedToast, useAchievementNotifications } from './components/achievement-unlocked-toast'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './types'
@@ -90,6 +97,11 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
   const [userId, setUserId] = useState<string | null>(null)
   const [profile, setProfile] = useState<any | null>(initialProfile)
   const [bonusStats, setBonusStats] = useState<any | null>(initialBonusStats)
+  
+  // State для модалок профиля (desktop)
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false)
+  const [renewalModalOpen, setRenewalModalOpen] = useState(false)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   
   useEffect(() => {
     const supabase = createClient()
@@ -600,13 +612,13 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                   {activeTab === 'overview' && (
                   <div className="space-y-6">
                     {/* Tabs переключатель */}
-                    <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 mb-4">
                       <button
                         onClick={() => setOverviewTab('widgets')}
                         className={cn(
-                          "flex-1 py-3 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          "flex-1 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'widgets'
-                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                            ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
                         )}
                       >
@@ -615,15 +627,18 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                       <button
                         onClick={() => setOverviewTab('habits')}
                         className={cn(
-                          "flex-1 py-3 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                          "flex-1 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                           overviewTab === 'habits'
-                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                            ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-500/20"
                             : "text-white/40 hover:text-white/60 hover:bg-white/5"
                         )}
                       >
                         Привычки
                       </button>
                     </div>
+
+                    {/* Разделитель */}
+                    <div className="h-px bg-white/5 mb-4" />
 
                     {/* Контент в зависимости от выбранного таба */}
                     {overviewTab === 'widgets' ? (
@@ -775,8 +790,8 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                     )}
                   </div>
 
-                  {/* Средняя колонка: привычки + заметки */}
-                  <div className="lg:col-span-5 flex flex-col gap-6 order-3 lg:order-2">
+                  {/* Средняя колонка: привычки */}
+                  <div className="lg:col-span-3 flex flex-col gap-6 order-3 lg:order-2">
                     <HabitsCard 
                       habits={data.habits} 
                       onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
@@ -787,8 +802,27 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
                     />
                   </div>
 
+                  {/* Колонка профиля: профиль + подписка + бонусы */}
+                  {profile && (
+                    <div className="lg:col-span-2 flex flex-col gap-6 order-4 lg:order-3">
+                      <DesktopProfileCard 
+                        profile={profile} 
+                        onEditClick={() => setProfileDialogOpen(true)}
+                      />
+                      <DesktopSubscriptionCard 
+                        profile={profile}
+                        onRenewalClick={() => setRenewalModalOpen(true)}
+                        onUpgradeClick={() => setUpgradeModalOpen(true)}
+                      />
+                      <DesktopBonusCard 
+                        bonusStats={bonusStats}
+                        profile={profile}
+                      />
+                    </div>
+                  )}
+
                   {/* Правая колонка: календарь, цели, достижения */}
-                  <div className="lg:col-span-3 space-y-6 order-1 lg:order-3">
+                  <div className="lg:col-span-3 space-y-6 order-1 lg:order-4">
                     <HealthTrackerCard 
                       className="p-4" 
                       title="Календарь" 
@@ -858,6 +892,32 @@ function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonu
           </button>
         </div>
       </div>
+
+      {/* Desktop Modals */}
+      {profile && (
+        <>
+          <ProfileEditDialog
+            open={profileDialogOpen}
+            onOpenChange={setProfileDialogOpen}
+            profile={profile}
+          />
+          
+          <SubscriptionRenewalModal
+            open={renewalModalOpen}
+            onOpenChange={setRenewalModalOpen}
+            currentTier={profile.subscription_tier}
+            currentExpires={profile.subscription_expires_at}
+            userId={profile.id}
+          />
+          
+          <SubscriptionUpgradeModal
+            open={upgradeModalOpen}
+            onOpenChange={setUpgradeModalOpen}
+            currentTier={profile.subscription_tier}
+            userId={profile.id}
+          />
+        </>
+      )}
     </>
   )
 }

@@ -19,7 +19,7 @@ export function WorkoutsTab() {
   return (
     <div className="space-y-6 pb-24 md:pb-10">
       {/* Tabs переключатель */}
-      <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10">
+      <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 mb-4">
         {tabs.map((tab) => {
           const Icon = tab.icon
           return (
@@ -27,7 +27,7 @@ export function WorkoutsTab() {
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
+                "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider",
                 activeSubTab === tab.id
                   ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
                   : "text-white/40 hover:text-white/60 hover:bg-white/5"
@@ -39,6 +39,9 @@ export function WorkoutsTab() {
           )
         })}
       </div>
+
+      {/* Разделитель */}
+      <div className="h-px bg-white/5 mb-4" />
 
       {/* Контент */}
       <AnimatePresence mode="wait">

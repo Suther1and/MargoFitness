@@ -30,7 +30,6 @@ const NAV_BUTTONS: NavButton[] = [
   { id: 'sleep', label: 'Сон', icon: Moon, color: 'text-indigo-400' },
   { id: 'mood', label: 'Настроение', icon: Smile, color: 'text-pink-400' },
   { id: 'nutrition', label: 'Питание', icon: Utensils, color: 'text-violet-400' },
-  { id: 'notes', label: 'Заметки', icon: NotebookText, color: 'text-sky-400' },
   { id: 'photos', label: 'Фото', icon: Camera, color: 'text-violet-400' },
 ]
 

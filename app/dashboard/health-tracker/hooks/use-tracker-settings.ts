@@ -20,7 +20,6 @@ const DEFAULT_SETTINGS: TrackerSettings = {
     mood: { enabled: false, goal: null, inDailyPlan: false },
     nutrition: { enabled: false, goal: null, inDailyPlan: false },
     photos: { enabled: false, goal: null, inDailyPlan: false },
-    notes: { enabled: false, goal: null, inDailyPlan: false },
   },
   userParams: {
     height: null,
