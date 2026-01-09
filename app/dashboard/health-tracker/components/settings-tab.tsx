@@ -553,32 +553,24 @@ export default function SettingsTab({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="space-y-10 settings-content-container w-full"
+              className="settings-content-container w-full"
             >
-            {widgetGroups.map((group) => {
-              const GroupIcon = group.icon
-              return (
-                <div key={group.name} className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <GroupIcon className="w-4 h-4 text-green-500/50" strokeWidth={2.5} />
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 whitespace-nowrap">{group.name}</h2>
-                    <div className="h-px bg-white/5 w-full" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                    {group.widgets.map(widgetId => {
-                      const id = widgetId as WidgetId
-                      const config = WIDGET_CONFIGS[id]
-                      const widget = localSettings.widgets[id]
-                      const Icon = ICON_MAP[id]
-                      return (
-                        <div
-                          key={id}
-                          onClick={() => handleToggle(id)}
-                          className={cn(
-                            "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
-                            widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
-                          )}
-                        >
+            {/* Объединенная сетка всех виджетов без группировки */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {widgetGroups.flatMap(group => group.widgets).map(widgetId => {
+                const id = widgetId as WidgetId
+                const config = WIDGET_CONFIGS[id]
+                const widget = localSettings.widgets[id]
+                const Icon = ICON_MAP[id]
+                return (
+                  <div
+                    key={id}
+                    onClick={() => handleToggle(id)}
+                    className={cn(
+                      "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
+                      widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
+                    )}
+                  >
                           <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
                             <div className="flex items-start justify-between mb-3 relative">
                               <div className="flex items-center gap-3">
@@ -678,11 +670,9 @@ export default function SettingsTab({
                           </div>
                         </div>
                       )
-                    })}
-                  </div>
+                    })
+                  }
                 </div>
-              )
-            })}
             </motion.div>
           ) : (
             <motion.div
