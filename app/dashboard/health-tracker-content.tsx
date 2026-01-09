@@ -769,7 +769,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.15 }}
-                          className="max-w-5xl mx-auto"
                         >
                           <SettingsTab 
                             userId={userId}

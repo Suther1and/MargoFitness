@@ -579,8 +579,8 @@ export default function SettingsTab({
                             widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
                           )}
                         >
-                          <div className={cn("relative z-10 p-5 md:px-6 md:py-5 flex flex-col h-full min-h-[145px] md:min-h-[120px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
-                            <div className="flex items-start justify-between mb-4 relative">
+                          <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
+                            <div className="flex items-start justify-between mb-3 relative">
                               <div className="flex items-center gap-3">
                                 <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center border shrink-0", widget.enabled ? "bg-green-500/20 border-green-500/20 text-green-400" : "bg-white/5 border-white/5 text-white/20")}>
                                   <Icon className="w-5 h-5" strokeWidth={2.25} />
