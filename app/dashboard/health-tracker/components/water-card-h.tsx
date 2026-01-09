@@ -15,12 +15,6 @@ interface WaterCardHProps {
 }
 
 const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: boolean }) => {
-  const animationConfig = useMemo(() => ({
-    initial: { width: 0 },
-    animate: { width: `${percentage}%` },
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const }
-  }), [percentage])
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[2rem]">
       <motion.div
@@ -30,8 +24,14 @@ const WaveBackground = ({ percentage, isDone }: { percentage: number; isDone: bo
             ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-400/20 to-emerald-500/15'
             : 'bg-gradient-to-r from-blue-600/15 via-blue-500/20 to-blue-600/15'
         )}
-        {...animationConfig}
-        layout
+        initial={{ width: 0 }}
+        animate={{ width: `${percentage}%` }}
+        transition={{
+          type: "spring",
+          stiffness: 100,
+          damping: 20,
+          mass: 0.5,
+        }}
       />
     </div>
   )
@@ -48,11 +48,15 @@ const BubblesField = memo(({ isDone, percentage }: { isDone: boolean; percentage
     })), [])
 
   return (
-    <div 
+    <motion.div 
       className="absolute inset-0 pointer-events-none opacity-40 overflow-hidden rounded-[2rem]"
-      style={{ 
-        clipPath: `inset(0 ${100 - percentage}% 0 0)`,
-        transition: 'clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+      initial={{ clipPath: 'inset(0 100% 0 0)' }}
+      animate={{ clipPath: `inset(0 ${100 - percentage}% 0 0)` }}
+      transition={{
+        type: "spring",
+        stiffness: 100,
+        damping: 20,
+        mass: 0.5,
       }}
     >
       {bubbles.map(b => (
@@ -82,7 +86,7 @@ const BubblesField = memo(({ isDone, percentage }: { isDone: boolean; percentage
           }}
         />
       ))}
-    </div>
+    </motion.div>
   )
 })
 
