@@ -421,10 +421,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         <>Мой<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-600">Профиль</span></>
                       )}
                       {activeTab === 'settings' && (
-                        <>Настройки<span className={cn(
+                        <>Мои<span className={cn(
                           "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
                           settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
-                        )}>трекера</span></>
+                        )}>Настройки</span></>
                       )}
                     </motion.h1>
                   </AnimatePresence>
@@ -458,22 +458,22 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           
                           <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap">
                             {activeTab === 'settings' && (
-                              <>Настройки <span className={cn(
+                              <>Мои<span className={cn(
                                 "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
                                 settingsSubTab === 'widgets' ? "from-green-400 to-emerald-600" : "from-amber-400 to-orange-600"
-                              )}>трекера</span></>
+                              )}>Настройки</span></>
                             )}
                             {activeTab === 'stats' && (
-                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
+                              <>Моя<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500">Статистика</span></>
                             )}
                             {activeTab === 'bonuses' && (
-                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-600">Бонусы</span></>
+                              <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-600">Бонусы</span></>
                             )}
                             {activeTab === 'subscription' && (
-                              <>Моя <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600">Подписка</span></>
+                              <>Моя<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600">Подписка</span></>
                             )}
                             {activeTab === 'workouts' && (
-                              <>Мои <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500">Тренировки</span></>
+                              <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500">Тренировки</span></>
                             )}
                           </h1>
                         </div>
@@ -573,7 +573,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               onExitComplete={() => window.scrollTo(0, 0)}
             >
               <motion.div
-                key={activeTab === 'settings' ? 'settings' : 'content'}
+                key={activeTab}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -755,7 +755,14 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <div className="flex-1 max-w-5xl mx-auto">
+                    <motion.div
+                      key="settings-content"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1 max-w-5xl mx-auto"
+                    >
                       <SettingsTab 
                         userId={userId}
                         onBack={() => setActiveTab('overview')} 
@@ -767,7 +774,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         setActiveSubTab={setSettingsSubTab}
                         isMobile={false}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -777,7 +784,14 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <div className="flex-1">
+                    <motion.div
+                      key="stats-content"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1"
+                    >
                       <StatsTab 
                         userId={userId}
                         periodType={statsPeriodType} 
@@ -785,7 +799,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         data={data} 
                         onPeriodSelect={handleStatsPeriodSelect}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -795,14 +809,21 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <div className="flex-1">
+                    <motion.div
+                      key="bonuses-content"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1"
+                    >
                       <BonusesTab 
                         bonusStats={bonusStats}
                         referralStats={referralStats}
                         referralLink={referralLink}
                         userId={userId || ''}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -812,13 +833,20 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <div className="flex-1">
+                    <motion.div
+                      key="subscription-content"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1"
+                    >
                       <SubscriptionTab 
                         profile={profile}
                         onRenewalClick={() => setRenewalModalOpen(true)}
                         onUpgradeClick={() => setUpgradeModalOpen(true)}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -828,9 +856,16 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       activeTab={activeTab}
                       onTabChange={(tab) => handleTabChange(tab as any)}
                     />
-                    <div className="flex-1">
+                    <motion.div
+                      key="workouts-content"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex-1"
+                    >
                       <WorkoutsTab />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -850,7 +885,14 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     </div>
                     
                     {/* Виджеты здоровья: 4/12 */}
-                    <div className="lg:col-span-4 flex flex-col gap-6">
+                    <motion.div
+                      key="overview-widgets"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="lg:col-span-4 flex flex-col gap-6"
+                    >
                     {!hasMainWidgets ? (
                       <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
@@ -901,10 +943,17 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       )}
                       </>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* Привычки: 4/12 */}
-                  <div className="lg:col-span-4 flex flex-col gap-6">
+                  <motion.div
+                    key="overview-habits"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="lg:col-span-4 flex flex-col gap-6"
+                  >
                     <HabitsCard 
                       habits={data.habits} 
                       onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
@@ -913,10 +962,17 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         setSettingsSubTab('habits')
                       }}
                     />
-                  </div>
+                  </motion.div>
 
                   {/* Календарь и цели: 3/12 */}
-                  <div className="lg:col-span-3 space-y-6">
+                  <motion.div
+                    key="overview-calendar"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                    className="lg:col-span-3 space-y-6"
+                  >
                     <HealthTrackerCard 
                       className="p-4" 
                       title="Календарь" 
@@ -952,7 +1008,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     {settings.widgets.photos?.enabled && (
                       <DailyPhotosCard photos={data.dailyPhotos} />
                     )}
-                  </div>
+                  </motion.div>
                 </div>
                 )}
               </motion.div>
