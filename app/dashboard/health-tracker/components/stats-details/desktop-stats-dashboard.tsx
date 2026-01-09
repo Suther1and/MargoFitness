@@ -134,16 +134,23 @@ export function DesktopStatsDashboard({
 
       {/* Grid layout: Контент + Календарь справа */}
       <div className="grid grid-cols-12 gap-6">
-        {/* Основной контент - занимает 9 колонок */}
-        <div className="col-span-9">
+        {/* Основной контент - занимает 8 колонок */}
+        <div className="col-span-8">
           {renderStatsContent()}
         </div>
 
-        {/* Календарь выбора периода - занимает 3 колонки */}
-        <div className="col-span-3">
-          <div className="space-y-8">
-            {/* Информация о периоде */}
-            <div className="relative">
+        {/* Календарь выбора периода - занимает 3 колонки, прижат к правому краю */}
+        <div className="col-span-3 col-start-10">
+          <div className="flex gap-6">
+            {/* Вертикальный разделитель */}
+            <div className="relative self-stretch flex items-center">
+              <div className="w-px h-full bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+              <div className="absolute inset-0 w-px bg-gradient-to-b from-transparent via-sky-500/5 to-transparent blur-sm" />
+            </div>
+            
+            <div className="flex-1 space-y-8">
+              {/* Информация о периоде */}
+              <div className="relative">
               <div className="flex items-center gap-2 mb-3">
                 <motion.div 
                   animate={{ 
@@ -183,6 +190,7 @@ export function DesktopStatsDashboard({
                   currentDateRange={currentDateRange}
                   onPeriodSelect={onPeriodSelect}
                 />
+              </div>
               </div>
             </div>
           </div>
