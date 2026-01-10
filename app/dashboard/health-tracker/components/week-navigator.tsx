@@ -16,6 +16,9 @@ interface WeekNavigatorProps {
   isExpanded?: boolean
   daysCount?: 1 | 3 | 7
   disableViewSwitch?: boolean
+  minDate?: Date | null  // Минимальная доступная дата (дата регистрации)
+  maxDate?: Date | null  // Максимальная доступная дата (сегодня для не-админов)
+  isAdmin?: boolean      // Флаг админа
 }
 
 export function WeekNavigator({ 
@@ -26,7 +29,10 @@ export function WeekNavigator({
   minimal = false,
   isExpanded = false,
   daysCount = 7,
-  disableViewSwitch = false
+  disableViewSwitch = false,
+  minDate = null,
+  maxDate = null,
+  isAdmin = false
 }: WeekNavigatorProps) {
   const [viewDate, setViewDate] = useState(selectedDate)
 
@@ -34,6 +40,52 @@ export function WeekNavigator({
   useEffect(() => {
     setViewDate(selectedDate)
   }, [selectedDate, isExpanded])
+
+  // Функция проверки доступности даты
+  const isDateDisabled = (date: Date): boolean => {
+    if (isAdmin) return false // Админу все доступно
+    
+    const dateOnly = new Date(date)
+    dateOnly.setHours(0, 0, 0, 0)
+    
+    // Проверяем минимальную дату (дата регистрации)
+    if (minDate) {
+      const minDateOnly = new Date(minDate)
+      minDateOnly.setHours(0, 0, 0, 0)
+      if (dateOnly < minDateOnly) return true
+    }
+    
+    // Проверяем максимальную дату (сегодня)
+    if (maxDate) {
+      const maxDateOnly = new Date(maxDate)
+      maxDateOnly.setHours(0, 0, 0, 0)
+      if (dateOnly > maxDateOnly) return true
+    }
+    
+    return false
+  }
+  
+  // Тип недоступности: before = до регистрации, after = будущие дни
+  const getDisabledType = (date: Date): 'before' | 'after' | null => {
+    if (isAdmin) return null
+    
+    const dateOnly = new Date(date)
+    dateOnly.setHours(0, 0, 0, 0)
+    
+    if (minDate) {
+      const minDateOnly = new Date(minDate)
+      minDateOnly.setHours(0, 0, 0, 0)
+      if (dateOnly < minDateOnly) return 'before'
+    }
+    
+    if (maxDate) {
+      const maxDateOnly = new Date(maxDate)
+      maxDateOnly.setHours(0, 0, 0, 0)
+      if (dateOnly > maxDateOnly) return 'after'
+    }
+    
+    return null
+  }
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   
@@ -91,20 +143,26 @@ export function WeekNavigator({
                 {displayDays.map((day, index) => {
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
+                  const disabled = isDateDisabled(day)
+                  const disabledType = getDisabledType(day)
                   
                   return (
                     <button
                       key={index}
-                      onClick={() => onDateChange(day)}
+                      onClick={() => !disabled && onDateChange(day)}
+                      disabled={disabled}
                       className={cn(
                         "relative rounded-xl flex flex-col items-center justify-center transform-gpu transition-colors",
                         minimal 
                           ? (daysCount === 3 ? "w-11 h-12" : "flex-1 max-w-[40px] h-12") 
                           : "w-9 h-14",
                         minimal && "bg-white/5 border border-white/5",
-                        isSelected
+                        disabled && "cursor-not-allowed",
+                        disabled && disabledType === 'before' && "opacity-30 bg-red-500/5 border-red-500/10",
+                        disabled && disabledType === 'after' && "opacity-30",
+                        !disabled && isSelected
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-transparent"
-                          : "hover:bg-white/10 text-white/60"
+                          : !disabled && "hover:bg-white/10 text-white/60"
                       )}
                     >
                       <span className={cn(
@@ -202,15 +260,24 @@ export function WeekNavigator({
                   const isSelected = isSameDay(day, selectedDate)
                   const isToday = isSameDay(day, new Date())
                   const isCurrentMonth = isSameMonth(day, viewDate)
+                  const disabled = isDateDisabled(day)
+                  const disabledType = getDisabledType(day)
                   
                   return (
                     <button
                       key={index}
-                      onClick={() => onDateChange(day)}
+                      onClick={() => !disabled && onDateChange(day)}
+                      disabled={disabled}
                       className={cn(
                         "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
-                        isSelected ? "bg-amber-500 text-black shadow-lg" : "hover:bg-white/5",
-                        !isCurrentMonth && "opacity-10"
+                        disabled && "cursor-not-allowed",
+                        disabled && disabledType === 'before' && "opacity-30 bg-red-500/5",
+                        disabled && disabledType === 'after' && "opacity-30",
+                        !disabled && isSelected && "bg-amber-500 text-black shadow-lg",
+                        !disabled && !isSelected && "hover:bg-white/5",
+                        !isCurrentMonth && !disabled && "opacity-30",
+                        !isCurrentMonth && disabled && disabledType === 'before' && "opacity-20",
+                        !isCurrentMonth && disabled && disabledType === 'after' && "opacity-20"
                       )}
                     >
                       <span className={cn(

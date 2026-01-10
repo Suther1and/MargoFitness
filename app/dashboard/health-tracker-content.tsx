@@ -141,23 +141,8 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   
-  // Проверка админских прав
-  const { isAdmin, isLoading: isAdminLoading } = useAdminCheck(userId)
-  
-  // Ограничения редактирования для не-админов
-  useEffect(() => {
-    if (isAdminLoading || isAdmin) return // Админам разрешено все
-    
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const selected = new Date(selectedDate)
-    selected.setHours(0, 0, 0, 0)
-    
-    // Если выбрана будущая дата - редирект на сегодня
-    if (selected > today) {
-      setSelectedDate(new Date())
-    }
-  }, [selectedDate, isAdmin, isAdminLoading])
+  // Проверка админских прав и даты регистрации
+  const { isAdmin, registrationDate, isLoading: isAdminLoading } = useAdminCheck(userId)
   
   // Флаг "только для чтения" для прошлых дней (для не-админов)
   const isReadOnly = useMemo(() => {
@@ -461,7 +446,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           setIsCalendarExpanded(false);
                         }} 
                         minimal={true} 
-                        isExpanded={true} 
+                        isExpanded={true}
+                        minDate={registrationDate}
+                        maxDate={new Date()}
+                        isAdmin={isAdmin}
                       />
                     </div>
                   </DialogContent>
@@ -1081,7 +1069,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         selectedDate={selectedDate} 
                         onDateChange={setSelectedDate} 
                         minimal={true} 
-                        isExpanded={isCalendarExpanded} 
+                        isExpanded={isCalendarExpanded}
+                        minDate={registrationDate}
+                        maxDate={new Date()}
+                        isAdmin={isAdmin}
                       />
                     </HealthTrackerCard>
 
