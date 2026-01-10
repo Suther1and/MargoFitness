@@ -23,7 +23,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
     photoType: PhotoType
   } | null>(null)
   const [mounted, setMounted] = useState(false)
-  const [displayedWeeks, setDisplayedWeeks] = useState(12) // Начинаем с 12 недель
+  const [displayedWeeks, setDisplayedWeeks] = useState(4) // Начинаем с 4 недель
   const observerTarget = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -33,36 +33,13 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
   // Блокируем скролл страницы когда lightbox открыт
   useEffect(() => {
     if (lightboxData) {
-      // Сохраняем текущую позицию скролла
-      const scrollY = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
       document.body.style.overflow = 'hidden'
     } else {
-      // Восстанавливаем позицию скролла
-      const scrollY = document.body.style.top
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
       document.body.style.overflow = ''
-      
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      }
     }
     
     return () => {
-      // Cleanup при размонтировании
-      const scrollY = document.body.style.top
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
       document.body.style.overflow = ''
-      
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      }
     }
   }, [lightboxData])
 
@@ -73,7 +50,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && displayedWeeks < weeklyPhotoSets.length) {
-          setDisplayedWeeks(prev => Math.min(prev + 8, weeklyPhotoSets.length))
+          setDisplayedWeeks(prev => Math.min(prev + 4, weeklyPhotoSets.length))
         }
       },
       { threshold: 0.1 }
@@ -387,7 +364,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
           )}
 
           {/* Сообщение о конце списка */}
-          {displayedWeeks >= filteredWeeks.length && filteredWeeks.length > 12 && (
+          {displayedWeeks >= filteredWeeks.length && filteredWeeks.length > 4 && (
             <div className="py-4 text-center text-sm text-white/40">
               Все недели загружены
             </div>
