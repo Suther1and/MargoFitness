@@ -56,6 +56,7 @@ import { useTrackerSettings } from './health-tracker/hooks/use-tracker-settings'
 import { useHabits } from './health-tracker/hooks/use-habits'
 import { useStatsDateRange } from './health-tracker/hooks/use-stats-date-range'
 import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
+import { useAdminCheck } from './health-tracker/hooks/use-admin-check'
 import { useQuery } from '@tanstack/react-query'
 import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
@@ -140,6 +141,36 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   
+  // Проверка админских прав
+  const { isAdmin, isLoading: isAdminLoading } = useAdminCheck(userId)
+  
+  // Ограничения редактирования для не-админов
+  useEffect(() => {
+    if (isAdminLoading || isAdmin) return // Админам разрешено все
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const selected = new Date(selectedDate)
+    selected.setHours(0, 0, 0, 0)
+    
+    // Если выбрана будущая дата - редирект на сегодня
+    if (selected > today) {
+      setSelectedDate(new Date())
+    }
+  }, [selectedDate, isAdmin, isAdminLoading])
+  
+  // Флаг "только для чтения" для прошлых дней (для не-админов)
+  const isReadOnly = useMemo(() => {
+    if (isAdmin) return false // Админам разрешено редактировать все
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const selected = new Date(selectedDate)
+    selected.setHours(0, 0, 0, 0)
+    
+    return selected < today // Прошлые дни - только чтение
+  }, [selectedDate, isAdmin])
+  
   // State для статистики (объединен в хук)
   const { 
     periodType: statsPeriodType, 
@@ -195,7 +226,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     refetchOnMount: 'always',
   })
   
-  // Локально считаем streak из данных (обновляется при каждом рефетче)
+  // Локально считаем текущие стрики из данных
   const habitStreaks = useMemo(() => {
     if (!habitsData?.success || !habitsData.data) {
       return {}
@@ -203,12 +234,12 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     
     const result: Record<string, number> = {}
     habits.forEach(habit => {
-      const stats = calculateHabitStats(habit, habitsData.data)
-      result[habit.id] = stats.maxStreak
+      const stats = calculateHabitStats(habit, habitsData.data, selectedDate)
+      result[habit.id] = stats.streak // Используем текущий стрик, а не максимальный
     })
     
     return result
-  }, [habitsData, habits])
+  }, [habitsData, habits, selectedDate])
   
   // Объединяем данные из БД с настройками для отображения
   const data: DailyMetrics = {
@@ -810,6 +841,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           setActiveTab('settings')
                           setSettingsSubTab('habits')
                         }}
+                        isReadOnly={isReadOnly}
                       />
                     )}
                   </div>
@@ -1017,6 +1049,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         setActiveTab('settings')
                         setSettingsSubTab('habits')
                       }}
+                      isReadOnly={isReadOnly}
                     />
                   </motion.div>
 

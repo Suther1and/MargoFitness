@@ -177,10 +177,12 @@ export type HabitTime = 'anytime' | 'morning' | 'afternoon' | 'evening'
 export interface Habit {
   id: string
   title: string
-  daysOfWeek?: DayOfWeek[]  // Опционально для обратной совместимости (до миграции)
+  daysOfWeek: DayOfWeek[]  // Required: дни недели когда привычка активна
   time: HabitTime
   enabled: boolean
   createdAt: string
+  maxStreak?: number  // Максимальный стрик за все время (для статистики)
+  lastCompletedDate?: string  // Дата последнего выполнения (для оптимизации)
 }
 
 export const DAY_OF_WEEK_LABELS: Record<DayOfWeek, string> = {

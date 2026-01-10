@@ -10,18 +10,22 @@ import { HealthTrackerCard } from './health-tracker-card'
 interface HabitItemProps {
   habit: DailyHabit
   onToggle: (id: string) => void
+  isReadOnly?: boolean
 }
 
-function HabitItem({ habit, onToggle }: HabitItemProps) {
+function HabitItem({ habit, onToggle, isReadOnly }: HabitItemProps) {
   return (
     <div
-      onClick={() => onToggle(habit.id)}
+      onClick={() => !isReadOnly && onToggle(habit.id)}
       className={cn(
         "group relative flex items-center justify-between p-2 rounded-xl",
-        "border transition-all duration-200 cursor-pointer",
+        "border transition-all duration-200",
+        isReadOnly ? "cursor-default" : "cursor-pointer",
         habit.completed
           ? "border-amber-500/20 bg-amber-500/5 opacity-60"
-          : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
+          : isReadOnly 
+            ? "border-white/5 bg-white/[0.02] opacity-50" 
+            : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
       )}
     >
       <div className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -75,9 +79,10 @@ interface HabitsCardProps {
   habits: DailyHabit[]
   onToggle: (id: string) => void
   onNavigateToSettings?: () => void
+  isReadOnly?: boolean
 }
 
-export const HabitsCard = memo(function HabitsCard({ habits, onToggle, onNavigateToSettings }: HabitsCardProps) {
+export const HabitsCard = memo(function HabitsCard({ habits, onToggle, onNavigateToSettings, isReadOnly }: HabitsCardProps) {
   const categories = {
     morning: { label: 'Утро', icon: Sun, color: 'text-amber-400' },
     afternoon: { label: 'День', icon: Calendar, color: 'text-blue-400' },
@@ -117,6 +122,13 @@ export const HabitsCard = memo(function HabitsCard({ habits, onToggle, onNavigat
       iconBg="bg-amber-500/10"
       className="gap-3"
     >
+      {isReadOnly && (
+        <div className="mb-3 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+          <p className="text-[10px] font-black text-white/30 uppercase tracking-widest text-center">
+            Только просмотр
+          </p>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
         <div className="grid grid-cols-1 gap-6">
           {(Object.entries(categories) as [keyof typeof categories, any][]).map(([key, info]) => {
@@ -138,6 +150,7 @@ export const HabitsCard = memo(function HabitsCard({ habits, onToggle, onNavigat
                       key={habit.id}
                       habit={habit}
                       onToggle={onToggle}
+                      isReadOnly={isReadOnly}
                     />
                   ))}
                 </div>

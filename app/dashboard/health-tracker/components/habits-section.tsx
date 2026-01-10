@@ -363,7 +363,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     setEditingId(habit.id)
     setEditForm({
       title: habit.title,
-      daysOfWeek: habit.daysOfWeek || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], // Фолбэк на все дни
+      daysOfWeek: habit.daysOfWeek.length > 0 ? habit.daysOfWeek : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       time: habit.time
     })
   }

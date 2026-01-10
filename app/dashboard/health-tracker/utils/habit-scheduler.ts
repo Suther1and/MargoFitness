@@ -1,5 +1,4 @@
 import { Habit, DayOfWeek } from '../types'
-import { startOfDay, isSameDay } from 'date-fns'
 
 /**
  * Конвертирует Date в строку дня недели
@@ -26,8 +25,8 @@ export function getDayOfWeek(date: Date): DayOfWeek {
 export function shouldShowHabitOnDate(habit: Habit, date: Date): boolean {
   if (!habit.enabled) return false
   
-  // Обратная совместимость: если daysOfWeek не задан, показываем каждый день
-  if (!habit.daysOfWeek || habit.daysOfWeek.length === 0) {
+  // Если массив пустой, считаем что привычка ежедневная
+  if (habit.daysOfWeek.length === 0) {
     return true
   }
   
@@ -43,7 +42,62 @@ export function getActiveHabitsForDate(habits: Habit[], date: Date): Habit[] {
 }
 
 /**
- * Данные статистики для одной привычки
+ * Упрощенный расчет текущего стрика для привычки
+ * 
+ * Алгоритм:
+ * 1. Идем от сегодня к прошлому
+ * 2. Для каждого дня проверяем: должна ли привычка показаться
+ * 3. Если должна И выполнена → стрик++
+ * 4. Если должна НО НЕ выполнена → СТОП, возвращаем стрик
+ * 5. Если не должна → пропускаем день
+ * 
+ * @param habit - Привычка для расчета
+ * @param diaryEntries - Записи дневника (отсортированные от новых к старым)
+ * @param today - Текущая дата для расчета
+ * @returns Текущий стрик (количество выполненных подряд запланированных дней)
+ */
+export function calculateCurrentStreak(
+  habit: Habit,
+  diaryEntries: Array<{ date: string; habits_completed: Record<string, boolean> | null }>,
+  today: Date = new Date()
+): number {
+  let streak = 0
+  
+  // Сортируем от новых к старым
+  const sortedEntries = [...diaryEntries]
+    .filter(entry => entry.habits_completed !== null)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  
+  // Проходим по записям от сегодня к прошлому
+  for (const entry of sortedEntries) {
+    const entryDate = new Date(entry.date)
+    
+    // Пропускаем будущие даты
+    if (entryDate > today) continue
+    
+    // Проверяем, должна ли привычка показаться в этот день
+    if (!shouldShowHabitOnDate(habit, entryDate)) {
+      // День не запланирован - пропускаем, не влияет на стрик
+      continue
+    }
+    
+    // День запланирован - проверяем выполнение
+    const completed = entry.habits_completed?.[habit.id] === true
+    
+    if (completed) {
+      // Выполнено - увеличиваем стрик
+      streak++
+    } else {
+      // Не выполнено - прерываем подсчет
+      break
+    }
+  }
+  
+  return streak
+}
+
+/**
+ * Данные статистики для одной привычки (упрощенные)
  */
 export interface HabitStatsData {
   id: string
@@ -51,85 +105,49 @@ export interface HabitStatsData {
   completed: number      // Сколько раз выполнена
   total: number         // Сколько раз должна была показаться
   streak: number        // Текущая серия выполнения
-  maxStreak: number     // Максимальная серия
-  scheduledDays: Date[] // Все даты когда должна была показаться
+  maxStreak: number     // Максимальная серия за весь период
 }
 
 /**
- * Вспомогательная функция: проверяет, является ли запись первым запланированным днем
- */
-function isFirstScheduledDay(
-  sortedData: Array<{ date: string; habits_completed: Record<string, boolean> }>,
-  currentIndex: number,
-  habit: Habit
-): boolean {
-  if (currentIndex === 0) return true
-  
-  // Проверяем, был ли предыдущий день запланирован
-  for (let i = currentIndex - 1; i >= 0; i--) {
-    const prevDate = new Date(sortedData[i].date)
-    if (shouldShowHabitOnDate(habit, prevDate)) {
-      return false // Есть предыдущий запланированный день
-    }
-  }
-  
-  return true // Нет предыдущих запланированных дней
-}
-
-/**
- * Рассчитывает все метрики для привычки с учетом расписания
+ * Рассчитывает статистику для привычки с учетом расписания (упрощенная версия)
  */
 export function calculateHabitStats(
   habit: Habit,
-  rawData: Array<{ date: string; habits_completed: Record<string, boolean> | null }>
+  rawData: Array<{ date: string; habits_completed: Record<string, boolean> | null }>,
+  today: Date = new Date()
 ): HabitStatsData {
-  // Сортируем данные от новых к старым
-  const sortedData = [...rawData]
-    .filter(entry => entry.habits_completed !== null)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  
-  let currentStreak = 0
-  let maxStreak = 0
-  let tempStreak = 0
   let totalCompleted = 0
   let totalScheduled = 0
-  const scheduledDays: Date[] = []
+  let maxStreak = 0
+  let tempStreak = 0
   
-  let foundFirstMissOrNonScheduled = false
+  // Сортируем данные от старых к новым для правильного подсчета maxStreak
+  const sortedData = [...rawData]
+    .filter(entry => entry.habits_completed !== null)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   
-  sortedData.forEach((entry, index) => {
+  sortedData.forEach(entry => {
     const entryDate = new Date(entry.date)
     
-    // КРИТИЧНО: проверяем должна ли привычка показаться в этот день
+    // Проверяем, должна ли привычка показаться в этот день
     if (!shouldShowHabitOnDate(habit, entryDate)) {
-      // День пропускается - не влияет на streak и статистику
-      return
+      return // День не запланирован - пропускаем
     }
     
-    scheduledDays.push(entryDate)
     totalScheduled++
-    
     const completed = entry.habits_completed?.[habit.id] === true
     
     if (completed) {
       totalCompleted++
       tempStreak++
-      
-      // Если это первый запланированный день или мы еще не нашли пропуск
-      if (!foundFirstMissOrNonScheduled) {
-        currentStreak = tempStreak
-      }
-      
       maxStreak = Math.max(maxStreak, tempStreak)
     } else {
-      // Привычка должна была показаться, но не выполнена - прерываем streak
-      if (!foundFirstMissOrNonScheduled) {
-        foundFirstMissOrNonScheduled = true
-        currentStreak = 0
-      }
-      tempStreak = 0
+      tempStreak = 0 // Сбрасываем временный стрик при пропуске
     }
   })
+  
+  // Рассчитываем текущий стрик
+  const currentStreak = calculateCurrentStreak(habit, rawData, today)
   
   return {
     id: habit.id,
@@ -137,8 +155,7 @@ export function calculateHabitStats(
     completed: totalCompleted,
     total: totalScheduled,
     streak: currentStreak,
-    maxStreak: maxStreak,
-    scheduledDays: scheduledDays
+    maxStreak: Math.max(maxStreak, currentStreak) // Убеждаемся что текущий стрик учтен
   }
 }
 

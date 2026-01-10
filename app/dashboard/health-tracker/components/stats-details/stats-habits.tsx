@@ -84,7 +84,8 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     const activeHabits = habits.filter(h => h.enabled)
     if (activeHabits.length === 0) return []
     
-    return activeHabits.map(habit => calculateHabitStats(habit, rawData.data))
+    const today = new Date()
+    return activeHabits.map(habit => calculateHabitStats(habit, rawData.data, today))
   }, [rawData, habits])
   
   // Реальная тепловая карта из completionData
