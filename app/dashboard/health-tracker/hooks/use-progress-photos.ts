@@ -7,11 +7,12 @@ import {
   uploadProgressPhoto,
   getWeekPhotos,
   getComparisonPhotos,
-  updateProgressPhoto
+  updateProgressPhoto,
+  updateWeeklyMeasurements
 } from '@/lib/actions/diary'
 import { useState } from 'react'
 import imageCompression from 'browser-image-compression'
-import { WeeklyPhotoSet, PhotoType, getWeekKey } from '@/types/database'
+import { WeeklyPhotoSet, PhotoType, getWeekKey, WeeklyMeasurements } from '@/types/database'
 
 interface UseProgressPhotosOptions {
   userId: string | null
@@ -226,7 +227,7 @@ export function useProgressPhotos({ userId, selectedDate, dateRange }: UseProgre
             }
           }
           return set
-        }).filter(set => set.hasPhotos)
+        }).filter(set => set.hasPhotos || set.hasMeasurements)
       )
 
       // Обновляем выбранную неделю
@@ -259,6 +260,27 @@ export function useProgressPhotos({ userId, selectedDate, dateRange }: UseProgre
     },
   })
 
+  // Обновление замеров
+  const updateMeasurementsMutation = useMutation({
+    mutationFn: async ({ 
+      measurements 
+    }: { 
+      measurements: WeeklyMeasurements 
+    }) => {
+      if (!userId) throw new Error('No user ID')
+      if (!weekKey) throw new Error('No week key - selectedDate is required')
+      const result = await updateWeeklyMeasurements(userId, weekKey, measurements)
+      if (!result.success) throw new Error(result.error)
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['progress-photos', userId] })
+      if (weekKey) {
+        queryClient.invalidateQueries({ queryKey: ['week-photos', userId, weekKey] })
+      }
+    }
+  })
+
   return {
     weeklyPhotoSets,
     currentWeekPhotos,
@@ -271,6 +293,8 @@ export function useProgressPhotos({ userId, selectedDate, dateRange }: UseProgre
     isDeleting: deleteMutation.isPending,
     canUploadThisWeek,
     getCurrentWeekPhotoCount,
+    updateMeasurements: updateMeasurementsMutation.mutate,
+    isUpdatingMeasurements: updateMeasurementsMutation.isPending,
   }
 }
 

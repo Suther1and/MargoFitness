@@ -1,13 +1,14 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { Camera, Scale, TrendingDown, Calendar, TrendingUp, Trash2, X } from "lucide-react"
+import { Camera, Scale, TrendingDown, Calendar, TrendingUp, Trash2, X, Ruler } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useProgressPhotos } from "../../hooks/use-progress-photos"
 import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { WeeklyPhotoSet, PhotoType } from "@/types/database"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface StatsPhotosProps {
   dateRange: { start: Date; end: Date }
@@ -199,6 +200,97 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
         variants={container}
         initial="hidden"
         animate="show"
+        className="space-y-6"
+      >
+        {/* График замеров */}
+        {filteredWeeks.some(w => w.hasMeasurements) && (
+          <motion.div variants={item} className="rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <Ruler className="w-5 h-5 text-violet-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">График замеров</h3>
+                <p className="text-xs text-white/40">Изменение объемов тела по неделям</p>
+              </div>
+            </div>
+
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={filteredWeeks
+                    .filter(w => w.hasMeasurements)
+                    .reverse()
+                    .map(w => ({
+                      week: w.week_label.split(' ').slice(0, 2).join(' '),
+                      chest: w.measurements?.chest,
+                      waist: w.measurements?.waist,
+                      hips: w.measurements?.hips
+                    }))}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                  <XAxis 
+                    dataKey="week" 
+                    stroke="#ffffff40"
+                    style={{ fontSize: '11px' }}
+                  />
+                  <YAxis 
+                    stroke="#ffffff40"
+                    style={{ fontSize: '11px' }}
+                    label={{ value: 'см', angle: -90, position: 'insideLeft', style: { fill: '#ffffff40', fontSize: '10px' } }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#1a1a24',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      fontSize: '12px'
+                    }}
+                    labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                    formatter={(value) => {
+                      const labels: Record<string, string> = { chest: 'Грудь', waist: 'Талия', hips: 'Бедра' }
+                      return labels[value] || value
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="chest" 
+                    stroke="#ec4899" 
+                    strokeWidth={2}
+                    dot={{ fill: '#ec4899', r: 4 }}
+                    connectNulls
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="waist" 
+                    stroke="#a855f7" 
+                    strokeWidth={2}
+                    dot={{ fill: '#a855f7', r: 4 }}
+                    connectNulls
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="hips" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    dot={{ fill: '#3b82f6', r: 4 }}
+                    connectNulls
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
         className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start"
       >
         {/* Левая колонка - Статистика (5 колонок) */}
@@ -271,14 +363,28 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                       {weekSet.week_label}
                     </span>
                   </div>
-                  {weekSet.weight && (
-                    <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 self-start sm:self-auto">
-                      <Scale className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
-                      <span className="text-xs sm:text-sm font-black text-amber-400 tabular-nums">
-                        {weekSet.weight.toFixed(1)} кг
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {weekSet.weight && (
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                        <Scale className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
+                        <span className="text-xs sm:text-sm font-black text-amber-400 tabular-nums">
+                          {weekSet.weight.toFixed(1)} кг
+                        </span>
+                      </div>
+                    )}
+                    {weekSet.hasMeasurements && (
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                        <Ruler className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-violet-400" />
+                        <span className="text-[10px] sm:text-xs font-black text-violet-400 tabular-nums">
+                          {weekSet.measurements?.chest && `Г: ${weekSet.measurements.chest}`}
+                          {weekSet.measurements?.chest && (weekSet.measurements?.waist || weekSet.measurements?.hips) && ' / '}
+                          {weekSet.measurements?.waist && `Т: ${weekSet.measurements.waist}`}
+                          {weekSet.measurements?.waist && weekSet.measurements?.hips && ' / '}
+                          {weekSet.measurements?.hips && `Б: ${weekSet.measurements.hips}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Сетка из 3 фото */}
@@ -291,7 +397,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                     
                     const labels: Record<PhotoType, string> = {
                       front: 'Профиль',
-                      side: 'Бок',
+                      side: 'Сбоку',
                       back: 'Спина'
                     }
 

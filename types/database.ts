@@ -92,6 +92,13 @@ export interface WeeklyPhoto {
   uploaded_at: string
 }
 
+/** Замеры тела за неделю */
+export interface WeeklyMeasurements {
+  chest?: number  // Объем груди в см
+  waist?: number  // Объем талии в см
+  hips?: number   // Объем бедер в см
+}
+
 /** Набор фото за неделю */
 export interface WeeklyPhotoSet {
   week_key: string // ISO формат понедельника недели "2026-01-06"
@@ -101,8 +108,10 @@ export interface WeeklyPhotoSet {
     side?: WeeklyPhoto
     back?: WeeklyPhoto
   }
+  measurements?: WeeklyMeasurements // Замеры тела за неделю
   weight?: number // средний/последний вес за неделю
   hasPhotos: boolean // есть ли хотя бы одно фото
+  hasMeasurements?: boolean // есть ли хотя бы один замер
 }
 
 /** Данные для сравнения фото */

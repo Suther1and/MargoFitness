@@ -373,12 +373,12 @@ export async function getProgressPhotos(userId: string) {
   const supabase = await createClient()
 
   try {
-    // Получаем все записи с weekly_photos
+    // Получаем все записи с weekly_photos или weekly_measurements
     const { data, error } = await supabase
       .from('diary_entries')
-      .select('date, weekly_photos, metrics')
+      .select('date, weekly_photos, weekly_measurements, metrics')
       .eq('user_id', userId)
-      .not('weekly_photos', 'is', null)
+      .or('weekly_photos.not.is.null,weekly_measurements.not.is.null')
       .order('date', { ascending: false })
 
     if (error) {
@@ -391,6 +391,7 @@ export async function getProgressPhotos(userId: string) {
       data.map(async (entry: any) => {
         const weeklyPhotos = entry.weekly_photos || {}
         const photos = weeklyPhotos.photos || {}
+        const weeklyMeasurements = entry.weekly_measurements || {}
         const weekKey = entry.date
         
         // Вычисляем диапазон недели (понедельник - воскресенье)
@@ -427,13 +428,17 @@ export async function getProgressPhotos(userId: string) {
             side: photos.side || undefined,
             back: photos.back || undefined
           },
+          measurements: weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips 
+            ? weeklyMeasurements 
+            : undefined,
           weight,
-          hasPhotos: !!(photos.front || photos.side || photos.back)
+          hasPhotos: !!(photos.front || photos.side || photos.back),
+          hasMeasurements: !!(weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips)
         }
       })
     )
 
-    return { success: true, data: weeklyPhotoSets.filter(set => set.hasPhotos) }
+    return { success: true, data: weeklyPhotoSets.filter(set => set.hasPhotos || set.hasMeasurements) }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] getProgressPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -449,7 +454,7 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
   try {
     const { data: entry, error } = await supabase
       .from('diary_entries')
-      .select('date, weekly_photos, metrics')
+      .select('date, weekly_photos, weekly_measurements, metrics')
       .eq('user_id', userId)
       .eq('date', weekKey)
       .maybeSingle()
@@ -466,13 +471,15 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
           week_key: weekKey,
           week_label: getWeekLabel(weekKey),
           photos: {},
-          hasPhotos: false
+          hasPhotos: false,
+          hasMeasurements: false
         } 
       }
     }
 
     const weeklyPhotos = (entry as any).weekly_photos || {}
     const photos = weeklyPhotos.photos || {}
+    const weeklyMeasurements = (entry as any).weekly_measurements || {}
 
     // Вычисляем диапазон недели для поиска веса
     const [year, month, day] = weekKey.split('-').map(Number)
@@ -508,8 +515,12 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
         side: photos.side || undefined,
         back: photos.back || undefined
       },
+      measurements: weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips 
+        ? weeklyMeasurements 
+        : undefined,
       weight,
-      hasPhotos: !!(photos.front || photos.side || photos.back)
+      hasPhotos: !!(photos.front || photos.side || photos.back),
+      hasMeasurements: !!(weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips)
     }
 
     return { success: true, data: weeklyPhotoSet }
@@ -722,3 +733,69 @@ export async function getComparisonPhotos(userId: string, startDate: string, end
     return { success: false, error: err?.message || 'Internal Server Error' }
   }
 }
+
+/**
+ * Обновить замеры тела за неделю
+ */
+export async function updateWeeklyMeasurements(
+  userId: string,
+  weekKey: string,
+  measurements: { chest?: number; waist?: number; hips?: number }
+) {
+  const supabase = await createClient()
+
+  try {
+    // Получаем существующую запись за эту неделю
+    const { data: entry } = await supabase
+      .from('diary_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('date', weekKey)
+      .maybeSingle()
+
+    // Подготавливаем данные замеров (удаляем undefined значения)
+    const cleanMeasurements: any = {}
+    if (measurements.chest !== undefined) cleanMeasurements.chest = measurements.chest
+    if (measurements.waist !== undefined) cleanMeasurements.waist = measurements.waist
+    if (measurements.hips !== undefined) cleanMeasurements.hips = measurements.hips
+
+    // Если есть хотя бы один замер, сохраняем
+    const weeklyMeasurements = Object.keys(cleanMeasurements).length > 0 ? cleanMeasurements : null
+
+    // Сохраняем в diary_entries с ключом = week_key (понедельник недели)
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .upsert({
+        user_id: userId,
+        date: weekKey,
+        weekly_measurements: weeklyMeasurements,
+        weekly_photos: (entry as any)?.weekly_photos || null,
+        metrics: (entry as any)?.metrics || {},
+        updated_at: new Date().toISOString()
+      } as any, {
+        onConflict: 'user_id,date'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logError('updateWeeklyMeasurements', error, userId)
+      return { success: false, error: error.message }
+    }
+
+    revalidatePath('/dashboard/health-tracker')
+
+    return { 
+      success: true, 
+      data: { 
+        weekKey, 
+        measurements: weeklyMeasurements,
+        entry: data 
+      } 
+    }
+  } catch (err: any) {
+    console.error('[Diary Action Unexpected] updateWeeklyMeasurements:', err)
+    return { success: false, error: err?.message || 'Internal Server Error' }
+  }
+}
+
