@@ -5,25 +5,29 @@ import {
   getProgressPhotos, 
   deleteProgressPhoto, 
   uploadProgressPhoto,
-  getCurrentWeekPhotos,
+  getWeekPhotos,
   getComparisonPhotos,
   updateProgressPhoto
 } from '@/lib/actions/diary'
 import { useState } from 'react'
 import imageCompression from 'browser-image-compression'
-import { WeeklyPhotoSet, PhotoType, getCurrentWeekKey } from '@/types/database'
+import { WeeklyPhotoSet, PhotoType, getWeekKey } from '@/types/database'
 
 interface UseProgressPhotosOptions {
   userId: string | null
+  selectedDate?: Date // Опциональный параметр для конкретной недели
 }
 
 /**
  * Хук для работы с недельными фото-прогресса
  */
-export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
+export function useProgressPhotos({ userId, selectedDate }: UseProgressPhotosOptions) {
   const queryClient = useQueryClient()
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+
+  // Вычисляем weekKey из выбранной даты (если передана)
+  const weekKey = selectedDate ? getWeekKey(selectedDate) : null
 
   // Получение всех недельных сетов фото
   const { data: weeklyPhotoSets = [], isLoading } = useQuery({
@@ -38,16 +42,16 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
     staleTime: 1000 * 60 * 5, // 5 минут
   })
 
-  // Получение фото текущей недели
+  // Получение фото выбранной недели (только если selectedDate передан)
   const { data: currentWeekPhotos } = useQuery({
-    queryKey: ['current-week-photos', userId],
+    queryKey: ['week-photos', userId, weekKey],
     queryFn: async () => {
-      if (!userId) return null
-      const result = await getCurrentWeekPhotos(userId)
+      if (!userId || !weekKey) return null
+      const result = await getWeekPhotos(userId, weekKey)
       if (!result.success || !result.data) return null
       return result.data as WeeklyPhotoSet
     },
-    enabled: !!userId,
+    enabled: !!userId && !!weekKey,
     staleTime: 1000 * 60 * 2, // 2 минуты
   })
 
@@ -68,10 +72,11 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
     return count
   }
 
-  // Загрузка фото
+  // Загрузка фото (на выбранную неделю, если selectedDate передан)
   const uploadMutation = useMutation({
     mutationFn: async ({ file, photoType }: { file: File; photoType: PhotoType }) => {
       if (!userId) throw new Error('No user ID')
+      if (!weekKey) throw new Error('No week key - selectedDate is required')
       
       setIsUploading(true)
       setUploadProgress(10)
@@ -95,8 +100,8 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
 
       setUploadProgress(70)
       
-      // Загружаем на сервер
-      const result = await uploadProgressPhoto(userId, photoType, formData)
+      // Загружаем на сервер с weekKey выбранной недели
+      const result = await uploadProgressPhoto(userId, photoType, formData, weekKey)
       
       setUploadProgress(100)
       
@@ -109,7 +114,9 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
     onSuccess: () => {
       // Обновляем список фото
       queryClient.invalidateQueries({ queryKey: ['progress-photos', userId] })
-      queryClient.invalidateQueries({ queryKey: ['current-week-photos', userId] })
+      if (weekKey) {
+        queryClient.invalidateQueries({ queryKey: ['week-photos', userId, weekKey] })
+      }
       
       setTimeout(() => {
         setIsUploading(false)
@@ -127,6 +134,7 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
   const replaceMutation = useMutation({
     mutationFn: async ({ file, photoType }: { file: File; photoType: PhotoType }) => {
       if (!userId) throw new Error('No user ID')
+      if (!weekKey) throw new Error('No week key - selectedDate is required')
       
       setIsUploading(true)
       setUploadProgress(10)
@@ -150,8 +158,8 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
 
       setUploadProgress(70)
       
-      // Заменяем фото
-      const result = await updateProgressPhoto(userId, photoType, formData)
+      // Заменяем фото с weekKey выбранной недели
+      const result = await updateProgressPhoto(userId, photoType, formData, weekKey)
       
       setUploadProgress(100)
       
@@ -163,7 +171,9 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['progress-photos', userId] })
-      queryClient.invalidateQueries({ queryKey: ['current-week-photos', userId] })
+      if (weekKey) {
+        queryClient.invalidateQueries({ queryKey: ['week-photos', userId, weekKey] })
+      }
       
       setTimeout(() => {
         setIsUploading(false)
@@ -190,11 +200,11 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
     onMutate: async ({ weekKey, photoType }) => {
       // Отменяем текущие запросы
       await queryClient.cancelQueries({ queryKey: ['progress-photos', userId] })
-      await queryClient.cancelQueries({ queryKey: ['current-week-photos', userId] })
+      await queryClient.cancelQueries({ queryKey: ['week-photos', userId, weekKey] })
 
       // Сохраняем предыдущее состояние
       const previousPhotos = queryClient.getQueryData(['progress-photos', userId])
-      const previousCurrentWeek = queryClient.getQueryData(['current-week-photos', userId])
+      const previousWeekPhotos = queryClient.getQueryData(['week-photos', userId, weekKey])
 
       // Оптимистично удаляем фото
       queryClient.setQueryData(['progress-photos', userId], (old: WeeklyPhotoSet[] = []) => 
@@ -212,35 +222,33 @@ export function useProgressPhotos({ userId }: UseProgressPhotosOptions) {
         }).filter(set => set.hasPhotos)
       )
 
-      // Обновляем текущую неделю если это она
-      if (weekKey === getCurrentWeekKey()) {
-        queryClient.setQueryData(['current-week-photos', userId], (old: WeeklyPhotoSet | null) => {
-          if (!old) return null
-          const updatedPhotos = { ...old.photos }
-          delete updatedPhotos[photoType]
-          return {
-            ...old,
-            photos: updatedPhotos,
-            hasPhotos: !!(updatedPhotos.front || updatedPhotos.side || updatedPhotos.back)
-          }
-        })
-      }
+      // Обновляем выбранную неделю
+      queryClient.setQueryData(['week-photos', userId, weekKey], (old: WeeklyPhotoSet | null) => {
+        if (!old) return null
+        const updatedPhotos = { ...old.photos }
+        delete updatedPhotos[photoType]
+        return {
+          ...old,
+          photos: updatedPhotos,
+          hasPhotos: !!(updatedPhotos.front || updatedPhotos.side || updatedPhotos.back)
+        }
+      })
 
-      return { previousPhotos, previousCurrentWeek }
+      return { previousPhotos, previousWeekPhotos }
     },
     onError: (err, variables, context) => {
       // Откатываем изменения в случае ошибки
       if (context?.previousPhotos) {
         queryClient.setQueryData(['progress-photos', userId], context.previousPhotos)
       }
-      if (context?.previousCurrentWeek) {
-        queryClient.setQueryData(['current-week-photos', userId], context.previousCurrentWeek)
+      if (context?.previousWeekPhotos) {
+        queryClient.setQueryData(['week-photos', userId, variables.weekKey], context.previousWeekPhotos)
       }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Финальное обновление данных
       queryClient.invalidateQueries({ queryKey: ['progress-photos', userId] })
-      queryClient.invalidateQueries({ queryKey: ['current-week-photos', userId] })
+      queryClient.invalidateQueries({ queryKey: ['week-photos', userId, variables.weekKey] })
     },
   })
 

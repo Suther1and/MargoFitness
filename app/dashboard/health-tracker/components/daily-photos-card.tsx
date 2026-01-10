@@ -5,11 +5,12 @@ import { useProgressPhotos } from '../hooks/use-progress-photos'
 import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { PhotoType, getCurrentWeekKey } from '@/types/database'
+import { PhotoType, getWeekKey, getWeekLabel } from '@/types/database'
 import { PhotoGuideDialog } from './photo-guide-dialog'
 
 interface DailyPhotosCardProps {
   userId: string | null
+  selectedDate: Date
 }
 
 const PHOTO_SLOTS: { type: PhotoType; label: string }[] = [
@@ -18,7 +19,7 @@ const PHOTO_SLOTS: { type: PhotoType; label: string }[] = [
   { type: 'back', label: 'Спина' },
 ]
 
-export function DailyPhotosCard({ userId }: DailyPhotosCardProps) {
+export function DailyPhotosCard({ userId, selectedDate }: DailyPhotosCardProps) {
   const { 
     currentWeekPhotos, 
     uploadPhoto, 
@@ -28,7 +29,7 @@ export function DailyPhotosCard({ userId }: DailyPhotosCardProps) {
     uploadProgress, 
     isDeleting,
     getCurrentWeekPhotoCount
-  } = useProgressPhotos({ userId })
+  } = useProgressPhotos({ userId, selectedDate })
   
   const [error, setError] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
@@ -41,7 +42,8 @@ export function DailyPhotosCard({ userId }: DailyPhotosCardProps) {
     back: null
   })
 
-  const weekKey = getCurrentWeekKey()
+  const weekKey = getWeekKey(selectedDate)
+  const weekLabel = getWeekLabel(weekKey)
   const photoCount = getCurrentWeekPhotoCount()
 
   const handleFileSelect = async (photoType: PhotoType, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +121,10 @@ export function DailyPhotosCard({ userId }: DailyPhotosCardProps) {
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
               <Camera className="w-3.5 h-3.5 md:w-4 md:h-4 text-pink-400" />
             </div>
-            <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-widest">Фото прогресса</h3>
+            <div className="flex flex-col">
+              <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-widest">Фото прогресса</h3>
+              <span className="text-[10px] md:text-xs text-white/40 font-medium">{weekLabel}</span>
+            </div>
           </div>
           
           <button

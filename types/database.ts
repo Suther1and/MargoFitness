@@ -212,8 +212,12 @@ export function getWeekKey(date: Date): string {
   monday.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
   monday.setHours(0, 0, 0, 0)
   
-  // Формат YYYY-MM-DD
-  return monday.toISOString().split('T')[0]
+  // Формат YYYY-MM-DD (используем локальное время, а не UTC)
+  const year = monday.getFullYear()
+  const month = String(monday.getMonth() + 1).padStart(2, '0')
+  const day = String(monday.getDate()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}`
 }
 
 /** Получить ключ текущей недели */
@@ -223,7 +227,9 @@ export function getCurrentWeekKey(): string {
 
 /** Получить человекочитаемый лейбл недели "6 - 12 января" */
 export function getWeekLabel(weekKey: string, locale: 'ru' | 'en' = 'ru'): string {
-  const monday = new Date(weekKey)
+  // Парсим дату как локальную (избегаем проблем с часовыми поясами)
+  const [year, month, day] = weekKey.split('-').map(Number)
+  const monday = new Date(year, month - 1, day)
   const sunday = new Date(monday)
   sunday.setDate(monday.getDate() + 6)
   

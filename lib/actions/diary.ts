@@ -271,16 +271,17 @@ export async function upsertDiaryEntry(
 export async function uploadProgressPhoto(
   userId: string, 
   photoType: PhotoType, 
-  formData: FormData
+  formData: FormData,
+  weekKey?: string // Опциональный параметр для указания недели
 ) {
   const supabase = await createClient()
   const file = formData.get('file') as File
   if (!file) return { success: false, error: 'No file provided' }
 
   try {
-    // Получаем week_key для текущей недели
-    const weekKey = getCurrentWeekKey()
-    const fileName = `${userId}/${weekKey}_${photoType}_${Date.now()}.jpg`
+    // Получаем week_key (используем переданный или текущую неделю)
+    const targetWeekKey = weekKey || getCurrentWeekKey()
+    const fileName = `${userId}/${targetWeekKey}_${photoType}_${Date.now()}.jpg`
 
     // Загружаем в storage
     const { error: uploadError } = await supabase.storage
@@ -310,14 +311,14 @@ export async function uploadProgressPhoto(
       .from('diary_entries')
       .select('*')
       .eq('user_id', userId)
-      .eq('date', weekKey)
+      .eq('date', targetWeekKey)
       .maybeSingle()
 
     // Создаем структуру weekly_photos
     const currentWeeklyPhotos = (entry as any)?.weekly_photos || { photos: {} }
     const updatedWeeklyPhotos = {
       ...currentWeeklyPhotos,
-      week_key: weekKey,
+      week_key: targetWeekKey,
       photos: {
         ...currentWeeklyPhotos.photos,
         [photoType]: {
@@ -333,7 +334,7 @@ export async function uploadProgressPhoto(
       .from('diary_entries')
       .upsert({
         user_id: userId,
-        date: weekKey,
+        date: targetWeekKey,
         weekly_photos: updatedWeeklyPhotos,
         metrics: (entry as any)?.metrics || {},
         updated_at: new Date().toISOString()
@@ -355,7 +356,7 @@ export async function uploadProgressPhoto(
       data: { 
         url: signedData.signedUrl, 
         photoType, 
-        weekKey,
+        weekKey: targetWeekKey,
         entry: data 
       } 
     }
@@ -554,15 +555,16 @@ export async function deleteProgressPhoto(
 export async function updateProgressPhoto(
   userId: string,
   photoType: PhotoType,
-  formData: FormData
+  formData: FormData,
+  weekKey?: string
 ) {
-  const weekKey = getCurrentWeekKey()
+  const targetWeekKey = weekKey || getCurrentWeekKey()
   
   // Сначала пытаемся удалить старое фото
-  await deleteProgressPhoto(userId, weekKey, photoType)
+  await deleteProgressPhoto(userId, targetWeekKey, photoType)
   
   // Затем загружаем новое
-  return uploadProgressPhoto(userId, photoType, formData)
+  return uploadProgressPhoto(userId, photoType, formData, targetWeekKey)
 }
 
 /**

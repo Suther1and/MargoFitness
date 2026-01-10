@@ -67,10 +67,17 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
     return () => observer.disconnect()
   }, [displayedWeeks, weeklyPhotoSets.length])
 
-  // Фильтруем фото по диапазону дат
+  // Фильтруем фото по диапазону дат (проверяем пересечение недели с диапазоном)
   const filteredWeeks = weeklyPhotoSets.filter(weekSet => {
-    const weekDate = new Date(weekSet.week_key)
-    return weekDate >= dateRange.start && weekDate <= dateRange.end
+    // Парсим weekKey как локальную дату (понедельник недели)
+    const [year, month, day] = weekSet.week_key.split('-').map(Number)
+    const weekStart = new Date(year, month - 1, day)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6) // Воскресенье
+    
+    // Неделя попадает в диапазон, если есть пересечение
+    // Неделя начинается до конца диапазона И заканчивается после начала диапазона
+    return weekStart <= dateRange.end && weekEnd >= dateRange.start
   })
 
   // Берем только нужное количество для отображения

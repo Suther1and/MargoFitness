@@ -173,6 +173,27 @@ export function WeekNavigator({
               exit={{ opacity: 0, height: 0 }}
               className="w-full"
             >
+              {/* Заголовок месяца с навигацией */}
+              <div className="flex items-center justify-between mb-3 px-1">
+                <button
+                  onClick={handleMonthPrev}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors group"
+                >
+                  <ChevronLeft className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                </button>
+                
+                <span className="text-sm font-black text-white/90 uppercase tracking-wider">
+                  {format(viewDate, 'LLLL yyyy', { locale: ru })}
+                </span>
+                
+                <button
+                  onClick={handleMonthNext}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors group"
+                >
+                  <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                </button>
+              </div>
+              
               <div className="grid grid-cols-7 gap-1">
                 {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((d, i) => (
                   <div key={`${d}-${i}`} className="text-[9px] font-black text-white/20 text-center pb-2 uppercase tracking-widest">{d}</div>

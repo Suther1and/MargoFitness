@@ -644,7 +644,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       />
                       <AchievementsCard />
                       {settings.widgets.photos?.enabled && (
-                        <DailyPhotosCard userId={userId} />
+                        <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                       )}
                     </div>
                   )}
@@ -984,7 +984,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     />
                     <AchievementsCard />
                     {settings.widgets.photos?.enabled && (
-                      <DailyPhotosCard userId={userId} />
+                      <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                     )}
                   </motion.div>
                   </AnimatePresence>
