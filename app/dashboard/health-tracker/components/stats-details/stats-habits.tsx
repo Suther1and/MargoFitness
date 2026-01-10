@@ -50,11 +50,11 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
         .eq('user_id', userId)
         .gte('date', startStr)
         .lt('date', endStr)
-        .order('date', { ascending: true })
+        .order('date', { ascending: true }) as any // Обходим типы т.к. habits_completed не в сгенерированных типах
       
       if (error) return { success: false, data: [] }
       
-      const habitsData = data?.map(entry => ({
+      const habitsData = data?.map((entry: any) => ({
         date: entry.date,
         habits_completed: entry.habits_completed || {}
       })) || []
