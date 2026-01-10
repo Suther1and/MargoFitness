@@ -40,11 +40,13 @@ interface HabitCardProps {
   cancelEditing: () => void
   toggleHabitStatus: (id: string, enabled: boolean) => void
   deleteHabit: (id: string) => void
+  deleteConfirm: string | null
 }
 
-function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit }: HabitCardProps) {
+function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit, deleteConfirm }: HabitCardProps) {
   const config = TIME_CONFIG[habit.time]
   const Icon = config.icon
+  const isConfirming = deleteConfirm === habit.id
 
   return (
     <motion.div
@@ -260,12 +262,14 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
                 <button
-                  onClick={() => {
-                    if (confirm(`Удалить привычку "${habit.title}"?`)) {
-                      deleteHabit(habit.id)
-                    }
-                  }}
-                  className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-white/40 hover:text-red-400 transition-colors"
+                  onClick={() => deleteHabit(habit.id)}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    isConfirming
+                      ? "bg-red-500/90 text-white scale-110"
+                      : "bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-400"
+                  )}
+                  title={isConfirming ? "Нажмите еще раз для удаления" : "Удалить привычку"}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -284,6 +288,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
   const [limitWarning, setLimitWarning] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null) // Для двойного подтверждения удаления
   
   const [newHabit, setNewHabit] = useState<{
     title: string
@@ -363,7 +368,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     setEditingId(habit.id)
     setEditForm({
       title: habit.title,
-      daysOfWeek: habit.daysOfWeek.length > 0 ? habit.daysOfWeek : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+      daysOfWeek: (habit.daysOfWeek && habit.daysOfWeek.length > 0) ? habit.daysOfWeek : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       time: habit.time
     })
   }
@@ -396,6 +401,16 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     }
     
     updateHabit(id, { enabled })
+  }
+  
+  const handleDeleteHabit = (id: string) => {
+    if (deleteConfirm === id) {
+      deleteHabit(id)
+      setDeleteConfirm(null)
+    } else {
+      setDeleteConfirm(id)
+      setTimeout(() => setDeleteConfirm(null), 3000)
+    }
   }
 
   if (!isLoaded) {
@@ -695,7 +710,8 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                               setEditForm(null)
                             }}
                             toggleHabitStatus={toggleHabitStatus}
-                            deleteHabit={deleteHabit}
+                            deleteHabit={handleDeleteHabit}
+                            deleteConfirm={deleteConfirm}
                           />
                         ))}
                         </AnimatePresence>
@@ -736,7 +752,8 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                         setEditForm(null)
                       }}
                       toggleHabitStatus={toggleHabitStatus}
-                      deleteHabit={deleteHabit}
+                      deleteHabit={handleDeleteHabit}
+                      deleteConfirm={deleteConfirm}
                     />
                   ))}
                 </AnimatePresence>
