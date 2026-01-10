@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Settings, Activity, ChevronDown, ChevronLeft, Target, ListChecks, X, BarChart3, Home, Dumbbell, User } from 'lucide-react'
@@ -56,6 +56,7 @@ import { useTrackerSettings } from './health-tracker/hooks/use-tracker-settings'
 import { useHabits } from './health-tracker/hooks/use-habits'
 import { useStatsDateRange } from './health-tracker/hooks/use-stats-date-range'
 import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
+import { useQuery } from '@tanstack/react-query'
 import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
 import { hasActiveMainWidgets } from './health-tracker/utils/widget-helpers'
@@ -63,6 +64,9 @@ import { calculateBMI, getBMICategory } from './health-tracker/utils/bmi-utils'
 import { StatsDatePickerDialog } from './health-tracker/components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
+import { getActiveHabitsForDate, calculateHabitStats } from './health-tracker/utils/habit-scheduler'
+import { getHabitsStats } from '@/lib/actions/health-stats'
+import { serializeDateRange } from './health-tracker/utils/query-utils'
 
 /**
  * Health Tracker - главная страница отслеживания здоровья
@@ -179,6 +183,33 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     habits
   })
   
+  // Получаем данные привычек для расчета streak (как в виджетах - из уже загруженного кэша)
+  const { data: habitsData } = useQuery({
+    queryKey: ['stats', 'habits', userId, serializeDateRange(statsDateRange)],
+    queryFn: async () => {
+      if (!userId) return null
+      return await getHabitsStats(userId, statsDateRange)
+    },
+    enabled: !!userId && habits.length > 0,
+    staleTime: 0,
+    refetchOnMount: 'always',
+  })
+  
+  // Локально считаем streak из данных (обновляется при каждом рефетче)
+  const habitStreaks = useMemo(() => {
+    if (!habitsData?.success || !habitsData.data) {
+      return {}
+    }
+    
+    const result: Record<string, number> = {}
+    habits.forEach(habit => {
+      const stats = calculateHabitStats(habit, habitsData.data)
+      result[habit.id] = stats.maxStreak
+    })
+    
+    return result
+  }, [habitsData, habits])
+  
   // Объединяем данные из БД с настройками для отображения
   const data: DailyMetrics = {
     date: selectedDate,
@@ -206,12 +237,12 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     age: settings.userParams.age || 25,
     gender: settings.userParams.gender || 'female',
     
-    // Habits - объединяем данные привычек с их статусом выполнения
-    habits: habits.filter(h => h.enabled).map(habit => ({
+    // Habits - фильтруем по расписанию и объединяем с данными выполнения
+    habits: getActiveHabitsForDate(habits, selectedDate).map(habit => ({
       id: habit.id,
       title: habit.title,
       completed: habitsCompleted[habit.id] || false,
-      streak: habit.streak,
+      streak: habitStreaks[habit.id] || 0,
       category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
     })),
     

@@ -6,7 +6,7 @@ import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, Power
 import { cn } from '@/lib/utils'
 import { useHabits } from '../hooks/use-habits'
 import { useIsMobile } from '@/lib/hooks/use-is-mobile'
-import { Habit, HabitFrequency, HabitTime, HABIT_FREQUENCY_OPTIONS, HABIT_TIME_OPTIONS } from '../types'
+import { Habit, DayOfWeek, HabitTime, DAY_OF_WEEK_LABELS, HABIT_TIME_OPTIONS, formatDaysOfWeek } from '../types'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,8 +33,8 @@ interface HabitCardProps {
   isEditing: boolean
   isAnyEditing: boolean
   isMobile: boolean
-  editForm: { title: string; frequency: HabitFrequency; time: HabitTime } | null
-  setEditForm: (form: { title: string; frequency: HabitFrequency; time: HabitTime } | null) => void
+  editForm: { title: string; daysOfWeek: DayOfWeek[]; time: HabitTime } | null
+  setEditForm: (form: { title: string; daysOfWeek: DayOfWeek[]; time: HabitTime } | null) => void
   startEditing: (habit: Habit) => void
   saveEdit: (id: string) => void
   cancelEditing: () => void
@@ -76,7 +76,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
             className="w-full flex flex-col gap-6 md:gap-3"
           >
             <div className="space-y-1.5 md:space-y-1">
-              <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Что планируем?</span>
+              <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Название</span>
               <input
                 placeholder="Йога, Чтение или Зарядка"
                 value={editForm.title}
@@ -85,30 +85,40 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
               />
             </div>
 
-            <div className="flex flex-row md:flex-row items-end gap-3 md:gap-4 w-full">
-              <div className="space-y-1.5 md:space-y-1 flex-1 md:flex-none">
-                <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Сколько раз в неделю?</span>
-                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between md:justify-start">
-                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
+            <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3 md:gap-4 w-full">
+              <div className="space-y-1.5 md:space-y-1 flex-[1.5]">
+                <span className="text-[8px] md:text-[7px] font-black uppercase tracking-[0.2em] text-white/40 md:text-white/30 ml-1">Расписание</span>
+                <div className="flex gap-1.5 bg-white/5 p-1.5 rounded-xl border border-white/5">
+                  {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as DayOfWeek[]).map((day) => (
                     <button
-                      key={num}
-                      onClick={() => setEditForm({ ...editForm, frequency: num })}
+                      key={day}
+                      onClick={() => {
+                        const isSelected = editForm.daysOfWeek.includes(day)
+                        const newDays = isSelected
+                          ? editForm.daysOfWeek.filter(d => d !== day)
+                          : [...editForm.daysOfWeek, day]
+                        
+                        // Минимум 1 день должен быть выбран
+                        if (newDays.length > 0) {
+                          setEditForm({ ...editForm, daysOfWeek: newDays })
+                        }
+                      }}
                       className={cn(
-                        "w-8 h-8 md:w-9 md:h-9 rounded-lg text-xs md:text-sm font-black transition-all flex items-center justify-center",
-                        editForm.frequency === num 
+                        "flex-1 h-8 md:h-9 rounded-lg text-[9px] md:text-[10px] font-black transition-all flex items-center justify-center",
+                        editForm.daysOfWeek.includes(day)
                           ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                          : "text-white/30 hover:text-white/60"
+                          : "text-white/30 hover:text-white/60 bg-white/5"
                       )}
                     >
-                      {num}
+                      {DAY_OF_WEEK_LABELS[day]}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Mobile: Dropdown */}
-              <div className="space-y-1.5 flex-[0.7] md:hidden">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
+              <div className="space-y-1.5 flex-[0.8] md:hidden">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Время</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">
@@ -210,34 +220,26 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
             transition={{ duration: 0.2 }}
             className="w-full flex items-center justify-between"
           >
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                habit.enabled ? config.bg : "bg-white/5",
-                habit.enabled ? config.color : "text-white/20"
-              )}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className={cn(
-                  "font-oswald font-black text-lg uppercase tracking-tight leading-none truncate transition-colors",
-                  habit.enabled ? "text-white group-hover:text-amber-400" : "text-white/40"
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                  habit.enabled ? config.bg : "bg-white/5",
+                  habit.enabled ? config.color : "text-white/20"
                 )}>
-                  {habit.title}
-                </h4>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className={cn(
+                    "font-oswald font-black text-lg uppercase tracking-tight leading-none truncate transition-colors",
+                    habit.enabled ? "text-white group-hover:text-amber-400" : "text-white/40"
+                  )}>
+                    {habit.title}
+                  </h4>
                 <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1">
-                  {HABIT_FREQUENCY_OPTIONS[habit.frequency]}
+                  {formatDaysOfWeek(habit.daysOfWeek)}
                 </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-colors",
-                habit.enabled ? "bg-amber-500/5 border-amber-500/10" : "bg-white/5 border-white/5"
-              )}>
-                <Flame className={cn("w-3.5 h-3.5", habit.enabled ? "text-amber-500 fill-amber-500" : "text-white/20")} />
-                <span className={cn("text-xs font-oswald font-black", habit.enabled ? "text-amber-500" : "text-white/20")}>{habit.streak}</span>
+                </div>
               </div>
 
               <div className="flex items-center gap-1">
@@ -285,19 +287,19 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   
   const [newHabit, setNewHabit] = useState<{
     title: string
-    frequency: HabitFrequency
+    daysOfWeek: DayOfWeek[]
     time: HabitTime
     enabled: boolean
   }>({
     title: '',
-    frequency: 7,
+    daysOfWeek: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], // По умолчанию все дни
     time: 'anytime',
     enabled: true
   })
 
   const [editForm, setEditForm] = useState<{
     title: string
-    frequency: HabitFrequency
+    daysOfWeek: DayOfWeek[]
     time: HabitTime
   } | null>(null)
 
@@ -344,14 +346,14 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     
     addHabit({
       title: newHabit.title.trim(),
-      frequency: newHabit.frequency,
+      daysOfWeek: newHabit.daysOfWeek,
       time: newHabit.time,
       enabled: newHabit.enabled
     })
 
     setNewHabit({
       title: '',
-      frequency: 7,
+      daysOfWeek: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       time: 'anytime',
       enabled: true
     })
@@ -361,7 +363,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     setEditingId(habit.id)
     setEditForm({
       title: habit.title,
-      frequency: habit.frequency,
+      daysOfWeek: habit.daysOfWeek || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], // Фолбэк на все дни
       time: habit.time
     })
   }
@@ -371,7 +373,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
     
     updateHabit(id, {
       title: editForm.title.trim(),
-      frequency: editForm.frequency,
+      daysOfWeek: editForm.daysOfWeek,
       time: editForm.time
     })
     
@@ -430,7 +432,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
         {/* DESKTOP VERSION */}
         <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl md:backdrop-blur-md">
           <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-[0.8] space-y-1.5">
               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Что планируем?</span>
               <input
                 placeholder="Йога, Чтение или Зарядка"
@@ -442,21 +444,31 @@ export function HabitsSection({ userId }: { userId: string | null }) {
             </div>
 
             <div className="flex flex-wrap items-end gap-6">
-              <div className="space-y-1.5">
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Сколько раз в неделю?</span>
-                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
-                      <button
-                        key={num}
-                        onClick={() => setNewHabit({...newHabit, frequency: num})}
-                        className={cn(
-                          "w-9 h-9 rounded-lg text-sm font-black transition-colors flex items-center justify-center",
-                          newHabit.frequency === num 
-                            ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                            : "text-white/30 hover:text-white/60"
-                        )}
-                      >
-                      {num}
+              <div className="space-y-1.5 flex-[1.2] min-w-[280px]">
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Расписание</span>
+                <div className="flex gap-1.5 bg-white/5 p-1.5 rounded-xl border border-white/5">
+                  {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as DayOfWeek[]).map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => {
+                        const isSelected = newHabit.daysOfWeek.includes(day)
+                        const newDays = isSelected
+                          ? newHabit.daysOfWeek.filter(d => d !== day)
+                          : [...newHabit.daysOfWeek, day]
+                        
+                        // Минимум 1 день должен быть выбран
+                        if (newDays.length > 0) {
+                          setNewHabit({...newHabit, daysOfWeek: newDays})
+                        }
+                      }}
+                      className={cn(
+                        "flex-1 h-9 rounded-lg text-[10px] font-black transition-colors flex items-center justify-center",
+                        newHabit.daysOfWeek.includes(day)
+                          ? "bg-amber-500 text-[#09090b] shadow-lg" 
+                          : "text-white/30 hover:text-white/60 bg-white/5"
+                      )}
+                    >
+                      {DAY_OF_WEEK_LABELS[day]}
                     </button>
                   ))}
                 </div>
@@ -513,7 +525,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
         <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl">
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Что планируем?</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Название</span>
               <input
                 placeholder="Йога, Чтение или Зарядка"
                 value={newHabit.title}
@@ -523,29 +535,39 @@ export function HabitsSection({ userId }: { userId: string | null }) {
               />
             </div>
 
-            <div className="flex flex-row items-end gap-3 w-full">
-              <div className="space-y-1.5 flex-1">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Сколько раз в неделю?</span>
-                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 justify-between">
-                  {([1, 2, 3, 4, 5, 6, 7] as HabitFrequency[]).map((num) => (
+            <div className="flex flex-col gap-3 w-full">
+              <div className="space-y-1.5">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Расписание</span>
+                <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+                  {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as DayOfWeek[]).map((day) => (
                     <button
-                      key={num}
-                      onClick={() => setNewHabit({...newHabit, frequency: num})}
+                      key={day}
+                      onClick={() => {
+                        const isSelected = newHabit.daysOfWeek.includes(day)
+                        const newDays = isSelected
+                          ? newHabit.daysOfWeek.filter(d => d !== day)
+                          : [...newHabit.daysOfWeek, day]
+                        
+                        // Минимум 1 день должен быть выбран
+                        if (newDays.length > 0) {
+                          setNewHabit({...newHabit, daysOfWeek: newDays})
+                        }
+                      }}
                       className={cn(
-                        "w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center",
-                        newHabit.frequency === num 
+                        "flex-1 h-8 rounded-lg text-[9px] font-black transition-all flex items-center justify-center",
+                        newHabit.daysOfWeek.includes(day)
                           ? "bg-amber-500 text-[#09090b] shadow-lg" 
-                          : "text-white/30 hover:text-white/60"
+                          : "text-white/30 hover:text-white/60 bg-white/5"
                       )}
                     >
-                      {num}
+                      {DAY_OF_WEEK_LABELS[day]}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-1.5 flex-[0.7]">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">В какое время?</span>
+              <div className="space-y-1.5">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Время</span>
                 <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="w-full h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between px-3 text-white/60 active:bg-white/10 transition-colors">

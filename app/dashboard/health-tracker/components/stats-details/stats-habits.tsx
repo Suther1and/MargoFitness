@@ -17,6 +17,7 @@ import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { serializeDateRange } from "../../utils/query-utils"
 import { Habit, DateRange } from "../../types"
+import { calculateHabitStats, calculateAverageCompletion, analyzeWeekendPerformance, shouldShowHabitOnDate } from "../../utils/habit-scheduler"
 
 interface StatsHabitsProps {
   userId: string | null
@@ -45,74 +46,45 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     refetchOnMount: 'always',
   })
 
+  // Рассчитываем completionData с учетом расписания
   const completionData = useMemo(() => {
     if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
     const activeHabits = habits.filter(h => h.enabled)
+    if (activeHabits.length === 0) return []
     
     return rawData.data.map((entry: any) => {
-      const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
-      const total = activeHabits.length
+      const date = new Date(entry.date)
+      
+      // Получаем привычки которые должны показаться в этот день
+      const scheduledHabits = activeHabits.filter(h => shouldShowHabitOnDate(h, date))
+      
+      if (scheduledHabits.length === 0) {
+        return {
+          date: format(date, 'd MMM', { locale: ru }),
+          value: 0 // Нет привычек = 0%
+        }
+      }
+      
+      const completedCount = scheduledHabits.filter(h =>
+        entry.habits_completed?.[h.id] === true
+      ).length
+      
       return {
-        date: format(new Date(entry.date), 'd MMM', { locale: ru }),
-        value: total > 0 ? Math.round((completed / total) * 100) : 0
+        date: format(date, 'd MMM', { locale: ru }),
+        value: Math.round((completedCount / scheduledHabits.length) * 100)
       }
     })
   }, [rawData, habits])
   
-  // Рассчитываем РЕАЛЬНУЮ статистику из rawData
+  // Рассчитываем РЕАЛЬНУЮ статистику из rawData с учетом расписания
   const HABIT_STATS = useMemo(() => {
     if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
     const activeHabits = habits.filter(h => h.enabled)
     if (activeHabits.length === 0) return []
     
-    return activeHabits.map(habit => {
-      let currentStreak = 0
-      let maxStreak = 0
-      let tempStreak = 0
-      let totalCompleted = 0
-      let totalDays = 0
-      
-      // Сортируем по дате (от новых к старым для streak)
-      const sortedData = [...rawData.data].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      )
-      
-      sortedData.forEach((entry: any, index: number) => {
-        // ВРЕМЕННОЕ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
-        if (index === 0 && typeof window !== 'undefined') {
-          console.log('[HABITS DEBUG]', {
-            habitId: habit.id,
-            habitTitle: habit.title,
-            habitsCompletedKeys: Object.keys(entry.habits_completed || {}),
-            habitsCompletedValues: entry.habits_completed
-          })
-        }
-        
-        const habitCompleted = entry.habits_completed?.[habit.id] === true
-        totalDays++
-        
-        if (habitCompleted) {
-          totalCompleted++
-          tempStreak++
-          if (index === 0) currentStreak = tempStreak // Текущая серия
-          maxStreak = Math.max(maxStreak, tempStreak)
-        } else {
-          if (index === 0) currentStreak = 0
-          tempStreak = 0
-        }
-      })
-      
-      return {
-        id: habit.id,
-        name: habit.title,
-        completed: totalCompleted,
-        total: totalDays,
-        streak: currentStreak,
-        maxStreak: maxStreak
-      }
-    })
+    return activeHabits.map(habit => calculateHabitStats(habit, rawData.data))
   }, [rawData, habits])
   
   // Реальная тепловая карта из completionData
@@ -125,44 +97,14 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     }))
   }, [completionData])
   
-  // Анализ выходных vs будни
+  // Анализ выходных vs будни с учетом расписания
   const weekendAnalysis = useMemo(() => {
     if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) {
       return { weekdayCompletion: 0, weekendCompletion: 0, weekendDrop: 0 }
     }
     
     const activeHabits = habits.filter(h => h.enabled)
-    const weekdayData: number[] = []
-    const weekendData: number[] = []
-    
-    rawData.data.forEach((entry: any) => {
-      const dayOfWeek = new Date(entry.date).getDay()
-      const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
-      const total = activeHabits.length
-      const completionPercent = total > 0 ? Math.round((completed / total) * 100) : 0
-      
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        weekendData.push(completionPercent)
-      } else {
-        weekdayData.push(completionPercent)
-      }
-    })
-    
-    const weekdayAvg = weekdayData.length > 0
-      ? Math.round(weekdayData.reduce((acc, val) => acc + val, 0) / weekdayData.length)
-      : 0
-    const weekendAvg = weekendData.length > 0
-      ? Math.round(weekendData.reduce((acc, val) => acc + val, 0) / weekendData.length)
-      : 0
-    const drop = weekdayAvg > 0 
-      ? Math.round(((weekdayAvg - weekendAvg) / weekdayAvg) * 100)
-      : 0
-    
-    return { 
-      weekdayCompletion: weekdayAvg, 
-      weekendCompletion: weekendAvg, 
-      weekendDrop: drop 
-    }
+    return analyzeWeekendPerformance(activeHabits, rawData.data)
   }, [rawData, habits])
   
   // Слабые и средние привычки
@@ -217,8 +159,8 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     : 0
   
   const bestHabit = HABIT_STATS.length > 0 
-    ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
-    : { name: "Привычки", streak: 0 }
+    ? HABIT_STATS.reduce((max, habit) => habit.maxStreak > max.maxStreak ? habit : max, HABIT_STATS[0])
+    : { name: "Привычки", maxStreak: 0 }
   
   const totalHabits = HABIT_STATS.length
   const { weekdayCompletion, weekendCompletion, weekendDrop } = weekendAnalysis
@@ -401,7 +343,7 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                       <div className="text-sm font-black text-white uppercase tracking-tight">{habit.name}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <Flame className="w-3 h-3 text-orange-500" />
-                        <span className="text-[10px] font-bold text-white/30 uppercase">{habit.streak} дней серия</span>
+                        <span className="text-[10px] font-bold text-white/30 uppercase">рекорд {habit.maxStreak} {habit.maxStreak === 1 ? 'день' : habit.maxStreak < 5 ? 'дня' : 'дней'}</span>
                       </div>
                     </div>
                   </div>
@@ -553,36 +495,36 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <Flame className={cn(
                     "w-4 h-4",
-                    bestHabit.streak >= 21 ? "text-emerald-400" : 
-                    bestHabit.streak >= 7 ? "text-blue-400" : "text-amber-400"
+                    bestHabit.maxStreak >= 21 ? "text-emerald-400" : 
+                    bestHabit.maxStreak >= 7 ? "text-blue-400" : "text-amber-400"
                   )} />
                   <span className={cn(
                     "text-xs font-bold uppercase tracking-wider",
-                    bestHabit.streak >= 21 ? "text-emerald-400" : 
-                    bestHabit.streak >= 7 ? "text-blue-400" : "text-amber-400"
+                    bestHabit.maxStreak >= 21 ? "text-emerald-400" : 
+                    bestHabit.maxStreak >= 7 ? "text-blue-400" : "text-amber-400"
                   )}>
-                    {bestHabit.streak >= 21 ? "Суперпривычка" : 
-                     bestHabit.streak >= 7 ? "Крепкий навык" : "Формируется"}
+                    {bestHabit.maxStreak >= 21 ? "Суперпривычка" : 
+                     bestHabit.maxStreak >= 7 ? "Крепкий навык" : "Формируется"}
                   </span>
                 </div>
                 <p className="text-[11px] text-white/60 leading-relaxed">
-                  {bestHabit.streak >= 21 ? (
+                  {bestHabit.maxStreak >= 21 ? (
                     <>
-                      <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
-                      <span className="font-bold text-emerald-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>{' '}
+                      <span className="font-bold text-white">"{bestHabit.name}"</span> с рекордом{' '}
+                      <span className="font-bold text-emerald-400">{bestHabit.maxStreak} {bestHabit.maxStreak === 1 ? 'день' : bestHabit.maxStreak < 5 ? 'дня' : 'дней'}</span>{' '}
                       — это уже автоматизм! 🏆
                     </>
-                  ) : bestHabit.streak >= 7 ? (
+                  ) : bestHabit.maxStreak >= 7 ? (
                     <>
-                      <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
-                      <span className="font-bold text-blue-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>{' '}
+                      <span className="font-bold text-white">"{bestHabit.name}"</span> с рекордом{' '}
+                      <span className="font-bold text-blue-400">{bestHabit.maxStreak} {bestHabit.maxStreak === 1 ? 'день' : bestHabit.maxStreak < 5 ? 'дня' : 'дней'}</span>{' '}
                       — отличный прогресс! 🔥
                     </>
                   ) : (
                     <>
-                      <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
-                      <span className="font-bold text-amber-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>. 
-                      Не прерывайте! 🌱
+                      <span className="font-bold text-white">"{bestHabit.name}"</span> с рекордом{' '}
+                      <span className="font-bold text-amber-400">{bestHabit.maxStreak} {bestHabit.maxStreak === 1 ? 'день' : bestHabit.maxStreak < 5 ? 'дня' : 'дней'}</span>. 
+                      Продолжайте! 🌱
                     </>
                   )}
                 </p>
@@ -593,14 +535,20 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="w-4 h-4 text-orange-400" />
-                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Проблемные</span>
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Требуют внимания</span>
                   </div>
                   <p className="text-[11px] text-white/60 leading-relaxed">
-                    <span className="font-bold text-white">
-                      {weakHabits.slice(0, 1).map(h => `"${h.name}"`)}
-                      {weakHabits.length > 1 && ` +${weakHabits.length - 1}`}
-                    </span> менее 40% 🎯<br />
-                    Упростите требования
+                    {weakHabits.slice(0, 2).map((h, idx) => {
+                      const completion = Math.round((h.completed / h.total) * 100)
+                      return (
+                        <span key={h.id}>
+                          {idx > 0 && <br />}
+                          <span className="font-bold text-white">"{h.name}"</span>{' '}
+                          <span className="font-bold text-orange-400">{completion}%</span>
+                        </span>
+                      )
+                    })}
+                    {weakHabits.length > 2 && <><br />+{weakHabits.length - 2} других</>}
                   </p>
                 </div>
               ) : mediumHabits.length > 0 ? (
@@ -610,8 +558,9 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                     <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Зона роста</span>
                   </div>
                   <p className="text-[11px] text-white/60 leading-relaxed">
-                    <span className="font-bold text-white">"{mediumHabits[0].name}"</span><br />
-                    На <span className="font-bold text-amber-400">{Math.round((mediumHabits[0].completed / mediumHabits[0].total) * 100)}%</span>. Уменьшите нагрузку 💡
+                    <span className="font-bold text-white">"{mediumHabits[0].name}"</span>{' '}
+                    <span className="font-bold text-amber-400">{Math.round((mediumHabits[0].completed / mediumHabits[0].total) * 100)}%</span>
+                    {mediumHabits.length > 1 && <><br />+{mediumHabits.length - 1} других</>}
                   </p>
                 </div>
               ) : (

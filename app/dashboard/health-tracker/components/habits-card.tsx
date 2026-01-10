@@ -44,6 +44,29 @@ function HabitItem({ habit, onToggle }: HabitItemProps) {
           </div>
         </div>
       </div>
+
+      {/* Индикатор серии в правом углу - показываем всегда */}
+      <div className={cn(
+        "flex items-center gap-1 px-2 py-0.5 rounded-lg border transition-all shrink-0 ml-2",
+        habit.completed 
+          ? "bg-amber-500/10 border-amber-500/20" 
+          : habit.streak > 0 
+            ? "bg-amber-500/10 border-amber-500/20"
+            : "bg-white/5 border-white/10"
+      )}>
+        <Flame className={cn(
+          "w-3 h-3",
+          habit.completed ? "text-amber-500/50" : 
+          habit.streak > 0 ? "text-amber-500" : "text-white/20"
+        )} />
+        <span className={cn(
+          "text-[10px] font-black tabular-nums",
+          habit.completed ? "text-white/20" : 
+          habit.streak > 0 ? "text-amber-500" : "text-white/20"
+        )}>
+          {habit.streak}
+        </span>
+      </div>
     </div>
   )
 }

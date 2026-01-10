@@ -97,7 +97,7 @@ export const StatsNutrition = memo(function StatsNutrition({ userId, settings, d
 
   const avgCalories = Math.round(data.reduce((acc, d) => acc + d.calories, 0) / data.length)
   const goal = settings.widgets.nutrition?.goal || 2000
-  const currentGoalType = settings.widgets.nutrition?.goalType || 'maintain'
+  const currentGoalType = settings.widgets.nutrition?.nutritionGoalType || 'maintain'
   
   // % дней с успешным выполнением цели
   const successDays = data.filter(day => 

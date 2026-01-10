@@ -171,27 +171,36 @@ export interface DailyHabit {
 }
 
 // Типы для управления привычками в настройках
-export type HabitFrequency = 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 export type HabitTime = 'anytime' | 'morning' | 'afternoon' | 'evening'
 
 export interface Habit {
   id: string
   title: string
-  frequency: HabitFrequency
+  daysOfWeek?: DayOfWeek[]  // Опционально для обратной совместимости (до миграции)
   time: HabitTime
   enabled: boolean
-  streak: number
   createdAt: string
 }
 
-export const HABIT_FREQUENCY_OPTIONS: Record<number, string> = {
-  1: 'Раз в неделю',
-  2: '2 раза в неделю',
-  3: '3 раза в неделю',
-  4: '4 раза в неделю',
-  5: '5 раз в неделю',
-  6: '6 раз в неделю',
-  7: 'Каждый день'
+export const DAY_OF_WEEK_LABELS: Record<DayOfWeek, string> = {
+  mon: 'Пн',
+  tue: 'Вт',
+  wed: 'Ср',
+  thu: 'Чт',
+  fri: 'Пт',
+  sat: 'Сб',
+  sun: 'Вс'
+}
+
+export const DAY_OF_WEEK_FULL_LABELS: Record<DayOfWeek, string> = {
+  mon: 'Понедельник',
+  tue: 'Вторник',
+  wed: 'Среда',
+  thu: 'Четверг',
+  fri: 'Пятница',
+  sat: 'Суббота',
+  sun: 'Воскресенье'
 }
 
 export const HABIT_TIME_OPTIONS: Record<HabitTime, string> = {
@@ -199,6 +208,34 @@ export const HABIT_TIME_OPTIONS: Record<HabitTime, string> = {
   morning: 'Утро',
   afternoon: 'День',
   evening: 'Вечер'
+}
+
+/**
+ * Форматирует массив дней недели в читаемую строку
+ */
+export function formatDaysOfWeek(days: DayOfWeek[] | undefined): string {
+  if (!days || days.length === 0) return 'Каждый день'
+  
+  const sortedDays: DayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+  const orderedDays = sortedDays.filter(d => days.includes(d))
+  
+  // Все 7 дней
+  if (orderedDays.length === 7) return 'Каждый день'
+  
+  // Только будни (пн-пт)
+  const weekdays: DayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri']
+  if (orderedDays.length === 5 && weekdays.every(d => orderedDays.includes(d))) {
+    return 'По будням'
+  }
+  
+  // Только выходные (сб-вс)
+  const weekends: DayOfWeek[] = ['sat', 'sun']
+  if (orderedDays.length === 2 && weekends.every(d => orderedDays.includes(d))) {
+    return 'По выходным'
+  }
+  
+  // Иначе перечисляем дни
+  return orderedDays.map(d => DAY_OF_WEEK_LABELS[d]).join(' ')
 }
 
 export interface DailyMetrics {

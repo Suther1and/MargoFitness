@@ -82,11 +82,10 @@ export function useHabits(userId: string | null) {
   const habits: Habit[] = Array.isArray(habitsData) ? habitsData : []
 
   // Добавить привычку
-  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'streak' | 'createdAt'>) => {
+  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'createdAt'>) => {
     const newHabit: Habit = {
       ...habit,
       id: Date.now().toString(),
-      streak: 0,
       createdAt: new Date().toISOString()
     }
     const newHabits = [...habits, newHabit]

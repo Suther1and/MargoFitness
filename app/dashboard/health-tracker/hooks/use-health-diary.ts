@@ -243,10 +243,38 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      // При размонтировании компонента сохраняем оставшиеся данные
-      forceSave()
+      // При размонтировании НЕ вызываем forceSave - он асинхронный и может не успеть
+      // Вместо этого полагаемся на синхронное сохранение при смене даты (см. ниже)
     }
   }, [userId, dateStr])
+
+  // Синхронное сохранение при смене даты через sendBeacon
+  useEffect(() => {
+    // Cleanup при смене dateStr - сохраняем данные предыдущей даты
+    return () => {
+      if (Object.keys(pendingUpdatesRef.current).length > 0) {
+        const dataToSave = {
+          type: 'diary',
+          data: {
+            date: dateStr, // Сохраняем для ТЕКУЩЕЙ (старой) даты
+            ...pendingUpdatesRef.current
+          }
+        }
+        
+        // Синхронное сохранение через sendBeacon
+        const blob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json' })
+        navigator.sendBeacon('/api/diary/save-sync', blob)
+        
+        pendingUpdatesRef.current = {}
+        
+        // Очищаем таймер
+        if (updateTimerRef.current) {
+          clearTimeout(updateTimerRef.current)
+          updateTimerRef.current = null
+        }
+      }
+    }
+  }, [dateStr]) // Зависимость только от dateStr - cleanup сработает при его изменении
 
   // Save status
   const saveStatus: SaveStatus = saveMutation.isPending
