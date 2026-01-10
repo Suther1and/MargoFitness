@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 
 /**
  * Хук для проверки прав администратора и получения даты регистрации
- * Проверяет роль пользователя в таблице users
+ * Проверяет роль пользователя в таблице profiles
  */
 export function useAdminCheck(userId: string | null) {
   const { data, isLoading } = useQuery({
@@ -14,8 +14,8 @@ export function useAdminCheck(userId: string | null) {
       if (!userId) return null
       
       const supabase = createClient()
-      const { data: userData, error } = await supabase
-        .from('users')
+      const { data: profileData, error } = await supabase
+        .from('profiles')
         .select('role, created_at')
         .eq('id', userId)
         .single()
@@ -25,7 +25,7 @@ export function useAdminCheck(userId: string | null) {
         return null
       }
       
-      return userData
+      return profileData
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 10, // Кешируем на 10 минут
