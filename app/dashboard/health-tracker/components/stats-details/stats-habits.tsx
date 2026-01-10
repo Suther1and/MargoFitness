@@ -532,14 +532,14 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="w-4 h-4 text-orange-400" />
-                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Требуют внимания</span>
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Проблемные</span>
                   </div>
                   <p className="text-[11px] text-white/60 leading-relaxed">
                     <span className="font-bold text-white">
-                      {weakHabits.slice(0, 2).map(h => `"${h.name}"`).join(', ')}
-                    </span>
-                    {weakHabits.length > 2 && ` +${weakHabits.length - 2}`}{' '}
-                    выполняются менее 40%. Упростите! 🎯
+                      {weakHabits.slice(0, 1).map(h => `"${h.name}"`)}
+                      {weakHabits.length > 1 && ` +${weakHabits.length - 1}`}
+                    </span> менее 40% 🎯<br />
+                    Упростите требования
                   </p>
                 </div>
               ) : mediumHabits.length > 0 ? (
@@ -549,22 +549,19 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                     <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Зона роста</span>
                   </div>
                   <p className="text-[11px] text-white/60 leading-relaxed">
-                    <span className="font-bold text-white">"{mediumHabits[0].name}"</span> на{' '}
-                    <span className="font-bold text-amber-400">
-                      {Math.round((mediumHabits[0].completed / mediumHabits[0].total) * 100)}%
-                    </span>. 
-                    Попробуйте мини-привычки 💡
+                    <span className="font-bold text-white">"{mediumHabits[0].name}"</span><br />
+                    На <span className="font-bold text-amber-400">{Math.round((mediumHabits[0].completed / mediumHabits[0].total) * 100)}%</span>. Уменьшите нагрузку 💡
                   </p>
                 </div>
               ) : (
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Нет слабых мест</span>
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Все стабильны</span>
                   </div>
                   <p className="text-[11px] text-white/60 leading-relaxed">
-                    <span className="font-bold text-white">Все привычки стабильны ✅</span><br />
-                    Отличный баланс!
+                    <span className="font-bold text-white">Отличный баланс ✅</span><br />
+                    Привычки закрепились
                   </p>
                 </div>
               )}
@@ -609,18 +606,18 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
                 <p className="text-[11px] text-white/60 leading-relaxed">
                   {weekendDrop > 30 ? (
                     <>
-                      <span className="font-bold text-white">Падение на {weekendDrop}%</span> (с {weekdayCompletion}% до {weekendCompletion}%) 📉<br />
-                      Создайте "выходной ритуал"
+                      <span className="font-bold text-white">-{weekendDrop}%</span> ({weekdayCompletion}→{weekendCompletion}%) 📉<br />
+                      Нужен ритуал
                     </>
                   ) : weekendDrop > 10 ? (
                     <>
-                      <span className="font-bold text-white">Небольшая просадка -{weekendDrop}%</span> ⚠️<br />
-                      Планируйте пятницей
+                      <span className="font-bold text-white">-{weekendDrop}%</span> ⚠️<br />
+                      Планируйте заранее
                     </>
                   ) : (
                     <>
-                      <span className="font-bold text-white">Дисциплина {weekendCompletion > weekdayCompletion ? 'выше' : 'стабильна'} ✅</span><br />
-                      Отличный баланс!
+                      <span className="font-bold text-white">Стабильно ✅</span><br />
+                      {weekendCompletion}% как в будни
                     </>
                   )}
                 </p>
@@ -636,19 +633,18 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
               <p className="text-xs text-white/70 leading-relaxed">
                 {avgCompletion < 50 ? (
                   <>
-                    Исследования показывают: для автоматизации привычки нужно{' '}
-                    <span className="font-bold text-white">21-66 дней</span>. 
-                    Простые (вода, зарядка) — 21 день, сложные (медитация, чтение) — до 66.
+                    Для автоматизации нужно <span className="font-bold text-white">21-66 дней</span> в зависимости от сложности. 
+                    Простые (вода, зарядка) — 21 день, сложные (медитация) — до 66.
                   </>
                 ) : avgCompletion >= 50 && avgCompletion < 80 ? (
                   <>
-                    Техника <span className="font-bold text-white">"Habit Stacking"</span>: привязывайте новую привычку к существующей. 
-                    Например: "После утреннего кофе я делаю 10 приседаний".
+                    <span className="font-bold text-white">"Habit Stacking"</span> — привязывайте новую привычку к существующей. 
+                    Например: "После кофе → 10 приседаний".
                   </>
                 ) : (
                   <>
-                    Концепция <span className="font-bold text-white">"Atomic Habits"</span>: улучшение на 1% каждый день даёт рост в 37 раз за год. 
-                    Фокус на качестве, а не количестве.
+                    <span className="font-bold text-white">"Atomic Habits"</span>: улучшение на 1% каждый день = рост в 37 раз за год. 
+                    Качество важнее количества.
                   </>
                 )}
               </p>
