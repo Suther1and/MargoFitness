@@ -23,7 +23,7 @@ BEGIN
   -- Получаем все записи дневника для пользователя, отсортированные от старых к новым
   FOR v_entry IN 
     SELECT date, habits_completed 
-    FROM health_diary 
+    FROM diary_entries 
     WHERE user_id = p_user_id 
       AND habits_completed IS NOT NULL
       AND habits_completed ? p_habit_id
@@ -72,13 +72,13 @@ DECLARE
 BEGIN
   -- Проходим по всем пользователям у которых есть привычки
   FOR v_user IN 
-    SELECT DISTINCT user_id, settings
+    SELECT DISTINCT user_id, habits
     FROM diary_settings
-    WHERE settings ? 'habits'
-      AND settings->'habits' != 'null'
-      AND jsonb_array_length(settings->'habits') > 0
+    WHERE habits IS NOT NULL
+      AND habits != 'null'
+      AND jsonb_array_length(habits) > 0
   LOOP
-    v_habits := v_user.settings->'habits';
+    v_habits := v_user.habits;
     v_updated_habits := '[]'::JSONB;
     
     -- Обрабатываем каждую привычку
@@ -116,7 +116,7 @@ BEGIN
     
     -- Обновляем привычки пользователя
     UPDATE diary_settings
-    SET settings = jsonb_set(settings, '{habits}', v_updated_habits)
+    SET habits = v_updated_habits
     WHERE user_id = v_user.user_id;
     
     RAISE NOTICE 'Updated % habits for user %', jsonb_array_length(v_updated_habits), v_user.user_id;

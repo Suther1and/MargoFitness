@@ -7,13 +7,13 @@
 -- =========================================================================
 
 -- Эта миграция не требует изменения структуры таблиц, так как:
--- 1. diary_settings.goals уже имеет тип JSONB
+-- 1. diary_settings.widget_goals уже имеет тип JSONB
 -- 2. diary_entries.metrics уже имеет тип JSONB  
 -- 3. diary_settings.user_params уже имеет тип JSONB
 
 -- Обновляем комментарии для документации новых полей
 
-COMMENT ON COLUMN public.diary_settings.goals IS 
+COMMENT ON COLUMN public.diary_settings.widget_goals IS 
 'JSONB containing widget goals and nutrition goal type. 
 Example structure:
 {
@@ -60,7 +60,7 @@ allowing proper validation of daily goals in statistics and tracking goal change
 -- Структура данных для использования в приложении
 -- =========================================================================
 
--- В diary_settings.goals для nutrition виджета сохраняется:
+-- В diary_settings.widget_goals для nutrition виджета сохраняется:
 -- {
 --   "goal": 2200,              -- Текущая цель по калориям (число)
 --   "goalType": "maintain"     -- Тип цели: 'loss' | 'maintain' | 'gain'
@@ -89,7 +89,7 @@ allowing proper validation of daily goals in statistics and tracking goal change
 -- После применения этой миграции в diary_entries.metrics будут доступны:
 -- - nutritionGoalType: 'loss' | 'maintain' | 'gain' - тип цели в конкретный день
 -- 
--- В diary_settings для nutrition виджета:
+-- В diary_settings.widget_goals для nutrition виджета:
 -- - goalType: 'loss' | 'maintain' | 'gain' - текущий тип цели пользователя
 -- 
 -- В diary_settings.user_params:
