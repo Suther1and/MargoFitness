@@ -116,7 +116,9 @@ export function useTrackerSettings(userId: string | null) {
       return DEFAULT_SETTINGS
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 минут
+    refetchOnMount: true, // Всегда проверять актуальность при монтировании
+    refetchOnWindowFocus: false, // Не перезагружать при возврате фокуса
   })
 
   // Mutation для обновления настроек
@@ -134,7 +136,12 @@ export function useTrackerSettings(userId: string | null) {
       queryClient.setQueryData(['diary-settings', userId], newSettings)
       return { previous }
     },
+    onSuccess: () => {
+      // Очищаем pending после успешного сохранения
+      pendingSettingsRef.current = null
+    },
     onError: (err, newSettings, context) => {
+      console.error('[Settings] Save failed:', err)
       // Откат при ошибке
       if (context?.previous) {
         queryClient.setQueryData(['diary-settings', userId], context.previous)
@@ -150,13 +157,9 @@ export function useTrackerSettings(userId: string | null) {
   // Debounced mutation для батчинга сохранений
   const debouncedMutate = useMemo(() => 
     debounce((newSettings: TrackerSettings) => {
+      // КРИТИЧНО: Обновляем pendingRef перед отправкой для корректной работы sendBeacon
+      pendingSettingsRef.current = newSettings
       updateMutation.mutate(newSettings)
-      // Очищаем после успешной отправки
-      setTimeout(() => {
-        if (pendingSettingsRef.current === newSettings) {
-          pendingSettingsRef.current = null
-        }
-      }, 100)
     }, 1000) // Увеличен до 1000ms для лучшего батчинга
   , [updateMutation.mutate])
 
@@ -170,6 +173,9 @@ export function useTrackerSettings(userId: string | null) {
     
     // Оптимистичное обновление UI
     queryClient.setQueryData(['diary-settings', userId], newSettings)
+    
+    // КРИТИЧНО: Обновляем pendingRef НЕМЕДЛЕННО для защиты от потери данных при F5
+    pendingSettingsRef.current = newSettings
     
     // Отложенное сохранение в БД через debounce
     debouncedMutate(newSettings)
@@ -185,10 +191,10 @@ export function useTrackerSettings(userId: string | null) {
     // Мгновенное обновление UI
     queryClient.setQueryData(['diary-settings', userId], newSettings)
     
-    // Обновляем pending ref для sendBeacon
+    // КРИТИЧНО: Обновляем pendingRef НЕМЕДЛЕННО для защиты от потери данных при F5
     pendingSettingsRef.current = newSettings
     
-    // Отложенное сохранение в БД
+    // Отложенное сохранение в БД (pendingRef перезапишется внутри debouncedMutate с актуальными данными)
     debouncedMutate(newSettings)
   }, [userId, queryClient, debouncedMutate, setIsFirstVisit])
 
@@ -300,7 +306,11 @@ export function useTrackerSettings(userId: string | null) {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      // При размонтировании компонента сохраняем
+      
+      // КРИТИЧНО: При размонтировании сбрасываем debounce и сохраняем немедленно
+      debouncedMutate.cancel()
+      
+      // При размонтировании компонента сохраняем немедленно
       if (pendingSettingsRef.current && userId && mutationRef.current) {
         const settingsToSave = pendingSettingsRef.current
         pendingSettingsRef.current = null
