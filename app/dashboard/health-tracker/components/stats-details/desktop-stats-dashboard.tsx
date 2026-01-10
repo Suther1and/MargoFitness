@@ -133,14 +133,14 @@ export function DesktopStatsDashboard({
       </div>
 
       {/* Grid layout: Контент + Календарь справа */}
-      <div className="grid grid-cols-12 gap-6">
-        {/* Основной контент - занимает 8 колонок */}
-        <div className="col-span-8">
+      <div className="grid grid-cols-24 gap-6">
+        {/* Основной контент - занимает 8.5 колонок (17 из 24) */}
+        <div className="col-span-17">
           {renderStatsContent()}
         </div>
 
-        {/* Календарь выбора периода - занимает 3 колонки, прижат к правому краю */}
-        <div className="col-span-3 col-start-10">
+        {/* Календарь выбора периода - занимает 3 колонки (6 из 24), начинается с позиции 19 */}
+        <div className="col-span-6 col-start-19">
           <div className="flex gap-6">
             {/* Вертикальный разделитель */}
             <div className="relative self-stretch flex items-center">
