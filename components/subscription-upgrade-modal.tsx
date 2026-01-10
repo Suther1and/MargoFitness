@@ -3,10 +3,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
 import { Product, SubscriptionTier, TIER_LEVELS, TIER_NAMES } from '@/types/database'
 import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+
+// Базовые цены за месяц (без скидок) - для конвертации
+const BASE_PRICES_PER_MONTH: Record<number, number> = {
+  1: 3990, // Basic
+  2: 4990, // Pro
+  3: 9990, // Elite
+}
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -133,6 +139,48 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     remainingDays: number
     currentTier: SubscriptionTier
   } | null>(null)
+  
+  // Данные профиля для локального расчета конвертации
+  const [profileData, setProfileData] = useState<{
+    currentTier: SubscriptionTier
+    currentTierLevel: number
+    expiresAt: string | null
+    remainingDays: number
+  } | null>(null)
+  
+  // Клиентская функция расчета конвертации (без Server Action!)
+  const calculateConversion = useCallback((newTierLevel: number, productDurationMonths: number) => {
+    if (!profileData) return null
+    
+    const { currentTierLevel, remainingDays } = profileData
+    
+    if (remainingDays <= 0) {
+      return {
+        convertedDays: 0,
+        newProductDays: productDurationMonths * 30,
+        totalDays: productDurationMonths * 30,
+        remainingDays: 0,
+      }
+    }
+    
+    // Конвертация по базовым ценам тарифов
+    const pricePerDayOld = BASE_PRICES_PER_MONTH[currentTierLevel] / 30
+    const remainingValue = remainingDays * pricePerDayOld
+    const basePricePerDayNew = BASE_PRICES_PER_MONTH[newTierLevel] / 30
+    const conversionRatio = remainingValue / basePricePerDayNew
+    const roundedConvertedDays = Math.round(conversionRatio)
+    
+    // Если конвертация дает 0, но есть оставшиеся дни - даем минимум 1 день
+    const convertedDays = roundedConvertedDays === 0 ? 1 : roundedConvertedDays
+    const newProductDays = productDurationMonths * 30
+    
+    return {
+      convertedDays: Math.max(0, convertedDays),
+      newProductDays,
+      totalDays: Math.max(0, convertedDays) + newProductDays,
+      remainingDays,
+    }
+  }, [profileData])
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -140,10 +188,10 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     try {
       const supabase = createClient()
       
-      // Получить профиль пользователя
+      // Получить профиль пользователя (один раз!)
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('subscription_tier')
+        .select('subscription_tier, subscription_expires_at')
         .eq('id', userId)
         .single()
       
@@ -154,6 +202,20 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       }
       
       const currentTierLevel = TIER_LEVELS[profile.subscription_tier as SubscriptionTier]
+      
+      // Рассчитать оставшиеся дни
+      const now = new Date()
+      const expiresAt = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) : now
+      const diffTime = expiresAt.getTime() - now.getTime()
+      const remainingDays = diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0
+      
+      // Сохраняем данные профиля для локальных расчетов
+      setProfileData({
+        currentTier: profile.subscription_tier as SubscriptionTier,
+        currentTierLevel,
+        expiresAt: profile.subscription_expires_at,
+        remainingDays,
+      })
       
       // Если уже Elite - апгрейда нет
       if (currentTierLevel >= 3) {
@@ -213,20 +275,20 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         
         const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
         
-        const conv = await calculateUpgradeConversion(userId, initialProd.tier_level || 0)
+        // ЛОКАЛЬНЫЙ расчет без Server Action!
+        const conversion = calculateConversion(initialProd.tier_level || 0, initialProd.duration_months)
         
         setSelectedTier(targetTier.tier)
         setSelectedProduct(initialProd)
         
-        if (conv.success && conv.data) {
-          const newProductDays = initialProd.duration_months * 30
+        if (conversion) {
           setConversionData({
-            newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + newProductDays) * 86400000).toISOString(),
-            convertedDays: conv.data.convertedDays,
-            newProductDays: newProductDays,
-            totalDays: conv.data.convertedDays + newProductDays,
-            remainingDays: conv.data.remainingDays,
-            currentTier: conv.data.currentTier
+            newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+            convertedDays: conversion.convertedDays,
+            newProductDays: conversion.newProductDays,
+            totalDays: conversion.totalDays,
+            remainingDays: conversion.remainingDays,
+            currentTier: profile.subscription_tier as SubscriptionTier
           })
         }
       }
@@ -235,14 +297,14 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     }
     
     setLoading(false)
-  }, [userId, initialTier])
+  }, [userId, initialTier, calculateConversion])
 
   useEffect(() => {
     if (open) loadData()
   }, [open, userId, initialTier, loadData])
 
-  const handleTierChange = async (tier: SubscriptionTier) => {
-    if (tier === selectedTier || calculating) return
+  const handleTierChange = (tier: SubscriptionTier) => {
+    if (tier === selectedTier || calculating || !profileData) return
     
     setCalculating(true)
     setSelectedTier(tier)
@@ -256,38 +318,40 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     const prod = tierData.products.find(p => p.duration_months === 6) || tierData.products[0]
     setSelectedProduct(prod)
     
-    const res = await calculateUpgradeConversion(userId, prod.tier_level || 0)
-    if (res.success && res.data) {
-      const newProductDays = prod.duration_months * 30
+    // ЛОКАЛЬНЫЙ расчет без Server Action!
+    const conversion = calculateConversion(prod.tier_level || 0, prod.duration_months)
+    
+    if (conversion) {
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + newProductDays) * 86400000).toISOString(),
-        convertedDays: res.data.convertedDays,
-        newProductDays: newProductDays,
-        totalDays: res.data.convertedDays + newProductDays,
-        remainingDays: res.data.remainingDays,
-        currentTier: res.data.currentTier
+        newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+        convertedDays: conversion.convertedDays,
+        newProductDays: conversion.newProductDays,
+        totalDays: conversion.totalDays,
+        remainingDays: conversion.remainingDays,
+        currentTier: profileData.currentTier
       })
     }
     
     setCalculating(false)
   }
 
-  const handleProductChange = async (product: Product) => {
-    if (product.id === selectedProduct?.id || calculating) return
+  const handleProductChange = (product: Product) => {
+    if (product.id === selectedProduct?.id || calculating || !profileData) return
     
     setCalculating(true)
     setSelectedProduct(product)
     
-    const res = await calculateUpgradeConversion(userId, product.tier_level || 0)
-    if (res.success && res.data) {
-      const newProductDays = product.duration_months * 30
+    // ЛОКАЛЬНЫЙ расчет без Server Action!
+    const conversion = calculateConversion(product.tier_level || 0, product.duration_months)
+    
+    if (conversion) {
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + (res.data.convertedDays + newProductDays) * 86400000).toISOString(),
-        convertedDays: res.data.convertedDays,
-        newProductDays: newProductDays,
-        totalDays: res.data.convertedDays + newProductDays,
-        remainingDays: res.data.remainingDays,
-        currentTier: res.data.currentTier
+        newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+        convertedDays: conversion.convertedDays,
+        newProductDays: conversion.newProductDays,
+        totalDays: conversion.totalDays,
+        remainingDays: conversion.remainingDays,
+        currentTier: profileData.currentTier
       })
     }
     
