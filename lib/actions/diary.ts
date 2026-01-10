@@ -418,7 +418,7 @@ export async function getProgressPhotos(userId: string) {
           .order('date', { ascending: false })
           .limit(1)
         
-        const weight = weekEntries?.[0]?.metrics?.weight || undefined
+        const weight = (weekEntries?.[0]?.metrics as any)?.weight || undefined
         
         return {
           week_key: weekKey,
@@ -505,7 +505,7 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
       .order('date', { ascending: false })
       .limit(1)
     
-    const weight = weekEntries?.[0]?.metrics?.weight || undefined
+    const weight = (weekEntries?.[0]?.metrics as any)?.weight || undefined
 
     const weeklyPhotoSet: WeeklyPhotoSet = {
       week_key: weekKey,
@@ -658,14 +658,14 @@ export async function getComparisonPhotos(userId: string, startDate: string, end
     // Фильтруем записи с весом и хотя бы одним фото
     const entriesWithWeight = data
       .filter((entry: any) => {
-        const weight = entry.metrics?.weight
+        const weight = (entry.metrics as any)?.weight
         const photos = entry.weekly_photos?.photos || {}
         const hasPhotos = !!(photos.front || photos.side || photos.back)
         return weight && hasPhotos
       })
       .map((entry: any) => ({
         weekKey: entry.date,
-        weight: entry.metrics.weight,
+        weight: (entry.metrics as any).weight,
         photos: entry.weekly_photos.photos
       }))
 
