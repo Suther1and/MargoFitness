@@ -4,24 +4,24 @@ import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 
 /**
- * Хук для проверки прав администратора и получения даты регистрации
- * Проверяет роль пользователя в таблице profiles
+ * Хук для получения даты регистрации пользователя
+ * Используется для ограничения доступа к датам до регистрации
  */
-export function useAdminCheck(userId: string | null) {
+export function useRegistrationDate(userId: string | null) {
   const { data, isLoading } = useQuery({
-    queryKey: ['user-role', userId],
+    queryKey: ['user-registration', userId],
     queryFn: async () => {
       if (!userId) return null
       
       const supabase = createClient()
       const { data: profileData, error } = await supabase
         .from('profiles')
-        .select('role, created_at')
+        .select('created_at')
         .eq('id', userId)
         .single()
       
       if (error) {
-        console.error('Error checking admin status:', error.message || error)
+        console.error('Error fetching registration date:', error.message || error)
         return null
       }
       
@@ -32,7 +32,6 @@ export function useAdminCheck(userId: string | null) {
   })
 
   return {
-    isAdmin: data?.role === 'admin',
     registrationDate: data?.created_at ? new Date(data.created_at) : null,
     isLoading,
   }

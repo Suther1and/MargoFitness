@@ -56,7 +56,7 @@ import { useTrackerSettings } from './health-tracker/hooks/use-tracker-settings'
 import { useHabits } from './health-tracker/hooks/use-habits'
 import { useStatsDateRange } from './health-tracker/hooks/use-stats-date-range'
 import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
-import { useAdminCheck } from './health-tracker/hooks/use-admin-check'
+import { useRegistrationDate } from './health-tracker/hooks/use-registration-date'
 import { useQuery } from '@tanstack/react-query'
 import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
@@ -141,20 +141,18 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   
-  // Проверка админских прав и даты регистрации
-  const { isAdmin, registrationDate, isLoading: isAdminLoading } = useAdminCheck(userId)
+  // Проверка даты регистрации
+  const { registrationDate, isLoading: isRegistrationLoading } = useRegistrationDate(userId)
   
-  // Флаг "только для чтения" для прошлых дней (для не-админов)
+  // Флаг "только для чтения" для прошлых дней
   const isReadOnly = useMemo(() => {
-    if (isAdmin) return false // Админам разрешено редактировать все
-    
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const selected = new Date(selectedDate)
     selected.setHours(0, 0, 0, 0)
     
     return selected < today // Прошлые дни - только чтение
-  }, [selectedDate, isAdmin])
+  }, [selectedDate])
   
   // State для статистики (объединен в хук)
   const { 
@@ -449,7 +447,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         isExpanded={true}
                         minDate={registrationDate}
                         maxDate={new Date()}
-                        isAdmin={isAdmin}
                       />
                     </div>
                   </DialogContent>
@@ -1072,7 +1069,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         isExpanded={isCalendarExpanded}
                         minDate={registrationDate}
                         maxDate={new Date()}
-                        isAdmin={isAdmin}
                       />
                     </HealthTrackerCard>
 

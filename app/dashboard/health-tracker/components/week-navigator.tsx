@@ -17,8 +17,7 @@ interface WeekNavigatorProps {
   daysCount?: 1 | 3 | 7
   disableViewSwitch?: boolean
   minDate?: Date | null  // Минимальная доступная дата (дата регистрации)
-  maxDate?: Date | null  // Максимальная доступная дата (сегодня для не-админов)
-  isAdmin?: boolean      // Флаг админа
+  maxDate?: Date | null  // Максимальная доступная дата (сегодня)
 }
 
 export function WeekNavigator({ 
@@ -31,8 +30,7 @@ export function WeekNavigator({
   daysCount = 7,
   disableViewSwitch = false,
   minDate = null,
-  maxDate = null,
-  isAdmin = false
+  maxDate = null
 }: WeekNavigatorProps) {
   const [viewDate, setViewDate] = useState(selectedDate)
 
@@ -43,8 +41,6 @@ export function WeekNavigator({
 
   // Функция проверки доступности даты
   const isDateDisabled = (date: Date): boolean => {
-    if (isAdmin) return false // Админу все доступно
-    
     const dateOnly = new Date(date)
     dateOnly.setHours(0, 0, 0, 0)
     
@@ -67,8 +63,6 @@ export function WeekNavigator({
   
   // Тип недоступности: before = до регистрации, after = будущие дни
   const getDisabledType = (date: Date): 'before' | 'after' | null => {
-    if (isAdmin) return null
-    
     const dateOnly = new Date(date)
     dateOnly.setHours(0, 0, 0, 0)
     
