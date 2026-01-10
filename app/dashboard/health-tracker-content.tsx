@@ -65,7 +65,7 @@ import { calculateBMI, getBMICategory } from './health-tracker/utils/bmi-utils'
 import { StatsDatePickerDialog } from './health-tracker/components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
-import { getActiveHabitsForDate, calculateHabitStats } from './health-tracker/utils/habit-scheduler'
+import { getActiveHabitsForDate, calculateHabitStats, shouldShowHabitOnDate } from './health-tracker/utils/habit-scheduler'
 import { getHabitsStats } from '@/lib/actions/health-stats'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 
