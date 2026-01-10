@@ -48,10 +48,10 @@ export function getActiveHabitsForDate(habits: Habit[], date: Date): Habit[] {
  * 1. Идем от выбранной даты (today) к прошлому
  * 2. Для каждого дня проверяем: должна ли привычка показаться
  * 3. Если должна И выполнена → стрик++
- * 4. Если должна НО НЕ выполнена → СТОП, возвращаем стрик
+ * 4. Если должна НО НЕ выполнена → проверяем, это сегодня?
+ *    - Если СЕГОДНЯ и не выполнено → НЕ прерываем (день еще не закончился), просто не считаем
+ *    - Если ПРОШЛОЕ и не выполнено → СТОП, возвращаем стрик
  * 5. Если не должна → пропускаем день
- * 
- * ВАЖНО: Если сегодняшний день запланирован И выполнен, он тоже считается!
  * 
  * @param habit - Привычка для расчета
  * @param diaryEntries - Записи дневника
@@ -64,10 +64,15 @@ export function calculateCurrentStreak(
   today: Date = new Date()
 ): number {
   let streak = 0
+  let isFirstScheduledDay = true // Флаг для первого запланированного дня
   
   // Нормализуем today (обнуляем время)
   const todayNormalized = new Date(today)
   todayNormalized.setHours(0, 0, 0, 0)
+  
+  // Текущая реальная дата для проверки "это сегодня?"
+  const realToday = new Date()
+  realToday.setHours(0, 0, 0, 0)
   
   // Сортируем от новых к старым
   const sortedEntries = [...diaryEntries]
@@ -94,9 +99,19 @@ export function calculateCurrentStreak(
     if (completed) {
       // Выполнено - увеличиваем стрик
       streak++
+      isFirstScheduledDay = false
     } else {
-      // Не выполнено - прерываем подсчет
-      break
+      // Не выполнено - проверяем, это сегодня или прошлое
+      const isToday = entryDate.getTime() === realToday.getTime()
+      
+      if (isToday && isFirstScheduledDay) {
+        // Это сегодняшний день и первый запланированный - не прерываем стрик
+        // День еще не закончился, просто не считаем его
+        continue
+      } else {
+        // Прошлый день не выполнен - прерываем стрик
+        break
+      }
     }
   }
   

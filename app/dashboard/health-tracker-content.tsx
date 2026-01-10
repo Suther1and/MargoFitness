@@ -145,7 +145,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const { registrationDate, isLoading: isRegistrationLoading } = useRegistrationDate(userId)
   
   // Флаг "только для чтения" для прошлых дней
+  // ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ТЕСТИРОВАНИЯ
   const isReadOnly = useMemo(() => {
+    // return false // Для теста - разрешаем редактировать все
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const selected = new Date(selectedDate)
@@ -197,16 +199,23 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     habits
   })
   
-  // Получаем данные привычек для расчета streak (как в виджетах - из уже загруженного кэша)
+  // Получаем данные привычек для расчета streak
+  // Используем компактный период: последние 30 дней (достаточно для расчета стрика)
+  const streakDateRange = useMemo(() => {
+    const end = new Date()
+    const start = subDays(end, 30) // Последние 30 дней достаточно для стрика
+    return { start, end }
+  }, [])
+  
   const { data: habitsData } = useQuery({
-    queryKey: ['stats', 'habits', userId, serializeDateRange(statsDateRange)],
+    queryKey: ['habits-streak-data', userId, format(streakDateRange.start, 'yyyy-MM-dd'), format(streakDateRange.end, 'yyyy-MM-dd')],
     queryFn: async () => {
       if (!userId) return null
-      return await getHabitsStats(userId, statsDateRange)
+      return await getHabitsStats(userId, streakDateRange)
     },
     enabled: !!userId && habits.length > 0,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 1000 * 60 * 2, // 2 минуты кеш - не нужно постоянно обновлять
+    refetchOnMount: false, // Не перезапрашивать каждый раз
   })
   
   // Локально считаем текущие стрики из данных + оптимистичное обновление
