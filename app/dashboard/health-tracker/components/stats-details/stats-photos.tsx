@@ -175,6 +175,34 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
               </span>
             </motion.div>
             
+            {lightboxData.weekSet.hasMeasurements && (
+              <motion.div 
+                className="hidden sm:flex items-center gap-4 px-5 py-2.5 rounded-2xl bg-black/80 backdrop-blur-md border border-violet-500/20 shadow-xl"
+              >
+                <Ruler className="w-5 h-5 text-violet-400" />
+                <div className="flex items-center gap-6">
+                  {lightboxData.weekSet.measurements?.chest && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-none mb-1.5">Грудь</span>
+                      <span className="text-xl font-black text-white tabular-nums leading-none">{lightboxData.weekSet.measurements.chest}</span>
+                    </div>
+                  )}
+                  {lightboxData.weekSet.measurements?.waist && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-none mb-1.5">Талия</span>
+                      <span className="text-xl font-black text-white tabular-nums leading-none">{lightboxData.weekSet.measurements.waist}</span>
+                    </div>
+                  )}
+                  {lightboxData.weekSet.measurements?.hips && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-none mb-1.5">Бедра</span>
+                      <span className="text-xl font-black text-white tabular-nums leading-none">{lightboxData.weekSet.measurements.hips}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+            
             {lightboxData.weekSet.weight && (
               <motion.div 
                 className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-black/80 backdrop-blur-md border border-amber-400/20 shadow-xl"
@@ -202,130 +230,127 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
         animate="show"
         className="space-y-6"
       >
-        {/* График замеров */}
-        {filteredWeeks.some(w => w.hasMeasurements) && (
-          <motion.div variants={item} className="rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                <Ruler className="w-5 h-5 text-violet-400" />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-widest">График замеров</h3>
-                <p className="text-xs text-white/40">Изменение объемов тела по неделям</p>
-              </div>
-            </div>
-
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={filteredWeeks
-                    .filter(w => w.hasMeasurements)
-                    .reverse()
-                    .map(w => ({
-                      week: w.week_label.split(' ').slice(0, 2).join(' '),
-                      chest: w.measurements?.chest,
-                      waist: w.measurements?.waist,
-                      hips: w.measurements?.hips
-                    }))}
-                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                  <XAxis 
-                    dataKey="week" 
-                    stroke="#ffffff40"
-                    style={{ fontSize: '11px' }}
-                  />
-                  <YAxis 
-                    stroke="#ffffff40"
-                    style={{ fontSize: '11px' }}
-                    label={{ value: 'см', angle: -90, position: 'insideLeft', style: { fill: '#ffffff40', fontSize: '10px' } }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1a1a24',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      fontSize: '12px'
-                    }}
-                    labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-                    formatter={(value) => {
-                      const labels: Record<string, string> = { chest: 'Грудь', waist: 'Талия', hips: 'Бедра' }
-                      return labels[value] || value
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="chest" 
-                    stroke="#ec4899" 
-                    strokeWidth={2}
-                    dot={{ fill: '#ec4899', r: 4 }}
-                    connectNulls
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="waist" 
-                    stroke="#a855f7" 
-                    strokeWidth={2}
-                    dot={{ fill: '#a855f7', r: 4 }}
-                    connectNulls
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="hips" 
-                    stroke="#3b82f6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3b82f6', r: 4 }}
-                    connectNulls
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
-
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start"
-      >
-        {/* Левая колонка - Статистика (5 колонок) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Общая статистика */}
-          <motion.div variants={item} className="p-5 rounded-2xl bg-gradient-to-br from-violet-500/20 via-purple-500/10 to-pink-500/20 border border-white/10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-xl bg-violet-500/20 border border-violet-500/30">
-                <Camera className="w-4 h-4 text-violet-400" />
-              </div>
-              <span className="text-xs font-black uppercase tracking-widest text-white/80">Прогресс</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="text-sm text-white/60 font-medium mb-1">Недель</div>
-                <div className="text-3xl font-black text-white">{filteredWeeks.length}</div>
-              </div>
-              {firstWeight && (
-                <div>
-                  <div className="text-sm text-white/60 font-medium mb-1">Было</div>
-                  <div className="text-xl font-black text-white tabular-nums">{firstWeight.toFixed(1)} кг</div>
+        {/* Верхняя строка: График + Статистика */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* График замеров */}
+          {filteredWeeks.some(w => w.hasMeasurements) ? (
+            <motion.div variants={item} className="lg:col-span-8 rounded-[2.5rem] bg-[#121214]/60 border border-white/10 p-6 flex flex-col justify-between">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <Ruler className="w-5 h-5 text-violet-400" />
                 </div>
-              )}
-              {lastWeight && (
                 <div>
-                  <div className="text-sm text-white/60 font-medium mb-1">Стало</div>
-                  <div className="text-xl font-black text-white tabular-nums">{lastWeight.toFixed(1)} кг</div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">График замеров</h3>
+                  <p className="text-xs text-white/40">Изменение объемов тела по неделям</p>
                 </div>
-              )}
+              </div>
+
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={filteredWeeks
+                      .filter(w => w.hasMeasurements)
+                      .reverse()
+                      .map(w => ({
+                        week: w.week_label.split(' ').slice(0, 2).join(' '),
+                        chest: w.measurements?.chest,
+                        waist: w.measurements?.waist,
+                        hips: w.measurements?.hips
+                      }))}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                    <XAxis 
+                      dataKey="week" 
+                      stroke="#ffffff40"
+                      style={{ fontSize: '11px' }}
+                    />
+                    <YAxis 
+                      stroke="#ffffff40"
+                      style={{ fontSize: '11px' }}
+                      label={{ value: 'см', angle: -90, position: 'insideLeft', style: { fill: '#ffffff40', fontSize: '10px' } }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1a1a24',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                      formatter={(value) => {
+                        const labels: Record<string, string> = { chest: 'Грудь', waist: 'Талия', hips: 'Бедра' }
+                        return labels[value] || value
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="chest" 
+                      stroke="#ec4899" 
+                      strokeWidth={2}
+                      dot={{ fill: '#ec4899', r: 4 }}
+                      connectNulls
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="waist" 
+                      stroke="#a855f7" 
+                      strokeWidth={2}
+                      dot={{ fill: '#a855f7', r: 4 }}
+                      connectNulls
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="hips" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ fill: '#3b82f6', r: 4 }}
+                      connectNulls
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="lg:col-span-8 hidden lg:block" />
+          )}
+
+          {/* Общая статистика (Карточка прогресса) */}
+          <motion.div variants={item} className="lg:col-span-4 p-6 rounded-[2.5rem] bg-gradient-to-br from-violet-500/20 via-purple-500/10 to-pink-500/20 border border-white/10 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="p-2 rounded-xl bg-violet-500/20 border border-violet-500/30">
+                  <Camera className="w-4 h-4 text-violet-400" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-widest text-white/80">Прогресс</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div>
+                  <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Недель</div>
+                  <div className="text-2xl font-black text-white">{filteredWeeks.length}</div>
+                </div>
+                {firstWeight && (
+                  <div>
+                    <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Было</div>
+                    <div className="text-lg font-black text-white tabular-nums">{firstWeight.toFixed(1)}</div>
+                  </div>
+                )}
+                {lastWeight && (
+                  <div>
+                    <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Стало</div>
+                    <div className="text-lg font-black text-white tabular-nums">{lastWeight.toFixed(1)}</div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {weightChange !== 0 && (
-              <div className="mt-4 p-3 rounded-xl bg-white/5 flex items-center justify-between">
-                <span className="text-sm text-white/70 font-medium">Изменение веса</span>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between">
+                <span className="text-xs text-white/40 font-bold uppercase tracking-wider">Изменение</span>
                 <div className="flex items-center gap-2">
                   {weightChange < 0 ? (
                     <TrendingDown className="w-4 h-4 text-emerald-400" />
@@ -333,7 +358,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                     <TrendingUp className="w-4 h-4 text-amber-400" />
                   )}
                   <span className={cn(
-                    "text-lg font-black tabular-nums",
+                    "text-xl font-black tabular-nums",
                     weightChange < 0 ? "text-emerald-400" : "text-amber-400"
                   )}>
                     {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} кг
@@ -344,43 +369,43 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
           </motion.div>
         </div>
 
-        {/* Правая колонка - Галерея по неделям (7 колонок) */}
-        <div className="lg:col-span-7 space-y-4">
-          {displayedWeeksSets.map((weekSet, weekIndex) => {
+        {/* Сетка фото: 2 в ряд на десктопе */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {displayedWeeksSets.map((weekSet) => {
             const photoTypes: PhotoType[] = ['front', 'side', 'back']
             
             return (
               <motion.div
                 key={weekSet.week_key}
                 variants={item}
-                className="p-5 rounded-2xl bg-white/5 border border-white/5"
+                className="p-5 rounded-[2.5rem] bg-[#121214]/60 border border-white/10 hover:border-white/20 transition-colors"
               >
                 {/* Заголовок недели */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400 flex-shrink-0" />
-                    <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                <div className="flex items-center justify-between gap-2 mb-5 flex-nowrap">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                      <Calendar className="w-3.5 h-3.5 text-violet-400" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-black text-white uppercase tracking-tight truncate">
                       {weekSet.week_label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 shrink-0">
                     {weekSet.weight && (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                        <Scale className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
-                        <span className="text-xs sm:text-sm font-black text-amber-400 tabular-nums">
-                          {weekSet.weight.toFixed(1)} кг
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <Scale className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-[11px] font-black text-amber-400 tabular-nums">
+                          {weekSet.weight.toFixed(1)}
                         </span>
                       </div>
                     )}
                     {weekSet.hasMeasurements && (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
-                        <Ruler className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-violet-400" />
-                        <span className="text-[10px] sm:text-xs font-black text-violet-400 tabular-nums">
-                          {weekSet.measurements?.chest && `Г: ${weekSet.measurements.chest}`}
-                          {weekSet.measurements?.chest && (weekSet.measurements?.waist || weekSet.measurements?.hips) && ' / '}
-                          {weekSet.measurements?.waist && `Т: ${weekSet.measurements.waist}`}
-                          {weekSet.measurements?.waist && weekSet.measurements?.hips && ' / '}
-                          {weekSet.measurements?.hips && `Б: ${weekSet.measurements.hips}`}
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                        <Ruler className="w-3.5 h-3.5 text-violet-400" />
+                        <span className="text-[11px] font-black text-violet-400 tabular-nums uppercase tracking-tight whitespace-nowrap">
+                          {weekSet.measurements?.chest && `Г:${weekSet.measurements.chest}`}
+                          {weekSet.measurements?.waist && ` Т:${weekSet.measurements.waist}`}
+                          {weekSet.measurements?.hips && ` Б:${weekSet.measurements.hips}`}
                         </span>
                       </div>
                     )}
@@ -388,7 +413,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                 </div>
 
                 {/* Сетка из 3 фото */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {photoTypes.map((photoType) => {
                     const photo = weekSet.photos[photoType]
                     const hasPhoto = !!photo
@@ -402,15 +427,15 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                     }
 
                     return (
-                      <div key={photoType} className="space-y-1.5 sm:space-y-2">
-                        <div className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-wider text-center">
+                      <div key={photoType} className="space-y-2">
+                        <div className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] text-center">
                           {labels[photoType]}
                         </div>
                         
                         {hasPhoto ? (
                           <motion.div
                             layoutId={`photo-${weekSet.week_key}-${photoType}`}
-                            className="relative aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden border border-white/10 bg-white/5 group cursor-pointer"
+                            className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-white/5 group cursor-pointer"
                             onClick={() => setLightboxData({
                               photoUrl: photo.url,
                               weekSet,
@@ -421,7 +446,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                               src={photo.url}
                               alt={`${labels[photoType]} ${weekSet.week_label}`}
                               fill
-                              className="object-cover"
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
                               unoptimized
                             />
                             
@@ -436,7 +461,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                               }}
                               disabled={isDeleting}
                               className={cn(
-                                "absolute top-1.5 right-1.5 sm:top-2 sm:right-2 p-1 sm:p-1.5 rounded-md sm:rounded-lg backdrop-blur-sm transition-all z-10 opacity-0 group-hover:opacity-100",
+                                "absolute top-2 right-2 p-1.5 rounded-lg backdrop-blur-md transition-all z-10 opacity-0 group-hover:opacity-100",
                                 isConfirming 
                                   ? "bg-red-500/90 scale-110 opacity-100" 
                                   : "bg-black/40 hover:bg-black/60",
@@ -444,14 +469,14 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
                               )}
                             >
                               <Trash2 className={cn(
-                                "w-2.5 h-2.5 sm:w-3 sm:h-3",
+                                "w-3 h-3",
                                 isConfirming ? "text-white" : "text-white/70"
                               )} />
                             </button>
                           </motion.div>
                         ) : (
-                          <div className="aspect-[3/4] rounded-lg sm:rounded-xl bg-white/5 border border-dashed border-white/5 flex items-center justify-center opacity-30">
-                            <Camera className="w-4 h-4 sm:w-6 sm:h-6 text-white/20" />
+                          <div className="aspect-[3/4] rounded-2xl bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center opacity-30">
+                            <Camera className="w-5 h-5 text-white/10" />
                           </div>
                         )}
                       </div>
@@ -461,7 +486,10 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
               </motion.div>
             )
           })}
+        </div>
 
+        {/* Навигация и сообщения */}
+        <div className="space-y-4">
           {/* Observer target для infinite scroll */}
           {displayedWeeks < filteredWeeks.length && (
             <div ref={observerTarget} className="py-8 flex justify-center">
@@ -471,7 +499,7 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
 
           {/* Сообщение о конце списка */}
           {displayedWeeks >= filteredWeeks.length && filteredWeeks.length > 4 && (
-            <div className="py-4 text-center text-sm text-white/40">
+            <div className="py-4 text-center text-sm text-white/40 font-medium">
               Все недели загружены
             </div>
           )}
