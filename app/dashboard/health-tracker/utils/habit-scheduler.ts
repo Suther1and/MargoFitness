@@ -45,15 +45,17 @@ export function getActiveHabitsForDate(habits: Habit[], date: Date): Habit[] {
  * Упрощенный расчет текущего стрика для привычки
  * 
  * Алгоритм:
- * 1. Идем от сегодня к прошлому
+ * 1. Идем от выбранной даты (today) к прошлому
  * 2. Для каждого дня проверяем: должна ли привычка показаться
  * 3. Если должна И выполнена → стрик++
  * 4. Если должна НО НЕ выполнена → СТОП, возвращаем стрик
  * 5. Если не должна → пропускаем день
  * 
+ * ВАЖНО: Если сегодняшний день запланирован И выполнен, он тоже считается!
+ * 
  * @param habit - Привычка для расчета
- * @param diaryEntries - Записи дневника (отсортированные от новых к старым)
- * @param today - Текущая дата для расчета
+ * @param diaryEntries - Записи дневника
+ * @param today - Дата, ДО которой (включительно) считаем стрик
  * @returns Текущий стрик (количество выполненных подряд запланированных дней)
  */
 export function calculateCurrentStreak(
@@ -63,17 +65,22 @@ export function calculateCurrentStreak(
 ): number {
   let streak = 0
   
+  // Нормализуем today (обнуляем время)
+  const todayNormalized = new Date(today)
+  todayNormalized.setHours(0, 0, 0, 0)
+  
   // Сортируем от новых к старым
   const sortedEntries = [...diaryEntries]
     .filter(entry => entry.habits_completed !== null)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   
-  // Проходим по записям от сегодня к прошлому
+  // Проходим по записям от выбранной даты к прошлому
   for (const entry of sortedEntries) {
     const entryDate = new Date(entry.date)
+    entryDate.setHours(0, 0, 0, 0)
     
-    // Пропускаем будущие даты
-    if (entryDate > today) continue
+    // Пропускаем даты ПОСЛЕ выбранной
+    if (entryDate > todayNormalized) continue
     
     // Проверяем, должна ли привычка показаться в этот день
     if (!shouldShowHabitOnDate(habit, entryDate)) {

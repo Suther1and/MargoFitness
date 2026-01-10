@@ -209,7 +209,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     refetchOnMount: 'always',
   })
   
-  // Локально считаем текущие стрики из данных
+  // Локально считаем текущие стрики из данных + оптимистичное обновление
   const habitStreaks = useMemo(() => {
     if (!habitsData?.success || !habitsData.data) {
       return {}
@@ -217,12 +217,36 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     
     const result: Record<string, number> = {}
     habits.forEach(habit => {
-      const stats = calculateHabitStats(habit, habitsData.data, selectedDate)
-      result[habit.id] = stats.streak // Используем текущий стрик, а не максимальный
+      // Создаем копию данных для оптимистичного расчета
+      const dataWithCurrent = [...habitsData.data]
+      
+      // Находим запись для выбранной даты
+      const dateStr = format(selectedDate, 'yyyy-MM-dd')
+      const existingEntry = dataWithCurrent.find(e => e.date === dateStr)
+      
+      if (existingEntry) {
+        // Обновляем существующую запись с текущим состоянием
+        existingEntry.habits_completed = {
+          ...existingEntry.habits_completed,
+          [habit.id]: habitsCompleted[habit.id] || false
+        }
+      } else if (shouldShowHabitOnDate(habit, selectedDate)) {
+        // Добавляем новую запись если день запланирован
+        dataWithCurrent.push({
+          date: dateStr,
+          habits_completed: {
+            [habit.id]: habitsCompleted[habit.id] || false
+          }
+        })
+      }
+      
+      // Считаем стрик с учетом оптимистичных изменений
+      const stats = calculateHabitStats(habit, dataWithCurrent, selectedDate)
+      result[habit.id] = stats.streak
     })
     
     return result
-  }, [habitsData, habits, selectedDate])
+  }, [habitsData, habits, selectedDate, habitsCompleted])
   
   // Объединяем данные из БД с настройками для отображения
   const data: DailyMetrics = {
