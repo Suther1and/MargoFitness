@@ -11,6 +11,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getHabitsStats } from "@/lib/actions/health-stats"
 import { format, differenceInDays } from "date-fns"
@@ -120,18 +121,47 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   const completedTasks = HABIT_STATS.reduce((acc, h) => acc + h.completed, 0)
   const totalHabits = HABIT_STATS.length
   
-  // Анализ выходных vs будни
-  // Разделяем на будни и выходные (примерное разделение)
-  const midpoint = Math.floor(completionData.length * 5/7)
-  const weekdayCompletion = completionData.slice(0, midpoint).length > 0
-    ? completionData.slice(0, midpoint).reduce((acc, d) => acc + d.value, 0) / completionData.slice(0, midpoint).length
+  // Улучшенный анализ выходных vs будни
+  // Пытаемся реально разделить по дням недели из rawData
+  const weekdayData: number[] = []
+  const weekendData: number[] = []
+  
+  if (rawData?.success && rawData.data && Array.isArray(rawData.data)) {
+    rawData.data.forEach((entry: any) => {
+      const dayOfWeek = new Date(entry.date).getDay() // 0-вс, 1-пн, ..., 6-сб
+      const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
+      const total = activeHabits.length
+      const completionPercent = total > 0 ? Math.round((completed / total) * 100) : 0
+      
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        weekendData.push(completionPercent)
+      } else {
+        weekdayData.push(completionPercent)
+      }
+    })
+  }
+  
+  const weekdayCompletion = weekdayData.length > 0
+    ? Math.round(weekdayData.reduce((acc, val) => acc + val, 0) / weekdayData.length)
     : 0
-  const weekendCompletion = completionData.slice(midpoint).length > 0
-    ? completionData.slice(midpoint).reduce((acc, d) => acc + d.value, 0) / completionData.slice(midpoint).length
+  const weekendCompletion = weekendData.length > 0
+    ? Math.round(weekendData.reduce((acc, val) => acc + val, 0) / weekendData.length)
     : 0
   const weekendDrop = weekdayCompletion > 0 
     ? Math.round(((weekdayCompletion - weekendCompletion) / weekdayCompletion) * 100)
     : 0
+  
+  // Слабые привычки (выполнение < 40%)
+  const weakHabits = HABIT_STATS.filter(h => {
+    const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
+    return completion < 40
+  })
+  
+  // Средние привычки (40-70%)
+  const mediumHabits = HABIT_STATS.filter(h => {
+    const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
+    return completion >= 40 && completion < 70
+  })
 
   const container = {
     hidden: { opacity: 0 },
@@ -327,160 +357,318 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
       </div>
 
       {/* Правая колонка: Персональные инсайты */}
-      <motion.div variants={item} className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
-            <Award className="w-5 h-5 text-amber-500" />
+      <motion.div variants={item} className="space-y-6">
+        <div className="p-6 rounded-[2.5rem] bg-[#121214]/60 border border-white/10">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-white/5 flex items-center justify-center">
+              <Award className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
+              <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ дисциплины</p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-base font-bold text-white uppercase tracking-tight">Персональные инсайты</h4>
-            <p className="text-[10px] font-medium text-white/40 uppercase tracking-[0.1em]">Анализ дисциплины</p>
-          </div>
-        </div>
 
-        <div className="space-y-3">
-          {/* Главная метрика */}
-          {avgCompletion >= 80 ? (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                    <Award className="w-4 h-4 text-amber-400" />
+          <div className="space-y-3">
+            {/* БЛОК 1: Главная оценка дисциплины (5 вариантов) */}
+            {avgCompletion >= 90 ? (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                      <Award className="w-4 h-4 text-emerald-400" />
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-amber-400 font-bold mb-1.5">🔥 Железная дисциплина!</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Средний процент выполнения <span className="font-bold text-white">{avgCompletion}%</span> — это отличный результат! 
-                    Вы формируете устойчивые привычки.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                      Продолжайте в том же духе
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : avgCompletion >= 60 ? (
-            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-blue-400" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-blue-300 font-bold mb-1.5">Хороший прогресс</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Выполнение на уровне <span className="font-bold text-white">{avgCompletion}%</span>. 
-                    До отличного результата осталось совсем немного!
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <Flame className="w-3 h-3 text-blue-400" />
-                    <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">
-                      Еще {80 - avgCompletion}% до цели
-                    </span>
+                  <div className="flex-1">
+                    <p className="text-sm text-emerald-400 font-bold mb-1.5">🏆 Легендарная дисциплина!</p>
+                    <p className="text-xs text-white/70 leading-relaxed mb-2">
+                      Средний процент <span className="font-bold text-white">{avgCompletion}%</span> — вы вошли в топ 5% людей по дисциплине! 
+                      Привычки стали частью вашей личности.
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                        Вы — образец для других
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
-                    <Target className="w-4 h-4 text-orange-400" />
+            ) : avgCompletion >= 75 ? (
+              <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                      <Flame className="w-4 h-4 text-blue-400" />
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-orange-300 font-bold mb-1.5">Есть потенциал для роста</p>
-                  <p className="text-xs text-white/70 leading-relaxed mb-2">
-                    Выполнение <span className="font-bold text-white">{avgCompletion}%</span>. 
-                    Начните с 2-3 простых привычек и постепенно добавляйте новые.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <Zap className="w-3 h-3 text-orange-400" />
-                    <span className="text-[10px] font-bold text-orange-300 uppercase tracking-wider">
-                      Фокус на приоритетах
-                    </span>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-300 font-bold mb-1.5">🔥 Железная дисциплина</p>
+                    <p className="text-xs text-white/70 leading-relaxed mb-2">
+                      Средний процент <span className="font-bold text-white">{avgCompletion}%</span> — отличный результат! 
+                      Вы формируете устойчивые привычки, которые работают на ваши цели.
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                      <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">
+                        Продолжайте в том же духе
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            ) : avgCompletion >= 60 ? (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-amber-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-amber-300 font-bold mb-1.5">⚡ Стабильный прогресс</p>
+                    <p className="text-xs text-white/70 leading-relaxed mb-2">
+                      Средний процент <span className="font-bold text-white">{avgCompletion}%</span> — хороший уровень! 
+                      Привычки начинают приживаться, продолжайте наращивать стабильность.
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <Flame className="w-3 h-3 text-amber-400" />
+                      <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                        Еще {75 - avgCompletion}% до высшего уровня
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : avgCompletion >= 40 ? (
+              <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-orange-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-orange-300 font-bold mb-1.5">🎯 Есть потенциал</p>
+                    <p className="text-xs text-white/70 leading-relaxed mb-2">
+                      Средний процент <span className="font-bold text-white">{avgCompletion}%</span>. 
+                      Вы на правильном пути! Начните с 2-3 простых привычек и постепенно добавляйте сложность.
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                      <Zap className="w-3 h-3 text-orange-400" />
+                      <span className="text-[10px] font-bold text-orange-300 uppercase tracking-wider">
+                        Фокус на приоритетах
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-red-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-red-300 font-bold mb-1.5">💪 Старт пути</p>
+                    <p className="text-xs text-white/70 leading-relaxed mb-2">
+                      Средний процент <span className="font-bold text-white">{avgCompletion}%</span>. 
+                      Формирование привычек требует времени. Сфокусируйтесь на 1-2 ключевых и выполняйте их каждый день минимум 2 недели.
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <span className="text-[10px] font-bold text-red-300 uppercase tracking-wider">
+                        Начните с малого
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-          {/* Анализ паттернов */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Flame className="w-4 h-4 text-orange-400" />
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Лучший стрик</span>
+            {/* БЛОК 2: Лучшая привычка (3 варианта) */}
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Flame className={cn(
+                  "w-5 h-5",
+                  bestHabit.streak >= 21 ? "text-emerald-400" : 
+                  bestHabit.streak >= 7 ? "text-blue-400" : "text-amber-400"
+                )} />
+                <h3 className={cn(
+                  "text-sm font-bold",
+                  bestHabit.streak >= 21 ? "text-emerald-400" : 
+                  bestHabit.streak >= 7 ? "text-blue-400" : "text-amber-400"
+                )}>
+                  {bestHabit.streak >= 21 ? "🏆 Суперпривычка" : 
+                   bestHabit.streak >= 7 ? "🔥 Крепкий навык" : "🌱 Формируется"}
+                </h3>
               </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                Привычка <span className="font-bold text-white">"{bestHabit.name}"</span> с серией 
-                <span className="font-bold text-orange-400"> {bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span> — ваша суперсила!
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Слабое место</span>
-              </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                {weekendDrop > 0 ? (
-                  <>В выходные выполнение падает на <span className="font-bold text-white">{weekendDrop}%</span>. Планируйте привычки заранее.</>
+              <p className="text-xs text-white/60 leading-relaxed">
+                {bestHabit.streak >= 21 ? (
+                  <>
+                    <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
+                    <span className="font-bold text-emerald-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>{' '}
+                    — это уже автоматизм! Используйте эту привычку как якорь для новых.
+                  </>
+                ) : bestHabit.streak >= 7 ? (
+                  <>
+                    <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
+                    <span className="font-bold text-blue-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>{' '}
+                    — отличный прогресс! Еще 14 дней до полной автоматизации.
+                  </>
                 ) : (
-                  <>В выходные выполнение <span className="font-bold text-emerald-400">стабильное</span>. Отличная дисциплина!</>
+                  <>
+                    <span className="font-bold text-white">"{bestHabit.name}"</span> с серией{' '}
+                    <span className="font-bold text-amber-400">{bestHabit.streak} {bestHabit.streak === 1 ? 'день' : bestHabit.streak < 5 ? 'дня' : 'дней'}</span>. 
+                    Первые 7 дней — самые сложные. Не прерывайте цепочку!
+                  </>
                 )}
               </p>
-            </div>
-          </div>
+            </Card>
 
-          {/* Статистика привычек */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">Всего выполнено:</span>
-                <span className="font-bold text-white">{completedTasks} / {totalTasks} задач</span>
+            {/* БЛОК 3: Слабые места (3 варианта) */}
+            {weakHabits.length > 0 ? (
+              <Card className="p-4 border-orange-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-5 h-5 text-orange-400" />
+                  <h3 className="text-sm font-bold text-orange-400">🎯 Требуют внимания</h3>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  {weakHabits.length === 1 ? 'Привычка' : 'Привычки'}{' '}
+                  <span className="font-bold text-white">
+                    {weakHabits.slice(0, 2).map(h => `"${h.name}"`).join(', ')}
+                  </span>
+                  {weakHabits.length > 2 && ` и ещё ${weakHabits.length - 2}`}{' '}
+                  выполняются менее чем в 40% случаев. Упростите их или замените на более реалистичные.
+                </p>
+              </Card>
+            ) : mediumHabits.length > 0 ? (
+              <Card className="p-4 border-amber-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-sm font-bold text-amber-400">💡 Зона роста</h3>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  <span className="font-bold text-white">"{mediumHabits[0].name}"</span> выполняется на{' '}
+                  <span className="font-bold text-amber-400">
+                    {Math.round((mediumHabits[0].completed / mediumHabits[0].total) * 100)}%
+                  </span>. 
+                  Попробуйте технику "мини-привычки": уменьшите требование в 2 раза на неделю.
+                </p>
+              </Card>
+            ) : (
+              <Card className="p-4 border-emerald-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-emerald-400">✅ Нет слабых мест</h3>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Все привычки выполняются стабильно! Это отличный баланс между амбициями и реалистичностью.
+                </p>
+              </Card>
+            )}
+
+            {/* БЛОК 4: Практические рекомендации (5 вариантов) */}
+            <Card className="p-4 bg-gradient-to-br from-amber-500/5 to-transparent border-amber-500/20">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-5 h-5 text-amber-400" />
+                <h3 className="text-sm font-bold text-amber-300">💡 Рекомендация</h3>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">Активных привычек:</span>
-                <span className="font-bold text-amber-400">{totalHabits} {totalHabits === 1 ? 'цель' : totalHabits < 5 ? 'цели' : 'целей'}</span>
-              </div>
-              <p className="text-[11px] text-white/50 mt-2 pt-2 border-t border-white/10">
-                💡 Совет: {totalHabits > 8 ? 'Вы отслеживаете много привычек. Сфокусируйтесь на 3-5 ключевых.' : 'Не перегружайте себя. Начните с 3-5 ключевых привычек и доведите их до автоматизма.'}
+              <p className="text-xs text-white/70 leading-relaxed">
+                {avgCompletion < 40 ? (
+                  <>
+                    🎯 <span className="font-bold text-white">Сократите до 1-2 привычек на 2 недели.</span> Лучше выполнять меньше, но стабильно, чем много и хаотично.
+                  </>
+                ) : avgCompletion >= 40 && avgCompletion < 60 && totalHabits > 5 ? (
+                  <>
+                    🎯 У вас <span className="font-bold text-white">{totalHabits} привычек</span>, но выполнение {avgCompletion}%. 
+                    Выберите 3 ключевые и сфокусируйтесь на них до достижения 80%.
+                  </>
+                ) : avgCompletion >= 60 && avgCompletion < 80 && weekendDrop > 20 ? (
+                  <>
+                    🎯 В выходные выполнение падает на <span className="font-bold text-white">{weekendDrop}%</span>. 
+                    Перенесите сложные привычки на утро субботы и воскресенья.
+                  </>
+                ) : avgCompletion >= 60 && avgCompletion < 80 && weekendDrop <= 20 ? (
+                  <>
+                    🎯 <span className="font-bold text-white">Отличная стабильность!</span> Добавьте 1 новую привычку, связанную с вашими целями, и доведите её до автоматизма.
+                  </>
+                ) : (
+                  <>
+                    🎯 Вы достигли <span className="font-bold text-white">высокой дисциплины!</span> Можете использовать привычки как фундамент для более сложных целей или наставничества других.
+                  </>
+                )}
               </p>
-            </div>
-          </div>
+            </Card>
 
-          {/* Практические советы */}
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">Стратегия на неделю</span>
-            </div>
-            <div className="space-y-2">
-              {avgCompletion < 60 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Сократите количество привычек до <span className="font-bold text-white">3-5 самых важных</span>. 
-                  Лучше выполнять меньше, но стабильно, чем много и хаотично.
+            {/* БЛОК 5: Анализ выходных (3 варианта) */}
+            {weekdayData.length > 0 && weekendData.length > 0 && (
+              <Card className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className={cn(
+                    "w-5 h-5",
+                    weekendDrop > 30 ? "text-red-400" : 
+                    weekendDrop > 10 ? "text-amber-400" : "text-emerald-400"
+                  )} />
+                  <h3 className={cn(
+                    "text-sm font-bold",
+                    weekendDrop > 30 ? "text-red-400" : 
+                    weekendDrop > 10 ? "text-amber-400" : "text-emerald-400"
+                  )}>
+                    {weekendDrop > 30 ? "📉 Выходные — проблема" : 
+                     weekendDrop > 10 ? "⚠️ Небольшая просадка" : "✅ Стабильные выходные"}
+                  </h3>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  {weekendDrop > 30 ? (
+                    <>
+                      В выходные выполнение падает на <span className="font-bold text-white">{weekendDrop}%</span> — 
+                      с <span className="font-bold text-white">{weekdayCompletion}%</span> до <span className="font-bold text-white">{weekendCompletion}%</span>. 
+                      Создайте специальный "выходной ритуал" для ключевых привычек.
+                    </>
+                  ) : weekendDrop > 10 ? (
+                    <>
+                      Небольшая просадка в выходные (<span className="font-bold text-white">-{weekendDrop}%</span>). 
+                      Это нормально, но можно улучшить через планирование пятничным вечером.
+                    </>
+                  ) : (
+                    <>
+                      В выходные дисциплина {weekendCompletion > weekdayCompletion ? (
+                        <span className="font-bold text-emerald-400">даже выше</span>
+                      ) : (
+                        <span className="font-bold text-emerald-400">не падает</span>
+                      )}! Отличный баланс между работой и отдыхом.
+                    </>
+                  )}
                 </p>
-              )}
-              {avgCompletion >= 60 && avgCompletion < 80 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Перенесите сложные привычки на <span className="font-bold text-white">утреннее время</span> в выходные. 
-                  Это повысит стабильность выполнения на 20-30%.
-                </p>
-              )}
-              {avgCompletion >= 80 && (
-                <p className="text-xs text-white/70 leading-relaxed">
-                  🎯 Отличная дисциплина! Теперь можно добавить <span className="font-bold text-white">1-2 новые привычки</span>, 
-                  которые выведут вас на следующий уровень.
-                </p>
-              )}
-            </div>
+              </Card>
+            )}
+
+            {/* БЛОК 6: Образовательный (3 варианта) */}
+            <Card className="p-4 bg-gradient-to-br from-indigo-500/5 to-transparent border-indigo-500/20">
+              <div className="flex items-center gap-2 mb-3">
+                <Award className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-sm font-bold text-indigo-300">📚 Знание</h3>
+              </div>
+              <p className="text-xs text-white/70 leading-relaxed">
+                {avgCompletion < 50 ? (
+                  <>
+                    Исследования показывают: для автоматизации привычки нужно{' '}
+                    <span className="font-bold text-white">21-66 дней</span> в зависимости от сложности. 
+                    Простые (вода, зарядка) — 21 день, сложные (медитация, чтение) — до 66.
+                  </>
+                ) : avgCompletion >= 50 && avgCompletion < 80 ? (
+                  <>
+                    Техника <span className="font-bold text-white">"Habit Stacking"</span>: привязывайте новую привычку к существующей. 
+                    Например: "После утреннего кофе я делаю 10 приседаний".
+                  </>
+                ) : (
+                  <>
+                    Концепция <span className="font-bold text-white">"Atomic Habits"</span>: улучшение на 1% каждый день даёт рост в 37 раз за год. 
+                    Фокус на качестве, а не на количестве привычек.
+                  </>
+                )}
+              </p>
+            </Card>
           </div>
         </div>
       </motion.div>
