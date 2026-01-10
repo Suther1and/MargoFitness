@@ -147,13 +147,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   // Флаг "только для чтения" для прошлых дней
   // ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ТЕСТИРОВАНИЯ
   const isReadOnly = useMemo(() => {
-    // return false // Для теста - разрешаем редактировать все
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const selected = new Date(selectedDate)
-    selected.setHours(0, 0, 0, 0)
-    
-    return selected < today // Прошлые дни - только чтение
+    return false // Для теста - разрешаем редактировать все
+    // const today = new Date()
+    // today.setHours(0, 0, 0, 0)
+    // const selected = new Date(selectedDate)
+    // selected.setHours(0, 0, 0, 0)
+    // 
+    // return selected < today // Прошлые дни - только чтение
   }, [selectedDate])
   
   // State для статистики (объединен в хук)
