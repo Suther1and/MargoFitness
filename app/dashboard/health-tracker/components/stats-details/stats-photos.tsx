@@ -33,19 +33,36 @@ export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
   // Блокируем скролл страницы когда lightbox открыт
   useEffect(() => {
     if (lightboxData) {
-      document.body.style.overflow = 'hidden'
+      // Сохраняем текущую позицию скролла
+      const scrollY = window.scrollY
       document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
       document.body.style.width = '100%'
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = ''
+      // Восстанавливаем позицию скролла
+      const scrollY = document.body.style.top
       document.body.style.position = ''
+      document.body.style.top = ''
       document.body.style.width = ''
+      document.body.style.overflow = ''
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
     
     return () => {
-      document.body.style.overflow = ''
+      // Cleanup при размонтировании
+      const scrollY = document.body.style.top
       document.body.style.position = ''
+      document.body.style.top = ''
       document.body.style.width = ''
+      document.body.style.overflow = ''
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
   }, [lightboxData])
 
