@@ -54,14 +54,16 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
       
       if (error) {
         console.error('Error loading water stats:', error)
-        return null
+        return { success: false, data: [] }
       }
       
       // Форматируем данные как в getWaterStats
-      return data?.map(entry => ({
+      const waterData = data?.map(entry => ({
         date: entry.date,
         value: (entry.metrics as any)?.water || 0
       })) || []
+      
+      return { success: true, data: waterData }
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,

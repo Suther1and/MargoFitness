@@ -52,12 +52,14 @@ export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange
         .lt('date', endStr)
         .order('date', { ascending: true })
       
-      if (error) return null
+      if (error) return { success: false, data: [] }
       
-      return data?.map(entry => ({
+      const stepsData = data?.map(entry => ({
         date: entry.date,
         value: (entry.metrics as any)?.steps || 0
       })) || []
+      
+      return { success: true, data: stepsData }
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
