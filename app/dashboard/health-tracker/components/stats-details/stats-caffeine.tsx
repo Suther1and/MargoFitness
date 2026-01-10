@@ -46,7 +46,6 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

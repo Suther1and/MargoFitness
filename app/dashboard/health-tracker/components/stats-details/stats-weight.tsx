@@ -32,7 +32,6 @@ export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRan
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

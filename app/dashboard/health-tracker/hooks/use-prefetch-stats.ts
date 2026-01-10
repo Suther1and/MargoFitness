@@ -35,11 +35,12 @@ export function usePrefetchStats({
 }: UsePrefetchStatsOptions) {
   const queryClient = useQueryClient()
 
-  // Prefetch соседних дней (±3 дня)
+  // Prefetch соседних дней (только прошлые: -7...-1, 0)
   useEffect(() => {
     if (!userId || !enabled || !selectedDate) return
 
-    const daysToPreload = [-3, -2, -1, 1, 2, 3]
+    // Prefetch только прошлые дни + сегодня (будущие недоступны для пользователя)
+    const daysToPreload = [-7, -6, -5, -4, -3, -2, -1, 0]
     
     daysToPreload.forEach(offset => {
       const targetDate = addDays(selectedDate, offset)

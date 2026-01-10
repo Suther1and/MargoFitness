@@ -61,7 +61,6 @@ export const StatsNutrition = memo(function StatsNutrition({ userId, settings, d
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

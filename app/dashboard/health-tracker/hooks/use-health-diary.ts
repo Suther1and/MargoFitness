@@ -47,7 +47,6 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     gcTime: 30 * 60 * 1000, // 30 минут в памяти
     refetchOnMount: false, // НЕ блокировать UI
     refetchOnWindowFocus: false, // НЕ блокировать при фокусе
-    placeholderData: (previousData) => previousData, // Мгновенный показ
     refetchInterval: isToday ? 30000 : false, // Сегодня - фоновое обновление каждые 30 сек
   })
 

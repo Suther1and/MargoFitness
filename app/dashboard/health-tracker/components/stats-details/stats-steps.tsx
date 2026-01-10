@@ -46,7 +46,6 @@ export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

@@ -45,7 +45,6 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
     gcTime: 30 * 60 * 1000, // 30 минут в памяти
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData, // Мгновенный показ
   })
 
   const data = useMemo(() => {

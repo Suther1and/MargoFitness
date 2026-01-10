@@ -46,7 +46,6 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
   })
 
   // Рассчитываем completionData с учетом расписания

@@ -32,10 +32,9 @@ export function useOverviewStats({
     },
     enabled: !!userId,
     staleTime: 60 * 1000, // 60 секунд - короткий для критичных данных overview
-    gcTime: 30 * 60 * 1000, // 30 минут в памяти (новое название cacheTime)
+    gcTime: 30 * 60 * 1000, // 30 минут в памяти
     refetchOnMount: false, // НЕ блокировать UI при монтировании
     refetchOnWindowFocus: false, // НЕ блокировать при фокусе
-    placeholderData: (previousData) => previousData, // Показываем старые данные мгновенно
   })
 
   return {
