@@ -36,12 +36,23 @@ function dbToAppSettings(dbData: any): TrackerSettings {
   const enabledWidgets = dbData.enabled_widgets || []
   const widgetGoals = dbData.widget_goals || {}
   const widgetsInPlan = dbData.widgets_in_daily_plan || []
+  const goals = dbData.goals || {} // JSONB поле goals для дополнительных настроек
   
   Object.keys(DEFAULT_SETTINGS.widgets).forEach(widgetId => {
-    widgets[widgetId] = {
+    const baseWidget = {
       enabled: enabledWidgets.includes(widgetId),
       goal: widgetGoals[widgetId] || null,
       inDailyPlan: widgetsInPlan.includes(widgetId)
+    }
+    
+    // Для nutrition добавляем nutritionGoalType из goals
+    if (widgetId === 'nutrition' && goals.nutrition?.goalType) {
+      widgets[widgetId] = {
+        ...baseWidget,
+        nutritionGoalType: goals.nutrition.goalType
+      }
+    } else {
+      widgets[widgetId] = baseWidget
     }
   })
   
@@ -56,18 +67,28 @@ function appToDbSettings(appSettings: TrackerSettings) {
   const enabledWidgets: string[] = []
   const widgetGoals: Record<string, number> = {}
   const widgetsInPlan: string[] = []
+  const goals: any = {}
   
   Object.entries(appSettings.widgets).forEach(([widgetId, widget]) => {
     if (widget.enabled) enabledWidgets.push(widgetId)
     if (widget.goal !== null) widgetGoals[widgetId] = widget.goal
     if (widget.inDailyPlan) widgetsInPlan.push(widgetId)
+    
+    // Для nutrition сохраняем дополнительное поле nutritionGoalType в goals
+    if (widgetId === 'nutrition' && widget.nutritionGoalType) {
+      goals.nutrition = {
+        goal: widget.goal,
+        goalType: widget.nutritionGoalType
+      }
+    }
   })
   
   return {
     enabled_widgets: enabledWidgets,
     widget_goals: widgetGoals,
     widgets_in_daily_plan: widgetsInPlan,
-    user_params: appSettings.userParams
+    user_params: appSettings.userParams,
+    goals: Object.keys(goals).length > 0 ? goals : undefined
   }
 }
 

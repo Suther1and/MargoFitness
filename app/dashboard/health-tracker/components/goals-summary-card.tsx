@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 import { CheckCircle2, Circle, Target, ShieldCheck, AlertCircle } from 'lucide-react'
-import { DailyMetrics, TrackerSettings, WidgetId, WIDGET_CONFIGS } from '../types'
+import { DailyMetrics, TrackerSettings, WidgetId, WIDGET_CONFIGS, NutritionGoalType } from '../types'
 import { cn } from '@/lib/utils'
 
 interface GoalsSummaryCardProps {
@@ -19,7 +19,37 @@ interface GoalData {
   goal: number
   unit: string
   type: MetricType
+  nutritionGoalType?: NutritionGoalType // только для nutrition
 }
+
+// Умная логика проверки достижения цели по питанию
+const isNutritionGoalSuccess = (
+  current: number,
+  goal: number,
+  goalType: NutritionGoalType
+): 'success' | 'warning' | 'danger' | 'incomplete' => {
+  const percentage = (current / goal) * 100;
+
+  switch (goalType) {
+    case 'loss': // Похудение
+      if (percentage >= 80 && percentage <= 100) return 'success';
+      if ((percentage >= 70 && percentage < 80) || (percentage > 100 && percentage <= 110)) return 'warning';
+      return 'danger';
+
+    case 'maintain': // Баланс
+      if (percentage >= 90 && percentage <= 110) return 'success';
+      if ((percentage >= 80 && percentage < 90) || (percentage > 110 && percentage <= 120)) return 'warning';
+      return 'danger';
+
+    case 'gain': // Набор
+      if (percentage >= 100 && percentage <= 120) return 'success';
+      if ((percentage >= 90 && percentage < 100) || (percentage > 120 && percentage <= 130)) return 'warning';
+      return 'danger';
+
+    default:
+      return 'incomplete';
+  }
+};
 
 export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings, onNavigateToSettings }: GoalsSummaryCardProps) {
   // Собираем виджеты, которые добавлены в план на день
@@ -64,12 +94,14 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
           type: 'limit' // Это лимит!
         }
       case 'nutrition':
+        const nutritionGoalType = settings.widgets.nutrition.nutritionGoalType || 'maintain'
         return { 
           label: 'Калории', 
           current: data.calories, 
           goal: settings.widgets.nutrition.goal || data.caloriesGoal, 
           unit: 'ккал',
-          type: 'limit' // Это лимит!
+          type: 'goal', // Изменили на goal, т.к. логика теперь динамическая
+          nutritionGoalType
         }
       case 'weight':
         return { 
@@ -89,10 +121,13 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
     .filter(Boolean) as GoalData[]
 
   // Подсчет выполненных целей (зеленых)
-  // Для целей: выполнено если достигнута
-  // Для лимитов: выполнено если НЕ превышена (может быть меньше или равна)
   const completedCount = goals.filter(g => {
-    if (g.type === 'goal') {
+    const isNutrition = g.label === 'Калории' && g.nutritionGoalType
+    
+    if (isNutrition && g.nutritionGoalType) {
+      // Для питания используем умную логику
+      return isNutritionGoalSuccess(g.current, g.goal, g.nutritionGoalType) === 'success'
+    } else if (g.type === 'goal') {
       return g.current >= g.goal // Достигнута или превышена
     } else {
       return g.current < g.goal // Строго меньше лимита (не на пределе)
@@ -147,6 +182,7 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
       <div className="space-y-3">
         {goals.map((g) => {
           const isLimit = g.type === 'limit'
+          const isNutrition = g.label === 'Калории' && g.nutritionGoalType
           
           // Процент выполнения
           const perc = Math.min((g.current / g.goal) * 100, 100)
@@ -154,7 +190,10 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
           // Определяем статус для визуализации
           let status: 'success' | 'warning' | 'danger' | 'incomplete'
           
-          if (isLimit) {
+          if (isNutrition && g.nutritionGoalType) {
+            // Для питания используем умную логику
+            status = isNutritionGoalSuccess(g.current, g.goal, g.nutritionGoalType)
+          } else if (isLimit) {
             // Для лимитов: зеленый если в норме, янтарный на пределе, красный при превышении
             if (g.current > g.goal) {
               status = 'danger' // Превышен
@@ -193,7 +232,7 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
                   )}>
                     {g.label}
                   </span>
-                  {isLimit && (
+                  {isLimit && !isNutrition && (
                     <span className={cn(
                       "text-[9px] font-black uppercase tracking-wider",
                       status === 'danger' ? "text-red-500/40" :
@@ -214,7 +253,7 @@ export const GoalsSummaryCard = memo(function GoalsSummaryCard({ data, settings,
                   )}>
                     {g.current}
                   </span>
-                  {isLimit && (
+                  {(isLimit || isNutrition) && (
                     <>
                       <span className="text-[10px] md:text-[9px] font-medium text-white/10">/</span>
                       <span className="text-[10px] md:text-[9px] font-medium text-white/10">{g.goal}</span>

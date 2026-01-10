@@ -10,6 +10,9 @@ import { ProgressRing } from './shared'
 import { ANIMATIONS } from '../constants'
 import { calculateBMI, getBMICategory, calculateCalorieNorms } from '../utils/bmi-utils'
 
+import { getActivityLevelLabel } from '../utils/bmi-utils'
+import type { NutritionGoalType } from '../types'
+
 interface NutritionCardHProps {
   calories: number
   caloriesGoal: number
@@ -18,7 +21,10 @@ interface NutritionCardHProps {
   height?: number
   age?: number
   gender?: 'male' | 'female'
+  activityLevel?: number
+  nutritionGoalType?: NutritionGoalType
   onUpdate: (metric: string, val: any) => void
+  onOpenBmiDialog?: () => void
 }
 
 export const NutritionCardH = memo(function NutritionCardH({
@@ -29,7 +35,10 @@ export const NutritionCardH = memo(function NutritionCardH({
   height = 170,
   age = 25,
   gender = 'female',
+  activityLevel = 1.55,
+  nutritionGoalType = 'maintain',
   onUpdate,
+  onOpenBmiDialog,
 }: NutritionCardHProps) {
   const [mealInput, setMealInput] = useState('')
   const { percentage } = useGoalProgress({ current: calories, goal: caloriesGoal })
@@ -44,7 +53,10 @@ export const NutritionCardH = memo(function NutritionCardH({
   const bmiValue = calculateBMI(height, weight)
   const bmi = bmiValue ? parseFloat(bmiValue) : 0
   const bmiCategory = getBMICategory(bmi)
-  const norms = calculateCalorieNorms(weight, height, age)
+  const norms = calculateCalorieNorms(weight, height, age, activityLevel)
+  
+  // Получаем название уровня активности
+  const activityLevelLabel = getActivityLevelLabel(activityLevel)
 
   const foodItems = [
     { rating: 1, icon: Hamburger, label: 'Много лишнего', color: 'text-red-400' },
@@ -125,7 +137,7 @@ export const NutritionCardH = memo(function NutritionCardH({
           </div>
         </div>
 
-        {/* Правая часть: ИМТ, Нормы и Качество */}
+        {/* Правая часть: ИМТ, Уровень активности, Цель и Качество */}
         <div className="flex-1 flex flex-col justify-between h-full py-0.5">
           <div className="flex flex-row justify-between items-start gap-4">
             <div className="space-y-1">
@@ -142,28 +154,38 @@ export const NutritionCardH = memo(function NutritionCardH({
             </div>
 
             <div className="space-y-1.5 flex-1 flex flex-col items-end">
-                <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Суточные нормы</span>
+                <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Уровень активности</span>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-[12px] md:text-[14px] font-black text-white/60 font-oswald">{activityLevelLabel}</span>
+                </div>
+                
+                <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest pr-1">Цель</span>
                 <div className="flex items-center gap-0.5">
                     {norms ? [
-                      { label: 'Сброс', val: norms.loss, color: 'text-emerald-400' },
-                      { label: 'Норма', val: norms.maintain, color: 'text-violet-400' },
-                      { label: 'Набор', val: norms.gain, color: 'text-orange-400' }
+                      { label: 'Сброс', val: norms.loss, color: 'text-emerald-400', type: 'loss' as NutritionGoalType },
+                      { label: 'Норма', val: norms.maintain, color: 'text-violet-400', type: 'maintain' as NutritionGoalType },
+                      { label: 'Набор', val: norms.gain, color: 'text-orange-400', type: 'gain' as NutritionGoalType }
                     ].map((n, i) => (
                       <div key={n.label} className="flex items-center gap-0.5">
                         <button 
-                          onClick={() => onUpdate('caloriesGoal', n.val)} 
+                          onClick={() => onOpenBmiDialog?.()} 
                             className={cn(
-                              "flex flex-col items-center px-2 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-colors min-w-[42px] md:min-w-[50px]",
-                              caloriesGoal === n.val ? "bg-white/10 border border-white/10 shadow-lg" : "hover:bg-white/5 border border-transparent"
+                              "flex flex-col items-center px-2 md:px-2.5 py-1 md:py-1.5 rounded-xl transition-all min-w-[42px] md:min-w-[50px] cursor-pointer",
+                              nutritionGoalType === n.type ? "bg-white/10 border border-white/10 shadow-lg scale-105" : "hover:bg-white/5 border border-transparent opacity-60 hover:opacity-100"
                             )}
                         >
-                            <span className={cn("text-[14px] md:text-[16px] font-black font-oswald transition-colors leading-none", caloriesGoal === n.val ? n.color : "text-white/30")}>{n.val}</span>
+                            <span className={cn("text-[14px] md:text-[16px] font-black font-oswald transition-colors leading-none", nutritionGoalType === n.type ? n.color : "text-white/30")}>{n.val}</span>
                             <span className="text-[6px] md:text-[7px] text-white/20 uppercase font-bold mt-1 tracking-tighter">{n.label}</span>
                         </button>
                         {i < 2 && <div className="w-px h-4 md:h-5 bg-white/5 mx-0.5" />}
                       </div>
                     )) : (
-                      <span className="text-[8px] font-bold text-white/10 uppercase italic pr-1">Укажите данные в настройках</span>
+                      <button 
+                        onClick={() => onOpenBmiDialog?.()} 
+                        className="text-[8px] font-bold text-white/10 uppercase italic pr-1 hover:text-white/20 transition-colors cursor-pointer"
+                      >
+                        Укажите данные в настройках
+                      </button>
                     )}
                 </div>
             </div>

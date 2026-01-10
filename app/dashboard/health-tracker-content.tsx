@@ -21,7 +21,7 @@ import { SubscriptionRenewalModal } from '@/components/subscription-renewal-moda
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 
 // Импорт напрямую - убираем ленивую загрузку для лучшей производительности
-import SettingsTab from './health-tracker/components/settings-tab'
+import SettingsTab, { BmiInfoDialog } from './health-tracker/components/settings-tab'
 
 // Новые компоненты
 import { WaterCardH } from './health-tracker/components/water-card-h'
@@ -59,6 +59,7 @@ import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
 import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
 import { hasActiveMainWidgets } from './health-tracker/utils/widget-helpers'
+import { calculateBMI, getBMICategory } from './health-tracker/utils/bmi-utils'
 import { StatsDatePickerDialog } from './health-tracker/components/stats-date-picker-dialog'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
@@ -102,6 +103,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [isBmiDialogOpen, setIsBmiDialogOpen] = useState(false)
   
   useEffect(() => {
     const supabase = createClient()
@@ -153,7 +155,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [dismissed, setDismissed] = useState(false)
 
   // Все хуки получают userId и загружаются параллельно
-  const { settings, isFirstVisit, isLoaded: isSettingsLoaded } = useTrackerSettings(userId)
+  const { settings, isFirstVisit, isLoaded: isSettingsLoaded, saveSettings } = useTrackerSettings(userId)
   const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
   const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
   
@@ -255,6 +257,21 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
+  // Автообновление веса из дневника в настройки
+  useEffect(() => {
+    if (data.weight && settings.userParams.weight !== data.weight) {
+      // Обновляем вес в настройках, если он изменился в дневнике
+      const newSettings = {
+        ...settings,
+        userParams: {
+          ...settings.userParams,
+          weight: data.weight
+        }
+      }
+      saveSettings(newSettings)
+    }
+  }, [data.weight, settings.userParams.weight]) // Зависимости: вес из дневника и вес из настроек
+
   useEffect(() => {
     setMounted(true)
     if ('scrollRestoration' in window.history) {
@@ -278,6 +295,12 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
           toggleHabitCompleted(habit.id, habit.completed)
         }
       })
+    } else if (metric === 'calories') {
+      // Для калорий также сохраняем тип цели
+      updateMetric(metric, value)
+      // Сохраняем nutritionGoalType в metrics
+      const nutritionGoalType = settings.widgets.nutrition.nutritionGoalType || 'maintain'
+      updateMetric('nutritionGoalType' as any, nutritionGoalType)
     } else {
       // Для всех остальных метрик
       updateMetric(metric, value)
@@ -732,7 +755,19 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                             )}
                           </div>
                           {settings.widgets.nutrition?.enabled && (
-                            <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                            <NutritionCardH 
+                              calories={data.calories} 
+                              caloriesGoal={data.caloriesGoal} 
+                              foodQuality={data.foodQuality} 
+                              weight={data.weight} 
+                              height={settings.userParams.height || data.height} 
+                              age={settings.userParams.age || data.age} 
+                              gender={settings.userParams.gender || data.gender}
+                              activityLevel={settings.userParams.activityLevel || 1.55}
+                              nutritionGoalType={settings.widgets.nutrition.nutritionGoalType || 'maintain'}
+                              onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
+                              onOpenBmiDialog={() => setIsBmiDialogOpen(true)}
+                            />
                           )}
                         </>
                       )
@@ -917,7 +952,19 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       )}
                     </div>
                       {settings.widgets.nutrition?.enabled && (
-                        <NutritionCardH calories={data.calories} caloriesGoal={data.caloriesGoal} foodQuality={data.foodQuality} weight={data.weight} height={data.height} age={data.age} gender={data.gender} onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)} />
+                        <NutritionCardH 
+                          calories={data.calories} 
+                          caloriesGoal={data.caloriesGoal} 
+                          foodQuality={data.foodQuality} 
+                          weight={data.weight} 
+                          height={settings.userParams.height || data.height} 
+                          age={settings.userParams.age || data.age} 
+                          gender={settings.userParams.gender || data.gender}
+                          activityLevel={settings.userParams.activityLevel || 1.55}
+                          nutritionGoalType={settings.widgets.nutrition.nutritionGoalType || 'maintain'}
+                          onUpdate={(field, val) => handleMetricUpdate(field as keyof DailyMetrics, val)}
+                          onOpenBmiDialog={() => setIsBmiDialogOpen(true)}
+                        />
                       )}
                       </>
                     )}
@@ -1045,6 +1092,23 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             userId={profile.id}
           />
         </>
+      )}
+
+      {/* BMI Dialog for Nutrition Widget */}
+      {settings && (
+        <BmiInfoDialog
+          isOpen={isBmiDialogOpen}
+          onOpenChange={setIsBmiDialogOpen}
+          bmiValue={calculateBMI(settings.userParams.height, settings.userParams.weight)}
+          bmiCategory={
+            calculateBMI(settings.userParams.height, settings.userParams.weight)
+              ? getBMICategory(parseFloat(calculateBMI(settings.userParams.height, settings.userParams.weight)!))
+              : null
+          }
+          userParams={settings.userParams}
+          settings={settings}
+          onUpdateSettings={saveSettings}
+        />
       )}
     </>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
@@ -46,13 +46,32 @@ const ICON_MAP: Record<string, any> = {
   notes: NotebookText,
 }
 
-function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: { 
+export function BmiInfoDialog({ 
+  bmiValue, 
+  bmiCategory, 
+  userParams, 
+  settings, 
+  onUpdateSettings,
+  isOpen,
+  onOpenChange
+}: { 
   bmiValue: string | null, 
   bmiCategory: any, 
-  userParams: any 
+  userParams: any,
+  settings: any,
+  onUpdateSettings: (settings: any) => void,
+  isOpen?: boolean,
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activityLevel, setActivityLevel] = useState(1.55);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [activityLevel, setActivityLevel] = useState(settings?.userParams?.activityLevel || 1.55);
+  const [selectedGoalType, setSelectedGoalType] = useState<'loss' | 'maintain' | 'gain'>(
+    settings?.widgets?.nutrition?.nutritionGoalType || 'maintain'
+  );
+
+  // Используем внешнее или внутреннее состояние
+  const dialogOpen = isOpen !== undefined ? isOpen : internalIsOpen;
+  const setDialogOpen = onOpenChange || setInternalIsOpen;
 
   const calorieNorms = useMemo(() => 
     calculateCalorieNorms(userParams.weight, userParams.height, userParams.age, activityLevel),
@@ -65,13 +84,64 @@ function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: {
     { label: 'Высокая', value: 1.725, desc: 'Более 3 интенсивных тренировок в неделю' }
   ];
 
+  // Обработчик выбора цели
+  const handleGoalSelect = (goalType: 'loss' | 'maintain' | 'gain') => {
+    if (!calorieNorms || !settings) return;
+    
+    setSelectedGoalType(goalType);
+    
+    // Получаем значение калорий для выбранной цели
+    const goalValue = goalType === 'loss' ? calorieNorms.loss : 
+                      goalType === 'maintain' ? calorieNorms.maintain : 
+                      calorieNorms.gain;
+    
+    // Обновляем настройки
+    const newSettings = {
+      ...settings,
+      userParams: {
+        ...settings.userParams,
+        activityLevel
+      },
+      widgets: {
+        ...settings.widgets,
+        nutrition: {
+          ...settings.widgets.nutrition,
+          goal: goalValue,
+          nutritionGoalType: goalType
+        }
+      }
+    };
+    
+    onUpdateSettings(newSettings);
+  };
+
+  // Обработчик изменения уровня активности
+  const handleActivityChange = (newActivityLevel: number) => {
+    setActivityLevel(newActivityLevel);
+    
+    if (!settings) return;
+    
+    // Обновляем настройки с новым уровнем активности
+    const newSettings = {
+      ...settings,
+      userParams: {
+        ...settings.userParams,
+        activityLevel: newActivityLevel
+      }
+    };
+    
+    onUpdateSettings(newSettings);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
-      <DialogTrigger asChild>
-        <button className="p-1.5 md:p-2 text-white/40 hover:text-white transition-all focus:outline-none">
-          <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
-        </button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
+      {isOpen === undefined && (
+        <DialogTrigger asChild>
+          <button className="p-1.5 md:p-2 text-white/40 hover:text-white transition-all focus:outline-none">
+            <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          </button>
+        </DialogTrigger>
+      )}
       <DialogContent className="bg-[#121214] border-white/10 text-white rounded-[2rem] max-w-sm overflow-hidden p-0 gap-0">
         <div className="p-6 pb-4">
           <DialogHeader>
@@ -103,7 +173,7 @@ function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: {
                 {activityOptions.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => setActivityLevel(opt.value)}
+                    onClick={() => handleActivityChange(opt.value)}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors relative",
                       activityLevel === opt.value 
@@ -139,54 +209,117 @@ function BmiInfoDialog({ bmiValue, bmiCategory, userParams }: {
                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Укажи возраст для расчета</p>
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-white/[0.03] rounded-2xl p-3.5 border border-white/5">
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-[7px] font-black text-emerald-400/40 uppercase tracking-widest mb-0.5">Похудение</span>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={() => handleGoalSelect('loss')}
+                  className={cn(
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    selectedGoalType === 'loss' 
+                      ? "bg-emerald-500/10 border-emerald-500/30 shadow-lg" 
+                      : "bg-white/[0.03] border-white/5 hover:border-emerald-500/20"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
+                    selectedGoalType === 'loss' ? "text-emerald-400" : "text-emerald-400/40"
+                  )}>
+                    Похудение
+                  </span>
                   <div className="flex items-baseline gap-0.5 overflow-hidden">
                     <motion.span
                       key={calorieNorms.loss}
                       initial={{ opacity: 0.3, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.1, ease: "easeOut" }}
-                      className="text-xl font-oswald font-black text-emerald-400"
+                      className={cn(
+                        "text-xl font-oswald font-black transition-colors",
+                        selectedGoalType === 'loss' ? "text-emerald-400" : "text-emerald-400/60"
+                      )}
                     >
                       {calorieNorms.loss}
                     </motion.span>
-                    <span className="text-[8px] font-bold text-emerald-400/20 uppercase">ккал</span>
+                    <span className={cn(
+                      "text-[8px] font-bold uppercase transition-colors",
+                      selectedGoalType === 'loss' ? "text-emerald-400/40" : "text-emerald-400/20"
+                    )}>
+                      ккал
+                    </span>
                   </div>
-                </div>
-                <div className="w-px h-6 bg-white/5" />
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-[7px] font-black text-violet-400/40 uppercase tracking-widest mb-0.5">Баланс</span>
+                </button>
+
+                <button
+                  onClick={() => handleGoalSelect('maintain')}
+                  className={cn(
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    selectedGoalType === 'maintain' 
+                      ? "bg-violet-500/10 border-violet-500/30 shadow-lg" 
+                      : "bg-white/[0.03] border-white/5 hover:border-violet-500/20"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
+                    selectedGoalType === 'maintain' ? "text-violet-400" : "text-violet-400/40"
+                  )}>
+                    Баланс
+                  </span>
                   <div className="flex items-baseline gap-0.5 overflow-hidden">
                     <motion.span
                       key={calorieNorms.maintain}
                       initial={{ opacity: 0.3, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.1, ease: "easeOut" }}
-                      className="text-xl font-oswald font-black text-violet-400"
+                      className={cn(
+                        "text-xl font-oswald font-black transition-colors",
+                        selectedGoalType === 'maintain' ? "text-violet-400" : "text-violet-400/60"
+                      )}
                     >
                       {calorieNorms.maintain}
                     </motion.span>
-                    <span className="text-[8px] font-bold text-violet-400/20 uppercase">ккал</span>
+                    <span className={cn(
+                      "text-[8px] font-bold uppercase transition-colors",
+                      selectedGoalType === 'maintain' ? "text-violet-400/40" : "text-violet-400/20"
+                    )}>
+                      ккал
+                    </span>
                   </div>
-                </div>
-                <div className="w-px h-6 bg-white/5" />
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-[7px] font-black text-orange-400/40 uppercase tracking-widest mb-0.5">Набор</span>
+                </button>
+
+                <button
+                  onClick={() => handleGoalSelect('gain')}
+                  className={cn(
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    selectedGoalType === 'gain' 
+                      ? "bg-orange-500/10 border-orange-500/30 shadow-lg" 
+                      : "bg-white/[0.03] border-white/5 hover:border-orange-500/20"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
+                    selectedGoalType === 'gain' ? "text-orange-400" : "text-orange-400/40"
+                  )}>
+                    Набор
+                  </span>
                   <div className="flex items-baseline gap-0.5 overflow-hidden">
                     <motion.span
                       key={calorieNorms.gain}
                       initial={{ opacity: 0.3, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.1, ease: "easeOut" }}
-                      className="text-xl font-oswald font-black text-orange-400"
+                      className={cn(
+                        "text-xl font-oswald font-black transition-colors",
+                        selectedGoalType === 'gain' ? "text-orange-400" : "text-orange-400/60"
+                      )}
                     >
                       {calorieNorms.gain}
                     </motion.span>
-                    <span className="text-[8px] font-bold text-orange-400/20 uppercase">ккал</span>
+                    <span className={cn(
+                      "text-[8px] font-bold uppercase transition-colors",
+                      selectedGoalType === 'gain' ? "text-orange-400/40" : "text-orange-400/20"
+                    )}>
+                      ккал
+                    </span>
                   </div>
-                </div>
+                </button>
               </div>
             )}
           </div>
@@ -226,6 +359,10 @@ export default function SettingsTab({
 }: SettingsTabProps) {
   const { settings, saveSettings, isLoaded } = useTrackerSettings(userId)
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
+  const [openBmiDialog, setOpenBmiDialog] = useState(false)
+  
+  // Отслеживаем предыдущие значения целей для восстановления inDailyPlan
+  const previousGoalsRef = useRef<Record<WidgetId, { goal: number | null, inPlan: boolean }>>({} as any)
 
   // ВАЖНО: все хуки должны вызываться до любых условных return
   const widgetGroups = useMemo(() => [
@@ -272,13 +409,41 @@ export default function SettingsTab({
 
   const handleGoalChange = (widgetId: WidgetId, value: string) => {
     const filtered = value.replace(/[^\d.]/g, '')
+    const widget = localSettings.widgets[widgetId]
+    const newGoalValue = filtered ? parseFloat(filtered) : null
+    const hadGoal = widget.goal !== null
+    const willHaveGoal = newGoalValue !== null && newGoalValue > 0
+    
+    // Логика inDailyPlan:
+    // 1. Если удаляем цель - сохраняем текущее состояние inDailyPlan и убираем из плана
+    // 2. Если добавляем цель - восстанавливаем сохраненное состояние inDailyPlan
+    let newInDailyPlan = widget.inDailyPlan
+    
+    if (!willHaveGoal && hadGoal) {
+      // Удаление цели - сохраняем текущее состояние inDailyPlan перед удалением
+      previousGoalsRef.current[widgetId] = {
+        goal: widget.goal,
+        inPlan: widget.inDailyPlan  // Сохраняем текущее состояние (включено или выключено)
+      }
+      newInDailyPlan = false  // Убираем из плана при удалении цели
+    } else if (willHaveGoal && !hadGoal) {
+      // Добавление новой цели - восстанавливаем сохраненное состояние
+      const prev = previousGoalsRef.current[widgetId]
+      if (prev !== undefined) {
+        newInDailyPlan = prev.inPlan  // Восстанавливаем то состояние, которое было ДО удаления
+      } else {
+        newInDailyPlan = false  // Если не было сохраненного состояния - по умолчанию выключено
+      }
+    }
+    
     const newSettings = {
       ...localSettings,
       widgets: {
         ...localSettings.widgets,
         [widgetId]: {
           ...localSettings.widgets[widgetId],
-          goal: filtered ? parseFloat(filtered) : null,
+          goal: newGoalValue,
+          inDailyPlan: newInDailyPlan
         }
       }
     }
@@ -405,7 +570,9 @@ export default function SettingsTab({
                   <BmiInfoDialog 
                     bmiValue={bmiValue} 
                     bmiCategory={bmiCategory} 
-                    userParams={localSettings.userParams} 
+                    userParams={localSettings.userParams}
+                    settings={localSettings}
+                    onUpdateSettings={saveSettings}
                   />
                 </div>
               </>
@@ -528,7 +695,9 @@ export default function SettingsTab({
                   <BmiInfoDialog 
                     bmiValue={bmiValue} 
                     bmiCategory={bmiCategory} 
-                    userParams={localSettings.userParams} 
+                    userParams={localSettings.userParams}
+                    settings={localSettings}
+                    onUpdateSettings={saveSettings}
                   />
                   </div>
                 </>
@@ -604,26 +773,51 @@ export default function SettingsTab({
                               <div className="mt-auto flex items-end gap-2.5">
                                 <div className={cn("relative flex-1", shakingWidget === id && "animate-shake")} onClick={(e) => widget.enabled && e.stopPropagation()}>
                                   {widget.enabled ? (
-                                    <input
-                                      type="text"
-                                      inputMode="decimal"
-                                      data-widget-id={id}
-                                      value={widget.goal ?? ''}
-                                      onChange={(e) => handleGoalChange(id, e.target.value)}
-                                      placeholder="Цель"
-                                      className={cn(
-                                        "w-full bg-white/5 border rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none min-h-[42px] transition-all",
-                                        shakingWidget === id 
-                                          ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
-                                          : "border-white/10 focus:border-green-500/50"
-                                      )}
-                                    />
+                                    id === 'nutrition' ? (
+                                      // Для nutrition виджета - кликабельное поле с открытием BMI диалога
+                                      <div
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setOpenBmiDialog(true)
+                                        }}
+                                        className={cn(
+                                          "w-full bg-white/5 border rounded-xl px-3.5 py-2 min-h-[42px] flex items-center cursor-pointer transition-all hover:border-violet-500/50 hover:bg-white/10",
+                                          shakingWidget === id 
+                                            ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                                            : "border-white/10",
+                                          !widget.goal && "hover:shadow-[0_0_10px_rgba(139,92,246,0.2)]"
+                                        )}
+                                      >
+                                        {widget.goal ? (
+                                          <span className="text-base font-oswald font-black text-white">{widget.goal}</span>
+                                        ) : (
+                                          <span className="text-base font-oswald font-black text-white/30">Выбрать цель</span>
+                                        )}
+                                        <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest">{config.goalUnit}</span>
+                                      </div>
+                                    ) : (
+                                      // Для остальных виджетов - обычное поле ввода
+                                      <input
+                                        type="text"
+                                        inputMode="decimal"
+                                        data-widget-id={id}
+                                        value={widget.goal ?? ''}
+                                        onChange={(e) => handleGoalChange(id, e.target.value)}
+                                        placeholder="Цель"
+                                        className={cn(
+                                          "w-full bg-white/5 border rounded-xl px-3.5 py-2 text-base font-oswald font-black text-white focus:outline-none min-h-[42px] transition-all",
+                                          shakingWidget === id 
+                                            ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                                            : "border-white/10 focus:border-green-500/50"
+                                        )}
+                                      />
+                                    )
                                   ) : (
                                     <div className="w-full bg-white/[0.03] border border-white/5 rounded-xl min-h-[42px] flex items-center px-3.5 opacity-10 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleToggle(id); }}>
                                       <div className="w-10 h-3 bg-white/10 rounded animate-pulse" />
                                     </div>
                                   )}
-                                  {widget.enabled && <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest">{config.goalUnit}</span>}
+                                  {widget.enabled && id !== 'nutrition' && <span className="absolute right-3.5 bottom-[11px] text-[8px] font-black text-white/20 uppercase tracking-widest">{config.goalUnit}</span>}
                                 </div>
                                 {id !== 'weight' && (
                                   <div className="relative group">
@@ -702,6 +896,17 @@ export default function SettingsTab({
         </AnimatePresence>
       </div>
     </div>
+
+    {/* Global BMI Dialog для nutrition виджета */}
+    <BmiInfoDialog
+      isOpen={openBmiDialog}
+      onOpenChange={setOpenBmiDialog}
+      bmiValue={bmiValue}
+      bmiCategory={bmiCategory}
+      userParams={localSettings.userParams}
+      settings={localSettings}
+      onUpdateSettings={saveSettings}
+    />
     </>
   )
 }

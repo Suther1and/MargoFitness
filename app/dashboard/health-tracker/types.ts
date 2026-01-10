@@ -1,5 +1,8 @@
 export type MoodRating = 1 | 2 | 3 | 4 | 5;
 
+// Типы для цели питания
+export type NutritionGoalType = 'loss' | 'maintain' | 'gain';
+
 // Типы для настроек трекера
 export type WidgetId = 'habits' | 'water' | 'steps' | 'weight' | 'caffeine' | 'sleep' | 'mood' | 'nutrition' | 'photos';
 
@@ -48,6 +51,7 @@ export interface WidgetSettings {
   enabled: boolean;
   goal: number | null;
   inDailyPlan: boolean;
+  nutritionGoalType?: NutritionGoalType; // только для nutrition виджета
 }
 
 export interface UserParameters {
@@ -55,6 +59,7 @@ export interface UserParameters {
   weight: number | null;
   age: number | null;
   gender: 'male' | 'female' | null;
+  activityLevel?: number; // 1.375 | 1.55 | 1.725
 }
 
 export interface TrackerSettings {

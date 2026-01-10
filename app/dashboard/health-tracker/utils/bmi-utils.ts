@@ -56,3 +56,28 @@ export const calculateCalorieNorms = (
   };
 };
 
+// Получить цель по калориям на основе типа цели
+export const getCalorieGoalByType = (
+  norms: CalorieNorms, 
+  goalType: 'loss' | 'maintain' | 'gain'
+): number => {
+  switch (goalType) {
+    case 'loss':
+      return norms.loss;
+    case 'maintain':
+      return norms.maintain;
+    case 'gain':
+      return norms.gain;
+    default:
+      return norms.maintain;
+  }
+};
+
+// Получить название уровня активности
+export const getActivityLevelLabel = (activityLevel: number): string => {
+  if (activityLevel === 1.375) return 'Низкая';
+  if (activityLevel === 1.55) return 'Средняя';
+  if (activityLevel === 1.725) return 'Высокая';
+  return 'Средняя';
+};
+
