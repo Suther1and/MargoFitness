@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown } from 'lucide-react'
+import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown, Check } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -213,12 +213,20 @@ export function BmiInfoDialog({
                 <button
                   onClick={() => handleGoalSelect('loss')}
                   className={cn(
-                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105 relative",
                     selectedGoalType === 'loss' 
-                      ? "bg-emerald-500/10 border-emerald-500/30 shadow-lg" 
+                      ? "bg-emerald-500/10 border-emerald-500/30 shadow-lg scale-[1.02]" 
                       : "bg-white/[0.03] border-white/5 hover:border-emerald-500/20"
                   )}
                 >
+                  <div className={cn(
+                    "absolute top-2 right-2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all",
+                    selectedGoalType === 'loss' 
+                      ? "bg-emerald-500 border-emerald-500 text-black scale-110 shadow-[0_0_8px_rgba(16,185,129,0.4)]" 
+                      : "bg-white/5 border-white/10 text-transparent"
+                  )}>
+                    <Check className="w-2.5 h-2.5" strokeWidth={4} />
+                  </div>
                   <span className={cn(
                     "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
                     selectedGoalType === 'loss' ? "text-emerald-400" : "text-emerald-400/40"
@@ -250,12 +258,20 @@ export function BmiInfoDialog({
                 <button
                   onClick={() => handleGoalSelect('maintain')}
                   className={cn(
-                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105 relative",
                     selectedGoalType === 'maintain' 
-                      ? "bg-violet-500/10 border-violet-500/30 shadow-lg" 
+                      ? "bg-violet-500/10 border-violet-500/30 shadow-lg scale-[1.02]" 
                       : "bg-white/[0.03] border-white/5 hover:border-violet-500/20"
                   )}
                 >
+                  <div className={cn(
+                    "absolute top-2 right-2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all",
+                    selectedGoalType === 'maintain' 
+                      ? "bg-violet-500 border-violet-500 text-black scale-110 shadow-[0_0_8px_rgba(139,92,246,0.4)]" 
+                      : "bg-white/5 border-white/10 text-transparent"
+                  )}>
+                    <Check className="w-2.5 h-2.5" strokeWidth={4} />
+                  </div>
                   <span className={cn(
                     "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
                     selectedGoalType === 'maintain' ? "text-violet-400" : "text-violet-400/40"
@@ -287,12 +303,20 @@ export function BmiInfoDialog({
                 <button
                   onClick={() => handleGoalSelect('gain')}
                   className={cn(
-                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105",
+                    "flex flex-col items-center flex-1 rounded-2xl p-3.5 border transition-all cursor-pointer hover:scale-105 relative",
                     selectedGoalType === 'gain' 
-                      ? "bg-orange-500/10 border-orange-500/30 shadow-lg" 
+                      ? "bg-orange-500/10 border-orange-500/30 shadow-lg scale-[1.02]" 
                       : "bg-white/[0.03] border-white/5 hover:border-orange-500/20"
                   )}
                 >
+                  <div className={cn(
+                    "absolute top-2 right-2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all",
+                    selectedGoalType === 'gain' 
+                      ? "bg-orange-500 border-orange-500 text-black scale-110 shadow-[0_0_8px_rgba(249,115,22,0.4)]" 
+                      : "bg-white/5 border-white/10 text-transparent"
+                  )}>
+                    <Check className="w-2.5 h-2.5" strokeWidth={4} />
+                  </div>
                   <span className={cn(
                     "text-[7px] font-black uppercase tracking-widest mb-0.5 transition-colors",
                     selectedGoalType === 'gain' ? "text-orange-400" : "text-orange-400/40"
