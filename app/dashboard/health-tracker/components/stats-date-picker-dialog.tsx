@@ -56,21 +56,27 @@ export function StatsDatePickerDialog({
 
   const handlePeriodClick = (periodId: PeriodType) => {
     const today = new Date()
+    today.setHours(23, 59, 59, 999) // Конец сегодняшнего дня
+    
     let start: Date
     let end: Date = today
 
     switch (periodId) {
       case '7d':
         start = subDays(today, 6)
+        start.setHours(0, 0, 0, 0) // Начало дня
         break
       case '30d':
         start = subDays(today, 29)
+        start.setHours(0, 0, 0, 0) // Начало дня
         break
       case '6m':
         start = subMonths(today, 6)
+        start.setHours(0, 0, 0, 0) // Начало дня
         break
       case '1y':
         start = subYears(today, 1)
+        start.setHours(0, 0, 0, 0) // Начало дня
         break
       default:
         return

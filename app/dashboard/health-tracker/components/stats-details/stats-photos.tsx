@@ -15,7 +15,7 @@ interface StatsPhotosProps {
 }
 
 export function StatsPhotos({ dateRange, userId }: StatsPhotosProps) {
-  const { weeklyPhotoSets, isLoading, deletePhoto, isDeleting } = useProgressPhotos({ userId })
+  const { weeklyPhotoSets, isLoading, deletePhoto, isDeleting } = useProgressPhotos({ userId, dateRange })
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [lightboxData, setLightboxData] = useState<{
     photoUrl: string

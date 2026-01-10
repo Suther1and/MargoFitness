@@ -22,10 +22,14 @@ import { PeriodType, DateRange } from '../types'
  */
 export function useStatsDateRange() {
   const today = new Date()
+  today.setHours(23, 59, 59, 999) // Конец сегодняшнего дня
+  
+  const sevenDaysAgo = subDays(today, 6)
+  sevenDaysAgo.setHours(0, 0, 0, 0) // Начало дня
   
   const [periodType, setPeriodType] = useState<PeriodType>('7d')
   const [dateRange, setDateRange] = useState<DateRange>({ 
-    start: subDays(today, 7), 
+    start: sevenDaysAgo, 
     end: today 
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)

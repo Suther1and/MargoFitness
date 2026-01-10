@@ -16,12 +16,13 @@ import { WeeklyPhotoSet, PhotoType, getWeekKey } from '@/types/database'
 interface UseProgressPhotosOptions {
   userId: string | null
   selectedDate?: Date // Опциональный параметр для конкретной недели
+  dateRange?: { start: Date; end: Date } // Опциональный параметр для статистики
 }
 
 /**
  * Хук для работы с недельными фото-прогресса
  */
-export function useProgressPhotos({ userId, selectedDate }: UseProgressPhotosOptions) {
+export function useProgressPhotos({ userId, selectedDate, dateRange }: UseProgressPhotosOptions) {
   const queryClient = useQueryClient()
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
@@ -29,9 +30,14 @@ export function useProgressPhotos({ userId, selectedDate }: UseProgressPhotosOpt
   // Вычисляем weekKey из выбранной даты (если передана)
   const weekKey = selectedDate ? getWeekKey(selectedDate) : null
 
+  // Создаем уникальный ключ для кеша на основе dateRange
+  const dateRangeKey = dateRange 
+    ? `${dateRange.start.getTime()}-${dateRange.end.getTime()}`
+    : 'all'
+
   // Получение всех недельных сетов фото
   const { data: weeklyPhotoSets = [], isLoading } = useQuery({
-    queryKey: ['progress-photos', userId],
+    queryKey: ['progress-photos', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return []
       const result = await getProgressPhotos(userId)
@@ -40,6 +46,7 @@ export function useProgressPhotos({ userId, selectedDate }: UseProgressPhotosOpt
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 минут
+    refetchOnMount: 'always', // Всегда обновлять при монтировании компонента
   })
 
   // Получение фото выбранной недели (только если selectedDate передан)
