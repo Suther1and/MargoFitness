@@ -141,7 +141,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
   } | null>(null)
   
   // Данные профиля для локального расчета конвертации
-  const [profileData, setProfileData] = useState<{
+  const profileDataRef = useRef<{
     currentTier: SubscriptionTier
     currentTierLevel: number
     expiresAt: string | null
@@ -149,10 +149,10 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
   } | null>(null)
   
   // Клиентская функция расчета конвертации (без Server Action!)
-  const calculateConversion = useCallback((newTierLevel: number, productDurationMonths: number) => {
-    if (!profileData) return null
+  const calculateConversion = (newTierLevel: number, productDurationMonths: number) => {
+    if (!profileDataRef.current) return null
     
-    const { currentTierLevel, remainingDays } = profileData
+    const { currentTierLevel, remainingDays } = profileDataRef.current
     
     if (remainingDays <= 0) {
       return {
@@ -180,7 +180,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       totalDays: Math.max(0, convertedDays) + newProductDays,
       remainingDays,
     }
-  }, [profileData])
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -210,12 +210,12 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       const remainingDays = diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0
       
       // Сохраняем данные профиля для локальных расчетов
-      setProfileData({
+      profileDataRef.current = {
         currentTier: profile.subscription_tier as SubscriptionTier,
         currentTierLevel,
         expiresAt: profile.subscription_expires_at,
         remainingDays,
-      })
+      }
       
       // Если уже Elite - апгрейда нет
       if (currentTierLevel >= 3) {
@@ -297,14 +297,14 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     }
     
     setLoading(false)
-  }, [userId, initialTier, calculateConversion])
+  }, [userId, initialTier])
 
   useEffect(() => {
     if (open) loadData()
   }, [open, userId, initialTier, loadData])
 
   const handleTierChange = (tier: SubscriptionTier) => {
-    if (tier === selectedTier || calculating || !profileData) return
+    if (tier === selectedTier || calculating || !profileDataRef.current) return
     
     setCalculating(true)
     setSelectedTier(tier)
@@ -328,7 +328,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         newProductDays: conversion.newProductDays,
         totalDays: conversion.totalDays,
         remainingDays: conversion.remainingDays,
-        currentTier: profileData.currentTier
+        currentTier: profileDataRef.current.currentTier
       })
     }
     
@@ -336,7 +336,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
   }
 
   const handleProductChange = (product: Product) => {
-    if (product.id === selectedProduct?.id || calculating || !profileData) return
+    if (product.id === selectedProduct?.id || calculating || !profileDataRef.current) return
     
     setCalculating(true)
     setSelectedProduct(product)
@@ -351,7 +351,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         newProductDays: conversion.newProductDays,
         totalDays: conversion.totalDays,
         remainingDays: conversion.remainingDays,
-        currentTier: profileData.currentTier
+        currentTier: profileDataRef.current.currentTier
       })
     }
     
