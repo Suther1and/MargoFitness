@@ -177,7 +177,7 @@ export type HabitTime = 'anytime' | 'morning' | 'afternoon' | 'evening'
 export interface Habit {
   id: string
   title: string
-  daysOfWeek: DayOfWeek[]  // Required: дни недели когда привычка активна
+  daysOfWeek?: DayOfWeek[]  // Optional для обратной совместимости со старыми данными
   time: HabitTime
   enabled: boolean
   createdAt: string

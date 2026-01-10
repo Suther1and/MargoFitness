@@ -25,8 +25,8 @@ export function getDayOfWeek(date: Date): DayOfWeek {
 export function shouldShowHabitOnDate(habit: Habit, date: Date): boolean {
   if (!habit.enabled) return false
   
-  // Если массив пустой, считаем что привычка ежедневная
-  if (habit.daysOfWeek.length === 0) {
+  // Если массив не задан или пустой, считаем что привычка ежедневная
+  if (!habit.daysOfWeek || habit.daysOfWeek.length === 0) {
     return true
   }
   
