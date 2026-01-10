@@ -6,62 +6,32 @@ import { Award, Trophy, Eye, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HealthTrackerCard } from './health-tracker-card'
 import { AchievementsPopup } from './achievements-popup'
-import { getRecentAchievements, getAchievementStats } from '@/lib/actions/achievements'
+import { useRecentAchievements, useAchievementStats } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
-import { AchievementWithStatus, AchievementStats } from '@/types/database'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 export const AchievementsCard = memo(function AchievementsCard() {
-  const [recentAchievements, setRecentAchievements] = useState<AchievementWithStatus[]>([])
-  const [stats, setStats] = useState<AchievementStats | null>(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    loadAchievements()
-  }, [])
-
-  async function loadAchievements() {
-    try {
-      setIsLoading(true)
-      setError(null)
-
+    const loadUser = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        setError('Необходимо авторизоваться')
-        setIsLoading(false)
-        return
-      }
-
-      // Загружаем последние достижения и статистику параллельно
-      const [recentResult, statsResult] = await Promise.all([
-        getRecentAchievements(user.id, 3),
-        getAchievementStats(user.id),
-      ])
-
-      if (recentResult.success && recentResult.data) {
-        setRecentAchievements(recentResult.data)
-      }
-
-      if (statsResult.success && statsResult.data) {
-        setStats(statsResult.data)
-      }
-    } catch (err) {
-      console.error('Error loading achievements:', err)
-      setError('Ошибка при загрузке достижений')
-    } finally {
-      setIsLoading(false)
+      setUserId(user?.id || null)
     }
-  }
+    loadUser()
+  }, [])
+
+  const { data: recentAchievements = [], isLoading: loadingRecent } = useRecentAchievements(userId, 3)
+  const { data: stats, isLoading: loadingStats } = useAchievementStats(userId)
+
+  const isLoading = loadingRecent || loadingStats
+  const error = !userId ? 'Необходимо авторизоваться' : null
 
   const handlePopupClose = () => {
     setIsPopupOpen(false)
-    // Перезагружаем при закрытии попапа на случай изменений
-    loadAchievements()
   }
 
   return (

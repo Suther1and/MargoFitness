@@ -5,9 +5,9 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Award, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getAllAchievementsWithStatus } from '@/lib/actions/achievements'
+import { useAllAchievements } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
-import { AchievementWithStatus, AchievementCategory, ACHIEVEMENT_CATEGORIES } from '@/types/database'
+import { AchievementCategory, ACHIEVEMENT_CATEGORIES } from '@/types/database'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -17,10 +17,9 @@ interface AchievementsPopupProps {
 }
 
 export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
-  const [achievements, setAchievements] = useState<AchievementWithStatus[]>([])
-  const [isLoading, setIsLoading] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all')
   const [mounted, setMounted] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -28,32 +27,16 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
 
   useEffect(() => {
     if (isOpen) {
-      loadAchievements()
+      const loadUser = async () => {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setUserId(user?.id || null)
+      }
+      loadUser()
     }
   }, [isOpen])
 
-  async function loadAchievements() {
-    try {
-      setIsLoading(true)
-
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        return
-      }
-
-      const result = await getAllAchievementsWithStatus(user.id)
-
-      if (result.success && result.data) {
-        setAchievements(result.data)
-      }
-    } catch (err) {
-      console.error('Error loading achievements:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { data: achievements = [], isLoading } = useAllAchievements(userId)
 
   const filteredAchievements = selectedCategory === 'all'
     ? achievements
