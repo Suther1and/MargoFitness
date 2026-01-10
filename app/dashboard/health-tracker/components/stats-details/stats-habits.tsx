@@ -200,6 +200,19 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     : daysInPeriod <= 180 ? 'grid-cols-13'
     : 'grid-cols-15'
   const showWeekLabels = daysInPeriod <= 7
+  
+  // Вычисляемые значения (ПОСЛЕ всех хуков)
+  const avgCompletion = completionData.length > 0 
+    ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
+    : 0
+  
+  const bestHabit = HABIT_STATS.length > 0 
+    ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
+    : { name: "Привычки", streak: 0 }
+  
+  const totalHabits = HABIT_STATS.length
+  const { weekdayCompletion, weekendCompletion, weekendDrop } = weekendAnalysis
+  const { weakHabits, mediumHabits } = habitCategories
 
   const container = {
     hidden: { opacity: 0 },
