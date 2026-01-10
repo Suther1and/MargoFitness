@@ -71,7 +71,7 @@ export function DailyPhotosCard({ userId, selectedDate }: DailyPhotosCardProps) 
         userId={userId}
         weekKey={weekKey}
         weekLabel={weekLabel}
-        currentPhotos={currentWeekPhotos}
+        currentPhotos={currentWeekPhotos ?? null}
         onUploadPhoto={(file, type) => uploadPhoto({ file, photoType: type })}
         onDeletePhoto={(type) => deletePhoto({ weekKey, photoType: type })}
         onSaveMeasurements={(measurements) => updateMeasurements({ measurements })}
