@@ -7,7 +7,7 @@ import { Utensils, Target, Award, TrendingDown, TrendingUp, Scale, Flame } from 
 import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine, Cell } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
-import { getNutritionStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings, NutritionGoalType } from "../../types"
@@ -54,10 +54,31 @@ export const StatsNutrition = memo(function StatsNutrition({ userId, settings, d
     queryKey: ['stats', 'nutrition', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getNutritionStats(userId, dateRange)
+      
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, metrics')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) return { success: false, data: [] }
+      
+      const nutritionData = data?.map(entry => ({
+        date: entry.date,
+        calories: (entry.metrics as any)?.calories || 0,
+        nutritionGoalType: (entry.metrics as any)?.nutritionGoalType || 'maintain'
+      })) || []
+      
+      return { success: true, data: nutritionData }
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

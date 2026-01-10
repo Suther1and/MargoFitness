@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Scale, TrendingDown, Target, Activity, Calendar, Award } from "lucide-react"
 import { WeightChart } from "../weight-chart"
 import { cn } from "@/lib/utils"
-import { getWeightStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
@@ -25,10 +25,30 @@ export const StatsWeight = memo(function StatsWeight({ userId, settings, dateRan
     queryKey: ['stats', 'weight', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getWeightStats(userId, dateRange)
+      
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, metrics')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) return { success: false, data: [] }
+      
+      const weightData = data?.map(entry => ({
+        date: entry.date,
+        weight: (entry.metrics as any)?.weight || null
+      })).filter(e => e.weight !== null) || []
+      
+      return { success: true, data: weightData }
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

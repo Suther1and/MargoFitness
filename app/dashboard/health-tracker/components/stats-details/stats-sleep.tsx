@@ -8,7 +8,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, ReferenceLine } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { getSleepStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
@@ -29,10 +29,30 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
     queryKey: ['stats', 'sleep', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getSleepStats(userId, dateRange)
+      
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, metrics')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) return { success: false, data: [] }
+      
+      const sleepData = data?.map(entry => ({
+        date: entry.date,
+        hours: (entry.metrics as any)?.sleep || 0
+      })) || []
+      
+      return { success: true, data: sleepData }
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

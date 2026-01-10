@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { getCaffeineStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
@@ -39,10 +39,30 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
     queryKey: ['stats', 'caffeine', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getCaffeineStats(userId, dateRange)
+      
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, metrics')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) return { success: false, data: [] }
+      
+      const caffeineData = data?.map(entry => ({
+        date: entry.date,
+        caffeine: (entry.metrics as any)?.caffeine || 0
+      })) || []
+      
+      return { success: true, data: caffeineData }
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
-import { getHabitsStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { serializeDateRange } from "../../utils/query-utils"
@@ -39,10 +39,30 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     queryKey: ['stats', 'habits', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getHabitsStats(userId, dateRange)
+      
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, habits_completed')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) return { success: false, data: [] }
+      
+      const habitsData = data?.map(entry => ({
+        date: entry.date,
+        habits_completed: entry.habits_completed || {}
+      })) || []
+      
+      return { success: true, data: habitsData }
     },
     enabled: !!userId && habits.length > 0,
-    staleTime: 60 * 1000, // 60 секунд - короткий для habits (критичные данные)
+    staleTime: 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
