@@ -48,9 +48,11 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   const completionData = useMemo(() => {
     if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
     
+    const activeHabits = habits.filter(h => h.enabled)
+    
     return rawData.data.map((entry: any) => {
       const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
-      const total = habits.filter(h => h.enabled).length
+      const total = activeHabits.length
       return {
         date: format(new Date(entry.date), 'd MMM', { locale: ru }),
         value: total > 0 ? Math.round((completed / total) * 100) : 0
@@ -58,29 +60,12 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     })
   }, [rawData, habits])
   
-  // Показываем загрузку
-  if (isLoading) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/60 text-sm">Загрузка статистики привычек...</p>
-        </div>
-      </div>
-    )
-  }
-  
-  // Фильтруем только активные привычки
-  const activeHabits = habits.filter(h => h.enabled)
-  
-  // Рассчитываем количество дней в периоде
-  const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
-  
   // Рассчитываем РЕАЛЬНУЮ статистику из rawData
   const HABIT_STATS = useMemo(() => {
-    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data) || activeHabits.length === 0) {
-      return []
-    }
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) return []
+    
+    const activeHabits = habits.filter(h => h.enabled)
+    if (activeHabits.length === 0) return []
     
     return activeHabits.map(habit => {
       let currentStreak = 0
@@ -118,25 +103,7 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
         maxStreak: maxStreak
       }
     })
-  }, [rawData, activeHabits])
-  
-  const avgCompletion = completionData.length > 0 
-    ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
-    : 0
-  
-  // Форматируем период для отображения
-  const periodLabel = daysInPeriod <= 7 ? 'Последние 7 дней' 
-    : daysInPeriod <= 30 ? 'Последние 30 дней'
-    : daysInPeriod <= 180 ? 'Последние 6 месяцев'
-    : 'Последний год'
-  
-  // Определяем количество колонок для heatmap
-  const heatmapCols = daysInPeriod <= 7 ? 'grid-cols-7'
-    : daysInPeriod <= 30 ? 'grid-cols-10'
-    : daysInPeriod <= 180 ? 'grid-cols-13'
-    : 'grid-cols-15'
-  
-  const showWeekLabels = daysInPeriod <= 7
+  }, [rawData, habits])
   
   // Реальная тепловая карта из completionData
   const heatmapData = useMemo(() => {
@@ -148,21 +115,18 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     }))
   }, [completionData])
   
-  const bestHabit = HABIT_STATS.length > 0 
-    ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
-    : { name: "Привычки", streak: 0 }
-  
   // Анализ выходных vs будни
-  const { weekdayCompletion, weekendCompletion, weekendDrop } = useMemo(() => {
+  const weekendAnalysis = useMemo(() => {
     if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) {
       return { weekdayCompletion: 0, weekendCompletion: 0, weekendDrop: 0 }
     }
     
+    const activeHabits = habits.filter(h => h.enabled)
     const weekdayData: number[] = []
     const weekendData: number[] = []
     
     rawData.data.forEach((entry: any) => {
-      const dayOfWeek = new Date(entry.date).getDay() // 0-вс, 1-пн, ..., 6-сб
+      const dayOfWeek = new Date(entry.date).getDay()
       const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
       const total = activeHabits.length
       const completionPercent = total > 0 ? Math.round((completed / total) * 100) : 0
@@ -189,9 +153,10 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
       weekendCompletion: weekendAvg, 
       weekendDrop: drop 
     }
-  }, [rawData, activeHabits])
+  }, [rawData, habits])
+  
   // Слабые и средние привычки
-  const { weakHabits, mediumHabits } = useMemo(() => {
+  const habitCategories = useMemo(() => {
     const weak = HABIT_STATS.filter(h => {
       const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
       return completion < 40
@@ -205,7 +170,36 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
     return { weakHabits: weak, mediumHabits: medium }
   }, [HABIT_STATS])
   
-  const totalHabits = HABIT_STATS.length
+  // Показываем загрузку
+  if (isLoading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Загрузка статистики привычек...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Фильтруем только активные привычки
+  const activeHabits = habits.filter(h => h.enabled)
+  
+  // Рассчитываем количество дней в периоде
+  const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
+  
+  // Форматируем период для отображения
+  const periodLabel = daysInPeriod <= 7 ? 'Последние 7 дней' 
+    : daysInPeriod <= 30 ? 'Последние 30 дней'
+    : daysInPeriod <= 180 ? 'Последние 6 месяцев'
+    : 'Последний год'
+  
+  // Определяем количество колонок для heatmap
+  const heatmapCols = daysInPeriod <= 7 ? 'grid-cols-7'
+    : daysInPeriod <= 30 ? 'grid-cols-10'
+    : daysInPeriod <= 180 ? 'grid-cols-13'
+    : 'grid-cols-15'
+  const showWeekLabels = daysInPeriod <= 7
 
   const container = {
     hidden: { opacity: 0 },
