@@ -197,7 +197,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     enabled: !!userId,
     settings,
     habits,
-    selectedDate // Добавляем для prefetch соседних дней
+    selectedDate
   })
   
   // Получаем данные привычек для расчета streak

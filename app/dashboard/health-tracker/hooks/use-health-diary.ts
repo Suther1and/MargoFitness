@@ -39,14 +39,27 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     queryKey: ['diary-entry', userId, dateStr],
     queryFn: async () => {
       if (!userId) return null
-      const result = await getDiaryEntry(userId, dateStr)
-      return result.success ? result.data : null
+      
+      // Прямой вызов Supabase для быстрой загрузки (Server Actions медленные в dev)
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', dateStr)
+        .maybeSingle()
+      
+      if (error) {
+        console.error('Error loading diary entry:', error)
+        return null
+      }
+      return data
     },
     enabled: !!userId,
     staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000, // Сегодня 30 сек, прошлое 15 мин
     gcTime: 30 * 60 * 1000, // 30 минут в памяти
-    refetchOnMount: false, // НЕ блокировать UI
-    refetchOnWindowFocus: false, // НЕ блокировать при фокусе
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     refetchInterval: isToday ? 30000 : false, // Сегодня - фоновое обновление каждые 30 сек
   })
 
