@@ -10,6 +10,7 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
+  // Параллельно загружаем bonusStats (после проверки профиля)
   const bonusStatsResult = await getBonusStats(profile.id)
   const bonusStats = bonusStatsResult.success ? (bonusStatsResult.data ?? null) : null
 

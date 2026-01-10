@@ -34,15 +34,18 @@ const chartConfig = {
 export const StatsWater = memo(function StatsWater({ userId, settings, dateRange }: StatsWaterProps) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data: rawData, isLoading } = useQuery({
+  const { data: rawData, isLoading, isFetching } = useQuery({
     queryKey: ['stats', 'water', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getWaterStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    gcTime: 30 * 60 * 1000, // 30 минут в памяти
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData, // Мгновенный показ
   })
 
   const data = useMemo(() => {

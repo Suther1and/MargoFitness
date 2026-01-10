@@ -26,15 +26,18 @@ const chartConfig = {
 export const StatsMood = memo(function StatsMood({ userId, dateRange }: StatsMoodProps) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data: rawData, isLoading } = useQuery({
+  const { data: rawData, isLoading, isFetching } = useQuery({
     queryKey: ['stats', 'mood', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getMoodStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

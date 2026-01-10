@@ -35,15 +35,18 @@ const chartConfig = {
 export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data: rawData, isLoading } = useQuery({
+  const { data: rawData, isLoading, isFetching } = useQuery({
     queryKey: ['stats', 'habits', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getHabitsStats(userId, dateRange)
     },
     enabled: !!userId && habits.length > 0,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 60 * 1000, // 60 секунд - короткий для habits (критичные данные)
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   })
 
   // Рассчитываем completionData с учетом расписания

@@ -35,15 +35,18 @@ const chartConfig = {
 export const StatsSteps = memo(function StatsSteps({ userId, settings, dateRange }: StatsStepsProps) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data: rawData, isLoading } = useQuery({
+  const { data: rawData, isLoading, isFetching } = useQuery({
     queryKey: ['stats', 'steps', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getStepsStats(userId, dateRange)
     },
     enabled: !!userId,
-    staleTime: 0, // Всегда считать устаревшими
-    refetchOnMount: 'always', // Всегда перезагружать
+    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   })
 
   const data = useMemo(() => {

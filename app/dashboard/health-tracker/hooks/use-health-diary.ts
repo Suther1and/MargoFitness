@@ -24,12 +24,18 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
   const queryClient = useQueryClient()
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
   
+  // Адаптивное кеширование: сегодня - короткий кеш, прошлое - долгий
+  const isToday = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd')
+    return dateStr === today
+  }, [dateStr])
+  
   // Debounce timer для батчинга обновлений
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null)
   const pendingUpdatesRef = useRef<any>({})
 
   // Query для загрузки данных дня
-  const { data: entryData, isLoading } = useQuery({
+  const { data: entryData, isLoading, isFetching } = useQuery({
     queryKey: ['diary-entry', userId, dateStr],
     queryFn: async () => {
       if (!userId) return null
@@ -37,7 +43,12 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       return result.success ? result.data : null
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 минут
+    staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000, // Сегодня 30 сек, прошлое 15 мин
+    gcTime: 30 * 60 * 1000, // 30 минут в памяти
+    refetchOnMount: false, // НЕ блокировать UI
+    refetchOnWindowFocus: false, // НЕ блокировать при фокусе
+    placeholderData: (previousData) => previousData, // Мгновенный показ
+    refetchInterval: isToday ? 30000 : false, // Сегодня - фоновое обновление каждые 30 сек
   })
 
   // Mutation для сохранения
@@ -58,10 +69,41 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       )
     },
     onSuccess: () => {
-      // Инвалидируем кеш статистики для обновления данных
+      // ГИБРИДНАЯ ИНВАЛИДАЦИЯ:
+      // 1. Overview stats - синхронно (критичные данные, пользователь увидит сразу)
       queryClient.invalidateQueries({ 
-        queryKey: ['stats'],
-        refetchType: 'active'
+        queryKey: ['stats', 'overview'],
+        refetchType: 'active' // Загрузить сразу ~200-500ms задержка
+      })
+      
+      // 2. Детальные stats - асинхронно (обновятся при открытии вкладки)
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'water'],
+        refetchType: 'none' // Только пометить stale
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'steps'],
+        refetchType: 'none'
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'weight'],
+        refetchType: 'none'
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'caffeine'],
+        refetchType: 'none'
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'sleep'],
+        refetchType: 'none'
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'mood'],
+        refetchType: 'none'
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'nutrition'],
+        refetchType: 'none'
       })
     },
     onError: (error) => {
@@ -164,9 +206,15 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       photoUrls: currentData?.photo_urls || []
     })
     
-    // Инвалидируем статистику привычек для пересчета стриков
+    // ГИБРИДНАЯ ИНВАЛИДАЦИЯ для привычек:
+    // Habits stats - синхронно (критичные данные для стриков)
     queryClient.invalidateQueries({ 
       queryKey: ['stats', 'habits'],
+      refetchType: 'active'
+    })
+    // Overview - синхронно
+    queryClient.invalidateQueries({ 
+      queryKey: ['stats', 'overview'],
       refetchType: 'active'
     })
   }
@@ -306,6 +354,7 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
     photoUrls: (entryData as any)?.photo_urls || [],
     habitsCompleted: (entryData as any)?.habits_completed || {},
     isLoading,
+    isFetching, // Для фоновых индикаторов
     saveStatus,
     updateMetric,
     updateMetrics,

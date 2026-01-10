@@ -58,12 +58,27 @@ export function useHabits(userId: string | null) {
     onSuccess: () => {
       // Очищаем pending после успешной отправки
       pendingHabitsRef.current = null
-      // Инвалидируем кеш статистики для обновления данных
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
-      // Принудительно перезапрашиваем активные запросы статистики
-      queryClient.refetchQueries({ 
-        queryKey: ['stats'], 
-        type: 'active' // Только активные (отображаемые) запросы
+      
+      // ГИБРИДНАЯ ИНВАЛИДАЦИЯ:
+      // 1. Habits stats - синхронно (критичные данные)
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'habits'],
+        refetchType: 'active' // Загрузить сразу
+      })
+      
+      // 2. Overview - тоже синхронно (часто показывается вместе с habits)
+      queryClient.invalidateQueries({ 
+        queryKey: ['stats', 'overview'],
+        refetchType: 'active'
+      })
+      
+      // 3. Остальные детальные stats - асинхронно
+      const detailedStatsKeys = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition']
+      detailedStatsKeys.forEach(key => {
+        queryClient.invalidateQueries({ 
+          queryKey: ['stats', key],
+          refetchType: 'none' // Обновятся при открытии
+        })
       })
     }
   })

@@ -24,20 +24,24 @@ export function useOverviewStats({
 }: UseOverviewStatsOptions) {
   const dateRangeKey = serializeDateRange(dateRange)
   
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isFetching } = useQuery({
     queryKey: ['stats', 'overview', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
       return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
     },
     enabled: !!userId,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 60 * 1000, // 60 секунд - короткий для критичных данных overview
+    gcTime: 30 * 60 * 1000, // 30 минут в памяти (новое название cacheTime)
+    refetchOnMount: false, // НЕ блокировать UI при монтировании
+    refetchOnWindowFocus: false, // НЕ блокировать при фокусе
+    placeholderData: (previousData) => previousData, // Показываем старые данные мгновенно
   })
 
   return {
     data: data?.data as OverviewStats | null | undefined,
     isLoading,
+    isFetching, // Добавляем для фоновых индикаторов (если понадобится)
     error
   }
 }
