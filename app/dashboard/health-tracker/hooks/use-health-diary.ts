@@ -109,14 +109,14 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       return updated
     })
 
+    // Получаем актуальные данные из кеша для сохранения
+    const currentData = queryClient.getQueryData(['diary-entry', userId, dateStr]) as any
+    
     // Запланировать сохранение
     scheduleSave({
-      metrics: {
-        ...(entryData?.metrics as Record<string, any> || {}),
-        [field]: value
-      },
-      habitsCompleted: (entryData as any)?.habits_completed,
-      photoUrls: (entryData as any)?.photo_urls
+      metrics: currentData?.metrics || {},
+      habitsCompleted: currentData?.habits_completed,
+      photoUrls: currentData?.photo_urls
     })
   }
 
@@ -130,34 +130,44 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       }
     }))
 
+    // Получаем актуальные данные из кеша для сохранения
+    const currentData = queryClient.getQueryData(['diary-entry', userId, dateStr]) as any
+    
     scheduleSave({
-      metrics: {
-        ...(entryData?.metrics as Record<string, any> || {}),
-        ...updates
-      },
-      habitsCompleted: (entryData as any)?.habits_completed,
-      photoUrls: (entryData as any)?.photo_urls
+      metrics: currentData?.metrics || {},
+      habitsCompleted: currentData?.habits_completed,
+      photoUrls: currentData?.photo_urls
     })
   }
 
 
   // Переключение привычки
   const toggleHabit = (habitId: string, completed: boolean) => {
-    queryClient.setQueryData(['diary-entry', userId, dateStr], (old: any) => ({
-      ...old,
-      habits_completed: {
+    // Optimistic update
+    queryClient.setQueryData(['diary-entry', userId, dateStr], (old: any) => {
+      const newHabitsCompleted = {
         ...(old?.habits_completed || {}),
         [habitId]: completed
       }
-    }))
+      return {
+        ...old,
+        habits_completed: newHabitsCompleted
+      }
+    })
 
+    // Получаем актуальные данные из кеша для сохранения
+    const currentData = queryClient.getQueryData(['diary-entry', userId, dateStr]) as any
+    
     scheduleSave({
-      metrics: (entryData?.metrics as Record<string, any>) || {},
-      habitsCompleted: {
-        ...((entryData as any)?.habits_completed || {}),
-        [habitId]: completed
-      },
-      photoUrls: (entryData as any)?.photo_urls
+      metrics: (currentData?.metrics as Record<string, any>) || {},
+      habitsCompleted: currentData?.habits_completed || {},
+      photoUrls: currentData?.photo_urls || []
+    })
+    
+    // Инвалидируем статистику привычек для пересчета стриков
+    queryClient.invalidateQueries({ 
+      queryKey: ['stats', 'habits'],
+      refetchType: 'active'
     })
   }
 
@@ -168,10 +178,13 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       photo_urls: [...(old?.photo_urls || []), url]
     }))
 
+    // Получаем актуальные данные из кеша для сохранения
+    const currentData = queryClient.getQueryData(['diary-entry', userId, dateStr]) as any
+    
     scheduleSave({
-      metrics: (entryData?.metrics as Record<string, any>) || {},
-      habitsCompleted: (entryData as any)?.habits_completed,
-      photoUrls: [...((entryData as any)?.photo_urls || []), url]
+      metrics: currentData?.metrics || {},
+      habitsCompleted: currentData?.habits_completed,
+      photoUrls: currentData?.photo_urls || []
     })
   }
 
@@ -182,10 +195,13 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       photo_urls: (old?.photo_urls || []).filter((u: string) => u !== url)
     }))
 
+    // Получаем актуальные данные из кеша для сохранения
+    const currentData = queryClient.getQueryData(['diary-entry', userId, dateStr]) as any
+    
     scheduleSave({
-      metrics: (entryData?.metrics as Record<string, any>) || {},
-      habitsCompleted: (entryData as any)?.habits_completed,
-      photoUrls: ((entryData as any)?.photo_urls || []).filter((u: string) => u !== url)
+      metrics: currentData?.metrics || {},
+      habitsCompleted: currentData?.habits_completed,
+      photoUrls: currentData?.photo_urls || []
     })
   }
 
