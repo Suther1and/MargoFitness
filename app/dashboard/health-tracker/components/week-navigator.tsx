@@ -157,7 +157,7 @@ export function WeekNavigator({
                           ? (daysCount === 3 ? "w-11 h-12" : "flex-1 max-w-[40px] h-12") 
                           : "w-9 h-14",
                         minimal && "bg-white/5 border border-white/5",
-                        disabled && "cursor-not-allowed opacity-30",
+                        disabled && "cursor-not-allowed opacity-40",
                         !disabled && isSelected
                           ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-transparent"
                           : !disabled && "hover:bg-white/10 text-white/60"
@@ -268,7 +268,7 @@ export function WeekNavigator({
                       disabled={disabled}
                       className={cn(
                         "relative aspect-square rounded-lg flex flex-col items-center justify-center transition-colors",
-                        disabled && "cursor-not-allowed opacity-30",
+                        disabled && "cursor-not-allowed opacity-40",
                         !disabled && isSelected && "bg-amber-500 text-black shadow-lg",
                         !disabled && !isSelected && "hover:bg-white/5",
                         !isCurrentMonth && !disabled && "opacity-30",
