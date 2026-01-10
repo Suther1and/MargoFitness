@@ -1,20 +1,19 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, Clock, PlusCircle } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer, Cell } from "recharts"
+import { Flame, Target, TrendingUp, Calendar, Zap, Award, CheckCircle2, PlusCircle } from "lucide-react"
+import { Bar, BarChart, CartesianGrid, XAxis, Cell } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { getHabitsStats } from "@/lib/actions/health-stats"
-import { format, differenceInDays } from "date-fns"
+import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { serializeDateRange } from "../../utils/query-utils"
 import { Habit, DateRange } from "../../types"
@@ -139,24 +138,29 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   
   const showWeekLabels = daysInPeriod <= 7
   
-  // Заглушка для heatmap (пока нет реальных данных по дням)
-  const heatmapData = Array.from({ length: Math.min(daysInPeriod, 50) }, (_, i) => ({
-    value: Math.random() * 100,
-    label: `${i + 1}`
-  }))
+  // Реальная тепловая карта из completionData
+  const heatmapData = useMemo(() => {
+    if (completionData.length === 0) return []
+    
+    return completionData.map(day => ({
+      value: day.value,
+      label: day.date
+    }))
+  }, [completionData])
+  
   const bestHabit = HABIT_STATS.length > 0 
     ? HABIT_STATS.reduce((max, habit) => habit.streak > max.streak ? habit : max, HABIT_STATS[0])
     : { name: "Привычки", streak: 0 }
-  const totalTasks = HABIT_STATS.reduce((acc, h) => acc + h.total, 0)
-  const completedTasks = HABIT_STATS.reduce((acc, h) => acc + h.completed, 0)
-  const totalHabits = HABIT_STATS.length
   
-  // Улучшенный анализ выходных vs будни
-  // Пытаемся реально разделить по дням недели из rawData
-  const weekdayData: number[] = []
-  const weekendData: number[] = []
-  
-  if (rawData?.success && rawData.data && Array.isArray(rawData.data)) {
+  // Анализ выходных vs будни
+  const { weekdayCompletion, weekendCompletion, weekendDrop } = useMemo(() => {
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data)) {
+      return { weekdayCompletion: 0, weekendCompletion: 0, weekendDrop: 0 }
+    }
+    
+    const weekdayData: number[] = []
+    const weekendData: number[] = []
+    
     rawData.data.forEach((entry: any) => {
       const dayOfWeek = new Date(entry.date).getDay() // 0-вс, 1-пн, ..., 6-сб
       const completed = Object.values(entry.habits_completed || {}).filter(Boolean).length
@@ -169,29 +173,39 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
         weekdayData.push(completionPercent)
       }
     })
-  }
+    
+    const weekdayAvg = weekdayData.length > 0
+      ? Math.round(weekdayData.reduce((acc, val) => acc + val, 0) / weekdayData.length)
+      : 0
+    const weekendAvg = weekendData.length > 0
+      ? Math.round(weekendData.reduce((acc, val) => acc + val, 0) / weekendData.length)
+      : 0
+    const drop = weekdayAvg > 0 
+      ? Math.round(((weekdayAvg - weekendAvg) / weekdayAvg) * 100)
+      : 0
+    
+    return { 
+      weekdayCompletion: weekdayAvg, 
+      weekendCompletion: weekendAvg, 
+      weekendDrop: drop 
+    }
+  }, [rawData, activeHabits])
+  // Слабые и средние привычки
+  const { weakHabits, mediumHabits } = useMemo(() => {
+    const weak = HABIT_STATS.filter(h => {
+      const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
+      return completion < 40
+    })
+    
+    const medium = HABIT_STATS.filter(h => {
+      const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
+      return completion >= 40 && completion < 70
+    })
+    
+    return { weakHabits: weak, mediumHabits: medium }
+  }, [HABIT_STATS])
   
-  const weekdayCompletion = weekdayData.length > 0
-    ? Math.round(weekdayData.reduce((acc, val) => acc + val, 0) / weekdayData.length)
-    : 0
-  const weekendCompletion = weekendData.length > 0
-    ? Math.round(weekendData.reduce((acc, val) => acc + val, 0) / weekendData.length)
-    : 0
-  const weekendDrop = weekdayCompletion > 0 
-    ? Math.round(((weekdayCompletion - weekendCompletion) / weekdayCompletion) * 100)
-    : 0
-  
-  // Слабые привычки (выполнение < 40%)
-  const weakHabits = HABIT_STATS.filter(h => {
-    const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
-    return completion < 40
-  })
-  
-  // Средние привычки (40-70%)
-  const mediumHabits = HABIT_STATS.filter(h => {
-    const completion = h.total > 0 ? (h.completed / h.total) * 100 : 0
-    return completion >= 40 && completion < 70
-  })
+  const totalHabits = HABIT_STATS.length
 
   const container = {
     hidden: { opacity: 0 },
@@ -619,7 +633,7 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
             </div>
 
             {/* БЛОК 4: Анализ выходных */}
-            {weekdayData.length > 0 && weekendData.length > 0 && (
+            {weekendDrop !== 0 && (
               <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className={cn(
