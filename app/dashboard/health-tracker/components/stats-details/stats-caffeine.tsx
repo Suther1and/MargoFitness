@@ -280,7 +280,7 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
           {/* БЛОК 2: Анализ паттернов */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Карточка А: Самый активный день */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <Coffee className={cn(
                   "w-4 h-4",
@@ -312,7 +312,7 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
             </div>
 
             {/* Карточка Б: Дни детокса */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <Moon className={cn(
                   "w-4 h-4",
@@ -336,7 +336,7 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
                   </>
                 ) : (
                   <>
-                    <span className="font-bold text-white">Постоянная зависимость ⚠️</span><br />
+                    <span className="font-bold text-white">Зависимость ⚠️</span><br />
                     {detoxPercent}% дней без кофеина
                   </>
                 )}

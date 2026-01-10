@@ -272,7 +272,7 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
           {/* БЛОК 2: Анализ стабильности */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Карточка А: Регулярность режима */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <Target className={cn(
                   "w-4 h-4",
@@ -304,7 +304,7 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
             </div>
 
             {/* Карточка Б: Постоянство */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <Award className={cn(
                   "w-4 h-4",
