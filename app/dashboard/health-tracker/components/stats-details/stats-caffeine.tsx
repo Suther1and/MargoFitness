@@ -289,7 +289,7 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
                 <span className={cn(
                   "text-xs font-bold uppercase tracking-wider",
                   maxDay.value <= 3 ? "text-emerald-400" : maxDay.value <= 5 ? "text-amber-400" : "text-red-400"
-                )}>Пик потребления</span>
+                )}>Максимум</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {maxDay.value <= 3 ? (
