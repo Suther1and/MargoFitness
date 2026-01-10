@@ -36,66 +36,43 @@ export function usePrefetchStats({
   const queryClient = useQueryClient()
 
   // Prefetch соседних дней (только прошлые: -7...-1, 0)
-  // DEBOUNCED - не запускаем при каждом изменении selectedDate
   useEffect(() => {
     if (!userId || !enabled || !selectedDate) return
 
-    // Debounce prefetch чтобы не триггерить множественные запросы
-    const timeoutId = setTimeout(() => {
-      // Prefetch только прошлые дни + сегодня (будущие недоступны для пользователя)
-      const daysToPreload = [-7, -6, -5, -4, -3, -2, -1, 0]
+    // Prefetch только прошлые дни + сегодня (будущие недоступны для пользователя)
+    const daysToPreload = [-7, -6, -5, -4, -3, -2, -1, 0]
+    
+    daysToPreload.forEach(offset => {
+      const targetDate = addDays(selectedDate, offset)
+      const dateStr = format(targetDate, 'yyyy-MM-dd')
+      const today = format(new Date(), 'yyyy-MM-dd')
+      const isToday = dateStr === today
       
-      daysToPreload.forEach(offset => {
-        const targetDate = addDays(selectedDate, offset)
-        const dateStr = format(targetDate, 'yyyy-MM-dd')
-        const today = format(new Date(), 'yyyy-MM-dd')
-        const isToday = dateStr === today
-        
-        // Проверяем есть ли уже в кеше - не загружаем повторно
-        const existingData = queryClient.getQueryData(['diary-entry', userId, dateStr])
-        if (existingData !== undefined) {
-          return // Уже в кеше, пропускаем
-        }
-        
-        // Prefetch в фоне
-        queryClient.prefetchQuery({
-          queryKey: ['diary-entry', userId, dateStr],
-          queryFn: async () => {
-            const result = await getDiaryEntry(userId, dateStr)
-            return result.success ? result.data : null
-          },
-          staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000, // Сегодня 30 сек, прошлое 15 мин
-        })
+      // Prefetch в фоне
+      queryClient.prefetchQuery({
+        queryKey: ['diary-entry', userId, dateStr],
+        queryFn: async () => {
+          const result = await getDiaryEntry(userId, dateStr)
+          return result.success ? result.data : null
+        },
+        staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000, // Сегодня 30 сек, прошлое 15 мин
       })
-    }, 300) // Debounce 300ms - не триггерим пока пользователь быстро переключается
-
-    return () => clearTimeout(timeoutId)
+    })
   }, [userId, enabled, selectedDate, queryClient])
 
   // Prefetch overview stats при входе в dashboard
-  // DEBOUNCED - не запускаем при каждом изменении периода
   useEffect(() => {
     if (!userId || !enabled) return
 
-    const timeoutId = setTimeout(() => {
-      // Предзагружаем overview для текущего периода
-      const dateRangeKey = serializeDateRange(dateRange)
-      
-      // Проверяем есть ли уже в кеше
-      const existingData = queryClient.getQueryData(['stats', 'overview', userId, dateRangeKey])
-      if (existingData !== undefined) {
-        return // Уже в кеше
-      }
-      
-      queryClient.prefetchQuery({
-        queryKey: ['stats', 'overview', userId, dateRangeKey],
-        queryFn: async () => {
-          return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
-        },
-        staleTime: 60 * 1000, // 60 секунд
-      })
-    }, 300) // Debounce 300ms
-
-    return () => clearTimeout(timeoutId)
+    // Предзагружаем overview для текущего периода
+    const dateRangeKey = serializeDateRange(dateRange)
+    
+    queryClient.prefetchQuery({
+      queryKey: ['stats', 'overview', userId, dateRangeKey],
+      queryFn: async () => {
+        return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
+      },
+      staleTime: 60 * 1000, // 60 секунд
+    })
   }, [userId, enabled, dateRange, settings, habits, queryClient])
 }
