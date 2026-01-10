@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
-import { getWaterStats } from "@/lib/actions/health-stats"
+import { createClient } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { TrackerSettings } from "../../types"
@@ -38,11 +38,34 @@ export const StatsWater = memo(function StatsWater({ userId, settings, dateRange
     queryKey: ['stats', 'water', userId, dateRangeKey],
     queryFn: async () => {
       if (!userId) return null
-      return await getWaterStats(userId, dateRange)
+      
+      // Прямой вызов Supabase (Server Actions медленные в dev)
+      const supabase = createClient()
+      const startStr = format(dateRange.start, 'yyyy-MM-dd')
+      const endStr = format(dateRange.end, 'yyyy-MM-dd')
+      
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('date, metrics')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lt('date', endStr)
+        .order('date', { ascending: true })
+      
+      if (error) {
+        console.error('Error loading water stats:', error)
+        return null
+      }
+      
+      // Форматируем данные как в getWaterStats
+      return data?.map(entry => ({
+        date: entry.date,
+        value: (entry.metrics as any)?.water || 0
+      })) || []
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 минут для детальных stats
-    gcTime: 30 * 60 * 1000, // 30 минут в памяти
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   })
