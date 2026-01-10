@@ -280,10 +280,16 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
           {/* БЛОК 2: Анализ паттернов */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Карточка А: Самый активный день */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Coffee className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Пик потребления</span>
+                <Coffee className={cn(
+                  "w-4 h-4",
+                  maxDay.value <= 3 ? "text-emerald-400" : maxDay.value <= 5 ? "text-amber-400" : "text-red-400"
+                )} />
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider",
+                  maxDay.value <= 3 ? "text-emerald-400" : maxDay.value <= 5 ? "text-amber-400" : "text-red-400"
+                )}>Пик потребления</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {maxDay.value <= 3 ? (
@@ -306,10 +312,16 @@ export const StatsCaffeine = memo(function StatsCaffeine({ userId, settings, dat
             </div>
 
             {/* Карточка Б: Дни детокса */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Moon className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Дни детокса</span>
+                <Moon className={cn(
+                  "w-4 h-4",
+                  detoxPercent >= 30 ? "text-emerald-400" : detoxPercent >= 10 ? "text-blue-400" : "text-orange-400"
+                )} />
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider",
+                  detoxPercent >= 30 ? "text-emerald-400" : detoxPercent >= 10 ? "text-blue-400" : "text-orange-400"
+                )}>Дни детокса</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {detoxPercent >= 30 ? (

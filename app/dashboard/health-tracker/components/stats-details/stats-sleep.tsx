@@ -272,10 +272,16 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
           {/* БЛОК 2: Анализ стабильности */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Карточка А: Регулярность режима */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Регулярность</span>
+                <Target className={cn(
+                  "w-4 h-4",
+                  regularityPercent >= 75 ? "text-emerald-400" : regularityPercent >= 50 ? "text-blue-400" : "text-orange-400"
+                )} />
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider",
+                  regularityPercent >= 75 ? "text-emerald-400" : regularityPercent >= 50 ? "text-blue-400" : "text-orange-400"
+                )}>Регулярность</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {regularityPercent >= 75 ? (
@@ -298,10 +304,16 @@ export const StatsSleep = memo(function StatsSleep({ userId, settings, dateRange
             </div>
 
             {/* Карточка Б: Постоянство */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 min-h-[100px] flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Award className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Постоянство</span>
+                <Award className={cn(
+                  "w-4 h-4",
+                  goodSleepPercent >= 80 ? "text-emerald-400" : goodSleepPercent >= 50 ? "text-blue-400" : "text-red-400"
+                )} />
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider",
+                  goodSleepPercent >= 80 ? "text-emerald-400" : goodSleepPercent >= 50 ? "text-blue-400" : "text-red-400"
+                )}>Постоянство</span>
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {goodSleepPercent >= 80 ? (
