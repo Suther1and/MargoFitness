@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { getRenewalOptions } from '@/lib/actions/subscription-actions'
-import { Product, SubscriptionTier } from '@/types/database'
+import { Product, SubscriptionTier, TIER_LEVELS } from '@/types/database'
 import { Calendar, CheckCircle2, Zap, Clock, Star } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -128,12 +128,45 @@ export function SubscriptionRenewalModal({
 
   const loadProducts = useCallback(async () => {
     setLoading(true)
-    const result = await getRenewalOptions(userId)
-    if (result.success && result.products) {
-      setProducts(result.products)
-      const twelveMonths = result.products.find(p => p.duration_months === 12)
-      setSelectedProduct(twelveMonths || result.products[result.products.length - 1])
+    
+    try {
+      const supabase = createClient()
+      
+      // Получить профиль пользователя
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', userId)
+        .single()
+      
+      if (profileError || !profile) {
+        console.error('[RenewalModal] Profile not found:', profileError)
+        setLoading(false)
+        return
+      }
+      
+      const currentTierLevel = TIER_LEVELS[profile.subscription_tier as SubscriptionTier]
+      
+      // Получить все продукты текущего тарифа
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('type', 'subscription_tier')
+        .eq('tier_level', currentTierLevel)
+        .eq('is_active', true)
+        .order('duration_months', { ascending: true })
+      
+      if (!productsError && products) {
+        setProducts(products)
+        const twelveMonths = products.find(p => p.duration_months === 12)
+        setSelectedProduct(twelveMonths || products[products.length - 1])
+      } else {
+        console.error('[RenewalModal] Products not found:', productsError)
+      }
+    } catch (error) {
+      console.error('[RenewalModal] Error loading products:', error)
     }
+    
     setLoading(false)
   }, [userId])
 

@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { getUpgradeOptions, calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
-import { Product, SubscriptionTier } from '@/types/database'
+import { calculateUpgradeConversion } from '@/lib/actions/subscription-actions'
+import { Product, SubscriptionTier, TIER_LEVELS, TIER_NAMES } from '@/types/database'
 import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -135,34 +136,104 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    const result = await getUpgradeOptions(userId)
     
-    if (result.success && result.data && result.data.availableTiers.length > 0) {
-      const tiers = result.data.availableTiers
-      setAvailableTiersData(tiers)
+    try {
+      const supabase = createClient()
       
-      // Если указан initialTier, используем его, иначе первый доступный
-      const targetTier = tiers.find(t => t.tier === initialTier) || tiers[0]
+      // Получить профиль пользователя
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', userId)
+        .single()
       
-      const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
-      
-      const conv = await calculateUpgradeConversion(userId, initialProd.tier_level || 0)
-      
-      setSelectedTier(targetTier.tier)
-      setSelectedProduct(initialProd)
-      
-      if (conv.success && conv.data) {
-        const newProductDays = initialProd.duration_months * 30
-        setConversionData({
-          newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + newProductDays) * 86400000).toISOString(),
-          convertedDays: conv.data.convertedDays,
-          newProductDays: newProductDays,
-          totalDays: conv.data.convertedDays + newProductDays,
-          remainingDays: conv.data.remainingDays,
-          currentTier: conv.data.currentTier
-        })
+      if (profileError || !profile) {
+        console.error('[UpgradeModal] Profile not found:', profileError)
+        setLoading(false)
+        return
       }
+      
+      const currentTierLevel = TIER_LEVELS[profile.subscription_tier as SubscriptionTier]
+      
+      // Если уже Elite - апгрейда нет
+      if (currentTierLevel >= 3) {
+        setAvailableTiersData([])
+        setLoading(false)
+        return
+      }
+      
+      // Получить продукты всех тарифов выше текущего
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('type', 'subscription_tier')
+        .gt('tier_level', currentTierLevel)
+        .eq('is_active', true)
+        .order('tier_level', { ascending: true })
+        .order('duration_months', { ascending: true })
+      
+      if (productsError || !products || products.length === 0) {
+        console.error('[UpgradeModal] Products not found:', productsError)
+        setAvailableTiersData([])
+        setLoading(false)
+        return
+      }
+      
+      // Группируем продукты по tier_level
+      const groupedByTier: Record<number, Product[]> = {}
+      products.forEach(product => {
+        const level = product.tier_level || 1
+        if (!groupedByTier[level]) {
+          groupedByTier[level] = []
+        }
+        groupedByTier[level].push(product)
+      })
+      
+      // Преобразуем в массив
+      const availableTiers: {
+        tier: SubscriptionTier
+        tierLevel: number
+        products: Product[]
+      }[] = []
+      
+      Object.entries(groupedByTier).forEach(([level, prods]) => {
+        const tierLevel = parseInt(level)
+        availableTiers.push({
+          tier: TIER_NAMES[tierLevel] as SubscriptionTier,
+          tierLevel,
+          products: prods
+        })
+      })
+      
+      if (availableTiers.length > 0) {
+        setAvailableTiersData(availableTiers)
+        
+        // Если указан initialTier, используем его, иначе первый доступный
+        const targetTier = availableTiers.find(t => t.tier === initialTier) || availableTiers[0]
+        
+        const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
+        
+        const conv = await calculateUpgradeConversion(userId, initialProd.tier_level || 0)
+        
+        setSelectedTier(targetTier.tier)
+        setSelectedProduct(initialProd)
+        
+        if (conv.success && conv.data) {
+          const newProductDays = initialProd.duration_months * 30
+          setConversionData({
+            newExpirationDate: new Date(new Date().getTime() + (conv.data.convertedDays + newProductDays) * 86400000).toISOString(),
+            convertedDays: conv.data.convertedDays,
+            newProductDays: newProductDays,
+            totalDays: conv.data.convertedDays + newProductDays,
+            remainingDays: conv.data.remainingDays,
+            currentTier: conv.data.currentTier
+          })
+        }
+      }
+    } catch (error) {
+      console.error('[UpgradeModal] Error loading data:', error)
     }
+    
     setLoading(false)
   }, [userId, initialTier])
 
