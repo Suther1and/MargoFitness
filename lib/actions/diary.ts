@@ -386,25 +386,54 @@ export async function getProgressPhotos(userId: string) {
       return { success: false, error: error.message }
     }
 
-    // Преобразуем в WeeklyPhotoSet[]
-    const weeklyPhotoSets: WeeklyPhotoSet[] = data.map((entry: any) => {
-      const weeklyPhotos = entry.weekly_photos || {}
-      const photos = weeklyPhotos.photos || {}
-      
-      return {
-        week_key: entry.date,
-        week_label: getWeekLabel(entry.date),
-        photos: {
-          front: photos.front || undefined,
-          side: photos.side || undefined,
-          back: photos.back || undefined
-        },
-        weight: entry.metrics?.weight || undefined,
-        hasPhotos: !!(photos.front || photos.side || photos.back)
-      }
-    }).filter((set: WeeklyPhotoSet) => set.hasPhotos)
+    // Для каждой недели получаем вес из любой записи за эту неделю
+    const weeklyPhotoSets: WeeklyPhotoSet[] = await Promise.all(
+      data.map(async (entry: any) => {
+        const weeklyPhotos = entry.weekly_photos || {}
+        const photos = weeklyPhotos.photos || {}
+        const weekKey = entry.date
+        
+        // Вычисляем диапазон недели (понедельник - воскресенье)
+        const [year, month, day] = weekKey.split('-').map(Number)
+        const weekStart = new Date(year, month - 1, day)
+        const weekEnd = new Date(weekStart)
+        weekEnd.setDate(weekStart.getDate() + 6)
+        
+        // Форматируем даты для SQL запроса
+        const startStr = weekKey // уже в формате YYYY-MM-DD
+        const endYear = weekEnd.getFullYear()
+        const endMonth = String(weekEnd.getMonth() + 1).padStart(2, '0')
+        const endDay = String(weekEnd.getDate()).padStart(2, '0')
+        const endStr = `${endYear}-${endMonth}-${endDay}`
+        
+        // Получаем последний вес за эту неделю
+        const { data: weekEntries } = await supabase
+          .from('diary_entries')
+          .select('metrics')
+          .eq('user_id', userId)
+          .gte('date', startStr)
+          .lte('date', endStr)
+          .not('metrics->weight', 'is', null)
+          .order('date', { ascending: false })
+          .limit(1)
+        
+        const weight = weekEntries?.[0]?.metrics?.weight || undefined
+        
+        return {
+          week_key: weekKey,
+          week_label: getWeekLabel(weekKey),
+          photos: {
+            front: photos.front || undefined,
+            side: photos.side || undefined,
+            back: photos.back || undefined
+          },
+          weight,
+          hasPhotos: !!(photos.front || photos.side || photos.back)
+        }
+      })
+    )
 
-    return { success: true, data: weeklyPhotoSets }
+    return { success: true, data: weeklyPhotoSets.filter(set => set.hasPhotos) }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] getProgressPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -445,6 +474,32 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
     const weeklyPhotos = (entry as any).weekly_photos || {}
     const photos = weeklyPhotos.photos || {}
 
+    // Вычисляем диапазон недели для поиска веса
+    const [year, month, day] = weekKey.split('-').map(Number)
+    const weekStart = new Date(year, month - 1, day)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    
+    // Форматируем даты для SQL запроса
+    const startStr = weekKey
+    const endYear = weekEnd.getFullYear()
+    const endMonth = String(weekEnd.getMonth() + 1).padStart(2, '0')
+    const endDay = String(weekEnd.getDate()).padStart(2, '0')
+    const endStr = `${endYear}-${endMonth}-${endDay}`
+    
+    // Получаем последний вес за эту неделю
+    const { data: weekEntries } = await supabase
+      .from('diary_entries')
+      .select('metrics')
+      .eq('user_id', userId)
+      .gte('date', startStr)
+      .lte('date', endStr)
+      .not('metrics->weight', 'is', null)
+      .order('date', { ascending: false })
+      .limit(1)
+    
+    const weight = weekEntries?.[0]?.metrics?.weight || undefined
+
     const weeklyPhotoSet: WeeklyPhotoSet = {
       week_key: weekKey,
       week_label: getWeekLabel(weekKey),
@@ -453,7 +508,7 @@ export async function getWeekPhotos(userId: string, weekKey: string) {
         side: photos.side || undefined,
         back: photos.back || undefined
       },
-      weight: (entry as any).metrics?.weight || undefined,
+      weight,
       hasPhotos: !!(photos.front || photos.side || photos.back)
     }
 
