@@ -77,19 +77,49 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
   // Рассчитываем количество дней в периоде
   const daysInPeriod = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
   
-  // Преобразуем привычки в формат для отображения статистики
-  const HABIT_STATS = activeHabits.map(habit => {
-    // Рассчитываем примерное выполнение на основе streak и частоты
-    const expectedDays = Math.min(daysInPeriod, Math.floor(daysInPeriod * habit.frequency / 7))
-    const completed = Math.min(habit.streak, expectedDays)
-    
-    return {
-      name: habit.title,
-      completed: completed,
-      total: expectedDays,
-      streak: habit.streak
+  // Рассчитываем РЕАЛЬНУЮ статистику из rawData
+  const HABIT_STATS = useMemo(() => {
+    if (!rawData?.success || !rawData.data || !Array.isArray(rawData.data) || activeHabits.length === 0) {
+      return []
     }
-  })
+    
+    return activeHabits.map(habit => {
+      let currentStreak = 0
+      let maxStreak = 0
+      let tempStreak = 0
+      let totalCompleted = 0
+      let totalDays = 0
+      
+      // Сортируем по дате (от новых к старым для streak)
+      const sortedData = [...rawData.data].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+      
+      sortedData.forEach((entry: any, index: number) => {
+        const habitCompleted = entry.habits_completed?.[habit.id] === true
+        totalDays++
+        
+        if (habitCompleted) {
+          totalCompleted++
+          tempStreak++
+          if (index === 0) currentStreak = tempStreak // Текущая серия
+          maxStreak = Math.max(maxStreak, tempStreak)
+        } else {
+          if (index === 0) currentStreak = 0
+          tempStreak = 0
+        }
+      })
+      
+      return {
+        id: habit.id,
+        name: habit.title,
+        completed: totalCompleted,
+        total: totalDays,
+        streak: currentStreak,
+        maxStreak: maxStreak
+      }
+    })
+  }, [rawData, activeHabits])
   
   const avgCompletion = completionData.length > 0 
     ? Math.round(completionData.reduce((acc, d) => acc + d.value, 0) / completionData.length)
