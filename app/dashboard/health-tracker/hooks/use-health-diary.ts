@@ -81,6 +81,9 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       )
     },
     onSuccess: () => {
+      // Очищаем pending updates после успешного сохранения
+      pendingUpdatesRef.current = {}
+      
       // ГИБРИДНАЯ ИНВАЛИДАЦИЯ:
       // 1. Overview stats - синхронно (критичные данные, пользователь увидит сразу)
       queryClient.invalidateQueries({ 
@@ -128,7 +131,7 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
   // Функция для батчинга обновлений
   const scheduleSave = useMemo(() => {
     return (updates: any) => {
-      // Мержим с pending updates
+      // Мержим с pending updates И СРАЗУ обновляем ref для sendBeacon
       pendingUpdatesRef.current = {
         ...pendingUpdatesRef.current,
         ...updates
@@ -142,9 +145,9 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
       // Устанавливаем новый таймер (1000ms для лучшего батчинга и производительности)
       updateTimerRef.current = setTimeout(() => {
         const dataToSave = pendingUpdatesRef.current
-        pendingUpdatesRef.current = {}
         
         saveMutation.mutate(dataToSave)
+        // НЕ очищаем pendingUpdatesRef.current здесь - он будет очищен после успешного сохранения
       }, 1000) // 1000ms debounce - оптимальный баланс для батчинга без лагов
     }
   }, [saveMutation])

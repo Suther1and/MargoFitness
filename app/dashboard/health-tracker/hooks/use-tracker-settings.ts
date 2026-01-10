@@ -150,7 +150,6 @@ export function useTrackerSettings(userId: string | null) {
   // Debounced mutation для батчинга сохранений
   const debouncedMutate = useMemo(() => 
     debounce((newSettings: TrackerSettings) => {
-      pendingSettingsRef.current = newSettings
       updateMutation.mutate(newSettings)
       // Очищаем после успешной отправки
       setTimeout(() => {
@@ -185,6 +184,9 @@ export function useTrackerSettings(userId: string | null) {
     
     // Мгновенное обновление UI
     queryClient.setQueryData(['diary-settings', userId], newSettings)
+    
+    // Обновляем pending ref для sendBeacon
+    pendingSettingsRef.current = newSettings
     
     // Отложенное сохранение в БД
     debouncedMutate(newSettings)
