@@ -80,6 +80,16 @@ export function StatsHabits({ userId, habits, dateRange }: StatsHabitsProps) {
       )
       
       sortedData.forEach((entry: any, index: number) => {
+        // ВРЕМЕННОЕ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
+        if (index === 0 && typeof window !== 'undefined') {
+          console.log('[HABITS DEBUG]', {
+            habitId: habit.id,
+            habitTitle: habit.title,
+            habitsCompletedKeys: Object.keys(entry.habits_completed || {}),
+            habitsCompletedValues: entry.habits_completed
+          })
+        }
+        
         const habitCompleted = entry.habits_completed?.[habit.id] === true
         totalDays++
         
