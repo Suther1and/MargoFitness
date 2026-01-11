@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
 import debounce from 'lodash.debounce'
 import { createClient } from '@/lib/supabase/client'
-import { getDiarySettings, updateDiarySettings } from '@/lib/actions/diary'
+import { updateDiarySettings } from '@/lib/actions/diary'
 import { WidgetId, TrackerSettings, UserParameters, WIDGET_CONFIGS } from '../types'
 
 const VISITED_KEY = 'health_tracker_visited'
@@ -104,16 +104,53 @@ export function useTrackerSettings(userId: string | null) {
   // Ref для mutation функции
   const mutationRef = useRef<((settings: TrackerSettings) => void) | null>(null)
 
-  // Query для загрузки настроек
+  // Query для загрузки настроек (прямой Supabase вместо Server Action!)
   const { data: settingsData, isLoading } = useQuery({
     queryKey: ['diary-settings', userId],
     queryFn: async () => {
       if (!userId) return null
-      const result = await getDiarySettings(userId)
-      if (result.success && result.data) {
-        return dbToAppSettings(result.data)
+      
+      const supabase = createClient()
+      
+      const { data, error } = await supabase
+        .from('diary_settings')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('[useTrackerSettings] Error loading settings:', error)
+        return DEFAULT_SETTINGS
       }
-      return DEFAULT_SETTINGS
+
+      if (!data) {
+        console.log('[useTrackerSettings] No settings found, creating defaults...')
+        // Создаем дефолтные настройки
+        const defaultSettings: any = {
+          user_id: userId,
+          enabled_widgets: [],
+          widget_goals: {},
+          widgets_in_daily_plan: [],
+          user_params: { height: null, weight: null, age: null, gender: null },
+          habits: [],
+          streaks: { current: 0, longest: 0, last_entry_date: null }
+        }
+
+        const { data: newData, error: insertError } = await supabase
+          .from('diary_settings')
+          .insert(defaultSettings)
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('[useTrackerSettings] Error creating defaults:', insertError)
+          return DEFAULT_SETTINGS
+        }
+
+        return dbToAppSettings(newData)
+      }
+      
+      return dbToAppSettings(data)
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 минут

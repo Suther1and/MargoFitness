@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useQueryClient } from '@tanstack/react-query'
 import { Droplets, Footprints, Scale, Coffee, Moon, Smile, Utensils, Zap, Apple, ChevronLeft, Info, Camera, NotebookText, Image, Film, Frown, Meh, SmilePlus, BatteryMedium, Target, Calendar, ChevronDown, Check } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
-import { WidgetId, WIDGET_CONFIGS } from '../types'
+import { WidgetId, WIDGET_CONFIGS, TrackerSettings } from '../types'
 import { HabitsSection } from './habits-section'
 import { WeekNavigator } from './week-navigator'
 import { calculateBMI, getBMICategory, calculateCalorieNorms } from '../utils/bmi-utils'
@@ -382,6 +383,7 @@ export default function SettingsTab({
   isMobile
 }: SettingsTabProps) {
   const { settings, saveSettings, isLoaded } = useTrackerSettings(userId)
+  const queryClient = useQueryClient()
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
   const [openBmiDialog, setOpenBmiDialog] = useState(false)
   
@@ -418,13 +420,17 @@ export default function SettingsTab({
   }
 
   const handleToggle = (widgetId: WidgetId) => {
+    // КРИТИЧНО: берем свежие данные из кэша React Query
+    const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
+    if (!freshSettings) return
+    
     const newSettings = {
-      ...localSettings,
+      ...freshSettings,
       widgets: {
-        ...localSettings.widgets,
+        ...freshSettings.widgets,
         [widgetId]: {
-          ...localSettings.widgets[widgetId],
-          enabled: !localSettings.widgets[widgetId].enabled,
+          ...freshSettings.widgets[widgetId],
+          enabled: !freshSettings.widgets[widgetId].enabled,
         }
       }
     }
@@ -432,8 +438,12 @@ export default function SettingsTab({
   }
 
   const handleGoalChange = (widgetId: WidgetId, value: string) => {
+    // КРИТИЧНО: берем свежие данные из кэша React Query
+    const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
+    if (!freshSettings) return
+    
     const filtered = value.replace(/[^\d.]/g, '')
-    const widget = localSettings.widgets[widgetId]
+    const widget = freshSettings.widgets[widgetId]
     const newGoalValue = filtered ? parseFloat(filtered) : null
     const hadGoal = widget.goal !== null
     const willHaveGoal = newGoalValue !== null && newGoalValue > 0
@@ -461,11 +471,11 @@ export default function SettingsTab({
     }
     
     const newSettings = {
-      ...localSettings,
+      ...freshSettings,
       widgets: {
-        ...localSettings.widgets,
+        ...freshSettings.widgets,
         [widgetId]: {
-          ...localSettings.widgets[widgetId],
+          ...freshSettings.widgets[widgetId],
           goal: newGoalValue,
           inDailyPlan: newInDailyPlan
         }
@@ -475,7 +485,11 @@ export default function SettingsTab({
   }
 
   const handleToggleInPlan = (widgetId: WidgetId) => {
-    const widget = localSettings.widgets[widgetId]
+    // КРИТИЧНО: берем свежие данные из кэша React Query
+    const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
+    if (!freshSettings) return
+    
+    const widget = freshSettings.widgets[widgetId]
     const config = WIDGET_CONFIGS[widgetId]
     
     // Проверяем, что если у виджета должна быть цель и мы хотим добавить в план, то цель должна быть указана
@@ -496,12 +510,12 @@ export default function SettingsTab({
     }
     
     const newSettings = {
-      ...localSettings,
+      ...freshSettings,
       widgets: {
-        ...localSettings.widgets,
+        ...freshSettings.widgets,
         [widgetId]: {
-          ...localSettings.widgets[widgetId],
-          inDailyPlan: !localSettings.widgets[widgetId].inDailyPlan,
+          ...freshSettings.widgets[widgetId],
+          inDailyPlan: !freshSettings.widgets[widgetId].inDailyPlan,
         }
       }
     }
@@ -509,6 +523,10 @@ export default function SettingsTab({
   }
 
   const handleParamChange = (param: 'height' | 'weight' | 'age' | 'gender', value: any) => {
+    // КРИТИЧНО: берем свежие данные из кэша React Query
+    const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
+    if (!freshSettings) return
+    
     let finalValue = value;
     if (param !== 'gender') {
       finalValue = value.replace(/[^\d.]/g, '').slice(0, 3)
@@ -516,9 +534,9 @@ export default function SettingsTab({
     }
     
     const newSettings = {
-      ...localSettings,
+      ...freshSettings,
       userParams: {
-        ...localSettings.userParams,
+        ...freshSettings.userParams,
         [param]: finalValue,
       }
     }
