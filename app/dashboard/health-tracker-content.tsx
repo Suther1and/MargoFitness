@@ -560,7 +560,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         <motion.div 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-center gap-3 mt-9"
+                          className="flex items-center gap-3 mt-[5px] mb-[5px]"
                         >
                           {profile && (
                             <>
@@ -621,7 +621,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-3 mt-9"
+                        className="flex items-center gap-3 mt-[5px] mb-[5px]"
                       >
                         {profile && (
                           <>

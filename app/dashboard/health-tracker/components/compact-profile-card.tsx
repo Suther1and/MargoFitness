@@ -13,7 +13,7 @@ export function CompactProfileCard({ profile, onEditClick }: CompactProfileCardP
   return (
     <button 
       onClick={onEditClick}
-      className="group relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 flex items-center gap-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-[0.98]"
+      className="group relative overflow-hidden rounded-2xl bg-white/[0.04] ring-1 ring-white/10 p-3 flex items-end gap-3 transition-all hover:bg-white/[0.06] hover:ring-white/15 active:scale-[0.98] h-[76px]"
       style={{ touchAction: 'manipulation' }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
