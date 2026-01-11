@@ -503,7 +503,7 @@ async function checkMetricAchievements(
     }
 
     // Фильтруем уже полученные
-    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
     console.log('[Achievements:Metrics] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
@@ -832,7 +832,7 @@ async function checkHabitAchievements(
     }
 
     // Фильтруем уже полученные
-    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
     console.log('[Achievements:Habits] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
@@ -907,7 +907,7 @@ async function checkWeightAchievements(
     }
 
     // Фильтруем уже полученные
-    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
     console.log('[Achievements:Weight] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
@@ -1017,7 +1017,7 @@ async function checkConsistencyAchievements(
     }
 
     // Фильтруем уже полученные
-    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
     console.log('[Achievements:Consistency] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
