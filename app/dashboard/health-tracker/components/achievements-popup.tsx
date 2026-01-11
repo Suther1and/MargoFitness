@@ -18,6 +18,7 @@ interface AchievementsPopupProps {
 
 export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<'uncompleted' | 'completed'>('uncompleted')
   const [mounted, setMounted] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
 
@@ -38,9 +39,15 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
 
   const { data: achievements = [], isLoading } = useAllAchievements(userId)
 
-  const filteredAchievements = selectedCategory === 'all'
-    ? achievements
-    : achievements.filter(a => a.category === selectedCategory)
+  const filteredAchievements = achievements
+    .filter(a => selectedCategory === 'all' ? true : a.category === selectedCategory)
+    .filter(a => statusFilter === 'uncompleted' ? !a.isUnlocked : a.isUnlocked)
+    .sort((a, b) => {
+      if (statusFilter === 'completed' && a.unlockedAt && b.unlockedAt) {
+        return new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
+      }
+      return 0
+    })
 
   const unlockedCount = achievements.filter(a => a.isUnlocked).length
   const totalCount = achievements.length
@@ -103,6 +110,32 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
                   className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
                 />
               </div>
+            </div>
+
+            {/* Status Filter Tabs */}
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => setStatusFilter('uncompleted')}
+                className={cn(
+                  'flex-1 px-4 py-2 rounded-xl text-xs font-bold transition-all',
+                  statusFilter === 'uncompleted'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-lg shadow-amber-500/20'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                )}
+              >
+                Невыполненные ({achievements.filter(a => !a.isUnlocked).length})
+              </button>
+              <button
+                onClick={() => setStatusFilter('completed')}
+                className={cn(
+                  'flex-1 px-4 py-2 rounded-xl text-xs font-bold transition-all',
+                  statusFilter === 'completed'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black shadow-lg shadow-green-500/20'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                )}
+              >
+                Выполненные ({unlockedCount})
+              </button>
             </div>
 
             {/* Category Filters */}

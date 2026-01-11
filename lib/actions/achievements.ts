@@ -470,20 +470,26 @@ async function checkMetricAchievements(
     // Подсчитываем общие значения
     let totalWater = 0
     let totalSteps = 0
+    let energyMaxCount = 0 // Количество раз с энергией 5/5
     
     if (allEntries) {
       for (const entry of allEntries) {
         const m = entry.metrics as any
         totalWater += m?.waterIntake || 0  // ИСПРАВЛЕНО: было water
         totalSteps += m?.steps || 0
+        
+        // Считаем записи с максимальной энергией
+        if (m?.energyLevel === 5) {
+          energyMaxCount++
+        }
       }
     }
 
     console.log('[Achievements:Metrics] Latest:', {
       waterIntake: metrics.waterIntake,
       steps: metrics.steps,
-      sleep: metrics.sleep
-    }, 'Total water:', totalWater, 'Total steps:', totalSteps)
+      sleepHours: metrics.sleepHours
+    }, 'Total water:', totalWater, 'Total steps:', totalSteps, 'Energy max count:', energyMaxCount)
 
     // Получаем ВСЕ достижения категории metrics
     const { data: allAchievements, error: achError } = await supabase
@@ -536,12 +542,196 @@ async function checkMetricAchievements(
       } else if (metadata.type === 'steps_total' && totalSteps >= metadata.value) {
         console.log('[Achievements:Metrics] ✅ Steps total:', achievement.id)
         achievementIds.push(achievement.id)
-      } else if (metadata.type === 'sleep_daily' && metrics.sleep >= metadata.value) {
-        console.log('[Achievements:Metrics] ✅ Sleep daily:', achievement.id)
+      } else if (metadata.type === 'sleep_daily' && metrics.sleepHours >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Sleep daily:', achievement.id, `(${metrics.sleepHours}h >= ${metadata.value}h)`)
         achievementIds.push(achievement.id)
-      } else if (metadata.type === 'sleep_low' && metrics.sleep && metrics.sleep < metadata.value) {
-        console.log('[Achievements:Metrics] ✅ Sleep low:', achievement.id)
+      } else if (metadata.type === 'sleep_low' && metrics.sleepHours && metrics.sleepHours < metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Sleep low:', achievement.id, `(${metrics.sleepHours}h < ${metadata.value}h)`)
         achievementIds.push(achievement.id)
+      } else if (metadata.type === 'sleep_streak') {
+        // Проверяем серию дней с достаточным сном
+        const streakDays = metadata.value
+        const requiredSleepHours = 8 // Для "Неделя сна"
+        
+        // Получаем последние N+5 дней для проверки серии
+        const { data: recentSleepEntries } = await supabase
+          .from('diary_entries')
+          .select('date, metrics')
+          .eq('user_id', userId)
+          .not('metrics->sleepHours', 'is', null)
+          .order('date', { ascending: false })
+          .limit(streakDays + 5)
+        
+        if (recentSleepEntries && recentSleepEntries.length >= streakDays) {
+          let currentStreak = 0
+          let maxStreak = 0
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          // Сортируем по дате убывания
+          const sortedEntries = [...recentSleepEntries].sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          
+          // Проверяем серию начиная с последнего дня
+          for (let i = 0; i < sortedEntries.length; i++) {
+            const entry = sortedEntries[i]
+            const entryDate = new Date(entry.date)
+            entryDate.setHours(0, 0, 0, 0)
+            
+            const expectedDate = new Date(today)
+            expectedDate.setDate(today.getDate() - i)
+            expectedDate.setHours(0, 0, 0, 0)
+            
+            const sleepHours = (entry.metrics as any)?.sleepHours || 0
+            
+            if (entryDate.getTime() === expectedDate.getTime() && sleepHours >= requiredSleepHours) {
+              currentStreak++
+              maxStreak = Math.max(maxStreak, currentStreak)
+            } else if (entryDate.getTime() !== expectedDate.getTime()) {
+              break
+            } else {
+              break
+            }
+          }
+          
+          console.log('[Achievements:Metrics] 😴 Sleep streak check:', {
+            achievementId: achievement.id,
+            required: streakDays,
+            currentStreak,
+            maxStreak
+          })
+          
+          if (currentStreak >= streakDays || maxStreak >= streakDays) {
+            console.log('[Achievements:Metrics] ✅ Sleep streak:', achievement.id)
+            achievementIds.push(achievement.id)
+          }
+        }
+      } else if (metadata.type === 'energy_max' && energyMaxCount >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Energy max:', achievement.id, `(${energyMaxCount} >= ${metadata.value})`)
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'water_goal_streak') {
+        // Проверяем серию дней с достижением цели по воде
+        const streakDays = metadata.value
+        
+        // Получаем цель по воде из настроек
+        const { data: waterSettings } = await supabase
+          .from('diary_settings')
+          .select('widget_goals')
+          .eq('user_id', userId)
+          .single()
+        
+        const waterGoal = waterSettings?.widget_goals?.water || 2500
+        
+        // Получаем последние N+5 дней для проверки серии
+        const { data: recentWaterEntries } = await supabase
+          .from('diary_entries')
+          .select('date, metrics')
+          .eq('user_id', userId)
+          .not('metrics->waterIntake', 'is', null)
+          .order('date', { ascending: false })
+          .limit(streakDays + 5)
+        
+        if (recentWaterEntries && recentWaterEntries.length >= streakDays) {
+          let currentStreak = 0
+          let maxStreak = 0
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          const sortedEntries = [...recentWaterEntries].sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          
+          for (let i = 0; i < sortedEntries.length; i++) {
+            const entry = sortedEntries[i]
+            const entryDate = new Date(entry.date)
+            entryDate.setHours(0, 0, 0, 0)
+            
+            const expectedDate = new Date(today)
+            expectedDate.setDate(today.getDate() - i)
+            expectedDate.setHours(0, 0, 0, 0)
+            
+            const waterIntake = (entry.metrics as any)?.waterIntake || 0
+            
+            if (entryDate.getTime() === expectedDate.getTime() && waterIntake >= waterGoal) {
+              currentStreak++
+              maxStreak = Math.max(maxStreak, currentStreak)
+            } else if (entryDate.getTime() !== expectedDate.getTime()) {
+              break
+            } else {
+              break
+            }
+          }
+          
+          console.log('[Achievements:Metrics] 💦 Water goal streak check:', {
+            achievementId: achievement.id,
+            required: streakDays,
+            goal: waterGoal,
+            currentStreak,
+            maxStreak
+          })
+          
+          if (currentStreak >= streakDays || maxStreak >= streakDays) {
+            console.log('[Achievements:Metrics] ✅ Water goal streak:', achievement.id)
+            achievementIds.push(achievement.id)
+          }
+        }
+      } else if (metadata.type === 'mood_great_streak') {
+        // Проверяем серию дней с отличным настроением (5/5)
+        const streakDays = metadata.value
+        
+        // Получаем последние N+5 дней для проверки серии
+        const { data: recentMoodEntries } = await supabase
+          .from('diary_entries')
+          .select('date, metrics')
+          .eq('user_id', userId)
+          .not('metrics->mood', 'is', null)
+          .order('date', { ascending: false })
+          .limit(streakDays + 5)
+        
+        if (recentMoodEntries && recentMoodEntries.length >= streakDays) {
+          let currentStreak = 0
+          let maxStreak = 0
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          const sortedEntries = [...recentMoodEntries].sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          
+          for (let i = 0; i < sortedEntries.length; i++) {
+            const entry = sortedEntries[i]
+            const entryDate = new Date(entry.date)
+            entryDate.setHours(0, 0, 0, 0)
+            
+            const expectedDate = new Date(today)
+            expectedDate.setDate(today.getDate() - i)
+            expectedDate.setHours(0, 0, 0, 0)
+            
+            const mood = (entry.metrics as any)?.mood || 0
+            
+            if (entryDate.getTime() === expectedDate.getTime() && mood === 5) {
+              currentStreak++
+              maxStreak = Math.max(maxStreak, currentStreak)
+            } else if (entryDate.getTime() !== expectedDate.getTime()) {
+              break
+            } else {
+              break
+            }
+          }
+          
+          console.log('[Achievements:Metrics] 😊 Mood great streak check:', {
+            achievementId: achievement.id,
+            required: streakDays,
+            currentStreak,
+            maxStreak
+          })
+          
+          if (currentStreak >= streakDays || maxStreak >= streakDays) {
+            console.log('[Achievements:Metrics] ✅ Mood great streak:', achievement.id)
+            achievementIds.push(achievement.id)
+          }
+        }
       }
     }
   } catch (error) {
@@ -562,10 +752,10 @@ async function checkHabitAchievements(
   const achievementIds: string[] = []
 
   try {
-    // Получаем последнюю запись дневника с привычками
+    // Получаем последнюю запись дневника с habits_completed
     const { data: latestEntry } = await supabase
       .from('diary_entries')
-      .select('metrics')
+      .select('habits_completed')
       .eq('user_id', userId)
       .order('date', { ascending: false })
       .limit(1)
@@ -576,9 +766,59 @@ async function checkHabitAchievements(
       return achievementIds
     }
 
-    const metrics = latestEntry.metrics as any
-    const habits = metrics?.habits || []
-    console.log('[Achievements:Habits] Found', habits.length, 'habits')
+    const habitsCompleted = latestEntry.habits_completed as any
+    console.log('[Achievements:Habits] Habits completed:', habitsCompleted)
+    
+    // Проверяем, есть ли хотя бы одна завершённая привычка
+    const hasAnyCompleted = habitsCompleted && Object.values(habitsCompleted).some((v: any) => v === true)
+    console.log('[Achievements:Habits] Has any completed:', hasAnyCompleted)
+
+    // Получаем настройки привычек
+    const { data: settings } = await supabase
+      .from('diary_settings')
+      .select('habits')
+      .eq('user_id', userId)
+      .single()
+
+    const habitsCreated = settings?.habits?.length || 0
+    const activeHabitIds = (settings?.habits || [])
+      .filter((h: any) => h.enabled)
+      .map((h: any) => h.id)
+    
+    console.log('[Achievements:Habits] Total habits created:', habitsCreated)
+    console.log('[Achievements:Habits] Active habit IDs:', activeHabitIds)
+
+    // Получаем все записи дневника с habits_completed для подсчёта статистики
+    const { data: allEntries } = await supabase
+      .from('diary_entries')
+      .select('date, habits_completed')
+      .eq('user_id', userId)
+      .not('habits_completed', 'is', null)
+      .order('date', { ascending: false })
+
+    // Подсчитываем статистику
+    let daysWithAllHabitsCompleted = 0
+    let totalCompletions = 0
+
+    if (allEntries && activeHabitIds.length > 0) {
+      for (const entry of allEntries) {
+        const completed = entry.habits_completed as any
+        if (!completed) continue
+
+        // Считаем общее количество выполнений
+        const completedCount = Object.values(completed).filter((v: any) => v === true).length
+        totalCompletions += completedCount
+
+        // Проверяем, все ли активные привычки выполнены в этот день
+        const allActiveCompleted = activeHabitIds.every((habitId: string) => completed[habitId] === true)
+        if (allActiveCompleted) {
+          daysWithAllHabitsCompleted++
+        }
+      }
+    }
+
+    console.log('[Achievements:Habits] Days with all habits completed:', daysWithAllHabitsCompleted)
+    console.log('[Achievements:Habits] Total completions:', totalCompletions)
 
     // Получаем ВСЕ достижения категории habits
     const { data: allAchievements, error: achError } = await supabase
@@ -595,12 +835,21 @@ async function checkHabitAchievements(
     const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
     console.log('[Achievements:Habits] Checking', achievements.length, 'achievements')
 
-    // Проверяем условия (упрощенная версия)
+    // Проверяем условия
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
-      if (metadata.type === 'habit_complete_any' && habits.length > 0) {
+      if (metadata.type === 'habit_complete_any' && hasAnyCompleted) {
         console.log('[Achievements:Habits] ✅ Habit complete any:', achievement.id)
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'habits_created' && habitsCreated >= metadata.value) {
+        console.log('[Achievements:Habits] ✅ Habits created:', achievement.id, `(${habitsCreated} >= ${metadata.value})`)
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'habits_all_streak' && daysWithAllHabitsCompleted >= metadata.value) {
+        console.log('[Achievements:Habits] ✅ Habits all streak (simplified):', achievement.id, `(${daysWithAllHabitsCompleted} >= ${metadata.value})`)
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'habit_completions' && totalCompletions >= metadata.value) {
+        console.log('[Achievements:Habits] ✅ Habit completions:', achievement.id, `(${totalCompletions} >= ${metadata.value})`)
         achievementIds.push(achievement.id)
       }
     }
@@ -666,12 +915,48 @@ async function checkWeightAchievements(
       const metadata = achievement.metadata as any
       
       if (metadata.type === 'weight_recorded' && weightEntries.length >= metadata.value) {
-        console.log('[Achievements:Weight] ✅ Weight recorded:', achievement.id)
+        console.log('[Achievements:Weight] ✅ Weight recorded:', achievement.id, `(${weightEntries.length} >= ${metadata.value})`)
         achievementIds.push(achievement.id)
-      } else if (metadata.type === 'weight_goal_reached' && goalWeight) {
-        const latestWeight = (weightEntries[0].metrics as any)?.weight
-        if (latestWeight && Math.abs(latestWeight - goalWeight) <= 1) {
-          console.log('[Achievements:Weight] ✅ Weight goal reached:', achievement.id)
+      } else if (metadata.type === 'weight_streak') {
+        // Проверяем серию записей веса
+        const streakDays = metadata.value
+        let currentStreak = 0
+        let maxStreak = 0
+        
+        // Сортируем даты по убыванию
+        const sortedEntries = [...weightEntries].sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        
+        // Проверяем непрерывность с последнего дня
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        for (let i = 0; i < sortedEntries.length; i++) {
+          const entryDate = new Date(sortedEntries[i].date)
+          entryDate.setHours(0, 0, 0, 0)
+          
+          const expectedDate = new Date(today)
+          expectedDate.setDate(today.getDate() - i)
+          expectedDate.setHours(0, 0, 0, 0)
+          
+          if (entryDate.getTime() === expectedDate.getTime()) {
+            currentStreak++
+            maxStreak = Math.max(maxStreak, currentStreak)
+          } else {
+            break
+          }
+        }
+        
+        console.log('[Achievements:Weight] Weight streak check:', {
+          achievementId: achievement.id,
+          required: streakDays,
+          currentStreak,
+          maxStreak
+        })
+        
+        if (currentStreak >= streakDays || maxStreak >= streakDays) {
+          console.log('[Achievements:Weight] ✅ Weight streak:', achievement.id)
           achievementIds.push(achievement.id)
         }
       }
