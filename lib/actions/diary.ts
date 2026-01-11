@@ -254,7 +254,7 @@ export async function upsertDiaryEntry(
     })
 
     // Проверяем достижения и возвращаем новые
-    let newAchievements = []
+    let newAchievements: any[] = []
     try {
       const achievementsResult = await checkAndUnlockAchievements(userId)
       if (achievementsResult.success && achievementsResult.newAchievements) {
