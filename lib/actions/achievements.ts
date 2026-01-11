@@ -305,14 +305,38 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
   const supabase = await createClient()
 
   try {
+    console.log('[Achievements] Checking achievements for user:', userId)
+    
     const newAchievements: Achievement[] = []
 
-    // Проверяем каждую категорию
-    const streakResults = await checkStreakAchievements(userId, supabase)
-    const metricResults = await checkMetricAchievements(userId, supabase)
-    const habitResults = await checkHabitAchievements(userId, supabase)
-    const weightResults = await checkWeightAchievements(userId, supabase)
-    const consistencyResults = await checkConsistencyAchievements(userId, supabase)
+    // КРИТИЧЕСКИ ВАЖНО: Получаем уже полученные достижения ОДИН РАз
+    const { data: userAchievements, error: userAchError } = await supabase
+      .from('user_achievements')
+      .select('achievement_id')
+      .eq('user_id', userId)
+
+    if (userAchError) {
+      console.error('[Achievements] Error fetching user achievements:', userAchError)
+      return { success: false, error: 'Ошибка при получении достижений пользователя' }
+    }
+
+    const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id) || [])
+    console.log('[Achievements] Already unlocked:', unlockedIds.size, 'achievements')
+
+    // Проверяем каждую категорию, передавая Set полученных ID
+    const streakResults = await checkStreakAchievements(userId, supabase, unlockedIds)
+    const metricResults = await checkMetricAchievements(userId, supabase, unlockedIds)
+    const habitResults = await checkHabitAchievements(userId, supabase, unlockedIds)
+    const weightResults = await checkWeightAchievements(userId, supabase, unlockedIds)
+    const consistencyResults = await checkConsistencyAchievements(userId, supabase, unlockedIds)
+
+    console.log('[Achievements] Found achievements to check:', {
+      streaks: streakResults.length,
+      metrics: metricResults.length,
+      habits: habitResults.length,
+      weight: weightResults.length,
+      consistency: consistencyResults.length,
+    })
 
     // Собираем все новые достижения
     const allResults = [
@@ -323,21 +347,29 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
       ...consistencyResults,
     ]
 
+    console.log('[Achievements] Total achievements to unlock:', allResults.length)
+
     for (const achievementId of allResults) {
       const result = await unlockAchievementInternal(userId, achievementId, supabase)
       if (result.success && result.achievement) {
+        console.log('[Achievements] ✅ Unlocked:', result.achievement.title)
         newAchievements.push(result.achievement)
+      } else if (!result.success) {
+        console.log('[Achievements] ❌ Failed to unlock:', achievementId, result.error)
       }
     }
 
     if (newAchievements.length > 0) {
+      console.log('[Achievements] 🎉 Total new achievements:', newAchievements.length)
       revalidatePath('/dashboard/health-tracker')
       revalidatePath('/dashboard/bonuses')
+    } else {
+      console.log('[Achievements] No new achievements earned')
     }
 
     return { success: true, newAchievements }
   } catch (error) {
-    console.error('Error in checkAndUnlockAchievements:', error)
+    console.error('[Achievements] Error in checkAndUnlockAchievements:', error)
     return { success: false, error: 'Ошибка при проверке достижений' }
   }
 }
@@ -351,7 +383,8 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
  */
 async function checkStreakAchievements(
   userId: string,
-  supabase: any
+  supabase: any,
+  unlockedIds: Set<string>
 ): Promise<string[]> {
   const achievementIds: string[] = []
 
@@ -364,31 +397,38 @@ async function checkStreakAchievements(
       .single()
 
     if (!settings?.streaks?.current) {
+      console.log('[Achievements:Streaks] No current streak found')
       return achievementIds
     }
 
     const currentStreak = settings.streaks.current
+    console.log('[Achievements:Streaks] Current streak:', currentStreak)
 
-    // Получаем достижения категории streaks, которые еще не получены
-    const { data: achievements } = await supabase
+    // Получаем ВСЕ достижения категории streaks
+    const { data: allAchievements, error: achError } = await supabase
       .from('achievements')
       .select('id, metadata')
       .eq('category', 'streaks')
-      .not('id', 'in', `(SELECT achievement_id FROM user_achievements WHERE user_id = '${userId}')`)
 
-    if (!achievements) {
+    if (achError || !allAchievements) {
+      console.error('[Achievements:Streaks] Error fetching achievements:', achError)
       return achievementIds
     }
+
+    // Фильтруем уже полученные в JavaScript
+    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    console.log('[Achievements:Streaks] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       if (metadata.type === 'streak_days' && currentStreak >= metadata.value) {
+        console.log('[Achievements:Streaks] ✅ Earned:', achievement.id, `(${currentStreak}>=${metadata.value})`)
         achievementIds.push(achievement.id)
       }
     }
   } catch (error) {
-    console.error('Error checking streak achievements:', error)
+    console.error('[Achievements:Streaks] Error checking streak achievements:', error)
   }
 
   return achievementIds
@@ -399,7 +439,8 @@ async function checkStreakAchievements(
  */
 async function checkMetricAchievements(
   userId: string,
-  supabase: any
+  supabase: any,
+  unlockedIds: Set<string>
 ): Promise<string[]> {
   const achievementIds: string[] = []
 
@@ -420,6 +461,7 @@ async function checkMetricAchievements(
       .eq('user_id', userId)
 
     if (!latestEntry && !allEntries) {
+      console.log('[Achievements:Metrics] No diary entries found')
       return achievementIds
     }
 
@@ -437,37 +479,49 @@ async function checkMetricAchievements(
       }
     }
 
-    // Получаем неполученные достижения категории metrics
-    const { data: achievements } = await supabase
+    console.log('[Achievements:Metrics] Latest:', metrics, 'Total water:', totalWater, 'Total steps:', totalSteps)
+
+    // Получаем ВСЕ достижения категории metrics
+    const { data: allAchievements, error: achError } = await supabase
       .from('achievements')
       .select('id, metadata')
       .eq('category', 'metrics')
-      .not('id', 'in', `(SELECT achievement_id FROM user_achievements WHERE user_id = '${userId}')`)
 
-    if (!achievements) {
+    if (achError || !allAchievements) {
+      console.error('[Achievements:Metrics] Error fetching achievements:', achError)
       return achievementIds
     }
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    console.log('[Achievements:Metrics] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
       if (metadata.type === 'water_daily' && metrics.water >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Water daily:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'water_total' && totalWater >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Water total:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'steps_daily' && metrics.steps >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Steps daily:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'steps_total' && totalSteps >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Steps total:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'sleep_daily' && metrics.sleep >= metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Sleep daily:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'sleep_low' && metrics.sleep && metrics.sleep < metadata.value) {
+        console.log('[Achievements:Metrics] ✅ Sleep low:', achievement.id)
         achievementIds.push(achievement.id)
       }
     }
   } catch (error) {
-    console.error('Error checking metric achievements:', error)
+    console.error('[Achievements:Metrics] Error checking metric achievements:', error)
   }
 
   return achievementIds
@@ -478,7 +532,8 @@ async function checkMetricAchievements(
  */
 async function checkHabitAchievements(
   userId: string,
-  supabase: any
+  supabase: any,
+  unlockedIds: Set<string>
 ): Promise<string[]> {
   const achievementIds: string[] = []
 
@@ -493,33 +548,40 @@ async function checkHabitAchievements(
       .single()
 
     if (!latestEntry) {
+      console.log('[Achievements:Habits] No diary entries found')
       return achievementIds
     }
 
     const metrics = latestEntry.metrics as any
     const habits = metrics?.habits || []
+    console.log('[Achievements:Habits] Found', habits.length, 'habits')
 
-    // Получаем неполученные достижения категории habits
-    const { data: achievements } = await supabase
+    // Получаем ВСЕ достижения категории habits
+    const { data: allAchievements, error: achError } = await supabase
       .from('achievements')
       .select('id, metadata')
       .eq('category', 'habits')
-      .not('id', 'in', `(SELECT achievement_id FROM user_achievements WHERE user_id = '${userId}')`)
 
-    if (!achievements) {
+    if (achError || !allAchievements) {
+      console.error('[Achievements:Habits] Error fetching achievements:', achError)
       return achievementIds
     }
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    console.log('[Achievements:Habits] Checking', achievements.length, 'achievements')
 
     // Проверяем условия (упрощенная версия)
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
       if (metadata.type === 'habit_complete_any' && habits.length > 0) {
+        console.log('[Achievements:Habits] ✅ Habit complete any:', achievement.id)
         achievementIds.push(achievement.id)
       }
     }
   } catch (error) {
-    console.error('Error checking habit achievements:', error)
+    console.error('[Achievements:Habits] Error checking habit achievements:', error)
   }
 
   return achievementIds
@@ -530,7 +592,8 @@ async function checkHabitAchievements(
  */
 async function checkWeightAchievements(
   userId: string,
-  supabase: any
+  supabase: any,
+  unlockedIds: Set<string>
 ): Promise<string[]> {
   const achievementIds: string[] = []
 
@@ -544,8 +607,11 @@ async function checkWeightAchievements(
       .order('date', { ascending: false })
 
     if (!weightEntries || weightEntries.length === 0) {
+      console.log('[Achievements:Weight] No weight entries found')
       return achievementIds
     }
+
+    console.log('[Achievements:Weight] Found', weightEntries.length, 'weight entries')
 
     // Получаем целевой вес из настроек
     const { data: settings } = await supabase
@@ -556,32 +622,38 @@ async function checkWeightAchievements(
 
     const goalWeight = settings?.goals?.weight
 
-    // Получаем неполученные достижения категории weight
-    const { data: achievements } = await supabase
+    // Получаем ВСЕ достижения категории weight
+    const { data: allAchievements, error: achError } = await supabase
       .from('achievements')
       .select('id, metadata')
       .eq('category', 'weight')
-      .not('id', 'in', `(SELECT achievement_id FROM user_achievements WHERE user_id = '${userId}')`)
 
-    if (!achievements) {
+    if (achError || !allAchievements) {
+      console.error('[Achievements:Weight] Error fetching achievements:', achError)
       return achievementIds
     }
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    console.log('[Achievements:Weight] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
       if (metadata.type === 'weight_recorded' && weightEntries.length >= metadata.value) {
+        console.log('[Achievements:Weight] ✅ Weight recorded:', achievement.id)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'weight_goal_reached' && goalWeight) {
         const latestWeight = (weightEntries[0].metrics as any)?.weight
         if (latestWeight && Math.abs(latestWeight - goalWeight) <= 1) {
+          console.log('[Achievements:Weight] ✅ Weight goal reached:', achievement.id)
           achievementIds.push(achievement.id)
         }
       }
     }
   } catch (error) {
-    console.error('Error checking weight achievements:', error)
+    console.error('[Achievements:Weight] Error checking weight achievements:', error)
   }
 
   return achievementIds
@@ -592,7 +664,8 @@ async function checkWeightAchievements(
  */
 async function checkConsistencyAchievements(
   userId: string,
-  supabase: any
+  supabase: any,
+  unlockedIds: Set<string>
 ): Promise<string[]> {
   const achievementIds: string[] = []
 
@@ -604,10 +677,12 @@ async function checkConsistencyAchievements(
       .eq('user_id', userId)
 
     if (!allEntries) {
+      console.log('[Achievements:Consistency] No diary entries found')
       return achievementIds
     }
 
     const totalEntries = allEntries.length
+    console.log('[Achievements:Consistency] Total entries:', totalEntries)
 
     // Получаем записи за текущий месяц
     const now = new Date()
@@ -619,30 +694,37 @@ async function checkConsistencyAchievements(
       .gte('date', monthStart.toISOString().split('T')[0])
 
     const monthlyEntries = monthEntries?.length || 0
+    console.log('[Achievements:Consistency] Monthly entries:', monthlyEntries)
 
-    // Получаем неполученные достижения категории consistency
-    const { data: achievements } = await supabase
+    // Получаем ВСЕ достижения категории consistency
+    const { data: allAchievements, error: achError } = await supabase
       .from('achievements')
       .select('id, metadata')
       .eq('category', 'consistency')
-      .not('id', 'in', `(SELECT achievement_id FROM user_achievements WHERE user_id = '${userId}')`)
 
-    if (!achievements) {
+    if (achError || !allAchievements) {
+      console.error('[Achievements:Consistency] Error fetching achievements:', achError)
       return achievementIds
     }
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    console.log('[Achievements:Consistency] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
       if (metadata.type === 'total_entries' && totalEntries >= metadata.value) {
+        console.log('[Achievements:Consistency] ✅ Total entries:', achievement.id, `(${totalEntries}>=${metadata.value})`)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'monthly_entries' && monthlyEntries >= metadata.value) {
+        console.log('[Achievements:Consistency] ✅ Monthly entries:', achievement.id, `(${monthlyEntries}>=${metadata.value})`)
         achievementIds.push(achievement.id)
       }
     }
   } catch (error) {
-    console.error('Error checking consistency achievements:', error)
+    console.error('[Achievements:Consistency] Error checking consistency achievements:', error)
   }
 
   return achievementIds

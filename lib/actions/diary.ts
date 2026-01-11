@@ -253,12 +253,23 @@ export async function upsertDiaryEntry(
       p_entry_date: date
     })
 
-    // Проверяем достижения (фоново, не блокируем ответ)
-    checkAndUnlockAchievements(userId).catch(err => {
+    // Проверяем достижения и возвращаем новые
+    let newAchievements = []
+    try {
+      const achievementsResult = await checkAndUnlockAchievements(userId)
+      if (achievementsResult.success && achievementsResult.newAchievements) {
+        newAchievements = achievementsResult.newAchievements
+        console.log('[Diary Action] Unlocked achievements:', newAchievements.length)
+      }
+    } catch (err) {
       console.error('[Diary Action] Error checking achievements:', err)
-    })
+    }
 
-    return { success: true, data: data as DiaryEntry }
+    return { 
+      success: true, 
+      data: data as DiaryEntry,
+      newAchievements // Возвращаем новые достижения клиенту
+    }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] upsertDiaryEntry:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }

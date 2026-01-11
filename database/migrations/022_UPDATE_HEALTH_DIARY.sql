@@ -44,6 +44,9 @@ CREATE TABLE public.diary_settings (
     -- Стрики (серии выполнения)
     streaks JSONB DEFAULT '{"current": 0, "longest": 0, "last_entry_date": null}'::JSONB,
     
+    -- Дополнительные цели и настройки (например: {"nutrition": {"goalType": "deficit"}, "weight": 70})
+    goals JSONB DEFAULT '{}'::JSONB,
+    
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

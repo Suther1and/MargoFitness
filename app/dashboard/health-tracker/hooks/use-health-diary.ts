@@ -80,9 +80,18 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         data.photoUrls
       )
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       // Очищаем pending updates после успешного сохранения
       pendingUpdatesRef.current = {}
+      
+      // Если есть новые достижения - эмитим событие для toast
+      if (result?.newAchievements && result.newAchievements.length > 0) {
+        console.log('[useHealthDiary] New achievements unlocked:', result.newAchievements.length)
+        // Эмитим событие - его поймает AchievementsChecker
+        window.dispatchEvent(new CustomEvent('achievements-unlocked', { 
+          detail: { achievements: result.newAchievements } 
+        }))
+      }
       
       // ГИБРИДНАЯ ИНВАЛИДАЦИЯ:
       // 1. Overview stats - синхронно (критичные данные, пользователь увидит сразу)
@@ -91,7 +100,15 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         refetchType: 'active' // Загрузить сразу ~200-500ms задержка
       })
       
-      // 2. Детальные stats - асинхронно (обновятся при открытии вкладки)
+      // 2. Достижения - синхронно (если разблокированы новые)
+      if (result?.newAchievements && result.newAchievements.length > 0) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['achievements'],
+          refetchType: 'active'
+        })
+      }
+      
+      // 3. Детальные stats - асинхронно (обновятся при открытии вкладки)
       queryClient.invalidateQueries({ 
         queryKey: ['stats', 'water'],
         refetchType: 'none' // Только пометить stale

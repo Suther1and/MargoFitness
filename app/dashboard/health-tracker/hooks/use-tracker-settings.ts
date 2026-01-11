@@ -133,7 +133,8 @@ export function useTrackerSettings(userId: string | null) {
           widgets_in_daily_plan: [],
           user_params: { height: null, weight: null, age: null, gender: null },
           habits: [],
-          streaks: { current: 0, longest: 0, last_entry_date: null }
+          streaks: { current: 0, longest: 0, last_entry_date: null },
+          goals: {} // Добавляем goals для дополнительных настроек (nutrition goalType и т.д.)
         }
 
         const { data: newData, error: insertError } = await supabase

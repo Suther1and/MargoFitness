@@ -19,6 +19,8 @@ import {
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
+import { ToastProvider } from '@/contexts/toast-context'
+import { ToastContainer } from '@/components/dashboard/universal-toast'
 
 // Импорт напрямую - убираем ленивую загрузку для лучшей производительности
 import SettingsTab, { BmiInfoDialog } from './health-tracker/components/settings-tab'
@@ -35,6 +37,7 @@ import { GoalsSummaryCard } from './health-tracker/components/goals-summary-card
 import { DailyPhotosCard } from './health-tracker/components/daily-photos-card'
 import { HabitsCard } from './health-tracker/components/habits-card'
 import { AchievementsCard } from './health-tracker/components/achievements-card'
+import { AchievementsChecker } from './health-tracker/components/achievements-checker'
 import { HealthTrackerCard } from './health-tracker/components/health-tracker-card'
 import { WeekNavigator } from './health-tracker/components/week-navigator'
 import StatsTab from './health-tracker/components/stats-tab'
@@ -49,7 +52,6 @@ import { CompactBonusCard } from './health-tracker/components/compact-bonus-card
 import { DesktopNavigation } from './health-tracker/components/desktop-navigation'
 import { BonusesTab } from './health-tracker/components/bonuses-tab'
 import { SubscriptionTab } from './health-tracker/components/subscription-tab'
-import { AchievementUnlockedToast, useAchievementNotifications } from './health-tracker/components/achievement-unlocked-toast'
 
 import { MOCK_DATA, DailyMetrics, MoodRating, PeriodType, DateRange } from './health-tracker/types'
 import { useTrackerSettings } from './health-tracker/hooks/use-tracker-settings'
@@ -177,7 +179,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   // Все хуки получают userId и загружаются параллельно
   const { settings, isFirstVisit, isLoaded: isSettingsLoaded, saveSettings } = useTrackerSettings(userId)
   const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
-  const { currentAchievement, showAchievement, clearCurrent } = useAchievementNotifications()
   
   // Интеграция с Supabase через useHealthDiary
   const { 
@@ -301,33 +302,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   // Проверка наличия активных виджетов (только основные метрики здоровья из левой колонки)
   const hasMainWidgets = hasActiveMainWidgets(settings)
 
-  // Фоновая проверка достижений при загрузке страницы
-  useEffect(() => {
-    async function checkAchievements() {
-      try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) return
-
-        const result = await checkAndUnlockAchievements(user.id)
-        
-        if (result.success && result.newAchievements && result.newAchievements.length > 0) {
-          // Показываем уведомления о новых достижениях
-          result.newAchievements.forEach(achievement => {
-            showAchievement(achievement)
-          })
-        }
-      } catch (err) {
-        console.error('Error checking achievements on load:', err)
-      }
-    }
-
-    if (mounted) {
-      checkAchievements()
-    }
-  }, [mounted, showAchievement])
-
   // Detect desktop
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024)
@@ -415,8 +389,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   }
 
   return (
-    <>
-      <AchievementUnlockedToast achievement={currentAchievement} onClose={clearCurrent} />
+    <ToastProvider>
+      <AchievementsChecker mounted={mounted} />
+      <ToastContainer />
       <div className="min-h-screen bg-[#09090b] text-white selection:bg-amber-500/30 font-sans pb-32 md:pb-20">
       <style jsx global>{`
         @media (max-width: 767px) {
@@ -1195,6 +1170,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
           onUpdateSettings={saveSettings}
         />
       )}
-    </>
+    </ToastProvider>
   )
 }
