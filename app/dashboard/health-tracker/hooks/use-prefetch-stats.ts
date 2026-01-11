@@ -3,8 +3,7 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { addDays, format } from 'date-fns'
-import { getDiaryEntry } from '@/lib/actions/diary'
-import { getOverviewStatsAggregated } from '@/lib/actions/health-stats'
+import { createClient } from '@/lib/supabase/client'
 import { DateRange, TrackerSettings, Habit } from '../types'
 import { serializeDateRange } from '../utils/query-utils'
 
@@ -39,6 +38,8 @@ export function usePrefetchStats({
   useEffect(() => {
     if (!userId || !enabled || !selectedDate) return
 
+    const supabase = createClient()
+    
     // Prefetch только прошлые дни + сегодня (будущие недоступны для пользователя)
     const daysToPreload = [-7, -6, -5, -4, -3, -2, -1, 0]
     
@@ -52,10 +53,21 @@ export function usePrefetchStats({
       queryClient.prefetchQuery({
         queryKey: ['diary-entry', userId, dateStr],
         queryFn: async () => {
-          const result = await getDiaryEntry(userId, dateStr)
-          return result.success ? result.data : null
+          const { data, error } = await supabase
+            .from('diary_entries')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('date', dateStr)
+            .maybeSingle()
+          
+          if (error) {
+            console.error('[Prefetch] Error:', error)
+            return null
+          }
+          
+          return data
         },
-        staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000, // Сегодня 30 сек, прошлое 15 мин
+        staleTime: isToday ? 30 * 1000 : 15 * 60 * 1000,
       })
     })
   }, [userId, enabled, selectedDate, queryClient])
@@ -64,15 +76,27 @@ export function usePrefetchStats({
   useEffect(() => {
     if (!userId || !enabled) return
 
-    // Предзагружаем overview для текущего периода
+    const supabase = createClient()
     const dateRangeKey = serializeDateRange(dateRange)
     
     queryClient.prefetchQuery({
       queryKey: ['stats', 'overview', userId, dateRangeKey],
       queryFn: async () => {
-        return await getOverviewStatsAggregated(userId, dateRange, settings, habits)
+        const startDate = format(dateRange.start, 'yyyy-MM-dd')
+        const endDate = format(dateRange.end, 'yyyy-MM-dd')
+
+        const { data: entries } = await supabase
+          .from('diary_entries')
+          .select('date, metrics, notes, habits_completed')
+          .eq('user_id', userId)
+          .gte('date', startDate)
+          .lt('date', endDate)
+          .order('date', { ascending: true })
+
+        // Агрегация будет в use-overview-stats
+        return entries
       },
-      staleTime: 60 * 1000, // 60 секунд
+      staleTime: 60 * 1000,
     })
   }, [userId, enabled, dateRange, settings, habits, queryClient])
 }
