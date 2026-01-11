@@ -474,12 +474,16 @@ async function checkMetricAchievements(
     if (allEntries) {
       for (const entry of allEntries) {
         const m = entry.metrics as any
-        totalWater += m?.water || 0
+        totalWater += m?.waterIntake || 0  // ИСПРАВЛЕНО: было water
         totalSteps += m?.steps || 0
       }
     }
 
-    console.log('[Achievements:Metrics] Latest:', metrics, 'Total water:', totalWater, 'Total steps:', totalSteps)
+    console.log('[Achievements:Metrics] Latest:', {
+      waterIntake: metrics.waterIntake,
+      steps: metrics.steps,
+      sleep: metrics.sleep
+    }, 'Total water:', totalWater, 'Total steps:', totalSteps)
 
     // Получаем ВСЕ достижения категории metrics
     const { data: allAchievements, error: achError } = await supabase
@@ -500,15 +504,35 @@ async function checkMetricAchievements(
     for (const achievement of achievements) {
       const metadata = achievement.metadata as any
       
-      if (metadata.type === 'water_daily' && metrics.water >= metadata.value) {
-        console.log('[Achievements:Metrics] ✅ Water daily:', achievement.id)
-        achievementIds.push(achievement.id)
+      if (metadata.type === 'water_daily') {
+        const currentWater = metrics.waterIntake || 0  // ИСПРАВЛЕНО: было metrics.water
+        const requiredWater = metadata.value
+        console.log('[Achievements:Metrics] 💧 Water daily check:', {
+          achievementId: achievement.id,
+          current: currentWater,
+          required: requiredWater,
+          passed: currentWater >= requiredWater
+        })
+        if (currentWater >= requiredWater) {
+          console.log('[Achievements:Metrics] ✅ Water daily earned:', achievement.id)
+          achievementIds.push(achievement.id)
+        }
       } else if (metadata.type === 'water_total' && totalWater >= metadata.value) {
         console.log('[Achievements:Metrics] ✅ Water total:', achievement.id)
         achievementIds.push(achievement.id)
-      } else if (metadata.type === 'steps_daily' && metrics.steps >= metadata.value) {
-        console.log('[Achievements:Metrics] ✅ Steps daily:', achievement.id)
-        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'steps_daily') {
+        const currentSteps = metrics.steps || 0
+        const requiredSteps = metadata.value
+        console.log('[Achievements:Metrics] 👟 Steps daily check:', {
+          achievementId: achievement.id,
+          current: currentSteps,
+          required: requiredSteps,
+          passed: currentSteps >= requiredSteps
+        })
+        if (currentSteps >= requiredSteps) {
+          console.log('[Achievements:Metrics] ✅ Steps daily earned:', achievement.id)
+          achievementIds.push(achievement.id)
+        }
       } else if (metadata.type === 'steps_total' && totalSteps >= metadata.value) {
         console.log('[Achievements:Metrics] ✅ Steps total:', achievement.id)
         achievementIds.push(achievement.id)
