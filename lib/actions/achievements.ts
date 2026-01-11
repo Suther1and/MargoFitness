@@ -416,7 +416,7 @@ async function checkStreakAchievements(
     }
 
     // Фильтруем уже полученные в JavaScript
-    const achievements = allAchievements.filter(a => !unlockedIds.has(a.id))
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
     console.log('[Achievements:Streaks] Checking', achievements.length, 'achievements')
 
     // Проверяем условия
