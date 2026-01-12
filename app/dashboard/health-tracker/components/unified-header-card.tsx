@@ -35,14 +35,14 @@ export function UnifiedHeaderCard({
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.005 }}
-      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card transition-all duration-300 hover:border-amber-500/30 hover:shadow-amber-500/5 hover:bg-white/[0.05]"
+      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card transition-all duration-300 hover:border-amber-500/30 hover:shadow-amber-500/5 hover:bg-white/[0.05] overflow-hidden"
     >
       {/* Мягкий фоновый градиент для глубины */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent pointer-events-none rounded-[2.5rem]" />
       
       {/* Свечение при наведении */}
       <div className="absolute inset-0 rounded-[2.5rem] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div className="absolute inset-[-1px] rounded-[2.5rem] bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-transparent blur-sm" />
+        <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-transparent blur-sm" />
       </div>
 
       {/* 1. Аватар */}
