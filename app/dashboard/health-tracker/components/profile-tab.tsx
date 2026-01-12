@@ -317,10 +317,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               <div className={cn("absolute inset-0 blur-lg rounded-full opacity-50 group-hover:opacity-75 transition-opacity duration-500", subStyles.badgeGlow)}></div>
               
               {/* Main Content */}
-              <div className={cn("relative flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/40 border backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition-all duration-300", subStyles.badgeBorder)}>
-                {/* Icon */}
-                <Crown className={cn("w-3.5 h-3.5", subStyles.badgeIcon)} />
-                
+              <div className={cn("relative flex items-center px-3 py-1 rounded-full bg-neutral-900/40 border backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition-all duration-300", subStyles.badgeBorder)}>
                 {/* Text */}
                 <span className={cn("text-[10px] font-black tracking-wider uppercase drop-shadow-sm font-montserrat", subStyles.badgeText)}>
                   {tierDisplayName}
