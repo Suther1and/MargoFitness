@@ -258,14 +258,14 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           <style jsx>{`
             @keyframes shimmer {
               0% { transform: translateX(-150%) skewX(-15deg); }
-              50%, 100% { transform: translateX(250%) skewX(-15deg); }
+              100% { transform: translateX(250%) skewX(-15deg); }
             }
             .shimmer-effect {
               position: absolute;
               top: 0; left: 0;
-              width: 50%; height: 100%;
+              width: 100%; height: 100%;
               background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-              animation: shimmer 3s infinite;
+              animation: shimmer 2.5s infinite linear;
             }
           `}</style>
 
@@ -277,8 +277,8 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                 <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90 font-montserrat", bonusStyles.icon)}>Бонусы</span>
               </div>
               
-              <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 py-1", bonusStyles.badge)}>
-                <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat">
+              <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 h-6 flex items-center justify-center", bonusStyles.badge)}>
+                <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
                   {bonusStats?.levelData.name || 'BRONZE'}
                 </span>
                 <div className="shimmer-effect"></div>
@@ -289,9 +289,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             <div className="space-y-3">
               <div className="flex items-end justify-between">
                 <div>
-                  <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5 font-montserrat", bonusStyles.subtext)}>баланс</span>
+                  <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5 font-montserrat leading-none", bonusStyles.subtext)}>баланс</span>
                   <div className="flex items-center gap-2">
-                    <span className={cn("text-3xl font-black font-oswald tracking-tight", bonusStyles.points)}>
+                    <span className={cn("text-3xl font-black font-oswald tracking-tight leading-none", bonusStyles.points)}>
                       {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
                     </span>
                     <Sparkles className={cn("w-4 h-4", bonusStyles.subtext)} />
@@ -299,7 +299,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                 </div>
                 
                 {bonusStats && (
-                  <span className={cn("text-[10px] font-black uppercase tracking-widest font-oswald", bonusStyles.points)}>
+                  <span className={cn("text-[10px] font-black uppercase tracking-widest font-oswald leading-none", bonusStyles.points)}>
                     {bonusStats.progress.progress}%
                   </span>
                 )}
@@ -322,20 +322,20 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               <button 
                 onClick={(e) => { e.stopPropagation(); window.location.href = '/dashboard/bonuses'; }}
                 className={cn(
-                  "text-[9px] font-black uppercase tracking-widest px-2 py-1 hover:opacity-70 transition-opacity flex items-center gap-1 font-montserrat",
+                  "text-[9px] font-black uppercase tracking-widest px-2 h-8 hover:opacity-70 transition-opacity flex items-center gap-1 font-montserrat",
                   bonusStyles.icon
                 )}
               >
-                Подробнее
-                <ChevronRight className="w-3 h-3" />
+                <span className="leading-none mt-[1px]">Подробнее</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
 
               <button className={cn(
-                "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg font-montserrat",
+                "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest h-9 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg font-montserrat",
                 bonusStyles.cta
               )}>
-                Использовать
-                <ArrowRight className="w-3 h-3" />
+                <span className="leading-none mt-[1px]">Использовать</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
