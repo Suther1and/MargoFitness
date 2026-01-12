@@ -210,7 +210,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         <div 
           onClick={() => window.location.href = '/dashboard/bonuses'}
           className={cn(
-            "relative overflow-hidden rounded-[2rem] p-6 shadow-xl transition-all duration-300 transform active:scale-[0.98] min-h-[180px] flex flex-col justify-between",
+            "relative overflow-hidden rounded-[2rem] p-5 shadow-xl transition-all duration-300 transform active:scale-[0.98] min-h-[150px] flex flex-col justify-between",
             bonusStyles.card,
             bonusStyles.shadow
           )}
@@ -234,12 +234,12 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             }
           `}</style>
 
-          <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+          <div className="relative z-10 flex flex-col h-full justify-between gap-4">
             {/* Card Top */}
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
-                <Trophy className={cn("w-4.5 h-4.5", bonusStyles.icon)} />
-                <span className={cn("text-[10px] font-bold uppercase tracking-[0.2em] opacity-90", bonusStyles.icon)}>Бонусная карта</span>
+                <Trophy className={cn("w-4 h-4", bonusStyles.icon)} />
+                <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90", bonusStyles.icon)}>Бонусы</span>
               </div>
               
               <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 py-1", bonusStyles.badge)}>
@@ -251,43 +251,57 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             </div>
 
             {/* Card Middle (Points) */}
-            <div>
-              <span className={cn("text-[10px] font-bold uppercase tracking-widest block mb-1.5", bonusStyles.subtext)}>доступные бонусы</span>
-              <div className="flex items-center gap-2">
-                <span className={cn("text-4xl font-black font-oswald tracking-tight", bonusStyles.points)}>
-                  {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
-                </span>
-                <Sparkles className={cn("w-5 h-5", bonusStyles.subtext)} />
-              </div>
-            </div>
-
-            {/* Card Bottom & Progress */}
-            <div className="space-y-4">
-              {bonusStats && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center px-0.5">
-                    <span className={cn("text-[9px] font-bold uppercase tracking-widest", bonusStyles.subtext)}>Прогресс уровня</span>
-                    <span className={cn("text-[9px] font-black uppercase tracking-widest", bonusStyles.points)}>{bonusStats.progress.progress}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/10 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${bonusStats.progress.progress}%` }}
-                      className={cn("h-full rounded-full bg-white/40")}
-                    />
+            <div className="space-y-3">
+              <div className="flex items-end justify-between">
+                <div>
+                  <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5", bonusStyles.subtext)}>баланс</span>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-3xl font-black font-oswald tracking-tight", bonusStyles.points)}>
+                      {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
+                    </span>
+                    <Sparkles className={cn("w-4 h-4", bonusStyles.subtext)} />
                   </div>
                 </div>
-              )}
-
-              <div className="flex justify-end">
-                <button className={cn(
-                  "backdrop-blur-md border text-[10px] font-black uppercase tracking-widest py-2.5 px-5 rounded-xl flex items-center gap-2 transition-all shadow-lg",
-                  bonusStyles.cta
-                )}>
-                  Использовать
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                
+                {bonusStats && (
+                  <span className={cn("text-[10px] font-black uppercase tracking-widest", bonusStyles.points)}>
+                    {bonusStats.progress.progress}%
+                  </span>
+                )}
               </div>
+
+              {/* Progress Bar - Spanning from start to end */}
+              {bonusStats && (
+                <div className="h-1.5 w-full bg-black/10 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${bonusStats.progress.progress}%` }}
+                    className={cn("h-full rounded-full bg-white/40")}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Card Bottom & CTA */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+              <button 
+                onClick={(e) => { e.stopPropagation(); window.location.href = '/dashboard/bonuses'; }}
+                className={cn(
+                  "text-[9px] font-black uppercase tracking-widest px-2 py-1 hover:opacity-70 transition-opacity flex items-center gap-1",
+                  bonusStyles.icon
+                )}
+              >
+                Подробнее
+                <ChevronRight className="w-3 h-3" />
+              </button>
+
+              <button className={cn(
+                "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg",
+                bonusStyles.cta
+              )}>
+                Использовать
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
         </div>
