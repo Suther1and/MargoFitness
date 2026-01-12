@@ -62,9 +62,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
   const tierColor = getTierColor(profile.subscription_tier)
 
-  // Новые стили для уровней бонусных карт
-  const getBonusLevelStyles = (level: number) => {
-    switch (level) {
       case 4: // Platinum
         return {
           gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
@@ -74,7 +71,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           cta: 'bg-slate-900 border-white/10 text-white hover:bg-black',
           icon: 'text-slate-800',
           shadow: 'shadow-blue-300/40',
-          pattern: 'rgba(0,0,0,0.1)',
+          pattern: 'rgba(15, 23, 42, 0.1)', // Темные точки для светлого фона
           progressBar: 'bg-slate-900',
           progressTrack: 'bg-slate-950/10'
         }
@@ -87,7 +84,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           cta: 'bg-black/10 border-black/20 text-amber-950 hover:bg-black/20',
           icon: 'text-amber-900',
           shadow: 'shadow-yellow-500/20',
-          pattern: 'rgba(255,255,255,0.1)',
+          pattern: 'rgba(255, 255, 255, 0.15)',
           progressBar: 'bg-white/40',
           progressTrack: 'bg-black/10'
         }
@@ -100,7 +97,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           cta: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
           icon: 'text-slate-100',
           shadow: 'shadow-slate-500/20',
-          pattern: 'rgba(255,255,255,0.1)',
+          pattern: 'rgba(255, 255, 255, 0.15)',
           progressBar: 'bg-white/40',
           progressTrack: 'bg-black/10'
         }
@@ -113,7 +110,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           cta: 'bg-white/10 border-white/30 text-white hover:bg-white/20',
           icon: 'text-orange-50',
           shadow: 'shadow-orange-900/20',
-          pattern: 'rgba(255,255,255,0.1)',
+          pattern: 'rgba(255, 255, 255, 0.15)',
           progressBar: 'bg-white/40',
           progressTrack: 'bg-black/10'
         }
@@ -242,13 +239,13 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           
           {/* Geometric Patterns overlay */}
           <div 
-            className="absolute inset-0 opacity-10 pointer-events-none" 
+            className="absolute inset-0 pointer-events-none" 
             style={{ 
               backgroundImage: `radial-gradient(circle at 1px 1px, ${bonusStyles.pattern} 1px, transparent 0)`, 
               backgroundSize: '20px 20px' 
             }}
           />
-          <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none"></div>
+          <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none opacity-50"></div>
           
           {/* Shimmer animation for the badge */}
           <style jsx>{`
