@@ -13,9 +13,12 @@ import {
   User,
   Mail,
   Phone,
-  ArrowUpRight
+  ArrowUpRight,
+  Trophy,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react'
-import { Profile, UserBonus, CashbackLevel, calculateLevelProgress } from '@/types/database'
+import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS } from '@/types/database'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
@@ -58,6 +61,54 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
   }
 
   const tierColor = getTierColor(profile.subscription_tier)
+
+  // Новые стили для уровней бонусных карт
+  const getBonusLevelStyles = (level: number) => {
+    switch (level) {
+      case 4: // Platinum
+        return {
+          card: 'bg-gradient-to-br from-slate-300 via-slate-100 to-blue-200 text-slate-900',
+          badge: 'bg-black/10 border-black/10 text-slate-900',
+          points: 'text-slate-900',
+          subtext: 'text-slate-800/70',
+          cta: 'bg-black/10 border-black/20 text-slate-900 hover:bg-black/20',
+          icon: 'text-slate-800',
+          shadow: 'shadow-blue-500/20'
+        }
+      case 3: // Gold
+        return {
+          card: 'bg-gradient-to-br from-yellow-600 via-yellow-400 to-amber-600 text-amber-950',
+          badge: 'bg-black/10 border-black/10 text-amber-950',
+          points: 'text-amber-950',
+          subtext: 'text-amber-900/70',
+          cta: 'bg-black/10 border-black/20 text-amber-950 hover:bg-black/20',
+          icon: 'text-amber-900',
+          shadow: 'shadow-yellow-500/20'
+        }
+      case 2: // Silver
+        return {
+          card: 'bg-gradient-to-br from-slate-500 via-slate-300 to-slate-600 text-slate-900',
+          badge: 'bg-black/10 border-black/10 text-slate-900',
+          points: 'text-slate-900',
+          subtext: 'text-slate-800/70',
+          cta: 'bg-black/10 border-black/20 text-slate-900 hover:bg-black/20',
+          icon: 'text-slate-800',
+          shadow: 'shadow-slate-500/20'
+        }
+      default: // Bronze (1)
+        return {
+          card: 'bg-gradient-to-br from-[#b46d3e] via-[#dfa579] to-[#5d2e12] text-orange-50',
+          badge: 'bg-black/20 border-white/20 text-orange-50',
+          points: 'text-white',
+          subtext: 'text-orange-200/80',
+          cta: 'bg-white/10 border-white/30 text-white hover:bg-white/20',
+          icon: 'text-orange-100',
+          shadow: 'shadow-orange-900/20'
+        }
+    }
+  }
+
+  const bonusStyles = getBonusLevelStyles(bonusStats?.levelData.level || 1)
 
   return (
     <div className="pb-32 space-y-6 pt-2">
@@ -106,7 +157,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         </div>
       </section>
 
-      {/* 2. Control Grid */}
+      {/* 2. Control Grid - Row with Subscription and Actions */}
       <section className="grid grid-cols-2 gap-4">
         {/* Subscription Info */}
         <div 
@@ -130,80 +181,127 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           </div>
         </div>
 
-        {/* Bonus Info */}
+        {/* Quick Actions / Settings & Upgrade */}
+        <div className="col-span-1 grid grid-rows-2 gap-4">
+          <button 
+            onClick={() => setProfileDialogOpen(true)}
+            className="bg-white/[0.02] border border-white/10 rounded-3xl p-4 flex items-center gap-3 active:scale-95 transition-all"
+          >
+            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <Settings className="w-4 h-4 text-blue-400" />
+            </div>
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">Профиль</span>
+          </button>
+          
+          <button 
+            onClick={() => setUpgradeModalOpen(true)}
+            className="bg-white/[0.02] border border-white/10 rounded-3xl p-4 flex items-center gap-3 active:scale-95 transition-all"
+          >
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
+              <CreditCard className="w-4 h-4 text-amber-400" />
+            </div>
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">Тариф</span>
+          </button>
+        </div>
+      </section>
+
+      {/* 3. New Bronze/Bonus Card Redesign */}
+      <section className="relative group">
         <div 
           onClick={() => window.location.href = '/dashboard/bonuses'}
-          className="col-span-1 bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 flex flex-col justify-between h-40 active:scale-95 transition-all cursor-pointer"
+          className={cn(
+            "relative overflow-hidden rounded-[2rem] p-6 shadow-xl transition-all duration-300 transform active:scale-[0.98] min-h-[180px] flex flex-col justify-between",
+            bonusStyles.card,
+            bonusStyles.shadow
+          )}
         >
-          <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-purple-400" />
+          {/* Shimmer & Overlay Patterns */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+          <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none"></div>
+          
+          {/* Shimmer animation for the badge */}
+          <style jsx>{`
+            @keyframes shimmer {
+              0% { transform: translateX(-150%) skewX(-15deg); }
+              50%, 100% { transform: translateX(250%) skewX(-15deg); }
+            }
+            .shimmer-effect {
+              position: absolute;
+              top: 0; left: 0;
+              width: 50%; height: 100%;
+              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+              animation: shimmer 3s infinite;
+            }
+          `}</style>
+
+          <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+            {/* Card Top */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <Trophy className={cn("w-4.5 h-4.5", bonusStyles.icon)} />
+                <span className={cn("text-[10px] font-bold uppercase tracking-[0.2em] opacity-90", bonusStyles.icon)}>Бонусная карта</span>
+              </div>
+              
+              <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 py-1", bonusStyles.badge)}>
+                <span className="text-[10px] font-black tracking-widest relative z-10 uppercase">
+                  {bonusStats?.levelData.name || 'BRONZE'}
+                </span>
+                <div className="shimmer-effect"></div>
+              </div>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-white/10" />
-          </div>
-          <div>
-            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Баланс</div>
-            <div className="text-xl font-bold text-white font-oswald tracking-tight leading-none mb-1">
-              {bonusStats?.account.balance.toLocaleString('ru-RU')}
+
+            {/* Card Middle (Points) */}
+            <div>
+              <span className={cn("text-[10px] font-bold uppercase tracking-widest block mb-1.5", bonusStyles.subtext)}>доступные бонусы</span>
+              <div className="flex items-center gap-2">
+                <span className={cn("text-4xl font-black font-oswald tracking-tight", bonusStyles.points)}>
+                  {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
+                </span>
+                <Sparkles className={cn("w-5 h-5", bonusStyles.subtext)} />
+              </div>
             </div>
-            <div className="text-[10px] font-bold text-purple-400/80 uppercase tracking-widest">
-              {bonusStats?.levelData.name} {bonusStats?.levelData.icon}
+
+            {/* Card Bottom & Progress */}
+            <div className="space-y-4">
+              {bonusStats && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center px-0.5">
+                    <span className={cn("text-[9px] font-bold uppercase tracking-widest", bonusStyles.subtext)}>Прогресс уровня</span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", bonusStyles.points)}>{bonusStats.progress.progress}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-black/10 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${bonusStats.progress.progress}%` }}
+                      className={cn("h-full rounded-full bg-white/40")}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <button className={cn(
+                  "backdrop-blur-md border text-[10px] font-black uppercase tracking-widest py-2.5 px-5 rounded-xl flex items-center gap-2 transition-all shadow-lg",
+                  bonusStyles.cta
+                )}>
+                  Использовать
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Level Progress - Full Width */}
-        {bonusStats && (
-          <div 
-            onClick={() => window.location.href = '/dashboard/bonuses'}
-            className="col-span-2 bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 active:scale-95 transition-all cursor-pointer"
-          >
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">Прогресс уровня</div>
-              <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                {bonusStats.progress.progress}%
-              </div>
-            </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${bonusStats.progress.progress}%` }}
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
-              />
-            </div>
-            <div className="mt-2 text-[8px] text-center text-white/20 uppercase tracking-[0.2em] font-bold">
-              До {bonusStats.progress.nextLevel ? `уровня ${bonusStats.progress.nextLevel}` : 'максимума'} — {bonusStats.progress.remaining.toLocaleString('ru-RU')} шагов
-            </div>
-          </div>
-        )}
       </section>
 
-      {/* 3. Action List */}
-      <section className="bg-white/[0.02] border border-white/10 rounded-[2rem] overflow-hidden">
-        {[
-          { icon: Settings, label: 'Настройки профиля', sub: 'Персональные данные', action: () => setProfileDialogOpen(true), color: 'text-blue-400' },
-          { icon: CreditCard, label: 'Управление тарифом', sub: 'Продление и апгрейд', action: () => setUpgradeModalOpen(true), color: 'text-amber-400' },
-          { icon: LogOut, label: 'Выйти из аккаунта', sub: 'Завершить сессию', action: () => window.location.href = '/auth/logout', color: 'text-red-400' },
-        ].map((item, i) => (
-          <button 
-            key={i}
-            onClick={item.action}
-            className={cn(
-              "w-full flex items-center justify-between p-5 active:bg-white/5 transition-colors border-b border-white/5 last:border-0 text-left",
-            )}
-          >
-            <div className="flex items-center gap-4">
-              <div className={cn("w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center", item.color.replace('text', 'bg').replace('400', '500/10'))}>
-                <item.icon className={cn("w-5 h-5", item.color)} />
-              </div>
-              <div>
-                <div className="text-sm font-bold text-white uppercase tracking-wider">{item.label}</div>
-                <div className="text-[10px] text-white/20 uppercase tracking-widest font-medium mt-0.5">{item.sub}</div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-white/10" />
-          </button>
-        ))}
+      {/* 4. Secondary Actions */}
+      <section className="pt-2">
+        <a 
+          href="/auth/logout"
+          className="w-full flex items-center justify-center gap-2 p-5 rounded-[2rem] bg-red-500/5 border border-red-500/10 active:scale-95 transition-all opacity-60 hover:opacity-100"
+        >
+          <LogOut className="w-4 h-4 text-red-400" />
+          <span className="text-[10px] font-black text-red-400 uppercase tracking-[0.3em]">Выйти из аккаунта</span>
+        </a>
       </section>
 
       {/* Modals */}
