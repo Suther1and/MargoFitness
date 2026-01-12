@@ -80,42 +80,42 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       case 3: // Gold
         return {
-          gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
-          badge: 'bg-amber-950/10 border-amber-950/10 text-amber-950',
-          points: 'text-amber-950',
+          gradient: 'linear-gradient(135deg, #fff9e6 0%, #ffffff 25%, #ffcc33 50%, #b38728 100%)',
+          badge: 'bg-amber-950/90 border-white/10 text-amber-50',
+          points: 'text-[#2d1a0a]',
           subtext: 'text-amber-900/70',
-          cta: 'bg-amber-950/10 border-amber-950/20 text-amber-950 hover:bg-amber-950/20',
+          cta: 'bg-amber-950 border-white/10 text-amber-50 hover:bg-black',
           icon: 'text-amber-900',
-          shadow: 'shadow-yellow-500/20',
-          pattern: 'rgba(69, 26, 3, 0.1)',
-          progressBar: 'bg-amber-950/30',
-          progressTrack: 'bg-black/10'
+          shadow: 'shadow-yellow-400/30',
+          pattern: 'rgba(69, 26, 3, 0.12)',
+          progressBar: 'bg-amber-950',
+          progressTrack: 'bg-amber-950/10'
         }
       case 2: // Silver
         return {
-          gradient: 'linear-gradient(135deg, #757575 0%, #bdbdbd 25%, #424242 50%, #212121 100%)',
-          badge: 'bg-slate-950/10 border-black/10 text-slate-900',
-          points: 'text-slate-950',
-          subtext: 'text-slate-800/60',
-          cta: 'bg-slate-950/10 border-black/10 text-slate-900 hover:bg-black/20',
-          icon: 'text-slate-900',
-          shadow: 'shadow-slate-500/20',
-          pattern: 'rgba(15, 23, 42, 0.1)',
-          progressBar: 'bg-slate-950/30',
-          progressTrack: 'bg-black/10'
+          gradient: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 25%, #e2e8f0 50%, #94a3b8 100%)',
+          badge: 'bg-slate-900/90 border-white/10 text-slate-50',
+          points: 'text-[#0f172a]',
+          subtext: 'text-slate-600',
+          cta: 'bg-slate-900 border-white/10 text-slate-50 hover:bg-black',
+          icon: 'text-slate-800',
+          shadow: 'shadow-slate-400/30',
+          pattern: 'rgba(15, 23, 42, 0.08)',
+          progressBar: 'bg-slate-900',
+          progressTrack: 'bg-slate-900/10'
         }
       default: // Bronze (1)
         return {
-          gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
-          badge: 'bg-[#2d1a0a]/10 border-[#2d1a0a]/10 text-[#2d1a0a]',
-          points: 'text-[#2d1a0a]',
+          gradient: 'linear-gradient(135deg, #fff5f0 0%, #ffffff 25%, #dfa579 50%, #8c4a20 100%)',
+          badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
+          points: 'text-[#1e0f04]',
           subtext: 'text-[#4a2e19]/70',
-          cta: 'bg-[#2d1a0a]/10 border-[#2d1a0a]/20 text-[#2d1a0a] hover:bg-[#2d1a0a]/20',
+          cta: 'bg-[#2d1a0a] border-white/10 text-orange-50 hover:bg-black',
           icon: 'text-[#3e2614]',
-          shadow: 'shadow-orange-900/20',
+          shadow: 'shadow-orange-400/20',
           pattern: 'rgba(45, 26, 10, 0.1)',
-          progressBar: 'bg-[#2d1a0a]/30',
-          progressTrack: 'bg-black/10'
+          progressBar: 'bg-[#2d1a0a]',
+          progressTrack: 'bg-[#2d1a0a]/10'
         }
     }
   }
