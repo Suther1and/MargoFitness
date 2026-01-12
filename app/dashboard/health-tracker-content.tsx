@@ -413,7 +413,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]" />
             </div>
 
-            <header className="mb-8 md:mb-12 lg:mb-6">
+            <header className="mb-8 md:mb-12 lg:mb-6 relative">
               {/* Mobile: Dialog календарь с анимированным заголовком */}
               <div className="flex flex-col lg:hidden">
                 {activeTab === 'stats' ? (
@@ -510,7 +510,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
               <div className="hidden lg:flex items-center w-full lg:min-h-[70px] lg:mb-0 pl-4 md:pl-8 pr-0">
-                <div className="flex items-start justify-between w-full">
+                <div className="flex items-start justify-between w-full pb-6">
                   <div className="flex flex-col">
                     <div className="h-8 mb-1 flex items-center">
                       <motion.div 
@@ -579,6 +579,17 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Декоративный разделитель */}
+              <div className="absolute bottom-0 left-0 w-full h-px overflow-hidden hidden lg:block">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <motion.div 
+                  initial={{ x: '-100%' }}
+                  animate={{ x: '300%' }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"
+                />
               </div>
             </header>
 
