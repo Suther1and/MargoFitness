@@ -343,8 +343,8 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             </div>
           </div>
 
-          {/* Card Body: Stats (Left) & Actions (Right) */}
-          <div className="flex items-start justify-between gap-4 mt-auto">
+            {/* Card Body: Stats (Left) & Actions (Right) */}
+            <div className={cn("flex justify-between gap-4 mt-auto", subscriptionActive ? "items-start" : "items-end")}>
             
             {/* Left: Status & Duration */}
             <div className="flex flex-col gap-1">
