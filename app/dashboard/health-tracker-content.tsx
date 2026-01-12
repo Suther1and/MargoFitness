@@ -174,6 +174,24 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
+  // Динамический цвет для разделителя и бейджа в зависимости от вкладки
+  const themeColor = useMemo(() => {
+    switch (activeTab) {
+      case 'overview': return { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-500', separator: 'via-amber-500/30' };
+      case 'stats': return { border: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-500', separator: 'via-blue-500/30' };
+      case 'workouts': return { border: 'border-cyan-500/20', bg: 'bg-cyan-500/10', text: 'text-cyan-500', separator: 'via-cyan-500/30' };
+      case 'goals': return { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-500', separator: 'via-emerald-500/30' };
+      case 'profile': return { border: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-500', separator: 'via-purple-500/30' };
+      case 'bonuses': return { border: 'border-purple-500/20', bg: 'bg-purple-500/10', text: 'text-purple-500', separator: 'via-purple-500/30' };
+      case 'subscription': return { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-500', separator: 'via-emerald-500/30' };
+      case 'settings': 
+        return settingsSubTab === 'widgets' 
+          ? { border: 'border-green-500/20', bg: 'bg-green-500/10', text: 'text-green-500', separator: 'via-green-500/30' }
+          : { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-500', separator: 'via-amber-500/30' };
+      default: return { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-500', separator: 'via-amber-500/30' };
+    }
+  }, [activeTab, settingsSubTab]);
+
   // Все хуки получают userId и загружаются параллельно
   const { settings, isFirstVisit, isLoaded: isSettingsLoaded, saveSettings } = useTrackerSettings(userId)
   const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
@@ -513,15 +531,20 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 <div className="flex items-start justify-between w-full pb-6">
                   <div className="flex flex-col">
                     <div className="h-8 mb-1 flex items-center">
-                      <motion.div 
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                          V3.0 Beta
-                        </div>
+                        <motion.div 
+                          initial={{ opacity: 0 }} 
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex items-center gap-2"
+                        >
+                          <div className={cn(
+                            "px-2 py-0.5 rounded-md border text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-500",
+                            themeColor.bg,
+                            themeColor.border,
+                            themeColor.text
+                          )}>
+                            V3.2 Beta
+                          </div>
                         <div className="h-px w-8 bg-white/10" />
                         <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
                           <Activity className="w-3 h-3" />
@@ -599,7 +622,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       initial={{ x: '-100%' }}
                       animate={{ x: '300%' }}
                       transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
+                      className={cn(
+                        "absolute inset-0 w-1/3 bg-gradient-to-r from-transparent to-transparent transition-colors duration-500",
+                        themeColor.separator
+                      )}
                     />
                   </div>
                 </div>
