@@ -101,7 +101,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           btnPrimary: 'from-purple-50 to-purple-100 text-purple-950 hover:from-white hover:to-purple-50',
           btnPrimaryIcon: 'text-purple-800'
         }
-      default: // basic
+      case 'basic':
         return {
           card: 'linear-gradient(165deg, #2a1f18 0%, #1c130e 40%, #0f0805 100%)',
           pattern: 'rgba(217, 119, 6, 0.1)',
@@ -117,6 +117,23 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           status: 'text-orange-300',
           btnPrimary: 'from-orange-50 to-orange-100 text-orange-950 hover:from-white hover:to-orange-50',
           btnPrimaryIcon: 'text-orange-800'
+        }
+      default: // free / none
+        return {
+          card: 'linear-gradient(165deg, #171717 0%, #0a0a0a 40%, #000000 100%)',
+          pattern: 'rgba(255, 255, 255, 0.03)',
+          accent: 'text-white/60',
+          border: 'rgba(255, 255, 255, 0.1)',
+          badgeGlow: 'bg-white/5',
+          badgeBorder: 'border-white/10 group-hover:border-white/20',
+          badgeIcon: 'text-white/40',
+          badgeText: 'text-white/40',
+          badgeDot: 'bg-white/20 shadow-[0_0_6px_rgba(255,255,255,0.2)]',
+          glow: 'bg-white/5',
+          shimmer: 'rgba(255, 255, 255, 0.03)',
+          status: 'text-white/40',
+          btnPrimary: 'from-white to-neutral-200 text-black hover:from-white hover:to-white shadow-[0_0_20px_rgba(255,255,255,0.2)]',
+          btnPrimaryIcon: 'text-black'
         }
     }
   }
@@ -334,48 +351,80 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               {/* Status */}
               <div className="flex items-center gap-2 opacity-80">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", subStyles.badgeDot)}></span>
-                  <span className={cn("relative inline-flex rounded-full h-1.5 w-1.5", subStyles.badgeDot)}></span>
+                  <span className={cn(
+                    "absolute inline-flex h-full w-full rounded-full opacity-75", 
+                    subscriptionActive ? "animate-ping " + subStyles.badgeDot : "bg-red-500/50"
+                  )}></span>
+                  <span className={cn(
+                    "relative inline-flex rounded-full h-1.5 w-1.5", 
+                    subscriptionActive ? subStyles.badgeDot : "bg-red-500"
+                  )}></span>
                 </span>
                 <span className={cn("text-[10px] font-bold tracking-wide uppercase font-montserrat", subStyles.status)}>
                   {subscriptionActive ? 'Активна' : 'Неактивна'}
                 </span>
               </div>
 
-              {/* Days Count */}
-              <div className="flex items-end gap-3">
-                <span className="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-lg leading-none font-oswald px-0.5">
-                  {daysLeft || 0}
-                </span>
-                <div className="flex flex-col pb-1.5">
-                  <span className="text-xs text-white/40 font-bold leading-none uppercase font-montserrat">дня</span>
-                  <span className="text-[9px] text-white/20 font-bold leading-none mt-1 uppercase font-montserrat tracking-tighter">осталось</span>
+              {/* Days Count or Inactive Message */}
+              {subscriptionActive ? (
+                <div className="flex items-end gap-3">
+                  <span className="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-lg leading-none font-oswald px-0.5">
+                    {daysLeft || 0}
+                  </span>
+                  <div className="flex flex-col pb-1.5">
+                    <span className="text-xs text-white/40 font-bold leading-none uppercase font-montserrat">дня</span>
+                    <span className="text-[9px] text-white/20 font-bold leading-none mt-1 uppercase font-montserrat tracking-tighter">осталось</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex flex-col gap-1 py-2">
+                  <span className="text-2xl font-black text-white/60 uppercase font-oswald leading-none tracking-tight">
+                    Подписка
+                  </span>
+                  <span className="text-lg font-bold text-white/30 uppercase font-oswald leading-none tracking-tight">
+                    не активна
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Right: Actions Stacked */}
-            <div className="flex flex-col gap-2 w-[120px]">
-              {/* Upgrade Button (Primary) */}
-              <button 
-                onClick={() => setUpgradeModalOpen(true)}
-                className={cn(
-                  "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 group/btn font-montserrat",
-                  subStyles.btnPrimary
-                )}
-              >
-                <Sparkles className={cn("w-3.5 h-3.5", subStyles.btnPrimaryIcon)} />
-                <span>Улучшить</span>
-              </button>
+            <div className="flex flex-col gap-2 w-[140px]">
+              {subscriptionActive ? (
+                <>
+                  {/* Upgrade Button (Primary) */}
+                  <button 
+                    onClick={() => setUpgradeModalOpen(true)}
+                    className={cn(
+                      "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 group/btn font-montserrat",
+                      subStyles.btnPrimary
+                    )}
+                  >
+                    <Sparkles className={cn("w-3.5 h-3.5", subStyles.btnPrimaryIcon)} />
+                    <span>Улучшить</span>
+                  </button>
 
-              {/* Renew Button (Secondary) */}
-              <button 
-                onClick={() => setRenewalModalOpen(true)}
-                className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 backdrop-blur-sm active:scale-95 font-montserrat"
-              >
-                <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
-                <span>Продлить</span>
-              </button>
+                  {/* Renew Button (Secondary) */}
+                  <button 
+                    onClick={() => setRenewalModalOpen(true)}
+                    className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 backdrop-blur-sm active:scale-95 font-montserrat"
+                  >
+                    <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
+                    <span>Продлить</span>
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setUpgradeModalOpen(true)}
+                  className={cn(
+                    "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-wider h-11 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 group/btn font-montserrat",
+                    subStyles.btnPrimary
+                  )}
+                >
+                  <Sparkles className={cn("w-4 h-4", subStyles.btnPrimaryIcon)} />
+                  <span>Выбрать подписку</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
