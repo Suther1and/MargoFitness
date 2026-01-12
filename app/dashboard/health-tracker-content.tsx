@@ -46,9 +46,7 @@ import { ProfileTab } from './health-tracker/components/profile-tab'
 import { DesktopProfileCard } from './health-tracker/components/desktop-profile-card'
 import { DesktopSubscriptionCard } from './health-tracker/components/desktop-subscription-card'
 import { DesktopBonusCard } from './health-tracker/components/desktop-bonus-card'
-import { CompactProfileCard } from './health-tracker/components/compact-profile-card'
-import { CompactSubscriptionCard } from './health-tracker/components/compact-subscription-card'
-import { CompactBonusCard } from './health-tracker/components/compact-bonus-card'
+import { UnifiedHeaderCard } from './health-tracker/components/unified-header-card'
 import { DesktopNavigation } from './health-tracker/components/desktop-navigation'
 import { BonusesTab } from './health-tracker/components/bonuses-tab'
 import { SubscriptionTab } from './health-tracker/components/subscription-tab'
@@ -563,21 +561,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           className="flex items-center gap-3 mt-[5px] mb-[5px]"
                         >
                           {profile && (
-                            <>
-                              <CompactProfileCard 
-                                profile={profile}
-                                onEditClick={() => setProfileDialogOpen(true)}
-                              />
-                              <CompactSubscriptionCard 
-                                profile={profile}
-                                onRenewalClick={() => setRenewalModalOpen(true)}
-                                onUpgradeClick={() => setUpgradeModalOpen(true)}
-                              />
-                              <CompactBonusCard 
-                                bonusStats={bonusStats}
-                                profile={profile}
-                              />
-                            </>
+                            <UnifiedHeaderCard 
+                              profile={profile}
+                              bonusStats={bonusStats}
+                              onEditClick={() => setProfileDialogOpen(true)}
+                              onRenewalClick={() => setRenewalModalOpen(true)}
+                              onUpgradeClick={() => setUpgradeModalOpen(true)}
+                            />
                           )}
                         </motion.div>
                       </div>
@@ -624,21 +614,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         className="flex items-center gap-3 mt-[5px] mb-[5px]"
                       >
                         {profile && (
-                          <>
-                            <CompactProfileCard 
-                              profile={profile}
-                              onEditClick={() => setProfileDialogOpen(true)}
-                            />
-                            <CompactSubscriptionCard 
-                              profile={profile}
-                              onRenewalClick={() => setRenewalModalOpen(true)}
-                              onUpgradeClick={() => setUpgradeModalOpen(true)}
-                            />
-                            <CompactBonusCard 
-                              bonusStats={bonusStats}
-                              profile={profile}
-                            />
-                          </>
+                          <UnifiedHeaderCard 
+                            profile={profile}
+                            bonusStats={bonusStats}
+                            onEditClick={() => setProfileDialogOpen(true)}
+                            onRenewalClick={() => setRenewalModalOpen(true)}
+                            onUpgradeClick={() => setUpgradeModalOpen(true)}
+                          />
                         )}
                       </motion.div>
                     </div>
