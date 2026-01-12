@@ -12,13 +12,15 @@ interface ProfileEditDialogProps {
   onOpenChange: (open: boolean) => void
   profile: Profile
   isFirstTime?: boolean
+  onSuccess?: (updatedProfile: Profile) => void
 }
 
 export function ProfileEditDialog({ 
   open, 
   onOpenChange, 
   profile,
-  isFirstTime = false 
+  isFirstTime = false,
+  onSuccess
 }: ProfileEditDialogProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -147,6 +149,10 @@ export function ProfileEditDialog({
       })
 
       if (result.success) {
+        // Вызываем колбэк если он передан
+        if (onSuccess && result.data) {
+          onSuccess(result.data as Profile)
+        }
         // Сначала обновляем страницу
         router.refresh()
         // Ждем немного чтобы страница обновилась

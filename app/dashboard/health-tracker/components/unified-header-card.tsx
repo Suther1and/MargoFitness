@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, RefreshCw, TrendingUp, Mail, Phone, Clock, User } from 'lucide-react'
+import { Crown, RefreshCw, TrendingUp, Mail, Phone, Clock, User, Pencil } from 'lucide-react'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration } from '@/lib/access-control'
 
@@ -34,25 +34,36 @@ export function UnifiedHeaderCard({
     <motion.div 
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card"
+      whileHover={{ scale: 1.005 }}
+      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card transition-all duration-300 hover:border-amber-500/30 hover:shadow-amber-500/5 hover:bg-white/[0.05]"
     >
       {/* Мягкий фоновый градиент для глубины */}
       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent pointer-events-none" />
+      
+      {/* Свечение при наведении */}
+      <div className="absolute inset-0 rounded-[2.5rem] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute inset-[-1px] rounded-[2.5rem] bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-transparent blur-sm" />
+      </div>
 
       {/* 1. Аватар */}
       <button 
         onClick={onEditClick}
         className="relative shrink-0 group/avatar mr-6"
       >
-        <div className="w-[60px] h-[60px] rounded-full p-[1.5px] bg-gradient-to-br from-amber-500/40 to-orange-600/40 group-hover/avatar:scale-105 transition-transform duration-500">
-          <div className="w-full h-full rounded-full bg-[#09090b] p-0.5 overflow-hidden">
+        <div className="w-[60px] h-[60px] rounded-full p-[1.5px] bg-gradient-to-br from-amber-500/40 to-orange-600/40 transition-all duration-500">
+          <div className="w-full h-full rounded-full bg-[#09090b] p-0.5 overflow-hidden relative">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover rounded-full" />
+              <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover rounded-full transition-all duration-500 group-hover/avatar:blur-[2px]" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-white/20 bg-white/5">
+              <div className="w-full h-full flex items-center justify-center text-white/20 bg-white/5 transition-all duration-500 group-hover/avatar:blur-[2px]">
                 <User className="w-7 h-7" />
               </div>
             )}
+            
+            {/* Оверлей редактирования */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300 bg-black/20">
+              <Pencil className="w-5 h-5 text-white drop-shadow-lg" />
+            </div>
           </div>
         </div>
         <div className="absolute bottom-0 right-0 w-4.5 h-4.5 bg-[#0c0c12] rounded-full flex items-center justify-center border-2 border-[#0c0c12]">
@@ -71,12 +82,29 @@ export function UnifiedHeaderCard({
             {displayName}
           </button>
           
-          <div className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 shrink-0">
-            <Crown className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">
+          <motion.div 
+            animate={{ 
+              boxShadow: ["0 0 0px rgba(245,158,11,0)", "0 0 12px rgba(245,158,11,0.2)", "0 0 0px rgba(245,158,11,0)"]
+            }}
+            transition={{ 
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 shrink-0 relative overflow-hidden group/badge"
+          >
+            {/* Анимированный блик на бейдже */}
+            <motion.div 
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+            />
+            
+            <Crown className="w-3.5 h-3.5 text-amber-500 relative z-10" />
+            <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none relative z-10">
               {tierDisplayName}
             </span>
-          </div>
+          </motion.div>
         </div>
         
         {/* Уровень 2: Статус дней (под именем) */}

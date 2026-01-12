@@ -1119,6 +1119,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             open={profileDialogOpen}
             onOpenChange={setProfileDialogOpen}
             profile={profile}
+            onSuccess={(updatedProfile) => {
+              setProfile(updatedProfile)
+            }}
           />
           
           <SubscriptionRenewalModal

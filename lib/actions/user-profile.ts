@@ -74,7 +74,7 @@ export async function updateUserProfile(data: UpdateProfileData) {
 
     // Обновляем профиль
     // Для Telegram аккаунтов: обновляем email ТОЛЬКО в profiles (в auth.users остается telegram_*@telegram.local для входа)
-    const { error: updateError } = await supabase
+    const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
       .update({
         full_name: data.full_name,
@@ -84,6 +84,8 @@ export async function updateUserProfile(data: UpdateProfileData) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)
+      .select()
+      .single()
 
     if (updateError) {
       console.error('Error updating profile:', updateError)
@@ -97,6 +99,7 @@ export async function updateUserProfile(data: UpdateProfileData) {
     
     return { 
       success: true,
+      data: updatedProfile,
       message: 'Профиль успешно обновлен' 
     }
   } catch (error) {
