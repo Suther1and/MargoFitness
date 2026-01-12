@@ -62,6 +62,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
   const tierColor = getTierColor(profile.subscription_tier)
 
+  // Новые стили для уровней бонусных карт
+  const getBonusLevelStyles = (level: number) => {
+    switch (level) {
       case 4: // Platinum
         return {
           gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
