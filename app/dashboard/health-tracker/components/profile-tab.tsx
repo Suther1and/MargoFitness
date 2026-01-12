@@ -377,7 +377,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-1 py-2">
+                <div className="flex flex-col gap-1 pt-2 pb-0">
                   <span className="text-2xl font-black text-white/60 uppercase font-oswald leading-none tracking-tight">
                     Подписка
                   </span>
