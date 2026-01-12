@@ -594,7 +594,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     {profile && (
                       <UnifiedHeaderCard 
                         profile={profile}
-                        bonusStats={bonusStats}
                         onEditClick={() => setProfileDialogOpen(true)}
                         onRenewalClick={() => setRenewalModalOpen(true)}
                         onUpgradeClick={() => setUpgradeModalOpen(true)}
