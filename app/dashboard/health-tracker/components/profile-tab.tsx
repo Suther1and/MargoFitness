@@ -76,24 +76,26 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           shadow: 'shadow-blue-300/40',
           pattern: 'rgba(15, 23, 42, 0.1)',
           progressBar: 'bg-slate-900',
-          progressTrack: 'bg-slate-950/10'
+          progressTrack: 'bg-slate-950/10',
+          circle: 'border-white/20'
         }
       case 3: // Gold
         return {
-          gradient: 'linear-gradient(135deg, #fff9e6 0%, #ffffff 25%, #ffcc33 50%, #b38728 100%)',
+          gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
           badge: 'bg-amber-950/90 border-white/10 text-amber-50',
           points: 'text-[#2d1a0a]',
           subtext: 'text-amber-900/70',
           cta: 'bg-amber-950 border-white/10 text-amber-50 hover:bg-black',
           icon: 'text-amber-900',
-          shadow: 'shadow-yellow-400/30',
+          shadow: 'shadow-yellow-500/20',
           pattern: 'rgba(69, 26, 3, 0.12)',
           progressBar: 'bg-amber-950',
-          progressTrack: 'bg-amber-950/10'
+          progressTrack: 'bg-amber-950/10',
+          circle: 'border-amber-900/10'
         }
       case 2: // Silver
         return {
-          gradient: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 25%, #e2e8f0 50%, #94a3b8 100%)',
+          gradient: 'linear-gradient(135deg, #757575 0%, #bdbdbd 25%, #424242 50%, #212121 100%)',
           badge: 'bg-slate-900/90 border-white/10 text-slate-50',
           points: 'text-[#0f172a]',
           subtext: 'text-slate-600',
@@ -102,11 +104,12 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           shadow: 'shadow-slate-400/30',
           pattern: 'rgba(15, 23, 42, 0.08)',
           progressBar: 'bg-slate-900',
-          progressTrack: 'bg-slate-900/10'
+          progressTrack: 'bg-slate-900/10',
+          circle: 'border-white/10'
         }
       default: // Bronze (1)
         return {
-          gradient: 'linear-gradient(135deg, #fff5f0 0%, #ffffff 25%, #dfa579 50%, #8c4a20 100%)',
+          gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
           badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
           points: 'text-[#1e0f04]',
           subtext: 'text-[#4a2e19]/70',
@@ -115,7 +118,8 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           shadow: 'shadow-orange-400/20',
           pattern: 'rgba(45, 26, 10, 0.1)',
           progressBar: 'bg-[#2d1a0a]',
-          progressTrack: 'bg-[#2d1a0a]/10'
+          progressTrack: 'bg-[#2d1a0a]/10',
+          circle: 'border-orange-900/10'
         }
     }
   }
@@ -248,7 +252,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               backgroundSize: '20px 20px' 
             }}
           />
-          <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none opacity-50"></div>
+          <div className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}></div>
           
           {/* Shimmer animation for the badge */}
           <style jsx>{`
