@@ -60,7 +60,7 @@ export async function createPayment(
           }
         : {
             type: 'redirect',
-            return_url: process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`
+            return_url: process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?tab=profile&payment=success`
           },
       capture: true,
       description: params.description,

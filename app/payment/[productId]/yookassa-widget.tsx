@@ -96,7 +96,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
       
       const checkout = new window.YooMoneyCheckoutWidget({
         confirmation_token: confirmationToken,
-        return_url: `${window.location.origin}/dashboard?payment=success`,
+        return_url: `${window.location.origin}/dashboard?tab=profile&payment=success`,
         locale: 'ru',
         error_callback: (error: any) => {
           console.error('[YooKassa] Widget error:', error)
@@ -169,7 +169,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
     if (params.get('payment') === 'success') {
       setSuccess(true)
       setTimeout(() => {
-        router.push('/dashboard?payment=success')
+        router.push('/dashboard?tab=profile&payment=success')
         router.refresh() // Обновить данные с сервера
       }, 2000)
     }

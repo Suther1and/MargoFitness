@@ -137,6 +137,28 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     })
   }, [initialProfile, initialBonusStats])
 
+  // Принудительное обновление данных после оплаты
+  useEffect(() => {
+    const isPaymentSuccess = searchParams.get('payment') === 'success'
+    if (isPaymentSuccess && userId) {
+      console.log('[HealthTracker] Payment success detected, refetching profile and bonus stats...')
+      
+      // Обновляем профиль
+      import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
+        if (p) {
+          setProfile(p)
+          // Если есть callback для обновления
+          // initialProfile может быть передан извне, но мы храним локальный стейт profile
+        }
+      })
+      
+      // Обновляем бонусы
+      import('@/lib/actions/bonuses').then(m => m.getBonusStats(userId)).then(result => {
+        if (result.success && result.data) setBonusStats(result.data)
+      })
+    }
+  }, [searchParams, userId])
+
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
