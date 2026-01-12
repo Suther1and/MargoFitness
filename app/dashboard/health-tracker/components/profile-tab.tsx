@@ -67,9 +67,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
     switch (level) {
       case 4: // Platinum
         return {
-          card: 'bg-gradient-to-br from-slate-300 via-slate-100 to-blue-200 text-slate-900',
-          badge: 'bg-black/10 border-black/10 text-slate-900',
-          points: 'text-slate-900',
+          gradient: 'linear-gradient(135deg, #e5e4e2 0%, #ffffff 25%, #b4b4b4 50%, #7d7d7d 100%)',
+          badge: 'bg-black/20 border-black/10 text-slate-900',
+          points: 'text-slate-950',
           subtext: 'text-slate-800/70',
           cta: 'bg-black/10 border-black/20 text-slate-900 hover:bg-black/20',
           icon: 'text-slate-800',
@@ -77,8 +77,8 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       case 3: // Gold
         return {
-          card: 'bg-gradient-to-br from-yellow-600 via-yellow-400 to-amber-600 text-amber-950',
-          badge: 'bg-black/10 border-black/10 text-amber-950',
+          gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
+          badge: 'bg-black/20 border-black/10 text-amber-950',
           points: 'text-amber-950',
           subtext: 'text-amber-900/70',
           cta: 'bg-black/10 border-black/20 text-amber-950 hover:bg-black/20',
@@ -87,22 +87,22 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       case 2: // Silver
         return {
-          card: 'bg-gradient-to-br from-slate-500 via-slate-300 to-slate-600 text-slate-900',
-          badge: 'bg-black/10 border-black/10 text-slate-900',
-          points: 'text-slate-900',
-          subtext: 'text-slate-800/70',
-          cta: 'bg-black/10 border-black/20 text-slate-900 hover:bg-black/20',
-          icon: 'text-slate-800',
+          gradient: 'linear-gradient(135deg, #757575 0%, #bdbdbd 25%, #424242 50%, #212121 100%)',
+          badge: 'bg-black/20 border-white/10 text-white',
+          points: 'text-white',
+          subtext: 'text-slate-100/70',
+          cta: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
+          icon: 'text-slate-100',
           shadow: 'shadow-slate-500/20'
         }
       default: // Bronze (1)
         return {
-          card: 'bg-gradient-to-br from-[#b46d3e] via-[#dfa579] to-[#5d2e12] text-orange-50',
+          gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
           badge: 'bg-black/20 border-white/20 text-orange-50',
           points: 'text-white',
-          subtext: 'text-orange-200/80',
+          subtext: 'text-orange-100/70',
           cta: 'bg-white/10 border-white/30 text-white hover:bg-white/20',
-          icon: 'text-orange-100',
+          icon: 'text-orange-50',
           shadow: 'shadow-orange-900/20'
         }
     }
@@ -211,11 +211,24 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           onClick={() => window.location.href = '/dashboard/bonuses'}
           className={cn(
             "relative overflow-hidden rounded-[2rem] p-5 shadow-xl transition-all duration-300 transform active:scale-[0.98] min-h-[150px] flex flex-col justify-between",
-            bonusStyles.card,
             bonusStyles.shadow
           )}
+          style={{ background: bonusStyles.gradient }}
         >
-          {/* Shimmer & Overlay Patterns */}
+          {/* Premium Inner Glow */}
+          <div className="absolute inset-0 rounded-[2rem] ring-1 ring-white/20 inset-shadow-sm pointer-events-none" />
+          
+          {/* Diagonal Light Overlay - matching reference exactly */}
+          <div 
+            className="absolute inset-0 opacity-60 pointer-events-none" 
+            style={{ 
+              background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 45%, transparent 60%)',
+              mixBlendMode: 'overlay',
+              backgroundSize: '200% auto'
+            }} 
+          />
+          
+          {/* Geometric Patterns overlay */}
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
           <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none"></div>
           
