@@ -73,7 +73,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           pattern: 'rgba(234, 179, 8, 0.1)',
           accent: 'text-yellow-400',
           border: 'rgba(234, 179, 8, 0.4)',
-          badge: 'from-yellow-900/40 to-black/40 border-yellow-500/30',
+          badgeGlow: 'bg-yellow-600/30',
+          badgeBorder: 'border-yellow-500/30 group-hover:border-yellow-500/50',
+          badgeIcon: 'text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]',
+          badgeText: 'text-yellow-100',
           badgeDot: 'bg-yellow-400 shadow-[0_0_6px_rgba(234,179,8,0.8)]',
           glow: 'bg-yellow-600/10',
           shimmer: 'rgba(234, 179, 8, 0.08)',
@@ -87,7 +90,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           pattern: 'rgba(168, 85, 247, 0.1)',
           accent: 'text-purple-400',
           border: 'rgba(168, 85, 247, 0.4)',
-          badge: 'from-purple-900/40 to-black/40 border-purple-500/30',
+          badgeGlow: 'bg-purple-600/30',
+          badgeBorder: 'border-purple-500/30 group-hover:border-purple-500/50',
+          badgeIcon: 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]',
+          badgeText: 'text-purple-100',
           badgeDot: 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)]',
           glow: 'bg-purple-600/10',
           shimmer: 'rgba(168, 85, 247, 0.08)',
@@ -101,7 +107,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           pattern: 'rgba(217, 119, 6, 0.1)',
           accent: 'text-orange-400',
           border: 'rgba(251, 146, 60, 0.4)',
-          badge: 'from-orange-900/40 to-black/40 border-orange-500/30',
+          badgeGlow: 'bg-orange-600/30',
+          badgeBorder: 'border-orange-500/30 group-hover:border-orange-500/50',
+          badgeIcon: 'text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]',
+          badgeText: 'text-orange-100',
           badgeDot: 'bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.8)]',
           glow: 'bg-orange-600/10',
           shimmer: 'rgba(251, 146, 60, 0.08)',
@@ -302,11 +311,20 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               <span className={cn("text-[11px] font-black uppercase tracking-widest opacity-60 font-montserrat", subStyles.status)}>Подписка</span>
             </div>
             
-            {/* Badge */}
-            <div className={cn("relative overflow-hidden bg-gradient-to-b backdrop-blur-md border rounded-full px-3 py-1 shadow-lg", subStyles.badge)}>
-              <div className="flex items-center gap-1.5">
-                <span className={cn("w-1.5 h-1.5 rounded-full", subStyles.badgeDot)}></span>
-                <span className="text-[10px] font-black tracking-wider uppercase font-montserrat">{tierDisplayName}</span>
+            {/* Premium VIP Badge */}
+            <div className="group cursor-default relative inline-flex">
+              {/* Glow Effect behind */}
+              <div className={cn("absolute inset-0 blur-lg rounded-full opacity-50 group-hover:opacity-75 transition-opacity duration-500", subStyles.badgeGlow)}></div>
+              
+              {/* Main Content */}
+              <div className={cn("relative flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/40 border backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] transition-all duration-300", subStyles.badgeBorder)}>
+                {/* Icon */}
+                <Crown className={cn("w-3.5 h-3.5", subStyles.badgeIcon)} />
+                
+                {/* Text */}
+                <span className={cn("text-[10px] font-black tracking-wider uppercase drop-shadow-sm font-montserrat", subStyles.badgeText)}>
+                  {tierDisplayName}
+                </span>
               </div>
             </div>
           </div>
