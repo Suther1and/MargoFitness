@@ -190,6 +190,16 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
     }
   }
 
+  const getLevelColorClass = (levelName: string) => {
+    switch (levelName?.toLowerCase()) {
+      case 'platinum': return 'text-blue-400/80'
+      case 'gold': return 'text-yellow-400/80'
+      case 'silver': return 'text-slate-300/80'
+      case 'bronze': return 'text-orange-400/80'
+      default: return 'text-white/40'
+    }
+  }
+
   const bonusStyles = getBonusLevelStyles(bonusStats?.levelData.level || 1)
 
   return (
@@ -473,15 +483,22 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                       {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
                     </span>
                     <Sparkles className={cn("w-4 h-4", bonusStyles.subtext)} />
+                    {bonusStats && (
+                      <div className={cn("ml-1 px-1.5 py-0.5 rounded bg-black/20 border border-white/5 text-[8px] font-bold uppercase tracking-tighter font-montserrat", bonusStyles.subtext)}>
+                        {bonusStats.levelData.percent}% кэшбэк
+                      </div>
+                    )}
                   </div>
                 </div>
                 
                 {bonusStats && (
                   <span className={cn("text-[10px] font-black uppercase tracking-widest font-oswald leading-none", bonusStyles.points)}>
-                    {bonusStats.progress.progress}%
                     {bonusStats.progress.nextLevel && (
-                      <span className="opacity-50 ml-1">
-                        — еще {bonusStats.progress.remaining.toLocaleString('ru-RU')} до уровня {CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name.toUpperCase()}
+                      <span className="opacity-50">
+                        еще {bonusStats.progress.remaining.toLocaleString('ru-RU')} до уровня {' '}
+                        <span className={cn("opacity-100", getLevelColorClass(CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name || ''))}>
+                          {CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name.toUpperCase()}
+                        </span>
                       </span>
                     )}
                   </span>

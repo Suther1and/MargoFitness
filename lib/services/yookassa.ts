@@ -49,6 +49,11 @@ export async function createPayment(
   try {
     const confirmationType = params.confirmationType || 'embedded'
     
+    const returnUrl = process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
+    const finalReturnUrl = returnUrl.includes('tab=profile') 
+      ? returnUrl 
+      : `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}tab=profile&payment=success`
+
     const paymentData: ICreatePayment = {
       amount: {
         value: params.amount.toFixed(2),
@@ -60,7 +65,7 @@ export async function createPayment(
           }
         : {
             type: 'redirect',
-            return_url: process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?tab=profile&payment=success`
+            return_url: finalReturnUrl
           },
       capture: true,
       description: params.description,
