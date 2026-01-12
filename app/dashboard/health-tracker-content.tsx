@@ -597,6 +597,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         onEditClick={() => setProfileDialogOpen(true)}
                         onRenewalClick={() => setRenewalModalOpen(true)}
                         onUpgradeClick={() => setUpgradeModalOpen(true)}
+                        onSubscriptionClick={() => handleTabChange('subscription' as any)}
                       />
                     )}
                   </div>
