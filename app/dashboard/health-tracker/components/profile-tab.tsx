@@ -109,17 +109,17 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       default: // Bronze (1)
         return {
-          gradient: 'linear-gradient(135deg, #633318 0%, #f7d4c1 30%, #8c4a20 55%, #e3a073 80%, #2d1a0a 100%)',
+          gradient: 'linear-gradient(135deg, #7a3e1a 0%, #ffdbbf 30%, #a65d37 55%, #d4815b 80%, #3e1f0e 100%)',
           badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
           points: 'text-[#1e0f04]',
           subtext: 'text-[#4a2e19]/70',
           cta: 'bg-[#2d1a0a] border-white/10 text-orange-50 hover:bg-black',
           icon: 'text-[#3e2614]',
-          shadow: 'shadow-orange-700/15',
-          pattern: 'rgba(255, 200, 150, 0.12)',
+          shadow: 'shadow-orange-900/12',
+          pattern: 'rgba(15, 23, 42, 0.05)',
           progressBar: 'bg-[#2d1a0a]',
           progressTrack: 'bg-[#2d1a0a]/10',
-          circle: 'border-orange-200/10'
+          circle: 'border-orange-200/5'
         }
     }
   }
