@@ -73,7 +73,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           subtext: 'text-slate-600',
           cta: 'bg-slate-900 border-white/10 text-white hover:bg-black',
           icon: 'text-slate-800',
-          shadow: 'shadow-blue-300/40'
+          shadow: 'shadow-blue-300/40',
+          pattern: 'rgba(0,0,0,0.1)',
+          progressBar: 'bg-slate-900',
+          progressTrack: 'bg-slate-950/10'
         }
       case 3: // Gold
         return {
@@ -83,7 +86,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           subtext: 'text-amber-900/70',
           cta: 'bg-black/10 border-black/20 text-amber-950 hover:bg-black/20',
           icon: 'text-amber-900',
-          shadow: 'shadow-yellow-500/20'
+          shadow: 'shadow-yellow-500/20',
+          pattern: 'rgba(255,255,255,0.1)',
+          progressBar: 'bg-white/40',
+          progressTrack: 'bg-black/10'
         }
       case 2: // Silver
         return {
@@ -93,7 +99,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           subtext: 'text-slate-100/70',
           cta: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
           icon: 'text-slate-100',
-          shadow: 'shadow-slate-500/20'
+          shadow: 'shadow-slate-500/20',
+          pattern: 'rgba(255,255,255,0.1)',
+          progressBar: 'bg-white/40',
+          progressTrack: 'bg-black/10'
         }
       default: // Bronze (1)
         return {
@@ -103,7 +112,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           subtext: 'text-orange-100/70',
           cta: 'bg-white/10 border-white/30 text-white hover:bg-white/20',
           icon: 'text-orange-50',
-          shadow: 'shadow-orange-900/20'
+          shadow: 'shadow-orange-900/20',
+          pattern: 'rgba(255,255,255,0.1)',
+          progressBar: 'bg-white/40',
+          progressTrack: 'bg-black/10'
         }
     }
   }
@@ -229,7 +241,13 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           />
           
           {/* Geometric Patterns overlay */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+          <div 
+            className="absolute inset-0 opacity-10 pointer-events-none" 
+            style={{ 
+              backgroundImage: `radial-gradient(circle at 1px 1px, ${bonusStyles.pattern} 1px, transparent 0)`, 
+              backgroundSize: '20px 20px' 
+            }}
+          />
           <div className="absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] border-white/5 blur-sm pointer-events-none"></div>
           
           {/* Shimmer animation for the badge */}
@@ -285,11 +303,11 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
               {/* Progress Bar - Spanning from start to end */}
               {bonusStats && (
-                <div className="h-1.5 w-full bg-black/10 rounded-full overflow-hidden">
+                <div className={cn("h-1.5 w-full rounded-full overflow-hidden", bonusStyles.progressTrack)}>
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${bonusStats.progress.progress}%` }}
-                    className={cn("h-full rounded-full bg-white/40")}
+                    className={cn("h-full rounded-full", bonusStyles.progressBar)}
                   />
                 </div>
               )}
