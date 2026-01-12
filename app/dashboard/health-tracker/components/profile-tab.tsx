@@ -95,31 +95,31 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       case 2: // Silver
         return {
-          gradient: 'linear-gradient(135deg, #757575 0%, #bdbdbd 25%, #424242 50%, #212121 100%)',
+          gradient: 'linear-gradient(135deg, #8e9196 0%, #ffffff 35%, #5c5f66 75%, #2a2c30 100%)',
           badge: 'bg-slate-900/90 border-white/10 text-slate-50',
           points: 'text-[#0f172a]',
           subtext: 'text-slate-600',
           cta: 'bg-slate-900 border-white/10 text-slate-50 hover:bg-black',
           icon: 'text-slate-800',
-          shadow: 'shadow-slate-400/30',
+          shadow: 'shadow-slate-400/15',
           pattern: 'rgba(15, 23, 42, 0.08)',
           progressBar: 'bg-slate-900',
           progressTrack: 'bg-slate-900/10',
-          circle: 'border-white/10'
+          circle: 'border-white/5'
         }
       default: // Bronze (1)
         return {
-          gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
+          gradient: 'linear-gradient(135deg, #c67a4d 0%, #ffdbbf 30%, #9e5b32 70%, #5d2e12 100%)',
           badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
           points: 'text-[#1e0f04]',
           subtext: 'text-[#4a2e19]/70',
           cta: 'bg-[#2d1a0a] border-white/10 text-orange-50 hover:bg-black',
           icon: 'text-[#3e2614]',
-          shadow: 'shadow-orange-400/20',
+          shadow: 'shadow-orange-900/15',
           pattern: 'rgba(45, 26, 10, 0.1)',
           progressBar: 'bg-[#2d1a0a]',
           progressTrack: 'bg-[#2d1a0a]/10',
-          circle: 'border-orange-900/10'
+          circle: 'border-white/5'
         }
     }
   }
@@ -252,7 +252,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               backgroundSize: '20px 20px' 
             }}
           />
-          <div className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}></div>
+          <div 
+            className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}
+            style={{ mixBlendMode: 'overlay' }}
+          ></div>
           
           {/* Shimmer animation for the badge */}
           <style jsx>{`
