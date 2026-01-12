@@ -468,10 +468,10 @@ export function ProfileEditDialog({
                   )}
 
                   {!isFirstTime && (
-                    <div className="flex gap-2.5">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <a
                         href="/auth/logout"
-                        className="h-12 flex-1 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
+                        className="h-12 w-full rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Выйти</span>
@@ -479,7 +479,7 @@ export function ProfileEditDialog({
                       
                       <button
                         type="button"
-                        className="h-12 flex-1 rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                        className="h-12 w-full rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
                       >
                         <KeyRound className="w-3.5 h-3.5" />
                         <span>Сменить пароль</span>

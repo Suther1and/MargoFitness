@@ -16,9 +16,10 @@ interface ProfileTabProps {
     levelData: CashbackLevel
     progress: ReturnType<typeof calculateLevelProgress>
   } | null
+  onProfileUpdate?: (profile: Profile) => void
 }
 
-export function ProfileTab({ profile, bonusStats }: ProfileTabProps) {
+export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabProps) {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -489,6 +490,9 @@ export function ProfileTab({ profile, bonusStats }: ProfileTabProps) {
         open={profileDialogOpen}
         onOpenChange={setProfileDialogOpen}
         profile={profile}
+        onSuccess={(updatedProfile) => {
+          onProfileUpdate?.(updatedProfile)
+        }}
       />
       
       <SubscriptionRenewalModal

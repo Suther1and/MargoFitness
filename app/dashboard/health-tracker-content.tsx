@@ -714,7 +714,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   )}
                   
                   {activeTab === 'profile' && profile && (
-                    <ProfileTab profile={profile} bonusStats={bonusStats} />
+                    <ProfileTab 
+                      profile={profile} 
+                      bonusStats={bonusStats} 
+                      onProfileUpdate={(updatedProfile) => {
+                        setProfile(updatedProfile)
+                      }}
+                    />
                   )}
                   
                   {activeTab === 'overview' && (
