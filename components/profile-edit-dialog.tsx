@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useRef, ChangeEvent } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { updateUserProfile, uploadUserAvatar, deleteUserAvatar } from '@/lib/actions/user-profile'
-import { Loader2 } from 'lucide-react'
+import { Loader2, User, Mail, Phone, Pencil, LogOut, Check, X, Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Profile } from '@/types/database'
+import { cn } from '@/lib/utils'
 
 interface ProfileEditDialogProps {
   open: boolean
@@ -81,39 +83,6 @@ export function ProfileEditDialog({
     }
   }
 
-  const handleAvatarUpload = async () => {
-    if (!selectedFile) return
-
-    setUploadingAvatar(true)
-    const uploadFormData = new FormData()
-    uploadFormData.append('avatar', selectedFile)
-
-    const result = await uploadUserAvatar(uploadFormData)
-    
-    if (result.success) {
-      setAvatarPreview(null)
-      setSelectedFile(null)
-      router.refresh()
-    } else {
-      setErrors({ ...errors, avatar: result.error || 'Ошибка загрузки' })
-    }
-    
-    setUploadingAvatar(false)
-  }
-
-  const handleDeleteAvatar = async () => {
-    setUploadingAvatar(true)
-    const result = await deleteUserAvatar()
-    
-    if (result.success) {
-      router.refresh()
-    } else {
-      setErrors({ ...errors, avatar: result.error || 'Ошибка удаления' })
-    }
-    
-    setUploadingAvatar(false)
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -149,15 +118,11 @@ export function ProfileEditDialog({
       })
 
       if (result.success) {
-        // Вызываем колбэк если он передан
         if (onSuccess && result.data) {
           onSuccess(result.data as Profile)
         }
-        // Сначала обновляем страницу
         router.refresh()
-        // Ждем немного чтобы страница обновилась
         await new Promise(resolve => setTimeout(resolve, 100))
-        // Потом закрываем диалог и очищаем превью
         setAvatarPreview(null)
         setSelectedFile(null)
         onOpenChange(false)
@@ -173,23 +138,65 @@ export function ProfileEditDialog({
     }
   }
 
-  const handleSkip = () => {
-    updateUserProfile({})
-    onOpenChange(false)
+  const getTierStyles = (tier: string) => {
+    switch (tier) {
+      case 'elite':
+        return {
+          text: 'text-yellow-400',
+          bg: 'bg-yellow-500/10',
+          border: 'border-yellow-500/20',
+          gradient: 'from-yellow-300/40 to-yellow-500/40',
+          shadow: 'shadow-yellow-500/20',
+          icon: 'text-yellow-500',
+          hoverBorder: 'hover:border-yellow-400/30',
+          accentColor: '#eab308',
+          buttonBg: 'bg-yellow-500 hover:bg-yellow-400 text-black',
+        }
+      case 'pro':
+        return {
+          text: 'text-purple-400',
+          bg: 'bg-purple-500/10',
+          border: 'border-purple-500/20',
+          gradient: 'from-purple-400/40 to-purple-600/40',
+          shadow: 'shadow-purple-500/20',
+          icon: 'text-purple-500',
+          hoverBorder: 'hover:border-purple-500/30',
+          accentColor: '#a855f7',
+          buttonBg: 'bg-purple-500 hover:bg-purple-400 text-white',
+        }
+      case 'basic':
+        return {
+          text: 'text-orange-400',
+          bg: 'bg-orange-500/10',
+          border: 'border-orange-500/20',
+          gradient: 'from-orange-400/40 to-orange-600/40',
+          shadow: 'shadow-orange-500/20',
+          icon: 'text-orange-500',
+          hoverBorder: 'hover:border-orange-500/30',
+          accentColor: '#f97316',
+          buttonBg: 'bg-orange-500 hover:bg-orange-400 text-black',
+        }
+      default:
+        return {
+          text: 'text-white/60',
+          bg: 'bg-white/5',
+          border: 'border-white/10',
+          gradient: 'from-white/20 to-white/10',
+          shadow: 'shadow-white/5',
+          icon: 'text-white/40',
+          hoverBorder: 'hover:border-white/20',
+          accentColor: '#ffffff',
+          buttonBg: 'bg-white/10 hover:bg-white/20 text-white',
+        }
+    }
   }
 
+  const styles = getTierStyles(profile.subscription_tier)
   const canClose = !(isTelegramAccount && isFirstTime && hasTelegramEmail)
 
   return (
     <>
       <style jsx global>{`
-        /* Плавный рендеринг шрифтов */
-        * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Force hide Dialog default close button */
         [data-slot="dialog-close"] {
           display: none !important;
         }
@@ -197,7 +204,7 @@ export function ProfileEditDialog({
       
       <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
         <DialogContent 
-          className="max-w-sm p-0 border-0 bg-transparent overflow-visible"
+          className="max-w-[440px] p-0 border-0 bg-transparent overflow-visible shadow-none"
           showCloseButton={false}
           onPointerDownOutside={(e) => {
             if (!canClose) e.preventDefault()
@@ -210,235 +217,238 @@ export function ProfileEditDialog({
             {isFirstTime ? 'Добро пожаловать!' : 'Редактировать профиль'}
           </DialogTitle>
           
-          {/* Card - Dashboard style glassmorphism */}
-          <div className="relative w-full max-w-[455px] mx-auto mt-8 mb-8 p-6 sm:p-8 overflow-hidden rounded-3xl bg-[#1a1a24]/80 ring-1 ring-white/20 backdrop-blur-xl shadow-2xl">
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              tabIndex={-1}
-              style={{ position: 'absolute', top: '3px', right: '3px', zIndex: 20, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', willChange: 'transform, opacity', outline: 'none' }}
-              className="transition-all hover:opacity-70 active:scale-95"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white/60 hover:text-white/80 pointer-events-none">
-                <path d="M18 6 6 18"></path>
-                <path d="m6 6 12 12"></path>
-              </svg>
-            </button>
+          <motion.div 
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={cn(
+              "relative w-full mx-auto p-8 rounded-[2.5rem] bg-[#0c0c12]/90 border backdrop-blur-3xl shadow-2xl overflow-hidden",
+              styles.border
+            )}
+          >
+            {/* Background decorative elements */}
+            <div className={cn(
+              "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none",
+              styles.bg.replace('/10', '/30')
+            )} />
+            <div className={cn(
+              "absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-[100px] opacity-10 pointer-events-none",
+              styles.bg.replace('/10', '/30')
+            )} />
 
-            {/* Background effects like dashboard */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl pointer-events-none" />
-            <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none" />
+            {/* Header section */}
+            <div className="relative z-10 flex flex-col items-center mb-8">
+              {canClose && (
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="absolute -top-4 -right-4 p-2 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
 
-            {/* Inner card with gradient - dashboard style */}
-            <div className="rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] p-6 ring-1 ring-white/10 backdrop-blur relative">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <h1 className="text-2xl leading-tight tracking-tight font-semibold text-white">
-                  {isFirstTime ? 'Добро пожаловать!' : 'Редактировать профиль'}
-                </h1>
-                <p className="mt-2 text-sm font-normal text-white/70">
-                  {isFirstTime 
-                    ? 'Заполни информацию о себе'
-                    : 'Обнови информацию твоего профиля'
-                  }
+              <div className="text-center">
+                <h2 className="font-oswald text-3xl font-bold text-white uppercase tracking-tight leading-none mb-2">
+                  {isFirstTime ? 'Добро пожаловать' : 'Профиль'}
+                </h2>
+                <p className="text-white/40 text-xs uppercase tracking-[0.2em] font-medium">
+                  Elite Performance System
                 </p>
               </div>
+            </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Аватар */}
-                <div className="flex flex-col items-center gap-4 mb-6">
-                  <div className="relative group/avatar">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingAvatar}
-                      tabIndex={-1}
-                      className="relative outline-none"
-                    >
-                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 p-[2px] shadow-lg shadow-purple-500/20 transition-all group-hover/avatar:ring-2 group-hover/avatar:ring-purple-400/50 active:scale-95">
-                        <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
-                          {(avatarPreview || profile.avatar_url) ? (
-                            <img 
-                              src={avatarPreview || profile.avatar_url!} 
-                              alt="Avatar" 
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white text-3xl font-bold">
-                              {(formData.full_name || formData.email || 'U').charAt(0).toUpperCase()}
-                            </div>
-                          )}
+            <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+              {/* Avatar section */}
+              <div className="flex flex-col items-center">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="group relative"
+                >
+                  <div className={cn(
+                    "w-[100px] h-[100px] rounded-full p-[2px] bg-gradient-to-br transition-all duration-500 shadow-xl",
+                    styles.gradient
+                  )}>
+                    <div className="w-full h-full rounded-full bg-[#09090b] p-1 overflow-hidden relative">
+                      {(avatarPreview || profile.avatar_url) ? (
+                        <img 
+                          src={avatarPreview || profile.avatar_url!} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover rounded-full transition-all duration-500 group-hover:blur-[2px]" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/10 bg-white/[0.02] rounded-full">
+                          <User className="w-10 h-10" />
                         </div>
-                      </div>
-                      {/* Edit overlay on hover */}
-                      <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      )}
+                      
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 rounded-full">
                         {uploadingAvatar ? (
-                          <Loader2 className="size-5 animate-spin text-white" />
+                          <Loader2 className="w-6 h-6 text-white animate-spin" />
                         ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                            <path d="m15 5 4 4"></path>
-                          </svg>
+                          <Camera className="w-6 h-6 text-white" />
                         )}
                       </div>
-                    </button>
+                    </div>
                   </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-
+                  <div className={cn(
+                    "absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#0c0c12] flex items-center justify-center shadow-lg",
+                    styles.buttonBg
+                  )}>
+                    <Pencil className="w-3.5 h-3.5" />
+                  </div>
+                </button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                <AnimatePresence>
                   {errors.avatar && (
-                    <p className="text-xs text-red-400 mt-2">{errors.avatar}</p>
+                    <motion.p 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-[10px] text-red-500 font-bold uppercase tracking-wider mt-3"
+                    >
+                      {errors.avatar}
+                    </motion.p>
                   )}
-                </div>
+                </AnimatePresence>
+              </div>
 
-                {/* Форма */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label htmlFor="full_name" className="block text-xs font-medium uppercase tracking-wider text-white/60">
-                      Имя
-                    </label>
-                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      <input
-                        id="full_name"
-                        type="text"
-                        placeholder="Твоё имя"
-                        value={formData.full_name}
-                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
-                      />
+              {/* Form fields */}
+              <div className="space-y-4">
+                {/* Name field */}
+                <div className="space-y-1.5">
+                  <label htmlFor="full_name" className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">
+                    Ваше имя
+                  </label>
+                  <div className={cn(
+                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    styles.border,
+                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                  )}>
+                    <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
+                      <User className="w-4 h-4" />
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-white/60">
-                      Email {isTelegramAccount && isFirstTime && <span className="text-red-400">*</span>}
-                    </label>
-                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
-                        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                      </svg>
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder={hasTelegramEmail ? "Введи твой email" : "email@example.com"}
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required={isTelegramAccount && isFirstTime}
-                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
-                      />
-                    </div>
-                    {isTelegramAccount && isFirstTime && hasTelegramEmail && (
-                      <p className="text-xs text-white/50">
-                        Укажи твой реальный email - он нужен для уведомлений и связи
-                      </p>
-                    )}
-                    {errors.email && (
-                      <p className="text-xs text-red-400">{errors.email}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-xs font-medium uppercase tracking-wider text-white/60">
-                      Телефон
-                    </label>
-                    <div className="flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3 text-sm text-white transition-all focus-within:ring-purple-500/50 focus-within:ring-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                      </svg>
-                      <input
-                        id="phone"
-                        type="tel"
-                        placeholder="+7 (999) 999-99-99"
-                        value={formData.phone}
-                        onChange={handlePhoneChange}
-                        maxLength={18}
-                        className="ml-3 flex-1 bg-transparent text-base font-normal text-white placeholder:text-white/40 focus:outline-none"
-                      />
-                    </div>
+                    <input
+                      id="full_name"
+                      type="text"
+                      placeholder="Имя Фамилия"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      className="w-full bg-transparent py-4 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                    />
                   </div>
                 </div>
 
-                {errors.form && (
-                  <div className="rounded-xl p-3" style={{
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)'
-                  }}>
-                    <p className="text-xs text-red-400">{errors.form}</p>
+                {/* Email field */}
+                <div className="space-y-1.5">
+                  <label htmlFor="email" className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1 flex justify-between">
+                    <span>Электронная почта</span>
+                    {isTelegramAccount && isFirstTime && <span className="text-red-500">* обязательна</span>}
+                  </label>
+                  <div className={cn(
+                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    styles.border,
+                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                  )}>
+                    <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="example@mail.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required={isTelegramAccount && isFirstTime}
+                      className="w-full bg-transparent py-4 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                    />
+                  </div>
+                  {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.email}</p>}
+                </div>
+
+                {/* Phone field */}
+                <div className="space-y-1.5">
+                  <label htmlFor="phone" className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">
+                    Телефон
+                  </label>
+                  <div className={cn(
+                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    styles.border,
+                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                  )}>
+                    <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <input
+                      id="phone"
+                      type="tel"
+                      placeholder="+7 (___) ___-__-__"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      maxLength={18}
+                      className="w-full bg-transparent py-4 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="space-y-4 pt-4">
+                <button
+                  type="submit"
+                  disabled={loading || uploadingAvatar}
+                  className={cn(
+                    "w-full h-[60px] rounded-2xl font-oswald text-lg font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl",
+                    styles.buttonBg
+                  )}
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <span>Сохранить изменения</span>
+                      <Check className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+
+                {!isFirstTime && (
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="h-px flex-1 bg-white/5" />
+                    <span className="text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">danger zone</span>
+                    <div className="h-px flex-1 bg-white/5" />
                   </div>
                 )}
 
-                {/* Кнопки */}
-                <div className="mt-6">
-                  <button
-                    type="submit"
-                    disabled={loading || uploadingAvatar}
-                    className="w-full rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-600/20 ring-1 ring-purple-400/50 px-4 py-2.5 transition-all hover:from-purple-500/30 hover:to-indigo-600/30 hover:ring-purple-400/60 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ touchAction: 'manipulation', willChange: 'transform' }}
+                {!isFirstTime && (
+                  <a
+                    href="/auth/logout"
+                    className="w-full h-12 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
                   >
-                    <div className="flex items-center justify-between pointer-events-none">
-                      <div className="text-left flex-1">
-                        <p className="text-sm font-semibold text-white">
-                          {loading ? 'Сохранение...' : 'Сохранить'}
-                        </p>
-                      </div>
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center flex-shrink-0">
-                        {loading || uploadingAvatar ? (
-                          <svg className="animate-spin h-4 w-4 text-purple-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-200">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                            <polyline points="7 3 7 8 15 8"></polyline>
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                </div>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Выйти из аккаунта</span>
+                  </a>
+                )}
                 
                 {isTelegramAccount && isFirstTime && hasTelegramEmail && (
-                  <p className="text-xs text-center text-white/50 mt-3">
-                    Пожалуйста, укажи email для продолжения
+                  <p className="text-[10px] text-center text-white/20 uppercase tracking-widest leading-relaxed">
+                    Пожалуйста, укажите почту для доступа<br/>к полному функционалу системы
                   </p>
                 )}
-              </form>
-
-              {/* Logout Button */}
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <a 
-                  href="/auth/logout" 
-                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-red-500/10 ring-1 ring-red-400/30 px-4 py-2.5 transition-all hover:bg-red-500/15 hover:ring-red-400/40 active:scale-95" 
-                  style={{ touchAction: 'manipulation' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-300">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                  <span className="text-red-200/90 font-medium text-sm">Выход</span>
-                </a>
               </div>
-            </div>
-          </div>
+            </form>
+          </motion.div>
         </DialogContent>
       </Dialog>
     </>
   )
 }
-
