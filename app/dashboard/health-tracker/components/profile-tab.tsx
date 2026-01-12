@@ -421,7 +421,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                     subStyles.btnPrimary
                   )}
                 >
-                  <ArrowRight className={cn("w-4 h-4 transition-transform group-hover:translate-x-0.5", subStyles.btnPrimaryIcon)} />
+                  <ArrowRight className={cn("w-5 h-5 transition-transform group-hover:translate-x-0.5", subStyles.btnPrimaryIcon)} />
                   <span>Выбрать подписку</span>
                 </button>
               )}
