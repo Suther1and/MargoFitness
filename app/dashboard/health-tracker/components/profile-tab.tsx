@@ -314,7 +314,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             </div>
 
             {/* Card Bottom & CTA */}
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+            <div className="flex items-center justify-between gap-2 pt-1">
               <button 
                 onClick={(e) => { e.stopPropagation(); window.location.href = '/dashboard/bonuses'; }}
                 className={cn(
