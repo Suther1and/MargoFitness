@@ -312,12 +312,12 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           </div>
 
           {/* Card Body: Stats (Left) & Actions (Right) */}
-          <div className="flex items-center justify-between gap-4 mt-auto">
+          <div className="flex items-start justify-between gap-4 mt-auto">
             
             {/* Left: Status & Duration */}
             <div className="flex flex-col gap-1">
               {/* Status */}
-              <div className="flex items-center gap-2 opacity-80">
+              <div className="flex items-center gap-2 opacity-80 h-[36px]">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", subStyles.badgeDot)}></span>
                   <span className={cn("relative inline-flex rounded-full h-1.5 w-1.5", subStyles.badgeDot)}></span>
