@@ -109,13 +109,13 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       default: // Bronze (1)
         return {
-          gradient: 'linear-gradient(135deg, #c67a4d 0%, #ffdbbf 30%, #9e5b32 70%, #5d2e12 100%)',
+          gradient: 'linear-gradient(135deg, #8c4a20 0%, #e3a073 25%, #4a2511 50%, #2d1a0a 100%)',
           badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
           points: 'text-[#1e0f04]',
           subtext: 'text-[#4a2e19]/70',
           cta: 'bg-[#2d1a0a] border-white/10 text-orange-50 hover:bg-black',
           icon: 'text-[#3e2614]',
-          shadow: 'shadow-orange-900/15',
+          shadow: 'shadow-orange-950/20',
           pattern: 'rgba(45, 26, 10, 0.1)',
           progressBar: 'bg-[#2d1a0a]',
           progressTrack: 'bg-[#2d1a0a]/10',
