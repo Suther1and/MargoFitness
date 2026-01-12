@@ -74,47 +74,47 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           cta: 'bg-slate-900 border-white/10 text-white hover:bg-black',
           icon: 'text-slate-800',
           shadow: 'shadow-blue-300/40',
-          pattern: 'rgba(15, 23, 42, 0.1)', // Темные точки для светлого фона
+          pattern: 'rgba(15, 23, 42, 0.1)',
           progressBar: 'bg-slate-900',
           progressTrack: 'bg-slate-950/10'
         }
       case 3: // Gold
         return {
           gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
-          badge: 'bg-black/20 border-black/10 text-amber-950',
+          badge: 'bg-amber-950/10 border-amber-950/10 text-amber-950',
           points: 'text-amber-950',
           subtext: 'text-amber-900/70',
-          cta: 'bg-black/10 border-black/20 text-amber-950 hover:bg-black/20',
+          cta: 'bg-amber-950/10 border-amber-950/20 text-amber-950 hover:bg-amber-950/20',
           icon: 'text-amber-900',
           shadow: 'shadow-yellow-500/20',
-          pattern: 'rgba(255, 255, 255, 0.15)',
-          progressBar: 'bg-white/40',
+          pattern: 'rgba(69, 26, 3, 0.1)',
+          progressBar: 'bg-amber-950/30',
           progressTrack: 'bg-black/10'
         }
       case 2: // Silver
         return {
           gradient: 'linear-gradient(135deg, #757575 0%, #bdbdbd 25%, #424242 50%, #212121 100%)',
-          badge: 'bg-black/20 border-white/10 text-white',
-          points: 'text-white',
-          subtext: 'text-slate-100/70',
-          cta: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
-          icon: 'text-slate-100',
+          badge: 'bg-slate-950/10 border-black/10 text-slate-900',
+          points: 'text-slate-950',
+          subtext: 'text-slate-800/60',
+          cta: 'bg-slate-950/10 border-black/10 text-slate-900 hover:bg-black/20',
+          icon: 'text-slate-900',
           shadow: 'shadow-slate-500/20',
-          pattern: 'rgba(255, 255, 255, 0.15)',
-          progressBar: 'bg-white/40',
+          pattern: 'rgba(15, 23, 42, 0.1)',
+          progressBar: 'bg-slate-950/30',
           progressTrack: 'bg-black/10'
         }
       default: // Bronze (1)
         return {
           gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
-          badge: 'bg-black/20 border-white/20 text-orange-50',
-          points: 'text-white',
-          subtext: 'text-orange-100/70',
-          cta: 'bg-white/10 border-white/30 text-white hover:bg-white/20',
-          icon: 'text-orange-50',
+          badge: 'bg-[#2d1a0a]/10 border-[#2d1a0a]/10 text-[#2d1a0a]',
+          points: 'text-[#2d1a0a]',
+          subtext: 'text-[#4a2e19]/70',
+          cta: 'bg-[#2d1a0a]/10 border-[#2d1a0a]/20 text-[#2d1a0a] hover:bg-[#2d1a0a]/20',
+          icon: 'text-[#3e2614]',
           shadow: 'shadow-orange-900/20',
-          pattern: 'rgba(255, 255, 255, 0.15)',
-          progressBar: 'bg-white/40',
+          pattern: 'rgba(45, 26, 10, 0.1)',
+          progressBar: 'bg-[#2d1a0a]/30',
           progressTrack: 'bg-black/10'
         }
     }
@@ -270,11 +270,11 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
                 <Trophy className={cn("w-4 h-4", bonusStyles.icon)} />
-                <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90", bonusStyles.icon)}>Бонусы</span>
+                <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90 font-montserrat", bonusStyles.icon)}>Бонусы</span>
               </div>
               
               <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 py-1", bonusStyles.badge)}>
-                <span className="text-[10px] font-black tracking-widest relative z-10 uppercase">
+                <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat">
                   {bonusStats?.levelData.name || 'BRONZE'}
                 </span>
                 <div className="shimmer-effect"></div>
@@ -285,7 +285,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             <div className="space-y-3">
               <div className="flex items-end justify-between">
                 <div>
-                  <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5", bonusStyles.subtext)}>баланс</span>
+                  <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5 font-montserrat", bonusStyles.subtext)}>баланс</span>
                   <div className="flex items-center gap-2">
                     <span className={cn("text-3xl font-black font-oswald tracking-tight", bonusStyles.points)}>
                       {bonusStats?.account.balance.toLocaleString('ru-RU') || 0}
@@ -295,7 +295,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                 </div>
                 
                 {bonusStats && (
-                  <span className={cn("text-[10px] font-black uppercase tracking-widest", bonusStyles.points)}>
+                  <span className={cn("text-[10px] font-black uppercase tracking-widest font-oswald", bonusStyles.points)}>
                     {bonusStats.progress.progress}%
                   </span>
                 )}
@@ -318,7 +318,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               <button 
                 onClick={(e) => { e.stopPropagation(); window.location.href = '/dashboard/bonuses'; }}
                 className={cn(
-                  "text-[9px] font-black uppercase tracking-widest px-2 py-1 hover:opacity-70 transition-opacity flex items-center gap-1",
+                  "text-[9px] font-black uppercase tracking-widest px-2 py-1 hover:opacity-70 transition-opacity flex items-center gap-1 font-montserrat",
                   bonusStyles.icon
                 )}
               >
@@ -327,7 +327,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               </button>
 
               <button className={cn(
-                "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg",
+                "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg font-montserrat",
                 bonusStyles.cta
               )}>
                 Использовать
