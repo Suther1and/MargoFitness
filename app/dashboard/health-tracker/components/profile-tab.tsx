@@ -344,7 +344,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                     subscriptionActive ? subStyles.badgeDot : "bg-red-500"
                   )}></span>
                 </span>
-                <span className={cn("text-[10px] font-bold tracking-wide uppercase font-montserrat", subStyles.status)}>
+                <span className={cn("text-[11px] font-black tracking-widest uppercase font-montserrat", subStyles.status)}>
                   {subscriptionActive ? 'Активна' : 'Неактивна'}
                 </span>
                 {subscriptionActive && profile.subscription_expires_at && (
