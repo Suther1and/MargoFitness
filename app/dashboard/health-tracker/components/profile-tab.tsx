@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { 
   Crown, 
   Settings, 
@@ -190,16 +192,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
     }
   }
 
-  const getLevelColorClass = (levelName: string) => {
-    switch (levelName?.toLowerCase()) {
-      case 'platinum': return 'text-blue-400/80'
-      case 'gold': return 'text-yellow-400/80'
-      case 'silver': return 'text-slate-300/80'
-      case 'bronze': return 'text-orange-400/80'
-      default: return 'text-white/40'
-    }
-  }
-
   const bonusStyles = getBonusLevelStyles(bonusStats?.levelData.level || 1)
 
   return (
@@ -355,6 +347,11 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                 <span className={cn("text-[10px] font-bold tracking-wide uppercase font-montserrat", subStyles.status)}>
                   {subscriptionActive ? 'Активна' : 'Неактивна'}
                 </span>
+                {subscriptionActive && profile.subscription_expires_at && (
+                  <span className="text-[9px] text-white/40 font-medium font-montserrat lowercase">
+                    до {format(new Date(profile.subscription_expires_at), 'd MMMM', { locale: ru })}
+                  </span>
+                )}
               </div>
 
               {/* Days Count or Inactive Message */}
@@ -458,7 +455,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           ></div>
           
           <div className="relative z-10 flex flex-col h-full justify-between gap-4">
-            {/* Card Top */}
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
                 <Trophy className={cn("w-4 h-4", bonusStyles.icon)} />
@@ -484,8 +480,12 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                     </span>
                     <Sparkles className={cn("w-4 h-4", bonusStyles.subtext)} />
                     {bonusStats && (
-                      <div className={cn("ml-1 px-1.5 py-0.5 rounded bg-black/20 border border-white/5 text-[8px] font-bold uppercase tracking-tighter font-montserrat", bonusStyles.subtext)}>
-                        {bonusStats.levelData.percent}% кэшбэк
+                      <div className={cn(
+                        "ml-1 px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-tight font-montserrat flex items-center gap-1 shadow-sm backdrop-blur-md",
+                        bonusStyles.badge
+                      )}>
+                        <div className={cn("w-1 h-1 rounded-full animate-pulse", bonusStyles.icon === bonusStyles.points ? "bg-current" : "bg-white")} />
+                        <span>{bonusStats.levelData.percent}% кэшбэк</span>
                       </div>
                     )}
                   </div>
@@ -495,8 +495,8 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   <span className={cn("text-[10px] font-black uppercase tracking-widest font-oswald leading-none", bonusStyles.points)}>
                     {bonusStats.progress.nextLevel && (
                       <span className="opacity-50">
-                        еще {bonusStats.progress.remaining.toLocaleString('ru-RU')} до уровня {' '}
-                        <span className={cn("opacity-100", getLevelColorClass(CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name || ''))}>
+                        еще {bonusStats.progress.remaining.toLocaleString('ru-RU')} ₽ до уровня {' '}
+                        <span>
                           {CASHBACK_LEVELS.find(l => l.level === bonusStats.progress.nextLevel)?.name.toUpperCase()}
                         </span>
                       </span>
