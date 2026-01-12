@@ -3,8 +3,8 @@
 import { useState, useRef, ChangeEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { updateUserProfile, uploadUserAvatar, deleteUserAvatar } from '@/lib/actions/user-profile'
-import { Loader2, User, Mail, Phone, Pencil, LogOut, Check, X, Camera } from 'lucide-react'
+import { updateUserProfile, uploadUserAvatar } from '@/lib/actions/user-profile'
+import { Loader2, User, Mail, Phone, Pencil, LogOut, Check, X, Camera, KeyRound } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Profile } from '@/types/database'
 import { cn } from '@/lib/utils'
@@ -200,6 +200,12 @@ export function ProfileEditDialog({
         [data-slot="dialog-close"] {
           display: none !important;
         }
+        
+        .grain-overlay {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.015;
+          pointer-events: none;
+        }
       `}</style>
       
       <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
@@ -221,19 +227,23 @@ export function ProfileEditDialog({
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             className={cn(
-              "relative w-full mx-auto p-8 rounded-[2.5rem] bg-[#0c0c12]/90 border backdrop-blur-3xl shadow-2xl overflow-hidden",
+              "relative w-full mx-auto p-8 rounded-[2.5rem] bg-[#0c0c12]/95 border backdrop-blur-3xl shadow-2xl overflow-hidden",
               styles.border
             )}
           >
-            {/* Background decorative elements */}
-            <div className={cn(
-              "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none",
-              styles.bg.replace('/10', '/30')
-            )} />
-            <div className={cn(
-              "absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-[100px] opacity-10 pointer-events-none",
-              styles.bg.replace('/10', '/30')
-            )} />
+            {/* Background Layer with Grain */}
+            <div className="absolute inset-0 z-0">
+              <div className="absolute inset-0 grain-overlay" />
+              {/* Background decorative elements */}
+              <div className={cn(
+                "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none",
+                styles.bg.replace('/10', '/30')
+              )} />
+              <div className={cn(
+                "absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-[100px] opacity-10 pointer-events-none",
+                styles.bg.replace('/10', '/30')
+              )} />
+            </div>
 
             {/* Header section */}
             <div className="relative z-10 flex flex-col items-center mb-8">
@@ -292,8 +302,10 @@ export function ProfileEditDialog({
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Edit icon badge (right) */}
                   <div className={cn(
-                    "absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#0c0c12] flex items-center justify-center shadow-lg",
+                    "absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#0c0c12] flex items-center justify-center shadow-lg transition-transform group-active:scale-90 z-10",
                     styles.buttonBg
                   )}>
                     <Pencil className="w-3.5 h-3.5" />
@@ -330,9 +342,9 @@ export function ProfileEditDialog({
                     Ваше имя
                   </label>
                   <div className={cn(
-                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    "relative group flex items-center rounded-2xl bg-[#12121a] border transition-all duration-300",
                     styles.border,
-                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                    "focus-within:bg-[#161620] focus-within:border-white/20"
                   )}>
                     <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
                       <User className="w-4 h-4" />
@@ -355,9 +367,9 @@ export function ProfileEditDialog({
                     {isTelegramAccount && isFirstTime && <span className="text-red-500">* обязательна</span>}
                   </label>
                   <div className={cn(
-                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    "relative group flex items-center rounded-2xl bg-[#12121a] border transition-all duration-300",
                     styles.border,
-                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                    "focus-within:bg-[#161620] focus-within:border-white/20"
                   )}>
                     <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
                       <Mail className="w-4 h-4" />
@@ -381,9 +393,9 @@ export function ProfileEditDialog({
                     Телефон
                   </label>
                   <div className={cn(
-                    "relative group flex items-center rounded-2xl bg-white/[0.03] border transition-all duration-300",
+                    "relative group flex items-center rounded-2xl bg-[#12121a] border transition-all duration-300",
                     styles.border,
-                    "focus-within:bg-white/[0.06] focus-within:border-white/20"
+                    "focus-within:bg-[#161620] focus-within:border-white/20"
                   )}>
                     <div className="pl-4 pr-3 text-white/20 group-focus-within:text-white/40 transition-colors">
                       <Phone className="w-4 h-4" />
@@ -407,7 +419,7 @@ export function ProfileEditDialog({
                   type="submit"
                   disabled={loading || uploadingAvatar}
                   className={cn(
-                    "w-full h-[60px] rounded-2xl font-oswald text-lg font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl",
+                    "w-full h-[60px] rounded-2xl font-oswald text-lg font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl",
                     styles.buttonBg
                   )}
                 >
@@ -430,13 +442,23 @@ export function ProfileEditDialog({
                 )}
 
                 {!isFirstTime && (
-                  <a
-                    href="/auth/logout"
-                    className="w-full h-12 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Выйти из аккаунта</span>
-                  </a>
+                  <div className="flex gap-3">
+                    <a
+                      href="/auth/logout"
+                      className="flex-1 h-12 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Выйти</span>
+                    </a>
+                    
+                    <button
+                      type="button"
+                      className="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Сменить пароль</span>
+                    </button>
+                  </div>
                 )}
                 
                 {isTelegramAccount && isFirstTime && hasTelegramEmail && (
