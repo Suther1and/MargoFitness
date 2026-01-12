@@ -329,7 +329,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
               {/* Days Count */}
               <div className="flex items-end gap-3">
-                <span className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-lg leading-[0.8] font-oswald">
+                <span className="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-lg leading-none font-oswald px-0.5">
                   {daysLeft || 0}
                 </span>
                 <div className="flex flex-col pb-1.5">
