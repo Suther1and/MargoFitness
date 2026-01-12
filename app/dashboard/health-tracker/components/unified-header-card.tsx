@@ -34,7 +34,7 @@ export function UnifiedHeaderCard({
     <motion.div 
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 gap-6 relative group/card"
+      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card"
     >
       {/* Мягкий фоновый градиент для глубины */}
       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent pointer-events-none" />
@@ -42,7 +42,7 @@ export function UnifiedHeaderCard({
       {/* 1. Аватар */}
       <button 
         onClick={onEditClick}
-        className="relative shrink-0 group/avatar"
+        className="relative shrink-0 group/avatar mr-6"
       >
         <div className="w-[60px] h-[60px] rounded-full p-[1.5px] bg-gradient-to-br from-amber-500/40 to-orange-600/40 group-hover/avatar:scale-105 transition-transform duration-500">
           <div className="w-full h-full rounded-full bg-[#09090b] p-0.5 overflow-hidden">
@@ -104,7 +104,7 @@ export function UnifiedHeaderCard({
       </div>
 
       {/* 3. Кнопки действий */}
-      <div className="flex items-center gap-2 ml-4 pl-6 border-l border-white/5 h-10">
+      <div className="flex items-center gap-2 ml-5 pl-5 border-l border-white/5 h-10">
         <button 
           onClick={(e) => { e.stopPropagation(); onRenewalClick(); }}
           className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all active:scale-90 group/btn"
