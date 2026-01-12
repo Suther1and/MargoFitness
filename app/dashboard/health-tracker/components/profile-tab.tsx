@@ -60,7 +60,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
   const tierColor = getTierColor(profile.subscription_tier)
 
   return (
-    <div className="pb-32 px-4 space-y-6 max-w-md mx-auto pt-4">
+    <div className="pb-32 space-y-6 pt-2">
       {/* 1. Integrated Header Card */}
       <section className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 backdrop-blur-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl pointer-events-none" />
