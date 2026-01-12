@@ -582,14 +582,27 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               </div>
 
               {/* Декоративный разделитель */}
-              <div className="absolute bottom-0 left-0 w-full h-px overflow-hidden hidden lg:block">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                <motion.div 
-                  initial={{ x: '-100%' }}
-                  animate={{ x: '300%' }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"
-                />
+              <div className="absolute bottom-0 left-0 w-full h-px hidden lg:block">
+                <div className="relative w-full h-full overflow-hidden">
+                  {/* Основная статичная линия с затуханием по краям */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  
+                  {/* Маска для анимации, повторяющая затухание краев */}
+                  <div 
+                    className="absolute inset-0 w-full h-full"
+                    style={{
+                      maskImage: 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)',
+                      WebkitMaskImage: 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)'
+                    }}
+                  >
+                    <motion.div 
+                      initial={{ x: '-100%' }}
+                      animate={{ x: '300%' }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
+                    />
+                  </div>
+                </div>
               </div>
             </header>
 
