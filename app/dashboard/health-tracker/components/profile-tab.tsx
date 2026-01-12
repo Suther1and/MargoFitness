@@ -317,7 +317,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             {/* Left: Status & Duration */}
             <div className="flex flex-col gap-1">
               {/* Status */}
-              <div className="flex items-center gap-2 opacity-80 h-[36px]">
+              <div className="flex items-center gap-2 opacity-80">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", subStyles.badgeDot)}></span>
                   <span className={cn("relative inline-flex rounded-full h-1.5 w-1.5", subStyles.badgeDot)}></span>
