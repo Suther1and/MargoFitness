@@ -39,12 +39,18 @@ export function UnifiedHeaderCard({
     switch (tier) {
       case 'elite':
         return {
-          text: 'text-amber-400',
-          bg: 'bg-amber-500/10',
-          border: 'border-amber-500/20',
-          gradient: 'from-amber-400/40 to-amber-600/40',
-          shadow: 'shadow-amber-500/20',
-          icon: 'text-amber-500'
+          text: 'text-yellow-400',
+          bg: 'bg-yellow-500/10',
+          border: 'border-yellow-500/20',
+          gradient: 'from-yellow-300/40 to-yellow-500/40',
+          shadow: 'shadow-yellow-500/20',
+          icon: 'text-yellow-500',
+          hoverBorder: 'hover:border-yellow-400/30',
+          hoverShadow: 'hover:shadow-yellow-500/15',
+          hoverBg: 'hover:bg-yellow-500/[0.05]',
+          accentIcon: 'text-yellow-500/40',
+          upgradeBtn: 'bg-yellow-500 hover:bg-yellow-400 text-black shadow-yellow-500/20',
+          nameHover: 'hover:text-yellow-400'
         }
       case 'pro':
         return {
@@ -53,7 +59,13 @@ export function UnifiedHeaderCard({
           border: 'border-purple-500/20',
           gradient: 'from-purple-400/40 to-purple-600/40',
           shadow: 'shadow-purple-500/20',
-          icon: 'text-purple-500'
+          icon: 'text-purple-500',
+          hoverBorder: 'hover:border-purple-500/30',
+          hoverShadow: 'hover:shadow-purple-500/10',
+          hoverBg: 'hover:bg-purple-500/[0.05]',
+          accentIcon: 'text-purple-500/40',
+          upgradeBtn: 'bg-purple-500 hover:bg-purple-400 text-white shadow-purple-500/20',
+          nameHover: 'hover:text-purple-400'
         }
       case 'basic':
         return {
@@ -62,7 +74,13 @@ export function UnifiedHeaderCard({
           border: 'border-orange-500/20',
           gradient: 'from-orange-400/40 to-orange-600/40',
           shadow: 'shadow-orange-500/20',
-          icon: 'text-orange-500'
+          icon: 'text-orange-500',
+          hoverBorder: 'hover:border-amber-500/30', // Как было (бронзовый/amber)
+          hoverShadow: 'hover:shadow-amber-500/5',
+          hoverBg: 'hover:bg-white/[0.05]',
+          accentIcon: 'text-orange-500/40',
+          upgradeBtn: 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/10',
+          nameHover: 'hover:text-amber-500'
         }
       default: // free
         return {
@@ -71,7 +89,13 @@ export function UnifiedHeaderCard({
           border: 'border-white/10',
           gradient: 'from-white/20 to-white/10',
           shadow: 'shadow-white/5',
-          icon: 'text-white/40'
+          icon: 'text-white/40',
+          hoverBorder: 'hover:border-white/20',
+          hoverShadow: 'hover:shadow-white/5',
+          hoverBg: 'hover:bg-white/[0.02]',
+          accentIcon: 'text-white/10',
+          upgradeBtn: 'bg-white/10 hover:bg-white/20 text-white shadow-white/5',
+          nameHover: 'hover:text-white/60'
         }
     }
   }
@@ -82,14 +106,30 @@ export function UnifiedHeaderCard({
     <motion.div 
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex items-center shadow-2xl px-7 relative group/card transition-all duration-300 hover:border-amber-500/30 hover:shadow-amber-500/5 hover:bg-white/[0.05] overflow-hidden"
+      className={cn(
+        "w-fit h-[88px] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border flex items-center shadow-2xl px-7 relative group/card transition-all duration-300 overflow-hidden",
+        styles.border,
+        styles.hoverBorder,
+        styles.hoverShadow,
+        styles.hoverBg
+      )}
     >
       {/* Мягкий фоновый градиент для глубины */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent pointer-events-none rounded-[2.5rem]" />
+      <div className={cn(
+        "absolute inset-0 bg-gradient-to-r from-transparent to-transparent pointer-events-none rounded-[2.5rem]",
+        profile.subscription_tier === 'elite' ? "from-amber-500/[0.02]" : 
+        profile.subscription_tier === 'pro' ? "from-purple-500/[0.02]" : 
+        profile.subscription_tier === 'basic' ? "from-orange-500/[0.02]" : ""
+      )} />
       
       {/* Свечение при наведении */}
       <div className="absolute inset-0 rounded-[2.5rem] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-transparent blur-sm" />
+        <div className={cn(
+          "absolute inset-0 rounded-[2.5rem] blur-sm bg-gradient-to-r from-transparent via-transparent to-transparent",
+          profile.subscription_tier === 'elite' ? "from-yellow-400/25 via-yellow-500/10" : 
+          profile.subscription_tier === 'pro' ? "from-purple-500/20 via-indigo-500/10" : 
+          profile.subscription_tier === 'basic' ? "from-amber-500/20 via-orange-500/10" : "from-white/10"
+        )} />
       </div>
 
       {/* 1. Аватар */}
@@ -127,7 +167,10 @@ export function UnifiedHeaderCard({
         <div className="flex items-center gap-3">
           <button 
             onClick={onEditClick}
-            className="font-oswald text-2xl font-bold text-white uppercase tracking-tight leading-none truncate hover:text-amber-500 transition-colors text-left"
+            className={cn(
+              "font-oswald text-2xl font-bold text-white uppercase tracking-tight leading-none truncate transition-colors text-left",
+              styles.nameHover
+            )}
           >
             {displayName}
           </button>
@@ -138,7 +181,7 @@ export function UnifiedHeaderCard({
               onSubscriptionClick?.();
             }}
             animate={{ 
-              boxShadow: ["0 0 0px rgba(245,158,11,0)", `0 0 12px ${styles.text === 'text-white/40' ? 'rgba(255,255,255,0.1)' : styles.text.replace('text-', 'rgba(').replace('-400', ',0.2)')}`, "0 0 0px rgba(245,158,11,0)"]
+              boxShadow: ["0 0 0px rgba(0,0,0,0)", `0 0 12px ${styles.text === 'text-white/40' ? 'rgba(255,255,255,0.1)' : styles.text.replace('text-', 'rgba(').replace('-400', ',0.2)')}`, "0 0 0px rgba(0,0,0,0)"]
             }}
             transition={{ 
               duration: 3,
@@ -168,26 +211,26 @@ export function UnifiedHeaderCard({
         
         {/* Уровень 2: Статус дней (под именем) */}
         <div className={cn(
-          "flex items-center gap-1.5",
-          daysLeft !== null && daysLeft < 10 ? "text-red-500" : (isFree ? "text-white/30" : "text-amber-500/80")
+          "flex items-center gap-1.5 transition-colors duration-300",
+          daysLeft !== null && daysLeft < 10 ? "text-red-500" : (isFree ? "text-white/30" : styles.text)
         )}>
           <Clock className="w-3 h-3" />
           <span className="text-[10px] font-bold uppercase tracking-wider leading-none">
-            {isFree ? "Доступ ограничен" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
+            {isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
           </span>
         </div>
 
         {/* Уровень 3: Контакты */}
         <div className="flex items-center gap-3 text-white/25">
           <div className="flex items-center gap-1.5 min-w-0">
-            <Mail className="w-2.5 h-2.5 text-amber-500/20 shrink-0" />
+            <Mail className={cn("w-2.5 h-2.5 shrink-0 transition-colors", styles.accentIcon)} />
             <span className="text-[10px] font-medium truncate max-w-[120px] tracking-wide">{email}</span>
           </div>
           
           <div className="w-1 h-1 rounded-full bg-white/5 shrink-0" />
           
           <div className="flex items-center gap-1.5 shrink-0">
-            <Phone className="w-2.5 h-2.5 text-amber-500/20 shrink-0" />
+            <Phone className={cn("w-2.5 h-2.5 shrink-0 transition-colors", styles.accentIcon)} />
             <span className="text-[10px] font-medium tracking-wide">{phone}</span>
           </div>
         </div>
@@ -214,10 +257,13 @@ export function UnifiedHeaderCard({
             
             <button 
               onClick={(e) => { e.stopPropagation(); onUpgradeClick(); }}
-              className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center hover:bg-amber-400 transition-all active:scale-90 shadow-lg shadow-amber-500/10 group/up"
+              className={cn(
+                "w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-lg group/up",
+                styles.upgradeBtn
+              )}
               title="Улучшить"
             >
-              <TrendingUp className="w-4 h-4 text-black group-hover:scale-110 transition-transform" />
+              <TrendingUp className="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
           </>
         )}
