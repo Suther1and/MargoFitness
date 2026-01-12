@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, RefreshCw, Sparkles, Footprints, Trophy, Sparkle } from 'lucide-react'
+import { Crown, RefreshCw, TrendingUp, Footprints, Trophy, Sparkle } from 'lucide-react'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration } from '@/lib/access-control'
 import { calculateLevelProgress, UserBonus, CashbackLevel } from '@/types/database'
@@ -42,7 +42,7 @@ export function UnifiedHeaderCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="w-[650px] h-[88px] min-w-[650px] min-h-[88px] max-w-[650px] max-h-[88px] bg-[#101016] rounded-xl border border-white/5 shadow-2xl flex flex-row overflow-hidden relative group/card shrink-0"
+      className="w-full lg:w-[650px] h-auto sm:h-[88px] bg-[#101016] rounded-xl border border-white/5 shadow-2xl flex flex-col sm:flex-row overflow-hidden relative group/card shrink-0"
     >
       {/* Global Bottom Highlight */}
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent z-20"></div>
@@ -50,7 +50,7 @@ export function UnifiedHeaderCard({
       {/* Section 1: Profile */}
       <button 
         onClick={onEditClick}
-        className="group/section relative flex-1 w-0 h-full overflow-hidden transition-colors hover:bg-white/[0.02] text-left"
+        className="group/section relative flex-1 w-full sm:w-0 sm:h-full overflow-hidden transition-colors hover:bg-white/[0.02] text-left py-4 sm:py-0"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#151520] to-transparent opacity-50"></div>
         {/* Glow */}
@@ -95,10 +95,12 @@ export function UnifiedHeaderCard({
       </button>
 
       {/* Vertical Divider */}
-      <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0"></div>
+      <div className="hidden sm:block w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0"></div>
+      {/* Horizontal Divider (Mobile) */}
+      <div className="sm:hidden w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent flex-shrink-0"></div>
 
       {/* Section 2: Subscription */}
-      <div className="group/section relative flex-1 w-0 h-full overflow-hidden transition-colors hover:bg-white/[0.02]">
+      <div className="group/section relative flex-1 w-full sm:w-0 sm:h-full overflow-hidden transition-colors hover:bg-white/[0.02] py-4 sm:py-0">
         {/* Glow */}
         <div className="absolute top-0 right-10 w-16 h-16 bg-purple-600/5 rounded-full blur-2xl group-hover/section:bg-purple-600/10 transition-all duration-500"></div>
 
@@ -144,19 +146,21 @@ export function UnifiedHeaderCard({
               className="group/btn relative h-8 w-8 rounded-lg bg-gradient-to-b from-purple-500/20 to-purple-600/10 border border-purple-500/20 hover:border-purple-500/40 hover:from-purple-500/30 hover:to-purple-600/20 transition-all duration-200 shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)] cursor-pointer flex items-center justify-center" 
               aria-label="Upgrade"
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-300 group-hover/btn:text-white transition-colors" />
+              <TrendingUp className="w-3.5 h-3.5 text-purple-300 group-hover/btn:text-white transition-colors" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Vertical Divider */}
-      <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0"></div>
+      <div className="hidden sm:block w-[1px] h-full bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0"></div>
+      {/* Horizontal Divider (Mobile) */}
+      <div className="sm:hidden w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent flex-shrink-0"></div>
 
       {/* Section 3: Rewards (Steps) */}
       <button 
         onClick={() => window.location.href = '/dashboard/bonuses'}
-        className="group/section relative flex-1 w-0 h-full overflow-hidden transition-all duration-500 hover:bg-[#1a1500]/30 text-left"
+        className="group/section relative flex-1 w-full sm:w-0 sm:h-full overflow-hidden transition-all duration-500 hover:bg-[#1a1500]/30 text-left py-4 sm:py-0"
       >
         {/* Premium Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.02] to-transparent"></div>

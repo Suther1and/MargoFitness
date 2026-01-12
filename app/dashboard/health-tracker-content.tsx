@@ -509,31 +509,40 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
               </div>
 
               {/* Desktop: Заголовок с идеально горизонтальным перетеканием и выравниванием по сетке */}
-              <div className="hidden lg:flex items-center max-w-[1400px] xl:max-w-[1600px] mx-auto w-full lg:min-h-[70px] px-4 md:px-8 lg:mb-0">
-                <div className="w-full">
-                  {activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts' ? (
-                    <div className="w-full">
-                      <div className="flex items-start justify-between">
-                        <div className="flex flex-col">
-                          <div className="h-8 mb-1 flex items-center">
-                            <motion.div 
-                              initial={{ opacity: 0 }} 
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex items-center gap-2"
-                            >
-                              <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                                V3.0 Beta
-                              </div>
-                              <div className="h-px w-8 bg-white/10" />
-                              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                                <Activity className="w-3 h-3" />
-                                Live
-                              </span>
-                            </motion.div>
-                          </div>
-                          
-                          <h1 className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap">
+              <div className="hidden lg:flex items-center w-full lg:min-h-[70px] lg:mb-0 pl-4 md:pl-8 pr-0">
+                <div className="flex items-start justify-between w-full">
+                  <div className="flex flex-col">
+                    <div className="h-8 mb-1 flex items-center">
+                      <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center gap-2"
+                      >
+                        <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                          V3.0 Beta
+                        </div>
+                        <div className="h-px w-8 bg-white/10" />
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                          <Activity className="w-3 h-3" />
+                          Live
+                        </span>
+                      </motion.div>
+                    </div>
+                    
+                    <AnimatePresence mode="wait">
+                      <motion.h1 
+                        key={activeTab}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
+                      >
+                        {activeTab === 'overview' ? (
+                          <>Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span></>
+                        ) : (
+                          <>
                             {activeTab === 'settings' && (
                               <>Мои<span className={cn(
                                 "text-transparent bg-clip-text bg-gradient-to-r transition-all duration-500",
@@ -552,79 +561,23 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                             {activeTab === 'workouts' && (
                               <>Мои<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500">Тренировки</span></>
                             )}
-                          </h1>
-                        </div>
-
-                        <motion.div 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="flex items-center gap-3 mt-[5px] mb-[5px]"
-                        >
-                          {profile && (
-                            <UnifiedHeaderCard 
-                              profile={profile}
-                              bonusStats={bonusStats}
-                              onEditClick={() => setProfileDialogOpen(true)}
-                              onRenewalClick={() => setRenewalModalOpen(true)}
-                              onUpgradeClick={() => setUpgradeModalOpen(true)}
-                            />
-                          )}
-                        </motion.div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Переключаем на items-start и добавляем mt-9 (36px), чтобы выровнять по верху h1 */
-                    <div className="flex items-start justify-between w-full">
-                      <div className="flex flex-col">
-                        <div className="h-8 mb-1 flex items-center">
-                          <motion.div 
-                            initial={{ opacity: 0 }} 
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex items-center gap-2"
-                          >
-                            <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-[0.2em]">
-                              V3.0 Beta
-                            </div>
-                            <div className="h-px w-8 bg-white/10" />
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                              <Activity className="w-3 h-3" />
-                              Live
-                            </span>
-                          </motion.div>
-                        </div>
-                        
-                        <motion.h1 
-                          layoutId="header-title"
-                          className="text-2xl md:text-5xl font-oswald font-bold tracking-tighter uppercase leading-none whitespace-nowrap"
-                          transition={{ 
-                            type: "spring", 
-                            stiffness: 220, 
-                            damping: 28,
-                            mass: 1
-                          }}
-                        >
-                          Мой <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600">Прогресс</span>
-                        </motion.h1>
-                      </div>
-
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-3 mt-[5px] mb-[5px]"
-                      >
-                        {profile && (
-                          <UnifiedHeaderCard 
-                            profile={profile}
-                            bonusStats={bonusStats}
-                            onEditClick={() => setProfileDialogOpen(true)}
-                            onRenewalClick={() => setRenewalModalOpen(true)}
-                            onUpgradeClick={() => setUpgradeModalOpen(true)}
-                          />
+                          </>
                         )}
-                      </motion.div>
-                    </div>
-                  )}
+                      </motion.h1>
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-[5px] mb-[5px]">
+                    {profile && (
+                      <UnifiedHeaderCard 
+                        profile={profile}
+                        bonusStats={bonusStats}
+                        onEditClick={() => setProfileDialogOpen(true)}
+                        onRenewalClick={() => setRenewalModalOpen(true)}
+                        onUpgradeClick={() => setUpgradeModalOpen(true)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </header>
