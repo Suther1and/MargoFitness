@@ -67,13 +67,13 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
     switch (level) {
       case 4: // Platinum
         return {
-          gradient: 'linear-gradient(135deg, #e5e4e2 0%, #ffffff 25%, #b4b4b4 50%, #7d7d7d 100%)',
-          badge: 'bg-black/20 border-black/10 text-slate-900',
-          points: 'text-slate-950',
-          subtext: 'text-slate-800/70',
-          cta: 'bg-black/10 border-black/20 text-slate-900 hover:bg-black/20',
+          gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
+          badge: 'bg-slate-900/90 border-white/10 text-white',
+          points: 'text-[#020617]',
+          subtext: 'text-slate-600',
+          cta: 'bg-slate-900 border-white/10 text-white hover:bg-black',
           icon: 'text-slate-800',
-          shadow: 'shadow-blue-500/20'
+          shadow: 'shadow-blue-300/40'
         }
       case 3: // Gold
         return {
