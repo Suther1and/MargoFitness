@@ -16,7 +16,9 @@ import {
   ArrowUpRight,
   Trophy,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  History,
+  ChevronLeft
 } from 'lucide-react'
 import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS } from '@/types/database'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
@@ -62,7 +64,57 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
   const tierColor = getTierColor(profile.subscription_tier)
 
-  // Новые стили для уровней бонусных карт
+  // Новые стили для блока подписки
+  const getSubscriptionStyles = (tier: string) => {
+    switch (tier) {
+      case 'elite':
+        return {
+          card: 'linear-gradient(165deg, #2a2110 0%, #17140c 40%, #090805 100%)',
+          pattern: 'rgba(234, 179, 8, 0.1)',
+          accent: 'text-yellow-400',
+          border: 'rgba(234, 179, 8, 0.4)',
+          badge: 'from-yellow-900/40 to-black/40 border-yellow-500/30',
+          badgeDot: 'bg-yellow-400 shadow-[0_0_6px_rgba(234,179,8,0.8)]',
+          glow: 'bg-yellow-600/10',
+          shimmer: 'rgba(234, 179, 8, 0.08)',
+          status: 'text-yellow-300',
+          btnPrimary: 'from-yellow-50 to-yellow-100 text-yellow-950 hover:from-white hover:to-yellow-50',
+          btnPrimaryIcon: 'text-yellow-800'
+        }
+      case 'pro':
+        return {
+          card: 'linear-gradient(165deg, #1a162a 0%, #0f0e1a 40%, #08070f 100%)',
+          pattern: 'rgba(168, 85, 247, 0.1)',
+          accent: 'text-purple-400',
+          border: 'rgba(168, 85, 247, 0.4)',
+          badge: 'from-purple-900/40 to-black/40 border-purple-500/30',
+          badgeDot: 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)]',
+          glow: 'bg-purple-600/10',
+          shimmer: 'rgba(168, 85, 247, 0.08)',
+          status: 'text-purple-300',
+          btnPrimary: 'from-purple-50 to-purple-100 text-purple-950 hover:from-white hover:to-purple-50',
+          btnPrimaryIcon: 'text-purple-800'
+        }
+      default: // basic
+        return {
+          card: 'linear-gradient(165deg, #2a1f18 0%, #1c130e 40%, #0f0805 100%)',
+          pattern: 'rgba(217, 119, 6, 0.1)',
+          accent: 'text-orange-400',
+          border: 'rgba(251, 146, 60, 0.4)',
+          badge: 'from-orange-900/40 to-black/40 border-orange-500/30',
+          badgeDot: 'bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.8)]',
+          glow: 'bg-orange-600/10',
+          shimmer: 'rgba(251, 146, 60, 0.08)',
+          status: 'text-orange-300',
+          btnPrimary: 'from-orange-50 to-orange-100 text-orange-950 hover:from-white hover:to-orange-50',
+          btnPrimaryIcon: 'text-orange-800'
+        }
+    }
+  }
+
+  const subStyles = getSubscriptionStyles(profile.subscription_tier)
+
+  // Стили для уровней бонусных карт
   const getBonusLevelStyles = (level: number) => {
     switch (level) {
       case 4: // Platinum
@@ -128,6 +180,64 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
   return (
     <div className="pb-32 space-y-6 pt-2">
+      {/* CSS Styles for Subscription Card */}
+      <style jsx>{`
+        .sub-card {
+          background: ${subStyles.card};
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+        .sub-pattern {
+          position: absolute;
+          inset: 0;
+          opacity: 0.15;
+          background-image: linear-gradient(45deg, ${subStyles.pattern} 25%, transparent 25%, transparent 50%, ${subStyles.pattern} 50%, ${subStyles.pattern} 75%, transparent 75%, transparent);
+          background-size: 20px 20px;
+          mask-image: linear-gradient(to bottom, black, transparent 90%);
+          -webkit-mask-image: linear-gradient(to bottom, black, transparent 90%);
+          z-index: 1;
+        }
+        .sub-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 1.5rem;
+          padding: 1px;
+          background: linear-gradient(180deg, ${subStyles.border}, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0));
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          z-index: 25;
+        }
+        @keyframes subShimmer {
+          0% { transform: translateX(-150%) rotate(25deg); }
+          20% { transform: translateX(150%) rotate(25deg); }
+          100% { transform: translateX(150%) rotate(25deg); }
+        }
+        .sub-shine {
+          position: absolute;
+          top: -50%; left: -50%;
+          width: 200%; height: 200%;
+          background: linear-gradient(90deg, transparent, ${subStyles.shimmer}, transparent);
+          animation: subShimmer 6s infinite ease-in-out;
+          pointer-events: none;
+          z-index: 2;
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-150%) skewX(-15deg); }
+          100% { transform: translateX(250%) skewX(-15deg); }
+        }
+        .shimmer-effect {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+          animation: shimmer 2.5s infinite linear;
+        }
+      `}</style>
+
       {/* 1. Integrated Header Card */}
       <section className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 backdrop-blur-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl pointer-events-none" />
@@ -173,51 +283,86 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         </div>
       </section>
 
-      {/* 2. Control Grid - Row with Subscription and Actions */}
-      <section className="grid grid-cols-2 gap-4">
-        {/* Subscription Info */}
-        <div 
-          onClick={() => subscriptionActive ? setRenewalModalOpen(true) : (window.location.href = '/#pricing')}
-          className="col-span-1 bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 flex flex-col justify-between h-40 active:scale-95 transition-all cursor-pointer"
-        >
-          <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-              <Shield className={cn("w-5 h-5", tierColor)} />
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-white/10" />
-          </div>
-          <div>
-            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Статус</div>
-            <div className="text-xl font-bold text-white font-oswald uppercase tracking-tight leading-none mb-1">
-              {tierDisplayName}
-            </div>
-            <div className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest">
-              {daysLeft !== null && daysLeft > 0 ? `${daysLeft} дн. осталось` : 'Неактивна'}
-            </div>
-          </div>
-        </div>
+      {/* 2. Premium Subscription Card */}
+      <section className="sub-card w-full rounded-[2rem] p-6 transform transition-all duration-300 relative group min-h-[200px]">
+        <div className="sub-pattern"></div>
+        <div className="sub-shine"></div>
+        
+        {/* Decorative Ambient Orbs */}
+        <div className={cn("absolute -right-10 -top-10 w-48 h-48 blur-[80px] rounded-full pointer-events-none mix-blend-screen opacity-50", subStyles.glow)}></div>
+        <div className={cn("absolute -left-10 bottom-0 w-40 h-40 blur-[60px] rounded-full pointer-events-none opacity-20", subStyles.glow)}></div>
 
-        {/* Quick Actions / Settings & Upgrade */}
-        <div className="col-span-1 grid grid-rows-2 gap-4">
-          <button 
-            onClick={() => setProfileDialogOpen(true)}
-            className="bg-white/[0.02] border border-white/10 rounded-3xl p-4 flex items-center gap-3 active:scale-95 transition-all"
-          >
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <Settings className="w-4 h-4 text-blue-400" />
+        <div className="relative z-10 flex flex-col h-full gap-8">
+          {/* Card Top: Title & Badge */}
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2.5">
+              <div className={cn("p-1.5 rounded-lg bg-black/40 border border-white/5 shadow-sm")}>
+                <Crown className={cn("w-4 h-4 opacity-80", subStyles.status)} />
+              </div>
+              <span className={cn("text-[11px] font-black uppercase tracking-widest opacity-60 font-montserrat", subStyles.status)}>Подписка</span>
             </div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">Профиль</span>
-          </button>
-          
-          <button 
-            onClick={() => setUpgradeModalOpen(true)}
-            className="bg-white/[0.02] border border-white/10 rounded-3xl p-4 flex items-center gap-3 active:scale-95 transition-all"
-          >
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <CreditCard className="w-4 h-4 text-amber-400" />
+            
+            {/* Badge */}
+            <div className={cn("relative overflow-hidden bg-gradient-to-b backdrop-blur-md border rounded-full px-3 py-1 shadow-lg", subStyles.badge)}>
+              <div className="flex items-center gap-1.5">
+                <span className={cn("w-1.5 h-1.5 rounded-full", subStyles.badgeDot)}></span>
+                <span className="text-[10px] font-black tracking-wider uppercase font-montserrat">{tierDisplayName}</span>
+              </div>
             </div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">Тариф</span>
-          </button>
+          </div>
+
+          {/* Card Body: Stats (Left) & Actions (Right) */}
+          <div className="flex items-end justify-between gap-4 mt-auto">
+            
+            {/* Left: Status & Duration */}
+            <div className="flex flex-col gap-1">
+              {/* Status */}
+              <div className="flex items-center gap-2 mb-1 opacity-80">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", subStyles.badgeDot)}></span>
+                  <span className={cn("relative inline-flex rounded-full h-1.5 w-1.5", subStyles.badgeDot)}></span>
+                </span>
+                <span className={cn("text-[10px] font-bold tracking-wide uppercase font-montserrat", subStyles.status)}>
+                  {subscriptionActive ? 'Активна' : 'Неактивна'}
+                </span>
+              </div>
+
+              {/* Days Count */}
+              <div className="flex items-end gap-3">
+                <span className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-lg leading-[0.8] font-oswald">
+                  {daysLeft || 0}
+                </span>
+                <div className="flex flex-col pb-1.5">
+                  <span className="text-xs text-white/40 font-bold leading-none uppercase font-montserrat">дня</span>
+                  <span className="text-[9px] text-white/20 font-bold leading-none mt-1 uppercase font-montserrat tracking-tighter">осталось</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Actions Stacked */}
+            <div className="flex flex-col gap-2 w-[120px]">
+              {/* Upgrade Button (Primary) */}
+              <button 
+                onClick={() => setUpgradeModalOpen(true)}
+                className={cn(
+                  "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 group/btn font-montserrat",
+                  subStyles.btnPrimary
+                )}
+              >
+                <Sparkles className={cn("w-3.5 h-3.5", subStyles.btnPrimaryIcon)} />
+                <span>Улучшить</span>
+              </button>
+
+              {/* Renew Button (Secondary) */}
+              <button 
+                onClick={() => setRenewalModalOpen(true)}
+                className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 backdrop-blur-sm active:scale-95 font-montserrat"
+              >
+                <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
+                <span>Продлить</span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -252,26 +397,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
               backgroundSize: '20px 20px' 
             }}
           />
-          <div 
-            className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}
+          <div className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}
             style={{ mixBlendMode: 'overlay' }}
           ></div>
           
-          {/* Shimmer animation for the badge */}
-          <style jsx>{`
-            @keyframes shimmer {
-              0% { transform: translateX(-150%) skewX(-15deg); }
-              100% { transform: translateX(250%) skewX(-15deg); }
-            }
-            .shimmer-effect {
-              position: absolute;
-              top: 0; left: 0;
-              width: 100%; height: 100%;
-              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-              animation: shimmer 2.5s infinite linear;
-            }
-          `}</style>
-
           <div className="relative z-10 flex flex-col h-full justify-between gap-4">
             {/* Card Top */}
             <div className="flex justify-between items-start">
