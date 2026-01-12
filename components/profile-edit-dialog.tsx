@@ -216,11 +216,23 @@ export function ProfileEditDialog({
           opacity: 0.015;
           pointer-events: none;
         }
+
+        /* Custom scrollbar for mobile */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
       `}</style>
       
       <Dialog open={open} onOpenChange={canClose ? onOpenChange : undefined}>
         <DialogContent 
-          className="max-w-[350px] p-0 border-0 bg-transparent overflow-visible shadow-none"
+          className="w-[calc(100%-32px)] sm:max-w-[400px] h-fit max-h-[90vh] p-0 border-0 !bg-transparent !shadow-none focus:ring-0 focus:outline-none overflow-visible"
           showCloseButton={false}
           onPointerDownOutside={(e) => {
             if (!canClose) e.preventDefault()
@@ -237,98 +249,90 @@ export function ProfileEditDialog({
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             className={cn(
-              "relative w-full mx-auto rounded-[2.5rem] bg-[#0c0c12]/95 border backdrop-blur-3xl shadow-2xl overflow-hidden",
+              "relative w-full h-full max-h-[90vh] rounded-[2.5rem] sm:rounded-[3rem] bg-[#0c0c12] border backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col",
               styles.border
             )}
           >
             {/* Background Layer with Grain */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 pointer-events-none">
               <div className="absolute inset-0 grain-overlay" />
               {/* Background decorative elements */}
               <div className={cn(
-                "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none",
+                "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[100px] opacity-20",
                 styles.bg.replace('/10', '/30')
               )} />
               <div className={cn(
-                "absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-[100px] opacity-10 pointer-events-none",
+                "absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-[100px] opacity-10",
                 styles.bg.replace('/10', '/30')
               )} />
             </div>
 
-            {/* Content Container */}
-            <div className="relative z-10 p-6 sm:p-8">
+            {/* Scrollable Content Container */}
+            <div className="relative z-10 p-6 sm:p-9 overflow-y-auto custom-scrollbar flex-1">
               {/* Header section */}
-              <div className="relative flex flex-col items-center mb-8">
+              <div className="relative flex flex-col items-center mb-6 sm:mb-8">
                 {canClose && (
                   <button
                     type="button"
                     onClick={() => onOpenChange(false)}
-                    className="absolute -top-4 -right-4 p-2 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                    className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 p-2.5 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90 z-20"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 )}
 
                 {/* Avatar section */}
-                <div className="mb-6 relative">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingAvatar}
-                    className="group relative"
-                  >
-                    <div className={cn(
-                      "w-[100px] h-[100px] rounded-full p-[2px] bg-gradient-to-br transition-all duration-500 shadow-xl",
+                <div className="mb-5 relative">
+                  <div
+                    className={cn(
+                      "w-[90px] h-[90px] sm:w-[100px] sm:h-[100px] rounded-full p-[3px] bg-gradient-to-br shadow-2xl ring-1 ring-white/5",
                       styles.gradient
-                    )}>
-                      <div className="w-full h-full rounded-full bg-[#09090b] p-1 overflow-hidden relative">
-                        {(avatarPreview || profile.avatar_url) ? (
-                          <img 
-                            src={avatarPreview || profile.avatar_url!} 
-                            alt="Avatar" 
-                            className="w-full h-full object-cover rounded-full transition-all duration-500 group-hover:blur-[2px]" 
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/10 bg-white/[0.02] rounded-full">
-                            <User className="w-10 h-10" />
-                          </div>
-                        )}
-                        
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 rounded-full">
-                          {uploadingAvatar ? (
-                            <Loader2 className="w-6 h-6 text-white animate-spin" />
-                          ) : (
-                            <Camera className="w-6 h-6 text-white" />
-                          )}
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="w-full h-full rounded-full bg-[#09090b] p-1 overflow-hidden relative group"
+                    >
+                      {(avatarPreview || profile.avatar_url) ? (
+                        <img 
+                          src={avatarPreview || profile.avatar_url!} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover rounded-full transition-all duration-500 group-hover:blur-[2px]" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/10 bg-white/[0.02] rounded-full">
+                          <User className="w-8 h-8 sm:w-10 sm:h-10" />
                         </div>
+                      )}
+                      
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 rounded-full">
+                        {uploadingAvatar ? (
+                          <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        ) : (
+                          <Camera className="w-6 h-6 text-white" />
+                        )}
                       </div>
-                    </div>
-                    
-                    {/* Edit icon badge (right) */}
-                    <div className={cn(
-                      "absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#0c0c12] flex items-center justify-center shadow-lg transition-transform group-active:scale-90 z-10",
-                      styles.buttonBg
-                    )}>
-                      <Pencil className="w-3.5 h-3.5" />
-                    </div>
-                  </button>
+                    </button>
+                  </div>
+                  
+                  {/* Edit icon badge (right) */}
+                  <div className={cn(
+                    "absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full border-4 border-[#0c0c12] flex items-center justify-center shadow-lg z-10",
+                    styles.buttonBg
+                  )}>
+                    <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-current" />
+                  </div>
                 </div>
 
                 <div className="text-center">
-                  <h2 className="font-oswald text-3xl font-bold text-white uppercase tracking-tight leading-none mb-2">
+                  <h2 className="font-oswald text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight leading-none mb-2">
                     {isFirstTime ? 'Добро пожаловать' : 'Профиль'}
                   </h2>
-                  <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">
+                  <p className="text-white/40 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-bold">
                     личного кабинета margofitness.pro
                   </p>
-                  
-                  {!isFirstTime && formattedRegistrationDate && (
-                    <div className="mt-3 text-[10px] text-white/20 font-medium flex items-center justify-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-white/10" />
-                      <span>На платформе с {formattedRegistrationDate}</span>
-                      <div className="w-1 h-1 rounded-full bg-white/10" />
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -346,7 +350,7 @@ export function ProfileEditDialog({
                       styles.border,
                       "hover:bg-white/[0.05] focus-within:bg-white/[0.05] focus-within:border-white/20"
                     )}>
-                      <div className="pl-4 pr-3 text-white/10 group-focus-within:text-white/30 transition-colors">
+                      <div className="pl-5 text-white/10 group-focus-within:text-white/30 transition-colors shrink-0">
                         <User className="w-4 h-4" />
                       </div>
                       <input
@@ -355,7 +359,7 @@ export function ProfileEditDialog({
                         placeholder="Имя Фамилия"
                         value={formData.full_name}
                         onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        className="w-full bg-transparent py-3.5 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                        className="w-full bg-transparent py-3.5 px-4 text-[16px] sm:text-sm text-white placeholder:text-white/10 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -371,7 +375,7 @@ export function ProfileEditDialog({
                       styles.border,
                       "hover:bg-white/[0.05] focus-within:bg-white/[0.05] focus-within:border-white/20"
                     )}>
-                      <div className="pl-4 pr-3 text-white/10 group-focus-within:text-white/30 transition-colors">
+                      <div className="pl-5 text-white/10 group-focus-within:text-white/30 transition-colors shrink-0">
                         <Mail className="w-4 h-4" />
                       </div>
                       <input
@@ -381,7 +385,7 @@ export function ProfileEditDialog({
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required={isTelegramAccount && isFirstTime}
-                        className="w-full bg-transparent py-3.5 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                        className="w-full bg-transparent py-3.5 px-4 text-[16px] sm:text-sm text-white placeholder:text-white/10 focus:outline-none"
                       />
                     </div>
                     {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.email}</p>}
@@ -397,7 +401,7 @@ export function ProfileEditDialog({
                       styles.border,
                       "hover:bg-white/[0.05] focus-within:bg-white/[0.05] focus-within:border-white/20"
                     )}>
-                      <div className="pl-4 pr-3 text-white/10 group-focus-within:text-white/30 transition-colors">
+                      <div className="pl-5 text-white/10 group-focus-within:text-white/30 transition-colors shrink-0">
                         <Phone className="w-4 h-4" />
                       </div>
                       <input
@@ -407,7 +411,7 @@ export function ProfileEditDialog({
                         value={formData.phone}
                         onChange={handlePhoneChange}
                         maxLength={18}
-                        className="w-full bg-transparent py-3.5 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none"
+                        className="w-full bg-transparent py-3.5 px-4 text-[16px] sm:text-sm text-white placeholder:text-white/10 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -436,12 +440,12 @@ export function ProfileEditDialog({
                 </AnimatePresence>
 
                 {/* Action buttons */}
-                <div className="space-y-4 pt-2">
+                <div className="space-y-6 pt-2">
                   <button
                     type="submit"
                     disabled={loading || uploadingAvatar}
                     className={cn(
-                      "w-full h-[56px] rounded-2xl font-oswald text-lg font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl",
+                      "w-full h-[56px] sm:h-[60px] rounded-2xl font-oswald text-lg sm:text-xl font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-xl",
                       styles.buttonBg
                     )}
                   >
@@ -456,18 +460,18 @@ export function ProfileEditDialog({
                   </button>
 
                   {!isFirstTime && (
-                    <div className="flex items-center gap-4 pt-2">
+                    <div className="flex items-center gap-4">
                       <div className="h-px flex-1 bg-white/5" />
-                      <span className="text-[10px] font-bold text-white/5 uppercase tracking-[0.2em]">danger zone</span>
+                      <span className="text-[10px] font-bold text-white/10 uppercase tracking-[0.2em]">danger zone</span>
                       <div className="h-px flex-1 bg-white/5" />
                     </div>
                   )}
 
                   {!isFirstTime && (
-                    <div className="flex gap-3">
+                    <div className="flex gap-2.5">
                       <a
                         href="/auth/logout"
-                        className="flex-1 h-11 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
+                        className="h-12 flex-1 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/60 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all active:scale-[0.98]"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Выйти</span>
@@ -475,7 +479,7 @@ export function ProfileEditDialog({
                       
                       <button
                         type="button"
-                        className="flex-1 h-11 rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                        className="h-12 flex-1 rounded-xl bg-white/5 border border-white/10 text-white/40 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
                       >
                         <KeyRound className="w-3.5 h-3.5" />
                         <span>Сменить пароль</span>
