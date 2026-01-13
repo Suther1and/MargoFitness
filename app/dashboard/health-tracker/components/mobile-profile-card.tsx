@@ -39,9 +39,6 @@ export const MobileProfileCard = memo(function MobileProfileCard({ profile, onEd
     btnSecondary: 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border-white/10',
   }
 
-  // Bonus card pattern for dots
-  const bonusPattern = 'rgba(255, 255, 255, 0.15)'
-
   return (
     <div className="w-full relative group">
       {/* Dynamic Style for Pattern */}
@@ -57,19 +54,10 @@ export const MobileProfileCard = memo(function MobileProfileCard({ profile, onEd
           inset: 0;
           opacity: 0.1;
           background-image: linear-gradient(45deg, ${subStyles.pattern} 25%, transparent 25%, transparent 50%, ${subStyles.pattern} 50%, ${subStyles.pattern} 75%, transparent 75%, transparent);
-          background-size: 20px 20px;
+          background-size: 40px 40px;
           z-index: 1;
         }
-        .dots-pattern {
-          position: absolute; 
-          inset: 0; 
-          pointer-events: none;
-          background-image: radial-gradient(circle at 1px 1px, ${bonusPattern} 1px, transparent 0);
-          background-size: 20px 20px;
-          opacity: 0.3;
-          z-index: 1;
-        }
-        .sub-card::after {
+Line 60:        .sub-card::after {
           content: '';
           position: absolute;
           inset: 0;
@@ -87,7 +75,6 @@ export const MobileProfileCard = memo(function MobileProfileCard({ profile, onEd
       {/* Main Card */}
       <div className="sub-card w-full rounded-[2.5rem] relative group min-h-[200px] flex flex-col overflow-hidden">
         <div className="sub-pattern"></div>
-        <div className="dots-pattern"></div>
         
         {/* Profile Logo - Right Side Decoration */}
         <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none z-0 rotate-12" style={{ willChange: 'transform' }}>
@@ -148,7 +135,7 @@ export const MobileProfileCard = memo(function MobileProfileCard({ profile, onEd
                     <img 
                       src={profile.avatar_url} 
                       alt={displayName} 
-                      className="w-full h-full rounded-full object-cover grayscale brightness-90 contrast-125" 
+                      className="w-full h-full rounded-full object-cover brightness-105 contrast-110" 
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-white/5 flex items-center justify-center">

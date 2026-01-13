@@ -40,13 +40,24 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
           }
-          .subtle-mesh {
+          .premium-contour {
             position: absolute;
             inset: 0;
-            opacity: 0.02;
-            background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
-            background-size: 24px 24px;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 Q 100 50 200 100 T 400 100 M0 200 Q 100 150 200 200 T 400 200 M0 300 Q 100 250 200 300 T 400 300' stroke='%2310b981' fill='none' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 100% 100%;
             z-index: 1;
+          }
+          .premium-glow-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 2;
           }
           .premium-container::after {
             content: '';
@@ -72,7 +83,8 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
         `}</style>
 
         <div className="premium-container w-full rounded-[2.5rem] flex flex-col min-h-[340px] overflow-hidden">
-          <div className="subtle-mesh" />
+          <div className="premium-contour" />
+          <div className="premium-glow-center" />
           <div className="glow-point -top-10 -right-10" />
           <div className="glow-point -bottom-20 -left-10" />
 
@@ -145,7 +157,7 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
             <div className="bg-white/[0.03] border border-white/5 rounded-[1.5rem] p-4">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 font-montserrat">
                     Общий прогресс
                   </span>
