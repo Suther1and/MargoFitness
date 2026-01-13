@@ -149,8 +149,8 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           <div className="flex items-center justify-between px-6 py-2 gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-              <LogoIcon width={40} height={53} className="transition-transform group-hover:scale-105" />
-              <LogoWithText width={180} height={50} className="transition-transform group-hover:scale-105" />
+              <LogoIcon width={40} height={53} />
+              <LogoWithText width={180} height={50} className="transition-opacity group-hover:opacity-70" />
             </Link>
 
             {/* Navigation Links */}
