@@ -7,6 +7,8 @@ import { Menu, X } from 'lucide-react'
 import { SignInPopup } from './signin-popup'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import { colors as sharedColors } from '@/lib/constants/colors'
+import { LogoIcon } from './LogoIcon'
+import { LogoWithText } from './LogoWithText'
 
 const colors = {
   ...sharedColors,
@@ -60,28 +62,9 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         >
           <div className="flex items-center justify-between px-6 py-2 gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-              <div 
-                className="flex text-white rounded-xl w-10 h-10 items-center justify-center shadow-lg" 
-                style={{
-                  background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                  boxShadow: `0 4px 20px ${colors.primary}40`
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m6.5 6.5 11 11"></path>
-                  <path d="m21 21-1-1"></path>
-                  <path d="m3 3 1 1"></path>
-                  <path d="m18 22 4-4"></path>
-                  <path d="m2 6 4-4"></path>
-                  <path d="m3 10 7-7"></path>
-                  <path d="m14 21 7-7"></path>
-                </svg>
-              </div>
-              <div className="flex flex-col">
-                <span className="uppercase leading-none text-lg font-semibold tracking-tight text-white">MargoFitness</span>
-                <span className="text-[0.55rem] uppercase tracking-widest text-white/40">Elite Performance</span>
-              </div>
+            <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
+              <LogoIcon width={40} height={53} className="transition-transform group-hover:scale-105" />
+              <LogoWithText width={180} height={50} className="transition-transform group-hover:scale-105" />
             </Link>
 
             {/* Navigation Links */}
@@ -157,25 +140,9 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
         >
           <div className="flex items-center justify-between px-4 py-2">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div 
-                className="flex text-white rounded-lg w-8 h-8 items-center justify-center shadow-lg" 
-                style={{
-                  background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                  boxShadow: `0 4px 20px ${colors.primary}40`
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m6.5 6.5 11 11"></path>
-                  <path d="m21 21-1-1"></path>
-                  <path d="m3 3 1 1"></path>
-                  <path d="m18 22 4-4"></path>
-                  <path d="m2 6 4-4"></path>
-                  <path d="m3 10 7-7"></path>
-                  <path d="m14 21 7-7"></path>
-                </svg>
-              </div>
-              <span className="uppercase text-sm font-semibold tracking-tight text-white">MargoFitness</span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <LogoIcon width={34} height={45} className="transition-transform group-hover:scale-105" />
+              <LogoWithText width={150} height={43} className="transition-transform group-hover:scale-105" />
             </Link>
 
             {/* Hamburger Button */}
