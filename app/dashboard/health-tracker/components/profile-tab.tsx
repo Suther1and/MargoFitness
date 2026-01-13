@@ -30,6 +30,7 @@ import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-moda
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { cn } from '@/lib/utils'
 import { AchievementsCard } from './achievements-card'
+import { MobileProfileCard } from './mobile-profile-card'
 
 interface ProfileTabProps {
   profile: Profile
@@ -50,24 +51,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
 
   const subscriptionActive = isSubscriptionActive(profile)
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
-  const displayName = profile.full_name || 'Пользователь'
-  const displayEmail = profile.email && !profile.email.includes('@telegram.local') ? profile.email : null
-  const displayPhone = profile.phone || null
-
+  
   useEffect(() => {
     setDaysLeft(getDaysUntilExpiration(profile))
   }, [profile])
-
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'elite': return 'text-yellow-400'
-      case 'pro': return 'text-purple-400'
-      case 'basic': return 'text-orange-400'
-      default: return 'text-white/40'
-    }
-  }
-
-  const tierColor = getTierColor(profile.subscription_tier)
 
   // Новые стили для блока подписки
   const getSubscriptionStyles = (tier: string) => {
@@ -258,49 +245,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
       `}</style>
 
       {/* 1. Integrated Header Card */}
-      <section className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 backdrop-blur-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl pointer-events-none" />
-        
-        <div className="flex items-center gap-5 relative z-10">
-          <button 
-            onClick={() => setProfileDialogOpen(true)}
-            className="relative shrink-0"
-          >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-white/10 to-white/5 p-[1px] shadow-2xl">
-              <div className="w-full h-full rounded-full bg-[#09090b] flex items-center justify-center overflow-hidden">
-                {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-8 h-8 text-white/10" />
-                )}
-              </div>
-            </div>
-            <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#0c0c12] rounded-full flex items-center justify-center border border-white/10">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            </div>
-          </button>
-
-          <div className="min-w-0 flex-1">
-            <h3 className="text-2xl font-bold text-white font-oswald uppercase tracking-tight truncate leading-none mb-2">
-              {displayName}
-            </h3>
-            <div className="flex flex-col gap-1.5">
-              {displayEmail && (
-                <div className="flex items-center gap-2 text-white/30 text-[10px] font-medium truncate">
-                  <Mail className="w-3 h-3 shrink-0" />
-                  {displayEmail}
-                </div>
-              )}
-              {displayPhone && (
-                <div className="flex items-center gap-2 text-white/30 text-[10px] font-medium">
-                  <Phone className="w-3 h-3 shrink-0" />
-                  {displayPhone}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <MobileProfileCard 
+        profile={profile} 
+        onEditClick={() => setProfileDialogOpen(true)} 
+      />
 
       {/* Tabs Selector */}
       <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden h-[54px]">
@@ -640,17 +588,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* 4. Secondary Actions */}
-      <section className="pt-2">
-        <a 
-          href="/auth/logout"
-          className="w-full flex items-center justify-center gap-2 p-5 rounded-[2rem] bg-red-500/5 border border-red-500/10 active:scale-95 transition-all opacity-60 hover:opacity-100"
-        >
-          <LogOut className="w-4 h-4 text-red-400" />
-          <span className="text-[10px] font-black text-red-400 uppercase tracking-[0.3em]">Выйти из аккаунта</span>
-        </a>
-      </section>
 
       {/* Modals */}
       <ProfileEditDialog
