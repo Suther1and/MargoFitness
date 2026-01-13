@@ -208,7 +208,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
           content: '';
           position: absolute;
           inset: 0;
-          border-radius: 2rem;
+          border-radius: 2.5rem;
           padding: 1.5px;
           background: linear-gradient(180deg, ${subStyles.border}, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0));
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -244,73 +244,94 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       `}</style>
 
-      {/* 1. Integrated Header Card */}
+      {/* 1. Integrated Header Card with Tabs */}
       <MobileProfileCard 
         profile={profile} 
-        onEditClick={() => setProfileDialogOpen(true)} 
+        onEditClick={() => setProfileDialogOpen(true)}
+        tabs={
+          <div className="flex items-center p-2 h-[64px] w-full relative">
+            <div className="flex h-full gap-2 w-full relative">
+              <button
+                onClick={() => setActiveTab('subscription')}
+                className={cn(
+                  "flex-1 px-2 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
+                  activeTab === 'subscription' ? "text-white shadow-lg" : "text-white/30 hover:text-white/50"
+                )}
+              >
+                {activeTab === 'subscription' && (
+                  <motion.div 
+                    layoutId="profileActiveTab" 
+                    className={cn("absolute inset-0 rounded-2xl -z-10", 
+                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                    )} 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                  >
+                    <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full", 
+                      profile.subscription_tier === 'elite' ? 'bg-yellow-400' :
+                      profile.subscription_tier === 'pro' ? 'bg-purple-500' :
+                      profile.subscription_tier === 'basic' ? 'bg-orange-500' : 'bg-white/40'
+                    )} />
+                  </motion.div>
+                )}
+                <div className="flex flex-col items-center gap-1">
+                  <Zap className={cn("w-3.5 h-3.5", activeTab === 'subscription' ? "opacity-100" : "opacity-0 transition-opacity")} />
+                  <span className="relative z-10">Подписка</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('bonuses')}
+                className={cn(
+                  "flex-1 px-2 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
+                  activeTab === 'bonuses' ? "text-white shadow-lg" : "text-white/30 hover:text-white/50"
+                )}
+              >
+                {activeTab === 'bonuses' && (
+                  <motion.div 
+                    layoutId="profileActiveTab" 
+                    className={cn("absolute inset-0 rounded-2xl -z-10", 
+                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                    )} 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                  >
+                    <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full", 
+                      bonusStats?.levelData.level === 4 ? 'bg-blue-400' :
+                      bonusStats?.levelData.level === 3 ? 'bg-amber-400' :
+                      bonusStats?.levelData.level === 2 ? 'bg-slate-300' : 'bg-orange-600'
+                    )} />
+                  </motion.div>
+                )}
+                <div className="flex flex-col items-center gap-1">
+                  <Trophy className={cn("w-3.5 h-3.5", activeTab === 'bonuses' ? "opacity-100" : "opacity-0 transition-opacity")} />
+                  <span className="relative z-10">Бонусы</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('achievements')}
+                className={cn(
+                  "flex-1 px-2 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
+                  activeTab === 'achievements' ? "text-white shadow-lg" : "text-white/30 hover:text-white/50"
+                )}
+              >
+                {activeTab === 'achievements' && (
+                  <motion.div 
+                    layoutId="profileActiveTab" 
+                    className={cn("absolute inset-0 rounded-2xl -z-10", 
+                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                    )} 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                  >
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full bg-emerald-500" />
+                  </motion.div>
+                )}
+                <div className="flex flex-col items-center gap-1">
+                  <Award className={cn("w-3.5 h-3.5", activeTab === 'achievements' ? "opacity-100" : "opacity-0 transition-opacity")} />
+                  <span className="relative z-10">Достижения</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        }
       />
-
-      {/* Tabs Selector */}
-      <div className="flex items-center p-1 bg-white/5 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden h-[54px]">
-        <div className="flex h-full gap-1 w-full relative">
-          <button
-            onClick={() => setActiveTab('subscription')}
-            className={cn(
-              "flex-1 px-2 rounded-xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
-              activeTab === 'subscription' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
-            )}
-          >
-            {activeTab === 'subscription' && (
-              <motion.div 
-                layoutId="profileActiveTab" 
-                className={cn("absolute inset-0 rounded-xl -z-10 shadow-lg", 
-                  profile.subscription_tier === 'elite' ? 'bg-yellow-400' :
-                  profile.subscription_tier === 'pro' ? 'bg-purple-500' :
-                  profile.subscription_tier === 'basic' ? 'bg-orange-500' : 'bg-white/20'
-                )} 
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
-              />
-            )}
-            <span className="relative z-10">Подписка</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('bonuses')}
-            className={cn(
-              "flex-1 px-2 rounded-xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
-              activeTab === 'bonuses' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
-            )}
-          >
-            {activeTab === 'bonuses' && (
-              <motion.div 
-                layoutId="profileActiveTab" 
-                className={cn("absolute inset-0 rounded-xl -z-10 shadow-lg", 
-                  bonusStats?.levelData.level === 4 ? 'bg-blue-400' :
-                  bonusStats?.levelData.level === 3 ? 'bg-amber-400' :
-                  bonusStats?.levelData.level === 2 ? 'bg-slate-300' : 'bg-orange-600'
-                )} 
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
-              />
-            )}
-            <span className="relative z-10">Бонусы</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('achievements')}
-            className={cn(
-              "flex-1 px-2 rounded-xl font-black text-[10px] uppercase tracking-[0.15em] transition-all relative h-full flex items-center justify-center z-10",
-              activeTab === 'achievements' ? "text-[#09090b] transition-colors duration-500" : "text-white/30 hover:text-white/60"
-            )}
-          >
-            {activeTab === 'achievements' && (
-              <motion.div 
-                layoutId="profileActiveTab" 
-                className="absolute inset-0 bg-emerald-500 rounded-xl -z-10 shadow-lg" 
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
-              />
-            )}
-            <span className="relative z-10">Достижения</span>
-          </button>
-        </div>
-      </div>
 
       <AnimatePresence mode="wait">
         {activeTab === 'subscription' && (

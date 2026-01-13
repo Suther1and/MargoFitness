@@ -1,7 +1,7 @@
 'use client'
 
 import { Profile } from '@/types/database'
-import { LogOut, Mail, Phone, User, Settings, Calendar } from 'lucide-react'
+import { LogOut, Mail, Phone, User, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTierDisplayName } from '@/lib/access-control'
 import { format } from 'date-fns'
@@ -10,9 +10,10 @@ import { ru } from 'date-fns/locale'
 interface MobileProfileCardProps {
   profile: Profile
   onEditClick: () => void
+  tabs?: React.ReactNode
 }
 
-export function MobileProfileCard({ profile, onEditClick }: MobileProfileCardProps) {
+export function MobileProfileCard({ profile, onEditClick, tabs }: MobileProfileCardProps) {
   const displayName = profile.full_name || 'Пользователь'
   const displayEmail = profile.email && !profile.email.includes('@telegram.local') ? profile.email : 'не указана'
   const displayPhone = profile.phone || 'не указан'
@@ -73,7 +74,7 @@ export function MobileProfileCard({ profile, onEditClick }: MobileProfileCardPro
           content: '';
           position: absolute;
           inset: 0;
-          border-radius: 2rem;
+          border-radius: 2.5rem;
           padding: 1.5px;
           background: linear-gradient(180deg, ${subStyles.border}, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0));
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -82,15 +83,10 @@ export function MobileProfileCard({ profile, onEditClick }: MobileProfileCardPro
           pointer-events: none;
           z-index: 25;
         }
-        @keyframes subShimmer {
-          0% { transform: translateX(-150%) rotate(25deg); }
-          20% { transform: translateX(150%) rotate(25deg); }
-          100% { transform: translateX(150%) rotate(25deg); }
-        }
       `}</style>
 
       {/* Main Card */}
-      <div className="sub-card w-full rounded-[2rem] p-6 relative group min-h-[200px] flex flex-col justify-between">
+      <div className="sub-card w-full rounded-[2.5rem] relative group min-h-[200px] flex flex-col overflow-hidden">
         <div className="sub-pattern"></div>
         <div className="dots-pattern"></div>
         
@@ -106,113 +102,111 @@ export function MobileProfileCard({ profile, onEditClick }: MobileProfileCardPro
         <div className={cn("absolute -right-10 -top-10 w-48 h-48 blur-[80px] rounded-full pointer-events-none mix-blend-screen opacity-50", subStyles.glow)}></div>
         <div className={cn("absolute -left-10 bottom-0 w-40 h-40 blur-[60px] rounded-full pointer-events-none opacity-20", subStyles.glow)}></div>
 
-        <div className="relative z-10 flex flex-col h-full gap-6">
-          
-          {/* Header Row: Title & Badge */}
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2.5">
-              <div className={cn("p-1.5 rounded-lg bg-black/40 border border-white/5 shadow-sm")}>
-                <User className={cn("w-4 h-4 opacity-80", subStyles.status)} />
-              </div>
-              <span className={cn("text-[11px] font-black uppercase tracking-widest opacity-60 font-montserrat", subStyles.status)}>Профиль</span>
-            </div>
-            
-            {/* Subscription Badge (Tier) */}
-            <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 h-6 flex items-center justify-center", subStyles.badge)}>
-              <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
-                {tierDisplayName}
-              </span>
-            </div>
-          </div>
-
-          {/* Body: Avatar & Info */}
-          <div className="flex items-center gap-5">
-            {/* Avatar */}
-             <div className="relative group/avatar shrink-0">
-              <div 
-                className={cn(
-                  "relative w-20 h-20 rounded-full p-[2px] ring-2 ring-offset-2 ring-offset-black/50 overflow-hidden transition-all ring-white/10"
-                )}
-              >
-                {profile.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt={displayName} 
-                    className="w-full h-full rounded-full object-cover grayscale brightness-90 contrast-125" 
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-white/5 flex items-center justify-center">
-                    <User className="w-8 h-8 text-white/20" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Name & Member Since */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
-                <div className="flex flex-col">
-                  <h2 className="text-3xl font-black font-oswald text-white/90 uppercase tracking-tight leading-none truncate drop-shadow-lg">
-                    {displayName}
-                  </h2>
-                  <div className="flex items-center gap-1.5 mt-1 text-white/40">
-                    <span className="text-[9px] font-bold uppercase tracking-widest font-montserrat">Участник с {memberSince}</span>
-                  </div>
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="p-6 flex flex-col gap-6">
+            {/* Header Row: Title & Badge & Actions */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2.5">
+                <div className={cn("p-1.5 rounded-lg bg-black/40 border border-white/5 shadow-sm")}>
+                  <User className={cn("w-4 h-4 opacity-80", subStyles.status)} />
                 </div>
+                <span className={cn("text-[11px] font-black uppercase tracking-widest opacity-60 font-montserrat", subStyles.status)}>Профиль</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={onEditClick}
+                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors active:scale-95"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
+                <a 
+                  href="/auth/logout"
+                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors active:scale-95"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </a>
+                
+                {/* Subscription Badge (Tier) */}
+                <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 h-7 flex items-center justify-center min-w-[50px]", subStyles.badge)}>
+                  <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
+                    {tierDisplayName}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Body: Avatar & Info */}
+            <div className="flex items-center gap-5">
+              {/* Avatar */}
+              <div className="relative group/avatar shrink-0">
+                <div 
+                  className={cn(
+                    "relative w-20 h-20 rounded-full p-[2px] ring-2 ring-offset-2 ring-offset-black/50 overflow-hidden transition-all ring-white/10"
+                  )}
+                >
+                  {profile.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt={displayName} 
+                      className="w-full h-full rounded-full object-cover grayscale brightness-90 contrast-125" 
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-white/5 flex items-center justify-center">
+                      <User className="w-8 h-8 text-white/20" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Name & Member Since */}
+              <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+                  <div className="flex flex-col">
+                    <h2 className="text-3xl font-black font-oswald text-white/90 uppercase tracking-tight leading-none truncate drop-shadow-lg">
+                      {displayName}
+                    </h2>
+                    <div className="flex items-center gap-1.5 mt-1 text-white/40">
+                      <span className="text-[9px] font-bold uppercase tracking-widest font-montserrat">Участник с {memberSince}</span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+            {/* Contact Details Grid */}
+            <div className="grid gap-2 mt-auto">
+              <div className="flex items-center justify-between gap-3 group/item transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                    <Mail className={cn("w-3.5 h-3.5", displayEmail !== 'не указана' ? "text-white/30" : "text-white/10")} />
+                    <span className={cn(
+                      "text-xs font-medium truncate font-montserrat tracking-wide",
+                      displayEmail !== 'не указана' ? "text-white/60" : "text-white/20 italic"
+                    )}>
+                      {displayEmail}
+                    </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 group/item transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                    <Phone className={cn("w-3.5 h-3.5", displayPhone !== 'не указан' ? "text-white/30" : "text-white/10")} />
+                    <span className={cn(
+                      "text-xs font-medium truncate font-montserrat tracking-wide",
+                      displayPhone !== 'не указан' ? "text-white/60" : "text-white/20 italic"
+                    )}>
+                      {displayPhone}
+                    </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Contact Details Grid */}
-          <div className="grid gap-2 mt-auto">
-             <div className="flex items-center justify-between gap-3 group/item transition-colors">
-               <div className="flex items-center gap-3 min-w-0">
-                  <Mail className={cn("w-3.5 h-3.5", displayEmail !== 'не указана' ? "text-white/30" : "text-white/10")} />
-                  <span className={cn(
-                    "text-xs font-medium truncate font-montserrat tracking-wide",
-                    displayEmail !== 'не указана' ? "text-white/60" : "text-white/20 italic"
-                  )}>
-                    {displayEmail}
-                  </span>
-               </div>
-             </div>
-
-             <div className="flex items-center justify-between gap-3 group/item transition-colors">
-               <div className="flex items-center gap-3 min-w-0">
-                  <Phone className={cn("w-3.5 h-3.5", displayPhone !== 'не указан' ? "text-white/30" : "text-white/10")} />
-                  <span className={cn(
-                    "text-xs font-medium truncate font-montserrat tracking-wide",
-                    displayPhone !== 'не указан' ? "text-white/60" : "text-white/20 italic"
-                  )}>
-                    {displayPhone}
-                  </span>
-               </div>
-             </div>
-          </div>
-
-          {/* Actions - Edit & Logout */}
-          <div className="pt-2 flex gap-3">
-             <button 
-                onClick={onEditClick}
-                className={cn(
-                  "relative text-[10px] font-black uppercase tracking-wider h-10 px-3 rounded-xl flex items-center justify-center gap-2 transition-all flex-1 active:scale-95 font-montserrat shadow-xl",
-                  subStyles.btnPrimary
-                )}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Настроить</span>
-              </button>
-
-             <a 
-                href="/auth/logout"
-                className={cn(
-                  "relative border text-[10px] font-black uppercase tracking-wider h-10 px-3 rounded-xl flex items-center justify-center gap-2 transition-all flex-1 active:scale-95 font-montserrat",
-                  subStyles.btnSecondary
-                )}
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Выйти</span>
-              </a>
-          </div>
-
+          {/* Integrated Tabs */}
+          {tabs && (
+            <div className="mt-auto bg-white/[0.03] backdrop-blur-md relative">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              {tabs}
+            </div>
+          )}
         </div>
       </div>
     </div>
