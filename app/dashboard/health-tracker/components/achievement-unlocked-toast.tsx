@@ -75,9 +75,17 @@ export function AchievementUnlockedToast({
                     damping: 20,
                     delay: 0.1,
                   }}
-                  className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-2xl shadow-lg"
+                  className="flex-shrink-0 w-14 h-14 flex items-center justify-center"
                 >
-                  {achievement.icon}
+                  {achievement.icon_url ? (
+                    <img 
+                      src={achievement.icon_url} 
+                      alt={achievement.title}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-3xl">{achievement.icon}</span>
+                  )}
                 </motion.div>
 
                 {/* Content */}

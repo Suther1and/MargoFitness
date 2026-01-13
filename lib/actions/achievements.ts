@@ -26,7 +26,7 @@ export async function getAllAchievements(): Promise<{
 
   const { data, error } = await supabase
     .from('achievements')
-    .select('*')
+    .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
     .order('sort_order', { ascending: true })
 
   if (error) {
@@ -76,7 +76,7 @@ export async function getRecentAchievements(
 
   const { data: userAchievements, error: userError } = await supabase
     .from('user_achievements')
-    .select('*, achievement:achievements(*)')
+    .select('*, achievement:achievements(id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at)')
     .eq('user_id', userId)
     .order('unlocked_at', { ascending: false })
     .limit(limit)
@@ -108,7 +108,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
   // Получаем все достижения
   const { data: allAchievements, error: achievementsError } = await supabase
     .from('achievements')
-    .select('*')
+    .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
     .order('sort_order', { ascending: true })
 
   if (achievementsError) {
@@ -230,7 +230,7 @@ async function unlockAchievementInternal(
     // Получаем информацию о достижении
     const { data: achievement, error: achError } = await supabase
       .from('achievements')
-      .select('*')
+      .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
       .eq('id', achievementId)
       .single()
 

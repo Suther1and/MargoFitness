@@ -13,10 +13,12 @@ import { ru } from 'date-fns/locale'
 interface AchievementsPopupProps {
   isOpen: boolean
   onClose: () => void
+  initialAchievementId?: string | null
 }
 
-export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
+export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: AchievementsPopupProps) {
   const [statusFilter, setStatusFilter] = useState<'completed' | 'uncompleted'>('uncompleted')
+  const [selectedAchievement, setSelectedAchievement] = useState<any | null>(null)
   const [mounted, setMounted] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
 
@@ -24,24 +26,45 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-      const loadUser = async () => {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        setUserId(user?.id || null)
-      }
-      loadUser()
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
   const { data: achievements = [], isLoading } = useAllAchievements(userId)
+
+  useEffect(() => {
+    if (isOpen && initialAchievementId && achievements.length > 0) {
+      console.log('Searching for achievement:', initialAchievementId);
+      const achievement = achievements.find(a => a.id === initialAchievementId)
+      if (achievement) {
+        console.log('Found achievement:', achievement.title);
+        setSelectedAchievement(achievement)
+        setStatusFilter(achievement.isUnlocked ? 'completed' : 'uncompleted')
+      }
+    }
+  }, [isOpen, initialAchievementId, achievements])
+
+  useEffect(() => {
+    if (isOpen || selectedAchievement) {
+      const originalOverflow = document.body.style.overflow;
+      const originalHTMLOverflow = document.documentElement.style.overflow;
+      
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      
+      if (isOpen && !userId) {
+        const loadUser = async () => {
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          setUserId(user?.id || null)
+        }
+        loadUser()
+      }
+      
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.documentElement.style.overflow = originalHTMLOverflow;
+        document.body.style.touchAction = 'auto';
+      };
+    }
+  }, [isOpen, selectedAchievement, userId])
 
   const filteredAchievements = achievements
     .filter(a => statusFilter === 'uncompleted' ? !a.isUnlocked : a.isUnlocked)
@@ -64,7 +87,7 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 bg-black/95 backdrop-blur-md"
+        className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 bg-black/70 backdrop-blur-xl"
         onClick={onClose}
       >
         <style jsx>{`
@@ -193,7 +216,7 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
                 <p className="text-[10px] font-black uppercase tracking-[0.2em]">Список пуст</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                 {filteredAchievements.map((achievement) => {
                   const isSecret = achievement.is_secret && !achievement.isUnlocked
                   
@@ -202,13 +225,12 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
                       key={achievement.id}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="group/item"
+                      className="group/item cursor-pointer"
+                      onClick={() => !isSecret && setSelectedAchievement(achievement)}
                     >
                       <div className={cn(
-                        'aspect-square rounded-[1.8rem] flex flex-col items-center justify-center p-3 transition-all duration-500 border relative overflow-hidden group/item',
-                        achievement.isUnlocked
-                          ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-emerald-500/20'
-                          : 'bg-black/20 border-white/[0.02] opacity-50'
+                        'aspect-square rounded-[1.8rem] flex flex-col items-center justify-center p-3 transition-all duration-500 relative overflow-hidden group/item hover:scale-105 active:scale-95',
+                        !achievement.isUnlocked && 'opacity-50'
                       )}>
                         {/* Hidden Glow */}
                         {achievement.isUnlocked && (
@@ -216,29 +238,44 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
                         )}
 
                         <div className={cn(
-                          'text-3xl sm:text-4xl mb-1.5 transition-all duration-700 ease-out z-10',
+                          'w-24 h-24 sm:w-32 sm:h-32 mb-4 transition-all duration-700 ease-out z-10 relative flex items-center justify-center',
                           !achievement.isUnlocked && 'grayscale brightness-0 opacity-10'
                         )}>
-                          {isSecret ? '🔒' : achievement.icon}
+                          {isSecret ? (
+                            <span className="text-5xl sm:text-6xl">🔒</span>
+                          ) : achievement.icon_url ? (
+                            <img 
+                              src={achievement.icon_url} 
+                              alt={achievement.title}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <span className="text-5xl sm:text-6xl">{achievement.icon}</span>
+                          )}
                         </div>
                         
-                        <span className={cn(
-                          'text-[8px] font-black uppercase tracking-tight text-center line-clamp-1 px-1 z-10 font-oswald transition-colors',
-                          achievement.isUnlocked ? 'text-white/80 group-hover/item:text-white' : 'text-white/20'
-                        )}>
-                          {isSecret ? '???' : achievement.title}
-                        </span>
+                        <div className="flex flex-col items-center justify-center gap-2 w-full px-1 z-10">
+                          <div className="flex items-center gap-1.5 justify-center w-full">
+                            {achievement.isUnlocked && (
+                              <div className="relative flex items-center justify-center shrink-0">
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,1)]" />
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                              </div>
+                            )}
+                            <span className={cn(
+                              'text-[11px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
+                              achievement.isUnlocked ? 'text-white/80 group-hover/item:text-white' : 'text-white/20'
+                            )}>
+                              {isSecret ? '???' : achievement.title}
+                            </span>
+                          </div>
+                        </div>
 
                         {/* Reward Badge */}
                         {achievement.reward_amount && achievement.isUnlocked && (
-                          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 z-10">
-                            <span className="text-[8px] font-black text-emerald-400">+{achievement.reward_amount}</span>
+                          <div className="absolute top-3 left-3 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 z-10">
+                            <span className="text-[9px] font-black text-emerald-400">+{achievement.reward_amount}</span>
                           </div>
-                        )}
-
-                        {/* Active Indicator */}
-                        {achievement.isUnlocked && (
-                          <div className="absolute bottom-2 right-2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] z-10 animate-pulse" />
                         )}
                       </div>
                     </motion.div>
@@ -248,6 +285,99 @@ export function AchievementsPopup({ isOpen, onClose }: AchievementsPopupProps) {
             )}
           </div>
         </motion.div>
+
+        {/* Achievement Details Modal */}
+        <AnimatePresence>
+          {selectedAchievement && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl"
+              onClick={() => setSelectedAchievement(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-sm bg-[#0d0d0f] rounded-[2.5rem] border border-white/10 p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Background Glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
+                
+                <button
+                  onClick={() => setSelectedAchievement(null)}
+                  className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all"
+                >
+                  <X className="w-4 h-4 text-white/40" />
+                </button>
+
+                <div className="flex flex-col items-center text-center relative z-10 pt-4">
+                  <motion.div
+                    initial={{ scale: 0.8, rotate: -10 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    className="w-48 h-48 mb-8 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+                  >
+                    {selectedAchievement.icon_url ? (
+                      <img 
+                        src={selectedAchievement.icon_url} 
+                        alt={selectedAchievement.title}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-8xl flex items-center justify-center h-full">
+                        {selectedAchievement.icon}
+                      </span>
+                    )}
+                  </motion.div>
+
+                  <h3 className="text-2xl font-black font-oswald text-white uppercase tracking-tight leading-none italic mb-4">
+                    {selectedAchievement.title}
+                  </h3>
+                  
+                  <p className="text-sm text-white/50 font-medium leading-relaxed mb-8 px-4 font-montserrat tracking-wide">
+                    {selectedAchievement.description || 'Условия получения не указаны'}
+                  </p>
+
+                  <div className="w-full space-y-3">
+                    {selectedAchievement.reward_amount && (
+                      <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Награда</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-lg font-black text-emerald-400 font-oswald">+{selectedAchievement.reward_amount}</span>
+                          <span className="text-sm">👟</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Статус</span>
+                      {selectedAchievement.isUnlocked ? (
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                            Разблокировано
+                          </span>
+                          {selectedAchievement.unlockedAt && (
+                            <span className="text-[10px] text-white/20 font-bold">
+                              {format(new Date(selectedAchievement.unlockedAt), 'd MMMM yyyy', { locale: ru })}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+                          В процессе
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   )

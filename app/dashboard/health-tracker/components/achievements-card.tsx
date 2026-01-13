@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Trophy, Award, Loader2, Sparkles, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -8,8 +8,9 @@ import { AchievementsPopup } from './achievements-popup'
 import { useRecentAchievements, useAchievementStats } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
 
-export const AchievementsCard = memo(function AchievementsCard() {
+export function AchievementsCard() {
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [selectedAchievementId, setSelectedAchievementId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -26,10 +27,20 @@ export const AchievementsCard = memo(function AchievementsCard() {
 
   const isLoading = loadingRecent || loadingStats
 
+  const handleOpenPopup = (achievementId?: string) => {
+    setSelectedAchievementId(achievementId || null)
+    setIsPopupOpen(true)
+  }
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false)
+    setSelectedAchievementId(null)
+  }
+
   return (
     <>
       <div 
-        onClick={() => setIsPopupOpen(true)}
+        onClick={() => handleOpenPopup()}
         className="group relative cursor-pointer active:scale-[0.99] transition-all duration-300 w-full"
       >
         {/* Glow behind the card */}
@@ -100,6 +111,12 @@ export const AchievementsCard = memo(function AchievementsCard() {
                   return (
                     <div 
                       key={idx}
+                      onClick={(e) => {
+                        if (achievement) {
+                          e.stopPropagation()
+                          handleOpenPopup(achievement.id)
+                        }
+                      }}
                       className={cn(
                         "group/slot relative aspect-square rounded-[24px] p-[1.5px] transition-all duration-500",
                         achievement 
@@ -110,13 +127,23 @@ export const AchievementsCard = memo(function AchievementsCard() {
                       <div className={cn(
                         "w-full h-full rounded-[23px] flex flex-col items-center justify-center transition-all duration-500",
                         achievement 
-                          ? "bg-gradient-to-b from-white/[0.08] to-white/[0.02] shadow-[inset_0_4px_12px_rgba(255,255,255,0.05)] backdrop-blur-md"
+                          ? "backdrop-blur-md"
                           : "bg-[#0d0d0f]/50"
                       )}>
                         {achievement ? (
                           <>
-                            <div className="text-3xl mb-1.5 filter drop-shadow-[0_8px_15px_rgba(0,0,0,0.5)] group-hover/slot:-translate-y-1 transition-transform duration-500">
-                              {achievement.icon}
+                            <div className="w-28 h-28 mb-2 filter drop-shadow-[0_8px_15px_rgba(0,0,0,0.5)] group-hover/slot:-translate-y-1 transition-transform duration-500 relative">
+                              {achievement.icon_url ? (
+                                <img 
+                                  src={achievement.icon_url} 
+                                  alt={achievement.title}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : (
+                                <span className="text-8xl absolute inset-0 flex items-center justify-center">
+                                  {achievement.icon}
+                                </span>
+                              )}
                             </div>
                             <span className="text-[8px] text-white/40 font-black uppercase text-center font-oswald tracking-tight px-2 line-clamp-1">
                               {achievement.title}
@@ -160,7 +187,11 @@ export const AchievementsCard = memo(function AchievementsCard() {
         </div>
       </div>
 
-      <AchievementsPopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <AchievementsPopup 
+        isOpen={isPopupOpen} 
+        onClose={handleClosePopup}
+        initialAchievementId={selectedAchievementId}
+      />
     </>
   )
-})
+}

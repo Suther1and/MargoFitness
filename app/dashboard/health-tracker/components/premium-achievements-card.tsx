@@ -127,8 +127,16 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
                     key={idx}
                     className="group/item flex items-center gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 transition-all duration-300 hover:bg-white/[0.06] hover:border-white/10"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center text-xl shadow-[inset_0_1px_4px_rgba(255,255,255,0.05)]">
-                      {achievement.icon}
+                    <div className="w-12 h-12 flex items-center justify-center transition-transform duration-300 group-hover/item:scale-110">
+                      {achievement.icon_url ? (
+                        <img 
+                          src={achievement.icon_url} 
+                          alt={achievement.title}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl">{achievement.icon}</span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-[13px] font-bold text-white/90 truncate font-montserrat tracking-tight leading-none mb-1">
@@ -190,7 +198,12 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
         </div>
       </div>
 
-      <AchievementsPopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+        <AchievementsPopup 
+          isOpen={isPopupOpen} 
+          onClose={() => {
+            setIsPopupOpen(false)
+          }} 
+        />
     </>
   )
 })

@@ -777,6 +777,7 @@ export interface Database {
           is_secret: boolean
           reward_amount: number | null
           icon: string
+          icon_url: string | null
           color_class: string
           metadata: Json
           sort_order: number
@@ -790,6 +791,7 @@ export interface Database {
           is_secret?: boolean
           reward_amount?: number | null
           icon: string
+          icon_url?: string | null
           color_class: string
           metadata?: Json
           sort_order?: number
@@ -803,6 +805,7 @@ export interface Database {
           is_secret?: boolean
           reward_amount?: number | null
           icon?: string
+          icon_url?: string | null
           color_class?: string
           metadata?: Json
           sort_order?: number

@@ -10,7 +10,7 @@ import type { AchievementWithStatus } from '@/types/database'
  */
 export function useRecentAchievements(userId: string | null, limit: number = 3) {
   return useQuery({
-    queryKey: ['achievements', 'recent', userId, limit],
+    queryKey: ['achievements', 'recent', userId, limit, 'v3'], // v3 для полной инвалидации кэша
     queryFn: async (): Promise<AchievementWithStatus[]> => {
       if (!userId) return []
       
@@ -18,7 +18,7 @@ export function useRecentAchievements(userId: string | null, limit: number = 3) 
       
       const { data: userAchievements, error } = await supabase
         .from('user_achievements')
-        .select('*, achievement:achievements(*)')
+        .select('*, achievement:achievements(id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at)')
         .eq('user_id', userId)
         .order('unlocked_at', { ascending: false })
         .limit(limit)
@@ -109,7 +109,7 @@ export function useAllAchievements(userId: string | null) {
       const [{ data: allAchievements, error: achievementsError }, { data: userAchievements, error: userError }] = await Promise.all([
         supabase
           .from('achievements')
-          .select('*')
+          .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
           .order('sort_order', { ascending: true }),
         supabase
           .from('user_achievements')
