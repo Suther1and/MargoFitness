@@ -330,7 +330,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       />
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {activeTab === 'subscription' && (
           <motion.div
             key="subscription"

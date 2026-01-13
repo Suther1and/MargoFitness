@@ -656,12 +656,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
             {/* Mobile версия с анимацией */}
             <AnimatePresence 
+              mode="wait"
               onExitComplete={() => window.scrollTo(0, 0)}
             >
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full lg:hidden"
