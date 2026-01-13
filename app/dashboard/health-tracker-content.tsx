@@ -661,9 +661,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             >
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
                 className="w-full lg:hidden"
               >
@@ -778,7 +778,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                     {/* Контент в зависимости от выбранного таба */}
                     {overviewTab === 'widgets' ? (
                       !hasMainWidgets ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                        <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                           <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                           <p className="text-xs text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
                             Выбери показатели здоровья, которые будем отслеживать
@@ -976,7 +976,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       className="lg:col-span-4 flex flex-col gap-6"
                     >
                     {!hasMainWidgets ? (
-                      <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
+                      <div className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[340px]">
                         <h3 className="text-xl font-oswald font-black text-white/90 mb-2 text-center uppercase tracking-wider">Настрой панель</h3>
                         <p className="text-[12px] text-white/30 text-center mb-8 max-w-[220px] leading-relaxed font-medium">
                           Выбери показатели здоровья, которые будем отслеживать

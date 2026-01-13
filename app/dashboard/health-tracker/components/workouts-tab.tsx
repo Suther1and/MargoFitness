@@ -93,7 +93,7 @@ interface EmptyStateProps {
 
 function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border border-white/10 relative overflow-hidden min-h-[400px]">
+    <div className="flex flex-col items-center justify-center py-16 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border border-white/10 relative overflow-hidden min-h-[400px]">
       {/* Фоновый градиент */}
       <div 
         className={cn(

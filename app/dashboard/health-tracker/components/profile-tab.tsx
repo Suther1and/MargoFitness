@@ -331,10 +331,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         {activeTab === 'subscription' && (
           <motion.div
             key="subscription"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
           >
             {/* 2. Premium Subscription Card */}
             <section className="sub-card w-full rounded-[2rem] p-6 transition-all duration-300 relative group min-h-[200px]">
@@ -459,10 +459,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         {activeTab === 'bonuses' && (
           <motion.div
             key="bonuses"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
           >
             {/* 3. New Bronze/Bonus Card Redesign */}
             <section className="relative group">
@@ -589,10 +589,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         {activeTab === 'achievements' && (
           <motion.div
             key="achievements"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
           >
             <AchievementsCard />
           </motion.div>

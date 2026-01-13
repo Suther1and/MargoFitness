@@ -135,7 +135,7 @@ export function StatsDatePickerDialog({
 
         <div className="p-3 pb-6 space-y-3">
           {/* Кнопки быстрого выбора периода */}
-          <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 backdrop-blur-md">
+          <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 md:backdrop-blur-md">
             {PERIOD_BUTTONS.map((period) => (
               <button
                 key={period.id}
@@ -258,7 +258,7 @@ export function StatsDatePickerDialog({
 
         <div className="p-3 pb-6 space-y-3">
           {/* Кнопки быстрого выбора периода */}
-          <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 backdrop-blur-md">
+          <div className="flex bg-white/[0.03] p-1 rounded-[2rem] border border-white/5 md:backdrop-blur-md">
             {PERIOD_BUTTONS.map((period) => (
               <button
                 key={period.id}

@@ -112,7 +112,7 @@ export function WeekNavigator({
         layout
         className={cn(
             "w-full",
-            !minimal && "px-2 py-2 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md"
+            !minimal && "px-2 py-2 rounded-2xl bg-white/5 border border-white/5 md:backdrop-blur-md"
         )}
       >
         <AnimatePresence mode="wait">

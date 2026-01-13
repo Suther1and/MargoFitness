@@ -669,7 +669,7 @@ export default function SettingsTab({
         {/* BMI Panel on Desktop only */}
         <div 
           onClick={(e) => e.stopPropagation()}
-          className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 backdrop-blur-md overflow-hidden shadow-2xl min-w-[320px] xl:min-w-[420px]"
+          className="hidden lg:flex flex-col bg-white/[0.03] rounded-2xl border border-white/10 md:backdrop-blur-md overflow-hidden shadow-2xl min-w-[320px] xl:min-w-[420px]"
         >
           <div className="flex items-stretch h-[54px]">
             <div className="flex items-center p-0.5 bg-white/[0.02] flex-1">

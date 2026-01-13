@@ -88,7 +88,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden"
+          className="flex flex-col items-center justify-center py-12 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden"
         >
           <h3 className="text-xl font-oswald font-black text-white mb-2 text-center uppercase tracking-wider">Аналитика пуста</h3>
           <p className="text-xs text-white/40 text-center mb-8 max-w-[240px] leading-relaxed font-medium">
@@ -509,7 +509,7 @@ export function StatsOverall({ settings, habits, period, onNavigate, layout = 'c
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex flex-col items-center justify-center py-20 px-6 rounded-[3rem] bg-white/[0.03] backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[400px]"
+          className="flex flex-col items-center justify-center py-20 px-6 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border-2 border-dashed border-white/10 relative overflow-hidden min-h-[400px]"
         >
           <h3 className="text-3xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">Аналитика пуста</h3>
           <p className="text-base text-white/30 text-center mb-10 max-w-[400px] leading-relaxed font-medium">
