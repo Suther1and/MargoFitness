@@ -93,6 +93,16 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
   
   const router = useRouter()
 
+  // Автоматически открываем попап входа если есть параметр redirect и пользователь не авторизован
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isAuthenticated) {
+      const searchParams = new URLSearchParams(window.location.search)
+      if (searchParams.has('redirect')) {
+        setSignInOpen(true)
+      }
+    }
+  }, [isAuthenticated])
+
   // Обновление цен при изменении периода
   const updatePricing = useCallback((days: Period, allProducts: Product[]) => {
     const months = DAYS_TO_MONTHS[days]
