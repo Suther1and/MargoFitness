@@ -29,7 +29,7 @@ import { SubscriptionRenewalModal } from '@/components/subscription-renewal-moda
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { cn } from '@/lib/utils'
-import { AchievementsCard } from './achievements-card'
+import { PremiumAchievementsCard } from './premium-achievements-card'
 import { MobileProfileCard } from './mobile-profile-card'
 
 interface ProfileTabProps {
@@ -594,7 +594,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <AchievementsCard />
+            <PremiumAchievementsCard />
           </motion.div>
         )}
       </AnimatePresence>

@@ -36,7 +36,7 @@ import { CaffeineCardH } from './health-tracker/components/caffeine-card-h'
 import { GoalsSummaryCard } from './health-tracker/components/goals-summary-card'
 import { DailyPhotosCard } from './health-tracker/components/daily-photos-card'
 import { HabitsCard } from './health-tracker/components/habits-card'
-import { AchievementsCard } from './health-tracker/components/achievements-card'
+import { PremiumAchievementsCard } from './health-tracker/components/premium-achievements-card'
 import { AchievementsChecker } from './health-tracker/components/achievements-checker'
 import { HealthTrackerCard } from './health-tracker/components/health-tracker-card'
 import { WeekNavigator } from './health-tracker/components/week-navigator'
@@ -1101,7 +1101,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         setSettingsSubTab('widgets')
                       }}
                     />
-                    <AchievementsCard />
+                    <PremiumAchievementsCard />
                     {settings.widgets.photos?.enabled && (
                       <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                     )}
