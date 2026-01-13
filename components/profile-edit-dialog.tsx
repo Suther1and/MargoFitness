@@ -249,12 +249,12 @@ export function ProfileEditDialog({
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             className={cn(
-              "relative w-full h-full max-h-[90vh] rounded-[2.5rem] sm:rounded-[3rem] bg-[#0c0c12] border backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col",
+              "relative w-full h-full max-h-[90vh] rounded-[2.5rem] sm:rounded-[3rem] bg-[#0c0c12] border md:backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col",
               styles.border
             )}
           >
             {/* Background Layer with Grain */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
               <div className="absolute inset-0 grain-overlay" />
               {/* Background decorative elements */}
               <div className={cn(

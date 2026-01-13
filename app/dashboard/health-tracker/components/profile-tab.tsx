@@ -262,9 +262,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   <motion.div 
                     layoutId="profileActiveTab" 
                     className={cn("absolute inset-0 rounded-2xl -z-10", 
-                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                      "bg-white/[0.12] border border-white/10 shadow-lg"
                     )} 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }} 
                   >
                     <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full", 
                       profile.subscription_tier === 'elite' ? 'bg-yellow-400' :
@@ -274,7 +274,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   </motion.div>
                 )}
                 <div className="flex flex-col items-center gap-1">
-                  <Zap className={cn("w-3.5 h-3.5", activeTab === 'subscription' ? "opacity-100" : "opacity-0 transition-opacity")} />
                   <span className="relative z-10">Подписка</span>
                 </div>
               </button>
@@ -289,9 +288,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   <motion.div 
                     layoutId="profileActiveTab" 
                     className={cn("absolute inset-0 rounded-2xl -z-10", 
-                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                      "bg-white/[0.12] border border-white/10 shadow-lg"
                     )} 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }} 
                   >
                     <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full", 
                       bonusStats?.levelData.level === 4 ? 'bg-blue-400' :
@@ -301,7 +300,6 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   </motion.div>
                 )}
                 <div className="flex flex-col items-center gap-1">
-                  <Trophy className={cn("w-3.5 h-3.5", activeTab === 'bonuses' ? "opacity-100" : "opacity-0 transition-opacity")} />
                   <span className="relative z-10">Бонусы</span>
                 </div>
               </button>
@@ -316,15 +314,14 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   <motion.div 
                     layoutId="profileActiveTab" 
                     className={cn("absolute inset-0 rounded-2xl -z-10", 
-                      "bg-white/[0.08] border border-white/10 backdrop-blur-xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)]"
+                      "bg-white/[0.12] border border-white/10 shadow-lg"
                     )} 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} 
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }} 
                   >
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full bg-emerald-500" />
                   </motion.div>
                 )}
                 <div className="flex flex-col items-center gap-1">
-                  <Award className={cn("w-3.5 h-3.5", activeTab === 'achievements' ? "opacity-100" : "opacity-0 transition-opacity")} />
                   <span className="relative z-10">Достижения</span>
                 </div>
               </button>
@@ -333,40 +330,38 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         }
       />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {activeTab === 'subscription' && (
           <motion.div
             key="subscription"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {/* 2. Premium Subscription Card */}
-            <section className="sub-card w-full rounded-[2rem] p-6 transform transition-all duration-300 relative group min-h-[200px]">
+            <section className="sub-card w-full rounded-[2rem] p-6 transition-all duration-300 relative group min-h-[200px]">
               <div className="sub-pattern"></div>
-              <div className="sub-shine"></div>
               
-              {/* Decorative Ambient Orbs */}
-              <div className={cn("absolute -right-10 -top-10 w-48 h-48 blur-[80px] rounded-full pointer-events-none mix-blend-screen opacity-50", subStyles.glow)}></div>
-              <div className={cn("absolute -left-10 bottom-0 w-40 h-40 blur-[60px] rounded-full pointer-events-none opacity-20", subStyles.glow)}></div>
+              {/* Decorative Ambient Orbs - simplified */}
+              <div className={cn("absolute -right-10 -top-10 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-3xl", subStyles.glow)}></div>
+              <div className={cn("absolute -left-10 bottom-0 w-40 h-40 rounded-full pointer-events-none opacity-10 blur-2xl", subStyles.glow)}></div>
 
               <div className="relative z-10 flex flex-col h-full gap-8">
                 {/* Card Top: Title & Badge */}
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2.5">
-                    <div className={cn("p-1.5 rounded-lg bg-black/40 border border-white/5 shadow-sm")}>
+                    <div className={cn("p-1.5 rounded-lg bg-black/60 border border-white/5 shadow-sm")}>
                       <Crown className={cn("w-4 h-4 opacity-80", subStyles.status)} />
                     </div>
                     <span className={cn("text-[11px] font-black uppercase tracking-widest opacity-60 font-montserrat", subStyles.status)}>Подписка</span>
                   </div>
                   
-                  {/* Subscription Badge - matching bonus style */}
-                  <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 h-6 flex items-center justify-center", subStyles.badge)}>
+                  {/* Subscription Badge */}
+                  <div className={cn("relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40", subStyles.badge)}>
                     <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
                       {tierDisplayName}
                     </span>
-                    <div className="shimmer-effect"></div>
                   </div>
                 </div>
 
@@ -439,7 +434,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                         {/* Renew Button (Secondary) */}
                         <button 
                           onClick={() => setRenewalModalOpen(true)}
-                          className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 backdrop-blur-sm active:scale-95 font-montserrat"
+                          className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-wider h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 md:backdrop-blur-sm active:scale-95 font-montserrat"
                         >
                           <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
                           <span>Продлить</span>
@@ -467,10 +462,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         {activeTab === 'bonuses' && (
           <motion.div
             key="bonuses"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {/* 3. New Bronze/Bonus Card Redesign */}
             <section className="relative group">
@@ -487,10 +482,9 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                 
                 {/* Diagonal Light Overlay - matching reference exactly */}
                 <div 
-                  className="absolute inset-0 opacity-60 pointer-events-none" 
+                  className="absolute inset-0 opacity-40 pointer-events-none" 
                   style={{ 
-                    background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 45%, transparent 60%)',
-                    mixBlendMode: 'overlay',
+                    background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 45%, transparent 60%)',
                     backgroundSize: '200% auto'
                   }} 
                 />
@@ -503,8 +497,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                     backgroundSize: '20px 20px' 
                   }}
                 />
-                <div className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[20px] blur-sm pointer-events-none", bonusStyles.circle)}
-                  style={{ mixBlendMode: 'overlay' }}
+                <div className={cn("absolute right-0 bottom-0 w-48 h-48 translate-x-12 translate-y-12 rounded-full border-[24px] blur-3xl opacity-30 pointer-events-none", bonusStyles.circle)}
                 ></div>
                 
                 <div className="relative z-10 flex flex-col h-full justify-between gap-4">
@@ -514,11 +507,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                       <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90 font-montserrat", bonusStyles.icon)}>Бонусы</span>
                     </div>
                     
-                    <div className={cn("relative overflow-hidden backdrop-blur-md border rounded-lg px-2.5 h-6 flex items-center justify-center", bonusStyles.badge)}>
+                    <div className={cn("relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/20", bonusStyles.badge)}>
                       <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
                         {bonusStats?.levelData.name || 'BRONZE'}
                       </span>
-                      <div className="shimmer-effect"></div>
                     </div>
                   </div>
 
@@ -534,7 +526,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                           <Sparkles className={cn("w-4 h-4", bonusStyles.subtext)} />
                           {bonusStats && (
                             <div className={cn(
-                              "ml-1 px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-tight font-montserrat flex items-center gap-1 shadow-sm backdrop-blur-md",
+                              "ml-1 px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-tight font-montserrat flex items-center gap-1 shadow-sm bg-white/10",
                               bonusStyles.badge
                             )}>
                               <div className={cn("w-1 h-1 rounded-full animate-pulse", bonusStyles.icon === bonusStyles.points ? "bg-current" : "bg-white")} />
@@ -584,7 +576,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                     </button>
 
                     <button className={cn(
-                      "backdrop-blur-md border text-[9px] font-black uppercase tracking-widest h-9 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg font-montserrat",
+                      "bg-white/10 border text-[9px] font-black uppercase tracking-widest h-9 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-lg font-montserrat",
                       bonusStyles.cta
                     )}>
                       <span className="leading-none mt-[1px]">Использовать</span>
@@ -600,10 +592,10 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
         {activeTab === 'achievements' && (
           <motion.div
             key="achievements"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <AchievementsCard />
           </motion.div>

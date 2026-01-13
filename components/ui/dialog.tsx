@@ -112,11 +112,13 @@ function Dialog({
       requestAnimationFrame(() => {
         if (blur.parentElement) {
           const isMobile = window.innerWidth < 768
-          const blurValue = isMobile ? '12px' : '8px'
-          blur.style.backdropFilter = `blur(${blurValue})`
-          ;(blur.style as any).webkitBackdropFilter = `blur(${blurValue})`
+          if (!isMobile) {
+            const blurValue = '8px'
+            blur.style.backdropFilter = `blur(${blurValue})`
+            ;(blur.style as any).webkitBackdropFilter = `blur(${blurValue})`
+          }
           
-          blur.style.background = isMobile ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.3)'
+          blur.style.background = isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)'
         }
       })
     } else if (!props.open && isOpenRef.current) {
@@ -214,8 +216,7 @@ function DialogOverlay({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "fixed inset-0 z-[49] bg-black/40 backdrop-blur-[8px]", 
-              "md:backdrop-blur-[2px] md:bg-black/40", 
+              "fixed inset-0 z-[49] bg-black/60 md:bg-black/40 md:backdrop-blur-[8px]", 
               className
             )}
           />
@@ -270,8 +271,8 @@ function DialogContent({
               className={cn(
                 "fixed z-[60] grid w-full gap-4 outline-none pointer-events-auto", 
                 // Применяем дефолтные стили только если они не переопределены в className
-                !hasCustomBackground && "bg-[#121214]/95 shadow-lg",
-                !hasCustomBlur && !hasCustomBackground && "backdrop-blur-2xl",
+                !hasCustomBackground && "bg-[#121214]/95 md:bg-[#121214]/95 shadow-lg",
+                !hasCustomBlur && !hasCustomBackground && "md:backdrop-blur-2xl",
                 !hasCustomBorder && "border border-white/10",
                 isBottom 
                   ? "bottom-0 left-0 rounded-t-[2.5rem] p-6 pb-10 max-w-none" 

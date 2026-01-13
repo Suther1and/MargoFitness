@@ -476,7 +476,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         <ChevronDown className={cn("w-3.5 h-3.5 text-white/60 group-hover:text-white/80 transition-transform -mt-0.5", isCalendarExpanded && "rotate-180")} />
                       </button>
                     </DialogTrigger>
-                  <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10">
+                  <DialogContent variant="bottom" className="p-0 overflow-hidden bg-[#121214]/95 md:backdrop-blur-2xl border-white/10 sm:max-w-md sm:mx-auto sm:rounded-[2.5rem] sm:bottom-6 rounded-t-[3rem] border-t border-x border-white/10">
                     <DialogHeader className="p-6 pb-2 border-b border-white/5">
                       <DialogTitle className="text-xl font-oswald font-black uppercase tracking-wider text-center flex items-center justify-center gap-3">
                         <Calendar className="w-5 h-5 text-amber-500" />
@@ -510,7 +510,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                 />
 
                 <div className="min-h-[40px] md:min-h-[60px] flex items-center relative overflow-hidden">
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence>
                     <motion.h1 
                       key={activeTab}
                       initial={{ opacity: 0, y: 25 }}
@@ -575,7 +575,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       </motion.div>
                     </div>
                     
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence>
                       <motion.h1 
                         key={activeTab}
                         initial={{ opacity: 0, y: 10 }}
@@ -656,15 +656,14 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
             {/* Mobile версия с анимацией */}
             <AnimatePresence 
-              mode="wait"
               onExitComplete={() => window.scrollTo(0, 0)}
             >
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className="w-full lg:hidden"
               >
                 {isFirstVisit && !dismissed && activeTab !== 'settings' && (
@@ -1118,7 +1117,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
       {/* Mobile Bottom Navigation - Stable UI */}
       <div className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md mobile-nav-container">
-        <div className="flex items-center justify-around p-2 rounded-[2rem] border border-white/10 bg-[#121214]/60 backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-h-[60px]">
+        <div className="flex items-center justify-around p-2 rounded-[2rem] border border-white/10 bg-[#121214]/95 md:bg-[#121214]/60 md:backdrop-blur-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-h-[60px]">
           <button onClick={() => handleTabChange('overview')} className={cn("flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300", activeTab === 'overview' ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30" : "text-white/40")}>
             <Home className="w-5 h-5" />
           </button>
