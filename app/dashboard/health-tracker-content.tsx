@@ -728,7 +728,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           setSettingsSubTab('widgets')
                         }}
                       />
-                      <AchievementsCard />
                       {settings.widgets.photos?.enabled && (
                         <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                       )}
