@@ -145,42 +145,42 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           <div className="premium-contour" />
           
           {/* Header */}
-          <div className="p-8 pb-6 relative z-20">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-inner">
-                  <Trophy className="w-8 h-8 text-emerald-400" />
+          <div className="p-6 pb-0 relative z-20">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-inner">
+                  <Trophy className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500/50 font-montserrat leading-none mb-1.5">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/50 font-montserrat leading-none mb-1">
                     Личная эволюция
                   </span>
-                  <h2 className="text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
+                  <h2 className="text-xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
                     Достижения
                   </h2>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all active:scale-95"
+                className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
               >
-                <X className="w-5 h-5 text-white/40 group-hover:text-white" />
+                <X className="w-4 h-4 text-white/40" />
               </button>
             </div>
 
             {/* Status Filter Tabs - Minimalist */}
-            <div className="flex p-1 bg-black/40 backdrop-blur-md border border-white/5 rounded-2xl">
+            <div className="flex p-1 bg-black/40 backdrop-blur-md border border-white/5 rounded-[1.2rem]">
               <button
                 onClick={() => setStatusFilter('uncompleted')}
                 className={cn(
-                  'flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
+                  'flex-1 py-2 rounded-[0.9rem] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
                   statusFilter === 'uncompleted' ? 'text-white' : 'text-white/20 hover:text-white/40'
                 )}
               >
                 {statusFilter === 'uncompleted' && (
                   <motion.div 
                     layoutId="popupTab" 
-                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-xl -z-10" 
+                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-[0.9rem] -z-10" 
                   />
                 )}
                 В процессе ({totalCount - unlockedCount})
@@ -188,14 +188,14 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               <button
                 onClick={() => setStatusFilter('completed')}
                 className={cn(
-                  'flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
+                  'flex-1 py-2 rounded-[0.9rem] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
                   statusFilter === 'completed' ? 'text-white' : 'text-white/20 hover:text-white/40'
                 )}
               >
                 {statusFilter === 'completed' && (
                   <motion.div 
                     layoutId="popupTab" 
-                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-xl -z-10" 
+                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-[0.9rem] -z-10" 
                   />
                 )}
                 Выполненные ({unlockedCount})
@@ -204,7 +204,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar relative z-20">
+          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 custom-scrollbar relative z-20">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
