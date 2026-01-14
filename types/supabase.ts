@@ -675,6 +675,10 @@ export interface Database {
           enabled_metrics: string[]
           goals: Json
           streaks: Json
+          user_params: Json | null
+          habits: Json | null
+          widgets_in_daily_plan: string[] | null
+          widget_goals: Json | null
           updated_at: string
         }
         Insert: {
@@ -682,6 +686,10 @@ export interface Database {
           enabled_metrics?: string[]
           goals?: Json
           streaks?: Json
+          user_params?: Json | null
+          habits?: Json | null
+          widgets_in_daily_plan?: string[] | null
+          widget_goals?: Json | null
           updated_at?: string
         }
         Update: {
@@ -689,6 +697,10 @@ export interface Database {
           enabled_metrics?: string[]
           goals?: Json
           streaks?: Json
+          user_params?: Json | null
+          habits?: Json | null
+          widgets_in_daily_plan?: string[] | null
+          widget_goals?: Json | null
           updated_at?: string
         }
         Relationships: [
