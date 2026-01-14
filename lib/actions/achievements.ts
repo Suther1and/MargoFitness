@@ -311,6 +311,85 @@ export async function getAchievementStats(userId: string) {
   return { success: true, data: { total, unlocked, percentage: total > 0 ? Math.round((unlocked / total) * 100) : 0, recentUnlocked: userRes.data || [] } }
 }
 
+/**
+ * Получить все достижения с глобальной статистикой (для админа)
+ */
+export async function getAdminAchievements() {
+  const supabase = await createClient()
+  
+  // Проверка прав админа
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { success: false, error: 'Not authorized' }
+
+  try {
+    // Получаем все достижения
+    const { data: achievements, error: achError } = await supabase
+      .from('achievements')
+      .select('*')
+      .order('sort_order', { ascending: true })
+
+    if (achError) throw achError
+
+    // Получаем количество пользователей для каждого достижения
+    const { data: stats, error: statsError } = await supabase
+      .from('user_achievements')
+      .select('achievement_id')
+
+    if (statsError) throw statsError
+
+    const counts = stats.reduce((acc: Record<string, number>, curr) => {
+      acc[curr.achievement_id] = (acc[curr.achievement_id] || 0) + 1
+      return acc
+    }, {})
+
+    const data = achievements.map(ach => ({
+      ...ach,
+      userCount: counts[ach.id] || 0
+    }))
+
+    return { success: true, data }
+  } catch (error: any) {
+    console.error('[Admin Achievements] Error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Обновить данные достижения (для админа)
+ */
+export async function updateAchievementAdmin(achievementId: string, updates: {
+  title?: string
+  reward_amount?: number | null
+  description?: string
+}) {
+  const supabase = await createClient()
+  
+  // Проверка прав админа
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { success: false, error: 'Not authorized' }
+
+  try {
+    const { error } = await supabase
+      .from('achievements')
+      .update(updates)
+      .eq('id', achievementId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/achievements')
+    revalidatePath('/dashboard/health-tracker')
+    
+    return { success: true }
+  } catch (error: any) {
+    console.error('[Admin Update Achievement] Error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
 export async function unlockAchievement(userId: string, achievementId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -98,7 +98,7 @@ glowing star badge with checkmark center, soft gradient from amber yellow to war
 royal crown with jewels and radiant aura, majestic gradient from golden yellow to rich amber with prismatic glints, intense royal glow, 3D glass icon design, rounded square shape with soft edges, glossy translucent surface, light reflections and highlights, subtle inner glow, volumetric lighting, centered composition, minimalist clean style, isolated on pure black background, premium mobile game achievement UI, 4k high quality render
 ```
 
-### 16. Коллекционер - `collector.png`
+### 16. Палитра привычек - `habit-palette.png`
 ```
 stack of books with bookmark ribbon, soft gradient from honey yellow to burnt orange, 3D glass icon design, rounded square shape with soft edges, glossy translucent surface, light reflections and highlights, subtle inner glow, volumetric lighting, centered composition, minimalist clean style, isolated on pure black background, premium mobile game achievement UI, 4k high quality render
 ```

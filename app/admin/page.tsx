@@ -1,7 +1,7 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { getRegistrationStats, getRevenueByPeriod } from "@/lib/actions/analytics"
 import { redirect } from "next/navigation"
-import { Calendar, BookOpen, Users, TrendingUp, Tag, ArrowRight, Settings, Activity, DollarSign, Percent } from "lucide-react"
+import { Calendar, BookOpen, Users, TrendingUp, Tag, ArrowRight, Settings, Activity, DollarSign, Percent, Trophy } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminPage() {
@@ -107,6 +107,16 @@ export default async function AdminPage() {
       bg: 'bg-rose-500/10',
       ring: 'ring-rose-400/20',
       accent: 'from-rose-500/10'
+    },
+    {
+      title: 'Достижения',
+      description: 'Управление системой достижений, условиями и бонусами',
+      href: '/admin/achievements',
+      icon: Trophy,
+      color: 'text-yellow-300',
+      bg: 'bg-yellow-500/10',
+      ring: 'ring-yellow-400/20',
+      accent: 'from-yellow-500/10'
     }
   ]
 
