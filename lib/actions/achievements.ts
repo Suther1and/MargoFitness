@@ -67,7 +67,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     ])
 
     // Извлекаем данные
-    const metricsStats = (statsRes.status === 'fulfilled' && !statsRes.value.error) ? (statsRes.value.data?.[0] || {}) : {}
+    const metricsStats: any = (statsRes.status === 'fulfilled' && !statsRes.value.error) ? (statsRes.value.data?.[0] || {}) : {}
     const userSettings = (settingsRes.status === 'fulfilled' && !settingsRes.value.error) ? settingsRes.value.data : null
     const latestEntry = (latestEntryRes.status === 'fulfilled' && !latestEntryRes.value.error) ? latestEntryRes.value.data : null
     const allEntriesCount = (allCountRes.status === 'fulfilled' && !allCountRes.value.error) ? (allCountRes.value.count || 0) : 0
@@ -244,7 +244,7 @@ export async function checkAndUnlockAchievements(userId: string) {
       supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false })
     ])
 
-    const mStats = stats.data?.[0] || {}
+    const mStats: any = stats.data?.[0] || {}
     const uSettings = settings.data
     const uProfile = profile.data
     const uPurchases = purchases.data || []
