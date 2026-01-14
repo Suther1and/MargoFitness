@@ -17,7 +17,7 @@ interface AchievementsPopupProps {
 }
 
 export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: AchievementsPopupProps) {
-  const [statusFilter, setStatusFilter] = useState<'completed' | 'uncompleted'>('uncompleted')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'uncompleted'>('all')
   const [selectedAchievement, setSelectedAchievement] = useState<any | null>(null)
   const [mounted, setMounted] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
@@ -67,8 +67,18 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
   }, [isOpen, selectedAchievement, userId])
 
   const filteredAchievements = achievements
-    .filter(a => statusFilter === 'uncompleted' ? !a.isUnlocked : a.isUnlocked)
+    .filter(a => {
+      if (statusFilter === 'all') return true
+      return statusFilter === 'uncompleted' ? !a.isUnlocked : a.isUnlocked
+    })
     .sort((a, b) => {
+      if (statusFilter === 'all') {
+        // Сначала выполненные, затем невыполненные
+        if (a.isUnlocked !== b.isUnlocked) {
+          return a.isUnlocked ? -1 : 1
+        }
+        return 0
+      }
       if (statusFilter === 'completed' && a.unlockedAt && b.unlockedAt) {
         return new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
       }
@@ -145,66 +155,88 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           <div className="premium-contour" />
           
           {/* Header */}
-          <div className="p-6 pb-0 relative z-20">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-inner">
-                  <Trophy className="w-6 h-6 text-emerald-400" />
+          <div className="relative z-30">
+            <div className="p-6 pb-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-inner">
+                    <Trophy className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/50 font-montserrat leading-none mb-1">
+                      Личная эволюция
+                    </span>
+                    <h2 className="text-xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
+                      Достижения
+                    </h2>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/50 font-montserrat leading-none mb-1">
-                    Личная эволюция
-                  </span>
-                  <h2 className="text-xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
-                    Достижения
-                  </h2>
-                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
+                >
+                  <X className="w-4 h-4 text-white/40" />
+                </button>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
-              >
-                <X className="w-4 h-4 text-white/40" />
-              </button>
             </div>
+          </div>
 
-            {/* Status Filter Tabs - Minimalist */}
-            <div className="flex p-1 bg-black/40 backdrop-blur-md border border-white/5 rounded-[1.2rem]">
+          {/* Floating Tabs - Safari Style */}
+          <div className="flex justify-center relative z-40 px-6">
+            <div className="flex p-1 bg-[#1a1a1c]/90 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.6)] w-full max-w-sm">
+              <button
+                onClick={() => setStatusFilter('all')}
+                className={cn(
+                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                  statusFilter === 'all' ? 'text-white' : 'text-white/30 hover:text-white/50'
+                )}
+              >
+                {statusFilter === 'all' && (
+                  <motion.div 
+                    layoutId="safariTab" 
+                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                Все ({totalCount})
+              </button>
               <button
                 onClick={() => setStatusFilter('uncompleted')}
                 className={cn(
-                  'flex-1 py-2 rounded-[0.9rem] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
-                  statusFilter === 'uncompleted' ? 'text-white' : 'text-white/20 hover:text-white/40'
+                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                  statusFilter === 'uncompleted' ? 'text-white' : 'text-white/30 hover:text-white/50'
                 )}
               >
                 {statusFilter === 'uncompleted' && (
                   <motion.div 
-                    layoutId="popupTab" 
-                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-[0.9rem] -z-10" 
+                    layoutId="safariTab" 
+                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                В процессе ({totalCount - unlockedCount})
+                Процесс ({totalCount - unlockedCount})
               </button>
               <button
                 onClick={() => setStatusFilter('completed')}
                 className={cn(
-                  'flex-1 py-2 rounded-[0.9rem] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative',
-                  statusFilter === 'completed' ? 'text-white' : 'text-white/20 hover:text-white/40'
+                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                  statusFilter === 'completed' ? 'text-white' : 'text-white/30 hover:text-white/50'
                 )}
               >
                 {statusFilter === 'completed' && (
                   <motion.div 
-                    layoutId="popupTab" 
-                    className="absolute inset-0 bg-white/[0.04] border border-white/5 rounded-[0.9rem] -z-10" 
+                    layoutId="safariTab" 
+                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                Выполненные ({unlockedCount})
+                Готово ({unlockedCount})
               </button>
             </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 custom-scrollbar relative z-20">
+          <div className="flex-1 overflow-y-auto px-6 pt-5 pb-8 custom-scrollbar relative z-20">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
