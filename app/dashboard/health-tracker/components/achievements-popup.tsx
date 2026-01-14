@@ -380,65 +380,65 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className="group/item cursor-pointer"
-                      onClick={() => !isSecret && setSelectedAchievement(achievement)}
+                      onClick={() => setSelectedAchievement(achievement)}
                     >
                       <div className="flex flex-col items-center gap-2 transition-all duration-500 relative group/item hover:scale-105 active:scale-95">
                         <div className="aspect-square w-[75%] sm:w-[80%] flex items-center justify-center relative z-10">
-                          {isSecret ? (
-                            <div className="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center bg-white/[0.03] rounded-full border border-white/5 backdrop-blur-sm">
-                              <span className="text-xl sm:text-3xl opacity-20">🔒</span>
+                          {/* Background / Unfilled Part (Grayscale) */}
+                          <div className={cn(
+                            "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
+                            achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20 group-hover/item:opacity-30",
+                            isSecret && "opacity-10"
+                          )}>
+                            {achievement.icon_url ? (
+                              <img 
+                                src={achievement.icon_url} 
+                                alt={achievement.title}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                            )}
+                          </div>
+
+                          {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}
+                          {achievement.isUnlocked && (
+                            <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-full">
+                              <div className="absolute inset-0 w-[50%] h-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine -top-[50%]" />
                             </div>
-                          ) : (
-                            <>
-                              {/* Background / Unfilled Part (Grayscale) */}
-                              <div className={cn(
-                                "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
-                                achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20 group-hover/item:opacity-30"
-                              )}>
-                                {achievement.icon_url ? (
-                                  <img 
-                                    src={achievement.icon_url} 
-                                    alt={achievement.title}
-                                    className="w-full h-full object-contain"
-                                  />
-                                ) : (
-                                  <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
-                                )}
-                              </div>
+                          )}
 
-                              {/* Progress Fill Part (Colored) */}
-                              {!achievement.isUnlocked && progress > 0 && (
-                                <div 
-                                  className="absolute inset-0 flex items-center justify-center transition-all duration-700 opacity-60 group-hover/item:opacity-90 z-10"
-                                  style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}
-                                >
-                                  {achievement.icon_url ? (
-                                    <img 
-                                      src={achievement.icon_url} 
-                                      alt={achievement.title}
-                                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
-                                    />
-                                  ) : (
-                                    <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
-                                  )}
-                                </div>
+                          {/* Progress Fill Part (Colored) - Hidden for Secret */}
+                          {!achievement.isUnlocked && progress > 0 && !isSecret && (
+                            <div 
+                              className="absolute inset-0 flex items-center justify-center transition-all duration-700 opacity-60 group-hover/item:opacity-90 z-10"
+                              style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}
+                            >
+                              {achievement.icon_url ? (
+                                <img 
+                                  src={achievement.icon_url} 
+                                  alt={achievement.title}
+                                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+                                />
+                              ) : (
+                                <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
                               )}
+                            </div>
+                          )}
 
-                              {/* Fully Unlocked Part (Colored) */}
-                              {achievement.isUnlocked && (
-                                <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10">
-                                  {achievement.icon_url ? (
-                                    <img 
-                                      src={achievement.icon_url} 
-                                      alt={achievement.title}
-                                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.4)]"
-                                    />
-                                  ) : (
-                                    <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
-                                  )}
-                                </div>
+                          {/* Fully Unlocked Part (Colored) */}
+                          {achievement.isUnlocked && (
+                            <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10">
+                              {achievement.icon_url ? (
+                                <img 
+                                  src={achievement.icon_url} 
+                                  alt={achievement.title}
+                                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.4)]"
+                                />
+                              ) : (
+                                <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
                               )}
-                            </>
+                            </div>
                           )}
 
                           {/* Reward Badge */}
@@ -472,7 +472,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                               'text-[10px] sm:text-[14px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
                               achievement.isUnlocked ? 'text-white/90 group-hover/item:text-white' : 'text-white/20 group-hover/item:text-white/40'
                             )}>
-                              {isSecret ? 'Секрет' : achievement.title}
+                              {achievement.title}
                             </span>
                           </div>
                         </div>
@@ -506,7 +506,12 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Background Glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
+                <div className={cn(
+                  "absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-colors duration-1000",
+                  selectedAchievement.is_secret && !selectedAchievement.isUnlocked
+                    ? "bg-purple-500/10"
+                    : getGlowColor(selectedAchievement.color_class)
+                )} />
                 
                 <button
                   onClick={(e) => {
@@ -542,8 +547,15 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       )}
                     </div>
 
+                    {/* Shine Effect for COMPLETED achievements only */}
+                    {selectedAchievement.isUnlocked && (
+                      <div className="absolute inset-0 z-20 overflow-hidden rounded-full pointer-events-none">
+                        <div className="absolute inset-0 w-[50%] h-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine -top-[50%]" />
+                      </div>
+                    )}
+
                     {/* Progress Fill Part (Colored) */}
-                    {!selectedAchievement.isUnlocked && (selectedAchievement.progress || 0) > 0 && (
+                    {!selectedAchievement.isUnlocked && (selectedAchievement.progress || 0) > 0 && !selectedAchievement.is_secret && (
                       <div 
                         className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10"
                         style={{ clipPath: `inset(0 ${100 - (selectedAchievement.progress || 0)}% 0 0)` }}
@@ -581,18 +593,24 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     )}
                   </motion.div>
 
-                  <h3 className="text-2xl font-black font-oswald text-white uppercase tracking-tight leading-none italic mb-4">
+                  <h3 className={cn(
+                    "text-2xl font-black font-oswald text-white uppercase tracking-tight leading-none italic mb-4",
+                    selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/60"
+                  )}>
                     {selectedAchievement.title}
                   </h3>
                   
                   <p className="text-sm text-white/50 font-medium leading-relaxed mb-8 px-4 font-montserrat tracking-wide">
-                    {selectedAchievement.metadata?.type === 'profile_complete' 
-                      ? 'Заполните данные вашего профиля' 
-                      : (selectedAchievement.description || 'Условия получения не указаны')}
+                    {selectedAchievement.is_secret && !selectedAchievement.isUnlocked 
+                      ? (selectedAchievement.secret_hint || 'Тайное становится явным для тех, кто ищет...')
+                      : (selectedAchievement.metadata?.type === 'profile_complete' 
+                        ? 'Заполните данные вашего профиля' 
+                        : (selectedAchievement.description || 'Условия получения не указаны'))}
                   </p>
 
                   {/* Health Passport, Mentor & Weekly Discipline Fields List */}
-                  {(selectedAchievement.metadata?.type === 'profile_complete' || 
+                  {!(selectedAchievement.is_secret && !selectedAchievement.isUnlocked) && 
+                   (selectedAchievement.metadata?.type === 'profile_complete' || 
                     selectedAchievement.metadata?.type === 'referral_mentor' || 
                     ((selectedAchievement.metadata?.type === 'perfect_streak' || selectedAchievement.metadata?.type === 'streak_days') && selectedAchievement.metadata?.value === 7)
                    ) && selectedAchievement.progressData?.fields && (
@@ -635,7 +653,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       </div>
                     )}
 
-                    {selectedAchievement.metadata?.type !== 'profile_complete' && 
+                    {!selectedAchievement.is_secret && 
+                     selectedAchievement.metadata?.type !== 'profile_complete' && 
                      selectedAchievement.metadata?.type !== 'referral_mentor' && 
                      !((selectedAchievement.metadata?.type === 'perfect_streak' || selectedAchievement.metadata?.type === 'streak_days') && selectedAchievement.metadata?.value === 7) && (
                       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden relative group/status">
@@ -734,4 +753,20 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
   )
 
   return createPortal(popupContent, document.body)
+}
+
+/**
+ * Helper to extract glow color from color_class
+ */
+function getGlowColor(colorClass: string | null): string {
+  if (!colorClass) return 'bg-emerald-500/10'
+  
+  // Extract color name from text-XXXX-500
+  const match = colorClass.match(/text-([a-z]+)-\d+/)
+  if (match && match[1]) {
+    const color = match[1]
+    return `bg-${color}-500/10`
+  }
+  
+  return 'bg-emerald-500/10'
 }

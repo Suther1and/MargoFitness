@@ -213,6 +213,29 @@
     animation: shimmer 2s ease-in-out infinite;
   }
   
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    5% { opacity: 0.5; }
+    50% { opacity: 0.5; }
+    95% { opacity: 0.5; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .animate-scan {
+    animation: scan 3s linear infinite;
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-200%) skewX(-30deg); opacity: 0; }
+    10% { opacity: 1; }
+    30% { transform: translateX(200%) skewX(-30deg); opacity: 0; }
+    100% { transform: translateX(200%) skewX(-30deg); opacity: 0; }
+  }
+
+  .animate-shine {
+    animation: shine 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  
   @keyframes benefitSlideIn {
     from {
       opacity: 0;

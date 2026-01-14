@@ -108,6 +108,9 @@ export function AchievementsCard() {
               <>
                 {Array.from({ length: 3 }).map((_, idx) => {
                   const achievement = recentAchievements[idx]
+                  const isSecret = achievement?.is_secret && !achievement?.isUnlocked
+                  const hasReward = !!achievement?.reward_amount
+
                   return (
                     <div 
                       key={idx}
@@ -118,31 +121,60 @@ export function AchievementsCard() {
                         }
                       }}
                       className={cn(
-                        "group/slot relative aspect-square rounded-[24px] p-[1.5px] transition-all duration-500",
+                        "group/slot relative aspect-square transition-all duration-500",
                         achievement 
-                          ? "bg-gradient-to-b from-white/20 via-transparent to-transparent hover:scale-105"
-                          : "bg-white/[0.05] border border-dashed border-white/10"
+                          ? "hover:scale-105"
+                          : "rounded-[24px] bg-white/[0.05] border border-dashed border-white/10"
                       )}
                     >
                       <div className={cn(
-                        "w-full h-full rounded-[23px] flex flex-col items-center justify-center transition-all duration-500",
-                        achievement 
-                          ? "backdrop-blur-md"
-                          : "bg-[#0d0d0f]/50"
+                        "w-full h-full flex flex-col items-center justify-center transition-all duration-500 relative",
+                        !achievement && "bg-[#0d0d0f]/50 rounded-[23px]"
                       )}>
                         {achievement ? (
                           <>
-                            <div className="w-28 h-28 mb-2 filter drop-shadow-[0_8px_15px_rgba(0,0,0,0.5)] group-hover/slot:-translate-y-1 transition-transform duration-500 relative">
-                              {achievement.icon_url ? (
-                                <img 
-                                  src={achievement.icon_url} 
-                                  alt={achievement.title}
-                                  className="w-full h-full object-contain"
-                                />
-                              ) : (
-                                <span className="text-8xl absolute inset-0 flex items-center justify-center">
-                                  {achievement.icon}
-                                </span>
+                            <div className="w-full h-full filter drop-shadow-[0_8px_15px_rgba(0,0,0,0.5)] group-hover/slot:-translate-y-1 transition-transform duration-500 relative flex items-center justify-center">
+                              {/* Background / Unfilled */}
+                              <div className={cn(
+                                "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
+                                isSecret && "opacity-10",
+                                !isSecret && "opacity-20"
+                              )}>
+                                {achievement.icon_url ? (
+                                  <img 
+                                    src={achievement.icon_url} 
+                                    alt={achievement.title}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <span className="text-8xl flex items-center justify-center">
+                                    {achievement.icon}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}
+                              {achievement.isUnlocked && (
+                                <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-full">
+                                  <div className="absolute inset-0 w-[50%] h-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine -top-[50%]" />
+                                </div>
+                              )}
+
+                              {/* Unlocked / Colored */}
+                              {achievement.isUnlocked && (
+                                <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10">
+                                  {achievement.icon_url ? (
+                                    <img 
+                                      src={achievement.icon_url} 
+                                      alt={achievement.title}
+                                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.4)]"
+                                    />
+                                  ) : (
+                                    <span className="text-8xl flex items-center justify-center">
+                                      {achievement.icon}
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </div>
                             <span className="text-[8px] text-white/40 font-black uppercase text-center font-oswald tracking-tight px-2 line-clamp-1">

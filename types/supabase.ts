@@ -781,6 +781,7 @@ export interface Database {
           color_class: string
           metadata: Json
           sort_order: number
+          secret_hint: string | null
           created_at: string
         }
         Insert: {
@@ -795,6 +796,7 @@ export interface Database {
           color_class: string
           metadata?: Json
           sort_order?: number
+          secret_hint?: string | null
           created_at?: string
         }
         Update: {
@@ -809,6 +811,7 @@ export interface Database {
           color_class?: string
           metadata?: Json
           sort_order?: number
+          secret_hint?: string | null
           created_at?: string
         }
         Relationships: []
