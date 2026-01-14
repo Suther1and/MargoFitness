@@ -405,6 +405,7 @@ export interface AchievementWithProgress extends AchievementWithStatus {
   progress?: number // Прогресс в процентах (0-100)
   currentValue?: number // Текущее значение для отображения
   targetValue?: number // Целевое значение
+  progressData?: any // Дополнительные данные о прогрессе (например, список полей)
 }
 
 /** Категории достижений с названиями для UI */

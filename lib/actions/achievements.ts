@@ -133,34 +133,43 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     )
 
     // 3. Собираем данные для расчета прогресса
-    // Параллельно запрашиваем всё необходимое
+    // Используем отдельные запросы с обработкой ошибок для каждого
     const [
-      { data: stats },
-      { data: settings },
-      { data: latestEntry },
-      { data: allEntriesCount },
-      { data: monthEntriesCount }
+      statsRes,
+      settingsRes,
+      latestEntryRes,
+      allEntriesRes,
+      monthEntriesRes,
+      profileRes
     ] = await Promise.all([
       supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
-      supabase.from('diary_settings').select('*').eq('user_id', userId).single(),
+      supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('diary_entries').select('metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
       supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('diary_entries').select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0])
+        .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]),
+      supabase.from('profiles').select('full_name, phone, email, avatar_url, subscription_tier').eq('id', userId).maybeSingle()
     ])
 
-    const metricsStats = stats?.[0] || { total_water: 0, total_steps: 0, energy_max_count: 0 }
+    // Логируем ошибки если они есть
+    if (statsRes.error) console.error('[Achievements] Stats error:', statsRes.error)
+    if (settingsRes.error) console.error('[Achievements] Settings error:', settingsRes.error)
+    if (profileRes.error) console.error('[Achievements] Profile error:', profileRes.error)
+
+    const metricsStats = statsRes.data?.[0] || { total_water: 0, total_steps: 0, energy_max_count: 0 }
+    const settings = settingsRes.data
+    const profile = profileRes.data
+    const latestEntry = latestEntryRes.data
     const currentMetrics = latestEntry?.metrics as any || {}
     const habitsCompleted = latestEntry?.habits_completed as any || {}
     const currentStreak = settings?.streaks?.current || 0
-    const totalEntries = allEntriesCount || 0
-    const monthlyEntries = monthEntriesCount || 0
-    
-    // Для более сложных расчетов (например, серии привычек или веса) 
-    // нам могут понадобиться последние записи. Но для базового прогресса 
-    // по большинству ачивок этого набора данных достаточно.
+    const totalEntries = allEntriesRes.count || 0
+    const monthlyEntries = monthEntriesRes.count || 0
 
+    const tierLevels: Record<string, number> = { 'free': 0, 'basic': 1, 'pro': 2, 'elite': 3 }
+    const currentTierLevel = tierLevels[profile?.subscription_tier || 'free'] || 0
+    
     // 4. Объединяем данные и считаем прогресс
     const data: AchievementWithProgress[] = allAchievements.map(achievement => {
       const isUnlocked = unlockedMap.has(achievement.id)
@@ -169,6 +178,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
       
       let currentValue = 0
       let targetValue = metadata?.value || 0
+      let progressData: any = null
 
       if (!isUnlocked && metadata) {
         switch (metadata.type) {
@@ -207,7 +217,32 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
             currentValue = unlockedMap.size
             if (targetValue === 0) targetValue = allAchievements.length
             break
-          // Другие типы можно добавить по мере необходимости
+          case 'profile_complete':
+            const fields = [
+              { label: 'Имя', done: !!profile?.full_name },
+              { label: 'Телефон', done: !!profile?.phone },
+              { label: 'Почта', done: !!profile?.email },
+              { label: 'Аватар', done: !!profile?.avatar_url },
+              { label: 'Вес', done: !!settings?.user_params?.weight },
+              { label: 'Рост', done: !!settings?.user_params?.height },
+              { label: 'Возраст', done: !!settings?.user_params?.age },
+            ]
+            currentValue = fields.filter(f => f.done).length
+            targetValue = fields.length
+            progressData = { fields }
+            break
+          case 'subscription_tier':
+            currentValue = currentTierLevel
+            targetValue = tierLevels[metadata.value] || 0
+            break
+          case 'weight_goal_reached':
+            currentValue = 0 // Бинарная цель
+            targetValue = 1
+            break
+          case 'registration':
+            currentValue = 1
+            targetValue = 1
+            break
         }
       }
 
@@ -224,7 +259,8 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
         unlockedAt,
         currentValue,
         targetValue,
-        progress
+        progress,
+        progressData
       }
     })
 

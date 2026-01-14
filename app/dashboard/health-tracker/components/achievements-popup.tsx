@@ -10,6 +10,127 @@ import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
+const getUnitLabel = (type: string) => {
+  switch (type) {
+    case 'water_daily':
+    case 'water_total':
+    case 'water_goal_streak':
+      return 'мл'
+    case 'steps_daily':
+    case 'steps_total':
+      return 'шагов'
+    case 'streak_days':
+    case 'perfect_streak':
+    case 'weight_streak':
+    case 'mood_great_streak':
+    case 'sleep_streak':
+      return 'дней'
+    case 'total_entries':
+    case 'monthly_entries':
+      return 'записей'
+    case 'habits_created':
+      return 'привычек'
+    case 'habit_completions':
+      return 'раз'
+    case 'achievement_count':
+      return 'дост.'
+    case 'weight_recorded':
+    case 'weight_down_streak':
+      return 'раз'
+    case 'profile_complete':
+      return 'пунктов'
+    case 'sleep_daily':
+      return 'ч'
+    default:
+      return ''
+  }
+}
+
+const getTierName = (level: number) => {
+  const names = ['Free', 'Basic', 'Pro', 'Elite']
+  return names[level] || 'Free'
+}
+
+const getTierStyles = (level: number) => {
+  switch (level) {
+    case 1: // Basic - Бронзовый
+      return {
+        bar: 'bg-gradient-to-r from-amber-800 to-amber-600',
+        shadow: 'shadow-[0_0_15px_rgba(146,64,14,0.5)]',
+        color: 'text-amber-700',
+        bg: 'bg-amber-900/10'
+      }
+    case 2: // Pro - Фиолетовый
+      return {
+        bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-500',
+        shadow: 'shadow-[0_0_15px_rgba(147,51,234,0.5)]',
+        color: 'text-purple-500',
+        bg: 'bg-purple-500/10'
+      }
+    case 3: // Elite - Желтый
+      return {
+        bar: 'bg-gradient-to-r from-yellow-500 to-yellow-300',
+        shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.5)]',
+        color: 'text-yellow-400',
+        bg: 'bg-yellow-500/10'
+      }
+    default: // Free - Светло-серый
+      return {
+        bar: 'bg-gradient-to-r from-slate-400 to-slate-300',
+        shadow: 'shadow-[0_0_10px_rgba(148,163,184,0.3)]',
+        color: 'text-slate-400',
+        bg: 'bg-slate-400/10'
+      }
+  }
+}
+
+const getCategoryStyles = (category: string) => {
+  switch (category) {
+    case 'streaks':
+      return {
+        color: 'text-orange-400',
+        bg: 'bg-orange-500/20',
+        bar: 'bg-gradient-to-r from-orange-600 to-amber-400',
+        shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]'
+      }
+    case 'metrics':
+      return {
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/20',
+        bar: 'bg-gradient-to-r from-blue-600 to-cyan-400',
+        shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+      }
+    case 'habits':
+      return {
+        color: 'text-yellow-400',
+        bg: 'bg-yellow-500/20',
+        bar: 'bg-gradient-to-r from-yellow-600 to-amber-300',
+        shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.4)]'
+      }
+    case 'weight':
+      return {
+        color: 'text-purple-400',
+        bg: 'bg-purple-500/20',
+        bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-400',
+        shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+      }
+    case 'consistency':
+      return {
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/20',
+        bar: 'bg-gradient-to-r from-emerald-600 to-teal-400',
+        shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+      }
+    default:
+      return {
+        color: 'text-white/60',
+        bg: 'bg-white/10',
+        bar: 'bg-white/40',
+        shadow: ''
+      }
+  }
+}
+
 interface AchievementsPopupProps {
   isOpen: boolean
   onClose: () => void
@@ -136,6 +257,10 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             mask-composite: exclude;
             pointer-events: none;
             z-index: 10;
+          }
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
           }
         `}</style>
 
@@ -397,21 +522,62 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                   <motion.div
                     initial={{ scale: 0.8, rotate: -10 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    className={cn(
-                      "w-48 h-48 mb-8 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700",
-                      !selectedAchievement.isUnlocked && "grayscale brightness-[0.8] opacity-20"
-                    )}
+                    className="w-48 h-48 mb-8 relative"
                   >
-                    {selectedAchievement.icon_url ? (
-                      <img 
-                        src={selectedAchievement.icon_url} 
-                        alt={selectedAchievement.title}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-8xl flex items-center justify-center h-full">
-                        {selectedAchievement.icon}
-                      </span>
+                    {/* Background / Unfilled Part (Grayscale) */}
+                    <div className={cn(
+                      "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
+                      selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20"
+                    )}>
+                      {selectedAchievement.icon_url ? (
+                        <img 
+                          src={selectedAchievement.icon_url} 
+                          alt={selectedAchievement.title}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-8xl flex items-center justify-center h-full">
+                          {selectedAchievement.icon}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Progress Fill Part (Colored) */}
+                    {!selectedAchievement.isUnlocked && (selectedAchievement.progress || 0) > 0 && (
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10"
+                        style={{ clipPath: `inset(0 ${100 - (selectedAchievement.progress || 0)}% 0 0)` }}
+                      >
+                        {selectedAchievement.icon_url ? (
+                          <img 
+                            src={selectedAchievement.icon_url} 
+                            alt={selectedAchievement.title}
+                            className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)]"
+                          />
+                        ) : (
+                          <span className="text-8xl flex items-center justify-center h-full">
+                            {selectedAchievement.icon}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Fully Unlocked Part (Colored) */}
+                    {selectedAchievement.isUnlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center transition-all duration-1000 z-10">
+                        <div className="absolute inset-0 bg-emerald-500/20 blur-[60px] rounded-full animate-pulse" />
+                        {selectedAchievement.icon_url ? (
+                          <img 
+                            src={selectedAchievement.icon_url} 
+                            alt={selectedAchievement.title}
+                            className="w-full h-full object-contain filter drop-shadow-[0_20px_40px_rgba(16,185,129,0.4)]"
+                          />
+                        ) : (
+                          <span className="text-8xl flex items-center justify-center h-full">
+                            {selectedAchievement.icon}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </motion.div>
 
@@ -420,8 +586,40 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                   </h3>
                   
                   <p className="text-sm text-white/50 font-medium leading-relaxed mb-8 px-4 font-montserrat tracking-wide">
-                    {selectedAchievement.description || 'Условия получения не указаны'}
+                    {selectedAchievement.metadata?.type === 'profile_complete' 
+                      ? 'Заполните данные вашего профиля' 
+                      : (selectedAchievement.description || 'Условия получения не указаны')}
                   </p>
+
+                  {/* Health Passport Fields List */}
+                  {selectedAchievement.metadata?.type === 'profile_complete' && selectedAchievement.progressData?.fields && (
+                    <div className="w-full grid grid-cols-2 gap-2 mb-8 px-2">
+                      {selectedAchievement.progressData.fields.map((field: any, idx: number) => (
+                        <div 
+                          key={idx}
+                          className={cn(
+                            "flex items-center gap-2 p-2 rounded-xl border transition-all duration-300",
+                            field.done 
+                              ? "bg-emerald-500/10 border-emerald-500/20" 
+                              : "bg-white/[0.02] border-white/5 opacity-40"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-4 h-4 rounded-full flex items-center justify-center shrink-0",
+                            field.done ? "bg-emerald-500" : "bg-white/10"
+                          )}>
+                            {field.done && <Sparkles className="w-2.5 h-2.5 text-white" />}
+                          </div>
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase tracking-tight",
+                            field.done ? "text-emerald-400" : "text-white/40"
+                          )}>
+                            {field.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="w-full space-y-3">
                     {selectedAchievement.reward_amount && (
@@ -434,35 +632,92 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Статус</span>
-                      {selectedAchievement.isUnlocked ? (
-                        <div className="flex flex-col items-end">
-                          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
-                            Разблокировано
-                          </span>
-                          {selectedAchievement.unlockedAt && (
-                            <span className="text-[10px] text-white/20 font-bold">
-                              {format(new Date(selectedAchievement.unlockedAt), 'd MMMM yyyy', { locale: ru })}
+                    {selectedAchievement.metadata?.type !== 'profile_complete' && (
+                      <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden relative group/status">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30 relative z-10">Статус</span>
+                        {selectedAchievement.isUnlocked ? (
+                          <div className="flex flex-col items-end relative z-10">
+                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
+                              Разблокировано
                             </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-end">
-                          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">
-                            {selectedAchievement.currentValue || 0} / {selectedAchievement.targetValue || 0}
-                          </span>
-                          <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${selectedAchievement.progress || 0}%` }}
-                              className="h-full bg-emerald-500/50"
-                            />
+                            {selectedAchievement.unlockedAt && (
+                              <span className="text-[10px] text-white/20 font-bold">
+                                {format(new Date(selectedAchievement.unlockedAt), 'd MMMM yyyy', { locale: ru })}
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        ) : (
+                          <div className="flex flex-col items-end w-2/3 relative z-10">
+                            <div className="flex items-baseline gap-1 mb-1.5">
+                              {selectedAchievement.metadata?.type === 'subscription_tier' ? (
+                                <>
+                                  <span className={cn(
+                                    "text-sm font-black italic font-oswald",
+                                    getTierStyles(selectedAchievement.currentValue || 0).color
+                                  )}>
+                                    {getTierName(selectedAchievement.currentValue || 0)}
+                                  </span>
+                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter mx-1">
+                                    →
+                                  </span>
+                                  <span className={cn(
+                                    "text-sm font-black italic font-oswald",
+                                    getTierStyles(selectedAchievement.targetValue || 0).color
+                                  )}>
+                                    {getTierName(selectedAchievement.targetValue || 0)}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-sm font-black text-white italic font-oswald">
+                                    {selectedAchievement.currentValue?.toLocaleString() || 0}
+                                  </span>
+                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter">
+                                    из {selectedAchievement.targetValue?.toLocaleString() || 0} {getUnitLabel(selectedAchievement.metadata?.type)}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            
+                            <div className={cn(
+                              "w-full h-1.5 rounded-full overflow-hidden relative",
+                              selectedAchievement.metadata?.type === 'subscription_tier' 
+                                ? getTierStyles(selectedAchievement.targetValue || 0).bg
+                                : getCategoryStyles(selectedAchievement.category).bg
+                            )}>
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${selectedAchievement.progress || 0}%` }}
+                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                className={cn(
+                                  "h-full relative rounded-full",
+                                  selectedAchievement.metadata?.type === 'subscription_tier'
+                                    ? getTierStyles(selectedAchievement.targetValue || 0).bar
+                                    : getCategoryStyles(selectedAchievement.category).bar,
+                                  selectedAchievement.metadata?.type === 'subscription_tier'
+                                    ? getTierStyles(selectedAchievement.targetValue || 0).shadow
+                                    : getCategoryStyles(selectedAchievement.category).shadow
+                                )}
+                              >
+                                <div className="absolute inset-0 bg-white/20 animate-[shimmer_3s_infinite]" 
+                                     style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
+                              </motion.div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Background category subtle glow */}
+                        {!selectedAchievement.isUnlocked && (
+                          <div className={cn(
+                            "absolute right-0 top-0 w-32 h-full blur-3xl opacity-5 transition-opacity group-hover/status:opacity-10",
+                            selectedAchievement.metadata?.type === 'subscription_tier'
+                              ? getTierStyles(selectedAchievement.targetValue || 0).bar.split(' ')[1]
+                              : getCategoryStyles(selectedAchievement.category).bar.split(' ')[1]
+                          )} />
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
