@@ -276,7 +276,7 @@ export async function checkAndUnlockAchievements(userId: string) {
           if ((uSettings?.goals as any)?.weight && uEntries.length > 0) {
             const cur = (uEntries[0].metrics as any)?.weight
             const start = (uEntries[uEntries.length-1].metrics as any)?.weight
-            const goal = (uSettings.goals as any).weight
+            const goal = (uSettings?.goals as any)?.weight
             earned = start > goal ? cur <= goal : cur >= goal
           }
           break
