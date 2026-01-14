@@ -11,6 +11,10 @@ import {
 } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
+// ============================================
+// Получение данных и Прогресс для UI
+// ============================================
+
 /**
  * Получить все достижения со статусом разблокировки и прогрессом
  */
@@ -37,7 +41,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     const userAchievements = userAchRes.data || []
     const unlockedMap = new Map(userAchievements.map(ua => [ua.achievement_id, ua.unlocked_at]))
 
-    // 2. Собираем данные для расчета прогресса (параллельно и безопасно)
+    // 2. Собираем данные для расчета прогресса (параллельно)
     const [
       statsRes,
       settingsRes,
@@ -46,7 +50,8 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
       monthCountRes,
       profileRes,
       refsRes,
-      weeklyRes
+      weeklyRes,
+      purchasesRes
     ] = await Promise.allSettled([
       supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
       supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
@@ -56,11 +61,12 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
         .eq('user_id', userId)
         .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]),
       supabase.from('profiles').select('full_name, phone, email, avatar_url, subscription_tier').eq('id', userId).maybeSingle(),
-      supabase.from('referrals').select('status').eq('referrer_id', userId).limit(5),
-      supabase.from('diary_entries').select('date, metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(7)
+      supabase.from('referrals').select('status').eq('referrer_id', userId),
+      supabase.from('diary_entries').select('date, metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(7),
+      supabase.from('user_purchases').select('product_id, products(duration_months)').eq('user_id', userId)
     ])
 
-    // Извлекаем данные с фолбеками
+    // Извлекаем данные
     const metricsStats = (statsRes.status === 'fulfilled' && !statsRes.value.error) ? (statsRes.value.data?.[0] || {}) : {}
     const userSettings = (settingsRes.status === 'fulfilled' && !settingsRes.value.error) ? settingsRes.value.data : null
     const latestEntry = (latestEntryRes.status === 'fulfilled' && !latestEntryRes.value.error) ? latestEntryRes.value.data : null
@@ -69,12 +75,13 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     const userProfile = (profileRes.status === 'fulfilled' && !profileRes.value.error) ? profileRes.value.data : null
     const mentorRefs = (refsRes.status === 'fulfilled' && !refsRes.value.error) ? (refsRes.value.data || []) : []
     const weeklyEntries = (weeklyRes.status === 'fulfilled' && !weeklyRes.value.error) ? (weeklyRes.value.data || []) : []
+    const allPurchases = (purchasesRes.status === 'fulfilled' && !purchasesRes.value.error) ? (purchasesRes.value.data || []) : []
 
     const currentMetrics = latestEntry?.metrics as any || {}
     const habitsCompleted = latestEntry?.habits_completed as any || {}
     const currentStreak = userSettings?.streaks?.current || 0
     
-    // Вспомогательная функция для проверки "Идеальности" дня
+    // Вспомогательная функция для "Идеальности"
     const isPerfectDay = (entry: any, dbSettings: any) => {
       if (!entry || !dbSettings) return false
       try {
@@ -116,15 +123,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
         if (!isUnlocked && metadata && metadata.type) {
           switch (metadata.type) {
             case 'streak_days':
-              if (targetValue === 7) {
-                const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-                const fields = days.map((label, idx) => ({ label, done: !!weeklyEntries[idx] })).reverse()
-                currentValue = fields.filter(f => f.done).length
-                targetValue = 7
-                progressData = { fields }
-              } else {
-                currentValue = currentStreak
-              }
+              currentValue = currentStreak
               break
             case 'water_daily': currentValue = Number(currentMetrics?.waterIntake) || 0; break
             case 'water_total': currentValue = Number(metricsStats?.total_water) || 0; break
@@ -133,26 +132,13 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
             case 'energy_max': currentValue = Number(metricsStats?.energy_max_count) || 0; break
             case 'total_entries': currentValue = allEntriesCount; break
             case 'monthly_entries': currentValue = monthEntriesCount; break
-            case 'habits_created': currentValue = userSettings?.habits?.length || 0; break
-            case 'habit_complete_any': 
-              currentValue = Object.values(habitsCompleted || {}).some(v => v === true) ? 1 : 0
-              targetValue = 1
-              break
             case 'achievement_count':
               currentValue = unlockedMap.size
-              if (targetValue === 0) targetValue = allAchievements.length
+              if (targetValue === 0) targetValue = allAchievements.length - 1
               break
             case 'referral_mentor':
-              const hasRefs = mentorRefs.length > 0
-              const hasPurchased = mentorRefs.some((r: any) => r.status === 'first_purchase_made')
-              const mentorFields = [
-                { label: 'Код использован', done: hasRefs },
-                { label: 'Друг зарегистрирован', done: hasRefs }, 
-                { label: 'Первая покупка друга', done: hasPurchased },
-              ]
-              currentValue = mentorFields.filter(f => f.done).length
-              targetValue = 3
-              progressData = { fields: mentorFields }
+              const successfulRefs = mentorRefs.filter((r: any) => r.status === 'first_purchase_made').length
+              currentValue = successfulRefs
               break
             case 'profile_complete':
               const fields = [
@@ -168,25 +154,27 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
               targetValue = 7
               progressData = { fields }
               break
-            case 'perfect_streak':
-              if (targetValue === 7) {
-                const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-                const fields = days.map((label, idx) => ({ label, done: isPerfectDay(weeklyEntries[idx], userSettings) })).reverse()
-                currentValue = fields.filter(f => f.done).length
-                targetValue = 7
-                progressData = { fields }
-              } else {
-                currentValue = currentStreak
-              }
-              break
             case 'subscription_tier':
               currentValue = currentTierLevel
               targetValue = tierLevels[metadata.value] || 0
               break
-            case 'weight_goal_reached':
-              currentValue = 0; targetValue = 1; break
-            case 'registration':
-              currentValue = 1; targetValue = 1; break
+            case 'subscription_duration':
+              const maxMonths = allPurchases.reduce((max: number, p: any) => 
+                Math.max(max, p.products?.duration_months || 0), 0)
+              currentValue = maxMonths
+              break
+            case 'perfect_day':
+              currentValue = isPerfectDay(latestEntry, userSettings) ? 1 : 0
+              targetValue = 1
+              break
+            case 'perfect_streak':
+              let streak = 0
+              for (const entry of weeklyEntries) {
+                if (isPerfectDay(entry, userSettings)) streak++
+                else break
+              }
+              currentValue = streak
+              break
           }
         }
 
@@ -195,7 +183,6 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
 
         return { ...achievement, isUnlocked, unlockedAt, currentValue, targetValue, progress, progressData }
       } catch (err) {
-        console.error(`[Achievements] Error processing ${achievement.id}:`, err)
         return { ...achievement, isUnlocked: unlockedMap.has(achievement.id), unlockedAt: unlockedMap.get(achievement.id) || null, currentValue: 0, targetValue: 0, progress: 0 }
       }
     })
@@ -207,35 +194,18 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
   }
 }
 
+// ============================================
+// Логика разблокировки
+// ============================================
+
 /**
- * Получить статистику достижений
+ * Вспомогательная функция для последовательных дат
  */
-export async function getAchievementStats(userId: string): Promise<{
-  success: boolean
-  data?: AchievementStats
-  error?: string
-}> {
-  const supabase = await createClient()
-  const [totalRes, userRes] = await Promise.all([
-    supabase.from('achievements').select('*', { count: 'exact', head: true }),
-    supabase.from('user_achievements').select('*').eq('user_id', userId).order('unlocked_at', { ascending: false }).limit(10)
-  ])
-
-  if (totalRes.error || userRes.error) return { success: false, error: 'Ошибка получения статистики' }
-
-  const total = totalRes.count || 0
-  const unlocked = userRes.data?.length || 0
-  const percentage = total > 0 ? Math.round((unlocked / total) * 100) : 0
-
-  return {
-    success: true,
-    data: { total, unlocked, percentage, recentUnlocked: userRes.data || [] },
-  }
+const isConsecutiveDates = (d1Str: string, d2Str: string) => {
+  const d1 = new Date(d1Str); d1.setHours(0,0,0,0)
+  const d2 = new Date(d2Str); d2.setHours(0,0,0,0)
+  return Math.abs(d1.getTime() - d2.getTime()) <= 86400000 * 1.5
 }
-
-// ============================================
-// Базовая логика разблокировки (без изменений)
-// ============================================
 
 async function unlockAchievementInternal(userId: string, achievementId: string, supabase: any) {
   try {
@@ -246,25 +216,108 @@ async function unlockAchievementInternal(userId: string, achievementId: string, 
   } catch { return { success: false } }
 }
 
-export async function unlockAchievement(userId: string, achievementId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Авторизуйтесь' }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { success: false, error: 'Нет прав' }
-  const result = await unlockAchievementInternal(userId, achievementId, supabase)
-  if (result.success) { revalidatePath('/dashboard/health-tracker'); revalidatePath('/dashboard/bonuses') }
-  return result
-}
-
+/**
+ * ГЛАВНАЯ ФУНКЦИЯ: Проверить и разблокировать достижения
+ */
 export async function checkAndUnlockAchievements(userId: string) {
+  if (!userId) return { success: false }
   const supabase = await createClient()
+  
   try {
     const { data: userAchievements } = await supabase.from('user_achievements').select('achievement_id').eq('user_id', userId)
     const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id) || [])
     
-    // Простые заглушки для проверки (полная логика в миграциях/RPC)
-    // Здесь можно вызывать специфичные функции check... если они нужны на стороне TS
-    return { success: true, newAchievements: [] }
-  } catch { return { success: false } }
+    const { data: allAchievements } = await supabase.from('achievements').select('*')
+    const achievementsToCheck = allAchievements?.filter(a => !unlockedIds.has(a.id)) || []
+    
+    if (achievementsToCheck.length === 0) return { success: true, newAchievements: [] }
+
+    // Получаем все нужные данные ОДНИМ паком (аналогично функции выше)
+    const [stats, settings, latest, allCount, profile, refs, purchases, allEntries] = await Promise.all([
+      supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
+      supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('referrals').select('status').eq('referrer_id', userId),
+      supabase.from('user_purchases').select('products(duration_months)').eq('user_id', userId),
+      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false })
+    ])
+
+    const mStats = stats.data?.[0] || {}
+    const uSettings = settings.data
+    const uProfile = profile.data
+    const uPurchases = purchases.data || []
+    const uRefs = refs.data || []
+    const uEntries = allEntries.data || []
+    
+    const newAchievements: Achievement[] = []
+
+    for (const ach of achievementsToCheck) {
+      const meta = ach.metadata as any
+      let earned = false
+
+      switch (meta.type) {
+        case 'registration': earned = true; break
+        case 'streak_days': earned = (uSettings?.streaks?.current || 0) >= meta.value; break
+        case 'water_total': earned = (mStats.total_water || 0) >= meta.value; break
+        case 'steps_total': earned = (mStats.total_steps || 0) >= meta.value; break
+        case 'achievement_count': earned = unlockedIds.size >= (meta.value || allAchievements!.length - 1); break
+        case 'referral_mentor': earned = uRefs.filter((r: any) => r.status === 'first_purchase_made').length >= (meta.value || 1); break
+        case 'subscription_tier': 
+          const levels: any = { 'free': 0, 'basic': 1, 'pro': 2, 'elite': 3 }
+          earned = levels[uProfile?.subscription_tier || 'free'] >= levels[meta.value]; 
+          break
+        case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= meta.value); break
+        case 'profile_complete':
+          earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && uSettings?.user_params?.weight);
+          break
+        case 'weight_goal_reached':
+          if (uSettings?.goals?.weight && uEntries.length > 0) {
+            const cur = uEntries[0].metrics?.weight
+            const start = uEntries[uEntries.length-1].metrics?.weight
+            const goal = uSettings.goals.weight
+            earned = start > goal ? cur <= goal : cur >= goal
+          }
+          break
+      }
+
+      if (earned) {
+        const res = await unlockAchievementInternal(userId, ach.id, supabase)
+        if (res.success && res.achievement) newAchievements.push(res.achievement)
+      }
+    }
+
+    if (newAchievements.length > 0) {
+      revalidatePath('/dashboard/health-tracker')
+      revalidatePath('/dashboard/bonuses')
+    }
+
+    return { success: true, newAchievements }
+  } catch (err) {
+    console.error('[Achievements] Check error:', err)
+    return { success: false }
+  }
+}
+
+export async function getAchievementStats(userId: string) {
+  const supabase = await createClient()
+  const [totalRes, userRes] = await Promise.all([
+    supabase.from('achievements').select('*', { count: 'exact', head: true }),
+    supabase.from('user_achievements').select('*').eq('user_id', userId).order('unlocked_at', { ascending: false }).limit(10)
+  ])
+  const total = totalRes.count || 0
+  const unlocked = userRes.data?.length || 0
+  return { success: true, data: { total, unlocked, percentage: total > 0 ? Math.round((unlocked / total) * 100) : 0, recentUnlocked: userRes.data || [] } }
+}
+
+export async function unlockAchievement(userId: string, achievementId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { success: false }
+  const result = await unlockAchievementInternal(userId, achievementId, supabase)
+  if (result.success) revalidatePath('/dashboard/health-tracker')
+  return result
 }

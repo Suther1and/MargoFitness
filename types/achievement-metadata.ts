@@ -151,6 +151,11 @@ export type SubscriptionTierMetadata = {
   value: string // basic, pro, elite
 }
 
+export type SubscriptionDurationMetadata = {
+  type: 'subscription_duration'
+  value: number // Количество месяцев
+}
+
 // ============================================
 // СПЕЦИАЛЬНЫЕ (Special)
 // ============================================
@@ -207,6 +212,7 @@ export type AchievementMetadata =
   | AchievementCountMetadata
   | ProfileCompleteMetadata
   | SubscriptionTierMetadata
+  | SubscriptionDurationMetadata
   | PerfectDayMetadata
   | PerfectStreakMetadata
   | WaterGoalStreakMetadata
