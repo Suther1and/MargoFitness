@@ -229,20 +229,26 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       onClick={() => !isSecret && setSelectedAchievement(achievement)}
                     >
                       <div className={cn(
-                        'aspect-square rounded-[1.8rem] flex flex-col items-center justify-center p-3 transition-all duration-500 relative overflow-hidden group/item hover:scale-105 active:scale-95',
-                        !achievement.isUnlocked && 'opacity-50'
+                        'aspect-square rounded-[2.2rem] flex flex-col items-center justify-center p-3 transition-all duration-500 relative overflow-hidden group/item hover:scale-105 active:scale-95',
+                        achievement.isUnlocked 
+                          ? 'bg-white/[0.03] border border-white/10' 
+                          : 'bg-white/[0.02] border border-white/[0.05]'
                       )}>
                         {/* Hidden Glow */}
-                        {achievement.isUnlocked && (
+                        {achievement.isUnlocked ? (
                           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none" />
+                        ) : (
+                          <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none" />
                         )}
 
                         <div className={cn(
                           'w-24 h-24 sm:w-32 sm:h-32 mb-4 transition-all duration-700 ease-out z-10 relative flex items-center justify-center',
-                          !achievement.isUnlocked && 'grayscale brightness-0 opacity-10'
+                          !achievement.isUnlocked && 'grayscale opacity-20 brightness-[0.8] group-hover/item:opacity-40 group-hover/item:brightness-100'
                         )}>
                           {isSecret ? (
-                            <span className="text-5xl sm:text-6xl">🔒</span>
+                            <div className="w-full h-full flex items-center justify-center bg-white/[0.03] rounded-full border border-white/5 backdrop-blur-sm">
+                              <span className="text-4xl sm:text-5xl opacity-20">🔒</span>
+                            </div>
                           ) : achievement.icon_url ? (
                             <img 
                               src={achievement.icon_url} 
@@ -264,9 +270,9 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                             )}
                             <span className={cn(
                               'text-[11px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
-                              achievement.isUnlocked ? 'text-white/80 group-hover/item:text-white' : 'text-white/20'
+                              achievement.isUnlocked ? 'text-white/80 group-hover/item:text-white' : 'text-white/20 group-hover/item:text-white/40'
                             )}>
-                              {isSecret ? '???' : achievement.title}
+                              {isSecret ? 'Секретное' : achievement.title}
                             </span>
                           </div>
                         </div>
@@ -297,7 +303,10 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl"
-              onClick={() => setSelectedAchievement(null)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedAchievement(null)
+              }}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -310,8 +319,11 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
                 
                 <button
-                  onClick={() => setSelectedAchievement(null)}
-                  className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedAchievement(null)
+                  }}
+                  className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all z-50"
                 >
                   <X className="w-4 h-4 text-white/40" />
                 </button>
@@ -320,7 +332,10 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                   <motion.div
                     initial={{ scale: 0.8, rotate: -10 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    className="w-48 h-48 mb-8 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+                    className={cn(
+                      "w-48 h-48 mb-8 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700",
+                      !selectedAchievement.isUnlocked && "grayscale brightness-[0.8] opacity-20"
+                    )}
                   >
                     {selectedAchievement.icon_url ? (
                       <img 
