@@ -119,6 +119,39 @@ export type TotalEntriesMetadata = {
 }
 
 // ============================================
+// СОЦИАЛЬНЫЕ (Social)
+// ============================================
+export type RegistrationMetadata = {
+  type: 'registration'
+  value: number // Сумма бонуса
+}
+
+export type ReferralJoinedMetadata = {
+  type: 'referral_joined'
+  value: number // Сумма бонуса
+}
+
+export type ReferralMentorMetadata = {
+  type: 'referral_mentor'
+  value: number // Сумма бонуса
+}
+
+export type AchievementCountMetadata = {
+  type: 'achievement_count'
+  value: number // Количество достижений (0 = все)
+}
+
+export type ProfileCompleteMetadata = {
+  type: 'profile_complete'
+  value: number // Сумма бонуса
+}
+
+export type SubscriptionTierMetadata = {
+  type: 'subscription_tier'
+  value: string // basic, pro, elite
+}
+
+// ============================================
 // СПЕЦИАЛЬНЫЕ (Special)
 // ============================================
 export type PerfectDayMetadata = {
@@ -168,6 +201,12 @@ export type AchievementMetadata =
   | WeightDownStreakMetadata
   | MonthlyEntriesMetadata
   | TotalEntriesMetadata
+  | RegistrationMetadata
+  | ReferralJoinedMetadata
+  | ReferralMentorMetadata
+  | AchievementCountMetadata
+  | ProfileCompleteMetadata
+  | SubscriptionTierMetadata
   | PerfectDayMetadata
   | PerfectStreakMetadata
   | WaterGoalStreakMetadata

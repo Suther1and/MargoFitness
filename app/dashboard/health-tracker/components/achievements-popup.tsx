@@ -247,6 +247,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               <div className="grid grid-cols-3 gap-x-3 gap-y-10 sm:gap-x-6 sm:gap-y-16">
                 {filteredAchievements.map((achievement) => {
                   const isSecret = achievement.is_secret && !achievement.isUnlocked
+                  const progress = achievement.progress || 0
                   
                   return (
                     <motion.div
@@ -257,22 +258,62 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       onClick={() => !isSecret && setSelectedAchievement(achievement)}
                     >
                       <div className="flex flex-col items-center gap-2 transition-all duration-500 relative group/item hover:scale-105 active:scale-95">
-                        <div className={cn(
-                          'aspect-square w-[75%] sm:w-[80%] flex items-center justify-center transition-all duration-700 ease-out z-10 relative',
-                          !achievement.isUnlocked && 'grayscale opacity-20 brightness-[0.8] group-hover/item:opacity-40 group-hover/item:brightness-100'
-                        )}>
+                        <div className="aspect-square w-[75%] sm:w-[80%] flex items-center justify-center relative z-10">
                           {isSecret ? (
                             <div className="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center bg-white/[0.03] rounded-full border border-white/5 backdrop-blur-sm">
                               <span className="text-xl sm:text-3xl opacity-20">🔒</span>
                             </div>
-                          ) : achievement.icon_url ? (
-                            <img 
-                              src={achievement.icon_url} 
-                              alt={achievement.title}
-                              className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
-                            />
                           ) : (
-                            <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                            <>
+                              {/* Background / Unfilled Part (Grayscale) */}
+                              <div className={cn(
+                                "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
+                                achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20 group-hover/item:opacity-30"
+                              )}>
+                                {achievement.icon_url ? (
+                                  <img 
+                                    src={achievement.icon_url} 
+                                    alt={achievement.title}
+                                    className="w-full h-full object-contain"
+                                  />
+                                ) : (
+                                  <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                                )}
+                              </div>
+
+                              {/* Progress Fill Part (Colored) */}
+                              {!achievement.isUnlocked && progress > 0 && (
+                                <div 
+                                  className="absolute inset-0 flex items-center justify-center transition-all duration-700 opacity-60 group-hover/item:opacity-90 z-10"
+                                  style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}
+                                >
+                                  {achievement.icon_url ? (
+                                    <img 
+                                      src={achievement.icon_url} 
+                                      alt={achievement.title}
+                                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+                                    />
+                                  ) : (
+                                    <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Fully Unlocked Part (Colored) */}
+                              {achievement.isUnlocked && (
+                                <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10">
+                                  {achievement.icon_url ? (
+                                    <img 
+                                      src={achievement.icon_url} 
+                                      alt={achievement.title}
+                                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.4)]"
+                                    />
+                                  ) : (
+                                    <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                                  )}
+                                </div>
+                              )}
+                            </>
                           )}
 
                           {/* Reward Badge */}
@@ -408,10 +449,18 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           )}
                         </div>
                       ) : (
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                          В процессе
-                        </span>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">
+                            {selectedAchievement.currentValue || 0} / {selectedAchievement.targetValue || 0}
+                          </span>
+                          <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${selectedAchievement.progress || 0}%` }}
+                              className="h-full bg-emerald-500/50"
+                            />
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>

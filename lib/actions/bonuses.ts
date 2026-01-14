@@ -12,6 +12,7 @@ import {
   CASHBACK_LEVELS
 } from '@/types/database'
 import { revalidatePath } from 'next/cache'
+import { checkAndUnlockAchievements } from './achievements'
 
 // ============================================
 // Получение данных
@@ -118,7 +119,7 @@ async function createBonusAccountManually(userId: string): Promise<{
       .from('user_bonuses')
       .insert({
         user_id: userId,
-        balance: 250,
+        balance: 0,
         cashback_level: 1,
         total_spent_for_cashback: 0,
         referral_level: 1,
@@ -137,19 +138,11 @@ async function createBonusAccountManually(userId: string): Promise<{
 
     if (refCodeError) throw refCodeError
 
-    // Создаем транзакцию приветственного бонуса
-    const { error: txError } = await supabase
-      .from('bonus_transactions')
-      .insert({
-        user_id: userId,
-        amount: 250,
-        type: 'welcome',
-        description: 'Приветственный бонус',
-      })
-
-    if (txError) throw txError
-
     console.log('[createBonusAccountManually] Successfully created for user:', userId)
+    
+    // Проверяем достижения (разблокирует "Теплый прием")
+    await checkAndUnlockAchievements(userId)
+
     return { success: true, created: true }
   } catch (error) {
     console.error('[createBonusAccountManually] Error:', error)

@@ -413,6 +413,7 @@ export const ACHIEVEMENT_CATEGORIES = {
   metrics: { label: 'Метрики', icon: '📊', color: 'text-blue-500' },
   habits: { label: 'Привычки', icon: '✨', color: 'text-yellow-500' },
   weight: { label: 'Вес', icon: '⚖️', color: 'text-purple-500' },
+  social: { label: 'Социальные', icon: '👥', color: 'text-rose-500' },
   consistency: { label: 'Регулярность', icon: '📅', color: 'text-green-500' },
   workouts: { label: 'Тренировки', icon: '🏋️', color: 'text-red-500' },
 } as const

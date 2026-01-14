@@ -2,7 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import type { AchievementWithStatus } from '@/types/database'
+import type { AchievementWithStatus, AchievementWithProgress } from '@/types/database'
+import { getAllAchievementsWithStatus } from '@/lib/actions/achievements'
 
 /**
  * Хук для получения последних N достижений
@@ -95,56 +96,27 @@ export function useAchievementStats(userId: string | null) {
 }
 
 /**
- * Хук для получения всех достижений со статусом
+ * Хук для получения всех достижений со статусом и прогрессом
  */
 export function useAllAchievements(userId: string | null) {
   return useQuery({
-    queryKey: ['achievements', 'all', userId],
-    queryFn: async (): Promise<AchievementWithStatus[]> => {
+    queryKey: ['achievements', 'all', userId, 'v4'], // v4 для инвалидации
+    queryFn: async (): Promise<AchievementWithProgress[]> => {
       if (!userId) return []
       
-      const supabase = createClient()
+      const result = await getAllAchievementsWithStatus(userId)
       
-      // Получаем все достижения и полученные достижения параллельно
-      const [{ data: allAchievements, error: achievementsError }, { data: userAchievements, error: userError }] = await Promise.all([
-        supabase
-          .from('achievements')
-          .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
-          .order('sort_order', { ascending: true }),
-        supabase
-          .from('user_achievements')
-          .select('*')
-          .eq('user_id', userId)
-      ])
-      
-      if (achievementsError) {
-        console.error('[useAllAchievements] Error fetching achievements:', achievementsError)
-        throw new Error('Не удалось получить достижения')
+      if (!result.success || !result.data) {
+        console.error('[useAllAchievements] Error:', result.error)
+        throw new Error(result.error || 'Не удалось получить достижения')
       }
       
-      if (userError) {
-        console.error('[useAllAchievements] Error fetching user achievements:', userError)
-        throw new Error('Не удалось получить достижения пользователя')
-      }
-      
-      // Создаем Map для быстрого поиска
-      const unlockedMap = new Map(
-        (userAchievements || []).map(ua => [ua.achievement_id, ua.unlocked_at])
-      )
-      
-      // Объединяем данные
-      const data: AchievementWithStatus[] = (allAchievements || []).map(achievement => ({
-        ...achievement,
-        isUnlocked: unlockedMap.has(achievement.id),
-        unlockedAt: unlockedMap.get(achievement.id) || null,
-      }))
-      
-      return data
+      return result.data
     },
     enabled: !!userId,
-    staleTime: 2 * 60 * 1000, // 2 минуты
-    gcTime: 30 * 60 * 1000, // 30 минут
-    refetchOnMount: false,
+    staleTime: 1 * 60 * 1000, // 1 минута
+    gcTime: 5 * 60 * 1000,
+    refetchOnMount: true, // Нам нужен свежий прогресс при открытии
     refetchOnWindowFocus: false,
   })
 }

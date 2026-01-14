@@ -146,6 +146,13 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/health-tracker')
 
+    // Сразу проверяем достижения, так как изменение целей может разблокировать их
+    try {
+      await checkAndUnlockAchievements(userId)
+    } catch (err) {
+      console.error('[Diary Action] Error checking achievements after settings update:', err)
+    }
+
     return { success: true, data: data as DiarySettings }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] updateDiarySettings:', err)

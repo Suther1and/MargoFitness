@@ -96,50 +96,143 @@ export async function getRecentAchievements(
 }
 
 /**
- * Получить все достижения со статусом разблокировки
+ * Получить все достижения со статусом разблокировки и прогрессом
  */
 export async function getAllAchievementsWithStatus(userId: string): Promise<{
   success: boolean
-  data?: AchievementWithStatus[]
+  data?: AchievementWithProgress[]
   error?: string
 }> {
   const supabase = await createClient()
 
-  // Получаем все достижения
-  const { data: allAchievements, error: achievementsError } = await supabase
-    .from('achievements')
-    .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
-    .order('sort_order', { ascending: true })
+  try {
+    // 1. Получаем все достижения
+    const { data: allAchievements, error: achievementsError } = await supabase
+      .from('achievements')
+      .select('id, title, description, category, is_secret, reward_amount, icon, icon_url, color_class, metadata, sort_order, created_at')
+      .order('sort_order', { ascending: true })
 
-  if (achievementsError) {
-    console.error('Error fetching all achievements:', achievementsError)
-    return { success: false, error: 'Не удалось получить достижения' }
+    if (achievementsError) {
+      console.error('Error fetching all achievements:', achievementsError)
+      return { success: false, error: 'Не удалось получить достижения' }
+    }
+
+    // 2. Получаем полученные достижения пользователя
+    const { data: userAchievements, error: userError } = await supabase
+      .from('user_achievements')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (userError) {
+      console.error('Error fetching user achievements:', userError)
+      return { success: false, error: 'Не удалось получить достижения пользователя' }
+    }
+
+    const unlockedMap = new Map(
+      userAchievements.map(ua => [ua.achievement_id, ua.unlocked_at])
+    )
+
+    // 3. Собираем данные для расчета прогресса
+    // Параллельно запрашиваем всё необходимое
+    const [
+      { data: stats },
+      { data: settings },
+      { data: latestEntry },
+      { data: allEntriesCount },
+      { data: monthEntriesCount }
+    ] = await Promise.all([
+      supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
+      supabase.from('diary_settings').select('*').eq('user_id', userId).single(),
+      supabase.from('diary_entries').select('metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('diary_entries').select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0])
+    ])
+
+    const metricsStats = stats?.[0] || { total_water: 0, total_steps: 0, energy_max_count: 0 }
+    const currentMetrics = latestEntry?.metrics as any || {}
+    const habitsCompleted = latestEntry?.habits_completed as any || {}
+    const currentStreak = settings?.streaks?.current || 0
+    const totalEntries = allEntriesCount || 0
+    const monthlyEntries = monthEntriesCount || 0
+    
+    // Для более сложных расчетов (например, серии привычек или веса) 
+    // нам могут понадобиться последние записи. Но для базового прогресса 
+    // по большинству ачивок этого набора данных достаточно.
+
+    // 4. Объединяем данные и считаем прогресс
+    const data: AchievementWithProgress[] = allAchievements.map(achievement => {
+      const isUnlocked = unlockedMap.has(achievement.id)
+      const unlockedAt = unlockedMap.get(achievement.id) || null
+      const metadata = achievement.metadata as any
+      
+      let currentValue = 0
+      let targetValue = metadata?.value || 0
+
+      if (!isUnlocked && metadata) {
+        switch (metadata.type) {
+          case 'streak_days':
+            currentValue = currentStreak
+            break
+          case 'water_daily':
+            currentValue = currentMetrics.waterIntake || 0
+            break
+          case 'water_total':
+            currentValue = metricsStats.total_water
+            break
+          case 'steps_daily':
+            currentValue = currentMetrics.steps || 0
+            break
+          case 'steps_total':
+            currentValue = metricsStats.total_steps
+            break
+          case 'energy_max':
+            currentValue = metricsStats.energy_max_count
+            break
+          case 'total_entries':
+            currentValue = totalEntries
+            break
+          case 'monthly_entries':
+            currentValue = monthlyEntries
+            break
+          case 'habits_created':
+            currentValue = settings?.habits?.length || 0
+            break
+          case 'habit_complete_any':
+            currentValue = Object.values(habitsCompleted).some(v => v === true) ? 1 : 0
+            targetValue = 1
+            break
+          case 'achievement_count':
+            currentValue = unlockedMap.size
+            if (targetValue === 0) targetValue = allAchievements.length
+            break
+          // Другие типы можно добавить по мере необходимости
+        }
+      }
+
+      // Если разблокировано, прогресс 100%
+      if (isUnlocked) {
+        currentValue = targetValue
+      }
+
+      const progress = targetValue > 0 ? Math.min(100, Math.round((currentValue / targetValue) * 100)) : 0
+
+      return {
+        ...achievement,
+        isUnlocked,
+        unlockedAt,
+        currentValue,
+        targetValue,
+        progress
+      }
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error in getAllAchievementsWithStatus:', error)
+    return { success: false, error: 'Ошибка при расчете прогресса достижений' }
   }
-
-  // Получаем полученные достижения пользователя
-  const { data: userAchievements, error: userError } = await supabase
-    .from('user_achievements')
-    .select('*')
-    .eq('user_id', userId)
-
-  if (userError) {
-    console.error('Error fetching user achievements:', userError)
-    return { success: false, error: 'Не удалось получить достижения пользователя' }
-  }
-
-  // Создаем Map для быстрого поиска
-  const unlockedMap = new Map(
-    userAchievements.map(ua => [ua.achievement_id, ua.unlocked_at])
-  )
-
-  // Объединяем данные
-  const data: AchievementWithStatus[] = allAchievements.map(achievement => ({
-    ...achievement,
-    isUnlocked: unlockedMap.has(achievement.id),
-    unlockedAt: unlockedMap.get(achievement.id) || null,
-  }))
-
-  return { success: true, data }
 }
 
 /**
@@ -330,6 +423,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
     const weightResults = await checkWeightAchievements(userId, supabase, unlockedIds)
     const consistencyResults = await checkConsistencyAchievements(userId, supabase, unlockedIds)
     const specialResults = await checkSpecialAchievements(userId, supabase, unlockedIds)
+    const socialResults = await checkSocialAchievements(userId, supabase, unlockedIds)
 
     console.log('[Achievements] Found achievements to check:', {
       streaks: streakResults.length,
@@ -338,6 +432,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
       weight: weightResults.length,
       consistency: consistencyResults.length,
       special: specialResults.length,
+      social: socialResults.length,
     })
 
     // Собираем все новые достижения
@@ -348,6 +443,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
       ...weightResults,
       ...consistencyResults,
       ...specialResults,
+      ...socialResults,
     ]
 
     console.log('[Achievements] Total achievements to unlock:', allResults.length)
@@ -1184,7 +1280,7 @@ async function checkSpecialAchievements(
       
       // 1. Проверка всех метрик из плана на день
       for (const id of widgetsInPlan) {
-        if (id === 'habits' || id === 'photos' || id === 'mood') continue // Эти проверяем отдельно или игнорируем
+        if (id === 'habits' || id === 'photos' || id === 'mood') continue
         
         const goal = widgetGoals[id]
         if (!goal) continue
@@ -1194,28 +1290,37 @@ async function checkSpecialAchievements(
                         id === 'sleep' ? metrics.sleepHours :
                         id === 'caffeine' ? metrics.caffeineIntake :
                         id === 'nutrition' ? metrics.calories :
-                        id === 'weight' ? metrics.weight : 0
+                        id === 'weight' ? metrics.weight : undefined
+
+        // ВАЖНО: Если в старой записи вообще нет этой метрики (current === undefined), 
+        // значит виджет тогда не использовался. Не считаем это провалом "идеальности".
+        if (current === undefined) continue
 
         if (id === 'caffeine') {
-          if (current > goal) return false // Кофеин - это лимит
+          if (current > goal) return false 
         } else if (id === 'nutrition') {
           const goalType = customGoals.nutrition?.goalType || 'maintain'
           if (!isNutritionSuccess(current, goal, goalType)) return false
         } else {
-          if (current < goal) return false // Для остальных - достижение цели
+          if (current < goal) return false 
         }
       }
       
-      // 2. Проверка привычек (если они в плане на день или просто есть активные)
-      if (activeHabitIds.length > 0) {
-        const allHabitsDone = activeHabitIds.every((id: string) => habitsCompleted[id] === true)
+      // 2. Проверка привычек
+      // Проверяем только те привычки, которые:
+      // а) Активны сейчас
+      // б) Присутствовали в записи на тот момент (чтобы не ломать старые "идеальные дни" новыми привычками)
+      const habitsToCheck = activeHabitIds.filter((id: string) => id in habitsCompleted)
+      
+      if (habitsToCheck.length > 0) {
+        const allHabitsDone = habitsToCheck.every((id: string) => habitsCompleted[id] === true)
         if (!allHabitsDone) return false
       }
       
-      // Должна быть хоть какая-то активность за день
-      const hasAnyActivity = (metrics.waterIntake || 0) > 0 || (metrics.steps || 0) > 0 || 
-                             (metrics.calories || 0) > 0 || (metrics.sleepHours || 0) > 0 ||
-                             Object.values(habitsCompleted).some(v => v === true)
+      // Должна быть хоть какая-то зафиксированная активность, иначе "пустой" день будет идеальным
+      const hasAnyActivity = (metrics.waterIntake !== undefined) || (metrics.steps !== undefined) || 
+                             (metrics.calories !== undefined) || (metrics.sleepHours !== undefined) ||
+                             (Object.keys(habitsCompleted).length > 0)
                              
       if (!hasAnyActivity) return false
 
@@ -1274,6 +1379,123 @@ async function checkSpecialAchievements(
 
   } catch (error) {
     console.error('[Achievements:Special] Error checking special achievements:', error)
+  }
+
+  return achievementIds
+}
+
+/**
+ * Проверка социальных достижений и мета-достижений
+ */
+async function checkSocialAchievements(
+  userId: string,
+  supabase: any,
+  unlockedIds: Set<string>
+): Promise<string[]> {
+  const achievementIds: string[] = []
+
+  try {
+    // Получаем ВСЕ социальные и мета достижения
+    const { data: allAchievements, error: achError } = await supabase
+      .from('achievements')
+      .select('id, metadata')
+      .or('category.eq.social,metadata->>type.eq.achievement_count,metadata->>type.eq.profile_complete,metadata->>type.eq.subscription_tier')
+
+    if (achError || !allAchievements) return achievementIds
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
+    if (achievements.length === 0) return achievementIds
+
+    // Нам понадобятся данные профиля и настроек для новых проверок
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, phone, email, avatar_url, subscription_tier')
+      .eq('id', userId)
+      .single()
+
+    const { data: diarySettings } = await supabase
+      .from('diary_settings')
+      .select('user_params')
+      .eq('user_id', userId)
+      .single()
+
+    for (const achievement of achievements) {
+      const metadata = achievement.metadata as any
+
+      if (metadata.type === 'registration') {
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'profile_complete') {
+        // Проверка заполнения всех данных
+        const hasBasicInfo = profile?.full_name && profile?.phone && profile?.email && profile?.avatar_url
+        const params = diarySettings?.user_params || {}
+        const hasHealthParams = params.height && params.weight && params.age
+        
+        if (hasBasicInfo && hasHealthParams) {
+          achievementIds.push(achievement.id)
+        }
+      } else if (metadata.type === 'subscription_tier') {
+        // Проверка уровня подписки (накопительная логика)
+        const tiers = ['free', 'basic', 'pro', 'elite']
+        const requiredTier = metadata.value // basic, pro, elite
+        const userTierIndex = tiers.indexOf(profile?.subscription_tier || 'free')
+        const requiredTierIndex = tiers.indexOf(requiredTier)
+        
+        // Если текущий уровень пользователя равен или выше требуемого
+        if (userTierIndex >= requiredTierIndex && requiredTierIndex > 0) {
+          achievementIds.push(achievement.id)
+        }
+      } else if (metadata.type === 'referral_joined') {
+        // Проверяем, пришел ли пользователь по рефералке или использовал ли промокод
+        const { count: refCount } = await supabase
+          .from('referrals')
+          .select('*', { count: 'exact', head: true })
+          .eq('referred_id', userId)
+
+        // Ищем транзакции оплат, где использовался промокод (в метаданных)
+        const { data: payments } = await supabase
+          .from('payment_transactions')
+          .select('metadata')
+          .eq('user_id', userId)
+          .eq('status', 'succeeded')
+
+        const hasUsedPromo = payments?.some((p: any) => p.metadata?.promo_code_id)
+        
+        if ((refCount || 0) > 0 || hasUsedPromo) {
+          achievementIds.push(achievement.id)
+        }
+      } else if (metadata.type === 'referral_mentor') {
+        // Проверяем, есть ли хоть один реферал с совершенной покупкой
+        const { count: mentorCount } = await supabase
+          .from('referrals')
+          .select('*', { count: 'exact', head: true })
+          .eq('referrer_id', userId)
+          .eq('status', 'first_purchase_made')
+
+        if ((mentorCount || 0) > 0) {
+          achievementIds.push(achievement.id)
+        }
+      } else if (metadata.type === 'achievement_count') {
+        const requiredCount = metadata.value
+        const currentUnlockedCount = unlockedIds.size
+
+        if (requiredCount === 0) {
+          // "Коллекционер" - все достижения
+          const { count: totalAchCount } = await supabase
+            .from('achievements')
+            .select('*', { count: 'exact', head: true })
+          
+          // -1 так как само достижение "Коллекционер" еще не получено
+          if (currentUnlockedCount >= (totalAchCount || 1) - 1) {
+            achievementIds.push(achievement.id)
+          }
+        } else if (currentUnlockedCount >= requiredCount) {
+          achievementIds.push(achievement.id)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[Achievements:Social] Error checking social achievements:', error)
   }
 
   return achievementIds

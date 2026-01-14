@@ -17,6 +17,7 @@ import type { Database } from '@/types/supabase'
 import { awardCashback, spendBonusesOnPayment } from '@/lib/actions/bonuses'
 import { handleReferralPurchase } from '@/lib/actions/referrals'
 import { incrementPromoUsage } from '@/lib/actions/promo-codes'
+import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 
 export async function POST(request: NextRequest) {
   try {
@@ -184,21 +185,24 @@ export async function POST(request: NextRequest) {
             supabase // Передаем admin client для обхода RLS
           )
           
-          if (referralResult.success && referralResult.bonusAwarded) {
-            console.log(`[Webhook] Referral bonus awarded: ${referralResult.bonusAwarded} шагов`)
-            
-            if (referralResult.isFirstPurchase) {
-              console.log('[Webhook] First referral purchase bonus included!')
-            }
-          } else if (!referralResult.success) {
-            console.error('[Webhook] Failed to process referral:', referralResult.error)
-          }
+        if (referralResult.success && referralResult.bonusAwarded) {
+          console.log(`[Webhook] Referral bonus awarded: ${referralResult.bonusAwarded} шагов`)
           
-          // 4. Увеличить счетчик использований промокода (если был)
-          if (metadata?.promo_code_id) {
-            await incrementPromoUsage(metadata.promo_code_id)
-            console.log(`[Webhook] Promo code usage incremented: ${metadata.promo_code_id}`)
+          if (referralResult.isFirstPurchase) {
+            console.log('[Webhook] First referral purchase bonus included!')
           }
+        } else if (!referralResult.success) {
+          console.error('[Webhook] Failed to process referral:', referralResult.error)
+        }
+
+        // 4. Проверить достижения пользователя (покупки, апгрейды, промокоды)
+        await checkAndUnlockAchievements(transaction.user_id)
+        
+        // 5. Увеличить счетчик использований промокода (если был)
+        if (metadata?.promo_code_id) {
+          await incrementPromoUsage(metadata.promo_code_id)
+          console.log(`[Webhook] Promo code usage incremented: ${metadata.promo_code_id}`)
+        }
           
         } catch (bonusError) {
           // Не прерываем обработку платежа, если бонусы не начислились

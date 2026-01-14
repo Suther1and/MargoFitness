@@ -270,22 +270,11 @@ export async function registerReferral(
       throw insertError
     }
 
-    console.log('[registerReferral] Referral record created, adding bonus')
+    console.log('[registerReferral] Referral record created')
 
-    // Начисляем бонус приглашенному
-    const bonusResult = await addBonusTransaction({
-      userId: newUserId,
-      amount: BONUS_CONSTANTS.REFERRED_USER_BONUS,
-      type: 'referral_bonus',
-      description: `Бонус за регистрацию по приглашению`,
-      relatedUserId: referrerId,
-    })
-
-    if (!bonusResult.success) {
-      console.error('[registerReferral] Failed to add bonus:', bonusResult.error)
-    } else {
-      console.log('[registerReferral] Bonus added successfully')
-    }
+    // Теперь достижения проверяются через checkAndUnlockAchievements
+    // Мы не начисляем бонусы здесь вручную, это сделает система достижений
+    await checkAndUnlockAchievements(newUserId)
 
     return {
       success: true,
@@ -398,40 +387,8 @@ export async function handleReferralPurchase(
       console.error('[handleReferralPurchase] Failed to update balance:', balanceError1)
     }
 
-    let firstPurchaseBonus = 0
-
-    // Если это первая покупка реферала
+    // Обновляем статус реферала
     if (isFirstPurchase && referral.status !== 'first_purchase_made') {
-      console.log('[handleReferralPurchase] First purchase! Adding bonus:', BONUS_CONSTANTS.REFERRAL_FIRST_BONUS)
-
-      // Начисляем разовый бонус 500
-      const { error: txError2 } = await supabase
-        .from('bonus_transactions')
-        .insert({
-          user_id: referral.referrer_id,
-          amount: BONUS_CONSTANTS.REFERRAL_FIRST_BONUS,
-          type: 'referral_first',
-          description: `Бонус за первую покупку реферала`,
-          related_user_id: referredUserId,
-        })
-
-      if (txError2) {
-        console.error('[handleReferralPurchase] Failed to add first purchase bonus:', txError2)
-      }
-
-      firstPurchaseBonus = BONUS_CONSTANTS.REFERRAL_FIRST_BONUS
-
-      // Обновляем баланс еще раз
-      const { error: balanceError2 } = await supabase
-        .from('user_bonuses')
-        .update({ balance: referrerAccount.balance + bonusAmount + firstPurchaseBonus })
-        .eq('user_id', referral.referrer_id)
-
-      if (balanceError2) {
-        console.error('[handleReferralPurchase] Failed to update balance with first bonus:', balanceError2)
-      }
-
-      // Обновляем статус реферала
       await supabase
         .from('referrals')
         .update({
@@ -441,6 +398,9 @@ export async function handleReferralPurchase(
         .eq('id', referral.id)
 
       console.log('[handleReferralPurchase] Referral status updated to first_purchase_made')
+      
+      // Проверяем достижения для приглашающего (может разблокировать "Наставник")
+      await checkAndUnlockAchievements(referral.referrer_id)
     }
 
     // Обновляем total_referral_earnings и уровень приглашающего
@@ -455,13 +415,13 @@ export async function handleReferralPurchase(
       })
       .eq('user_id', referral.referrer_id)
 
-    console.log('[handleReferralPurchase] ✅ SUCCESS - Total awarded:', bonusAmount + firstPurchaseBonus)
+    console.log('[handleReferralPurchase] ✅ SUCCESS - Awarded cashback:', bonusAmount)
 
     revalidatePath('/dashboard/bonuses')
 
     return {
       success: true,
-      bonusAwarded: bonusAmount + firstPurchaseBonus,
+      bonusAwarded: bonusAmount,
       isFirstPurchase,
     }
   } catch (error) {
