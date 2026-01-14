@@ -163,15 +163,15 @@ export async function getBonusTransactions(
 }> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('bonus_transactions')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+    const { data, error } = await supabase
+      .from('bonus_transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
 
   if (error) {
-    console.error('Error fetching bonus transactions:', error)
+    console.error('Error fetching bonus transactions:', error.message || error)
     return { success: false, error: 'Не удалось получить историю' }
   }
 
@@ -191,26 +191,52 @@ export async function getBonusStats(userId: string): Promise<{
   }
   error?: string
 }> {
-  const accountResult = await getUserBonusAccount(userId)
-  if (!accountResult.success || !accountResult.data) {
-    return { success: false, error: accountResult.error }
-  }
+  try {
+    const accountResult = await getUserBonusAccount(userId)
+    
+    // Если счета нет, возвращаем пустую статистику (дефолтную)
+    if (!accountResult.success || !accountResult.data) {
+      const defaultAccount: UserBonus = {
+        id: '',
+        user_id: userId,
+        balance: 0,
+        cashback_level: 1,
+        total_spent_for_cashback: 0,
+        referral_level: 1,
+        total_referral_earnings: 0,
+        created_at: new Date().toISOString()
+      }
+      
+      return {
+        success: true,
+        data: {
+          account: defaultAccount,
+          levelData: getCashbackLevelData(1),
+          progress: calculateLevelProgress(0, false),
+          recentTransactions: [],
+        }
+      }
+    }
 
-  const account = accountResult.data
-  const levelData = getCashbackLevelData(account.cashback_level)
-  const progress = calculateLevelProgress(account.total_spent_for_cashback, false)
+    const account = accountResult.data
+    const levelData = getCashbackLevelData(account.cashback_level)
+    const progress = calculateLevelProgress(account.total_spent_for_cashback, false)
 
-  const transactionsResult = await getBonusTransactions(userId, 10)
-  const recentTransactions = transactionsResult.data || []
+    const transactionsResult = await getBonusTransactions(userId, 10)
+    const recentTransactions = transactionsResult.data || []
 
-  return {
-    success: true,
-    data: {
-      account,
-      levelData,
-      progress,
-      recentTransactions,
-    },
+    return {
+      success: true,
+      data: {
+        account,
+        levelData,
+        progress,
+        recentTransactions,
+      },
+    }
+  } catch (error) {
+    console.error('[getBonusStats] Critical error:', error)
+    return { success: false, error: 'Ошибка загрузки статистики' }
   }
 }
 

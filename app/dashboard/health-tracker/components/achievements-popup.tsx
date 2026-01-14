@@ -591,14 +591,17 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       : (selectedAchievement.description || 'Условия получения не указаны')}
                   </p>
 
-                  {/* Health Passport Fields List */}
-                  {selectedAchievement.metadata?.type === 'profile_complete' && selectedAchievement.progressData?.fields && (
-                    <div className="w-full grid grid-cols-2 gap-2 mb-8 px-2">
+                  {/* Health Passport, Mentor & Weekly Discipline Fields List */}
+                  {(selectedAchievement.metadata?.type === 'profile_complete' || 
+                    selectedAchievement.metadata?.type === 'referral_mentor' || 
+                    ((selectedAchievement.metadata?.type === 'perfect_streak' || selectedAchievement.metadata?.type === 'streak_days') && selectedAchievement.metadata?.value === 7)
+                   ) && selectedAchievement.progressData?.fields && (
+                    <div className="w-full grid grid-cols-3 gap-2 mb-8 px-2">
                       {selectedAchievement.progressData.fields.map((field: any, idx: number) => (
                         <div 
                           key={idx}
                           className={cn(
-                            "flex items-center gap-2 p-2 rounded-xl border transition-all duration-300",
+                            "flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all duration-300",
                             field.done 
                               ? "bg-emerald-500/10 border-emerald-500/20" 
                               : "bg-white/[0.02] border-white/5 opacity-40"
@@ -606,12 +609,12 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         >
                           <div className={cn(
                             "w-4 h-4 rounded-full flex items-center justify-center shrink-0",
-                            field.done ? "bg-emerald-500" : "bg-white/10"
+                            field.done ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-white/10"
                           )}>
                             {field.done && <Sparkles className="w-2.5 h-2.5 text-white" />}
                           </div>
                           <span className={cn(
-                            "text-[10px] font-bold uppercase tracking-tight",
+                            "text-[9px] font-bold uppercase tracking-tight text-center leading-tight",
                             field.done ? "text-emerald-400" : "text-white/40"
                           )}>
                             {field.label}
@@ -632,7 +635,9 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       </div>
                     )}
 
-                    {selectedAchievement.metadata?.type !== 'profile_complete' && (
+                    {selectedAchievement.metadata?.type !== 'profile_complete' && 
+                     selectedAchievement.metadata?.type !== 'referral_mentor' && 
+                     !((selectedAchievement.metadata?.type === 'perfect_streak' || selectedAchievement.metadata?.type === 'streak_days') && selectedAchievement.metadata?.value === 7) && (
                       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden relative group/status">
                         <span className="text-[10px] font-black uppercase tracking-widest text-white/30 relative z-10">Статус</span>
                         {selectedAchievement.isUnlocked ? (
