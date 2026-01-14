@@ -862,6 +862,16 @@ export interface Database {
         }
         Returns: boolean
       }
+      get_user_metrics_stats: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          total_water: number | null
+          total_steps: number | null
+          energy_max_count: number | null
+        }[]
+      }
     }
     Enums: {
       subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
