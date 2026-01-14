@@ -204,7 +204,8 @@ export async function getBonusStats(userId: string): Promise<{
         total_spent_for_cashback: 0,
         referral_level: 1,
         total_referral_earnings: 0,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
       
       return {
