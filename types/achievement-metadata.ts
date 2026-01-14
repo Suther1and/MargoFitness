@@ -236,7 +236,7 @@ export function isMetadataType<T extends AchievementMetadata['type']>(
 /**
  * Helper для безопасного получения значения метаданных
  */
-export function getMetadataValue(metadata: AchievementMetadata): number | undefined {
+export function getMetadataValue(metadata: AchievementMetadata): string | number | undefined {
   if ('value' in metadata) {
     return metadata.value
   }
