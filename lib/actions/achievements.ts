@@ -79,7 +79,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
 
     const currentMetrics = latestEntry?.metrics as any || {}
     const habitsCompleted = latestEntry?.habits_completed as any || {}
-    const currentStreak = userSettings?.streaks?.current || 0
+    const currentStreak = (userSettings?.streaks as any)?.current || 0
     
     // Вспомогательная функция для "Идеальности"
     const isPerfectDay = (entry: any, dbSettings: any) => {
@@ -146,9 +146,9 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
                 { label: 'Телефон', done: !!userProfile?.phone },
                 { label: 'Почта', done: !!userProfile?.email },
                 { label: 'Аватар', done: !!userProfile?.avatar_url },
-                { label: 'Вес', done: !!userSettings?.user_params?.weight },
-                { label: 'Рост', done: !!userSettings?.user_params?.height },
-                { label: 'Возраст', done: !!userSettings?.user_params?.age },
+                { label: 'Вес', done: !!(userSettings?.user_params as any)?.weight },
+                { label: 'Рост', done: !!(userSettings?.user_params as any)?.height },
+                { label: 'Возраст', done: !!(userSettings?.user_params as any)?.age },
               ]
               currentValue = fields.filter(f => f.done).length
               targetValue = 7
@@ -259,7 +259,7 @@ export async function checkAndUnlockAchievements(userId: string) {
 
       switch (meta.type) {
         case 'registration': earned = true; break
-        case 'streak_days': earned = (uSettings?.streaks?.current || 0) >= meta.value; break
+        case 'streak_days': earned = ((uSettings?.streaks as any)?.current || 0) >= meta.value; break
         case 'water_total': earned = (mStats.total_water || 0) >= meta.value; break
         case 'steps_total': earned = (mStats.total_steps || 0) >= meta.value; break
         case 'achievement_count': earned = unlockedIds.size >= (meta.value || allAchievements!.length - 1); break
@@ -270,13 +270,13 @@ export async function checkAndUnlockAchievements(userId: string) {
           break
         case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= meta.value); break
         case 'profile_complete':
-          earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && uSettings?.user_params?.weight);
+          earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && (uSettings?.user_params as any)?.weight);
           break
         case 'weight_goal_reached':
-          if (uSettings?.goals?.weight && uEntries.length > 0) {
-            const cur = uEntries[0].metrics?.weight
-            const start = uEntries[uEntries.length-1].metrics?.weight
-            const goal = uSettings.goals.weight
+          if ((uSettings?.goals as any)?.weight && uEntries.length > 0) {
+            const cur = (uEntries[0].metrics as any)?.weight
+            const start = (uEntries[uEntries.length-1].metrics as any)?.weight
+            const goal = (uSettings.goals as any).weight
             earned = start > goal ? cur <= goal : cur >= goal
           }
           break
