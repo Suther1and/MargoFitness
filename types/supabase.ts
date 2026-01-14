@@ -706,6 +706,7 @@ export interface Database {
           user_id: string
           date: string
           metrics: Json
+          habits_completed: Json | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -715,6 +716,7 @@ export interface Database {
           user_id: string
           date?: string
           metrics?: Json
+          habits_completed?: Json | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -724,6 +726,7 @@ export interface Database {
           user_id?: string
           date?: string
           metrics?: Json
+          habits_completed?: Json | null
           notes?: string | null
           created_at?: string
           updated_at?: string
