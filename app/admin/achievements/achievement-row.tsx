@@ -26,6 +26,7 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [title, setTitle] = useState(achievement.title)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   const handleSaveTitle = async () => {
     if (title === achievement.title) {
@@ -69,22 +70,26 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
     const type = meta.type
     const val = meta.value
 
-    const baseInfo = {
-      trigger: 'checkAndUnlockAchievements (lib/actions/achievements.ts)',
-      rpc: 'unlock_achievement_for_user (PostgreSQL RPC)',
-      table: 'user_achievements'
-    }
-
     switch (type) {
+      case 'registration':
+        return {
+          title: 'При регистрации',
+          steps: [
+            'Проверка выполняется сразу после создания профиля',
+            'Триггер: Первый вход пользователя в систему',
+            'Файл: `lib/actions/achievements.ts` -> `checkAndUnlockAchievements`.'
+          ],
+          testing: '1. Создайте новый аккаунт. 2. Сразу после входа перейдите в раздел достижений — оно должно быть уже получено.'
+        }
       case 'streak_days':
         return {
           title: 'Система серий (Streaks)',
           steps: [
-            `Проверка: \`diary_settings.streaks.current >= ${val}\``,
+            `Проверка текущего счетчика дней: \`diary_settings.streaks.current >= ${val}\``,
             'Триггер: При каждом сохранении записи в дневнике.',
-            'Файл: `lib/actions/diary.ts` -> `checkAndUnlockAchievements`.'
+            'Обновление: Если сегодня данных нет, а вчера были — стрик растет. Если был пропуск — сбрасывается.'
           ],
-          testing: `1. Открыть БД. 2. Найти таблицу \`diary_settings\` для юзера. 3. Установить \`streaks -> current = ${val}\`. 4. Сохранить любую запись в дневнике на сайте.`
+          testing: `1. Заполняйте дневник каждый день без пропусков. 2. На ${val}-й день при сохранении дневника достижение разблокируется. 3. Для быстрой проверки админом: вручную измените \`current_streak\` в БД и сохраните любую запись в дневнике.`
         }
       case 'water_daily':
       case 'steps_daily':
@@ -93,11 +98,11 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
         return {
           title: 'Ежедневные метрики',
           steps: [
-            `Проверка: \`diary_entries.metrics.${field} >= ${val}\``,
-            'Триггер: При сохранении дневника за текущий день.',
-            'Важно: Учитывается только запись за "сегодня".'
+            `Проверка: значение \`metrics.${field}\` в записи за текущую дату >= ${val}`,
+            'Триггер: При сохранении дневника.',
+            'Условие: Нужно ввести число, равное или больше цели, и нажать кнопку сохранения.'
           ],
-          testing: `1. Открыть дневник. 2. Ввести значение ${val} в поле ${metric === 'water' ? 'Вода' : 'Шаги'}. 3. Нажать сохранить. 4. Достижение должно разблокироваться.`
+          testing: `1. Откройте дневник за сегодня. 2. Введите ${val} в поле "${metric === 'water' ? 'Вода' : 'Шаги'}". 3. Нажмите "Сохранить". 4. Достижение должно появиться в уведомлении.`
         }
       case 'water_total':
       case 'steps_total':
@@ -105,70 +110,110 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
         return {
           title: 'Накопительные метрики',
           steps: [
-            `Проверка: \`RPC get_user_metrics_stats().total_${totalMetric} >= ${val}\``,
-            'Триггер: При входе в раздел "Прогресс" или обновлении дневника.',
-            'Логика: Суммируются данные из всех записей за всё время.'
+            `Система суммирует все показатели \`${totalMetric === 'water' ? 'воды' : 'шагов'}\` из всех записей пользователя`,
+            `Цель: накопить ${val.toLocaleString('ru-RU')} единиц`,
+            'Проверка выполняется при каждом открытии страницы прогресса/достижений.'
           ],
-          testing: `1. Добавить несколько записей в дневник за разные даты. 2. Сумма \`${totalMetric}\` должна стать >= ${val}. 3. Зайти в раздел достижений.`
+          testing: `1. Заполните дневник за несколько разных дат (например, вчера и сегодня). 2. Убедитесь, что сумма за все дни стала больше ${val}. 3. Перейдите на вкладку достижений — прогресс обновится и оно разблокируется.`
         }
       case 'achievement_count':
         return {
-          title: 'Мета-достижение',
+          title: 'Количество достижений',
           steps: [
-            `Проверка: \`COUNT(user_achievements) >= ${val === 0 ? 'всех' : val}\``,
-            'Исключение: Само это достижение не учитывается в расчете.',
-            'Триггер: После разблокировки любого другого достижения.'
+            'Проверка: сколько других достижений уже разблокировано пользователем',
+            `Цель: получить еще ${val === 0 ? 'все' : val} достижений`,
+            'Триггер: любая новая разблокировка.'
           ],
-          testing: `1. Получить ${val === 0 ? 'все доступные' : val} других достижений. 2. Это достижение разблокируется автоматически последним.`
+          testing: `1. Получайте другие достижения по очереди. 2. Когда общее количество достигнутых (не считая этого) станет равно ${val}, это достижение откроется автоматически.`
         }
       case 'subscription_tier':
         return {
           title: 'Уровень подписки',
           steps: [
-            `Проверка: \`profiles.subscription_tier\` маппится на ${val}`,
-            'Иерархия: free(0) < basic(1) < pro(2) < elite(3)',
-            'Триггер: При обновлении профиля или после оплаты.'
+            `Проверка текущего тарифа в профиле (\`subscription_tier\`)`,
+            `Требуемый уровень: "${val}" (или выше)`,
+            'Триггер: При обновлении профиля, успешной оплате или просто при входе.'
           ],
-          testing: `1. В админке пользователей изменить тариф юзера на \`${val}\`. 2. Зайти под этим юзером в дашборд.`
+          testing: `1. Оформите подписку уровня "${val}" (или выше). 2. Либо в админке пользователей изменить тариф вручную. 3. Зайдите в личный кабинет — достижение разблокируется.`
         }
       case 'profile_complete':
         return {
           title: 'Заполнение профиля',
           steps: [
-            'Проверка (Profiles): `full_name`, `phone`, `avatar_url` IS NOT NULL',
-            'Проверка (Settings): `weight`, `height`, `age` в `user_params` заданы',
-            'Триггер: Сохранение настроек профиля.'
+            'Проверка: Имя, Телефон, Аватар (в профиле)',
+            'Проверка: Вес, Рост, Возраст (в параметрах тела)',
+            'Триггер: Кнопка "Сохранить" в настройках профиля.'
           ],
-          testing: `1. Перейти в настройки профиля. 2. Заполнить все текстовые поля. 3. Загрузить аватар. 4. Указать вес, рост и возраст в параметрах тела. 5. Сохранить.`
+          testing: '1. Перейдите в настройки профиля. 2. Заполните абсолютно все поля (включая аватар и параметры тела). 3. Нажмите "Сохранить".'
         }
       case 'perfect_day':
         return {
           title: 'Идеальный день',
           steps: [
-            'Проверка: Все цели из `diary_settings.widget_goals` достигнуты за сегодня',
-            'Проверка: Все привычки на сегодня отмечены как выполненные',
-            'Триггер: При сохранении дневника.'
+            'Проверка: все поставленные цели в дневнике выполнены (вода, шаги и т.д.)',
+            'Проверка: все привычки на сегодня отмечены галочками',
+            'Триггер: Сохранение дневника в конце дня.'
           ],
-          testing: `1. Настроить цели (например, 2000мл воды). 2. Выполнить все цели в дневнике. 3. Отметить все привычки. 4. Сохранить.`
+          testing: '1. Установите цели в настройках (например, 1000 шагов). 2. В дневнике выполните эти цели. 3. Отметите все привычки. 4. Нажмите "Сохранить".'
         }
       case 'weight_goal_reached':
         return {
-          title: 'Целевой вес',
+          title: 'Достижение цели веса',
           steps: [
-            'Логика: Сравнение первого веса, текущего и `settings.goals.weight`.',
-            'Поддержка: Работает как на похудение, так и на набор массы.',
-            'Триггер: При записи нового веса в дневник.'
+            'Сравнение: стартовый вес (самая первая запись) и текущий вес',
+            'Условие: текущий вес должен быть равен или "пройти" цель из настроек',
+            'Триггер: Сохранение новой записи веса.'
           ],
-          testing: `1. Установить цель по весу в настройках (например, 70кг). 2. Записать в дневник вес, который равен или "прошел" цель относительно стартового.`
+          testing: '1. Установите цель веса в настройках (например, 70 кг). 2. Запишите в дневник вес, который соответствует этой цели (меньше цели при похудении или больше при наборе). 3. Сохраните.'
+        }
+      case 'referral_joined':
+        return {
+          title: 'В команде',
+          steps: [
+            'Проверка использования реферального кода при регистрации',
+            'Триггер: Успешное создание аккаунта через реферальную ссылку',
+            'Условие: Пользователь должен быть приглашен кем-то'
+          ],
+          testing: '1. Скопируйте реферальный код/ссылку из любого аккаунта. 2. Зарегистрируйте новый аккаунт, используя этот код. 3. После входа достижение должно быть получено.'
+        }
+      case 'referral_mentor':
+        return {
+          title: 'Наставник',
+          steps: [
+            'Проверка количества активных рефералов (кто совершил покупку)',
+            `Цель: ${val} приглашенных пользователей с оплатой`,
+            'Триггер: Момент оплаты приглашенным пользователем'
+          ],
+          testing: `1. Пригласите друга по своему коду. 2. Друг должен оформить любую подписку. 3. Когда оплата друга пройдет, в вашем аккаунте (наставника) зачислится прогресс или сразу выдастся достижение (если цель ${val}).`
+        }
+      case 'perfect_streak':
+        return {
+          title: 'Серия идеальных дней',
+          steps: [
+            `Проверка: ${val} идеальных дней подряд`,
+            'Идеальный день = выполнены все цели и все привычки',
+            'Триггер: Сохранение дневника в конце дня'
+          ],
+          testing: `1. Выполняйте "Идеальный день" ${val} дней подряд. 2. На ${val}-й день при сохранении дневника вы получите это достижение.`
+        }
+      case 'energy_max':
+        return {
+          title: 'На пике формы',
+          steps: [
+            `Проверка: запись максимальной энергии (5/5) ${val} раз`,
+            'Учитываются разные дни',
+            'Триггер: Сохранение оценки энергии в дневнике'
+          ],
+          testing: `1. В дневнике установите ползунок энергии на максимум (5). 2. Повторите это в течение ${val} разных дней. 3. На ${val}-й раз достижение разблокируется.`
         }
       default:
         return {
-          title: `Тип: ${type}`,
+          title: `Условие: ${type}`,
           steps: [
-            `Техническое условие: \`${JSON.stringify(meta)}\``,
-            'Обработка в `lib/actions/achievements.ts` -> `switch(meta.type)`.'
+            `Технический тип: ${type}`,
+            `Значение: ${val}`
           ],
-          testing: 'Проверьте соответствие типа метаданных коду в `lib/actions/achievements.ts`.'
+          testing: 'Для этого достижения пока нет ручного сценария. Пожалуйста, обратитесь к разработчику.'
         }
     }
   }
@@ -177,29 +222,29 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
 
   // Описание логики на основе метаданных
   const getLogicDescription = (meta: any) => {
-    if (!metadata) return 'Логика не указана'
-    const type = metadata.type
-    const val = metadata.value
+    if (!meta) return 'Логика не указана'
+    const type = meta.type
+    const val = meta.value
 
     switch (type) {
-      case 'registration': return 'Выдается при регистрации'
-      case 'streak_days': return `Серия из ${val} дней подряд`
-      case 'water_daily': return `Выпить ${val}мл воды за день`
-      case 'water_total': return `Выпить ${val}мл воды всего`
-      case 'steps_daily': return `Пройти ${val} шагов за день`
-      case 'steps_total': return `Пройти ${val} шагов всего`
-      case 'total_entries': return `Сделать ${val} записей в дневнике`
-      case 'monthly_entries': return `Сделать ${val} записей за месяц`
-      case 'achievement_count': return `Получить ${val === 0 ? 'все остальные' : val} достижений`
-      case 'referral_mentor': return `Пригласить ${val} активных друзей`
-      case 'profile_complete': return 'Полностью заполнить профиль'
-      case 'subscription_tier': return `Оформить подписку уровня ${val}`
-      case 'subscription_duration': return `Подписка на ${val} месяцев`
-      case 'perfect_day': return 'Выполнить все цели за один день'
-      case 'perfect_streak': return `Выполнять все цели ${val} дней подряд`
-      case 'weight_goal_reached': return 'Достичь целевого веса'
-      case 'energy_max': return `Записать максимальную энергию ${val} раз`
-      default: return `Тип: ${type}, значение: ${val}`
+      case 'registration': return 'При регистрации'
+      case 'streak_days': return `Серия: ${val} дн.`
+      case 'water_daily': return `Вода: ${val}мл/день`
+      case 'water_total': return `Вода: ${val}мл всего`
+      case 'steps_daily': return `Шаги: ${val}/день`
+      case 'steps_total': return `Шаги: ${val} всего`
+      case 'total_entries': return `Записей: ${val}`
+      case 'monthly_entries': return `За месяц: ${val}`
+      case 'achievement_count': return `Достижений: ${val === 0 ? 'все' : val}`
+      case 'referral_mentor': return `Рефералы: ${val}`
+      case 'profile_complete': return 'Профиль заполнен'
+      case 'subscription_tier': return `Тариф: ${val}`
+      case 'subscription_duration': return `Период: ${val} мес.`
+      case 'perfect_day': return 'Идеальный день'
+      case 'perfect_streak': return `Идеально: ${val} дн.`
+      case 'weight_goal_reached': return 'Цель по весу'
+      case 'energy_max': return `Макс. энергия: ${val}`
+      default: return `${type}: ${val}`
     }
   }
 
@@ -272,68 +317,71 @@ export function AchievementRow({ achievement }: AchievementRowProps) {
       </td>
 
       <td className="p-4 max-w-xs">
-        <div className="space-y-1">
-          <p className="text-xs text-white/70 line-clamp-2">{achievement.description}</p>
-          <Dialog>
+        <div className="space-y-1.5">
+          <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">{achievement.description}</p>
+          <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
             <DialogTrigger asChild>
-              <button className="flex items-center gap-1.5 text-[10px] text-white/30 bg-white/5 hover:bg-white/10 transition-colors w-fit px-2 py-0.5 rounded-md outline-none">
-                <HelpCircle className="size-3" />
-                <span>Логика: {getLogicDescription(metadata)}</span>
+              <button className="flex items-center gap-2 text-[10px] font-bold text-orange-400 bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 transition-all w-fit px-2.5 py-1 rounded-lg outline-none cursor-pointer group/btn">
+                <Code className="size-3 transition-transform group-hover/btn:scale-110" />
+                <span>Тест и логика: {getLogicDescription(metadata)}</span>
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-[#121214] border-white/10 text-white sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 font-oswald uppercase tracking-wider">
-                  <Code className="size-5 text-orange-400" />
-                  Техническая логика
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-6 pt-4">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                  <div className="p-2 rounded-lg bg-orange-500/10">
-                    <Zap className="size-4 text-orange-400" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white uppercase tracking-tight">{techLogic.title}</h4>
-                    <p className="text-[10px] text-white/40 font-mono">Type: {metadata?.type || 'unknown'}</p>
-                  </div>
-                </div>
+            <DialogContent className="max-w-md p-0 border-0 bg-transparent overflow-visible shadow-none">
+              <div className="relative w-full overflow-hidden rounded-[2.5rem] bg-[#1a1a24] ring-1 ring-white/20 backdrop-blur-xl shadow-2xl p-8">
+                <DialogHeader className="relative z-10 mb-8 text-left">
+                  <DialogTitle className="text-2xl font-bold text-white font-oswald uppercase tracking-tight flex items-center gap-3">
+                    <Code className="size-6 text-orange-400" />
+                    Техническая логика
+                  </DialogTitle>
+                </DialogHeader>
 
-                <div className="space-y-3">
-                  <h5 className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Алгоритм проверки</h5>
-                  <div className="space-y-2">
-                    {techLogic.steps.map((step, i) => (
-                      <div key={i} className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                          <div className="size-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/40">
-                            {i + 1}
+                <div className="relative z-10 space-y-6">
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10">
+                    <div className="p-2.5 rounded-xl bg-orange-500/10">
+                      <Zap className="size-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-tight">{techLogic.title}</h4>
+                      <p className="text-[10px] text-white/40 font-mono">Type: {metadata?.type || 'unknown'}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h5 className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Алгоритм проверки</h5>
+                    <div className="space-y-3">
+                      {techLogic.steps.map((step, i) => (
+                        <div key={i} className="flex gap-4">
+                          <div className="flex flex-col items-center">
+                            <div className="size-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/40 shrink-0">
+                              {i + 1}
+                            </div>
+                            {i < techLogic.steps.length - 1 && <div className="w-px h-full bg-white/5 mt-2" />}
                           </div>
-                          {i < techLogic.steps.length - 1 && <div className="w-px h-full bg-white/5 mt-1" />}
+                          <p className="text-xs text-white/60 pt-1 leading-relaxed">{step}</p>
                         </div>
-                        <p className="text-xs text-white/60 pt-0.5 leading-relaxed">{step}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
+
+                  {techLogic.testing && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-2">
+                      <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                        <Check className="size-3" />
+                        Инструкция для тестирования
+                      </h5>
+                      <p className="text-xs text-white/70 leading-relaxed italic pl-1">
+                        {techLogic.testing}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                {techLogic.testing && (
-                  <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 space-y-2">
-                    <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Как протестировать</h5>
-                    <p className="text-xs text-white/70 leading-relaxed italic">
-                      {techLogic.testing}
-                    </p>
-                  </div>
-                )}
-
-                <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 flex gap-3">
-                  <SettingsIcon className="size-4 text-blue-400 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h5 className="text-[10px] font-bold text-blue-300 uppercase">Метаданные (JSON)</h5>
-                    <pre className="text-[10px] font-mono text-white/40 bg-black/20 p-2 rounded-lg overflow-x-auto">
-                      {JSON.stringify(metadata, null, 2)}
-                    </pre>
-                  </div>
-                </div>
+                <button
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="absolute top-6 right-6 z-20 w-8 h-8 flex items-center justify-center transition-all hover:opacity-70 active:scale-95 bg-white/5 rounded-full"
+                >
+                  <X className="size-4 text-white/40" />
+                </button>
               </div>
             </DialogContent>
           </Dialog>

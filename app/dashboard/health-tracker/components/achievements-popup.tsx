@@ -86,6 +86,42 @@ const getTierStyles = (level: number) => {
 
 const getCategoryStyles = (category: string) => {
   switch (category) {
+    case 'common':
+      return {
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/20',
+        bar: 'bg-gradient-to-r from-emerald-600 to-teal-400',
+        shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+      }
+    case 'rare':
+      return {
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/20',
+        bar: 'bg-gradient-to-r from-blue-600 to-cyan-400',
+        shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+      }
+    case 'epic':
+      return {
+        color: 'text-purple-400',
+        bg: 'bg-purple-500/20',
+        bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-400',
+        shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+      }
+    case 'legendary':
+      return {
+        color: 'text-orange-400',
+        bg: 'bg-orange-500/20',
+        bar: 'bg-gradient-to-r from-orange-600 to-amber-400',
+        shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]'
+      }
+    case 'absolute':
+      return {
+        color: 'text-yellow-400',
+        bg: 'bg-yellow-500/20',
+        bar: 'bg-gradient-to-r from-yellow-600 to-amber-300',
+        shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.4)]'
+      }
+    // Старые категории для обратной совместимости во время миграции
     case 'streaks':
       return {
         color: 'text-orange-400',

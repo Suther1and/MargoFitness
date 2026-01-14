@@ -410,13 +410,11 @@ export interface AchievementWithProgress extends AchievementWithStatus {
 
 /** Категории достижений с названиями для UI */
 export const ACHIEVEMENT_CATEGORIES = {
-  streaks: { label: 'Серии', icon: '🔥', color: 'text-orange-500' },
-  metrics: { label: 'Метрики', icon: '📊', color: 'text-blue-500' },
-  habits: { label: 'Привычки', icon: '✨', color: 'text-yellow-500' },
-  weight: { label: 'Вес', icon: '⚖️', color: 'text-purple-500' },
-  social: { label: 'Социальные', icon: '👥', color: 'text-rose-500' },
-  consistency: { label: 'Регулярность', icon: '📅', color: 'text-green-500' },
-  workouts: { label: 'Тренировки', icon: '🏋️', color: 'text-red-500' },
+  common: { label: 'Обычное', icon: '🟢', color: 'text-emerald-500' },
+  rare: { label: 'Редкое', icon: '🔵', color: 'text-blue-400' },
+  epic: { label: 'Эпическое', icon: '🟣', color: 'text-purple-400' },
+  legendary: { label: 'Легендарное', icon: '🟠', color: 'text-orange-400' },
+  absolute: { label: 'Абсолютное', icon: '🏆', color: 'text-yellow-400' },
 } as const
 
 /** Статистика достижений пользователя */

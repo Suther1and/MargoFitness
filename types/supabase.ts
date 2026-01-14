@@ -893,7 +893,7 @@ export interface Database {
       bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment' | 'achievement'
       referral_status: 'registered' | 'first_purchase_made'
       promo_discount_type: 'percent' | 'fixed_amount'
-      achievement_category: 'streaks' | 'metrics' | 'habits' | 'weight' | 'consistency' | 'workouts'
+      achievement_category: 'common' | 'rare' | 'epic' | 'legendary' | 'absolute' | 'streaks' | 'metrics' | 'habits' | 'weight' | 'consistency' | 'workouts' | 'social'
     }
     CompositeTypes: {
       [_ in never]: never
