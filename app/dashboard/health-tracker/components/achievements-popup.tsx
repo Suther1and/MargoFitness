@@ -236,7 +236,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto px-6 pt-5 pb-8 custom-scrollbar relative z-20">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-5 pb-8 custom-scrollbar relative z-20">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
@@ -248,7 +248,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 <p className="text-[10px] font-black uppercase tracking-[0.2em]">Список пуст</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-3 gap-x-3 gap-y-10 sm:gap-x-6 sm:gap-y-16">
                 {filteredAchievements.map((achievement) => {
                   const isSecret = achievement.is_secret && !achievement.isUnlocked
                   
@@ -260,64 +260,52 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       className="group/item cursor-pointer"
                       onClick={() => !isSecret && setSelectedAchievement(achievement)}
                     >
-                      <div className={cn(
-                        'aspect-square rounded-[2.2rem] flex flex-col items-center justify-center p-3 transition-all duration-500 relative overflow-hidden group/item hover:scale-105 active:scale-95',
-                        achievement.isUnlocked 
-                          ? 'bg-white/[0.03] border border-white/10' 
-                          : 'bg-white/[0.02] border border-white/[0.05]'
-                      )}>
-                        {/* Hidden Glow */}
-                        {achievement.isUnlocked ? (
-                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none" />
-                        ) : (
-                          <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none" />
-                        )}
-
+                      <div className="flex flex-col items-center gap-2 transition-all duration-500 relative group/item hover:scale-105 active:scale-95">
                         <div className={cn(
-                          'w-24 h-24 sm:w-32 sm:h-32 mb-4 transition-all duration-700 ease-out z-10 relative flex items-center justify-center',
+                          'aspect-square w-[75%] sm:w-[80%] flex items-center justify-center transition-all duration-700 ease-out z-10 relative',
                           !achievement.isUnlocked && 'grayscale opacity-20 brightness-[0.8] group-hover/item:opacity-40 group-hover/item:brightness-100'
                         )}>
                           {isSecret ? (
-                            <div className="w-full h-full flex items-center justify-center bg-white/[0.03] rounded-full border border-white/5 backdrop-blur-sm">
-                              <span className="text-4xl sm:text-5xl opacity-20">🔒</span>
+                            <div className="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center bg-white/[0.03] rounded-full border border-white/5 backdrop-blur-sm">
+                              <span className="text-xl sm:text-3xl opacity-20">🔒</span>
                             </div>
                           ) : achievement.icon_url ? (
                             <img 
                               src={achievement.icon_url} 
                               alt={achievement.title}
-                              className="w-full h-full object-contain"
+                              className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
                             />
                           ) : (
-                            <span className="text-5xl sm:text-6xl">{achievement.icon}</span>
+                            <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
+                          )}
+
+                          {/* Reward Badge */}
+                          {achievement.reward_amount && achievement.isUnlocked && (
+                            <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-lg bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)] z-20">
+                              <span className="text-[8px] font-black text-emerald-400 flex items-center gap-0.5">
+                                +{achievement.reward_amount}
+                                <span className="text-[7px]">👟</span>
+                              </span>
+                            </div>
                           )}
                         </div>
                         
-                        <div className="flex flex-col items-center justify-center gap-2 w-full px-1 z-10">
-                          <div className="flex items-center gap-1.5 justify-center w-full">
+                        <div className="flex flex-col items-center justify-center gap-1 w-full px-1 z-10 mt-1">
+                          <div className="flex items-center gap-1 justify-center w-full">
                             {achievement.isUnlocked && (
                               <div className="relative flex items-center justify-center shrink-0">
-                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,1)]" />
-                                <div className="absolute inset-0 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                                <div className="w-1 h-1 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,1)]" />
+                                <div className="absolute inset-0 w-1 h-1 bg-emerald-500 rounded-full animate-ping opacity-75" />
                               </div>
                             )}
                             <span className={cn(
-                              'text-[11px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
-                              achievement.isUnlocked ? 'text-white/80 group-hover/item:text-white' : 'text-white/20 group-hover/item:text-white/40'
+                              'text-[10px] sm:text-[14px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
+                              achievement.isUnlocked ? 'text-white/90 group-hover/item:text-white' : 'text-white/20 group-hover/item:text-white/40'
                             )}>
-                              {isSecret ? 'Секретное' : achievement.title}
+                              {isSecret ? 'Секрет' : achievement.title}
                             </span>
                           </div>
                         </div>
-
-                        {/* Reward Badge */}
-                        {achievement.reward_amount && achievement.isUnlocked && (
-                          <div className="absolute top-3 right-3 px-2 py-0.5 rounded-lg bg-emerald-500/10 backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)] z-10">
-                            <span className="text-[10px] font-black text-emerald-400 flex items-center gap-1">
-                              +{achievement.reward_amount}
-                              <span className="text-[8px]">👟</span>
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </motion.div>
                   )
