@@ -457,33 +457,38 @@ async function checkMetricAchievements(
       .limit(1)
       .single()
 
-    // Получаем все записи для подсчета общих значений
-    const { data: allEntries } = await supabase
-      .from('diary_entries')
-      .select('metrics')
-      .eq('user_id', userId)
+    // Используем RPC для эффективного подсчета суммарных метрик
+    const { data: stats, error: statsError } = await supabase.rpc('get_user_metrics_stats', {
+      p_user_id: userId
+    })
 
-    if (!latestEntry && !allEntries) {
-      console.log('[Achievements:Metrics] No diary entries found')
-      return achievementIds
+    if (statsError) {
+      console.error('[Achievements:Metrics] Error calling get_user_metrics_stats RPC:', statsError)
     }
 
     const metrics = latestEntry?.metrics as any || {}
     
-    // Подсчитываем общие значения
-    let totalWater = 0
-    let totalSteps = 0
-    let energyMaxCount = 0 // Количество раз с энергией 5/5
-    
-    if (allEntries) {
-      for (const entry of allEntries) {
-        const m = entry.metrics as any
-        totalWater += m?.waterIntake || 0  // ИСПРАВЛЕНО: было water
-        totalSteps += m?.steps || 0
-        
-        // Считаем записи с максимальной энергией
-        if (m?.energyLevel === 5) {
-          energyMaxCount++
+    // Подсчитываем общие значения (с фолбеком на случай если RPC не сработал)
+    let totalWater = stats?.[0]?.total_water || 0
+    let totalSteps = stats?.[0]?.total_steps || 0
+    let energyMaxCount = stats?.[0]?.energy_max_count || 0
+
+    // Если RPC вернул null/ошибку, считаем по старинке (фолбек для надежности)
+    if (statsError || !stats || stats.length === 0) {
+      const { data: allEntries } = await supabase
+        .from('diary_entries')
+        .select('metrics')
+        .eq('user_id', userId)
+
+      if (allEntries) {
+        totalWater = 0
+        totalSteps = 0
+        energyMaxCount = 0
+        for (const entry of allEntries) {
+          const m = entry.metrics as any
+          totalWater += m?.waterIntake || 0
+          totalSteps += m?.steps || 0
+          if (m?.energyLevel === 5) energyMaxCount++
         }
       }
     }
@@ -801,10 +806,18 @@ async function checkHabitAchievements(
 
     // Подсчитываем статистику
     let daysWithAllHabitsCompleted = 0
+    let maxHabitsStreak = 0
+    let currentHabitsStreak = 0
     let totalCompletions = 0
 
     if (allEntries && activeHabitIds.length > 0) {
-      for (const entry of allEntries) {
+      // Сортируем записи по дате от новых к старым
+      const sortedEntries = [...allEntries].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+
+      for (let i = 0; i < sortedEntries.length; i++) {
+        const entry = sortedEntries[i]
         const completed = entry.habits_completed as any
         if (!completed) continue
 
@@ -814,14 +827,29 @@ async function checkHabitAchievements(
 
         // Проверяем, все ли активные привычки выполнены в этот день
         const allActiveCompleted = activeHabitIds.every((habitId: string) => completed[habitId] === true)
+        
         if (allActiveCompleted) {
           daysWithAllHabitsCompleted++
+          
+          // Проверка на серию подряд
+          if (i === 0 || isConsecutiveDates(sortedEntries[i-1].date, entry.date)) {
+            currentHabitsStreak++
+            maxHabitsStreak = Math.max(maxHabitsStreak, currentHabitsStreak)
+          } else {
+            currentHabitsStreak = 1
+            maxHabitsStreak = Math.max(maxHabitsStreak, currentHabitsStreak)
+          }
+        } else {
+          currentHabitsStreak = 0
         }
       }
     }
 
-    console.log('[Achievements:Habits] Days with all habits completed:', daysWithAllHabitsCompleted)
-    console.log('[Achievements:Habits] Total completions:', totalCompletions)
+    console.log('[Achievements:Habits] Stats:', {
+      totalCompletions,
+      daysWithAllHabitsCompleted,
+      maxHabitsStreak
+    })
 
     // Получаем ВСЕ достижения категории habits
     const { data: allAchievements, error: achError } = await supabase
@@ -848,8 +876,8 @@ async function checkHabitAchievements(
       } else if (metadata.type === 'habits_created' && habitsCreated >= metadata.value) {
         console.log('[Achievements:Habits] ✅ Habits created:', achievement.id, `(${habitsCreated} >= ${metadata.value})`)
         achievementIds.push(achievement.id)
-      } else if (metadata.type === 'habits_all_streak' && daysWithAllHabitsCompleted >= metadata.value) {
-        console.log('[Achievements:Habits] ✅ Habits all streak (simplified):', achievement.id, `(${daysWithAllHabitsCompleted} >= ${metadata.value})`)
+      } else if (metadata.type === 'habits_all_streak' && maxHabitsStreak >= metadata.value) {
+        console.log('[Achievements:Habits] ✅ Habits all streak:', achievement.id, `(${maxHabitsStreak} >= ${metadata.value})`)
         achievementIds.push(achievement.id)
       } else if (metadata.type === 'habit_completions' && totalCompletions >= metadata.value) {
         console.log('[Achievements:Habits] ✅ Habit completions:', achievement.id, `(${totalCompletions} >= ${metadata.value})`)
@@ -961,6 +989,24 @@ async function checkWeightAchievements(
         if (currentStreak >= streakDays || maxStreak >= streakDays) {
           console.log('[Achievements:Weight] ✅ Weight streak:', achievement.id)
           achievementIds.push(achievement.id)
+        }
+      } else if (metadata.type === 'weight_goal_reached') {
+        // Проверяем, достигнут ли целевой вес
+        if (goalWeight && weightEntries.length > 0) {
+          const latestWeight = (weightEntries[0].metrics as any)?.weight
+          
+          // Проверяем текущий вес относительно цели
+          // Мы считаем цель достигнутой, если текущий вес равен или "лучше" целевого
+          // (меньше цели при похудении, больше при наборе)
+          const startingWeight = (weightEntries[weightEntries.length - 1].metrics as any)?.weight
+          const isLosing = startingWeight > goalWeight
+          
+          const reached = isLosing ? latestWeight <= goalWeight : latestWeight >= goalWeight
+          
+          if (reached) {
+            console.log('[Achievements:Weight] ✅ Weight goal reached:', achievement.id, { latestWeight, goalWeight })
+            achievementIds.push(achievement.id)
+          }
         }
       } else if (metadata.type === 'weight_down_streak') {
         // Проверяем тренд на снижение веса N раз подряд
@@ -1186,15 +1232,7 @@ async function checkSpecialAchievements(
 
     if (!recentEntries || recentEntries.length === 0) return achievementIds
 
-    const isConsecutive = (d1Str: string, d2Str: string) => {
-      const d1 = new Date(d1Str)
-      const d2 = new Date(d2Str)
-      // Сравниваем даты без учета времени
-      d1.setHours(0,0,0,0)
-      d2.setHours(0,0,0,0)
-      const diff = Math.abs(d1.getTime() - d2.getTime())
-      return diff <= 86400000 * 1.5 // 1 день (с запасом на переходы летнего времени)
-    }
+    const isConsecutive = isConsecutiveDates
 
     const todayPerfect = isPerfectDay(recentEntries[0])
 
