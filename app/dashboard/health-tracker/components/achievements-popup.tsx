@@ -73,11 +73,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
     })
     .sort((a, b) => {
       if (statusFilter === 'all') {
-        // Сначала выполненные, затем невыполненные
-        if (a.isUnlocked !== b.isUnlocked) {
-          return a.isUnlocked ? -1 : 1
-        }
-        return 0
+        return 0 // Оставляем стандартный порядок
       }
       if (statusFilter === 'completed' && a.unlockedAt && b.unlockedAt) {
         return new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
@@ -280,11 +276,19 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           )}
 
                           {/* Reward Badge */}
-                          {achievement.reward_amount && achievement.isUnlocked && (
-                            <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-lg bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)] z-20">
-                              <span className="text-[8px] font-black text-emerald-400 flex items-center gap-0.5">
+                          {achievement.reward_amount && (
+                            <div className={cn(
+                              "absolute -top-1 -right-1 px-1.5 py-0.5 rounded-lg backdrop-blur-md border z-20 transition-all duration-500",
+                              achievement.isUnlocked 
+                                ? "bg-emerald-500/20 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                : "bg-white/5 border-white/10 opacity-40 group-hover/item:opacity-70"
+                            )}>
+                              <span className={cn(
+                                "text-[8px] font-black flex items-center gap-0.5 transition-colors",
+                                achievement.isUnlocked ? "text-emerald-400" : "text-white/40"
+                              )}>
                                 +{achievement.reward_amount}
-                                <span className="text-[7px]">👟</span>
+                                <span className="text-[7px] filter grayscale-[0.5]">👟</span>
                               </span>
                             </div>
                           )}

@@ -329,6 +329,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
     const habitResults = await checkHabitAchievements(userId, supabase, unlockedIds)
     const weightResults = await checkWeightAchievements(userId, supabase, unlockedIds)
     const consistencyResults = await checkConsistencyAchievements(userId, supabase, unlockedIds)
+    const specialResults = await checkSpecialAchievements(userId, supabase, unlockedIds)
 
     console.log('[Achievements] Found achievements to check:', {
       streaks: streakResults.length,
@@ -336,6 +337,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
       habits: habitResults.length,
       weight: weightResults.length,
       consistency: consistencyResults.length,
+      special: specialResults.length,
     })
 
     // Собираем все новые достижения
@@ -345,6 +347,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<{
       ...habitResults,
       ...weightResults,
       ...consistencyResults,
+      ...specialResults,
     ]
 
     console.log('[Achievements] Total achievements to unlock:', allResults.length)
@@ -959,6 +962,41 @@ async function checkWeightAchievements(
           console.log('[Achievements:Weight] ✅ Weight streak:', achievement.id)
           achievementIds.push(achievement.id)
         }
+      } else if (metadata.type === 'weight_down_streak') {
+        // Проверяем тренд на снижение веса N раз подряд
+        const requiredStreak = metadata.value
+        
+        // Берем последние записи с весом (необязательно подряд по дням, а именно записи)
+        const sortedEntries = [...weightEntries].sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+
+        if (sortedEntries.length >= requiredStreak) {
+          let currentTrend = 1 // Первая запись всегда начало тренда
+          
+          for (let i = 0; i < sortedEntries.length - 1; i++) {
+            const currentWeight = (sortedEntries[i].metrics as any)?.weight
+            const nextWeight = (sortedEntries[i + 1].metrics as any)?.weight
+            
+            if (currentWeight !== undefined && nextWeight !== undefined && currentWeight <= nextWeight) {
+              currentTrend++
+              if (currentTrend >= requiredStreak) break
+            } else {
+              break // Тренд прерван
+            }
+          }
+
+          console.log('[Achievements:Weight] Weight down trend check:', {
+            achievementId: achievement.id,
+            required: requiredStreak,
+            currentTrend
+          })
+
+          if (currentTrend >= requiredStreak) {
+            console.log('[Achievements:Weight] ✅ Weight down trend earned:', achievement.id)
+            achievementIds.push(achievement.id)
+          }
+        }
       }
     }
   } catch (error) {
@@ -1038,4 +1076,169 @@ async function checkConsistencyAchievements(
 
   return achievementIds
 }
+
+/**
+ * Проверка специальных достижений (Идеальный день, Перфекционист)
+ */
+async function checkSpecialAchievements(
+  userId: string,
+  supabase: any,
+  unlockedIds: Set<string>
+): Promise<string[]> {
+  const achievementIds: string[] = []
+
+  try {
+    // Получаем ВСЕ специальные достижения
+    const { data: allAchievements, error: achError } = await supabase
+      .from('achievements')
+      .select('id, metadata')
+      .or('metadata->>type.eq.perfect_day,metadata->>type.eq.perfect_streak')
+
+    if (achError || !allAchievements) return achievementIds
+
+    // Фильтруем уже полученные
+    const achievements = allAchievements.filter((a: { id: string }) => !unlockedIds.has(a.id))
+    if (achievements.length === 0) return achievementIds
+
+    // Получаем настройки пользователя из БД
+    const { data: dbSettings } = await supabase
+      .from('diary_settings')
+      .select('enabled_widgets, widget_goals, widgets_in_daily_plan, goals, habits')
+      .eq('user_id', userId)
+      .single()
+
+    if (!dbSettings) return achievementIds
+
+    // Мапим БД формат в удобный формат настроек (аналог useTrackerSettings)
+    const enabledWidgets = dbSettings.enabled_widgets || []
+    const widgetGoals = dbSettings.widget_goals || {}
+    const widgetsInPlan = dbSettings.widgets_in_daily_plan || []
+    const customGoals = dbSettings.goals || {}
+    const habits = dbSettings.habits || []
+
+    const activeHabitIds = habits
+      .filter((h: any) => h.enabled)
+      .map((h: any) => h.id)
+
+    // Вспомогательная функция для проверки достижения цели по питанию (аналог из UI)
+    const isNutritionSuccess = (current: number, goal: number, goalType: string) => {
+      const percentage = (current / goal) * 100;
+      if (goalType === 'loss') return percentage >= 80 && percentage <= 100;
+      if (goalType === 'maintain') return percentage >= 90 && percentage <= 110;
+      if (goalType === 'gain') return percentage >= 100 && percentage <= 120;
+      return false;
+    };
+
+    // Функция для проверки "Идеальности" конкретного дня
+    const isPerfectDay = (entry: any) => {
+      if (!entry) return false
+      
+      const metrics = entry.metrics || {}
+      const habitsCompleted = entry.habits_completed || {}
+      
+      // 1. Проверка всех метрик из плана на день
+      for (const id of widgetsInPlan) {
+        if (id === 'habits' || id === 'photos' || id === 'mood') continue // Эти проверяем отдельно или игнорируем
+        
+        const goal = widgetGoals[id]
+        if (!goal) continue
+
+        const current = id === 'water' ? metrics.waterIntake :
+                        id === 'steps' ? metrics.steps :
+                        id === 'sleep' ? metrics.sleepHours :
+                        id === 'caffeine' ? metrics.caffeineIntake :
+                        id === 'nutrition' ? metrics.calories :
+                        id === 'weight' ? metrics.weight : 0
+
+        if (id === 'caffeine') {
+          if (current > goal) return false // Кофеин - это лимит
+        } else if (id === 'nutrition') {
+          const goalType = customGoals.nutrition?.goalType || 'maintain'
+          if (!isNutritionSuccess(current, goal, goalType)) return false
+        } else {
+          if (current < goal) return false // Для остальных - достижение цели
+        }
+      }
+      
+      // 2. Проверка привычек (если они в плане на день или просто есть активные)
+      if (activeHabitIds.length > 0) {
+        const allHabitsDone = activeHabitIds.every((id: string) => habitsCompleted[id] === true)
+        if (!allHabitsDone) return false
+      }
+      
+      // Должна быть хоть какая-то активность за день
+      const hasAnyActivity = (metrics.waterIntake || 0) > 0 || (metrics.steps || 0) > 0 || 
+                             (metrics.calories || 0) > 0 || (metrics.sleepHours || 0) > 0 ||
+                             Object.values(habitsCompleted).some(v => v === true)
+                             
+      if (!hasAnyActivity) return false
+
+      return true
+    }
+
+    // Получаем последние записи для проверки
+    const { data: recentEntries } = await supabase
+      .from('diary_entries')
+      .select('date, metrics, habits_completed')
+      .eq('user_id', userId)
+      .order('date', { ascending: false })
+      .limit(15) 
+
+    if (!recentEntries || recentEntries.length === 0) return achievementIds
+
+    const isConsecutive = (d1Str: string, d2Str: string) => {
+      const d1 = new Date(d1Str)
+      const d2 = new Date(d2Str)
+      // Сравниваем даты без учета времени
+      d1.setHours(0,0,0,0)
+      d2.setHours(0,0,0,0)
+      const diff = Math.abs(d1.getTime() - d2.getTime())
+      return diff <= 86400000 * 1.5 // 1 день (с запасом на переходы летнего времени)
+    }
+
+    const todayPerfect = isPerfectDay(recentEntries[0])
+
+    for (const achievement of achievements) {
+      const metadata = achievement.metadata as any
+
+      if (metadata.type === 'perfect_day' && todayPerfect) {
+        console.log('[Achievements:Special] ✅ Perfect day earned:', achievement.id)
+        achievementIds.push(achievement.id)
+      } else if (metadata.type === 'perfect_streak') {
+        const requiredStreak = metadata.value || 7
+        let currentStreak = 0
+        
+        for (let i = 0; i < recentEntries.length; i++) {
+          if (isPerfectDay(recentEntries[i])) {
+            currentStreak++
+            if (currentStreak >= requiredStreak) break
+            
+            // Если есть следующая запись, проверяем на непрерывность
+            if (recentEntries[i+1]) {
+              if (!isConsecutive(recentEntries[i].date, recentEntries[i+1].date)) {
+                break
+              }
+            } else if (currentStreak < requiredStreak) {
+              // Записей больше нет, а цель не достигнута
+              break
+            }
+          } else {
+            break
+          }
+        }
+        
+        if (currentStreak >= requiredStreak) {
+          console.log('[Achievements:Special] ✅ Perfect streak earned:', achievement.id)
+          achievementIds.push(achievement.id)
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error('[Achievements:Special] Error checking special achievements:', error)
+  }
+
+  return achievementIds
+}
+
 

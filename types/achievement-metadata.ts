@@ -100,6 +100,11 @@ export type WeightMaintainMetadata = {
   value: number // Поддерживать целевой вес N дней
 }
 
+export type WeightDownStreakMetadata = {
+  type: 'weight_down_streak'
+  value: number // Записывать вес N раз подряд на понижение
+}
+
 // ============================================
 // РЕГУЛЯРНОСТЬ (Consistency)
 // ============================================
@@ -160,6 +165,7 @@ export type AchievementMetadata =
   | WeightStreakMetadata
   | WeightGoalReachedMetadata
   | WeightMaintainMetadata
+  | WeightDownStreakMetadata
   | MonthlyEntriesMetadata
   | TotalEntriesMetadata
   | PerfectDayMetadata
