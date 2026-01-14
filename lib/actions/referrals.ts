@@ -10,6 +10,7 @@ import {
   BONUS_CONSTANTS,
 } from '@/types/database'
 import { addBonusTransaction, getUserBonusAccount } from './bonuses'
+import { checkAndUnlockAchievements } from './achievements'
 import { revalidatePath } from 'next/cache'
 
 // ============================================
