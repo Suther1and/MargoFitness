@@ -55,14 +55,14 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     ] = await Promise.allSettled([
       supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
       supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
-      supabase.from('diary_entries').select('metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
       supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('diary_entries').select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]),
       supabase.from('profiles').select('full_name, phone, email, avatar_url, subscription_tier').eq('id', userId).maybeSingle(),
       supabase.from('referrals').select('status').eq('referrer_id', userId),
-      supabase.from('diary_entries').select('date, metrics, habits_completed').eq('user_id', userId).order('date', { ascending: false }).limit(7),
+      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(7),
       supabase.from('user_purchases').select('product_id, products(duration_months)').eq('user_id', userId)
     ])
 
