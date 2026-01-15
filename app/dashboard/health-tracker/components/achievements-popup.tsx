@@ -296,7 +296,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="premium-popup relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-[#0a0a0b]"
           style={{ 
-            background: `
+            backgroundImage: `
               radial-gradient(circle at 50% 0%, ${
                 selectedAchievement 
                   ? getGlowFromColorClass(selectedAchievement.color_class) 
