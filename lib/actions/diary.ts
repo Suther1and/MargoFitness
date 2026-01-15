@@ -92,11 +92,12 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
     // ЗАЩИТА: Если мы пытаемся сохранить пустые виджеты или параметры, но в базе они были — это ошибка
     if (existing) {
       const existingAny = existing as any
+      const settingsAny = settings as any
       const isOverwritingWidgets = 
         Array.isArray(existingAny.enabled_widgets) && 
         existingAny.enabled_widgets.length > 0 && 
-        Array.isArray(settings.enabled_widgets) && 
-        settings.enabled_widgets.length === 0
+        Array.isArray(settingsAny.enabled_widgets) && 
+        settingsAny.enabled_widgets.length === 0
 
       const isOverwritingParams = 
         existing.user_params && 
