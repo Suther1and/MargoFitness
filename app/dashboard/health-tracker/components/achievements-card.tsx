@@ -179,7 +179,7 @@ export function AchievementsCard() {
                               {/* Background / Unfilled */}
                               <div className={cn(
                                 "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
-                                isSecret && "opacity-10",
+                                isSecret && "opacity-10 blur-[3px]",
                                 !isSecret && "opacity-20"
                               )}>
                                 {achievement.icon_url ? (
@@ -194,6 +194,13 @@ export function AchievementsCard() {
                                   </span>
                                 )}
                               </div>
+
+                              {/* Question Mark for Secret */}
+                              {isSecret && (
+                                <div className="absolute inset-0 flex items-center justify-center z-20">
+                                  <span className="text-2xl font-black text-white/20 font-oswald">?</span>
+                                </div>
+                              )}
 
                               {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}
                               {achievement.isUnlocked && (

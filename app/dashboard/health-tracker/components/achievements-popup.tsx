@@ -456,7 +456,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           <div className={cn(
                             "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
                             achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20 group-hover/item:opacity-30",
-                            isSecret && "opacity-10"
+                            isSecret && "opacity-10 blur-[3px]"
                           )}>
                             {achievement.icon_url ? (
                               <img 
@@ -468,6 +468,13 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                               <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
                             )}
                           </div>
+
+                          {/* Question Mark for Secret */}
+                          {isSecret && (
+                            <div className="absolute inset-0 flex items-center justify-center z-20">
+                              <span className="text-2xl sm:text-4xl font-black text-white/20 font-oswald">?</span>
+                            </div>
+                          )}
 
                           {/* Адаптивное свечение за иконкой в ленте */}
                           {achievement.isUnlocked && (
@@ -616,7 +623,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     {/* Background / Unfilled Part (Grayscale) */}
                     <div className={cn(
                       "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
-                      selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20"
+                      selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20",
+                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "blur-[4px]"
                     )}>
                       {selectedAchievement.icon_url ? (
                         <img 
@@ -630,6 +638,13 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         </span>
                       )}
                     </div>
+
+                    {/* Question Mark for Secret */}
+                    {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <span className="text-6xl font-black text-white/20 font-oswald">?</span>
+                      </div>
+                    )}
 
                     {/* Shine Effect for COMPLETED achievements only */}
                     {selectedAchievement.isUnlocked && (
