@@ -122,7 +122,7 @@ export async function getUpgradeOptions(userId: string): Promise<{
   
   // Группируем продукты по tier_level
   const groupedByTier: Record<number, Product[]> = {}
-  products?.forEach(product => {
+  products?.forEach((product: any) => {
     const level = product.tier_level || 1
     if (!groupedByTier[level]) {
       groupedByTier[level] = []
@@ -131,7 +131,7 @@ export async function getUpgradeOptions(userId: string): Promise<{
   })
   
   // Преобразуем в массив
-  Object.entries(groupedByTier).forEach(([level, prods]) => {
+  Object.entries(groupedByTier).forEach(([level, prods]: [string, any]) => {
     const tierLevel = parseInt(level)
     availableTiers.push({
       tier: tierMap[level] as SubscriptionTier,

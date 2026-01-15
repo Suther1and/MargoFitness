@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Trophy, Award, Loader2, Sparkles, ChevronRight } from 'lucide-react'
+import { Trophy, Award, Loader2, Sparkles, ChevronRight, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AchievementsPopup } from './achievements-popup'
 import { useRecentAchievements, useAchievementStats } from '../hooks/use-achievements'

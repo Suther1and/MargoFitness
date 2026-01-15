@@ -178,7 +178,7 @@ export async function getReferralStats(userId: string): Promise<{
     }
 
     const referrals = referralsResult.data
-    const activeReferrals = referrals.filter(r => r.status === 'first_purchase_made').length
+    const activeReferrals = referrals.filter((r: any) => r.status === 'first_purchase_made').length
 
     // Получаем общую сумму заработанного с рефералов
     const { data: transactions } = await supabase
@@ -187,7 +187,7 @@ export async function getReferralStats(userId: string): Promise<{
       .eq('user_id', userId)
       .in('type', ['referral_bonus', 'referral_first'])
 
-    const totalEarned = transactions?.reduce((sum, tx) => sum + tx.amount, 0) || 0
+    const totalEarned = transactions?.reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
 
     const referralLevelData = getReferralLevelData(bonusAccount.referral_level)
     const progress = calculateLevelProgress(bonusAccount.total_referral_earnings, true)
@@ -597,7 +597,7 @@ export async function getAdminReferralStats(): Promise<{
       .select('amount')
       .in('type', ['referral_bonus', 'referral_first'])
 
-    const totalBonusesPaid = transactions?.reduce((sum, tx) => sum + tx.amount, 0) || 0
+    const totalBonusesPaid = transactions?.reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
 
     // Топ рефереров
     const { data: referrers } = await supabase
@@ -605,7 +605,7 @@ export async function getAdminReferralStats(): Promise<{
       .select('referrer_id')
 
     const referrerCounts: Record<string, number> = {}
-    referrers?.forEach(ref => {
+    referrers?.forEach((ref: any) => {
       referrerCounts[ref.referrer_id] = (referrerCounts[ref.referrer_id] || 0) + 1
     })
 
@@ -628,7 +628,7 @@ export async function getAdminReferralStats(): Promise<{
           .eq('user_id', userId)
           .in('type', ['referral_bonus', 'referral_first'])
 
-        const totalEarned = txs?.reduce((sum, tx) => sum + tx.amount, 0) || 0
+        const totalEarned = txs?.reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
 
         return {
           userId,

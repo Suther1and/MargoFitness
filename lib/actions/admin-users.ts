@@ -85,7 +85,7 @@ export async function getAllUsers(filters?: {
 
     // Создаем Map для быстрого доступа
     const bonusMap = new Map(
-      bonuses?.map(b => [b.user_id, b]) || []
+      bonuses?.map((b: any) => [b.user_id, b]) || []
     )
 
     // Объединяем данные
@@ -102,7 +102,7 @@ export async function getAllUsers(filters?: {
     // Если есть фильтр по уровню кешбека, фильтруем пользователей у которых нет бонусного счета
     if (filters?.cashback_level && filters.cashback_level !== 'all') {
       const targetLevel = parseInt(filters.cashback_level)
-      usersWithBonuses = usersWithBonuses.filter(user => user.cashback_level === targetLevel)
+      usersWithBonuses = usersWithBonuses.filter((user: any) => user.cashback_level === targetLevel)
     }
 
     return { success: true, users: usersWithBonuses }
@@ -243,13 +243,13 @@ export async function getUsersStats(): Promise<{
 
     const stats = {
       total: users.length,
-      admins: users.filter(u => u.role === 'admin').length,
-      activeSubscriptions: users.filter(u => u.subscription_status === 'active').length,
+      admins: users.filter((u: any) => u.role === 'admin').length,
+      activeSubscriptions: users.filter((u: any) => u.subscription_status === 'active').length,
       tierCounts: {
-        free: users.filter(u => u.subscription_tier === 'free').length,
-        basic: users.filter(u => u.subscription_tier === 'basic').length,
-        pro: users.filter(u => u.subscription_tier === 'pro').length,
-        elite: users.filter(u => u.subscription_tier === 'elite').length,
+        free: users.filter((u: any) => u.subscription_tier === 'free').length,
+        basic: users.filter((u: any) => u.subscription_tier === 'basic').length,
+        pro: users.filter((u: any) => u.subscription_tier === 'pro').length,
+        elite: users.filter((u: any) => u.subscription_tier === 'elite').length,
       }
     }
 

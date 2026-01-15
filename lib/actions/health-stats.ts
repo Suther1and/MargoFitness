@@ -48,7 +48,7 @@ export async function getStatsForPeriod(
     const processedData = data.map((entry: any) => {
       if (metrics && metrics.length > 0) {
         const filteredMetrics: any = {}
-        metrics.forEach(metric => {
+        metrics.forEach((metric: any) => {
           if (entry.metrics && entry.metrics[metric] !== undefined) {
             filteredMetrics[metric] = entry.metrics[metric]
           }
@@ -113,7 +113,7 @@ export async function getWeightStats(userId: string, dateRange: DateRange) {
   const weightData = result.data.map((entry: any) => ({
     date: entry.date,
     weight: entry.metrics?.weight || null
-  })).filter(entry => entry.weight !== null)
+  })).filter((entry: any) => entry.weight !== null)
 
   return { success: true, data: weightData }
 }
@@ -162,7 +162,7 @@ export async function getMoodStats(userId: string, dateRange: DateRange) {
     date: entry.date,
     mood: entry.metrics?.mood || null,
     energy: entry.metrics?.energyLevel || null
-  })).filter(entry => entry.mood !== null || entry.energy !== null)
+  })).filter((entry: any) => entry.mood !== null || entry.energy !== null)
 
   return { success: true, data: moodData }
 }
@@ -209,7 +209,7 @@ export async function getNotesStats(userId: string, dateRange: DateRange) {
   if (!result.success) return result
 
   const notesData = result.data
-    .filter(entry => entry.notes && entry.notes.trim() !== '')
+    .filter((entry: any) => entry.notes && entry.notes.trim() !== '')
     .map((entry: any) => ({
       date: entry.date,
       notes: entry.notes,
@@ -257,7 +257,7 @@ export async function getOverviewStatsAggregated(
   }
 
   const entries = result.data
-  const activeHabits = habits.filter(h => h.enabled)
+  const activeHabits = habits.filter((h: any) => h.enabled)
 
   // Вычисляем период для отображения
   const periodDays = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24))
@@ -269,7 +269,7 @@ export async function getOverviewStatsAggregated(
   // ========== ВЕС ==========
   let weightStats = null
   if (settings.widgets.weight?.enabled) {
-    const weightEntries = entries.filter(e => e.metrics?.weight != null && e.metrics.weight > 0)
+    const weightEntries = entries.filter((e: any) => e.metrics?.weight != null && e.metrics.weight > 0)
     if (weightEntries.length > 0) {
       const startWeight = weightEntries[0].metrics.weight
       const currentWeight = weightEntries[weightEntries.length - 1].metrics.weight
@@ -286,7 +286,7 @@ export async function getOverviewStatsAggregated(
   // ========== ПРИВЫЧКИ ==========
   let habitsStats = null
   if (activeHabits.length > 0) {
-    const entriesWithHabits = entries.filter(e => e.habits_completed && Object.keys(e.habits_completed).length > 0)
+    const entriesWithHabits = entries.filter((e: any) => e.habits_completed && Object.keys(e.habits_completed).length > 0)
     if (entriesWithHabits.length > 0) {
       let totalCompleted = 0
       let totalExpected = 0
@@ -294,16 +294,16 @@ export async function getOverviewStatsAggregated(
       let bestHabitName = activeHabits[0]?.title || 'Привычка'
 
       // Подсчитываем процент выполнения
-      entriesWithHabits.forEach(entry => {
+      entriesWithHabits.forEach((entry: any) => {
         const completed = Object.entries(entry.habits_completed || {})
-          .filter(([id, val]) => val === true && activeHabits.some(h => h.id === id))
+          .filter(([id, val]) => val === true && activeHabits.some((h: any) => h.id === id))
           .length
         totalCompleted += completed
         totalExpected += activeHabits.length
       })
 
       // Находим лучший streak
-      activeHabits.forEach(habit => {
+      activeHabits.forEach((habit: any) => {
         if (habit.streak > maxStreak) {
           maxStreak = habit.streak
           bestHabitName = habit.title
@@ -323,9 +323,9 @@ export async function getOverviewStatsAggregated(
   // ========== ШАГИ ==========
   let stepsStats = null
   if (settings.widgets.steps?.enabled) {
-    const stepsEntries = entries.filter(e => e.metrics?.steps != null && e.metrics.steps > 0)
+    const stepsEntries = entries.filter((e: any) => e.metrics?.steps != null && e.metrics.steps > 0)
     if (stepsEntries.length > 0) {
-      const totalSteps = stepsEntries.reduce((sum, e) => sum + (e.metrics.steps || 0), 0)
+      const totalSteps = stepsEntries.reduce((sum: number, e: any) => sum + (e.metrics.steps || 0), 0)
       const average = Math.round(totalSteps / stepsEntries.length)
       const goal = settings.widgets.steps?.goal || 10000
       const percentage = Math.round((average / goal) * 100)
@@ -341,9 +341,9 @@ export async function getOverviewStatsAggregated(
   // ========== ВОДА ==========
   let waterStats = null
   if (settings.widgets.water?.enabled) {
-    const waterEntries = entries.filter(e => e.metrics?.waterIntake != null && e.metrics.waterIntake > 0)
+    const waterEntries = entries.filter((e: any) => e.metrics?.waterIntake != null && e.metrics.waterIntake > 0)
     if (waterEntries.length > 0) {
-      const totalWater = waterEntries.reduce((sum, e) => sum + (e.metrics.waterIntake || 0), 0)
+      const totalWater = waterEntries.reduce((sum: number, e: any) => sum + (e.metrics.waterIntake || 0), 0)
       const average = Math.round(totalWater / waterEntries.length)
       const goal = settings.widgets.water?.goal || 2500
       const percentage = Math.round((average / goal) * 100)
@@ -359,9 +359,9 @@ export async function getOverviewStatsAggregated(
   // ========== КОФЕИН ==========
   let caffeineStats = null
   if (settings.widgets.caffeine?.enabled) {
-    const caffeineEntries = entries.filter(e => e.metrics?.caffeineIntake != null && e.metrics.caffeineIntake > 0)
+    const caffeineEntries = entries.filter((e: any) => e.metrics?.caffeineIntake != null && e.metrics.caffeineIntake > 0)
     if (caffeineEntries.length > 0) {
-      const totalCaffeine = caffeineEntries.reduce((sum, e) => sum + (e.metrics.caffeineIntake || 0), 0)
+      const totalCaffeine = caffeineEntries.reduce((sum: number, e: any) => sum + (e.metrics.caffeineIntake || 0), 0)
       const average = Number((totalCaffeine / caffeineEntries.length).toFixed(1))
       caffeineStats = {
         average,
@@ -373,9 +373,9 @@ export async function getOverviewStatsAggregated(
   // ========== СОН ==========
   let sleepStats = null
   if (settings.widgets.sleep?.enabled) {
-    const sleepEntries = entries.filter(e => e.metrics?.sleepHours != null && e.metrics.sleepHours > 0)
+    const sleepEntries = entries.filter((e: any) => e.metrics?.sleepHours != null && e.metrics.sleepHours > 0)
     if (sleepEntries.length > 0) {
-      const totalSleep = sleepEntries.reduce((sum, e) => sum + (e.metrics.sleepHours || 0), 0)
+      const totalSleep = sleepEntries.reduce((sum: number, e: any) => sum + (e.metrics.sleepHours || 0), 0)
       const average = Number((totalSleep / sleepEntries.length).toFixed(1))
       const goal = settings.widgets.sleep?.goal || 8
       const percentage = Math.round((average / goal) * 100)
@@ -391,16 +391,16 @@ export async function getOverviewStatsAggregated(
   // ========== ПИТАНИЕ ==========
   let nutritionStats = null
   if (settings.widgets.nutrition?.enabled) {
-    const nutritionEntries = entries.filter(e => e.metrics?.calories != null && e.metrics.calories > 0)
+    const nutritionEntries = entries.filter((e: any) => e.metrics?.calories != null && e.metrics.calories > 0)
     if (nutritionEntries.length > 0) {
-      const totalCalories = nutritionEntries.reduce((sum, e) => sum + (e.metrics.calories || 0), 0)
+      const totalCalories = nutritionEntries.reduce((sum: number, e: any) => sum + (e.metrics.calories || 0), 0)
       const avgCalories = Math.round(totalCalories / nutritionEntries.length)
       
       // Качество питания (только дни где указано)
-      const qualityEntries = entries.filter(e => e.metrics?.foodQuality != null && e.metrics.foodQuality > 0)
+      const qualityEntries = entries.filter((e: any) => e.metrics?.foodQuality != null && e.metrics.foodQuality > 0)
       let avgQuality = null
       if (qualityEntries.length > 0) {
-        const totalQuality = qualityEntries.reduce((sum, e) => sum + (e.metrics.foodQuality || 0), 0)
+        const totalQuality = qualityEntries.reduce((sum: number, e: any) => sum + (e.metrics.foodQuality || 0), 0)
         avgQuality = Number((totalQuality / qualityEntries.length).toFixed(1))
       }
 
@@ -416,20 +416,20 @@ export async function getOverviewStatsAggregated(
   // ========== НАСТРОЕНИЕ/ЭНЕРГИЯ ==========
   let moodStats = null
   if (settings.widgets.mood?.enabled) {
-    const moodEntries = entries.filter(e => e.metrics?.mood != null && e.metrics.mood > 0)
-    const energyEntries = entries.filter(e => e.metrics?.energyLevel != null && e.metrics.energyLevel > 0)
+    const moodEntries = entries.filter((e: any) => e.metrics?.mood != null && e.metrics.mood > 0)
+    const energyEntries = entries.filter((e: any) => e.metrics?.energyLevel != null && e.metrics.energyLevel > 0)
     
     if (moodEntries.length > 0 || energyEntries.length > 0) {
       let avgMood = null
       let avgEnergy = null
 
       if (moodEntries.length > 0) {
-        const totalMood = moodEntries.reduce((sum, e) => sum + (e.metrics.mood || 0), 0)
+        const totalMood = moodEntries.reduce((sum: number, e: any) => sum + (e.metrics.mood || 0), 0)
         avgMood = Number((totalMood / moodEntries.length).toFixed(1))
       }
 
       if (energyEntries.length > 0) {
-        const totalEnergy = energyEntries.reduce((sum, e) => sum + (e.metrics.energyLevel || 0), 0)
+        const totalEnergy = energyEntries.reduce((sum: number, e: any) => sum + (e.metrics.energyLevel || 0), 0)
         avgEnergy = Number((totalEnergy / energyEntries.length).toFixed(1))
       }
 
@@ -440,7 +440,7 @@ export async function getOverviewStatsAggregated(
   // ========== ЗАМЕТКИ ==========
   let notesStats = null
   if (settings.widgets.notes?.enabled) {
-    const notesEntries = entries.filter(e => e.notes && e.notes.trim() !== '')
+    const notesEntries = entries.filter((e: any) => e.notes && e.notes.trim() !== '')
     if (notesEntries.length > 0) {
       // Находим заметку с лучшими показателями (максимальный % выполнения привычек)
       let bestEntry = notesEntries[0]
@@ -448,9 +448,9 @@ export async function getOverviewStatsAggregated(
 
       if (activeHabits.length > 0) {
         // Если есть привычки, ищем по максимальному проценту выполнения
-        notesEntries.forEach(entry => {
+        notesEntries.forEach((entry: any) => {
           const completed = Object.entries(entry.habits_completed || {})
-            .filter(([id, val]) => val === true && activeHabits.some(h => h.id === id))
+            .filter(([id, val]) => val === true && activeHabits.some((h: any) => h.id === id))
             .length
           const score = activeHabits.length > 0 ? (completed / activeHabits.length) : 0
           if (score > bestScore) {
@@ -460,7 +460,7 @@ export async function getOverviewStatsAggregated(
         })
       } else {
         // Если нет привычек, берем по максимальному настроению
-        notesEntries.forEach(entry => {
+        notesEntries.forEach((entry: any) => {
           const mood = entry.metrics?.mood || 0
           const energy = entry.metrics?.energyLevel || 0
           const score = mood + energy

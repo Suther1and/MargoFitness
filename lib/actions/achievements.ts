@@ -257,7 +257,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
                 { label: 'Рост', done: !!(userSettings?.user_params as any)?.height },
                 { label: 'Возраст', done: !!(userSettings?.user_params as any)?.age },
               ]
-              currentValue = fields.filter(f => f.done).length
+              currentValue = fields.filter((f: any) => f.done).length
               targetValue = 7
               progressData = { fields }
               break
@@ -353,7 +353,7 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
     const unlockedIds = new Set((userAchievements as { achievement_id: string }[] | null)?.map((ua: any) => ua.achievement_id) || [])
     
     const { data: allAchievements } = await supabase.from('achievements').select('*')
-    const achievementsToCheck = allAchievements?.filter(a => !unlockedIds.has(a.id)) || []
+    const achievementsToCheck = (allAchievements as Achievement[] | null)?.filter((a: any) => !unlockedIds.has(a.id)) || []
     
     if (achievementsToCheck.length === 0) return { success: true, newAchievements: [] }
 
@@ -646,10 +646,10 @@ export async function getAdminAchievements() {
 
     if (statsError) throw statsError
 
-    const counts = stats.reduce((acc: Record<string, number>, curr) => {
+    const counts = (stats as any[] | null)?.reduce((acc: Record<string, number>, curr: any) => {
       acc[curr.achievement_id] = (acc[curr.achievement_id] || 0) + 1
       return acc
-    }, {})
+    }, {}) || {}
 
     const data = (achievements as Achievement[]).map((ach: any) => ({
       ...ach,

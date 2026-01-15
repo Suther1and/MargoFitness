@@ -399,8 +399,8 @@ export async function getPromoCodeStats(): Promise<{
       .select('*')
 
     const totalPromoCodes = promoCodes?.length || 0
-    const activePromoCodes = promoCodes?.filter(p => p.is_active).length || 0
-    const totalUsage = promoCodes?.reduce((sum, p) => sum + p.usage_count, 0) || 0
+    const activePromoCodes = promoCodes?.filter((p: any) => p.is_active).length || 0
+    const totalUsage = promoCodes?.reduce((sum: number, p: any) => sum + p.usage_count, 0) || 0
 
     const topPromoCodes = promoCodes
       ?.sort((a, b) => b.usage_count - a.usage_count)

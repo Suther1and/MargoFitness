@@ -80,7 +80,7 @@ export async function getSubscriptionsByDuration(durationMonths: number): Promis
     
     if (tierProducts && tierProducts.length > 0) {
       // Рассчитать цены с учетом периода и скидок
-      return tierProducts.map(product => {
+      return tierProducts.map((product: any) => {
         const discount = 
           durationMonths === 3 ? 5 :
           durationMonths === 6 ? 10 :

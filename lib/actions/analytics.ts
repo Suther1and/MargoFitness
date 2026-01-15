@@ -117,7 +117,7 @@ export async function getRevenueByPeriod(
     )
     
     // Подсчет метрик
-    const totalRevenue = transactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0
+    const totalRevenue = transactions?.reduce((sum: number, tx: any) => sum + Number(tx.amount), 0) || 0
     const transactionsCount = transactions?.length || 0
     const averageTransaction = transactionsCount > 0 ? totalRevenue / transactionsCount : 0
     
@@ -128,7 +128,7 @@ export async function getRevenueByPeriod(
       elite: 0
     }
     
-    transactions?.forEach(tx => {
+    (transactions as any[] | null)?.forEach((tx: any) => {
       const tierLevel = productTierMap.get(tx.product_id!)
       if (tierLevel === 1) byTier.basic += Number(tx.amount)
       else if (tierLevel === 2) byTier.pro += Number(tx.amount)
@@ -181,7 +181,7 @@ export async function getRevenueByMonth(
     // Группировка по месяцам
     const revenueByMonth = new Map<string, number>()
     
-    transactions?.forEach(tx => {
+    (transactions as any[] | null)?.forEach((tx: any) => {
       const date = new Date(tx.created_at)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       const current = revenueByMonth.get(monthKey) || 0
@@ -228,7 +228,7 @@ export async function getSubscriptionStats(): Promise<{
     
     const stats: SubscriptionStats = {
       total: profiles?.length || 0,
-      active: profiles?.filter(p => p.subscription_status === 'active').length || 0,
+      active: profiles?.filter((p: any) => p.subscription_status === 'active').length || 0,
       byTier: {
         free: 0,
         basic: 0,
@@ -243,7 +243,7 @@ export async function getSubscriptionStats(): Promise<{
       }
     }
     
-    profiles?.forEach(profile => {
+    profiles?.forEach((profile: any) => {
       // По тарифам
       if (profile.subscription_tier === 'free') stats.byTier.free++
       else if (profile.subscription_tier === 'basic') stats.byTier.basic++
@@ -296,19 +296,19 @@ export async function getRegistrationStats(): Promise<{
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
     
     const total = profiles?.length || 0
-    const withActiveSubscription = profiles?.filter(p => 
+    const withActiveSubscription = profiles?.filter((p: any) => 
       p.subscription_status === 'active' && p.subscription_tier !== 'free'
     ).length || 0
     
-    const newThisWeek = profiles?.filter(p => 
+    const newThisWeek = profiles?.filter((p: any) => 
       new Date(p.created_at) > weekAgo
     ).length || 0
     
-    const newThisMonth = profiles?.filter(p => 
+    const newThisMonth = profiles?.filter((p: any) => 
       new Date(p.created_at) > monthAgo
     ).length || 0
 
-    const activeToday = profiles?.filter(p => 
+    const activeToday = profiles?.filter((p: any) => 
       new Date(p.updated_at) > todayStart
     ).length || 0
     

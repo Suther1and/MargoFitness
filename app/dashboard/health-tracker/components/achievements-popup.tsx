@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trophy, Award, Loader2, Target, Sparkles, ChevronRight } from 'lucide-react'
+import { X, Trophy, Award, Loader2, Target, Sparkles, ChevronRight, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAllAchievements } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'

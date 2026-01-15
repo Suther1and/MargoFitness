@@ -480,7 +480,7 @@ export async function getProgressPhotos(userId: string) {
       }
     })
 
-    return { success: true, data: weeklyPhotoSets.filter(set => set.hasPhotos || set.hasMeasurements) }
+    return { success: true, data: weeklyPhotoSets.filter((set: any) => set.hasPhotos || set.hasMeasurements) }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] getProgressPhotos:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -720,10 +720,10 @@ export async function getComparisonPhotos(userId: string, startDate: string, end
     }
 
     // Находим неделю с максимальным и минимальным весом
-    const maxWeightEntry = entriesWithWeight.reduce((max, entry) => 
+    const maxWeightEntry = entriesWithWeight.reduce((max: any, entry: any) => 
       entry.weight > max.weight ? entry : max
     )
-    const minWeightEntry = entriesWithWeight.reduce((min, entry) => 
+    const minWeightEntry = entriesWithWeight.reduce((min: any, entry: any) => 
       entry.weight < min.weight ? entry : min
     )
 

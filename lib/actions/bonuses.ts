@@ -636,13 +636,13 @@ export async function getAdminBonusStats(): Promise<{
       .from('bonus_transactions')
       .select('amount')
 
-    const totalBonusesIssued = transactions?.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0) || 0
-    const totalBonusesSpent = transactions?.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
-    const totalBonusesInCirculation = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0
+    const totalBonusesIssued = transactions?.filter((t: any) => t.amount > 0).reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+    const totalBonusesSpent = transactions?.filter((t: any) => t.amount < 0).reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
+    const totalBonusesInCirculation = accounts?.reduce((sum: number, acc: any) => sum + acc.balance, 0) || 0
     const averageBalance = accounts?.length ? Math.floor(totalBonusesInCirculation / accounts.length) : 0
 
     const usersByLevel: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
-    accounts?.forEach(acc => {
+    accounts?.forEach((acc: any) => {
       usersByLevel[acc.cashback_level] = (usersByLevel[acc.cashback_level] || 0) + 1
     })
 
