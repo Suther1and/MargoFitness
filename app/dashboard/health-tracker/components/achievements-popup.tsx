@@ -555,12 +555,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           )}
                         </div>
                         
-                        <div className="flex flex-col items-center justify-center gap-0.5 w-full px-1 z-10 mt-1">
-                          {isSecret && (
-                            <span className="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic">
-                              Секретно
-                            </span>
-                          )}
+                        <div className="flex flex-col items-center justify-center gap-1 w-full px-1 z-10 mt-1">
                           <div className="flex items-center justify-center w-full">
                             <span className={cn(
                               'text-[11px] sm:text-[15px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight relative inline-block',
@@ -582,6 +577,11 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                               {achievement.title}
                             </span>
                           </div>
+                          {isSecret && (
+                            <span className="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic transition-colors group-hover/item:text-purple-400">
+                              Секрет
+                            </span>
+                          )}
                         </div>
                       </div>
                     </motion.div>
