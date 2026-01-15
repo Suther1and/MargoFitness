@@ -114,9 +114,10 @@ export async function getRevenueByPeriod(
       .from('products')
       .select('id, tier_level')
     
-    const productTierMap = new Map(
-      (products as any[] | null)?.map((p: any) => [p.id, p.tier_level]) || []
-    )
+    const productTierMap: Record<string, number> = {}
+    (products as any[] | null)?.forEach((p: any) => {
+      productTierMap[p.id] = p.tier_level
+    })
     
     // Подсчет метрик
     const totalRevenue = transactions?.reduce((sum: number, tx: any) => sum + Number(tx.amount), 0) || 0
@@ -125,7 +126,7 @@ export async function getRevenueByPeriod(
     
     // Выручка по тарифам через reduce
     const tierRevenues = (transactions as any[] | null)?.reduce((acc: any, tx: any) => {
-      const tierLevel = productTierMap.get(tx.product_id!)
+      const tierLevel = productTierMap[tx.product_id!]
       if (tierLevel === 1) acc.basic += Number(tx.amount)
       else if (tierLevel === 2) acc.pro += Number(tx.amount)
       else if (tierLevel === 3) acc.elite += Number(tx.amount)
@@ -175,20 +176,19 @@ export async function getRevenueByMonth(
       return { success: false, error: 'Failed to fetch data' }
     }
     
-    // Группировка по месяцам
-    const revenueByMonth = new Map<string, number>()
-    
-    (transactions as any[] | null)?.forEach((tx: any) => {
+    // Группировка по месяцам через reduce
+    const monthlyData = (transactions as any[] | null)?.reduce((acc: any, tx: any) => {
       const date = new Date(tx.created_at)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      const current = revenueByMonth.get(monthKey) || 0
-      revenueByMonth.set(monthKey, current + Number(tx.amount))
-    })
+      if (!acc[monthKey]) acc[monthKey] = 0
+      acc[monthKey] += Number(tx.amount)
+      return acc
+    }, {}) || {}
     
-    // Преобразовать в массив
-    const result = Array.from(revenueByMonth.entries()).map(([month, revenue]) => ({
+    // Преобразовать в массив и отсортировать
+    const result = Object.entries(monthlyData).map(([month, revenue]) => ({
       month,
-      revenue
+      revenue: revenue as number
     })).sort((a, b) => a.month.localeCompare(b.month))
     
     return { success: true, data: result }
@@ -385,8 +385,16 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
       .select('id, name')
       .in('id', productIds)
     
-    const userMap = new Map((users as any[] | null)?.map((u: any) => [u.id, u.email]) || [])
-    const productMap = new Map((products as any[] | null)?.map((p: any) => [p.id, p.name]) || [])
+    const userMap: Record<string, string> = {}
+    const productMap: Record<string, string> = {}
+    
+    (users as any[] | null)?.forEach((u: any) => {
+      userMap[u.id] = u.email
+    })
+    
+    (products as any[] | null)?.forEach((p: any) => {
+      productMap[p.id] = p.name
+    })
     
     const result = (transactions as any[] | null)?.map((tx: any) => ({
       id: tx.id,
@@ -394,8 +402,8 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
       status: tx.status,
       payment_type: tx.payment_type || 'unknown',
       created_at: tx.created_at,
-      user_email: userMap.get(tx.user_id) || 'Unknown',
-      product_name: tx.product_id ? (productMap.get(tx.product_id) || 'Unknown') : 'N/A'
+      user_email: userMap[tx.user_id] || 'Unknown',
+      product_name: tx.product_id ? (productMap[tx.product_id] || 'Unknown') : 'N/A'
     })) || []
     
     return { success: true, data: result }
