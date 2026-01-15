@@ -123,17 +123,14 @@ export async function getRevenueByPeriod(
     const transactionsCount = transactions?.length || 0
     const averageTransaction = transactionsCount > 0 ? totalRevenue / transactionsCount : 0
     
-    // Выручка по тарифам
-    let basicRevenue = 0
-    let proRevenue = 0
-    let eliteRevenue = 0
-    
-    (transactions as any[] | null)?.forEach((tx: any) => {
+    // Выручка по тарифам через reduce
+    const tierRevenues = (transactions as any[] | null)?.reduce((acc: any, tx: any) => {
       const tierLevel = productTierMap.get(tx.product_id!)
-      if (tierLevel === 1) basicRevenue += Number(tx.amount)
-      else if (tierLevel === 2) proRevenue += Number(tx.amount)
-      else if (tierLevel === 3) eliteRevenue += Number(tx.amount)
-    })
+      if (tierLevel === 1) acc.basic += Number(tx.amount)
+      else if (tierLevel === 2) acc.pro += Number(tx.amount)
+      else if (tierLevel === 3) acc.elite += Number(tx.amount)
+      return acc
+    }, { basic: 0, pro: 0, elite: 0 }) || { basic: 0, pro: 0, elite: 0 }
     
     return {
       success: true,
@@ -142,11 +139,7 @@ export async function getRevenueByPeriod(
         periodRevenue: totalRevenue, // В данном случае совпадает
         transactionsCount,
         averageTransaction,
-        byTier: {
-          basic: basicRevenue,
-          pro: proRevenue,
-          elite: eliteRevenue
-        }
+        byTier: tierRevenues
       }
     }
   } catch (error) {
