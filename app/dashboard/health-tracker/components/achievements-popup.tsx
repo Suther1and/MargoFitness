@@ -266,7 +266,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
       >
         <style jsx>{`
           .premium-popup {
-            background: linear-gradient(165deg, #161618 0%, #0a0a0b 40%, #000000 100%);
+            background: #0a0a0b;
             position: relative;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
@@ -318,7 +318,20 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           onClick={(e) => e.stopPropagation()}
         >
           <div className="premium-mesh" />
-          <div className="premium-contour" />
+          
+          {/* Top Glow Effect - bridges header and content */}
+          <div className="absolute top-0 left-0 right-0 h-[350px] pointer-events-none z-[2] overflow-hidden">
+            <div 
+              className="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[140%] h-[300px] blur-[100px] rounded-[100%] transition-all duration-1000 opacity-60"
+              style={{ 
+                background: `radial-gradient(circle at center, ${
+                  selectedAchievement 
+                    ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.25') 
+                    : 'rgba(16, 185, 129, 0.2)'
+                } 0%, transparent 70%)`
+              }}
+            />
+          </div>
           
           {/* Header */}
           <div className="relative z-30">
