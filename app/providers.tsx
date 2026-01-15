@@ -12,9 +12,12 @@ import { useState, useEffect } from 'react'
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Блокировка контекстного меню (правой кнопки мыши)
+    // Блокировка контекстного меню только на изображениях и видео
     const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'IMG' || target.tagName === 'VIDEO' || target.closest('img') || target.closest('video')) {
+        e.preventDefault();
+      }
     };
 
     // Блокировка перетаскивания (для изображений и т.д.)
