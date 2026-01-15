@@ -266,29 +266,19 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
       >
         <style jsx>{`
           .premium-popup {
-            background: #0a0a0b;
+            background-color: #0a0a0b;
+            background-image: 
+              radial-gradient(circle at 50% 0%, var(--glow-color) 0%, transparent 70%),
+              radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.02) 1px, transparent 0);
+            background-size: 100% 100%, 32px 32px;
             position: relative;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
           }
           @media (max-width: 640px) {
             .premium-popup {
-              background: #0a0a0c;
+              background-color: #0a0a0c;
             }
-          }
-          .premium-mesh {
-            position: absolute;
-            inset: 0;
-            opacity: 0.02;
-            background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
-            background-size: 32px 32px;
-            z-index: 1;
-          }
-          .premium-contour {
-            position: absolute;
-            inset: 0;
-            opacity: 0.03;
-            z-index: 2;
           }
           .premium-popup::after {
             content: '';
@@ -315,26 +305,15 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="premium-popup relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)]"
+          style={{ 
+            '--glow-color': selectedAchievement 
+                ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.25') 
+                : 'rgba(16, 185, 129, 0.15)'
+          } as any}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="premium-mesh" />
-          
-          {/* Top Glow Effect - bridges header and content */}
-          <div className="absolute top-0 left-0 right-0 h-[350px] pointer-events-none z-[2] overflow-hidden">
-            <div 
-              className="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[140%] h-[300px] blur-[100px] rounded-[100%] transition-all duration-1000 opacity-60"
-              style={{ 
-                background: `radial-gradient(circle at center, ${
-                  selectedAchievement 
-                    ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.25') 
-                    : 'rgba(16, 185, 129, 0.2)'
-                } 0%, transparent 70%)`
-              }}
-            />
-          </div>
-          
           {/* Header */}
-          <div className="relative z-30">
+          <div className="relative">
             <div className="p-6 pb-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
