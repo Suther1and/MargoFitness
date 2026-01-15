@@ -78,7 +78,7 @@ export async function getWaterStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const waterData = result.data.map(entry => ({
+  const waterData = result.data.map((entry: any) => ({
     date: entry.date,
     water: entry.metrics?.waterIntake || 0
   }))
@@ -94,7 +94,7 @@ export async function getStepsStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const stepsData = result.data.map(entry => ({
+  const stepsData = result.data.map((entry: any) => ({
     date: entry.date,
     steps: entry.metrics?.steps || 0
   }))
@@ -110,7 +110,7 @@ export async function getWeightStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const weightData = result.data.map(entry => ({
+  const weightData = result.data.map((entry: any) => ({
     date: entry.date,
     weight: entry.metrics?.weight || null
   })).filter(entry => entry.weight !== null)
@@ -126,7 +126,7 @@ export async function getCaffeineStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const caffeineData = result.data.map(entry => ({
+  const caffeineData = result.data.map((entry: any) => ({
     date: entry.date,
     caffeine: entry.metrics?.caffeineIntake || 0
   }))
@@ -142,7 +142,7 @@ export async function getSleepStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const sleepData = result.data.map(entry => ({
+  const sleepData = result.data.map((entry: any) => ({
     date: entry.date,
     hours: entry.metrics?.sleepHours || 0
   }))
@@ -158,7 +158,7 @@ export async function getMoodStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const moodData = result.data.map(entry => ({
+  const moodData = result.data.map((entry: any) => ({
     date: entry.date,
     mood: entry.metrics?.mood || null,
     energy: entry.metrics?.energyLevel || null
@@ -175,7 +175,7 @@ export async function getNutritionStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const nutritionData = result.data.map(entry => ({
+  const nutritionData = result.data.map((entry: any) => ({
     date: entry.date,
     calories: entry.metrics?.calories || 0,
     foodQuality: entry.metrics?.foodQuality || null
@@ -192,7 +192,7 @@ export async function getHabitsStats(userId: string, dateRange: DateRange) {
   
   if (!result.success) return result
 
-  const habitsData = result.data.map(entry => ({
+  const habitsData = result.data.map((entry: any) => ({
     date: entry.date,
     habits_completed: entry.habits_completed || {}
   }))
@@ -210,7 +210,7 @@ export async function getNotesStats(userId: string, dateRange: DateRange) {
 
   const notesData = result.data
     .filter(entry => entry.notes && entry.notes.trim() !== '')
-    .map(entry => ({
+    .map((entry: any) => ({
       date: entry.date,
       notes: entry.notes,
       mood: entry.metrics?.mood || null

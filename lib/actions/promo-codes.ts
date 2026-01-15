@@ -405,7 +405,7 @@ export async function getPromoCodeStats(): Promise<{
     const topPromoCodes = promoCodes
       ?.sort((a, b) => b.usage_count - a.usage_count)
       .slice(0, 10)
-      .map(p => ({
+      .map((p: any) => ({
         code: p.code,
         usageCount: p.usage_count,
         discountType: p.discount_type,

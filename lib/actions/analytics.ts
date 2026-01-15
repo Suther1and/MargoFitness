@@ -113,7 +113,7 @@ export async function getRevenueByPeriod(
       .select('id, tier_level')
     
     const productTierMap = new Map(
-      products?.map(p => [p.id, p.tier_level]) || []
+      (products as any[] | null)?.map((p: any) => [p.id, p.tier_level]) || []
     )
     
     // Подсчет метрик
@@ -375,8 +375,8 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
     }
     
     // Получить информацию о пользователях и продуктах
-    const userIds = [...new Set(transactions?.map(t => t.user_id) || [])]
-    const productIds = [...new Set(transactions?.map(t => t.product_id).filter((id): id is string => id !== null) || [])]
+    const userIds = [...new Set((transactions as any[] | null)?.map((t: any) => t.user_id) || [])]
+    const productIds = [...new Set((transactions as any[] | null)?.map((t: any) => t.product_id).filter((id): id is string => id !== null) || [])]
     
     const { data: users } = await supabase
       .from('profiles')
@@ -388,10 +388,10 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
       .select('id, name')
       .in('id', productIds)
     
-    const userMap = new Map(users?.map(u => [u.id, u.email]) || [])
-    const productMap = new Map(products?.map(p => [p.id, p.name]) || [])
+    const userMap = new Map((users as any[] | null)?.map((u: any) => [u.id, u.email]) || [])
+    const productMap = new Map((products as any[] | null)?.map((p: any) => [p.id, p.name]) || [])
     
-    const result = transactions?.map(tx => ({
+    const result = (transactions as any[] | null)?.map((tx: any) => ({
       id: tx.id,
       amount: Number(tx.amount),
       status: tx.status,

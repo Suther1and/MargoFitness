@@ -123,7 +123,7 @@ export async function getUserReferrals(userId: string): Promise<{
 
   // Получаем сумму покупок каждого реферала
   const enrichedReferrals = await Promise.all(
-    (referrals || []).map(async (ref) => {
+    (referrals || []).map(async (ref: any) => {
       const { data: bonusAccount } = await supabase
         .from('user_bonuses')
         .select('total_spent_for_cashback')
@@ -615,7 +615,7 @@ export async function getAdminReferralStats(): Promise<{
       .map(([id]) => id)
 
     const topReferrers = await Promise.all(
-      topReferrerIds.map(async (userId) => {
+      topReferrerIds.map(async (userId: string) => {
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')

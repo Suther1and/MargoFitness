@@ -39,7 +39,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
 
     const allAchievements = achRes.data || []
     const userAchievements = userAchRes.data || []
-    const unlockedMap = new Map(userAchievements.map(ua => [ua.achievement_id, ua.unlocked_at]))
+    const unlockedMap = new Map((userAchievements as UserAchievement[]).map((ua: any) => [ua.achievement_id, ua.unlocked_at]))
 
     // 2. Собираем данные для расчета прогресса (параллельно)
     const queries: Record<string, any> = {
@@ -126,7 +126,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     const currentTierLevel = tierLevels[userProfile?.subscription_tier || 'free'] || 0
     
     // 3. Расчет прогресса для каждого достижения
-    const data: AchievementWithProgress[] = allAchievements.map(achievement => {
+    const data: AchievementWithProgress[] = (allAchievements as Achievement[]).map((achievement: any) => {
       try {
         const isUnlocked = unlockedMap.has(achievement.id)
         const unlockedAt = unlockedMap.get(achievement.id) || null
@@ -350,7 +350,7 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
   
   try {
     const { data: userAchievements } = await supabase.from('user_achievements').select('achievement_id').eq('user_id', userId)
-    const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id) || [])
+    const unlockedIds = new Set((userAchievements as { achievement_id: string }[] | null)?.map((ua: any) => ua.achievement_id) || [])
     
     const { data: allAchievements } = await supabase.from('achievements').select('*')
     const achievementsToCheck = allAchievements?.filter(a => !unlockedIds.has(a.id)) || []
@@ -651,7 +651,7 @@ export async function getAdminAchievements() {
       return acc
     }, {})
 
-    const data = achievements.map(ach => ({
+    const data = (achievements as Achievement[]).map((ach: any) => ({
       ...ach,
       userCount: counts[ach.id] || 0
     }))

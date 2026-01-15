@@ -114,7 +114,7 @@ export async function getCurrentWeekWithAccess(): Promise<ContentWeekWithSession
 
   // Добавить информацию о доступе к каждой тренировке
   const sessionsWithAccess: WorkoutSessionWithAccess[] = await Promise.all(
-    sessions.map(async (session) => {
+    sessions.map(async (session: any) => {
       const access = checkWorkoutAccess(session, profile, currentWeek)
       const exercises = await getExercisesBySession(session.id)
       const completion = completions.find((c) => c.workout_session_id === session.id)
