@@ -42,37 +42,50 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
     const unlockedMap = new Map(userAchievements.map(ua => [ua.achievement_id, ua.unlocked_at]))
 
     // 2. Собираем данные для расчета прогресса (параллельно)
-    const results = await Promise.allSettled([
-      supabase.rpc('get_user_metrics_stats', { p_user_id: userId }), // 0
-      supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(), // 1
-      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(), // 2
-      supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId), // 3
-      supabase.from('diary_entries').select('id', { count: 'exact', head: true }) // 4
+    const queries: Record<string, any> = {
+      metricsStats: supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
+      userSettings: supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
+      latestEntry: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
+      allEntriesCount: supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      monthEntriesCount: supabase.from('diary_entries').select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]),
-      supabase.from('profiles').select('full_name, phone, email, avatar_url, subscription_tier').eq('id', userId).maybeSingle(), // 5
-      supabase.from('referrals').select('status').eq('referrer_id', userId), // 6
-      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(7), // 7
-      supabase.from('user_purchases').select('product_id, products(duration_months)').eq('user_id', userId), // 8
-      supabase.from('referrals').select('id').eq('referred_id', userId).maybeSingle(), // 9
-      supabase.from('payment_transactions').select('metadata').eq('user_id', userId).eq('status', 'succeeded') // 10
-    ])
+      userProfile: supabase.from('profiles').select('full_name, phone, email, avatar_url, subscription_tier').eq('id', userId).maybeSingle(),
+      mentorRefs: supabase.from('referrals').select('status').eq('referrer_id', userId),
+      recentEntries: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(31),
+      allPurchases: supabase.from('user_purchases').select('product_id, products(duration_months)').eq('user_id', userId),
+      isReferredData: supabase.from('referrals').select('id').eq('referred_id', userId).maybeSingle(),
+      promoTransactions: supabase.from('payment_transactions').select('metadata').eq('user_id', userId).eq('status', 'succeeded'),
+      firstEntry: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: true }).limit(1).maybeSingle()
+    }
 
-    // Безопасное извлечение данных
-    const getRes = (idx: number) => results[idx].status === 'fulfilled' && !results[idx].value.error ? results[idx].value.data : null
-    const getCount = (idx: number) => results[idx].status === 'fulfilled' && !results[idx].value.error ? (results[idx].value.count || 0) : 0
+    const queryKeys = Object.keys(queries)
+    const resultsArray = await Promise.allSettled(Object.values(queries))
+    
+    const results: Record<string, any> = {}
+    queryKeys.forEach((key, i) => {
+      const res = resultsArray[i]
+      if (res.status === 'fulfilled' && !res.value.error) {
+        results[key] = res.value.data
+        if (res.value.count !== undefined) results[key + 'Count'] = res.value.count
+      } else {
+        results[key] = null
+        if (res.status === 'rejected') console.error(`[Achievements] Query ${key} rejected:`, res.reason)
+      }
+    })
 
-    const metricsStats: any = (getRes(0)?.[0] || {})
-    const userSettings = getRes(1)
-    const latestEntry = getRes(2)
-    const allEntriesCount = getCount(3)
-    const monthEntriesCount = getCount(4)
-    const userProfile = getRes(5)
-    const mentorRefs = getRes(6) || []
-    const weeklyEntries = getRes(7) || []
-    const allPurchases = getRes(8) || []
-    const isReferredData = getRes(9)
-    const promoTransactions = getRes(10) || []
+    const metricsStats: any = (results.metricsStats?.[0] || {})
+    const userSettings = results.userSettings
+    const latestEntry = results.latestEntry
+    const allEntriesCount = results.allEntriesCountCount || 0
+    const monthEntriesCount = results.monthEntriesCountCount || 0
+    const userProfile = results.userProfile
+    const mentorRefs = results.mentorRefs || []
+    const recentEntries: any[] = results.recentEntries || []
+    const allPurchases = results.allPurchases || []
+    const isReferredData = results.isReferredData
+    const promoTransactions = results.promoTransactions || []
+    const firstEntry = results.firstEntry
 
     // Проверка условий
     const isReferred = !!isReferredData
@@ -133,11 +146,67 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
               currentValue = (isReferred || hasUsedPromo) ? 1 : 0
               targetValue = 1
               break
-            case 'water_daily': currentValue = Number(currentMetrics?.waterIntake) || 0; break
+            case 'water_daily': 
+              const wVal = Number(currentMetrics?.waterIntake) || 0
+              currentValue = (wVal >= targetValue) ? targetValue : (wVal * 1000 >= targetValue ? wVal * 1000 : wVal)
+              break
             case 'water_total': currentValue = Number(metricsStats?.total_water) || 0; break
             case 'steps_daily': currentValue = Number(currentMetrics?.steps) || 0; break
             case 'steps_total': currentValue = Number(metricsStats?.total_steps) || 0; break
-            case 'energy_max': currentValue = Number(metricsStats?.energy_max_count) || 0; break
+            case 'sleep_low': 
+              currentValue = Number(currentMetrics?.sleepHours) || 0; break
+            case 'sleep_high': 
+            case 'sleep_daily':
+              currentValue = Number(currentMetrics?.sleepHours) || 0; break
+            case 'sleep_streak':
+              let sStreak = 0
+              const sleepThreshold = metadata.value_extra || 8
+              for (const entry of recentEntries) {
+                if ((entry.metrics as any)?.sleepHours >= sleepThreshold) sStreak++
+                else break
+              }
+              currentValue = sStreak
+              break
+            case 'habit_complete_any':
+              currentValue = Object.values(habitsCompleted || {}).some(v => v === true) ? 1 : 0
+              targetValue = 1
+              break
+            case 'weight_recorded':
+              currentValue = (Number(currentMetrics?.weight) || 0) > 0 ? 1 : 0
+              targetValue = 1
+              break
+            case 'weight_streak':
+              let wStreak = 0
+              for (const entry of recentEntries) {
+                if ((entry.metrics as any)?.weight > 0) wStreak++
+                else break
+              }
+              currentValue = wStreak
+              break
+            case 'habits_all_streak':
+              let hStreak = 0
+              const hList = userSettings?.habits || []
+              const activeHIds = hList.filter((h: any) => h.enabled).map((h: any) => h.id)
+              if (activeHIds.length > 0) {
+                for (const entry of recentEntries) {
+                  const hc = entry.habits_completed || {}
+                  if (activeHIds.every((id: string) => hc[id] === true)) hStreak++
+                  else break
+                }
+              }
+              currentValue = hStreak
+              break
+            case 'habits_created': 
+            case 'habits_count':
+              const hCount = (userSettings?.habits || []).length
+              currentValue = hCount
+              break
+            case 'habit_completions':
+              currentValue = Number(metricsStats?.total_habit_completions) || 0; break
+            case 'energy_max':
+              currentValue = Number(metricsStats?.energy_max_count) || 0; break
+            case 'energy_max_count':
+              currentValue = Number(metricsStats?.energy_max_count) || 0; break
             case 'total_entries': currentValue = allEntriesCount; break
             case 'monthly_entries': currentValue = monthEntriesCount; break
             case 'achievement_count':
@@ -177,11 +246,23 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
               break
             case 'perfect_streak':
               let streak = 0
-              for (const entry of weeklyEntries) {
+              for (const entry of recentEntries) {
                 if (isPerfectDay(entry, userSettings)) streak++
                 else break
               }
               currentValue = streak
+              break
+            case 'weight_goal_reached':
+              if ((userSettings?.goals as any)?.weight && latestEntry && firstEntry) {
+                const cur = (latestEntry.metrics as any)?.weight
+                const start = (firstEntry.metrics as any)?.weight
+                const goal = (userSettings?.goals as any)?.weight
+                if (cur && start && goal) {
+                  const isSuccess = (start >= goal && cur <= goal) || (start <= goal && cur >= goal)
+                  currentValue = isSuccess ? 1 : 0
+                  targetValue = 1
+                }
+              }
               break
           }
         }
@@ -243,42 +324,46 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
     if (achievementsToCheck.length === 0) return { success: true, newAchievements: [] }
 
     // 2. Собираем данные для расчета прогресса (параллельно)
-    const results = await Promise.allSettled([
-      supabase.rpc('get_user_metrics_stats', { p_user_id: userId }), // 0
-      supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(), // 1
-      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(), // 2
-      supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId), // 3
-      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(), // 4
-      supabase.from('referrals').select('status').eq('referrer_id', userId), // 5
-      supabase.from('user_purchases').select('products(duration_months)').eq('user_id', userId), // 6
-      supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: true }).limit(1).maybeSingle(), // 7
-      supabase.from('referrals').select('id, referrer_id, status').eq('referred_id', userId).maybeSingle(), // 8
-      supabase.from('payment_transactions').select('metadata').eq('user_id', userId).eq('status', 'succeeded') // 9
-    ])
-
-    // Безопасное извлечение данных
-    const getRes = (idx: number) => {
-      const res = results[idx]
-      if (res.status === 'fulfilled' && !res.value.error) return res.value.data
-      if (res.status === 'rejected') console.error(`[Achievements] Query ${idx} rejected:`, res.reason)
-      return null
-    }
-    const getCount = (idx: number) => {
-      const res = results[idx]
-      if (res.status === 'fulfilled' && !res.value.error) return (res.value.count || 0)
-      return 0
+    const queries: Record<string, any> = {
+      metricsStats: supabase.rpc('get_user_metrics_stats', { p_user_id: userId }),
+      userSettings: supabase.from('diary_settings').select('*').eq('user_id', userId).maybeSingle(),
+      latestEntry: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(1).maybeSingle(),
+      allEntriesCount: supabase.from('diary_entries').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      userProfile: supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      uRefs: supabase.from('referrals').select('status').eq('referrer_id', userId),
+      uPurchases: supabase.from('user_purchases').select('products(duration_months)').eq('user_id', userId),
+      firstEntry: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: true }).limit(1).maybeSingle(),
+      referredRecord: supabase.from('referrals').select('id, referrer_id, status').eq('referred_id', userId).maybeSingle(),
+      promoTransactions: supabase.from('payment_transactions').select('metadata').eq('user_id', userId).eq('status', 'succeeded'),
+      recentEntries: supabase.from('diary_entries').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(31)
     }
 
-    const mStats: any = (getRes(0)?.[0] || {})
-    const uSettings = getRes(1)
-    const latestEntry = getRes(2)
-    const allEntriesCount = getCount(3)
-    const uProfile = getRes(4)
-    const uRefs = getRes(5) || []
-    const uPurchases = getRes(6) || []
-    const firstEntry = getRes(7)
-    const referredRecord = getRes(8)
-    const promoTransactions = getRes(9) || []
+    const queryKeys = Object.keys(queries)
+    const resultsArray = await Promise.allSettled(Object.values(queries))
+    
+    const results: Record<string, any> = {}
+    queryKeys.forEach((key, i) => {
+      const res = resultsArray[i]
+      if (res.status === 'fulfilled' && !res.value.error) {
+        results[key] = res.value.data
+        if (res.value.count !== undefined) results[key + 'Count'] = res.value.count
+      } else {
+        results[key] = null
+        if (res.status === 'rejected') console.error(`[Achievements] Query ${key} rejected:`, res.reason)
+      }
+    })
+
+    const mStats: any = (results.metricsStats?.[0] || {})
+    const uSettings: any = results.userSettings
+    const latestEntry: any = results.latestEntry
+    const allEntriesCount = results.allEntriesCountCount || 0
+    const uProfile: any = results.userProfile
+    const uRefs = results.uRefs || []
+    const uPurchases = results.uPurchases || []
+    const firstEntry: any = results.firstEntry
+    const referredRecord = results.referredRecord
+    const promoTransactions = results.promoTransactions || []
+    const recentEntries: any[] = results.recentEntries || []
     
     // Проверка условий
     // Fallback: проверяем метаданные профиля, если записи в referrals еще нет
@@ -290,50 +375,148 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
       return meta && (meta.promo_code_id || meta.promoCodeId || meta.promo_code || meta.promoCode || meta.promo_code_code)
     })
 
+    const currentMetrics = latestEntry?.metrics as any || {}
+    const habitsCompleted = latestEntry?.habits_completed as any || {}
+    const habitsList = Array.isArray(uSettings?.habits) ? uSettings.habits : []
+    
+    // Вспомогательная функция для "Идеальности"
+    const isPerfectDayInternal = (entry: any, dbSettings: any) => {
+      if (!entry || !dbSettings) return false
+      try {
+        const m = entry.metrics || {}
+        const hc = entry.habits_completed || {}
+        const widgetsInPlan = dbSettings.widgets_in_daily_plan || []
+        const widgetGoals = dbSettings.widget_goals || {}
+        const habits = dbSettings.habits || []
+        const activeHabitIds = habits.filter((h: any) => h.enabled).map((h: any) => h.id)
+        
+        for (const id of widgetsInPlan) {
+          if (id === 'habits' || id === 'photos' || id === 'mood') continue
+          const goal = widgetGoals[id]
+          if (!goal) continue
+          const val = id === 'water' ? m.waterIntake : id === 'steps' ? m.steps : id === 'sleep' ? m.sleepHours : undefined
+          if (val === undefined || val < goal) return false 
+        }
+        const habitsToCheck = activeHabitIds.filter((id: string) => id in hc)
+        if (habitsToCheck.length > 0 && !habitsToCheck.every((id: string) => hc[id] === true)) return false
+        return true
+      } catch { return false }
+    }
+
     console.log(`[Achievements] DEBUG for ${userId}:`, {
       isReferred,
-      referredRecord,
       hasUsedPromo,
-      promoCount: promoTransactions.length,
-      referralCount: uRefs.length,
-      activeReferrals: Array.isArray(uRefs) ? uRefs.filter((r: any) => r.status === 'first_purchase_made').length : 0
+      habitsCount: habitsList.length,
+      waterToday: currentMetrics?.waterIntake,
+      sleepToday: currentMetrics?.sleepHours,
+      energyToday: currentMetrics?.energyLevel,
+      weight: currentMetrics?.weight,
+      recentEntries: recentEntries.length,
+      habitCompletions: mStats.total_habit_completions
     })
     
     const newAchievements: Achievement[] = []
 
     for (const ach of achievementsToCheck) {
       try {
-        const meta = ach.metadata as any
+        let metadata = ach.metadata as any
+        if (typeof metadata === 'string') {
+          try { metadata = JSON.parse(metadata) } catch { continue }
+        }
+        
+        if (!metadata || !metadata.type) continue
+        
         let earned = false
+        const targetVal = Number(metadata.value) || 0
 
-        switch (meta.type) {
+        switch (metadata.type) {
           case 'registration': earned = true; break
           case 'referral_joined': earned = !!(isReferred || hasUsedPromo); break
-          case 'streak_days': earned = ((uSettings?.streaks as any)?.current || 0) >= meta.value; break
-          case 'water_total': earned = (mStats.total_water || 0) >= meta.value; break
-          case 'steps_total': earned = (mStats.total_steps || 0) >= meta.value; break
-          case 'achievement_count': earned = unlockedIds.size >= (meta.value || allAchievements!.length - 1); break
-          case 'referral_mentor': earned = uRefs.filter((r: any) => r.status === 'first_purchase_made').length >= (meta.value || 1); break
+          case 'streak_days': earned = ((uSettings?.streaks as any)?.current || 0) >= targetVal; break
+          case 'water_total': earned = (mStats.total_water || 0) >= targetVal; break
+          case 'steps_total': earned = (mStats.total_steps || 0) >= targetVal; break
+          case 'water_daily': 
+            const waterVal = Number(currentMetrics?.waterIntake) || 0
+            earned = (waterVal >= targetVal) || (waterVal * 1000 >= targetVal); 
+            break
+          case 'steps_daily': earned = (Number(currentMetrics?.steps) || 0) >= targetVal; break
+          case 'sleep_low': 
+            const sLow = Number(currentMetrics?.sleepHours) || 0
+            earned = sLow > 0 && sLow <= targetVal; 
+            break
+          case 'sleep_high': 
+          case 'sleep_daily':
+            earned = (Number(currentMetrics?.sleepHours) || 0) >= targetVal; 
+            break
+          case 'sleep_streak':
+            let sStreak = 0
+            for (const entry of recentEntries) {
+              if ((entry.metrics as any)?.sleepHours >= (metadata.value_extra || 8)) sStreak++
+              else break
+            }
+            earned = sStreak >= targetVal
+            break
+          case 'habit_complete_any':
+            earned = Object.values(habitsCompleted || {}).some(v => v === true);
+            break
+          case 'weight_recorded':
+            earned = (Number(currentMetrics?.weight) || 0) > 0;
+            break
+          case 'weight_streak':
+            let wStreak = 0
+            for (const entry of recentEntries) {
+              if ((entry.metrics as any)?.weight > 0) wStreak++
+              else break
+            }
+            earned = wStreak >= targetVal
+            break
+          case 'habits_all_streak':
+            let hStreak = 0
+            const activeHIds = habitsList.filter((h: any) => h.enabled).map((h: any) => h.id)
+            if (activeHIds.length > 0) {
+              for (const entry of recentEntries) {
+                const hc = entry.habits_completed || {}
+                if (activeHIds.every((id: string) => hc[id] === true)) hStreak++
+                else break
+              }
+            }
+            earned = hStreak >= targetVal
+            break
+          case 'habits_created': 
+          case 'habits_count':
+            earned = habitsList.length >= targetVal; 
+            break
+          case 'habit_completions':
+            earned = (mStats.total_habit_completions || 0) >= targetVal;
+            break
+          case 'energy_max':
+            earned = (mStats.energy_max_count || 0) >= targetVal;
+            break
+          case 'achievement_count': earned = unlockedIds.size >= (targetVal || allAchievements!.length - 1); break
+          case 'referral_mentor': earned = uRefs.filter((r: any) => r.status === 'first_purchase_made').length >= (targetVal || 1); break
           case 'subscription_tier': 
             const levels: any = { 'free': 0, 'basic': 1, 'pro': 2, 'elite': 3 }
-            earned = levels[uProfile?.subscription_tier || 'free'] >= levels[meta.value]; 
+            const currentTier = uProfile?.subscription_tier || 'free'
+            earned = levels[currentTier] >= levels[metadata.value]; 
             break
-          case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= meta.value); break
+          case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= targetVal); break
           case 'profile_complete':
             earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && (uSettings?.user_params as any)?.weight);
             break
+          case 'perfect_day': earned = isPerfectDayInternal(latestEntry, uSettings); break
           case 'weight_goal_reached':
             if ((uSettings?.goals as any)?.weight && latestEntry && firstEntry) {
               const cur = (latestEntry.metrics as any)?.weight
               const start = (firstEntry.metrics as any)?.weight
               const goal = (uSettings?.goals as any)?.weight
               if (cur && start && goal) {
-                earned = start > goal ? cur <= goal : cur >= goal
+                // Если мы уже на цели или перешагнули её - это победа
+                earned = (start >= goal && cur <= goal) || (start <= goal && cur >= goal)
               }
             }
             break
           case 'total_entries':
-            earned = allEntriesCount >= meta.value;
+            earned = allEntriesCount >= targetVal;
             break
         }
 

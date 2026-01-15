@@ -23,24 +23,9 @@ function logError(context: string, error: any, userId?: string) {
  * Получить настройки дневника пользователя
  */
 export async function getDiarySettings(userId: string) {
-  console.log(`[Diary Action] Starting getDiarySettings for ${userId}`)
   const supabase = await createClient()
 
   try {
-    // Проверяем, существует ли таблица вообще
-    const { error: tableCheckError } = await supabase
-      .from('diary_settings')
-      .select('user_id')
-      .limit(1)
-    
-    if (tableCheckError) {
-      logError('Table Check (diary_settings)', tableCheckError, userId)
-      // Если таблицы нет, код ошибки 42P01
-      if (tableCheckError.code === '42P01') {
-        return { success: false, error: 'Таблица diary_settings не найдена. Пожалуйста, выполните SQL миграцию 022.' }
-      }
-    }
-
     const { data, error } = await supabase
       .from('diary_settings')
       .select('*')
@@ -54,7 +39,6 @@ export async function getDiarySettings(userId: string) {
 
     if (!data) {
       console.log(`[Diary Action] No settings found for ${userId}, creating defaults...`)
-      // Используем any так как типы из миграции 022 не совпадают с сгенерированными
       const defaultSettings: any = {
         user_id: userId,
         enabled_widgets: [],
@@ -94,11 +78,40 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
 
   try {
     // Сначала проверяем, существуют ли настройки
-    const { data: existing } = await supabase
+    const { data: existing, error: fetchError } = await supabase
       .from('diary_settings')
-      .select('user_id')
+      .select('*')
       .eq('user_id', userId)
       .maybeSingle()
+
+    if (fetchError) {
+      logError('fetchExistingSettings', fetchError, userId)
+      return { success: false, error: fetchError.message }
+    }
+
+    // ЗАЩИТА: Если мы пытаемся сохранить пустые виджеты или параметры, но в базе они были — это ошибка
+    if (existing) {
+      const isOverwritingWidgets = 
+        Array.isArray(existing.enabled_widgets) && 
+        existing.enabled_widgets.length > 0 && 
+        Array.isArray(settings.enabled_widgets) && 
+        settings.enabled_widgets.length === 0
+
+      const isOverwritingParams = 
+        existing.user_params && 
+        typeof existing.user_params === 'object' && 
+        (existing.user_params as any).height && 
+        settings.user_params && 
+        !(settings.user_params as any).height
+
+      if (isOverwritingWidgets || isOverwritingParams) {
+        console.warn(`[Diary Action] PROTECTED: Attempted to overwrite populated settings with empty data for ${userId}. Aborting update.`, {
+          isOverwritingWidgets,
+          isOverwritingParams
+        })
+        return { success: true, data: existing as DiarySettings }
+      }
+    }
 
     // Если настроек нет, создаем с дефолтными значениями
     if (!existing) {
@@ -131,6 +144,11 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
     }
 
     // Обновляем существующие настройки
+    console.log(`[Diary Action] Updating settings for ${userId}:`, {
+      updatingHabits: !!(settings as any).habits,
+      habitsCount: (settings as any).habits?.length
+    })
+
     const { data, error } = await supabase
       .from('diary_settings')
       .update(settings)
@@ -147,13 +165,22 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
     revalidatePath('/dashboard/health-tracker')
 
     // Сразу проверяем достижения, так как изменение целей может разблокировать их
+    let newAchievements: any[] = []
     try {
-      await checkAndUnlockAchievements(userId)
+      const achievementsResult = await checkAndUnlockAchievements(userId)
+      if (achievementsResult.success && achievementsResult.newAchievements) {
+        newAchievements = achievementsResult.newAchievements
+        console.log('[Diary Action] Unlocked achievements after settings update:', newAchievements.length)
+      }
     } catch (err) {
       console.error('[Diary Action] Error checking achievements after settings update:', err)
     }
 
-    return { success: true, data: data as DiarySettings }
+    return { 
+      success: true, 
+      data: data as DiarySettings,
+      newAchievements 
+    }
   } catch (err: any) {
     console.error('[Diary Action Unexpected] updateDiarySettings:', err)
     return { success: false, error: err?.message || 'Internal Server Error' }
@@ -405,56 +432,53 @@ export async function getProgressPhotos(userId: string) {
     }
 
     // Для каждой недели получаем вес из любой записи за эту неделю
-    const weeklyPhotoSets: WeeklyPhotoSet[] = await Promise.all(
-      data.map(async (entry: any) => {
-        const weeklyPhotos = entry.weekly_photos || {}
-        const photos = weeklyPhotos.photos || {}
-        const weeklyMeasurements = entry.weekly_measurements || {}
-        const weekKey = entry.date
-        
-        // Вычисляем диапазон недели (понедельник - воскресенье)
-        const [year, month, day] = weekKey.split('-').map(Number)
-        const weekStart = new Date(year, month - 1, day)
-        const weekEnd = new Date(weekStart)
-        weekEnd.setDate(weekStart.getDate() + 6)
-        
-        // Форматируем даты для SQL запроса
-        const startStr = weekKey // уже в формате YYYY-MM-DD
-        const endYear = weekEnd.getFullYear()
-        const endMonth = String(weekEnd.getMonth() + 1).padStart(2, '0')
-        const endDay = String(weekEnd.getDate()).padStart(2, '0')
-        const endStr = `${endYear}-${endMonth}-${endDay}`
-        
-        // Получаем последний вес за эту неделю
-        const { data: weekEntries } = await supabase
-          .from('diary_entries')
-          .select('metrics')
-          .eq('user_id', userId)
-          .gte('date', startStr)
-          .lte('date', endStr)
-          .not('metrics->weight', 'is', null)
-          .order('date', { ascending: false })
-          .limit(1)
-        
-        const weight = (weekEntries?.[0]?.metrics as any)?.weight || undefined
-        
-        return {
-          week_key: weekKey,
-          week_label: getWeekLabel(weekKey),
-          photos: {
-            front: photos.front || undefined,
-            side: photos.side || undefined,
-            back: photos.back || undefined
-          },
-          measurements: weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips 
-            ? weeklyMeasurements 
-            : undefined,
-          weight,
-          hasPhotos: !!(photos.front || photos.side || photos.back),
-          hasMeasurements: !!(weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips)
-        }
-      })
-    )
+    // Оптимизация: получаем все записи за период одним запросом
+    const allRelevantEntries = await supabase
+      .from('diary_entries')
+      .select('date, metrics')
+      .eq('user_id', userId)
+      .not('metrics->weight', 'is', null)
+
+    const weightMap = new Map()
+    allRelevantEntries.data?.forEach((entry: any) => {
+      const date = entry.date
+      // Группируем по неделям (понедельникам)
+      // Нам нужен последний вес в неделе
+      const d = new Date(date)
+      const day = d.getDay()
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+      const monday = new Date(d.setDate(diff)).toISOString().split('T')[0]
+      
+      const current = weightMap.get(monday)
+      if (!current || date > current.date) {
+        weightMap.set(monday, { date, weight: entry.metrics.weight })
+      }
+    })
+
+    const weeklyPhotoSets: WeeklyPhotoSet[] = data.map((entry: any) => {
+      const weeklyPhotos = entry.weekly_photos || {}
+      const photos = weeklyPhotos.photos || {}
+      const weeklyMeasurements = entry.weekly_measurements || {}
+      const weekKey = entry.date
+      
+      const weight = weightMap.get(weekKey)?.weight
+      
+      return {
+        week_key: weekKey,
+        week_label: getWeekLabel(weekKey),
+        photos: {
+          front: photos.front || undefined,
+          side: photos.side || undefined,
+          back: photos.back || undefined
+        },
+        measurements: weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips 
+          ? weeklyMeasurements 
+          : undefined,
+        weight,
+        hasPhotos: !!(photos.front || photos.side || photos.back),
+        hasMeasurements: !!(weeklyMeasurements.chest || weeklyMeasurements.waist || weeklyMeasurements.hips)
+      }
+    })
 
     return { success: true, data: weeklyPhotoSets.filter(set => set.hasPhotos || set.hasMeasurements) }
   } catch (err: any) {

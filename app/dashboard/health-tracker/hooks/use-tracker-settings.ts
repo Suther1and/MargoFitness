@@ -163,9 +163,30 @@ export function useTrackerSettings(userId: string | null) {
   const updateMutation = useMutation({
     mutationFn: async (newSettings: TrackerSettings) => {
       if (!userId) throw new Error('No user ID')
+      
+      // Дополнительная защита на уровне клиента
+      if (settingsData) {
+         const hasExistingWidgets = Object.values(settingsData.widgets).some((w: any) => w.enabled)
+         const hasNewWidgets = Object.values(newSettings.widgets).some((w: any) => w.enabled)
+         
+         if (hasExistingWidgets && !hasNewWidgets) {
+           console.warn('[Settings] Client-side protection: prevented saving empty widgets over populated ones')
+           return { success: true }
+         }
+      }
+
       const dbSettings = appToDbSettings(newSettings)
-      // Приводим к any так как поля из миграции 022 не в сгенерированных типах
-      return await updateDiarySettings(userId, dbSettings as any)
+      const result = await updateDiarySettings(userId, dbSettings as any)
+      
+      // Если пришли новые достижения, генерируем событие
+      if (result.success && (result as any).newAchievements?.length > 0) {
+        console.log('[Settings] New achievements unlocked:', (result as any).newAchievements.length)
+        window.dispatchEvent(new CustomEvent('achievements-unlocked', {
+          detail: { achievements: (result as any).newAchievements }
+        }))
+      }
+      
+      return result
     },
     onMutate: async (newSettings) => {
       // Optimistic update
@@ -203,6 +224,12 @@ export function useTrackerSettings(userId: string | null) {
 
   // Универсальная функция обновления с queryClient.getQueryData
   const updateSettings = useCallback((updater: (prev: TrackerSettings) => TrackerSettings) => {
+    // ЗАЩИТА: Не обновляем, пока данные не загружены
+    if (!userId || isLoading || !settingsData) {
+      console.warn('[useTrackerSettings] Prevented update: data not loaded yet')
+      return
+    }
+
     // Получаем текущее значение из кэша React Query
     const currentSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!currentSettings) return
@@ -217,10 +244,16 @@ export function useTrackerSettings(userId: string | null) {
     
     // Отложенное сохранение в БД через debounce
     debouncedMutate(newSettings)
-  }, [queryClient, userId, debouncedMutate])
+  }, [queryClient, userId, isLoading, settingsData, debouncedMutate])
 
   // Сохранение настроек с debounce
   const saveSettings = useCallback((newSettings: TrackerSettings) => {
+    // ЗАЩИТА: Не сохраняем, пока данные не загружены
+    if (!userId || isLoading || !settingsData) {
+      console.warn('[useTrackerSettings] Prevented save: data not loaded yet')
+      return
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(VISITED_KEY, 'true')
       setIsFirstVisit(false)
@@ -234,7 +267,7 @@ export function useTrackerSettings(userId: string | null) {
     
     // Отложенное сохранение в БД (pendingRef перезапишется внутри debouncedMutate с актуальными данными)
     debouncedMutate(newSettings)
-  }, [userId, queryClient, debouncedMutate, setIsFirstVisit])
+  }, [userId, isLoading, settingsData, queryClient, debouncedMutate, setIsFirstVisit])
 
   // Переключение виджета
   const toggleWidget = useCallback((widgetId: WidgetId) => {

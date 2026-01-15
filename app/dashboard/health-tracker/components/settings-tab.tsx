@@ -420,6 +420,7 @@ export default function SettingsTab({
   }
 
   const handleToggle = (widgetId: WidgetId) => {
+    if (!isLoaded) return
     // КРИТИЧНО: берем свежие данные из кэша React Query
     const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!freshSettings) return
@@ -438,6 +439,7 @@ export default function SettingsTab({
   }
 
   const handleGoalChange = (widgetId: WidgetId, value: string) => {
+    if (!isLoaded) return
     // КРИТИЧНО: берем свежие данные из кэша React Query
     const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!freshSettings) return
@@ -485,6 +487,7 @@ export default function SettingsTab({
   }
 
   const handleToggleInPlan = (widgetId: WidgetId) => {
+    if (!isLoaded) return
     // КРИТИЧНО: берем свежие данные из кэша React Query
     const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!freshSettings) return
@@ -523,6 +526,7 @@ export default function SettingsTab({
   }
 
   const handleParamChange = (param: 'height' | 'weight' | 'age' | 'gender', value: any) => {
+    if (!isLoaded) return
     // КРИТИЧНО: берем свежие данные из кэша React Query
     const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!freshSettings) return

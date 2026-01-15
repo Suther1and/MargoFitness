@@ -188,7 +188,13 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
     setMounted(true)
   }, [])
 
-  const { data: achievements = [], isLoading } = useAllAchievements(userId)
+  const { data: achievements = [], isLoading, isError, error } = useAllAchievements(userId)
+
+  useEffect(() => {
+    if (isError) {
+      console.error('[AchievementsPopup] Query error:', error)
+    }
+  }, [isError, error])
 
   useEffect(() => {
     if (isOpen && initialAchievementId && achievements.length > 0) {
@@ -411,6 +417,19 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Синхронизация данных...</span>
+              </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4 px-10 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
+                  <X className="w-8 h-8 text-red-500" />
+                </div>
+                <p className="text-sm text-white/60">Не удалось загрузить данные достижений. Пожалуйста, попробуйте позже.</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                  Обновить страницу
+                </button>
               </div>
             ) : filteredAchievements.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 opacity-20">
