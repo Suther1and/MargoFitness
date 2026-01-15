@@ -313,8 +313,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
             
             {/* Sticky Header */}
-            <div className="sticky top-0 z-30 pt-6 px-6 pb-2 bg-[#0a0a0b]/80 backdrop-blur-xl">
-              <div className="flex items-center justify-between">
+            <div className="sticky top-0 z-30 pt-4 px-4 sm:px-6 pb-2 pointer-events-none">
+              <div className="flex items-center justify-between bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-3 shadow-2xl pointer-events-auto">
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     "w-10 h-10 rounded-xl border flex items-center justify-center shadow-inner transition-colors duration-500",
@@ -348,8 +348,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             </div>
 
             {/* Sticky Tabs */}
-            <div className="sticky top-[84px] z-30 px-6 pt-2 pb-6 bg-[#0a0a0b]/80 backdrop-blur-xl">
-              <div className="flex justify-center">
+            <div className="sticky top-[88px] z-30 px-6 pt-2 pb-6 pointer-events-none">
+              <div className="flex justify-center pointer-events-auto">
                 <div className="flex p-1 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] w-full max-w-sm">
                   <button
                     onClick={() => setStatusFilter('all')}
