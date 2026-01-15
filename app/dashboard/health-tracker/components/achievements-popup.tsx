@@ -300,7 +300,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               radial-gradient(circle at 50% 0%, ${
                 selectedAchievement 
                   ? getGlowFromColorClass(selectedAchievement.color_class) 
-                  : 'rgba(16, 185, 129, 0.2)'
+                  : 'rgba(255, 255, 255, 0.03)'
               } 0%, transparent 70%),
               radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.02) 1px, transparent 0),
               linear-gradient(165deg, #161618 0%, #0a0a0b 40%, #000000 100%)
@@ -313,7 +313,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
             
             {/* Sticky Header */}
-            <div className="sticky top-0 z-30 pt-6 px-6 pb-2 backdrop-blur-md bg-[#0a0a0b]/10">
+            <div className="sticky top-0 z-30 pt-6 px-6 pb-2 bg-[#0a0a0b]/80 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={cn(
@@ -348,7 +348,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             </div>
 
             {/* Sticky Tabs */}
-            <div className="sticky top-[84px] z-30 px-6 pt-2 pb-6 backdrop-blur-md bg-[#0a0a0b]/10">
+            <div className="sticky top-[84px] z-30 px-6 pt-2 pb-6 bg-[#0a0a0b]/80 backdrop-blur-xl">
               <div className="flex justify-center">
                 <div className="flex p-1 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] w-full max-w-sm">
                   <button

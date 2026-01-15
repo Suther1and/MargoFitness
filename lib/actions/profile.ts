@@ -30,12 +30,16 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     // Если профиля нет (триггер не сработал), создаем вручную
     if (error) {
-      if (error.code === 'PGRST116') {
-        // console.log('Profile not found, creating one...')
+      console.error('Error fetching profile:', error.message || error)
+      return null
+    }
+
+    if (!profile) {
+      // console.log('Profile not found, creating one...')
         
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
@@ -68,10 +72,6 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
         return newProfile
       }
-      
-      // Другая ошибка
-      return null
-    }
 
     // Убрано избыточное логирование
     // console.log('Profile found:', profile)

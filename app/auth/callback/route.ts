@@ -46,9 +46,9 @@ export async function GET(request: Request) {
         .from('profiles')
         .select('*')
         .eq('id', sessionData.user.id)
-        .single()
+        .maybeSingle()
 
-      console.log('[Callback] Profile check:', profile ? 'EXISTS' : 'NOT FOUND', profileError?.code)
+      console.log('[Callback] Profile check:', profile ? 'EXISTS' : 'NOT FOUND', profileError)
 
       // Если профиль существует, убедимся что есть бонусный аккаунт
       if (profile) {
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       }
 
       // Если профиля нет, создаем его вручную
-      if (profileError?.code === 'PGRST116' || !profile) {
+      if (!profile) {
         console.log('[Callback] Creating profile for user:', sessionData.user.id)
         
         // Извлекаем дополнительные данные из метаданных

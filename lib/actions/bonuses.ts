@@ -33,13 +33,15 @@ export async function getUserBonusAccount(userId: string): Promise<{
       .from('user_bonuses')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     if (error) {
-      if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned", which is not necessarily an error
-        console.error('Error fetching bonus account:', error)
-      }
+      console.error('Error fetching bonus account:', error.message || error)
       return { success: false, error: 'Не удалось получить бонусный счет' }
+    }
+
+    if (!data) {
+      return { success: false, error: 'Бонусный счет не найден' }
     }
 
     return { success: true, data }

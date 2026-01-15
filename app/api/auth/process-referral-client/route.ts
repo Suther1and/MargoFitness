@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { BONUS_CONSTANTS } from '@/types/database'
 
 const getAdminClient = () => {
