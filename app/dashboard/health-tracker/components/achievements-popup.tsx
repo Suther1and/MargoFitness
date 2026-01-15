@@ -85,6 +85,14 @@ const getTierStyles = (level: number) => {
   }
 }
 
+const getEvolutionRank = (pct: number) => {
+  if (pct >= 100) return { name: 'Легенда', color: 'text-yellow-400' }
+  if (pct >= 75) return { name: 'Элита', color: 'text-orange-400' }
+  if (pct >= 50) return { name: 'Мастер', color: 'text-purple-400' }
+  if (pct >= 25) return { name: 'Энтузиаст', color: 'text-blue-400' }
+  return { name: 'Новичок', color: 'text-emerald-500' }
+}
+
 const getCategoryStyles = (category: string) => {
   switch (category) {
     case 'common':
@@ -316,58 +324,78 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             <div className="sticky top-0 z-30 pt-4 px-4 sm:px-6 pb-2 pointer-events-none">
               <div className="flex items-center justify-between bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-3 shadow-2xl pointer-events-auto">
                 <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl border flex items-center justify-center shadow-inner transition-colors duration-500",
-                    getCategoryStyles(selectedAchievement?.category || 'common').bg,
-                    getCategoryStyles(selectedAchievement?.category || 'common').border
-                  )}>
-                    <Trophy className={cn(
-                      "w-6 h-6 transition-colors duration-500",
-                      selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-400"
-                    )} />
+                  <div className="relative flex items-center justify-center">
+                    {/* Radial Progress Ring around the Icon */}
+                    <svg className="absolute inset-0 w-12 h-12 -rotate-90" viewBox="0 0 100 100">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.05)"
+                        strokeWidth="4"
+                      />
+                      <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke={getEvolutionRank(percentage).color.includes('emerald') ? '#10b981' : 
+                                getEvolutionRank(percentage).color.includes('blue') ? '#3b82f6' :
+                                getEvolutionRank(percentage).color.includes('purple') ? '#a855f7' :
+                                getEvolutionRank(percentage).color.includes('orange') ? '#f97316' : '#fac415'}
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        initial={{ strokeDasharray: 283, strokeDashoffset: 283 }}
+                        animate={{ strokeDashoffset: 283 - (283 * percentage) / 100 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                      />
+                    </svg>
+
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl border flex items-center justify-center shadow-inner transition-colors duration-500 relative z-10",
+                      getCategoryStyles(selectedAchievement?.category || 'common').bg,
+                      getCategoryStyles(selectedAchievement?.category || 'common').border
+                    )}>
+                      <Trophy className={cn(
+                        "w-5 h-5 transition-colors duration-500",
+                        selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-400"
+                      )} />
+                    </div>
                   </div>
                   <div className="flex flex-col">
-                    <span className={cn(
-                      "text-[9px] font-black uppercase tracking-[0.2em] font-montserrat leading-none mb-1 transition-colors duration-500",
-                      selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-500/50"
-                    )}>
-                      Личная эволюция
-                    </span>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-[0.2em] font-montserrat leading-none transition-colors duration-500",
+                        selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-500/50"
+                      )}>
+                        Личная эволюция
+                      </span>
+                      <span className="text-[10px] text-white/10 font-bold">•</span>
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-wider font-oswald leading-none",
+                        getEvolutionRank(percentage).color
+                      )}>
+                        {getEvolutionRank(percentage).name}
+                      </span>
+                      <span className="text-[9px] font-black text-white/20 font-oswald ml-1 italic">
+                        {percentage}%
+                      </span>
+                    </div>
                     <h2 className="text-xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
                       Достижения
                     </h2>
                   </div>
                 </div>
 
-                {/* Overall Progress Stats */}
-                <div className="flex items-center gap-4 ml-auto mr-4 sm:mr-6">
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg font-black text-white font-oswald leading-none tracking-tighter">
-                        {unlockedCount}
-                      </span>
-                      <span className="text-[10px] font-bold text-white/20 font-oswald">
-                        / {totalCount}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="w-12 sm:w-20 h-1 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${percentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                        />
-                      </div>
-                      <span className="text-[9px] font-black text-emerald-500/60 font-oswald uppercase tracking-wider">
-                        {percentage}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
                 <button
                   onClick={onClose}
+                  className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
+                >
+                  <X className="w-4 h-4 text-white/40" />
+                </button>
+              </div>
+            </div>
                   className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
                 >
                   <X className="w-4 h-4 text-white/40" />
