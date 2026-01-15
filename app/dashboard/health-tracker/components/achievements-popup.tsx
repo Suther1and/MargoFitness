@@ -629,7 +629,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     <div className={cn(
                       "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
                       selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20",
-                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "blur-[4px] opacity-10"
+                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "brightness-[0.1] contrast-[1.5]"
                     )}>
                       {selectedAchievement.icon_url ? (
                         <img 
@@ -644,10 +644,14 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       )}
                     </div>
 
-                    {/* Secret Indicator Text for Detail View */}
+                    {/* Premium Glass Overlay for Secret - Detail View */}
                     {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-                        <span className="text-sm font-black text-white/20 font-oswald uppercase tracking-[0.3em] italic mt-32">Секретное</span>
+                      <div className="absolute inset-0 z-20 overflow-hidden rounded-[3rem]">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 opacity-40 rounded-[3rem] z-20" />
+                        <div className="absolute inset-0 flex items-center justify-center z-30">
+                          <span className="text-sm font-black text-white/20 font-oswald uppercase tracking-[0.3em] italic mt-32">Секретное</span>
+                        </div>
+                        <div className="absolute inset-0 border border-white/5 rounded-[3rem] z-20" />
                       </div>
                     )}
 
