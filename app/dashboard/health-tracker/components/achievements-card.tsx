@@ -176,11 +176,11 @@ export function AchievementsCard() {
                         {achievement ? (
                           <>
                             <div className="w-full h-full filter drop-shadow-[0_8px_15px_rgba(0,0,0,0.5)] group-hover/slot:-translate-y-1 transition-transform duration-500 relative flex items-center justify-center">
-                              {/* Background / Unfilled */}
+                              {/* Icon Container */}
                               <div className={cn(
-                                "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
-                                isSecret && "opacity-10 blur-[3px]",
-                                !isSecret && "opacity-20"
+                                "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
+                                achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-100",
+                                isSecret ? "brightness-[0.1] contrast-[1.5]" : "brightness-[0.8] opacity-20"
                               )}>
                                 {achievement.icon_url ? (
                                   <img 
@@ -195,11 +195,14 @@ export function AchievementsCard() {
                                 )}
                               </div>
 
-                              {/* Question Mark for Secret */}
+                              {/* Glass Overlay for Secret */}
                               {isSecret && (
-                                <div className="absolute inset-0 flex items-center justify-center z-20">
-                                  <span className="text-2xl font-black text-white/20 font-oswald">?</span>
-                                </div>
+                                <>
+                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-40 rounded-[24px] z-20" />
+                                  <div className="absolute inset-0 flex items-center justify-center z-30">
+                                    <span className="text-[8px] font-black text-white/20 font-oswald uppercase tracking-[0.2em] italic mt-12">Секретное</span>
+                                  </div>
+                                </>
                               )}
 
                               {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}

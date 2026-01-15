@@ -452,11 +452,11 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     >
                       <div className="flex flex-col items-center gap-2 transition-all duration-500 relative group/item hover:scale-105 active:scale-95">
                         <div className="aspect-square w-[75%] sm:w-[80%] flex items-center justify-center relative z-10">
-                          {/* Background / Unfilled Part (Grayscale) */}
+                          {/* Main Icon Container */}
                           <div className={cn(
-                            "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
-                            achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20 group-hover/item:opacity-30",
-                            isSecret && "opacity-10 blur-[3px]"
+                            "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
+                            achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-100",
+                            isSecret ? "brightness-[0.1] contrast-[1.5]" : "brightness-[0.8] opacity-20 group-hover/item:opacity-30"
                           )}>
                             {achievement.icon_url ? (
                               <img 
@@ -469,11 +469,16 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                             )}
                           </div>
 
-                          {/* Question Mark for Secret */}
+                          {/* Premium Glass Overlay for Secret */}
                           {isSecret && (
-                            <div className="absolute inset-0 flex items-center justify-center z-20">
-                              <span className="text-2xl sm:text-4xl font-black text-white/20 font-oswald">?</span>
-                            </div>
+                            <>
+                              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 opacity-40 rounded-[2rem] z-20" />
+                              <div className="absolute inset-0 flex items-center justify-center z-30">
+                                <span className="text-[7px] sm:text-[10px] font-black text-white/20 font-oswald uppercase tracking-[0.2em] italic mt-12 sm:mt-16">Секретное</span>
+                              </div>
+                              {/* Edge Shine */}
+                              <div className="absolute inset-0 border border-white/5 rounded-[2rem] z-20" />
+                            </>
                           )}
 
                           {/* Адаптивное свечение за иконкой в ленте */}
@@ -599,7 +604,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                   className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 blur-[100px] rounded-full pointer-events-none transition-all duration-1000"
                   style={{ 
                     backgroundColor: selectedAchievement.is_secret && !selectedAchievement.isUnlocked 
-                      ? 'rgba(255, 255, 255, 0.02)' 
+                      ? 'rgba(99, 102, 241, 0.05)' 
                       : getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.15') 
                   }}
                 />
@@ -622,9 +627,9 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                   >
                     {/* Background / Unfilled Part (Grayscale) */}
                     <div className={cn(
-                      "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale brightness-[0.8]",
+                      "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
                       selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20",
-                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "blur-[4px]"
+                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "blur-[4px] opacity-10"
                     )}>
                       {selectedAchievement.icon_url ? (
                         <img 
@@ -639,10 +644,10 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       )}
                     </div>
 
-                    {/* Question Mark for Secret */}
+                    {/* Secret Indicator Text for Detail View */}
                     {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <span className="text-6xl font-black text-white/20 font-oswald">?</span>
+                      <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+                        <span className="text-sm font-black text-white/20 font-oswald uppercase tracking-[0.3em] italic mt-32">Секретное</span>
                       </div>
                     )}
 

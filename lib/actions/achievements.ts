@@ -284,11 +284,15 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
               break
             case 'weight_goal_reached':
               if ((userSettings?.goals as any)?.weight && latestEntry && firstEntry) {
-                const cur = (latestEntry.metrics as any)?.weight
-                const start = (firstEntry.metrics as any)?.weight
-                const goal = (userSettings?.goals as any)?.weight
-                if (cur && start && goal) {
-                  const isSuccess = start > goal ? Number(cur) <= Number(goal) : Number(cur) >= Number(goal)
+                const cur = Number((latestEntry.metrics as any)?.weight) || 0
+                // Для старта берем вес из параметров профиля ИЛИ из самой первой записи
+                const start = Number((userSettings?.user_params as any)?.weight) || Number((firstEntry.metrics as any)?.weight) || 0
+                const goal = Number((userSettings?.goals as any)?.weight) || 0
+                
+                if (cur > 0 && start > 0 && goal > 0) {
+                  // Если цель была сбросить вес: start > goal
+                  // Если цель была набрать вес: start < goal
+                  const isSuccess = start > goal ? cur <= goal : cur >= goal
                   currentValue = isSuccess ? 1 : 0
                   targetValue = 1
                 }
@@ -567,13 +571,12 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
           case 'perfect_day': earned = isPerfectDayInternal(latestEntry, uSettings); break
             case 'weight_goal_reached':
               if ((uSettings?.goals as any)?.weight && latestEntry && firstEntry) {
-                const cur = (latestEntry.metrics as any)?.weight
-                const start = (firstEntry.metrics as any)?.weight
-                const goal = (uSettings?.goals as any)?.weight
-                if (cur && start && goal) {
-                  // Если цель была сбросить вес: start > goal
-                  // Если цель была набрать вес: start < goal
-                  earned = start > goal ? Number(cur) <= Number(goal) : Number(cur) >= Number(goal)
+                const cur = Number((latestEntry.metrics as any)?.weight) || 0
+                const start = Number((uSettings?.user_params as any)?.weight) || Number((firstEntry.metrics as any)?.weight) || 0
+                const goal = Number((uSettings?.goals as any)?.weight) || 0
+                
+                if (cur > 0 && start > 0 && goal > 0) {
+                  earned = start > goal ? cur <= goal : cur >= goal
                 }
               }
               break
