@@ -8,6 +8,65 @@ import { AchievementsPopup } from './achievements-popup'
 import { useRecentAchievements, useAchievementStats } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
 
+const getCategoryStyles = (category: string) => {
+  switch (category) {
+    case 'common':
+      return {
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500/20',
+        glow: 'bg-emerald-500',
+        bar: 'bg-gradient-to-r from-emerald-600 to-teal-400',
+        shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+      }
+    case 'rare':
+      return {
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/30',
+        glow: 'bg-blue-500',
+        bar: 'bg-gradient-to-r from-blue-600 to-cyan-400',
+        shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+      }
+    case 'epic':
+      return {
+        color: 'text-purple-400',
+        bg: 'bg-purple-500/10',
+        border: 'border-purple-500/30',
+        glow: 'bg-purple-500',
+        bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-400',
+        shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+      }
+    case 'legendary':
+      return {
+        color: 'text-orange-400',
+        bg: 'bg-orange-500/10',
+        border: 'border-orange-500/30',
+        glow: 'bg-orange-500',
+        bar: 'bg-gradient-to-r from-orange-600 to-amber-400',
+        shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]'
+      }
+    case 'absolute':
+      return {
+        color: 'text-yellow-400',
+        bg: 'bg-yellow-500/10',
+        border: 'border-yellow-500/30',
+        glow: 'bg-yellow-500',
+        bar: 'bg-gradient-to-r from-yellow-600 to-amber-300',
+        shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.4)]'
+      }
+    default:
+      return {
+        color: 'text-white/60',
+        bg: 'bg-white/10',
+        border: 'border-white/10',
+        glow: 'bg-white',
+        bar: 'bg-white/40',
+        shadow: ''
+      }
+  }
+}
+
 function getGlowFromColorClass(colorClass: string | null): string {
   if (!colorClass) return 'rgba(255, 255, 255, 0.05)';
   const colorMap: Record<string, string> = {
@@ -180,7 +239,7 @@ export function AchievementsCard() {
                               <div className={cn(
                                 "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
                                 achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-100",
-                                isSecret ? "brightness-[0.1] contrast-[1.5]" : "brightness-[0.8] opacity-20"
+                                "brightness-[0.8] opacity-20"
                               )}>
                                 {achievement.icon_url ? (
                                   <img 
@@ -194,16 +253,6 @@ export function AchievementsCard() {
                                   </span>
                                 )}
                               </div>
-
-                              {/* Glass Overlay for Secret */}
-                              {isSecret && (
-                                <>
-                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-40 rounded-[24px] z-20" />
-                                  <div className="absolute inset-0 flex items-center justify-center z-30">
-                                    <span className="text-[8px] font-black text-white/20 font-oswald uppercase tracking-[0.2em] italic mt-12">Секретное</span>
-                                  </div>
-                                </>
-                              )}
 
                               {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}
                               {achievement.isUnlocked && (
@@ -238,8 +287,15 @@ export function AchievementsCard() {
                             <div className="flex items-center gap-2 justify-center w-full">
                               {achievement.isUnlocked && (
                                 <div className="relative flex items-center justify-center shrink-0">
-                                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                                  <div className="absolute inset-0 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                                  <div className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    getCategoryStyles(achievement.category).glow,
+                                    getCategoryStyles(achievement.category).shadow.replace('shadow-[', 'shadow-[0_0_10px_')
+                                  )} />
+                                  <div className={cn(
+                                    "absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping opacity-75",
+                                    getCategoryStyles(achievement.category).glow
+                                  )} />
                                 </div>
                               )}
                               <span className="text-[10px] text-white/40 font-black uppercase text-center font-oswald tracking-tight px-2 line-clamp-1">

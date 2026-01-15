@@ -456,7 +456,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           <div className={cn(
                             "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
                             achievement.isUnlocked ? "opacity-0 scale-90" : "opacity-100",
-                            isSecret ? "brightness-[0.1] contrast-[1.5]" : "brightness-[0.8] opacity-20 group-hover/item:opacity-30"
+                            "brightness-[0.8] opacity-20 group-hover/item:opacity-30"
                           )}>
                             {achievement.icon_url ? (
                               <img 
@@ -468,18 +468,6 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                               <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
                             )}
                           </div>
-
-                          {/* Premium Glass Overlay for Secret */}
-                          {isSecret && (
-                            <>
-                              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 opacity-40 rounded-[2rem] z-20" />
-                              <div className="absolute inset-0 flex items-center justify-center z-30">
-                                <span className="text-[7px] sm:text-[10px] font-black text-white/20 font-oswald uppercase tracking-[0.2em] italic mt-12 sm:mt-16">Секретное</span>
-                              </div>
-                              {/* Edge Shine */}
-                              <div className="absolute inset-0 border border-white/5 rounded-[2rem] z-20" />
-                            </>
-                          )}
 
                           {/* Адаптивное свечение за иконкой в ленте */}
                           {achievement.isUnlocked && (
@@ -558,8 +546,15 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           <div className="flex items-center gap-2 justify-center w-full">
                             {achievement.isUnlocked && (
                               <div className="relative flex items-center justify-center shrink-0 mr-1">
-                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                                <div className="absolute inset-0 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                                <div className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  getCategoryStyles(achievement.category).glow,
+                                  getCategoryStyles(achievement.category).shadow.replace('shadow-[', 'shadow-[0_0_10px_')
+                                )} />
+                                <div className={cn(
+                                  "absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping opacity-75",
+                                  getCategoryStyles(achievement.category).glow
+                                )} />
                               </div>
                             )}
                             <span className={cn(
@@ -603,9 +598,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 <div 
                   className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 blur-[100px] rounded-full pointer-events-none transition-all duration-1000"
                   style={{ 
-                    backgroundColor: selectedAchievement.is_secret && !selectedAchievement.isUnlocked 
-                      ? 'rgba(99, 102, 241, 0.05)' 
-                      : getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.15') 
+                    backgroundColor: getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.15') 
                   }}
                 />
                 
@@ -628,8 +621,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     {/* Background / Unfilled Part (Grayscale) */}
                     <div className={cn(
                       "absolute inset-0 flex items-center justify-center transition-all duration-700 grayscale",
-                      selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20",
-                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "brightness-[0.1] contrast-[1.5]"
+                      selectedAchievement.isUnlocked ? "opacity-0 scale-90" : "opacity-20"
                     )}>
                       {selectedAchievement.icon_url ? (
                         <img 
@@ -643,17 +635,6 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         </span>
                       )}
                     </div>
-
-                    {/* Premium Glass Overlay for Secret - Detail View */}
-                    {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
-                      <div className="absolute inset-0 z-20 overflow-hidden rounded-[3rem]">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 opacity-40 rounded-[3rem] z-20" />
-                        <div className="absolute inset-0 flex items-center justify-center z-30">
-                          <span className="text-sm font-black text-white/20 font-oswald uppercase tracking-[0.3em] italic mt-32">Секретное</span>
-                        </div>
-                        <div className="absolute inset-0 border border-white/5 rounded-[3rem] z-20" />
-                      </div>
-                    )}
 
                     {/* Shine Effect for COMPLETED achievements only */}
                     {selectedAchievement.isUnlocked && (
@@ -714,10 +695,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     )}>
                       {ACHIEVEMENT_CATEGORIES[selectedAchievement.category as keyof typeof ACHIEVEMENT_CATEGORIES]?.label}
                     </div>
-                    <h3 className={cn(
-                      "text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic",
-                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/60"
-                    )}>
+                    <h3 className="text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
                       {selectedAchievement.title}
                     </h3>
                   </div>
@@ -783,8 +761,12 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         <span className="text-[10px] font-black uppercase tracking-widest text-white/30 relative z-10">Статус</span>
                         {selectedAchievement.isUnlocked ? (
                           <div className="flex flex-col items-end relative z-10">
-                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full animate-pulse",
+                                getCategoryStyles(selectedAchievement.category).glow,
+                                getCategoryStyles(selectedAchievement.category).shadow.replace('shadow-[', 'shadow-[0_0_10px_')
+                              )} />
                               Разблокировано
                             </span>
                             {selectedAchievement.unlockedAt && (
