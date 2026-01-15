@@ -396,12 +396,6 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 </button>
               </div>
             </div>
-                  className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
-                >
-                  <X className="w-4 h-4 text-white/40" />
-                </button>
-              </div>
-            </div>
 
             {/* Sticky Tabs */}
             <div className="sticky top-[88px] z-30 px-6 pt-2 pb-6 pointer-events-none">
