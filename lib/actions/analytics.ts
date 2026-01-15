@@ -14,16 +14,18 @@ import { redirect } from 'next/navigation'
 // Типы
 // ============================================
 
+type TierRevenue = {
+  basic: number
+  pro: number
+  elite: number
+}
+
 export interface RevenueData {
   totalRevenue: number
   periodRevenue: number
   transactionsCount: number
   averageTransaction: number
-  byTier: {
-    basic: number
-    pro: number
-    elite: number
-  }
+  byTier: TierRevenue
 }
 
 export interface SubscriptionStats {
@@ -122,7 +124,7 @@ export async function getRevenueByPeriod(
     const averageTransaction = transactionsCount > 0 ? totalRevenue / transactionsCount : 0
     
     // Выручка по тарифам
-    const tierRevenue = {
+    const revenueByTier: TierRevenue = {
       basic: 0,
       pro: 0,
       elite: 0
@@ -130,9 +132,9 @@ export async function getRevenueByPeriod(
     
     (transactions as any[] | null)?.forEach((tx: any) => {
       const tierLevel = productTierMap.get(tx.product_id!)
-      if (tierLevel === 1) tierRevenue.basic += Number(tx.amount)
-      else if (tierLevel === 2) tierRevenue.pro += Number(tx.amount)
-      else if (tierLevel === 3) tierRevenue.elite += Number(tx.amount)
+      if (tierLevel === 1) revenueByTier.basic += Number(tx.amount)
+      else if (tierLevel === 2) revenueByTier.pro += Number(tx.amount)
+      else if (tierLevel === 3) revenueByTier.elite += Number(tx.amount)
     })
     
     return {
@@ -142,7 +144,7 @@ export async function getRevenueByPeriod(
         periodRevenue: totalRevenue, // В данном случае совпадает
         transactionsCount,
         averageTransaction,
-        byTier: tierRevenue
+        byTier: revenueByTier
       }
     }
   } catch (error) {
