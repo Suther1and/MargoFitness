@@ -294,27 +294,26 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-[#0a0a0b]"
+          className="premium-popup relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-[#0a0a0b]"
+          style={{ 
+            background: `
+              radial-gradient(circle at 50% 0%, ${
+                selectedAchievement 
+                  ? getGlowFromColorClass(selectedAchievement.color_class) 
+                  : 'rgba(16, 185, 129, 0.2)'
+              } 0%, transparent 70%),
+              radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.02) 1px, transparent 0),
+              linear-gradient(165deg, #161618 0%, #0a0a0b 40%, #000000 100%)
+            `,
+            backgroundSize: '100% 100%, 32px 32px, 100% 100%'
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Unified Background Layer */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div 
-              className="absolute inset-0 transition-all duration-1000 opacity-60"
-              style={{ 
-                background: `radial-gradient(circle at 50% 0%, ${
-                  selectedAchievement 
-                    ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.4') 
-                    : 'rgba(16, 185, 129, 0.25)'
-                } 0%, transparent 70%)`
-              }}
-            />
-            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[size:32px_32px]" />
-          </div>
-
-          {/* Header */}
-          <div className="relative z-10">
-            <div className="p-6 pb-5">
+          {/* Main Scrollable Container */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+            
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-30 pt-6 px-6 pb-2 backdrop-blur-md bg-[#0a0a0b]/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={cn(
@@ -347,64 +346,65 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Floating Tabs - Safari Style */}
-          <div className="flex justify-center relative z-10 px-6">
-            <div className="flex p-1 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] w-full max-w-sm">
-              <button
-                onClick={() => setStatusFilter('all')}
-                className={cn(
-                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
-                  statusFilter === 'all' ? 'text-white' : 'text-white/30 hover:text-white/50'
-                )}
-              >
-                {statusFilter === 'all' && (
-                  <motion.div 
-                    layoutId="safariTab" 
-                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                Все ({totalCount})
-              </button>
-              <button
-                onClick={() => setStatusFilter('uncompleted')}
-                className={cn(
-                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
-                  statusFilter === 'uncompleted' ? 'text-white' : 'text-white/30 hover:text-white/50'
-                )}
-              >
-                {statusFilter === 'uncompleted' && (
-                  <motion.div 
-                    layoutId="safariTab" 
-                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                Процесс ({totalCount - unlockedCount})
-              </button>
-              <button
-                onClick={() => setStatusFilter('completed')}
-                className={cn(
-                  'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
-                  statusFilter === 'completed' ? 'text-white' : 'text-white/30 hover:text-white/50'
-                )}
-              >
-                {statusFilter === 'completed' && (
-                  <motion.div 
-                    layoutId="safariTab" 
-                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                Готово ({unlockedCount})
-              </button>
+            {/* Sticky Tabs */}
+            <div className="sticky top-[84px] z-30 px-6 pt-2 pb-6 backdrop-blur-md bg-[#0a0a0b]/10">
+              <div className="flex justify-center">
+                <div className="flex p-1 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] w-full max-w-sm">
+                  <button
+                    onClick={() => setStatusFilter('all')}
+                    className={cn(
+                      'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                      statusFilter === 'all' ? 'text-white' : 'text-white/30 hover:text-white/50'
+                    )}
+                  >
+                    {statusFilter === 'all' && (
+                      <motion.div 
+                        layoutId="safariTab" 
+                        className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    Все ({totalCount})
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('uncompleted')}
+                    className={cn(
+                      'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                      statusFilter === 'uncompleted' ? 'text-white' : 'text-white/30 hover:text-white/50'
+                    )}
+                  >
+                    {statusFilter === 'uncompleted' && (
+                      <motion.div 
+                        layoutId="safariTab" 
+                        className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    Процесс ({totalCount - unlockedCount})
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('completed')}
+                    className={cn(
+                      'flex-1 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 relative whitespace-nowrap',
+                      statusFilter === 'completed' ? 'text-white' : 'text-white/30 hover:text-white/50'
+                    )}
+                  >
+                    {statusFilter === 'completed' && (
+                      <motion.div 
+                        layoutId="safariTab" 
+                        className="absolute inset-0 bg-white/10 border border-white/10 rounded-full -z-10 shadow-inner" 
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    Готово ({unlockedCount})
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-5 pb-8 custom-scrollbar relative z-20">
+            {/* Content Area */}
+            <div className="flex-1 px-4 sm:px-6 pt-5 pb-8 relative z-10 bg-transparent">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
@@ -569,7 +569,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
+      </motion.div>
 
         {/* Achievement Details Modal */}
         <AnimatePresence>
