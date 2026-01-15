@@ -122,7 +122,7 @@ export async function getRevenueByPeriod(
     const averageTransaction = transactionsCount > 0 ? totalRevenue / transactionsCount : 0
     
     // Выручка по тарифам
-    const byTier = {
+    const byTier: { basic: number; pro: number; elite: number } = {
       basic: 0,
       pro: 0,
       elite: 0
