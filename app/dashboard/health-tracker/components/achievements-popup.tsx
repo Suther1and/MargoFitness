@@ -265,16 +265,6 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
         onClick={onClose}
       >
         <style jsx>{`
-          .premium-popup {
-            background-color: #0a0a0b;
-            background-image: 
-              radial-gradient(circle at 50% 0%, var(--glow-color) 0%, transparent 70%),
-              radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.02) 1px, transparent 0);
-            background-size: 100% 100%, 32px 32px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-          }
           @media (max-width: 640px) {
             .premium-popup {
               background-color: #0a0a0c;
@@ -304,16 +294,26 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="premium-popup relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)]"
-          style={{ 
-            '--glow-color': selectedAchievement 
-                ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.25') 
-                : 'rgba(16, 185, 129, 0.15)'
-          } as any}
+          className="relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-[2.5rem] border-x-0 sm:border border-white/10 overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-[#0a0a0b]"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Unified Background Layer */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div 
+              className="absolute inset-0 transition-all duration-1000 opacity-60"
+              style={{ 
+                background: `radial-gradient(circle at 50% 0%, ${
+                  selectedAchievement 
+                    ? getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.4') 
+                    : 'rgba(16, 185, 129, 0.25)'
+                } 0%, transparent 70%)`
+              }}
+            />
+            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[size:32px_32px]" />
+          </div>
+
           {/* Header */}
-          <div className="relative">
+          <div className="relative z-10">
             <div className="p-6 pb-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -350,8 +350,8 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
           </div>
 
           {/* Floating Tabs - Safari Style */}
-          <div className="flex justify-center relative z-40 px-6">
-            <div className="flex p-1 bg-[#1a1a1c]/90 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.6)] w-full max-w-sm">
+          <div className="flex justify-center relative z-10 px-6">
+            <div className="flex p-1 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.4)] w-full max-w-sm">
               <button
                 onClick={() => setStatusFilter('all')}
                 className={cn(
