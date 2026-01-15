@@ -116,10 +116,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       if (data.user) {
         setUserId(data.user.id)
         // Обновляем profile и bonusStats если они пришли null (маловероятно)
-        if (!initialProfile) {
+        if (!profile) {
           import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
         }
-        if (!initialBonusStats) {
+        if (!bonusStats) {
           import('@/lib/actions/bonuses').then(m => m.getBonusStats(data.user.id)).then(result => {
             if (result.success) setBonusStats(result.data)
           })
@@ -135,27 +135,31 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         })
       }
     })
-  }, [initialProfile, initialBonusStats])
+  }, [userId]) // Зависим от userId, чтобы загрузить данные один раз при получении ID
 
-  // Принудительное обновление данных после оплаты
   useEffect(() => {
     const isPaymentSuccess = searchParams.get('payment') === 'success'
-    if (isPaymentSuccess && userId) {
-      console.log('[HealthTracker] Payment success detected, refetching profile and bonus stats...')
+    if (isPaymentSuccess) {
+      console.log('[HealthTracker] Payment success detected in URL, current state:', { userId, hasProfile: !!profile, hasBonus: !!bonusStats })
       
-      // Обновляем профиль
-      import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
-        if (p) {
-          setProfile(p)
-          // Если есть callback для обновления
-          // initialProfile может быть передан извне, но мы храним локальный стейт profile
-        }
-      })
-      
-      // Обновляем бонусы
-      import('@/lib/actions/bonuses').then(m => m.getBonusStats(userId)).then(result => {
-        if (result.success && result.data) setBonusStats(result.data)
-      })
+      // Если у нас уже есть userId, подгружаем свежие данные
+      if (userId) {
+        // Обновляем профиль
+        import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
+          if (p) {
+            console.log('[HealthTracker] Profile refreshed after payment')
+            setProfile(p)
+          }
+        })
+        
+        // Обновляем бонусы
+        import('@/lib/actions/bonuses').then(m => m.getBonusStats(userId)).then(result => {
+          if (result.success && result.data) {
+            console.log('[HealthTracker] Bonus stats refreshed after payment')
+            setBonusStats(result.data)
+          }
+        })
+      }
     }
   }, [searchParams, userId])
 
@@ -191,6 +195,15 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings' | 'bonuses' | 'subscription'>(
     (tabParam as any) || 'overview'
   )
+
+  // Синхронизация таба при изменении параметров URL
+  useEffect(() => {
+    if (tabParam && ['overview', 'stats', 'workouts', 'goals', 'profile', 'settings', 'bonuses', 'subscription'].includes(tabParam)) {
+      console.log('[HealthTracker] Switching tab from URL:', tabParam)
+      setActiveTab(tabParam as any)
+    }
+  }, [tabParam])
+
   const [overviewTab, setOverviewTab] = useState<'widgets' | 'habits'>('widgets')
   const [settingsSubTab, setSettingsSubTab] = useState<'widgets' | 'habits'>('widgets')
   const [mounted, setMounted] = useState(false)
@@ -370,12 +383,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     }
   }, [])
 
-  useEffect(() => {
-    if (tabParam && ['overview', 'stats', 'habits', 'goals', 'settings'].includes(tabParam)) {
-      setActiveTab(tabParam as any)
-    }
-  }, [tabParam])
-
   const handleMetricUpdate = (metric: keyof DailyMetrics, value: any) => {
     // Проверяем, является ли это метрикой из БД или локальным состоянием
     if (metric === 'habits') {
@@ -403,28 +410,30 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   }
 
   // Функция переключения табов с принудительным сохранением данных
-  const handleTabChange = async (tab: 'overview' | 'stats' | 'workouts' | 'goals' | 'profile' | 'settings') => {
+  const handleTabChange = async (tab: string) => {
+    console.log('[HealthTracker] Manual tab change to:', tab)
     // Если переходим в статистику, принудительно сохраняем данные и ждем завершения
     if (tab === 'stats') {
       await forceSave()
     }
-    setActiveTab(tab)
+    setActiveTab(tab as any)
   }
+
+  // Проверка валидности таба
+  const isValidTab = useMemo(() => {
+    return ['overview', 'stats', 'workouts', 'goals', 'profile', 'settings', 'bonuses', 'subscription'].includes(activeTab)
+  }, [activeTab])
+
+  // Если таб не валиден, сбрасываем на overview
+  useEffect(() => {
+    if (!isValidTab) {
+      console.warn('[HealthTracker] Invalid tab detected, resetting to overview:', activeTab)
+      setActiveTab('overview')
+    }
+  }, [isValidTab, activeTab])
 
   // Прогрессивный рендеринг: показываем UI сразу, данные появляются по мере загрузки
   const isLoading = !isSettingsLoaded || !isHabitsLoaded || isDiaryLoading
-
-  // Полноэкранный индикатор загрузки
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/60 text-sm">Загрузка трекера...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <ToastProvider>
@@ -858,10 +867,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
             {/* Desktop версия БЕЗ общей анимации, навигация статична */}
             <div className="hidden lg:block">
-              {(activeTab === 'settings' || activeTab === 'stats' || activeTab === 'bonuses' || activeTab === 'subscription' || activeTab === 'workouts') && (
+              {activeTab !== 'overview' ? (
                 <div className="flex gap-6 w-full">
                   <DesktopNavigation 
-                    activeTab={activeTab}
+                    activeTab={activeTab as any}
                     onTabChange={(tab) => handleTabChange(tab as any)}
                   />
                   <div className="flex-1">
@@ -950,12 +959,51 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           <WorkoutsTab />
                         </motion.div>
                       )}
+
+                      {activeTab === 'profile' && profile && (
+                        <motion.div
+                          key="profile-content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <ProfileTab 
+                            profile={profile} 
+                            bonusStats={bonusStats} 
+                            onProfileUpdate={(updatedProfile) => {
+                              setProfile(updatedProfile)
+                            }}
+                          />
+                        </motion.div>
+                      )}
+
+                      {activeTab === 'goals' && (
+                        <motion.div
+                          key="goals-content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-col gap-6"
+                        >
+                          <GoalsSummaryCard 
+                            data={data} 
+                            settings={settings}
+                            onNavigateToSettings={() => {
+                              setActiveTab('settings')
+                              setSettingsSubTab('widgets')
+                            }}
+                          />
+                          {settings.widgets.photos?.enabled && (
+                            <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
+                          )}
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </div>
                 </div>
-              )}
-
-              {activeTab === 'overview' && (
+              ) : (
                 <div className="grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
                   {/* Левая навигация: фиксированная ширина */}
                   <div className="col-span-1" style={{ paddingTop: 0, paddingBottom: 0 }}>
@@ -1037,75 +1085,75 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       )}
                       </>
                     )}
-                  </motion.div>
+                    </motion.div>
 
-                  {/* Привычки: 4/12 */}
-                  <motion.div
-                    key="overview-habits"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="lg:col-span-4 flex flex-col gap-6"
-                  >
-                    <HabitsCard 
-                      habits={data.habits} 
-                      onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
-                      onNavigateToSettings={() => {
-                        setActiveTab('settings')
-                        setSettingsSubTab('habits')
-                      }}
-                      isReadOnly={isReadOnly}
-                    />
-                  </motion.div>
-
-                  {/* Календарь и цели: 3/12 */}
-                  <motion.div
-                    key="overview-calendar"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="lg:col-span-3 space-y-6"
-                  >
-                    <HealthTrackerCard 
-                      className="p-4" 
-                      title="Календарь" 
-                      subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
-                      icon={Calendar} 
-                      iconColor="text-amber-500" 
-                      iconBg="bg-amber-500/10"
-                      rightAction={
-                        <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
-                          <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
-                            <ChevronDown className="w-4 h-4 text-white/60 hover:text-white/80 transition-colors" />
-                          </motion.div>
-                        </button>
-                      }
+                    {/* Привычки: 4/12 */}
+                    <motion.div
+                      key="overview-habits"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="lg:col-span-4 flex flex-col gap-6"
                     >
-                      <WeekNavigator 
-                        selectedDate={selectedDate} 
-                        onDateChange={setSelectedDate} 
-                        minimal={true} 
-                        isExpanded={isCalendarExpanded}
-                        minDate={registrationDate}
-                        maxDate={new Date()}
+                      <HabitsCard 
+                        habits={data.habits} 
+                        onToggle={(id) => handleMetricUpdate('habits', data.habits.map(h => h.id === id ? {...h, completed: !h.completed} : h))} 
+                        onNavigateToSettings={() => {
+                          setActiveTab('settings')
+                          setSettingsSubTab('habits')
+                        }}
+                        isReadOnly={isReadOnly}
                       />
-                    </HealthTrackerCard>
+                    </motion.div>
 
-                    <GoalsSummaryCard 
-                      data={data} 
-                      settings={settings}
-                      onNavigateToSettings={() => {
-                        setActiveTab('settings')
-                        setSettingsSubTab('widgets')
-                      }}
-                    />
-                    <PremiumAchievementsCard />
-                    {settings.widgets.photos?.enabled && (
-                      <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
-                    )}
-                  </motion.div>
+                    {/* Календарь и цели: 3/12 */}
+                    <motion.div
+                      key="overview-calendar"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="lg:col-span-3 space-y-6"
+                    >
+                      <HealthTrackerCard 
+                        className="p-4" 
+                        title="Календарь" 
+                        subtitle={format(selectedDate, 'LLLL', { locale: ru })} 
+                        icon={Calendar} 
+                        iconColor="text-amber-500" 
+                        iconBg="bg-amber-500/10"
+                        rightAction={
+                          <button onClick={() => setIsCalendarExpanded(!isCalendarExpanded)} className="p-2">
+                            <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }}>
+                              <ChevronDown className="w-4 h-4 text-white/60 hover:text-white/80 transition-colors" />
+                            </motion.div>
+                          </button>
+                        }
+                      >
+                        <WeekNavigator 
+                          selectedDate={selectedDate} 
+                          onDateChange={setSelectedDate} 
+                          minimal={true} 
+                          isExpanded={isCalendarExpanded}
+                          minDate={registrationDate}
+                          maxDate={new Date()}
+                        />
+                      </HealthTrackerCard>
+
+                      <GoalsSummaryCard 
+                        data={data} 
+                        settings={settings}
+                        onNavigateToSettings={() => {
+                          setActiveTab('settings')
+                          setSettingsSubTab('widgets')
+                        }}
+                      />
+                      <PremiumAchievementsCard />
+                      {settings.widgets.photos?.enabled && (
+                        <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
+                      )}
+                    </motion.div>
                   </AnimatePresence>
                 </div>
               )}

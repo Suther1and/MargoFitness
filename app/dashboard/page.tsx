@@ -11,8 +11,16 @@ export default async function DashboardPage() {
   }
 
   // Параллельно загружаем bonusStats (после проверки профиля)
-  const bonusStatsResult = await getBonusStats(profile.id)
-  const bonusStats = bonusStatsResult.success ? (bonusStatsResult.data ?? null) : null
+  // Используем try/catch для предотвращения падения всей страницы
+  let bonusStats = null
+  try {
+    const bonusStatsResult = await getBonusStats(profile.id)
+    if (bonusStatsResult.success) {
+      bonusStats = bonusStatsResult.data ?? null
+    }
+  } catch (e) {
+    console.error('Failed to load bonus stats in DashboardPage:', e)
+  }
 
   return <HealthTrackerContent profile={profile} bonusStats={bonusStats} />
 }

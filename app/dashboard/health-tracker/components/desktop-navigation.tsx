@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Home, Dumbbell, Tag, Award, BarChart3, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type NavigationTab = 'overview' | 'workouts' | 'bonuses' | 'subscription' | 'stats' | 'settings'
+type NavigationTab = 'overview' | 'workouts' | 'bonuses' | 'subscription' | 'stats' | 'settings' | 'profile' | 'goals'
 
 interface DesktopNavigationProps {
   activeTab: NavigationTab

@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase'
 import {
   Referral,
   ReferralCode,
@@ -223,19 +225,29 @@ export async function registerReferral(
   referrerName?: string | null
   error?: string
 }> {
-  const supabase = await createClient()
+  // Используем системный клиент для обхода RLS, так как регистрация связей
+  // и проверка достижений требуют доступа к данным других пользователей
+  const supabaseAdmin = createServiceClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   try {
     console.log('[registerReferral] Starting registration with code:', referralCode, 'for user:', newUserId)
 
     // Проверяем код
-    const validationResult = await validateReferralCode(referralCode)
-    if (!validationResult.success || !validationResult.data) {
+    const { data: refCode, error: refCodeError } = await supabaseAdmin
+      .from('referral_codes')
+      .select('user_id')
+      .eq('code', referralCode)
+      .single()
+
+    if (refCodeError || !refCode) {
       console.error('[registerReferral] Invalid referral code')
       return { success: false, error: 'Неверный реферальный код' }
     }
 
-    const referrerId = validationResult.data.userId
+    const referrerId = refCode.user_id
     console.log('[registerReferral] Valid code, referrer:', referrerId)
 
     // Проверяем, что пользователь не пытается использовать свой код
@@ -245,11 +257,11 @@ export async function registerReferral(
     }
 
     // Проверяем, что реферал еще не зарегистрирован
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseAdmin
       .from('referrals')
       .select('id')
       .eq('referred_id', newUserId)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       console.error('[registerReferral] User already registered with referral')
@@ -258,8 +270,8 @@ export async function registerReferral(
 
     console.log('[registerReferral] Creating referral record')
     
-    // Создаем связь
-    const { error: insertError } = await supabase
+    // Создаем связь через админ-клиент
+    const { error: insertError } = await supabaseAdmin
       .from('referrals')
       .insert({
         referrer_id: referrerId,
@@ -268,18 +280,28 @@ export async function registerReferral(
       })
 
     if (insertError) {
+      console.error('[registerReferral] Insert error:', insertError)
       throw insertError
     }
 
     console.log('[registerReferral] Referral record created')
 
-    // Теперь достижения проверяются через checkAndUnlockAchievements
-    // Мы не начисляем бонусы здесь вручную, это сделает система достижений
-    await checkAndUnlockAchievements(newUserId)
+    // Сразу проверяем достижения для обоих пользователей через админ-клиент
+    await Promise.all([
+      checkAndUnlockAchievements(newUserId, supabaseAdmin),
+      checkAndUnlockAchievements(referrerId, supabaseAdmin)
+    ])
+
+    // Получаем имя приглашающего для ответа
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('full_name')
+      .eq('id', referrerId)
+      .single()
 
     return {
       success: true,
-      referrerName: validationResult.data.userName,
+      referrerName: profile?.full_name || null,
     }
   } catch (error) {
     console.error('Error registering referral:', error)
@@ -400,8 +422,12 @@ export async function handleReferralPurchase(
 
       console.log('[handleReferralPurchase] Referral status updated to first_purchase_made')
       
-      // Проверяем достижения для приглашающего (может разблокировать "Наставник")
-      await checkAndUnlockAchievements(referral.referrer_id)
+      // Проверяем достижения для ОБОИХ пользователей
+      // Приглашающий может получить "Наставник", а приглашенный - "В команде"
+      await Promise.all([
+        checkAndUnlockAchievements(referral.referrer_id, supabase),
+        checkAndUnlockAchievements(referredUserId, supabase)
+      ])
     }
 
     // Обновляем total_referral_earnings и уровень приглашающего

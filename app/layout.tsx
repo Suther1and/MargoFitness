@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import { getCurrentProfile } from "@/lib/actions/profile";
 import { headers } from "next/headers";
 import { ReferralCodeCapture } from "@/components/referral-code-capture";
+import { ReferralProcessor } from "@/components/referral-processor";
 import { AnimationProvider } from "@/components/animation-provider";
 import { Providers } from "./providers";
 
@@ -58,6 +59,7 @@ export default async function RootLayout({
         <Providers>
           <AnimationProvider>
             <ReferralCodeCapture />
+            <ReferralProcessor />
             <div className="flex flex-col items-center w-full p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4">
             <div 
               className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] rounded-b-[3rem] overflow-hidden" 

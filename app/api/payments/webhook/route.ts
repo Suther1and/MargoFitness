@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Проверить достижения пользователя (покупки, апгрейды, промокоды)
-        await checkAndUnlockAchievements(transaction.user_id)
+        await checkAndUnlockAchievements(transaction.user_id, supabase)
         
         // 5. Увеличить счетчик использований промокода (если был)
         if (metadata?.promo_code_id) {

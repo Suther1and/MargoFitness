@@ -71,8 +71,23 @@ export async function POST(request: Request) {
       .single()
 
     if (existing) {
-      return NextResponse.json({ error: 'Already registered' }, { status: 400 })
+      // Если уже зарегистрирован, все равно проверяем достижения на случай если они не были выданы
+      await Promise.all([
+        checkAndUnlockAchievements(user.id, supabaseAdmin),
+        checkAndUnlockAchievements(referrerId, supabaseAdmin)
+      ])
+      return NextResponse.json({ success: true, message: 'Already registered, but achievements checked' })
     }
+
+    // Проверяем, были ли у пользователя уже успешные покупки
+    const { data: purchases } = await supabaseAdmin
+      .from('payment_transactions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'succeeded')
+      .limit(1)
+
+    const hasPurchased = purchases && purchases.length > 0
 
     // Создаем связь
     const { error: insertError } = await supabaseAdmin
@@ -80,7 +95,8 @@ export async function POST(request: Request) {
       .insert({
         referrer_id: referrerId,
         referred_id: user.id,
-        status: 'registered',
+        status: hasPurchased ? 'first_purchase_made' : 'registered',
+        first_purchase_at: hasPurchased ? new Date().toISOString() : null
       })
 
     if (insertError) {
@@ -88,34 +104,12 @@ export async function POST(request: Request) {
       throw insertError
     }
 
-    // Начисляем бонус
-    const { error: txError } = await supabaseAdmin
-      .from('bonus_transactions')
-      .insert({
-        user_id: user.id,
-        amount: BONUS_CONSTANTS.REFERRED_USER_BONUS,
-        type: 'referral_bonus',
-        description: 'Бонус за регистрацию по приглашению',
-        related_user_id: referrerId,
-      })
-
-    if (txError) {
-      console.error('[Process Referral Client] Failed to add bonus transaction:', txError)
-    }
-
-    // Обновляем баланс
-    const { data: currentBalance } = await supabaseAdmin
-      .from('user_bonuses')
-      .select('balance')
-      .eq('user_id', user.id)
-      .single()
-
-    if (currentBalance) {
-      await supabaseAdmin
-        .from('user_bonuses')
-        .update({ balance: currentBalance.balance + BONUS_CONSTANTS.REFERRED_USER_BONUS })
-        .eq('user_id', user.id)
-    }
+    // Вызываем проверку достижений для обоих пользователей
+    // Это автоматически начислит бонусы через систему достижений
+    await Promise.all([
+      checkAndUnlockAchievements(user.id, supabaseAdmin),
+      checkAndUnlockAchievements(referrerId, supabaseAdmin)
+    ])
 
     return NextResponse.json({ success: true })
 

@@ -5,69 +5,18 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export function ReferralProcessor() {
-  const router = useRouter()
   const isProcessing = useRef(false)
   
   useEffect(() => {
-    const processReferral = async () => {
-      // Защита от повторного запуска
-      if (isProcessing.current) {
-        console.log('[ReferralProcessor] Обработка уже запущена, пропускаем')
-        return
-      }
-      
-      const refCode = localStorage.getItem('pending_referral_code')
-      
-      console.log('[ReferralProcessor] Проверка кода:', {
-        refCode,
-        expiry: localStorage.getItem('referral_code_expiry'),
-        hasCode: !!refCode
-      })
-      
-      if (!refCode) {
-        console.log('[ReferralProcessor] Код не найден, пропускаем')
-        return
-      }
-      
-      // Отмечаем что обработка запущена
+    const supabase = createClient()
+    
+    const processReferral = async (userId: string, refCode: string, retryCount = 0) => {
+      if (isProcessing.current) return
       isProcessing.current = true
       
-      console.log('[ReferralProcessor] Начинаем обработку кода:', refCode)
-      
-      // ВАЖНО: Удаляем код сразу, чтобы избежать повторной обработки
-      localStorage.removeItem('pending_referral_code')
-      localStorage.removeItem('referral_code_expiry')
-
       try {
-        // Ждем установки сессии с проверкой (до 10 секунд)
-        const supabase = createClient()
-        let user = null
-        let attempts = 0
-        const maxAttempts = 10
+        console.log(`[ReferralProcessor] Processing referral (attempt ${retryCount + 1}):`, { userId, refCode })
         
-        while (!user && attempts < maxAttempts) {
-          attempts++
-          console.log(`[ReferralProcessor] Проверка сессии, попытка ${attempts}/${maxAttempts}`)
-          
-          const { data: { user: currentUser } } = await supabase.auth.getUser()
-          
-          if (currentUser) {
-            user = currentUser
-            console.log('[ReferralProcessor] Сессия установлена:', user.id)
-            break
-          }
-          
-          // Ждем 1 секунду перед следующей попыткой
-          await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-        
-        if (!user) {
-          console.error('[ReferralProcessor] Не удалось установить сессию за 10 секунд, отмена')
-          return
-        }
-
-        // Теперь отправляем запрос
-        console.log('[ReferralProcessor] Отправляем запрос к API...')
         const response = await fetch('/api/auth/process-referral-client', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -75,14 +24,17 @@ export function ReferralProcessor() {
         })
 
         const data = await response.json()
-        
-        console.log('[ReferralProcessor] Ответ API:', { response: response.status, data })
+        console.log('[ReferralProcessor] API Response:', data)
 
-        if (data.success) {
-          console.log('[ReferralProcessor] Успех! Бонус начислен')
+        // Удаляем код только при успехе или если он уже был обработан/недействителен
+        if (data.success || data.error === 'Already registered' || data.error === 'Invalid referral code') {
+          localStorage.removeItem('pending_referral_code')
+          localStorage.removeItem('referral_code_expiry')
           
-          // Задержка для плавного появления после загрузки
-          setTimeout(() => {
+          if (data.success && !data.message?.includes('Already registered')) {
+            console.log('[ReferralProcessor] Success! Showing toast...')
+            // Показываем toast...
+            // (оставляем старый код toast)
             const toast = document.createElement('div')
             toast.className = 'absolute top-4 right-8 xl:right-12 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-xl shadow-2xl z-[100] max-w-sm opacity-0 transition-all duration-500 ease-out translate-x-4'
             toast.style.backdropFilter = 'blur(10px)'
@@ -103,50 +55,55 @@ export function ReferralProcessor() {
                 </div>
               </div>
             `
-            
-            // Вставляем в контентный контейнер
-            const contentContainer = document.querySelector('main') || document.body
-            contentContainer.appendChild(toast)
-            
-            // Плавное появление
+            document.body.appendChild(toast)
             requestAnimationFrame(() => {
-              setTimeout(() => {
-                toast.style.opacity = '1'
-                toast.style.transform = 'translateX(0)'
-              }, 50)
+              toast.style.opacity = '1'
+              toast.style.transform = 'translateX(0)'
             })
-            
-            // Удаляем toast через 5 секунд
             setTimeout(() => {
               toast.style.opacity = '0'
               toast.style.transform = 'translateX(1rem)'
               setTimeout(() => toast.remove(), 500)
             }, 5000)
-          }, 300)
-          
-          // Не вызываем router.refresh() чтобы избежать мерцания диалога
-          // Баланс обновится при следующей навигации пользователя
-          console.log('[ReferralProcessor] Бонусы успешно начислены. Баланс обновится автоматически.')
-        } else {
-          console.error('[ReferralProcessor] Ошибка обработки:', data.error)
-          // Код уже удалён в начале функции
+          }
+        } else if (retryCount < 3) {
+          // Если произошла временная ошибка, пробуем еще раз через 3 секунды
+          isProcessing.current = false
+          setTimeout(() => processReferral(userId, refCode, retryCount + 1), 3000)
         }
       } catch (error) {
-        console.error('[ReferralProcessor] Ошибка запроса:', error)
-        // Код уже удалён в начале функции
+        console.error('[ReferralProcessor] Request failed:', error)
+        if (retryCount < 3) {
+          isProcessing.current = false
+          setTimeout(() => processReferral(userId, refCode, retryCount + 1), 3000)
+        }
       } finally {
-        // Сбрасываем флаг после завершения (успех или ошибка)
         isProcessing.current = false
       }
     }
 
-    processReferral()
-    
-    // Cleanup function
+    // 1. Проверяем текущую сессию при монтировании
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const refCode = localStorage.getItem('pending_referral_code')
+      if (user && refCode) {
+        processReferral(user.id, refCode)
+      }
+    })
+
+    // 2. Слушаем изменения состояния авторизации (для входа/регистрации без перезагрузки)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[ReferralProcessor] Auth event:', event)
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        const refCode = localStorage.getItem('pending_referral_code')
+        if (refCode) {
+          processReferral(session.user.id, refCode)
+        }
+      }
+    })
+
     return () => {
-      isProcessing.current = false
+      subscription.unsubscribe()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return null

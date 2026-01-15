@@ -26,20 +26,27 @@ export async function getUserBonusAccount(userId: string): Promise<{
   data?: UserBonus
   error?: string
 }> {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('user_bonuses')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
+    const { data, error } = await supabase
+      .from('user_bonuses')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
 
-  if (error) {
-    console.error('Error fetching bonus account:', error)
-    return { success: false, error: 'Не удалось получить бонусный счет' }
+    if (error) {
+      if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned", which is not necessarily an error
+        console.error('Error fetching bonus account:', error)
+      }
+      return { success: false, error: 'Не удалось получить бонусный счет' }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('[getUserBonusAccount] Critical error:', error)
+    return { success: false, error: 'Ошибка подключения к базе данных' }
   }
-
-  return { success: true, data }
 }
 
 /**
@@ -161,7 +168,8 @@ export async function getBonusTransactions(
   data?: BonusTransaction[]
   error?: string
 }> {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('bonus_transactions')
@@ -170,12 +178,16 @@ export async function getBonusTransactions(
       .order('created_at', { ascending: false })
       .limit(limit)
 
-  if (error) {
-    console.error('Error fetching bonus transactions:', error.message || error)
-    return { success: false, error: 'Не удалось получить историю' }
-  }
+    if (error) {
+      console.error('Error fetching bonus transactions:', error.message || error)
+      return { success: false, error: 'Не удалось получить историю' }
+    }
 
-  return { success: true, data }
+    return { success: true, data }
+  } catch (error) {
+    console.error('[getBonusTransactions] Critical error:', error)
+    return { success: false, error: 'Ошибка подключения при получении транзакций' }
+  }
 }
 
 /**
@@ -192,7 +204,11 @@ export async function getBonusStats(userId: string): Promise<{
   error?: string
 }> {
   try {
-    const accountResult = await getUserBonusAccount(userId)
+    // Параллельно загружаем аккаунт и транзакции
+    const [accountResult, transactionsResult] = await Promise.all([
+      getUserBonusAccount(userId),
+      getBonusTransactions(userId, 10)
+    ])
     
     // Если счета нет, возвращаем пустую статистику (дефолтную)
     if (!accountResult.success || !accountResult.data) {
@@ -222,8 +238,6 @@ export async function getBonusStats(userId: string): Promise<{
     const account = accountResult.data
     const levelData = getCashbackLevelData(account.cashback_level)
     const progress = calculateLevelProgress(account.total_spent_for_cashback, false)
-
-    const transactionsResult = await getBonusTransactions(userId, 10)
     const recentTransactions = transactionsResult.data || []
 
     return {

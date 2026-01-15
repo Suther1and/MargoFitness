@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/contexts/toast-context'
 import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
@@ -12,6 +13,7 @@ import type { Achievement } from '@/types/database'
  */
 export function AchievementsChecker({ mounted }: { mounted: boolean }) {
   const { showAchievement } = useToast()
+  const queryClient = useQueryClient()
 
   // Проверка при загрузке страницы
   useEffect(() => {
@@ -25,6 +27,9 @@ export function AchievementsChecker({ mounted }: { mounted: boolean }) {
         const result = await checkAndUnlockAchievements(user.id)
         
         if (result.success && result.newAchievements && result.newAchievements.length > 0) {
+          // Инвалидируем кэш достижений, чтобы виджеты обновились
+          queryClient.invalidateQueries({ queryKey: ['achievements'] })
+
           // Показываем уведомления о новых достижениях
           result.newAchievements.forEach(achievement => {
             showAchievement(achievement)
@@ -38,12 +43,16 @@ export function AchievementsChecker({ mounted }: { mounted: boolean }) {
     if (mounted) {
       checkAchievements()
     }
-  }, [mounted, showAchievement])
+  }, [mounted, showAchievement, queryClient])
 
   // Слушаем события разблокировки достижений (после сохранения дневника)
   useEffect(() => {
     const handleAchievementsUnlocked = (event: CustomEvent<{ achievements: Achievement[] }>) => {
       console.log('[AchievementsChecker] Received achievements-unlocked event:', event.detail.achievements.length)
+      
+      // Инвалидируем кэш достижений, чтобы виджеты обновились
+      queryClient.invalidateQueries({ queryKey: ['achievements'] })
+
       event.detail.achievements.forEach(achievement => {
         showAchievement(achievement)
       })
@@ -54,7 +63,7 @@ export function AchievementsChecker({ mounted }: { mounted: boolean }) {
     return () => {
       window.removeEventListener('achievements-unlocked' as any, handleAchievementsUnlocked as any)
     }
-  }, [showAchievement])
+  }, [showAchievement, queryClient])
 
   return null
 }
