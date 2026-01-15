@@ -153,6 +153,36 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
             case 'water_total': currentValue = Number(metricsStats?.total_water) || 0; break
             case 'steps_daily': currentValue = Number(currentMetrics?.steps) || 0; break
             case 'steps_total': currentValue = Number(metricsStats?.total_steps) || 0; break
+            case 'mood_great_streak':
+              let moodStreak = 0
+              for (const entry of recentEntries) {
+                if ((entry.metrics as any)?.mood === 'great' || (entry.metrics as any)?.mood >= 4) moodStreak++
+                else break
+              }
+              currentValue = moodStreak
+              break
+            case 'water_goal_streak':
+              let waterGoalStreak = 0
+              const wGoal = (userSettings?.widget_goals as any)?.water || 2000
+              for (const entry of recentEntries) {
+                const val = Number((entry.metrics as any)?.waterIntake) || 0
+                if (val >= wGoal || val * 1000 >= wGoal) waterGoalStreak++
+                else break
+              }
+              currentValue = waterGoalStreak
+              break
+            case 'weight_maintain':
+              let wMaintainStreak = 0
+              const tWeight = (userSettings?.goals as any)?.weight
+              if (tWeight) {
+                for (const entry of recentEntries) {
+                  const cW = Number((entry.metrics as any)?.weight) || 0
+                  if (Math.abs(cW - tWeight) <= 0.5) wMaintainStreak++
+                  else break
+                }
+              }
+              currentValue = wMaintainStreak
+              break
             case 'sleep_low': 
               currentValue = Number(currentMetrics?.sleepHours) || 0; break
             case 'sleep_high': 
@@ -258,7 +288,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
                 const start = (firstEntry.metrics as any)?.weight
                 const goal = (userSettings?.goals as any)?.weight
                 if (cur && start && goal) {
-                  const isSuccess = (start >= goal && cur <= goal) || (start <= goal && cur >= goal)
+                  const isSuccess = start > goal ? Number(cur) <= Number(goal) : Number(cur) >= Number(goal)
                   currentValue = isSuccess ? 1 : 0
                   targetValue = 1
                 }
@@ -440,6 +470,37 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
             earned = (waterVal >= targetVal) || (waterVal * 1000 >= targetVal); 
             break
           case 'steps_daily': earned = (Number(currentMetrics?.steps) || 0) >= targetVal; break
+          case 'mood_great_streak':
+            let mStreak = 0
+            for (const entry of recentEntries) {
+              if ((entry.metrics as any)?.mood === 'great' || (entry.metrics as any)?.mood >= 4) mStreak++
+              else break
+            }
+            earned = mStreak >= targetVal
+            break
+          case 'water_goal_streak':
+            let wgStreak = 0
+            const waterGoal = (uSettings?.widget_goals as any)?.water || 2000
+            for (const entry of recentEntries) {
+              const val = Number((entry.metrics as any)?.waterIntake) || 0
+              if (val >= waterGoal || val * 1000 >= waterGoal) wgStreak++
+              else break
+            }
+            earned = wgStreak >= targetVal
+            break
+          case 'weight_maintain':
+            let wmStreak = 0
+            const targetWeight = (uSettings?.goals as any)?.weight
+            if (targetWeight) {
+              for (const entry of recentEntries) {
+                const curW = Number((entry.metrics as any)?.weight) || 0
+                // Допускаем погрешность в 0.5 кг для удержания
+                if (Math.abs(curW - targetWeight) <= 0.5) wmStreak++
+                else break
+              }
+            }
+            earned = wmStreak >= targetVal
+            break
           case 'sleep_low': 
             const sLow = Number(currentMetrics?.sleepHours) || 0
             earned = sLow > 0 && sLow <= targetVal; 
@@ -504,17 +565,18 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
             earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && (uSettings?.user_params as any)?.weight);
             break
           case 'perfect_day': earned = isPerfectDayInternal(latestEntry, uSettings); break
-          case 'weight_goal_reached':
-            if ((uSettings?.goals as any)?.weight && latestEntry && firstEntry) {
-              const cur = (latestEntry.metrics as any)?.weight
-              const start = (firstEntry.metrics as any)?.weight
-              const goal = (uSettings?.goals as any)?.weight
-              if (cur && start && goal) {
-                // Если мы уже на цели или перешагнули её - это победа
-                earned = (start >= goal && cur <= goal) || (start <= goal && cur >= goal)
+            case 'weight_goal_reached':
+              if ((uSettings?.goals as any)?.weight && latestEntry && firstEntry) {
+                const cur = (latestEntry.metrics as any)?.weight
+                const start = (firstEntry.metrics as any)?.weight
+                const goal = (uSettings?.goals as any)?.weight
+                if (cur && start && goal) {
+                  // Если цель была сбросить вес: start > goal
+                  // Если цель была набрать вес: start < goal
+                  earned = start > goal ? Number(cur) <= Number(goal) : Number(cur) >= Number(goal)
+                }
               }
-            }
-            break
+              break
           case 'total_entries':
             earned = allEntriesCount >= targetVal;
             break
