@@ -699,7 +699,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       getCategoryStyles(selectedAchievement.category).border
                     )}>
                       {ACHIEVEMENT_CATEGORIES[selectedAchievement.category as keyof typeof ACHIEVEMENT_CATEGORIES]?.label}
-                      {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
+                      {selectedAchievement.is_secret && (
                         <span className="opacity-50"> • Секретное</span>
                       )}
                     </div>

@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 /**
  * Providers компонент для React Query
@@ -11,6 +11,26 @@ import { useState } from 'react'
  * для Health Tracker.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // Блокировка контекстного меню (правой кнопки мыши)
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    // Блокировка перетаскивания (для изображений и т.д.)
+    const handleDragStart = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('dragstart', handleDragStart);
+
+    return () => {
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('dragstart', handleDragStart);
+    };
+  }, []);
+
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
