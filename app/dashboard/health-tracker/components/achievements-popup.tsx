@@ -557,28 +557,28 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         
                         <div className="flex flex-col items-center justify-center gap-0.5 w-full px-1 z-10 mt-1">
                           {isSecret && (
-                            <span className="text-[6px] sm:text-[8px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic">
+                            <span className="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic">
                               Секретно
                             </span>
                           )}
-                          <div className="flex items-center gap-2 justify-center w-full">
-                            {achievement.isUnlocked && (
-                              <div className="relative flex items-center justify-center shrink-0 mr-1">
-                                <div className={cn(
-                                  "w-1.5 h-1.5 rounded-full",
-                                  getCategoryStyles(achievement.category).glow,
-                                  getCategoryStyles(achievement.category).shadow.replace('shadow-[', 'shadow-[0_0_10px_')
-                                )} />
-                                <div className={cn(
-                                  "absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping opacity-75",
-                                  getCategoryStyles(achievement.category).glow
-                                )} />
-                              </div>
-                            )}
+                          <div className="flex items-center justify-center w-full">
                             <span className={cn(
-                              'text-[10px] sm:text-[14px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight',
+                              'text-[11px] sm:text-[15px] font-black uppercase tracking-tight text-center font-oswald transition-colors leading-tight relative inline-block',
                               achievement.isUnlocked ? 'text-white/90 group-hover/item:text-white' : 'text-white/20 group-hover/item:text-white/40'
                             )}>
+                              {achievement.isUnlocked && (
+                                <div className="absolute -left-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                                  <div className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    getCategoryStyles(achievement.category).glow,
+                                    getCategoryStyles(achievement.category).shadow.replace('shadow-[', 'shadow-[0_0_10px_')
+                                  )} />
+                                  <div className={cn(
+                                    "absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping opacity-75",
+                                    getCategoryStyles(achievement.category).glow
+                                  )} />
+                                </div>
+                              )}
                               {achievement.title}
                             </span>
                           </div>
@@ -707,7 +707,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
 
                   <div className="flex flex-col items-center gap-4 mb-8">
                     <div className={cn(
-                      "px-5 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] font-montserrat shadow-xl backdrop-blur-md transition-all duration-500",
+                      "px-5 py-1.5 rounded-full border text-[11px] font-black uppercase tracking-[0.2em] font-montserrat shadow-xl backdrop-blur-md transition-all duration-500",
                       "bg-white/[0.03]",
                       getCategoryStyles(selectedAchievement.category).color,
                       getCategoryStyles(selectedAchievement.category).border
@@ -717,7 +717,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         <span className="opacity-50"> • Секретное</span>
                       )}
                     </div>
-                    <h3 className="text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
+                    <h3 className="text-4xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
                       {selectedAchievement.title}
                     </h3>
                   </div>
