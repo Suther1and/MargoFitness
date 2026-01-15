@@ -114,10 +114,10 @@ export async function getRevenueByPeriod(
       .from('products')
       .select('id, tier_level')
     
-    const productTierMap: Record<string, number> = {}
-    (products as any[] | null)?.forEach((p: any) => {
-      productTierMap[p.id] = p.tier_level
-    })
+    // Создать маппинг продуктов к тарифам
+    const productTierMap = Object.fromEntries(
+      (products as any[] | null)?.map((p: any) => [p.id, p.tier_level]) ?? []
+    )
     
     // Подсчет метрик
     const totalRevenue = transactions?.reduce((sum: number, tx: any) => sum + Number(tx.amount), 0) || 0
@@ -385,16 +385,14 @@ export async function getRecentTransactions(limit: number = 10): Promise<{
       .select('id, name')
       .in('id', productIds)
     
-    const userMap: Record<string, string> = {}
-    const productMap: Record<string, string> = {}
+    // Создать маппинги через Object.fromEntries
+    const userMap = Object.fromEntries(
+      (users as any[] | null)?.map((u: any) => [u.id, u.email]) ?? []
+    )
     
-    (users as any[] | null)?.forEach((u: any) => {
-      userMap[u.id] = u.email
-    })
-    
-    (products as any[] | null)?.forEach((p: any) => {
-      productMap[p.id] = p.name
-    })
+    const productMap = Object.fromEntries(
+      (products as any[] | null)?.map((p: any) => [p.id, p.name]) ?? []
+    )
     
     const result = (transactions as any[] | null)?.map((tx: any) => ({
       id: tx.id,
