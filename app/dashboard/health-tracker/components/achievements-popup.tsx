@@ -338,6 +338,34 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     </h2>
                   </div>
                 </div>
+
+                {/* Overall Progress Stats */}
+                <div className="flex items-center gap-4 ml-auto mr-4 sm:mr-6">
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-lg font-black text-white font-oswald leading-none tracking-tighter">
+                        {unlockedCount}
+                      </span>
+                      <span className="text-[10px] font-bold text-white/20 font-oswald">
+                        / {totalCount}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-12 sm:w-20 h-1 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                        />
+                      </div>
+                      <span className="text-[9px] font-black text-emerald-500/60 font-oswald uppercase tracking-wider">
+                        {percentage}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   onClick={onClose}
                   className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all active:scale-95"
