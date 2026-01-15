@@ -542,7 +542,12 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           )}
                         </div>
                         
-                        <div className="flex flex-col items-center justify-center gap-1 w-full px-1 z-10 mt-1">
+                        <div className="flex flex-col items-center justify-center gap-0.5 w-full px-1 z-10 mt-1">
+                          {isSecret && (
+                            <span className="text-[6px] sm:text-[8px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic">
+                              Секретно
+                            </span>
+                          )}
                           <div className="flex items-center gap-2 justify-center w-full">
                             {achievement.isUnlocked && (
                               <div className="relative flex items-center justify-center shrink-0 mr-1">
@@ -694,6 +699,9 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                       getCategoryStyles(selectedAchievement.category).border
                     )}>
                       {ACHIEVEMENT_CATEGORIES[selectedAchievement.category as keyof typeof ACHIEVEMENT_CATEGORIES]?.label}
+                      {selectedAchievement.is_secret && !selectedAchievement.isUnlocked && (
+                        <span className="opacity-50"> • Секретное</span>
+                      )}
                     </div>
                     <h3 className="text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
                       {selectedAchievement.title}

@@ -298,9 +298,16 @@ export function AchievementsCard() {
                                   )} />
                                 </div>
                               )}
+                            <div className="flex flex-col items-center gap-0.5 w-full">
+                              {isSecret && (
+                                <span className="text-[6px] font-black text-white/20 uppercase tracking-[0.2em] font-oswald italic">
+                                  Секретно
+                                </span>
+                              )}
                               <span className="text-[10px] text-white/40 font-black uppercase text-center font-oswald tracking-tight px-2 line-clamp-1">
                                 {achievement.title}
                               </span>
+                            </div>
                             </div>
                           </>
                         ) : (
