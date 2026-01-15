@@ -9,6 +9,7 @@ import { useAllAchievements } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { ACHIEVEMENT_CATEGORIES } from '@/types/database'
 
 const getUnitLabel = (type: string) => {
   switch (type) {
@@ -89,78 +90,54 @@ const getCategoryStyles = (category: string) => {
     case 'common':
       return {
         color: 'text-emerald-400',
-        bg: 'bg-emerald-500/20',
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500/20',
+        glow: 'bg-emerald-500',
         bar: 'bg-gradient-to-r from-emerald-600 to-teal-400',
         shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]'
       }
     case 'rare':
       return {
         color: 'text-blue-400',
-        bg: 'bg-blue-500/20',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/30',
+        glow: 'bg-blue-500',
         bar: 'bg-gradient-to-r from-blue-600 to-cyan-400',
         shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]'
       }
     case 'epic':
       return {
         color: 'text-purple-400',
-        bg: 'bg-purple-500/20',
+        bg: 'bg-purple-500/10',
+        border: 'border-purple-500/30',
+        glow: 'bg-purple-500',
         bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-400',
         shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'
       }
     case 'legendary':
       return {
         color: 'text-orange-400',
-        bg: 'bg-orange-500/20',
+        bg: 'bg-orange-500/10',
+        border: 'border-orange-500/30',
+        glow: 'bg-orange-500',
         bar: 'bg-gradient-to-r from-orange-600 to-amber-400',
         shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]'
       }
     case 'absolute':
       return {
         color: 'text-yellow-400',
-        bg: 'bg-yellow-500/20',
+        bg: 'bg-yellow-500/10',
+        border: 'border-yellow-500/30',
+        glow: 'bg-yellow-500',
         bar: 'bg-gradient-to-r from-yellow-600 to-amber-300',
         shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.4)]'
-      }
-    // Старые категории для обратной совместимости во время миграции
-    case 'streaks':
-      return {
-        color: 'text-orange-400',
-        bg: 'bg-orange-500/20',
-        bar: 'bg-gradient-to-r from-orange-600 to-amber-400',
-        shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]'
-      }
-    case 'metrics':
-      return {
-        color: 'text-blue-400',
-        bg: 'bg-blue-500/20',
-        bar: 'bg-gradient-to-r from-blue-600 to-cyan-400',
-        shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]'
-      }
-    case 'habits':
-      return {
-        color: 'text-yellow-400',
-        bg: 'bg-yellow-500/20',
-        bar: 'bg-gradient-to-r from-yellow-600 to-amber-300',
-        shadow: 'shadow-[0_0_15px_rgba(234,179,8,0.4)]'
-      }
-    case 'weight':
-      return {
-        color: 'text-purple-400',
-        bg: 'bg-purple-500/20',
-        bar: 'bg-gradient-to-r from-purple-600 to-fuchsia-400',
-        shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'
-      }
-    case 'consistency':
-      return {
-        color: 'text-emerald-400',
-        bg: 'bg-emerald-500/20',
-        bar: 'bg-gradient-to-r from-emerald-600 to-teal-400',
-        shadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]'
       }
     default:
       return {
         color: 'text-white/60',
         bg: 'bg-white/10',
+        border: 'border-white/10',
+        glow: 'bg-white',
         bar: 'bg-white/40',
         shadow: ''
       }
@@ -171,6 +148,34 @@ interface AchievementsPopupProps {
   isOpen: boolean
   onClose: () => void
   initialAchievementId?: string | null
+}
+
+function getGlowFromColorClass(colorClass: string | null): string {
+  if (!colorClass) return 'rgba(255, 255, 255, 0.05)';
+  const colorMap: Record<string, string> = {
+    'text-green-500': 'rgba(16, 185, 129, 0.3)',
+    'text-blue-500': 'rgba(59, 130, 246, 0.3)',
+    'text-purple-500': 'rgba(168, 85, 247, 0.3)',
+    'text-purple-400': 'rgba(192, 132, 252, 0.3)',
+    'text-orange-500': 'rgba(249, 115, 22, 0.3)',
+    'text-amber-500': 'rgba(245, 158, 11, 0.3)',
+    'text-amber-400': 'rgba(251, 191, 36, 0.3)',
+    'text-amber-600': 'rgba(217, 119, 6, 0.3)',
+    'text-rose-500': 'rgba(244, 63, 94, 0.3)',
+    'text-rose-400': 'rgba(251, 113, 133, 0.3)',
+    'text-sky-500': 'rgba(14, 165, 233, 0.3)',
+    'text-indigo-500': 'rgba(99, 102, 241, 0.3)',
+    'text-indigo-400': 'rgba(129, 140, 248, 0.3)',
+    'text-yellow-400': 'rgba(250, 204, 21, 0.3)',
+    'text-red-500': 'rgba(239, 68, 68, 0.3)',
+    'text-pink-500': 'rgba(236, 72, 153, 0.3)',
+    'text-cyan-500': 'rgba(6, 182, 212, 0.3)',
+    'text-cyan-400': 'rgba(34, 211, 238, 0.3)',
+    'text-emerald-500': 'rgba(16, 185, 129, 0.3)',
+    'text-slate-400': 'rgba(148, 163, 184, 0.3)',
+    'text-gray-500': 'rgba(107, 114, 128, 0.3)',
+  };
+  return colorMap[colorClass] || 'rgba(255, 255, 255, 0.1)';
 }
 
 export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: AchievementsPopupProps) {
@@ -277,8 +282,6 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             position: absolute;
             inset: 0;
             opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 Q 100 50 200 100 T 400 100 M0 200 Q 100 150 200 200 T 400 200 M0 300 Q 100 250 200 300 T 400 300' stroke='%2310b981' fill='none' stroke-width='1'/%3E%3C/svg%3E");
-            background-size: 100% 100%;
             z-index: 2;
           }
           .premium-popup::after {
@@ -287,7 +290,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             inset: 0;
             border-radius: 2.5rem;
             padding: 1px;
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.2), rgba(255, 255, 255, 0.02) 40%, transparent);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02) 40%, transparent);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -316,11 +319,21 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
             <div className="p-6 pb-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-inner">
-                    <Trophy className="w-6 h-6 text-emerald-400" />
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl border flex items-center justify-center shadow-inner transition-colors duration-500",
+                    getCategoryStyles(selectedAchievement?.category || 'common').bg,
+                    getCategoryStyles(selectedAchievement?.category || 'common').border
+                  )}>
+                    <Trophy className={cn(
+                      "w-6 h-6 transition-colors duration-500",
+                      selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-400"
+                    )} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/50 font-montserrat leading-none mb-1">
+                    <span className={cn(
+                      "text-[9px] font-black uppercase tracking-[0.2em] font-montserrat leading-none mb-1 transition-colors duration-500",
+                      selectedAchievement ? getCategoryStyles(selectedAchievement.category).color : "text-emerald-500/50"
+                    )}>
                       Личная эволюция
                     </span>
                     <h2 className="text-xl font-black font-oswald text-white uppercase tracking-tight leading-none italic">
@@ -437,6 +450,14 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                             )}
                           </div>
 
+                          {/* Адаптивное свечение за иконкой в ленте */}
+                          {achievement.isUnlocked && (
+                            <div 
+                              className="absolute inset-0 blur-3xl opacity-40 scale-125 rounded-full transition-all duration-1000"
+                              style={{ backgroundColor: getGlowFromColorClass(achievement.color_class) }}
+                            />
+                          )}
+
                           {/* Shine Effect for COMPLETED Achievements only - Contained in a circle to avoid corners */}
                           {achievement.isUnlocked && (
                             <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-full">
@@ -465,11 +486,17 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           {/* Fully Unlocked Part (Colored) */}
                           {achievement.isUnlocked && (
                             <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 z-10">
+                              {/* Мягкое адаптивное свечение от цвета иконки */}
+                              <div 
+                                className="absolute inset-0 blur-3xl opacity-30 scale-125 rounded-full"
+                                style={{ backgroundColor: getGlowFromColorClass(achievement.color_class) }}
+                              />
+                              
                               {achievement.icon_url ? (
                                 <img 
                                   src={achievement.icon_url} 
                                   alt={achievement.title}
-                                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(16,185,129,0.4)]"
+                                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
                                 />
                               ) : (
                                 <span className="text-3xl sm:text-5xl">{achievement.icon}</span>
@@ -480,28 +507,28 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                           {/* Reward Badge */}
                           {achievement.reward_amount && (
                             <div className={cn(
-                              "absolute -top-1 -right-1 px-1.5 py-0.5 rounded-lg backdrop-blur-md border z-20 transition-all duration-500",
+                              "absolute -top-1 -right-1 px-2 py-0.5 rounded-full backdrop-blur-xl border z-20 transition-all duration-500",
                               achievement.isUnlocked 
-                                ? "bg-emerald-500/20 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                ? "bg-white/10 border-white/20 shadow-[0_5px_15px_rgba(0,0,0,0.3)]"
                                 : "bg-white/5 border-white/10 opacity-40 group-hover/item:opacity-70"
                             )}>
                               <span className={cn(
-                                "text-[8px] font-black flex items-center gap-0.5 transition-colors",
-                                achievement.isUnlocked ? "text-emerald-400" : "text-white/40"
+                                "text-[9px] font-bold flex items-center gap-1 transition-colors font-oswald tracking-wider",
+                                achievement.isUnlocked ? "text-white" : "text-white/40"
                               )}>
                                 +{achievement.reward_amount}
-                                <span className="text-[7px] filter grayscale-[0.5]">👟</span>
+                                <span className="text-[10px] filter grayscale-[0.5]">👟</span>
                               </span>
                             </div>
                           )}
                         </div>
                         
                         <div className="flex flex-col items-center justify-center gap-1 w-full px-1 z-10 mt-1">
-                          <div className="flex items-center gap-1 justify-center w-full">
+                          <div className="flex items-center gap-2 justify-center w-full">
                             {achievement.isUnlocked && (
-                              <div className="relative flex items-center justify-center shrink-0">
-                                <div className="w-1 h-1 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,1)]" />
-                                <div className="absolute inset-0 w-1 h-1 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                              <div className="relative flex items-center justify-center shrink-0 mr-1">
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
                               </div>
                             )}
                             <span className={cn(
@@ -541,13 +568,15 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                 className="relative w-full max-w-sm bg-[#0d0d0f] rounded-[2.5rem] border border-white/10 p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Background Glow */}
-                <div className={cn(
-                  "absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-colors duration-1000",
-                  selectedAchievement.is_secret && !selectedAchievement.isUnlocked
-                    ? "bg-purple-500/10"
-                    : getGlowColor(selectedAchievement.color_class)
-                )} />
+                {/* Background Glow - Адаптивный от иконки */}
+                <div 
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 blur-[100px] rounded-full pointer-events-none transition-all duration-1000"
+                  style={{ 
+                    backgroundColor: selectedAchievement.is_secret && !selectedAchievement.isUnlocked 
+                      ? 'rgba(255, 255, 255, 0.02)' 
+                      : getGlowFromColorClass(selectedAchievement.color_class).replace('0.3', '0.15') 
+                  }}
+                />
                 
                 <button
                   onClick={(e) => {
@@ -613,7 +642,11 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     {/* Fully Unlocked Part (Colored) */}
                     {selectedAchievement.isUnlocked && (
                       <div className="absolute inset-0 flex items-center justify-center transition-all duration-1000 z-10">
-                        <div className="absolute inset-0 bg-emerald-500/20 blur-[60px] rounded-full animate-pulse" />
+                        {/* Мягкое адаптивное свечение от цвета иконки */}
+                        <div 
+                          className="absolute inset-0 blur-[60px] opacity-40 scale-125 rounded-full animate-pulse"
+                          style={{ backgroundColor: getGlowFromColorClass(selectedAchievement.color_class) }}
+                        />
                         {selectedAchievement.icon_url ? (
                           <img 
                             src={selectedAchievement.icon_url} 
@@ -629,12 +662,22 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                     )}
                   </motion.div>
 
-                  <h3 className={cn(
-                    "text-2xl font-black font-oswald text-white uppercase tracking-tight leading-none italic mb-4",
-                    selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/60"
-                  )}>
-                    {selectedAchievement.title}
-                  </h3>
+                  <div className="flex flex-col items-center gap-4 mb-8">
+                    <div className={cn(
+                      "px-5 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] font-montserrat shadow-xl backdrop-blur-md transition-all duration-500",
+                      "bg-white/[0.03]",
+                      getCategoryStyles(selectedAchievement.category).color,
+                      getCategoryStyles(selectedAchievement.category).border
+                    )}>
+                      {ACHIEVEMENT_CATEGORIES[selectedAchievement.category as keyof typeof ACHIEVEMENT_CATEGORIES]?.label}
+                    </div>
+                    <h3 className={cn(
+                      "text-3xl font-black font-oswald text-white uppercase tracking-tight leading-none italic",
+                      selectedAchievement.is_secret && !selectedAchievement.isUnlocked && "text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/60"
+                    )}>
+                      {selectedAchievement.title}
+                    </h3>
+                  </div>
                   
                   <p className="text-sm text-white/50 font-medium leading-relaxed mb-8 px-4 font-montserrat tracking-wide">
                     {selectedAchievement.is_secret && !selectedAchievement.isUnlocked 

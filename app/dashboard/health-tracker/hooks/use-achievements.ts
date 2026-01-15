@@ -11,7 +11,7 @@ import { getAllAchievementsWithStatus } from '@/lib/actions/achievements'
  */
 export function useRecentAchievements(userId: string | null, limit: number = 3) {
   return useQuery({
-    queryKey: ['achievements', 'recent', userId, limit, 'v3'], // v3 для полной инвалидации кэша
+    queryKey: ['achievements', 'recent', userId, limit, 'v4'], // v4 для инвалидации после обновления цветов
     queryFn: async (): Promise<AchievementWithStatus[]> => {
       if (!userId) return []
       
@@ -100,7 +100,7 @@ export function useAchievementStats(userId: string | null) {
  */
 export function useAllAchievements(userId: string | null) {
   return useQuery({
-    queryKey: ['achievements', 'all', userId, 'v4'], // v4 для инвалидации
+    queryKey: ['achievements', 'all', userId, 'v5'], // v5 для инвалидации
     queryFn: async (): Promise<AchievementWithProgress[]> => {
       if (!userId) return []
       
