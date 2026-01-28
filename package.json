@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import-week": "node scripts/import-week.mjs"
   },
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
