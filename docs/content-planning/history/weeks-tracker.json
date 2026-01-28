@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "last_updated": "2026-01-28",
+    "total_weeks_generated": 0,
+    "current_week": 0
+  },
+  "exercises_history": {
+    "_comment": "Формат: 'pattern_id_exercise_id': { ... }",
+    "_example": {
+      "1.1.1_classical_squat": {
+        "exercise_name": "Классические приседания",
+        "pattern": "1.1_squat_pattern",
+        "last_used_week": 5,
+        "total_uses": 2,
+        "weeks_used": [1, 5],
+        "last_variation_used": "standard"
+      }
+    }
+  },
+  "muscle_groups_balance": {
+    "_comment": "Баланс проработки групп мышц по месяцам",
+    "_example": {
+      "2026-01": {
+        "lower_body": 8,
+        "upper_push": 6,
+        "upper_pull": 6,
+        "arms": 4,
+        "core": 8,
+        "functional": 4
+      }
+    }
+  },
+  "workout_structure_history": {
+    "_comment": "История структур тренировок для 3-й тренировки",
+    "_example": [
+      {
+        "week": 1,
+        "structure": "additional_strength_light_cardio"
+      },
+      {
+        "week": 2,
+        "structure": "circuit_training"
+      }
+    ]
+  },
+  "weeks_generated": []
+}
