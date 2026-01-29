@@ -224,7 +224,7 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
                         min="1"
                         value={formData.default_sets || ''}
                         onChange={(e) => setFormData({ ...formData, default_sets: parseInt(e.target.value) })}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/input:opacity-100 transition-opacity">
                         <button 
@@ -278,7 +278,7 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
                         step="5"
                         value={formData.default_rest_seconds || ''}
                         onChange={(e) => setFormData({ ...formData, default_rest_seconds: parseInt(e.target.value) })}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/input:opacity-100 transition-opacity">
                         <button 
