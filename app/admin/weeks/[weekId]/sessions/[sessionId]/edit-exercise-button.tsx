@@ -121,14 +121,14 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                             onClick={() => setFormData(prev => ({ ...prev, sets: prev.sets + 1 }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 -rotate-90" />
+                            <ChevronRight className="size-3 -rotate-90 text-white/40" />
                           </button>
                           <button 
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, sets: Math.max(1, prev.sets - 1) }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 rotate-90" />
+                            <ChevronRight className="size-3 rotate-90 text-white/40" />
                           </button>
                         </div>
                       </div>
@@ -158,14 +158,14 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                             onClick={() => setFormData(prev => ({ ...prev, rest_seconds: prev.rest_seconds + 5 }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 -rotate-90" />
+                            <ChevronRight className="size-3 -rotate-90 text-white/40" />
                           </button>
                           <button 
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, rest_seconds: Math.max(0, prev.rest_seconds - 5) }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 rotate-90" />
+                            <ChevronRight className="size-3 rotate-90 text-white/40" />
                           </button>
                         </div>
                       </div>
@@ -186,14 +186,14 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                             onClick={() => setFormData(prev => ({ ...prev, order_index: prev.order_index + 1 }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 -rotate-90" />
+                            <ChevronRight className="size-3 -rotate-90 text-white/40" />
                           </button>
                           <button 
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, order_index: Math.max(0, prev.order_index - 1) }))}
                             className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
                           >
-                            <ChevronRight className="size-3 rotate-90" />
+                            <ChevronRight className="size-3 rotate-90 text-white/40" />
                           </button>
                         </div>
                       </div>

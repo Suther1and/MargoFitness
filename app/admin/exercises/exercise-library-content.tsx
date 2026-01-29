@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, Info, X, BookOpen, Dumbbell, Timer, Repeat, Zap, Edit2, Save } from 'lucide-react'
+import { Search, Info, X, BookOpen, Dumbbell, Timer, Repeat, Zap, Edit2, Save, ChevronRight } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 
@@ -211,52 +211,94 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4 py-6 border-y border-white/5">
-                <div className="flex flex-col gap-1">
+              <div className="grid grid-cols-3 gap-6 py-8 border-y border-white/5">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-white/20">
-                    <Dumbbell className="size-3" />
+                    <Dumbbell className="size-3.5" />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Подходы</span>
                   </div>
                   {isEditing ? (
-                    <input
-                      type="number"
-                      value={formData.default_sets || ''}
-                      onChange={(e) => setFormData({ ...formData, default_sets: parseInt(e.target.value) })}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-bold font-oswald w-20"
-                    />
+                    <div className="relative group/input">
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.default_sets || ''}
+                        onChange={(e) => setFormData({ ...formData, default_sets: parseInt(e.target.value) })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/input:opacity-100 transition-opacity">
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, default_sets: (prev.default_sets || 0) + 1 }))}
+                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                        >
+                          <ChevronRight className="size-3 -rotate-90 text-white/40" />
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, default_sets: Math.max(1, (prev.default_sets || 1) - 1) }))}
+                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                        >
+                          <ChevronRight className="size-3 rotate-90 text-white/40" />
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <span className="text-xl font-bold font-oswald text-white">{selectedExercise.default_sets || '—'}</span>
+                    <span className="text-2xl font-bold font-oswald text-white">{selectedExercise.default_sets || '—'}</span>
                   )}
                 </div>
-                <div className="flex flex-col gap-1">
+
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-white/20">
-                    <Repeat className="size-3" />
+                    <Repeat className="size-3.5" />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Повторения</span>
                   </div>
                   {isEditing ? (
                     <input
                       value={formData.default_reps || ''}
                       onChange={(e) => setFormData({ ...formData, default_reps: e.target.value })}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-bold font-oswald w-full"
+                      placeholder="12-15"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                     />
                   ) : (
-                    <span className="text-xl font-bold font-oswald text-white">{selectedExercise.default_reps || '—'}</span>
+                    <span className="text-2xl font-bold font-oswald text-white">{selectedExercise.default_reps || '—'}</span>
                   )}
                 </div>
-                <div className="flex flex-col gap-1">
+
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-white/20">
-                    <Timer className="size-3" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Отдых</span>
+                    <Timer className="size-3.5" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Отдых (сек)</span>
                   </div>
                   {isEditing ? (
-                    <input
-                      type="number"
-                      value={formData.default_rest_seconds || ''}
-                      onChange={(e) => setFormData({ ...formData, default_rest_seconds: parseInt(e.target.value) })}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-bold font-oswald w-20"
-                    />
+                    <div className="relative group/input">
+                      <input
+                        type="number"
+                        min="0"
+                        step="5"
+                        value={formData.default_rest_seconds || ''}
+                        onChange={(e) => setFormData({ ...formData, default_rest_seconds: parseInt(e.target.value) })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold font-oswald text-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/input:opacity-100 transition-opacity">
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, default_rest_seconds: (prev.default_rest_seconds || 0) + 5 }))}
+                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                        >
+                          <ChevronRight className="size-3 -rotate-90 text-white/40" />
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, default_rest_seconds: Math.max(0, (prev.default_rest_seconds || 0) - 5) }))}
+                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                        >
+                          <ChevronRight className="size-3 rotate-90 text-white/40" />
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <span className="text-xl font-bold font-oswald text-white">{selectedExercise.default_rest_seconds ? `${selectedExercise.default_rest_seconds}с` : '—'}</span>
+                    <span className="text-2xl font-bold font-oswald text-white">{selectedExercise.default_rest_seconds ? `${selectedExercise.default_rest_seconds}с` : '—'}</span>
                   )}
                 </div>
               </div>

@@ -48,6 +48,19 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+@layer base {
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
