@@ -197,8 +197,8 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                           </button>
                         </div>
                       </div>
-                    </div>
                   </div>
+                </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">ID видео Kinescope</label>

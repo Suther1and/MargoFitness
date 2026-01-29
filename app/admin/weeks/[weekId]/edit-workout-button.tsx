@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Edit, X, Type, FileText, Clock, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { Edit, X, Type, FileText, Clock, ShieldCheck, AlertTriangle, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { WorkoutSession } from '@/types/database'
 import {

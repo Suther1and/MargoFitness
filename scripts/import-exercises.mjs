@@ -41,60 +41,71 @@ async function importExercises() {
     const sectionTitle = lines[0].trim()
     if (sectionTitle.includes('📖 Как использовать')) return
 
-    // Внутри раздела ищем упражнения (#### 1.1.1)
-    const exerciseBlocks = section.split(/^#### /m).slice(1)
+    // Внутри раздела ищем паттерны (### ПАТТЕРН)
+    const patternBlocks = section.split(/^### ПАТТЕРН/m).slice(1)
     
-    exerciseBlocks.forEach(block => {
-      const blockLines = block.split('\n')
-      const titleLine = blockLines[0].trim()
+    patternBlocks.forEach(patternBlock => {
+      const patternLines = patternBlock.split('\n')
+      const patternTitle = patternLines[0].trim()
       
-      // Парсим ID и название: "1.1.1 Классические приседания"
-      const idMatch = titleLine.match(/^(\d+\.\d+\.\d+)\s+(.+)$/)
-      if (!idMatch) return
+      // Очищаем название категории (например, "Приседания (Squat Pattern)")
+      const cleanCategory = patternTitle.replace(/^\s*\d+\.\d+:\s*/, '').trim()
 
-      const id = idMatch[1]
-      const name = idMatch[2]
-
-      // Извлекаем описание
-      const descMatch = block.match(/\*\*Описание:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
-      const description = descMatch ? descMatch[1].trim() : ''
-
-      // Извлекаем параметры
-      const setsMatch = block.match(/\*\*Подходы:\*\*\s*(\d+)/)
-      const repsMatch = block.match(/\*\*Повторения:\*\*\s*([^\n]+)/)
-      const restMatch = block.match(/\*\*Отдых:\*\*\s*(\d+)/)
+      // Внутри паттерна ищем упражнения (#### 1.1.1)
+      const exerciseBlocks = patternBlock.split(/^#### /m).slice(1)
       
-      // Новые поля
-      const inventoryMatch = block.match(/\*\*Инвентарь:\*\*\s*([^\n]+)/)
-      const inventoryAltMatch = block.match(/\*\*Альтернатива инвентарю:\*\*\s*([^\n]+)/)
-      const lightVersionMatch = block.match(/\*\*Облегченный вариант:\*\*\s*([^\n]+)/)
+      exerciseBlocks.forEach(block => {
+        const blockLines = block.split('\n')
+        const titleLine = blockLines[0].trim()
+        
+        // Парсим ID и название: "1.1.1 Классические приседания"
+        const idMatch = titleLine.match(/^(\d+\.\d+\.\d+)\s+(.+)$/)
+        if (!idMatch) return
 
-      // Извлекаем технику
-      const techniqueMatch = block.match(/\*\*Техника выполнения:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
-      const technique = techniqueMatch ? techniqueMatch[1].trim() : ''
+        const id = idMatch[1]
+        const name = idMatch[2]
 
-      // Извлекаем ошибки
-      const mistakesMatch = block.match(/\*\*Типичные ошибки:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
-      const mistakes = mistakesMatch ? mistakesMatch[1].trim() : ''
+        // Извлекаем описание
+        const descMatch = block.match(/\*\*Описание:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
+        const description = descMatch ? descMatch[1].trim() : ''
 
-      // Извлекаем сценарий
-      const scriptMatch = block.match(/\*\*Видео-сценарий:\*\*\s*\n?([\s\S]*?)(?=\n---|(?:\n\*\*|$))/ )
-      const script = scriptMatch ? scriptMatch[1].trim() : ''
+        // Извлекаем параметры
+        const setsMatch = block.match(/\*\*Подходы:\*\*\s*(\d+)/)
+        const repsMatch = block.match(/\*\*Повторения:\*\*\s*([^\n]+)/)
+        const restMatch = block.match(/\*\*Отдых:\*\*\s*(\d+)/)
+        
+        // Новые поля (с учетом разных вариантов написания в MD)
+        const inventoryMatch = block.match(/\*\*(?:Инвентарь|Оборудование):\*\*\s*([^\n]+)/i)
+        const inventoryAltMatch = block.match(/\*\*Альтернатива (?:инвентаря|инвентарю):\*\*\s*([^\n]+)/i)
+        const lightVersionMatch = block.match(/\*\*(?:Облегченный вариант|Облегченная версия):\*\*\s*([^\n]+)/i)
 
-      exercises.push({
-        id,
-        name,
-        description,
-        category: sectionTitle.replace(/^🏋️\s*РАЗДЕЛ\s*\d+:\s*/, ''),
-        default_sets: setsMatch ? parseInt(setsMatch[1]) : 3,
-        default_reps: repsMatch ? repsMatch[1].trim() : '12-15',
-        default_rest_seconds: restMatch ? parseInt(restMatch[1]) : 60,
-        technique_steps: technique,
-        typical_mistakes: mistakes,
-        video_script: script,
-        inventory: inventoryMatch ? inventoryMatch[1].trim() : null,
-        inventory_alternative: inventoryAltMatch ? inventoryAltMatch[1].trim() : null,
-        light_version: lightVersionMatch ? lightVersionMatch[1].trim() : null
+        // Извлекаем технику (ищем разные варианты заголовков)
+        const techniqueMatch = block.match(/\*\*Техника выполнения(?:\s*\([^)]+\))?:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/i)
+        const technique = techniqueMatch ? techniqueMatch[1].trim() : ''
+
+        // Извлекаем ошибки
+        const mistakesMatch = block.match(/\*\*Типичные ошибки:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/i)
+        const mistakes = mistakesMatch ? mistakesMatch[1].trim() : ''
+
+        // Извлекаем сценарий
+        const scriptMatch = block.match(/\*\*Видео-сценарий:\*\*\s*\n?([\s\S]*?)(?=\n---|(?:\n\*\*|$))/i)
+        const script = scriptMatch ? scriptMatch[1].trim() : ''
+
+        exercises.push({
+          id,
+          name,
+          description,
+          category: cleanCategory,
+          default_sets: setsMatch ? parseInt(setsMatch[1]) : 3,
+          default_reps: repsMatch ? repsMatch[1].trim() : '12-15',
+          default_rest_seconds: restMatch ? parseInt(restMatch[1]) : 60,
+          technique_steps: technique,
+          typical_mistakes: mistakes,
+          video_script: script,
+          inventory: inventoryMatch ? inventoryMatch[1].trim() : null,
+          inventory_alternative: inventoryAltMatch ? inventoryAltMatch[1].trim() : null,
+          light_version: lightVersionMatch ? lightVersionMatch[1].trim() : null
+        })
       })
     })
   })
