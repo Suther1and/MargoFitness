@@ -170,34 +170,6 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Порядок</label>
-                      <div className="relative group">
-                        <input
-                          type="number"
-                          min="1"
-                          value={formData.order_index + 1}
-                          onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) - 1})}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-bold text-center appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, order_index: prev.order_index + 1 }))}
-                            className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
-                          >
-                            <ChevronRight className="size-3 -rotate-90" />
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, order_index: Math.max(0, prev.order_index - 1) }))}
-                            className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
-                          >
-                            <ChevronRight className="size-3 rotate-90" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                 <div className="space-y-2">

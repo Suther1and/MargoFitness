@@ -1,14 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dumbbell, BookOpen, Zap, ChevronRight } from 'lucide-react'
+import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getDashboardWorkouts } from '@/lib/actions/dashboard-workouts'
+import type { ContentWeekWithSessions, WorkoutSessionWithAccess } from '@/types/database'
+import { Badge } from '@/components/ui/badge'
+import WorkoutCompleteButton from '@/app/workouts/[id]/workout-complete-button'
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives'
 
 export function WorkoutsTab() {
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
+  const [loading, setLoading] = useState(true)
+  const [weekData, setWeekData] = useState<ContentWeekWithSessions | null>(null)
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleReset = () => setSelectedSessionId(null)
+    window.addEventListener('reset-workout-selection', handleReset)
+    return () => window.removeEventListener('reset-workout-selection', handleReset)
+  }, [])
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true)
+        const result = await getDashboardWorkouts()
+        if (result.success) {
+          setWeekData(result.data)
+        } else {
+          console.error('Failed to load workouts:', result.error)
+        }
+      } catch (err) {
+        console.error('Runtime error loading workouts:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  const selectedSession = weekData?.sessions.find(s => s.id === selectedSessionId)
 
   const tabs = [
     { id: 'workouts' as WorkoutSubTab, label: 'Тренировки', icon: Dumbbell, color: 'bg-cyan-500', shadow: 'shadow-cyan-500/20' },
@@ -16,9 +50,17 @@ export function WorkoutsTab() {
     { id: 'intensives' as WorkoutSubTab, label: 'Интенсивы', icon: Zap, color: 'bg-yellow-500', shadow: 'shadow-yellow-500/20' },
   ]
 
+  if (selectedSession) {
+    return (
+      <WorkoutDetail 
+        session={selectedSession} 
+        onBack={() => setSelectedSessionId(null)} 
+      />
+    )
+  }
+
   return (
-    <div className="space-y-6 pb-24 md:pb-10">
-      {/* Tabs переключатель */}
+    <div className="space-y-6 pb-24 md:pb-10 text-left">
       <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 mb-4">
         {tabs.map((tab) => {
           const Icon = tab.icon
@@ -40,10 +82,8 @@ export function WorkoutsTab() {
         })}
       </div>
 
-      {/* Разделитель */}
       <div className="h-px bg-white/5 mb-4" />
 
-      {/* Контент */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeSubTab}
@@ -53,12 +93,32 @@ export function WorkoutsTab() {
           transition={{ duration: 0.2 }}
         >
           {activeSubTab === 'workouts' && (
-            <EmptyState
-              icon={Dumbbell}
-              title="Тренировки скоро появятся"
-              description="Мы готовим для тебя персональные программы тренировок с видео и подробными инструкциями"
-              gradient="from-amber-500 to-orange-500"
-            />
+            <div className="space-y-6">
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-64 rounded-[2.5rem] bg-white/5 animate-pulse border border-white/10" />
+                  ))}
+                </div>
+              ) : weekData && weekData.sessions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {weekData.sessions.map((session) => (
+                    <WorkoutCard 
+                      key={session.id} 
+                      session={session} 
+                      onClick={() => session.hasAccess && setSelectedSessionId(session.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={Dumbbell}
+                  title="Тренировки скоро появятся"
+                  description="Мы готовим для тебя персональные программы тренировок с видео и подробными инструкциями"
+                  gradient="from-amber-500 to-orange-500"
+                />
+              )}
+            </div>
           )}
           
           {activeSubTab === 'materials' && (
@@ -84,6 +144,320 @@ export function WorkoutsTab() {
   )
 }
 
+function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, onClick: () => void }) {
+  const isLocked = !session.hasAccess
+
+  return (
+    <button 
+      onClick={onClick}
+      className={cn(
+        "relative group overflow-hidden rounded-[2.5rem] border transition-all duration-500 text-left w-full",
+        isLocked 
+          ? "bg-white/[0.02] border-white/5 opacity-60 grayscale-[0.5] cursor-not-allowed" 
+          : "bg-white/[0.03] border-white/10 hover:border-cyan-500/30 hover:bg-white/[0.05] shadow-xl hover:shadow-cyan-500/10",
+        session.isCompleted && "border-emerald-500/30 bg-emerald-500/[0.02]"
+      )}
+    >
+      {!isLocked && (
+        <div className="absolute -inset-24 bg-cyan-500/5 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      )}
+
+      <div className="relative p-8 flex flex-col h-full min-h-[280px]">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              "w-10 h-10 rounded-2xl flex items-center justify-center border transition-colors",
+              isLocked ? "bg-white/5 border-white/10" : "bg-cyan-500/10 border-cyan-500/20"
+            )}>
+              {isLocked ? <Lock className="size-5 text-white/20" /> : <Dumbbell className="size-5 text-cyan-400" />}
+            </div>
+            <div>
+              <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Тренировка {session.session_number}</div>
+              <Badge variant="outline" className={cn(
+                "text-[9px] font-mono px-1.5 py-0 uppercase tracking-tighter",
+                session.required_tier === 'pro' ? "text-purple-400 border-purple-400/30" : "text-cyan-400 border-cyan-400/30"
+              )}>
+                {session.required_tier === 'pro' ? 'Pro+' : 'Basic'}
+              </Badge>
+            </div>
+          </div>
+          
+          {session.isCompleted && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Готово</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1">
+          <h3 className="text-2xl font-oswald font-black text-white uppercase tracking-tight mb-3 group-hover:text-cyan-400 transition-colors">
+            {session.title}
+          </h3>
+          <div className="flex items-center gap-4 text-white/40">
+            <div className="flex items-center gap-1.5">
+              <Clock className="size-3.5" />
+              <span className="text-xs font-bold">{session.estimated_duration || 45} мин</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Zap className="size-3.5" />
+              <span className="text-xs font-bold">{session.exercises?.length || 0} упр.</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          {isLocked ? (
+            <div className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/20 font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+              Открыть доступ
+              <ChevronRight className="size-4" />
+            </div>
+          ) : (
+            <div className="w-full py-4 rounded-2xl bg-cyan-500 text-black font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 group-hover:scale-[1.02] transition-transform">
+              <Play className="size-4 fill-current" />
+              Начать тренировку
+            </div>
+          )}
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess, onBack: () => void }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="space-y-8 pb-24 text-left"
+    >
+      <div className="flex items-center justify-between mb-8">
+        <button 
+          onClick={onBack}
+          className="group flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-95"
+        >
+          <ArrowLeft className="size-4 text-white/40 group-hover:text-white transition-colors" />
+          <span className="text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">К списку тренировок</span>
+        </button>
+
+        <div className="flex items-center gap-3">
+          {session.isCompleted && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Завершено</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                <Dumbbell className="size-6 text-cyan-400" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-cyan-500/50 uppercase tracking-[0.2em] leading-none mb-1">Тренировка {session.session_number}</div>
+                <h1 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter leading-none">
+                  {session.title}
+                </h1>
+              </div>
+            </div>
+            {session.description && (
+              <p className="text-lg text-white/40 leading-relaxed font-medium">
+                {session.description}
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-xl">
+            <div className="text-center">
+              <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
+                <Clock className="size-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Время</span>
+              </div>
+              <div className="text-xl font-oswald font-bold">{session.estimated_duration || 45} <span className="text-xs text-white/40 uppercase">мин</span></div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
+                <Zap className="size-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Упражнения</span>
+              </div>
+              <div className="text-xl font-oswald font-bold">{session.exercises?.length || 0}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/10" />
+          <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-white/20">Программа тренировки</h2>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/10" />
+        </div>
+
+        {session.exercises?.map((exercise, index) => (
+          <div 
+            key={exercise.id}
+            className="group relative overflow-hidden rounded-[3rem] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-500"
+          >
+            <div className="p-8 md:p-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div className="lg:col-span-7 space-y-8">
+                  <div className="flex items-start gap-6">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-colors">
+                      <span className="text-2xl font-oswald font-black text-white/20 group-hover:text-cyan-400 transition-colors">{index + 1}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge variant="outline" className="text-[9px] font-mono border-white/10 text-white/30 px-1.5 py-0">
+                          {exercise.exercise_library.category}
+                        </Badge>
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-4">
+                        {exercise.exercise_library.name}
+                      </h3>
+                      <p className="text-sm text-white/50 leading-relaxed italic border-l-2 border-white/10 pl-4">
+                        {exercise.exercise_library.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1.5 text-white/20">
+                        <Repeat className="size-3" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest">Подходы</span>
+                      </div>
+                      <div className="text-xl font-oswald font-bold text-white">{exercise.sets}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1.5 text-white/20">
+                        <Sparkles className="size-3" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest">Повторы</span>
+                      </div>
+                      <div className="text-xl font-oswald font-bold text-white">{exercise.reps}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1.5 text-white/20">
+                        <Clock className="size-3" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest">Отдых</span>
+                      </div>
+                      <div className="text-xl font-oswald font-bold text-white">{exercise.rest_seconds} <span className="text-[10px] text-white/40 uppercase">сек</span></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Info className="size-4 text-cyan-400" />
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/80">Техника выполнения</h4>
+                    </div>
+                    <div className="text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
+                      {exercise.exercise_library.technique_steps}
+                    </div>
+                  </div>
+
+                  {exercise.exercise_library.typical_mistakes && (
+                    <div className="p-6 rounded-[2rem] bg-rose-500/5 border border-rose-500/10 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="size-4 text-rose-400/50" />
+                        <span className="text-[10px] font-bold text-rose-400/50 uppercase tracking-widest">Типичные ошибки</span>
+                      </div>
+                      <p className="text-xs text-rose-200/40 leading-relaxed whitespace-pre-line">
+                        {exercise.exercise_library.typical_mistakes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="lg:col-span-5">
+                  <div className="sticky top-8">
+                    <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto overflow-hidden rounded-[3rem] bg-white/5 border border-white/10 shadow-2xl group/video">
+                      {exercise.video_kinescope_id ? (
+                        <div className="flex h-full items-center justify-center">
+                          <div className="text-center space-y-4 p-8">
+                            <div className="w-20 h-20 rounded-full bg-cyan-500/20 flex items-center justify-center mx-auto ring-4 ring-cyan-500/10 group-hover/video:scale-110 transition-transform duration-500">
+                              <Play className="size-8 text-cyan-400 fill-current" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-bold text-white uppercase tracking-widest">Видео-инструкция</div>
+                              <div className="text-[10px] text-white/20 font-mono uppercase truncate px-4">
+                                ID: {exercise.video_kinescope_id}
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-white/30 leading-relaxed">
+                              Плеер Kinescope будет интегрирован в следующем обновлении
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <div className="text-center space-y-4 p-8">
+                            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto border border-white/10">
+                              <Play className="size-8 text-white/10" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-bold text-white/20 uppercase tracking-widest">Видео готовится</div>
+                              <p className="text-[10px] text-white/10 leading-relaxed">
+                                Мы скоро добавим видео для этого упражнения
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 pointer-events-none border-[12px] border-black/20 rounded-[3rem]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-20">
+        <div className="relative overflow-hidden rounded-[3.5rem] bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-transparent border border-white/10 p-10 md:p-16 text-center">
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px]" />
+          
+          <div className="relative space-y-8 max-w-xl mx-auto">
+            <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 flex items-center justify-center mx-auto border border-white/10 shadow-2xl">
+              <CheckCircle2 className={cn("size-10", session.isCompleted ? "text-emerald-400" : "text-white/20")} />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight">
+                {session.isCompleted ? 'Тренировка завершена!' : 'Завершили тренировку?'}
+              </h3>
+              <p className="text-white/40 font-medium">
+                {session.isCompleted 
+                  ? 'Отличная работа! Вы можете обновить свою оценку или пройти тренировку заново.' 
+                  : 'Отметьте свой прогресс, поставьте оценку и двигайтесь к цели!'}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <WorkoutCompleteButton 
+                sessionId={session.id} 
+                isRetake={session.isCompleted}
+              />
+              <button 
+                onClick={onBack}
+                className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 border border-white/10"
+              >
+                К списку тренировок
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 interface EmptyStateProps {
   icon: React.ComponentType<{ className?: string }>
   title: string
@@ -94,7 +468,6 @@ interface EmptyStateProps {
 function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border border-white/10 relative overflow-hidden min-h-[400px]">
-      {/* Фоновый градиент */}
       <div 
         className={cn(
           "absolute inset-0 opacity-5 bg-gradient-to-br",
@@ -102,7 +475,6 @@ function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProp
         )} 
       />
       
-      {/* Иконка */}
       <div className="relative mb-6">
         <div 
           className={cn(
@@ -120,7 +492,6 @@ function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProp
         </div>
       </div>
 
-      {/* Текст */}
       <h3 className="text-2xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">
         {title}
       </h3>
@@ -128,7 +499,6 @@ function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProp
         {description}
       </p>
 
-      {/* Дополнительный индикатор */}
       <div className="flex items-center gap-2 text-xs text-white/20 font-black uppercase tracking-widest">
         <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
         Скоро запуск

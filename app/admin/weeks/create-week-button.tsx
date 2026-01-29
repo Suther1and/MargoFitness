@@ -57,15 +57,22 @@ export default function CreateWeekButton() {
 
   const generateWeekOptions = () => {
     const options = []
-    const nextMonday = getNextMonday()
+    const now = new Date()
+    const dayOfWeek = now.getDay()
     
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(nextMonday)
-      date.setDate(nextMonday.getDate() + (i * 7))
+    // Находим текущий понедельник
+    const currentMonday = new Date(now)
+    currentMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    currentMonday.setHours(0, 0, 0, 0)
+
+    // Генерируем от -2 до +8 недель
+    for (let i = -2; i <= 8; i++) {
+      const date = new Date(currentMonday)
+      date.setDate(currentMonday.getDate() + (i * 7))
       const dateStr = formatDateForInput(date)
       options.push({
         value: dateStr,
-        label: formatDateDisplay(dateStr)
+        label: formatDateDisplay(dateStr) + (i === 0 ? ' (Текущая)' : '')
       })
     }
     return options
@@ -88,8 +95,12 @@ export default function CreateWeekButton() {
 
   useEffect(() => {
     if (open && !formData.start_date) {
-      const nextMonday = getNextMonday()
-      handleDateChange(formatDateForInput(nextMonday))
+      const now = new Date()
+      const dayOfWeek = now.getDay()
+      const currentMonday = new Date(now)
+      currentMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+      currentMonday.setHours(0, 0, 0, 0)
+      handleDateChange(formatDateForInput(currentMonday))
     }
   }, [open])
 
