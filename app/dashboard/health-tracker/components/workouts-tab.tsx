@@ -233,45 +233,47 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
       className="space-y-8 pb-24 text-left"
     >
       <div className="flex flex-col gap-8 mb-12">
+        {/* Top Row: Navigation & Stats */}
         <div className="flex items-center justify-between">
           <button 
             onClick={onBack}
-            className="group flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
+            className="group flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-95"
           >
             <ArrowLeft className="size-4 text-white/40 group-hover:text-white transition-colors" />
-            <span className="text-[11px] font-black uppercase tracking-[0.15em] text-white/40 group-hover:text-white transition-colors">Назад к списку</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/40 group-hover:text-white transition-colors">Назад к списку</span>
           </button>
 
-          <div className="flex items-center gap-3 p-1.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
-            <div className="flex items-center gap-6 px-4 py-2">
-              <div className="flex items-center gap-3">
-                <Clock className="size-4 text-cyan-400/50" />
-                <div className="flex flex-col -space-y-1">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Время</span>
-                  <span className="text-sm font-oswald font-bold text-white">{session.estimated_duration || 45} мин</span>
-                </div>
+          <div className="flex items-center gap-6 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <Clock className="size-4 text-cyan-400" />
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xl font-oswald font-bold text-white leading-none">{session.estimated_duration || 45}</span>
+                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none">мин</span>
               </div>
-              <div className="w-px h-6 bg-white/10" />
-              <div className="flex items-center gap-3">
-                <Zap className="size-4 text-yellow-400/50" />
-                <div className="flex flex-col -space-y-1">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Упр.</span>
-                  <span className="text-sm font-oswald font-bold text-white">{session.exercises?.length || 0}</span>
-                </div>
+            </div>
+            <div className="w-px h-4 bg-white/10" />
+            <div className="flex items-center gap-3">
+              <Zap className="size-4 text-yellow-400" />
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xl font-oswald font-bold text-white leading-none">{session.exercises?.length || 0}</span>
+                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none">упр.</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent rounded-full hidden md:block" />
-          <div className="space-y-1">
+        {/* Main Title Row */}
+        <div className="flex items-end gap-6">
+          <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shrink-0 mb-1">
+            <Dumbbell className="size-8 text-cyan-400" />
+          </div>
+          <div className="flex flex-col justify-end">
             <div className="flex items-center gap-3 mb-2">
               <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em]">
                 Тренировка {session.session_number}
               </span>
             </div>
-            <h1 className="text-6xl md:text-8xl font-oswald font-black uppercase tracking-tighter leading-[0.85] text-white">
+            <h1 className="text-5xl md:text-7xl font-oswald font-black uppercase tracking-tighter leading-[0.8] text-white">
               {session.title}
             </h1>
           </div>
