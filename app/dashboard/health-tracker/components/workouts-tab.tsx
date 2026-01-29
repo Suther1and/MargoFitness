@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle } from 'lucide-react'
+import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getDashboardWorkouts } from '@/lib/actions/dashboard-workouts'
 import type { ContentWeekWithSessions, WorkoutSessionWithAccess } from '@/types/database'
@@ -339,24 +339,42 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { label: 'Подходы', val: exercise.sets, icon: Repeat, color: 'text-cyan-400' },
-                      { label: 'Повторы', val: exercise.reps, icon: Sparkles, color: 'text-yellow-400' },
-                      { label: 'Отдых', val: `${exercise.rest_seconds} сек`, icon: Clock, color: 'text-purple-400' },
-                      { label: 'Инвентарь', val: exercise.exercise_library.inventory || 'Нет', icon: Dumbbell, color: 'text-orange-400' }
+                      { label: 'Подходы', val: exercise.sets, icon: RotateCcw, unit: 'x' },
+                      { label: 'Повторы', val: exercise.reps, icon: Zap, unit: !exercise.reps.toLowerCase().includes('ногу') && !exercise.reps.toLowerCase().includes('секунд') ? 'раз' : '' },
+                      { label: 'Отдых', val: exercise.rest_seconds, icon: Clock, unit: 'секунд' },
+                      { label: 'Инвентарь', val: exercise.exercise_library.inventory || 'Нет', icon: Dumbbell, isInventory: true }
                     ].map((item, i) => (
-                      <div key={i} className="flex-1 min-w-[120px] h-20 p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex flex-col items-center justify-center text-center group/item hover:bg-white/[0.05] hover:border-white/10 transition-all">
-                        <div className="flex items-center gap-1.5 mb-1 opacity-30 group-hover/item:opacity-50 transition-opacity">
-                          <item.icon className="size-3" />
-                          <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
+                      <div key={i} className="group/card relative overflow-hidden p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-all flex flex-col justify-between min-h-[90px]">
+                        <div className="relative flex items-center gap-2 text-white/20">
+                          <item.icon className="size-3.5" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
                         </div>
-                        <div className={cn(
-                          "font-oswald font-bold leading-none uppercase",
-                          item.color,
-                          String(item.val).length > 10 ? "text-[10px]" : "text-lg"
-                        )}>
-                          {item.val}
+                        
+                        <div className="relative flex items-baseline mt-auto overflow-hidden">
+                          {item.label === 'Подходы' && item.unit && (
+                            <span className="text-[14px] font-black text-white/20 uppercase leading-none shrink-0 mb-0.5 mr-0.5">
+                              {item.unit}
+                            </span>
+                          )}
+                          <div className={cn(
+                            "font-oswald font-bold leading-none uppercase text-white whitespace-nowrap",
+                            item.isInventory ? (
+                              String(item.val).length > 15 ? "text-sm" : "text-lg"
+                            ) : (
+                              String(item.val).length > 18 ? "text-[11px]" :
+                              String(item.val).length > 14 ? "text-[13px]" :
+                              String(item.val).length > 10 ? "text-lg" : "text-2xl"
+                            )
+                          )}>
+                            {item.val}
+                          </div>
+                          {item.label !== 'Подходы' && item.unit && (
+                            <span className="text-[10px] font-black text-white/20 uppercase leading-none shrink-0 ml-1.5">
+                              {item.unit}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
