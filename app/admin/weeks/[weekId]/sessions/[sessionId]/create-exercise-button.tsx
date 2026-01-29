@@ -1,233 +1,169 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getExerciseLibrary } from '@/lib/actions/exercise-library'
 import { createExercise } from '@/lib/actions/admin'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, X, Sparkles, Video, Clock, Repeat } from 'lucide-react'
+import { Search, Plus, X, Dumbbell, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import type { ExerciseLibrary } from '@/types/database'
+import { Badge } from '@/components/ui/badge'
 
 interface CreateExerciseButtonProps {
   sessionId: string
+  nextOrderIndex: number
 }
 
-export default function CreateExerciseButton({ sessionId }: CreateExerciseButtonProps) {
+export default function CreateExerciseButton({ sessionId, nextOrderIndex }: CreateExerciseButtonProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [exercises, setExercises] = useState<ExerciseLibrary[]>([])
+  const [search, setSearch] = useState('')
+  const [addingId, setAddingId] = useState<string | null>(null)
   const router = useRouter()
 
-  const [formData, setFormData] = useState({
-    order_index: 1,
-    title: '',
-    description: '',
-    video_kinescope_id: '',
-    sets: 3,
-    reps: '12-15',
-    rest_seconds: 60,
-  })
+  useEffect(() => {
+    if (open) {
+      loadExercises()
+    }
+  }, [open])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  async function loadExercises() {
+    const data = await getExerciseLibrary()
+    setExercises(data)
+  }
 
+  const filteredExercises = exercises.filter(ex => 
+    ex.name.toLowerCase().includes(search.toLowerCase()) ||
+    ex.category.toLowerCase().includes(search.toLowerCase()) ||
+    ex.id.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const handleAdd = async (exercise: ExerciseLibrary) => {
+    setAddingId(exercise.id)
     const result = await createExercise({
-      workout_session_id: sessionId,
-      ...formData,
+      session_id: sessionId,
+      exercise_library_id: exercise.id,
+      order_index: nextOrderIndex,
+      sets: exercise.default_sets || 3,
+      reps: exercise.default_reps || '12-15',
+      rest_seconds: exercise.default_rest_seconds || 60,
     })
 
-    setLoading(false)
-
     if (result.success) {
-      setOpen(false)
-      setFormData({
-        order_index: 1,
-        title: '',
-        description: '',
-        video_kinescope_id: '',
-        sets: 3,
-        reps: '12-15',
-        rest_seconds: 60,
-      })
       router.refresh()
+      // Не закрываем сразу, чтобы можно было добавить несколько
+      setTimeout(() => setAddingId(null), 1000)
     } else {
-      setError(result.error || 'Ошибка создания')
+      setAddingId(null)
+      alert(result.error || 'Ошибка добавления')
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-500/20">
-          <Plus className="size-4" />
-          Добавить упражнение
+        <button className="group flex flex-col items-center justify-center p-8 rounded-[2rem] border-2 border-dashed border-white/5 hover:border-purple-500/20 hover:bg-purple-500/5 transition-all gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 group-hover:bg-purple-500/20 flex items-center justify-center transition-colors">
+            <Plus className="size-6 text-white/20 group-hover:text-purple-400" />
+          </div>
+          <div className="text-center">
+            <div className="text-sm font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">Добавить упражнение</div>
+            <div className="text-[10px] text-white/10 group-hover:text-white/20 uppercase tracking-widest mt-1">Из библиотеки</div>
+          </div>
         </button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-2xl p-0 border-0 bg-transparent overflow-visible shadow-none">
-        <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-[#1a1a24] ring-1 ring-white/20 backdrop-blur-xl shadow-2xl p-8">
-          {/* Кнопка закрытия */}
-          <button 
-            onClick={() => setOpen(false)}
-            className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-colors z-20"
-          >
-            <X className="size-5" />
-          </button>
-
-          {/* Декоративные элементы */}
-          <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -right-24 -bottom-24 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-
-          <DialogHeader className="relative z-10 mb-8 text-left">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                <Sparkles className="size-5 text-orange-400" />
+      <DialogContent className="max-w-3xl p-0 border-0 bg-transparent overflow-visible shadow-none [&>button]:hidden">
+        <div className="relative w-full max-h-[85vh] overflow-hidden rounded-[2.5rem] bg-[#0A0A0A] ring-1 ring-white/10 shadow-2xl flex flex-col">
+          
+          {/* Header */}
+          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#0A0A0A] shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                <Dumbbell className="size-5 text-purple-400" />
               </div>
-              <DialogTitle className="text-2xl font-bold text-white font-oswald uppercase tracking-tight">Новое упражнение</DialogTitle>
+              <div>
+                <DialogTitle className="text-xl font-bold text-white font-oswald uppercase tracking-tight">
+                  Добавить из библиотеки
+                </DialogTitle>
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Выберите упражнение для тренировки</p>
+              </div>
             </div>
-            <DialogDescription className="text-white/50 text-sm">Добавьте упражнение в текущую тренировку</DialogDescription>
-          </DialogHeader>
+            <button 
+              onClick={() => setOpen(false)}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
 
-          <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-            {error && (
-              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-xs font-bold text-rose-400 uppercase tracking-widest">
-                {error}
-              </div>
-            )}
+          {/* Search */}
+          <div className="p-6 bg-[#0A0A0A] border-b border-white/5 shrink-0">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-purple-400 transition-colors" />
+              <input
+                placeholder="Поиск по названию, ID или категории..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-11 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all text-sm"
+              />
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Название упражнения</label>
-                  <input
-                    placeholder="Например: Отжимания"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-sm font-medium"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Описание техники</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Подробно опишите технику выполнения..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-sm resize-none leading-relaxed"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1 flex items-center gap-2">
-                    <Video className="size-3" />
-                    ID видео Kinescope
-                  </label>
-                  <input
-                    placeholder="demo_id_123"
-                    value={formData.video_kinescope_id}
-                    onChange={(e) => setFormData({...formData, video_kinescope_id: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Порядковый номер</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.order_index}
-                    onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value)})}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-sm"
-                  />
-                </div>
-
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="size-3 text-blue-400" />
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Параметры выполнения</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1 flex items-center gap-2">
-                        <Repeat className="size-3" />
-                        Подходы
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={formData.sets}
-                        onChange={(e) => setFormData({...formData, sets: parseInt(e.target.value)})}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm font-bold"
-                      />
+          {/* List */}
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[#0A0A0A]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filteredExercises.map((ex) => (
+                <button
+                  key={ex.id}
+                  onClick={() => handleAdd(ex)}
+                  disabled={addingId === ex.id}
+                  className="group flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-left active:scale-[0.98]"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Badge variant="outline" className="text-[8px] h-3.5 px-1 text-purple-400/50 border-purple-400/20 font-mono">
+                        {ex.id}
+                      </Badge>
+                      <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest truncate">{ex.category}</span>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1 flex items-center gap-2">
-                        <Repeat className="size-3" />
-                        Повторения
-                      </label>
-                      <input
-                        placeholder="Например: 12-15"
-                        value={formData.reps}
-                        onChange={(e) => setFormData({...formData, reps: e.target.value})}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm font-bold"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1 flex items-center gap-2">
-                        <Clock className="size-3" />
-                        Отдых (сек)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.rest_seconds}
-                        onChange={(e) => setFormData({...formData, rest_seconds: parseInt(e.target.value)})}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm font-bold"
-                      />
+                    <div className="text-sm font-bold text-white group-hover:text-purple-100 transition-colors leading-tight">
+                      {ex.name}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <div className="flex gap-4 pt-6">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                disabled={loading}
-                className="flex-1 px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all active:scale-95 border border-white/10"
-              >
-                Отмена
-              </button>
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="flex-1 px-8 py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-500/20 disabled:opacity-50"
-              >
-                {loading ? 'Создание...' : 'Создать упражнение'}
-              </button>
+                  <div className="shrink-0 ml-2">
+                    {addingId === ex.id ? (
+                      <CheckCircle2 className="size-5 text-emerald-400 animate-in zoom-in duration-300" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                        <Plus className="size-4 text-white/20 group-hover:text-purple-400" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
             </div>
-          </form>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t border-white/5 bg-[#0A0A0A] shrink-0">
+            <button
+              onClick={() => setOpen(false)}
+              className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white font-bold text-[10px] uppercase tracking-widest transition-all"
+            >
+              Готово
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
-

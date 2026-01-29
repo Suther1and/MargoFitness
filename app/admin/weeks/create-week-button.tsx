@@ -10,8 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, X, Calendar, Type, FileText } from 'lucide-react'
+import { Plus, X, Calendar, Type, FileText, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 function getNextMonday(): Date {
   const today = new Date()
@@ -46,23 +52,46 @@ export default function CreateWeekButton() {
     start_date: '',
     end_date: '',
     title: '',
-    description: '',
     is_published: false,
   })
+
+  const generateWeekOptions = () => {
+    const options = []
+    const nextMonday = getNextMonday()
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(nextMonday)
+      date.setDate(nextMonday.getDate() + (i * 7))
+      const dateStr = formatDateForInput(date)
+      options.push({
+        value: dateStr,
+        label: formatDateDisplay(dateStr)
+      })
+    }
+    return options
+  }
+
+  const weekOptions = generateWeekOptions()
+
+  const handleDateChange = (dateStr: string) => {
+    const start = new Date(dateStr)
+    const end = new Date(start)
+    end.setDate(start.getDate() + 7)
+    
+    setFormData({
+      ...formData,
+      start_date: dateStr,
+      end_date: formatDateForInput(end),
+      title: `Неделя ${formatDateDisplay(dateStr)}`,
+    })
+  }
 
   useEffect(() => {
     if (open && !formData.start_date) {
       const nextMonday = getNextMonday()
-      const followingMonday = new Date(nextMonday)
-      followingMonday.setDate(nextMonday.getDate() + 7)
-      
-      setFormData(prev => ({
-        ...prev,
-        start_date: formatDateForInput(nextMonday),
-        end_date: formatDateForInput(followingMonday),
-      }))
+      handleDateChange(formatDateForInput(nextMonday))
     }
-  }, [open, formData.start_date])
+  }, [open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,7 +108,6 @@ export default function CreateWeekButton() {
         start_date: '',
         end_date: '',
         title: '',
-        description: '',
         is_published: false,
       })
       router.refresh()
@@ -97,7 +125,7 @@ export default function CreateWeekButton() {
         </button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-md p-0 border-0 bg-transparent overflow-visible shadow-none">
+      <DialogContent className="max-w-md p-0 border-0 bg-transparent overflow-visible shadow-none [&>button]:hidden">
         <div className="relative w-full overflow-hidden rounded-[2.5rem] bg-[#1a1a24] ring-1 ring-white/20 backdrop-blur-xl shadow-2xl p-8">
           <button
             onClick={() => setOpen(false)}
@@ -121,48 +149,53 @@ export default function CreateWeekButton() {
               </div>
             )}
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between relative">
+              <div className="flex items-center gap-3 flex-1">
                 <div className="p-2 rounded-lg bg-orange-500/10">
                   <Calendar className="size-4 text-orange-400" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Период</span>
-                  <span className="text-sm font-bold text-white">
-                    {formData.start_date && formData.end_date ? (
-                      <>{formatDateDisplay(formData.start_date)} — {formatDateDisplay(formData.end_date)}</>
-                    ) : 'Загрузка...'}
-                  </span>
+                <div className="flex flex-col flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Выберите неделю (ПН)</span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center justify-between w-full bg-transparent text-sm font-bold text-white focus:outline-none text-left mt-0.5">
+                        {formData.start_date ? formatDateDisplay(formData.start_date) : 'Выберите дату'}
+                        <ChevronDown className="size-4 text-white/20" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      className="w-64 bg-[#1a1a24] border-white/10 text-white rounded-2xl p-2 max-h-80 overflow-y-auto custom-scrollbar z-[100]"
+                      align="start"
+                      sideOffset={8}
+                    >
+                      {weekOptions.map(opt => (
+                        <DropdownMenuItem 
+                          key={opt.value} 
+                          onClick={() => handleDateChange(opt.value)}
+                          className="rounded-xl focus:bg-orange-500/20 focus:text-orange-400 cursor-pointer py-2.5 px-4 text-sm font-medium transition-colors"
+                        >
+                          {opt.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-              <div className="px-2 py-1 rounded-lg bg-white/5 text-[10px] font-bold text-white/40 uppercase">7 дней</div>
+              <div className="px-2 py-1 rounded-lg bg-white/5 text-[10px] font-bold text-white/40 uppercase ml-4">7 дней</div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40 ml-1">
                   <Type className="size-3" />
-                  Название
+                  Название недели
                 </label>
                 <input
-                  placeholder="Неделя 1: Сила и выносливость"
+                  placeholder="Например: Неделя 17 февраля"
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40 ml-1">
-                  <FileText className="size-3" />
-                  Описание
-                </label>
-                <textarea
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all min-h-[100px] resize-none text-sm"
-                  placeholder="О чем будет эта неделя?"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
             </div>

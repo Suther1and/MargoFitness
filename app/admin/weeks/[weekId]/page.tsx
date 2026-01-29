@@ -5,6 +5,8 @@ import { ArrowLeft, ChevronRight, Edit, Plus } from "lucide-react"
 import Link from "next/link"
 import CreateSessionButton from "./create-session-button"
 import SessionActions from "./session-actions"
+import SmartImportButton from "./smart-import-button"
+import { Badge } from "@/components/ui/badge"
 
 interface AdminWeekPageProps {
   params: {
@@ -36,11 +38,13 @@ export default async function AdminWeekPage({ params }: AdminWeekPageProps) {
   // Получить тренировки
   const { data: sessions, error: sessionsError } = await supabase
     .from('workout_sessions')
-    .select('*, exercises(count)')
+    .select('*, workout_exercises(count)')
     .eq('week_id', weekId)
     .order('session_number', { ascending: true })
 
   const workoutSessions = sessions || []
+
+  const isWeekPublished = week.is_published
 
   return (
     <div className="space-y-8 py-6">
@@ -55,15 +59,23 @@ export default async function AdminWeekPage({ params }: AdminWeekPageProps) {
             Назад к неделям
           </Link>
           <div className="space-y-1">
-            <h1 className="text-4xl md:text-5xl font-bold text-white font-oswald uppercase tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-white font-oswald uppercase tracking-tight flex items-center gap-4">
               {week.title}
+              {!isWeekPublished && (
+                <Badge variant="outline" className="text-orange-400 border-orange-400/30 font-bold uppercase tracking-widest text-[10px] px-3 py-1">
+                  Черновик
+                </Badge>
+              )}
             </h1>
             <p className="text-sm font-medium text-white/40 uppercase tracking-widest">
               {formatDate(week.start_date)} — {formatDate(week.end_date)}
             </p>
           </div>
         </div>
-        <CreateSessionButton weekId={weekId} />
+        <div className="flex flex-wrap gap-3">
+          <SmartImportButton weekId={weekId} />
+          <CreateSessionButton weekId={weekId} />
+        </div>
       </div>
 
       {/* Тренировки */}
@@ -112,7 +124,7 @@ export default async function AdminWeekPage({ params }: AdminWeekPageProps) {
                         </div>
                         <div className="space-y-1">
                           <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Упражнений</div>
-                          <div className="text-sm font-bold text-white/80">{session.exercises[0]?.count || 0}</div>
+                          <div className="text-sm font-bold text-white/80">{session.workout_exercises[0]?.count || 0}</div>
                         </div>
                       </div>
                     </div>

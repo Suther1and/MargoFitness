@@ -9,7 +9,8 @@ export type UserPurchase = Database['public']['Tables']['user_purchases']['Row']
 export type PaymentTransaction = Database['public']['Tables']['payment_transactions']['Row']
 export type ContentWeek = Database['public']['Tables']['content_weeks']['Row']
 export type WorkoutSession = Database['public']['Tables']['workout_sessions']['Row']
-export type Exercise = Database['public']['Tables']['exercises']['Row']
+export type ExerciseLibrary = Database['public']['Tables']['exercise_library']['Row']
+export type WorkoutExercise = Database['public']['Tables']['workout_exercises']['Row']
 export type UserWorkoutCompletion = Database['public']['Tables']['user_workout_completions']['Row']
 export type UserBonus = Database['public']['Tables']['user_bonuses']['Row']
 export type BonusTransaction = Database['public']['Tables']['bonus_transactions']['Row']
@@ -31,7 +32,8 @@ export type UserPurchaseInsert = Database['public']['Tables']['user_purchases'][
 export type PaymentTransactionInsert = Database['public']['Tables']['payment_transactions']['Insert']
 export type ContentWeekInsert = Database['public']['Tables']['content_weeks']['Insert']
 export type WorkoutSessionInsert = Database['public']['Tables']['workout_sessions']['Insert']
-export type ExerciseInsert = Database['public']['Tables']['exercises']['Insert']
+export type ExerciseLibraryInsert = Database['public']['Tables']['exercise_library']['Insert']
+export type WorkoutExerciseInsert = Database['public']['Tables']['workout_exercises']['Insert']
 export type UserWorkoutCompletionInsert = Database['public']['Tables']['user_workout_completions']['Insert']
 export type UserBonusInsert = Database['public']['Tables']['user_bonuses']['Insert']
 export type BonusTransactionInsert = Database['public']['Tables']['bonus_transactions']['Insert']
@@ -53,7 +55,8 @@ export type UserPurchaseUpdate = Database['public']['Tables']['user_purchases'][
 export type PaymentTransactionUpdate = Database['public']['Tables']['payment_transactions']['Update']
 export type ContentWeekUpdate = Database['public']['Tables']['content_weeks']['Update']
 export type WorkoutSessionUpdate = Database['public']['Tables']['workout_sessions']['Update']
-export type ExerciseUpdate = Database['public']['Tables']['exercises']['Update']
+export type ExerciseLibraryUpdate = Database['public']['Tables']['exercise_library']['Update']
+export type WorkoutExerciseUpdate = Database['public']['Tables']['workout_exercises']['Update']
 export type UserWorkoutCompletionUpdate = Database['public']['Tables']['user_workout_completions']['Update']
 export type UserBonusUpdate = Database['public']['Tables']['user_bonuses']['Update']
 export type BonusTransactionUpdate = Database['public']['Tables']['bonus_transactions']['Update']
@@ -135,7 +138,7 @@ export interface PhotoComparisonData {
 export interface WorkoutSessionWithAccess extends WorkoutSession {
   hasAccess: boolean
   accessReason?: 'subscription' | 'locked'
-  exercises?: Exercise[]
+  exercises?: (WorkoutExercise & { exercise_library: ExerciseLibrary })[]
   isCompleted?: boolean
   userCompletion?: UserWorkoutCompletion | null
 }
@@ -156,11 +159,6 @@ export interface ProfileWithSubscription extends Profile {
 export interface ProductWithPurchase extends Product {
   isPurchased: boolean
   purchaseDate?: string
-}
-
-/** Упражнение с порядковым номером для отображения */
-export interface ExerciseWithNumber extends Exercise {
-  displayNumber: number
 }
 
 /** Завершение тренировки с названием тренировки */

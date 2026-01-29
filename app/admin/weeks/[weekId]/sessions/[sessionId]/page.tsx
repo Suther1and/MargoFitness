@@ -57,13 +57,13 @@ export default async function AdminSessionPage({ params }: AdminSessionPageProps
           <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight">Упражнения</h2>
           <div className="h-px flex-1 bg-white/5" />
           <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
-            {workout.exercises.length} упражнений
+            {workout.exercises?.length || 0} упражнений
           </span>
         </div>
         
-        {workout.exercises.length > 0 ? (
+        {workout.exercises && workout.exercises.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
-            {workout.exercises.map((exercise, index) => (
+            {workout.exercises.map((exercise: any, index: number) => (
               <ExerciseCard
                 key={exercise.id}
                 exercise={exercise}
@@ -79,7 +79,7 @@ export default async function AdminSessionPage({ params }: AdminSessionPageProps
               </div>
               <div className="space-y-2">
                 <p className="text-white/60 font-medium">Упражнений пока нет</p>
-                <p className="text-xs text-white/30 leading-relaxed">Добавьте первое упражнение, чтобы наполнить эту тренировку контентом</p>
+                <p className="text-xs text-white/30 leading-relaxed">Используйте "Умный импорт" на странице недели или добавьте вручную из библиотеки</p>
               </div>
               <CreateExerciseButton sessionId={sessionId} />
             </div>

@@ -69,6 +69,16 @@ export default async function AdminPage() {
       accent: 'from-purple-500/10'
     },
     {
+      title: 'Библиотека упражнений',
+      description: 'Просмотр и управление базой упражнений, техник и сценариев',
+      href: '/admin/exercises',
+      icon: BookOpen,
+      color: 'text-indigo-300',
+      bg: 'bg-indigo-500/10',
+      ring: 'ring-indigo-400/20',
+      accent: 'from-indigo-500/10'
+    },
+    {
       title: 'Пользователи',
       description: 'Управление подписками и ролями пользователей',
       href: '/admin/users',

@@ -8,8 +8,8 @@ import type {
   ContentWeekUpdate, 
   WorkoutSessionInsert,
   WorkoutSessionUpdate,
-  ExerciseInsert,
-  ExerciseUpdate
+  WorkoutExerciseInsert,
+  WorkoutExerciseUpdate
 } from '@/types/database'
 
 /**
@@ -237,30 +237,30 @@ export async function deleteWorkoutSession(sessionId: string): Promise<{ success
  * Создать упражнение
  */
 export async function createExercise(data: {
-  workout_session_id: string
+  session_id: string
+  exercise_library_id: string
   order_index: number
-  title: string
-  description: string
-  video_kinescope_id: string
   sets?: number
   reps?: string
   rest_seconds?: number
+  video_kinescope_id?: string
+  video_script?: string
 }): Promise<{ success: boolean; error?: string; exerciseId?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
 
     const { data: exercise, error } = await supabase
-      .from('exercises')
+      .from('workout_exercises')
       .insert({
-        workout_session_id: data.workout_session_id,
+        session_id: data.session_id,
+        exercise_library_id: data.exercise_library_id,
         order_index: data.order_index,
-        title: data.title,
-        description: data.description,
-        video_kinescope_id: data.video_kinescope_id,
         sets: data.sets || null,
         reps: data.reps || null,
         rest_seconds: data.rest_seconds || null,
+        video_kinescope_id: data.video_kinescope_id || null,
+        video_script: data.video_script || null,
       })
       .select()
       .single()
@@ -284,14 +284,14 @@ export async function createExercise(data: {
  */
 export async function updateExercise(
   exerciseId: string,
-  data: ExerciseUpdate
+  data: any
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
 
     const { error } = await supabase
-      .from('exercises')
+      .from('workout_exercises')
       .update(data)
       .eq('id', exerciseId)
 
@@ -318,7 +318,7 @@ export async function deleteExercise(exerciseId: string): Promise<{ success: boo
     const supabase = await createClient()
 
     const { error } = await supabase
-      .from('exercises')
+      .from('workout_exercises')
       .delete()
       .eq('id', exerciseId)
 

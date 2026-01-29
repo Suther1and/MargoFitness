@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import {
   ContentWeek,
   WorkoutSession,
-  Exercise,
+  ExerciseLibrary,
+  WorkoutExercise,
   WorkoutSessionWithAccess,
   ContentWeekWithSessions,
   UserWorkoutCompletion,
@@ -51,7 +52,8 @@ export async function getCurrentContentWeek(): Promise<ContentWeek | null> {
   if (!data || data.length === 0) return null
 
   // Найти неделю, в которую попадает текущая дата
-  return getCurrentWeek(data)
+  const profile = await getCurrentProfile()
+  return getCurrentWeek(data, profile)
 }
 
 /**
@@ -77,21 +79,21 @@ export async function getWorkoutSessionsByWeek(
 }
 
 /**
- * Получить упражнения для конкретной тренировки
+ * Получить упражнения для конкретной тренировки (из новой структуры)
  */
-export async function getExercisesBySession(
+export async function getWorkoutExercises(
   sessionId: string
-): Promise<Exercise[]> {
+): Promise<(WorkoutExercise & { exercise_library: ExerciseLibrary })[]> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('exercises')
-    .select('*')
-    .eq('workout_session_id', sessionId)
+    .from('workout_exercises')
+    .select('*, exercise_library(*)')
+    .eq('session_id', sessionId)
     .order('order_index', { ascending: true })
 
   if (error) {
-    console.error('Error fetching exercises:', error)
+    console.error('Error fetching workout exercises:', error)
     return []
   }
 
@@ -116,7 +118,8 @@ export async function getCurrentWeekWithAccess(): Promise<ContentWeekWithSession
   const sessionsWithAccess: WorkoutSessionWithAccess[] = await Promise.all(
     sessions.map(async (session: any) => {
       const access = checkWorkoutAccess(session, profile, currentWeek)
-      const exercises = await getExercisesBySession(session.id)
+      // Используем новую функцию для получения упражнений
+      const exercises = await getWorkoutExercises(session.id)
       const completion = completions.find((c) => c.workout_session_id === session.id)
 
       return {
@@ -142,7 +145,7 @@ export async function getCurrentWeekWithAccess(): Promise<ContentWeekWithSession
  */
 export async function getWorkoutSessionById(
   sessionId: string
-): Promise<(WorkoutSession & { exercises: Exercise[] }) | null> {
+): Promise<(WorkoutSession & { exercises: (WorkoutExercise & { exercise_library: ExerciseLibrary })[] }) | null> {
   const supabase = await createClient()
 
   const { data: session, error: sessionError } = await supabase
@@ -156,7 +159,7 @@ export async function getWorkoutSessionById(
     return null
   }
 
-  const exercises = await getExercisesBySession(sessionId)
+  const exercises = await getWorkoutExercises(sessionId)
 
   return {
     ...session,

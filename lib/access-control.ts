@@ -50,7 +50,7 @@ export function checkWorkoutAccess(
   }
 
   // Случай 3: Неделя не опубликована
-  if (!currentWeek.is_published) {
+  if (!currentWeek.is_published && profile.role !== 'admin') {
     return {
       hasAccess: false,
       reason: 'locked',
@@ -177,12 +177,14 @@ export function isDateInWeek(date: Date, week: ContentWeek): boolean {
 /**
  * Получить текущую неделю из списка недель
  */
-export function getCurrentWeek(weeks: ContentWeek[]): ContentWeek | null {
+export function getCurrentWeek(weeks: ContentWeek[], profile?: Profile | null): ContentWeek | null {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
   return weeks.find(week => {
-    return week.is_published && isDateInWeek(today, week)
+    const isInRange = isDateInWeek(today, week)
+    if (profile?.role === 'admin') return isInRange
+    return week.is_published && isInRange
   }) || null
 }
 

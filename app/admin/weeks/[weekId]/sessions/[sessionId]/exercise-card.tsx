@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { deleteExercise } from '@/lib/actions/admin'
 import { Trash2, Video, Repeat, Clock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { Exercise } from '@/types/database'
+import type { WorkoutExercise, ExerciseLibrary } from '@/types/database'
 import EditExerciseButton from './edit-exercise-button'
 
 interface ExerciseCardProps {
-  exercise: Exercise
+  exercise: WorkoutExercise & { exercise_library: ExerciseLibrary }
   index: number
 }
 
@@ -48,11 +48,16 @@ export default function ExerciseCard({ exercise, index }: ExerciseCardProps) {
             </div>
             <div className="flex-1 space-y-3 min-w-0">
               <div>
-                <h3 className="text-xl font-bold text-white font-oswald uppercase tracking-tight group-hover:text-blue-400 transition-colors">
-                  {exercise.title}
-                </h3>
-                <p className="text-sm text-white/50 leading-relaxed mt-1 line-clamp-2 md:line-clamp-none">
-                  {exercise.description}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold text-purple-400 font-mono uppercase tracking-widest bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+                    {exercise.exercise_library_id}
+                  </span>
+                  <h3 className="text-xl font-bold text-white font-oswald uppercase tracking-tight group-hover:text-blue-400 transition-colors">
+                    {exercise.exercise_library.name}
+                  </h3>
+                </div>
+                <p className="text-sm text-white/50 leading-relaxed line-clamp-2 md:line-clamp-none">
+                  {exercise.exercise_library.description}
                 </p>
               </div>
               
@@ -60,7 +65,7 @@ export default function ExerciseCard({ exercise, index }: ExerciseCardProps) {
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
                   <Video className="size-3 text-white/20" />
                   <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate max-w-[120px]">
-                    {exercise.video_kinescope_id}
+                    {exercise.video_kinescope_id || 'Нет видео'}
                   </span>
                 </div>
                 {exercise.sets && (
