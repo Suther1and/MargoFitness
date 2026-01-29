@@ -232,46 +232,48 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
       exit={{ opacity: 0, x: -20 }}
       className="space-y-8 pb-24 text-left"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-        <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8 mb-12">
+        <div className="flex items-center justify-between">
           <button 
             onClick={onBack}
-            className="w-fit group flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-95"
+            className="group flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
           >
             <ArrowLeft className="size-4 text-white/40 group-hover:text-white transition-colors" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white transition-colors">Назад</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.15em] text-white/40 group-hover:text-white transition-colors">Назад к списку</span>
           </button>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                <Dumbbell className="size-5 text-cyan-400" />
+          <div className="flex items-center gap-3 p-1.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
+            <div className="flex items-center gap-6 px-4 py-2">
+              <div className="flex items-center gap-3">
+                <Clock className="size-4 text-cyan-400/50" />
+                <div className="flex flex-col -space-y-1">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Время</span>
+                  <span className="text-sm font-oswald font-bold text-white">{session.estimated_duration || 45} мин</span>
+                </div>
               </div>
-              <span className="text-[10px] font-black text-cyan-500/50 uppercase tracking-[0.3em]">Тренировка {session.session_number}</span>
+              <div className="w-px h-6 bg-white/10" />
+              <div className="flex items-center gap-3">
+                <Zap className="size-4 text-yellow-400/50" />
+                <div className="flex flex-col -space-y-1">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Упр.</span>
+                  <span className="text-sm font-oswald font-bold text-white">{session.exercises?.length || 0}</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-oswald font-black uppercase tracking-tighter leading-[0.9] text-white">
-              {session.title}
-            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-2 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-8 px-6 py-4">
-            <div className="text-center">
-              <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
-                <Clock className="size-3.5" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Время</span>
-              </div>
-              <div className="text-2xl font-oswald font-bold text-white">{session.estimated_duration || 45} <span className="text-[10px] text-white/40 uppercase">мин</span></div>
+        <div className="relative">
+          <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent rounded-full hidden md:block" />
+          <div className="space-y-1">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em]">
+                Тренировка {session.session_number}
+              </span>
             </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="text-center">
-              <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
-                <Zap className="size-3.5" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Упр.</span>
-              </div>
-              <div className="text-2xl font-oswald font-bold text-white">{session.exercises?.length || 0}</div>
-            </div>
+            <h1 className="text-6xl md:text-8xl font-oswald font-black uppercase tracking-tighter leading-[0.85] text-white">
+              {session.title}
+            </h1>
           </div>
         </div>
       </div>
@@ -304,65 +306,47 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <Badge className={cn(
-                          "text-[10px] font-bold uppercase tracking-widest px-3 py-1 border-none shadow-sm",
-                          exercise.exercise_library.category?.includes('НИЖНЯЯ') ? "bg-orange-500/20 text-orange-400" :
-                          exercise.exercise_library.category?.includes('ВЕРХНЯЯ') ? "bg-cyan-500/20 text-cyan-400" :
-                          exercise.exercise_library.category?.includes('КОР') ? "bg-purple-500/20 text-purple-400" :
+                          "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 border-none shadow-sm",
+                          exercise.exercise_library.name.includes('Приседания') ? "bg-orange-500/20 text-orange-400" :
+                          exercise.exercise_library.name.includes('Тяга') ? "bg-cyan-500/20 text-cyan-400" :
+                          exercise.exercise_library.name.includes('Выпады') ? "bg-yellow-500/20 text-yellow-400" :
+                          exercise.exercise_library.name.includes('Планка') ? "bg-purple-500/20 text-purple-400" :
+                          exercise.exercise_library.name.includes('Отжимания') ? "bg-emerald-500/20 text-emerald-400" :
                           "bg-white/10 text-white/60"
                         )}>
-                          {exercise.exercise_library.category?.split('(')[0].trim()}
+                          {exercise.exercise_library.name.split(' ')[0]}
                         </Badge>
                       </div>
-                      <h3 className="text-2xl md:text-4xl font-oswald font-black text-white uppercase tracking-tight leading-none mb-4">
+                      <h3 className="text-3xl md:text-5xl font-oswald font-black text-white uppercase tracking-tight leading-[0.9] mb-4">
                         {exercise.exercise_library.name}
                       </h3>
-                      <p className="text-sm text-white/40 leading-relaxed italic border-l-2 border-white/5 pl-4">
+                      <p className="text-sm text-white/40 leading-relaxed italic border-l-2 border-white/10 pl-4">
                         {exercise.exercise_library.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1">
-                      <div className="flex items-center justify-center gap-1.5 text-white/20">
-                        <Repeat className="size-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">Подходы</span>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Подходы', val: exercise.sets, icon: Repeat, color: 'text-cyan-400' },
+                      { label: 'Повторы', val: exercise.reps, icon: Sparkles, color: 'text-yellow-400' },
+                      { label: 'Отдых', val: `${exercise.rest_seconds} сек`, icon: Clock, color: 'text-purple-400' },
+                      { label: 'Инвентарь', val: exercise.exercise_library.inventory || 'Нет', icon: Dumbbell, color: 'text-orange-400' }
+                    ].map((item, i) => (
+                      <div key={i} className="flex-1 min-w-[120px] h-20 p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex flex-col items-center justify-center text-center group/item hover:bg-white/[0.05] hover:border-white/10 transition-all">
+                        <div className="flex items-center gap-1.5 mb-1 opacity-30 group-hover/item:opacity-50 transition-opacity">
+                          <item.icon className="size-3" />
+                          <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
+                        </div>
+                        <div className={cn(
+                          "font-oswald font-bold leading-none uppercase",
+                          item.color,
+                          String(item.val).length > 10 ? "text-[10px]" : "text-lg"
+                        )}>
+                          {item.val}
+                        </div>
                       </div>
-                      <div className="text-2xl font-oswald font-bold text-white leading-none">{exercise.sets}</div>
-                    </div>
-                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1 overflow-hidden">
-                      <div className="flex items-center justify-center gap-1.5 text-white/20">
-                        <Sparkles className="size-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">Повторы</span>
-                      </div>
-                      <div className={cn(
-                        "font-oswald font-bold text-white leading-tight uppercase transition-all",
-                        exercise.reps.length > 8 ? "text-xs" : "text-2xl"
-                      )}>
-                        {exercise.reps}
-                      </div>
-                    </div>
-                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1">
-                      <div className="flex items-center justify-center gap-1.5 text-white/20">
-                        <Clock className="size-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">Отдых</span>
-                      </div>
-                      <div className="text-2xl font-oswald font-bold text-white leading-none">
-                        {exercise.rest_seconds} <span className="text-[10px] text-white/40 uppercase">сек</span>
-                      </div>
-                    </div>
-                    <div className="h-24 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex flex-col items-center justify-center text-center space-y-1 overflow-hidden">
-                      <div className="flex items-center justify-center gap-1.5 text-amber-400/40">
-                        <Dumbbell className="size-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">Инвентарь</span>
-                      </div>
-                      <div className={cn(
-                        "font-bold text-amber-200/70 leading-tight uppercase transition-all text-center",
-                        (exercise.exercise_library.inventory?.length || 0) > 12 ? "text-[10px]" : "text-xs"
-                      )}>
-                        {exercise.exercise_library.inventory || 'Без инвентаря'}
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
                   <div className="space-y-4">
