@@ -7,6 +7,7 @@ import CreateSessionButton from "./create-session-button"
 import SessionActions from "./session-actions"
 import SmartImportButton from "./smart-import-button"
 import { Badge } from "@/components/ui/badge"
+import { EditWorkoutButton } from "./edit-workout-button"
 
 interface AdminWeekPageProps {
   params: {
@@ -130,13 +131,16 @@ export default async function AdminWeekPage({ params }: AdminWeekPageProps) {
                     </div>
                     
                     <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-                      <Link href={`/admin/weeks/${weekId}/sessions/${session.id}`} className="w-full">
-                        <button className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-500/20">
-                          <Edit className="size-4" />
-                          Управление
-                          <ChevronRight className="size-4" />
-                        </button>
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link href={`/admin/weeks/${weekId}/sessions/${session.id}`} className="flex-1">
+                          <button className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-500/20">
+                            <Edit className="size-4" />
+                            Управление
+                            <ChevronRight className="size-4" />
+                          </button>
+                        </Link>
+                        <EditWorkoutButton session={session} />
+                      </div>
                       <SessionActions session={session} />
                     </div>
                   </div>

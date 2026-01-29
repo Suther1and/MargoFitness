@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Edit, X, Sparkles, Video, Clock, Repeat, Info, AlertTriangle, LayoutDashboard, ChevronRight } from 'lucide-react'
+import { Edit, X, Sparkles, Video, Clock, Repeat, Info, AlertTriangle, LayoutDashboard, ChevronRight, Dumbbell, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { WorkoutExercise, ExerciseLibrary } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
@@ -170,6 +170,34 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                         </div>
                       </div>
                     </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Порядок</label>
+                      <div className="relative group">
+                        <input
+                          type="number"
+                          min="1"
+                          value={formData.order_index + 1}
+                          onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) - 1})}
+                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-bold text-center appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, order_index: prev.order_index + 1 }))}
+                            className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                          >
+                            <ChevronRight className="size-3 -rotate-90" />
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, order_index: Math.max(0, prev.order_index - 1) }))}
+                            className="p-0.5 hover:bg-white/10 rounded text-white/40 hover:text-white transition-colors"
+                          >
+                            <ChevronRight className="size-3 rotate-90" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                 <div className="space-y-2">
@@ -194,13 +222,45 @@ export default function EditExerciseButton({ exercise }: EditExerciseButtonProps
                 </div>
 
                 <div className="space-y-6">
-                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-3">
-                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Описание техники</span>
-                    <p className="text-sm text-white/70 leading-relaxed italic">«{exercise.exercise_library.description}»</p>
-                    <div className="text-sm text-white/50 leading-relaxed whitespace-pre-line pt-2">
-                      {exercise.exercise_library.technique_steps}
+                    <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-3">
+                      <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Описание техники</span>
+                      <p className="text-sm text-white/70 leading-relaxed italic">«{exercise.exercise_library.description}»</p>
+                      
+                      {/* Инвентарь и облегченная версия */}
+                      {(exercise.exercise_library.inventory || exercise.exercise_library.light_version) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                          {exercise.exercise_library.inventory && (
+                            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-1">
+                              <div className="flex items-center gap-2 text-amber-400/50">
+                                <Dumbbell className="size-3" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest">Инвентарь</span>
+                              </div>
+                              <p className="text-xs text-amber-200/60 font-medium">
+                                {exercise.exercise_library.inventory}
+                                {exercise.exercise_library.inventory_alternative && (
+                                  <span className="block text-[10px] text-white/20 mt-1 italic">
+                                    Альт: {exercise.exercise_library.inventory_alternative}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {exercise.exercise_library.light_version && (
+                            <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-1">
+                              <div className="flex items-center gap-2 text-emerald-400/50">
+                                <Zap className="size-3" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest">Облегченная версия</span>
+                              </div>
+                              <p className="text-xs text-emerald-200/60 font-medium">{exercise.exercise_library.light_version}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="text-sm text-white/50 leading-relaxed whitespace-pre-line pt-4 border-t border-white/5">
+                        {exercise.exercise_library.technique_steps}
+                      </div>
                     </div>
-                  </div>
 
                   <div className="p-6 rounded-3xl bg-red-500/5 border border-red-500/10 space-y-3">
                     <div className="flex items-center gap-2">

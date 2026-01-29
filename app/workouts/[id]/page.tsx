@@ -159,7 +159,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                     </div>
 
                     {/* Params Grid */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
                         <div className="flex items-center justify-center gap-1.5 text-white/20">
                           <Repeat className="size-3" />
@@ -181,6 +181,17 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                         </div>
                         <div className="text-xl font-oswald font-bold text-white">{exercise.rest_seconds} <span className="text-[10px] text-white/40 uppercase">сек</span></div>
                       </div>
+                      {exercise.exercise_library.inventory && (
+                        <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 text-center space-y-1">
+                          <div className="flex items-center justify-center gap-1.5 text-amber-400/40">
+                            <Dumbbell className="size-3" />
+                            <span className="text-[9px] font-bold uppercase tracking-widest">Инвентарь</span>
+                          </div>
+                          <div className="text-[11px] font-bold text-amber-200/70 leading-tight uppercase line-clamp-2">
+                            {exercise.exercise_library.inventory}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Technique Steps */}
@@ -191,6 +202,34 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                       </div>
                       <div className="text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
                         {exercise.exercise_library.technique_steps}
+                        
+                        {/* Альтернатива и облегченная версия */}
+                        {(exercise.exercise_library.inventory_alternative || exercise.exercise_library.light_version) && (
+                          <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {exercise.exercise_library.inventory_alternative && (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-white/20">
+                                  <Dumbbell className="size-3" />
+                                  <span className="text-[9px] font-bold uppercase tracking-widest">Чем заменить инвентарь</span>
+                                </div>
+                                <p className="text-xs text-white/40 italic">
+                                  {exercise.exercise_library.inventory_alternative}
+                                </p>
+                              </div>
+                            )}
+                            {exercise.exercise_library.light_version && (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-emerald-400/30">
+                                  <Zap className="size-3" />
+                                  <span className="text-[9px] font-bold uppercase tracking-widest">Облегченная версия</span>
+                                </div>
+                                <p className="text-xs text-emerald-200/40 italic">
+                                  {exercise.exercise_library.light_version}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 

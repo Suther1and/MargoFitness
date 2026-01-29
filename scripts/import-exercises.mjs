@@ -1,154 +1,127 @@
-import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 
-// Функция для ручного парсинга .env.local
+// Загрузка .env.local вручную
 function loadEnv() {
-  const envPath = path.join(process.cwd(), '.env.local');
+  const envPath = path.resolve(process.cwd(), '.env.local')
   if (fs.existsSync(envPath)) {
-    const envContent = fs.readFileSync(envPath, 'utf8');
+    const envContent = fs.readFileSync(envPath, 'utf8')
     envContent.split('\n').forEach(line => {
-      const [key, ...valueParts] = line.split('=');
+      const [key, ...valueParts] = line.split('=')
       if (key && valueParts.length > 0) {
-        process.env[key.trim()] = valueParts.join('=').trim().replace(/^["']|["']$/g, '');
+        process.env[key.trim()] = valueParts.join('=').trim()
       }
-    });
+    })
   }
 }
 
-loadEnv();
+loadEnv()
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials');
-  process.exit(1);
+  console.error('Missing Supabase credentials in .env.local')
+  process.exit(1)
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-async function importLibrary() {
-  const filePath = path.join(process.cwd(), 'docs/content-planning/EXERCISE_LIBRARY.md');
-  const content = fs.readFileSync(filePath, 'utf8');
+async function importExercises() {
+  const filePath = path.resolve(process.cwd(), 'docs/content-planning/EXERCISE_LIBRARY.md')
+  const content = fs.readFileSync(filePath, 'utf8')
 
-  const exercises = [];
-  const sections = content.split('#### ').slice(1);
+  const exercises = []
+  // Разделяем по заголовкам разделов (## РАЗДЕЛ)
+  const sections = content.split(/^## /m).slice(1)
 
-  console.log(`Found ${sections.length} sections in MD file.`);
+  sections.forEach(section => {
+    const lines = section.split('\n')
+    const sectionTitle = lines[0].trim()
+    if (sectionTitle.includes('📖 Как использовать')) return
 
-  for (const section of sections) {
-    const lines = section.split('\n');
-    const firstLine = lines[0].trim();
-    const idMatch = firstLine.match(/^(\d+\.\d+\.\d+)\s+(.+)$/);
+    // Внутри раздела ищем упражнения (#### 1.1.1)
+    const exerciseBlocks = section.split(/^#### /m).slice(1)
     
-    if (!idMatch) continue;
+    exerciseBlocks.forEach(block => {
+      const blockLines = block.split('\n')
+      const titleLine = blockLines[0].trim()
+      
+      // Парсим ID и название: "1.1.1 Классические приседания"
+      const idMatch = titleLine.match(/^(\d+\.\d+\.\d+)\s+(.+)$/)
+      if (!idMatch) return
 
-    const id = idMatch[1];
-    const name = idMatch[2];
-    
-    // Ищем описание
-    let description = '';
-    const descIndex = lines.findIndex(l => l.includes('**Описание:**'));
-    if (descIndex !== -1) {
-      description = lines[descIndex + 1].trim();
-    }
+      const id = idMatch[1]
+      const name = idMatch[2]
 
-    // Ищем подходы, повторения, отдых
-    let sets = null;
-    let reps = '';
-    let rest = null;
+      // Извлекаем описание
+      const descMatch = block.match(/\*\*Описание:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
+      const description = descMatch ? descMatch[1].trim() : ''
 
-    const setsLine = lines.find(l => l.includes('**Подходы:**'));
-    if (setsLine) {
-      const match = setsLine.match(/\d+/);
-      if (match) sets = parseInt(match[0]);
-    }
+      // Извлекаем параметры
+      const setsMatch = block.match(/\*\*Подходы:\*\*\s*(\d+)/)
+      const repsMatch = block.match(/\*\*Повторения:\*\*\s*([^\n]+)/)
+      const restMatch = block.match(/\*\*Отдых:\*\*\s*(\d+)/)
+      
+      // Новые поля
+      const inventoryMatch = block.match(/\*\*Инвентарь:\*\*\s*([^\n]+)/)
+      const inventoryAltMatch = block.match(/\*\*Альтернатива инвентарю:\*\*\s*([^\n]+)/)
+      const lightVersionMatch = block.match(/\*\*Облегченный вариант:\*\*\s*([^\n]+)/)
 
-    const repsLine = lines.find(l => l.includes('**Повторения:**'));
-    if (repsLine) {
-      reps = repsLine.split('**Повторения:**')[1].trim();
-    }
+      // Извлекаем технику
+      const techniqueMatch = block.match(/\*\*Техника выполнения:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
+      const technique = techniqueMatch ? techniqueMatch[1].trim() : ''
 
-    const restLine = lines.find(l => l.includes('**Отдых:**'));
-    if (restLine) {
-      const match = restLine.match(/\d+/);
-      if (match) rest = parseInt(match[0]);
-    }
+      // Извлекаем ошибки
+      const mistakesMatch = block.match(/\*\*Типичные ошибки:\*\*\s*\n?([\s\S]*?)(?=\n\*\*|$)/)
+      const mistakes = mistakesMatch ? mistakesMatch[1].trim() : ''
 
-    // Ищем технику выполнения
-    let technique = '';
-    const techIndex = lines.findIndex(l => l.includes('**Техника выполнения:**'));
-    if (techIndex !== -1) {
-      let i = techIndex + 1;
-      while (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('**')) {
-        technique += lines[i].trim() + '\n';
-        i++;
-      }
-    }
+      // Извлекаем сценарий
+      const scriptMatch = block.match(/\*\*Видео-сценарий:\*\*\s*\n?([\s\S]*?)(?=\n---|(?:\n\*\*|$))/ )
+      const script = scriptMatch ? scriptMatch[1].trim() : ''
 
-    // Ищем типичные ошибки
-    let mistakes = '';
-    const mistakeIndex = lines.findIndex(l => l.includes('**Типичные ошибки:**'));
-    if (mistakeIndex !== -1) {
-      let i = mistakeIndex + 1;
-      while (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('**')) {
-        mistakes += lines[i].trim() + '\n';
-        i++;
-      }
-    }
+      exercises.push({
+        id,
+        name,
+        description,
+        category: sectionTitle.replace(/^🏋️\s*РАЗДЕЛ\s*\d+:\s*/, ''),
+        default_sets: setsMatch ? parseInt(setsMatch[1]) : 3,
+        default_reps: repsMatch ? repsMatch[1].trim() : '12-15',
+        default_rest_seconds: restMatch ? parseInt(restMatch[1]) : 60,
+        technique_steps: technique,
+        typical_mistakes: mistakes,
+        video_script: script,
+        inventory: inventoryMatch ? inventoryMatch[1].trim() : null,
+        inventory_alternative: inventoryAltMatch ? inventoryAltMatch[1].trim() : null,
+        light_version: lightVersionMatch ? lightVersionMatch[1].trim() : null
+      })
+    })
+  })
 
-    // Ищем видео-сценарий
-    let script = '';
-    const scriptIndex = lines.findIndex(l => l.includes('**Видео-сценарий:**'));
-    if (scriptIndex !== -1) {
-      let i = scriptIndex + 1;
-      while (i < lines.length && !lines[i].includes('---') && !lines[i].startsWith('####')) {
-        script += lines[i].trim() + '\n';
-        i++;
-      }
-    }
+  console.log(`Parsed ${exercises.length} exercises. Starting import...`)
 
-    // Категория и мышцы
-    const patternId = id.split('.').slice(0, 2).join('.');
-    const patternRegex = new RegExp(`### ПАТТЕРН ${patternId}: (.+)`);
-    const patternMatch = content.match(patternRegex);
-    const category = patternMatch ? patternMatch[1].split('(')[0].trim() : 'Другое';
-
-    const musclesRegex = new RegExp(`### ПАТТЕРН ${patternId}:[\\s\\S]*?\\*\\*Целевые мышцы:\\*\\* (.+)`);
-    const musclesMatch = content.match(musclesRegex);
-    const targetMuscles = musclesMatch ? musclesMatch[1].split(',').map(m => m.trim()) : [];
-
-    exercises.push({
-      id,
-      name,
-      description,
-      category,
-      target_muscles: targetMuscles,
-      default_sets: sets,
-      default_reps: reps,
-      default_rest_seconds: rest,
-      technique_steps: technique.trim(),
-      typical_mistakes: mistakes.trim(),
-      video_script: script.trim()
-    });
+  if (exercises.length === 0) {
+    console.log('No exercises found. Check parsing logic.')
+    return
   }
 
-  console.log(`Parsed ${exercises.length} exercises. Inserting into DB in batches...`);
-
-  // Вставляем пачками по 20, чтобы избежать таймаутов и сетевых ошибок
-  for (let i = 0; i < exercises.length; i += 20) {
-    const batch = exercises.slice(i, i + 20);
+  // Пакетная вставка (по 20 штук)
+  const batchSize = 20
+  for (let i = 0; i < exercises.length; i += batchSize) {
+    const batch = exercises.slice(i, i + batchSize)
     const { error } = await supabase
       .from('exercise_library')
-      .upsert(batch, { onConflict: 'id' });
+      .upsert(batch, { onConflict: 'id' })
 
     if (error) {
-      console.error(`Error inserting batch ${i / 20 + 1}:`, error);
+      console.error(`Error importing batch ${i / batchSize + 1}:`, error)
     } else {
-      console.log(`Successfully imported batch ${i / 20 + 1}`);
+      console.log(`Imported batch ${i / batchSize + 1}/${Math.ceil(exercises.length / batchSize)}`)
     }
   }
+
+  console.log('Import finished!')
 }
 
-importLibrary();
+importExercises()
