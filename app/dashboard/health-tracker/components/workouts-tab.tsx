@@ -232,65 +232,55 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
       exit={{ opacity: 0, x: -20 }}
       className="space-y-8 pb-24 text-left"
     >
-      <div className="flex items-center justify-between mb-8">
-        <button 
-          onClick={onBack}
-          className="group flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-95"
-        >
-          <ArrowLeft className="size-4 text-white/40 group-hover:text-white transition-colors" />
-          <span className="text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">К списку тренировок</span>
-        </button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div className="flex flex-col gap-4">
+          <button 
+            onClick={onBack}
+            className="w-fit group flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-95"
+          >
+            <ArrowLeft className="size-4 text-white/40 group-hover:text-white transition-colors" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white transition-colors">Назад</span>
+          </button>
 
-        <div className="flex items-center gap-3">
-          {session.isCompleted && (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <CheckCircle2 className="size-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Завершено</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mb-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-4 max-w-2xl">
+          <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                <Dumbbell className="size-6 text-cyan-400" />
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                <Dumbbell className="size-5 text-cyan-400" />
               </div>
-              <div>
-                <div className="text-[10px] font-bold text-cyan-500/50 uppercase tracking-[0.2em] leading-none mb-1">Тренировка {session.session_number}</div>
-                <h1 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter leading-none">
-                  {session.title}
-                </h1>
-              </div>
+              <span className="text-[10px] font-black text-cyan-500/50 uppercase tracking-[0.3em]">Тренировка {session.session_number}</span>
             </div>
-            {session.description && (
-              <p className="text-lg text-white/40 leading-relaxed font-medium">
-                {session.description}
-              </p>
-            )}
+            <h1 className="text-5xl md:text-7xl font-oswald font-black uppercase tracking-tighter leading-[0.9] text-white">
+              {session.title}
+            </h1>
           </div>
+        </div>
 
-          <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-xl">
+        <div className="flex items-center gap-4 p-2 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl shrink-0">
+          <div className="flex items-center gap-8 px-6 py-4">
             <div className="text-center">
               <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
                 <Clock className="size-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Время</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Время</span>
               </div>
-              <div className="text-xl font-oswald font-bold">{session.estimated_duration || 45} <span className="text-xs text-white/40 uppercase">мин</span></div>
+              <div className="text-2xl font-oswald font-bold text-white">{session.estimated_duration || 45} <span className="text-[10px] text-white/40 uppercase">мин</span></div>
             </div>
-            <div className="w-px h-8 bg-white/10" />
+            <div className="w-px h-10 bg-white/10" />
             <div className="text-center">
               <div className="flex items-center gap-2 text-white/20 mb-1 justify-center">
                 <Zap className="size-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Упражнения</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Упр.</span>
               </div>
-              <div className="text-xl font-oswald font-bold">{session.exercises?.length || 0}</div>
+              <div className="text-2xl font-oswald font-bold text-white">{session.exercises?.length || 0}</div>
             </div>
           </div>
         </div>
       </div>
+
+      {session.description && (
+        <p className="text-xl text-white/40 leading-relaxed font-medium max-w-3xl mb-12 border-l-2 border-white/10 pl-6 italic">
+          {session.description}
+        </p>
+      )}
 
       <div className="space-y-8">
         <div className="flex items-center gap-4 mb-8">
@@ -312,48 +302,64 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
                       <span className="text-2xl font-oswald font-black text-white/20 group-hover:text-cyan-400 transition-colors">{index + 1}</span>
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Badge variant="outline" className="text-[9px] font-mono border-white/10 text-white/30 px-1.5 py-0">
-                          {exercise.exercise_library.category}
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <Badge className={cn(
+                          "text-[10px] font-bold uppercase tracking-widest px-3 py-1 border-none shadow-sm",
+                          exercise.exercise_library.category?.includes('НИЖНЯЯ') ? "bg-orange-500/20 text-orange-400" :
+                          exercise.exercise_library.category?.includes('ВЕРХНЯЯ') ? "bg-cyan-500/20 text-cyan-400" :
+                          exercise.exercise_library.category?.includes('КОР') ? "bg-purple-500/20 text-purple-400" :
+                          "bg-white/10 text-white/60"
+                        )}>
+                          {exercise.exercise_library.category?.split('(')[0].trim()}
                         </Badge>
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-4">
+                      <h3 className="text-2xl md:text-4xl font-oswald font-black text-white uppercase tracking-tight leading-none mb-4">
                         {exercise.exercise_library.name}
                       </h3>
-                      <p className="text-sm text-white/50 leading-relaxed italic border-l-2 border-white/10 pl-4">
+                      <p className="text-sm text-white/40 leading-relaxed italic border-l-2 border-white/5 pl-4">
                         {exercise.exercise_library.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1">
                       <div className="flex items-center justify-center gap-1.5 text-white/20">
                         <Repeat className="size-3" />
                         <span className="text-[9px] font-bold uppercase tracking-widest">Подходы</span>
                       </div>
-                      <div className="text-xl font-oswald font-bold text-white">{exercise.sets}</div>
+                      <div className="text-2xl font-oswald font-bold text-white leading-none">{exercise.sets}</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1 overflow-hidden">
                       <div className="flex items-center justify-center gap-1.5 text-white/20">
                         <Sparkles className="size-3" />
                         <span className="text-[9px] font-bold uppercase tracking-widest">Повторы</span>
                       </div>
-                      <div className="text-xl font-oswald font-bold text-white">{exercise.reps}</div>
+                      <div className={cn(
+                        "font-oswald font-bold text-white leading-tight uppercase transition-all",
+                        exercise.reps.length > 8 ? "text-xs" : "text-2xl"
+                      )}>
+                        {exercise.reps}
+                      </div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                    <div className="h-24 p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center space-y-1">
                       <div className="flex items-center justify-center gap-1.5 text-white/20">
                         <Clock className="size-3" />
                         <span className="text-[9px] font-bold uppercase tracking-widest">Отдых</span>
                       </div>
-                      <div className="text-xl font-oswald font-bold text-white">{exercise.rest_seconds} <span className="text-[10px] text-white/40 uppercase">сек</span></div>
+                      <div className="text-2xl font-oswald font-bold text-white leading-none">
+                        {exercise.rest_seconds} <span className="text-[10px] text-white/40 uppercase">сек</span>
+                      </div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 text-center space-y-1">
+                    <div className="h-24 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex flex-col items-center justify-center text-center space-y-1 overflow-hidden">
                       <div className="flex items-center justify-center gap-1.5 text-amber-400/40">
                         <Dumbbell className="size-3" />
                         <span className="text-[9px] font-bold uppercase tracking-widest">Инвентарь</span>
                       </div>
-                      <div className="text-[11px] font-bold text-amber-200/70 leading-tight uppercase line-clamp-2">
+                      <div className={cn(
+                        "font-bold text-amber-200/70 leading-tight uppercase transition-all text-center",
+                        (exercise.exercise_library.inventory?.length || 0) > 12 ? "text-[10px]" : "text-xs"
+                      )}>
                         {exercise.exercise_library.inventory || 'Без инвентаря'}
                       </div>
                     </div>
@@ -368,27 +374,27 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
                       {exercise.exercise_library.technique_steps}
                       
                       {/* Альтернатива и облегченная версия */}
-                      {(exercise.exercise_library.inventory_alternative || exercise.exercise_library.light_version) && (
-                        <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {exercise.exercise_library.inventory_alternative && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-white/20">
-                                <Dumbbell className="size-3" />
-                                <span className="text-[9px] font-bold uppercase tracking-widest">Чем заменить инвентарь</span>
-                              </div>
-                              <p className="text-xs text-white/40 italic leading-relaxed">
-                                {exercise.exercise_library.inventory_alternative}
-                              </p>
-                            </div>
-                          )}
+                      {(exercise.exercise_library.light_version || exercise.exercise_library.inventory_alternative) && (
+                        <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
                           {exercise.exercise_library.light_version && (
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                               <div className="flex items-center gap-2 text-emerald-400/30">
                                 <Zap className="size-3" />
                                 <span className="text-[9px] font-bold uppercase tracking-widest">Облегченная версия</span>
                               </div>
-                              <p className="text-xs text-emerald-200/40 italic leading-relaxed">
+                              <p className="text-xs text-emerald-200/40 italic leading-snug">
                                 {exercise.exercise_library.light_version}
+                              </p>
+                            </div>
+                          )}
+                          {exercise.exercise_library.inventory_alternative && (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-white/20">
+                                <Dumbbell className="size-3" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest">Чем заменить инвентарь</span>
+                              </div>
+                              <p className="text-xs text-white/40 italic leading-snug">
+                                {exercise.exercise_library.inventory_alternative}
                               </p>
                             </div>
                           )}

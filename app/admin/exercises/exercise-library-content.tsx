@@ -124,12 +124,20 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
                     onClick={() => handleExerciseClick(exercise)}
                     className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left border ${
                       selectedExercise?.id === exercise.id 
-                        ? 'bg-purple-500/10 border-purple-500/30 ring-1 ring-purple-500/30' 
+                        ? exercise.category?.includes('НИЖНЯЯ') ? 'bg-orange-500/10 border-orange-500/30 ring-1 ring-orange-500/30' :
+                          exercise.category?.includes('ВЕРХНЯЯ') ? 'bg-cyan-500/10 border-cyan-500/30 ring-1 ring-cyan-500/30' :
+                          exercise.category?.includes('КОР') ? 'bg-purple-500/10 border-purple-500/30 ring-1 ring-purple-500/30' :
+                          'bg-white/10 border-white/30 ring-1 ring-white/30'
                         : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
                     }`}
                   >
                     <span className={`text-[9px] font-bold font-mono shrink-0 ${
-                      selectedExercise?.id === exercise.id ? 'text-purple-400' : 'text-white/20'
+                      selectedExercise?.id === exercise.id 
+                        ? exercise.category?.includes('НИЖНЯЯ') ? 'text-orange-400' :
+                          exercise.category?.includes('ВЕРХНЯЯ') ? 'text-cyan-400' :
+                          exercise.category?.includes('КОР') ? 'text-purple-400' :
+                          'text-white'
+                        : 'text-white/20'
                     }`}>
                       {exercise.id}
                     </span>
