@@ -1,10 +1,12 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { getAllWeeks } from "@/lib/actions/content"
 import { redirect } from "next/navigation"
-import { Calendar, Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, MoreHorizontal, Clock, ChevronRight } from "lucide-react"
+import { Calendar, Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, MoreHorizontal, Clock, ChevronRight, Sparkles, Settings2 } from "lucide-react"
 import Link from "next/link"
 import CreateWeekButton from "./create-week-button"
 import WeekActions from "./week-actions"
+import { createClient } from "@/lib/supabase/server"
+import { EditWorkoutButton } from "./[weekId]/edit-workout-button"
 
 export default async function AdminWeeksPage() {
   const profile = await getCurrentProfile()
@@ -14,6 +16,16 @@ export default async function AdminWeeksPage() {
   }
 
   const weeks = await getAllWeeks()
+  const supabase = await createClient()
+  
+  // Получаем демо-тренировку
+  const { data: demoWorkouts } = await supabase
+    .from('workout_sessions')
+    .select('*')
+    .eq('is_demo', true)
+    .limit(1)
+  
+  const demoWorkout = demoWorkouts?.[0]
 
   return (
     <div className="space-y-10 py-6">
@@ -28,17 +40,27 @@ export default async function AdminWeeksPage() {
             <span>Назад в панель</span>
           </Link>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white font-oswald uppercase">
-            Управление неделями
+            Контент
           </h1>
           <p className="mt-2 text-white/60">
-            Создавайте тренировочные программы и планируйте контент для пользователей
+            Управление тренировочными программами и демо-контентом
           </p>
         </div>
-        <CreateWeekButton />
+        <div className="flex items-center gap-3">
+          {!demoWorkout && (
+            <Link href="/admin/weeks/demo/create">
+              <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs uppercase tracking-widest hover:bg-emerald-500/20 transition-all active:scale-95">
+                <Sparkles className="size-4" />
+                Создать демо
+              </button>
+            </Link>
+          )}
+          <CreateWeekButton />
+        </div>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: 'Всего недель', value: weeks.length, color: 'text-blue-400', bg: 'bg-blue-500/10' },
           { label: 'Опубликовано', value: weeks.filter(w => w.is_published).length, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
@@ -50,7 +72,36 @@ export default async function AdminWeeksPage() {
             <div className="text-3xl font-bold font-oswald text-white">{stat.value}</div>
           </div>
         ))}
+
+        {/* Demo Workout Card */}
+        {demoWorkout ? (
+          <div className="relative overflow-hidden rounded-3xl bg-emerald-500/5 ring-1 ring-emerald-500/20 p-6 group">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-400/60">Демо-тренировка</p>
+              <div className="flex items-center gap-2">
+                <EditWorkoutButton session={demoWorkout} />
+                <Link href={`/admin/weeks/demo/sessions/${demoWorkout.id}`}>
+                  <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all active:scale-95 shadow-sm">
+                    <Settings2 className="size-4" />
+                  </button>
+                </Link>
+              </div>
+            </div>
+            <div className="text-xl font-bold font-oswald text-white uppercase truncate mb-1">
+              {demoWorkout.title}
+            </div>
+            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
+              {demoWorkout.estimated_duration} мин • Free
+            </p>
+          </div>
+        ) : (
+          <div className="relative overflow-hidden rounded-3xl bg-white/[0.02] border border-dashed border-white/10 p-6 flex flex-col items-center justify-center text-center">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">Демо не создана</p>
+          </div>
+        )}
       </div>
+
+      {/* Weeks List */}
 
       {/* Weeks List */}
       <div className="space-y-6">

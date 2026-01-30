@@ -133,6 +133,29 @@ export async function getCurrentWeekWithAccess(): Promise<ContentWeekWithSession
     })
   )
 
+  // Получить демо-тренировку (статическая, не привязана к неделе)
+  const { data: demoSessions, error: demoError } = await supabase
+    .from('workout_sessions')
+    .select('*')
+    .eq('is_demo', true)
+    .eq('required_tier', 'free')
+    .limit(1)
+
+  if (!demoError && demoSessions && demoSessions.length > 0) {
+    const demoSession = demoSessions[0]
+    const exercises = await getWorkoutExercises(demoSession.id)
+    const completion = completions.find((c) => c.workout_session_id === demoSession.id)
+    
+    sessionsWithAccess.unshift({
+      ...demoSession,
+      hasAccess: true,
+      accessReason: 'subscription',
+      exercises,
+      isCompleted: !!completion,
+      userCompletion: completion || null,
+    } as WorkoutSessionWithAccess)
+  }
+
   return {
     ...currentWeek,
     sessions: sessionsWithAccess,

@@ -42,6 +42,7 @@ export default function CreateSessionButton({ weekId }: CreateSessionButtonProps
     title: '',
     description: '',
     estimated_duration: 45,
+    is_demo: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +51,7 @@ export default function CreateSessionButton({ weekId }: CreateSessionButtonProps
     setError('')
 
     const result = await createWorkoutSession({
-      week_id: weekId,
+      week_id: weekId === 'demo' ? null : weekId,
       ...formData,
     })
 
@@ -64,6 +65,7 @@ export default function CreateSessionButton({ weekId }: CreateSessionButtonProps
         title: '',
         description: '',
         estimated_duration: 45,
+        is_demo: false,
       })
       router.refresh()
     } else {
@@ -141,7 +143,7 @@ export default function CreateSessionButton({ weekId }: CreateSessionButtonProps
                     {TIER_OPTIONS.map(opt => (
                       <DropdownMenuItem 
                         key={opt.value} 
-                        onClick={() => setFormData({...formData, required_tier: opt.value as any})}
+                        onClick={() => setFormData({...formData, required_tier: opt.value as any, is_demo: opt.value === 'free'})}
                         className={`rounded-xl focus:bg-white/5 cursor-pointer py-2.5 px-4 text-sm font-medium transition-colors ${opt.color}`}
                       >
                         {opt.label}

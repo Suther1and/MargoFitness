@@ -35,6 +35,7 @@ export function EditWorkoutButton({ session }: EditWorkoutButtonProps) {
     description: session.description || '',
     estimated_duration: session.estimated_duration || 45,
     required_tier: session.required_tier,
+    is_demo: session.is_demo || false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,7 +139,7 @@ export function EditWorkoutButton({ session }: EditWorkoutButtonProps) {
                   </label>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-bold text-left flex items-center justify-between">
+                      <button type="button" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-bold text-left flex items-center justify-between">
                         <span className={cn(tiers.find(t => t.id === formData.required_tier)?.color)}>
                           {tiers.find(t => t.id === formData.required_tier)?.label}
                         </span>
@@ -149,7 +150,7 @@ export function EditWorkoutButton({ session }: EditWorkoutButtonProps) {
                       {tiers.map((tier) => (
                         <DropdownMenuItem
                           key={tier.id}
-                          onClick={() => setFormData({...formData, required_tier: tier.id as any})}
+                          onClick={() => setFormData({...formData, required_tier: tier.id as any, is_demo: tier.id === 'free'})}
                           className={cn("rounded-lg cursor-pointer focus:bg-white/5", tier.color)}
                         >
                           {tier.label}

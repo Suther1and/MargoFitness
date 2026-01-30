@@ -1,7 +1,7 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
 import { getRegistrationStats, getRevenueByPeriod } from "@/lib/actions/analytics"
 import { redirect } from "next/navigation"
-import { Calendar, BookOpen, Users, TrendingUp, Tag, ArrowRight, Settings, Activity, DollarSign, Percent, Trophy } from "lucide-react"
+import { Calendar, BookOpen, Users, TrendingUp, Tag, ArrowRight, Settings, Activity, DollarSign, Percent, Trophy, Sparkles } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminPage() {

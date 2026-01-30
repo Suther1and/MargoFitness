@@ -140,6 +140,7 @@ export async function createWorkoutSession(data: {
   title: string
   description?: string
   estimated_duration?: number
+  is_demo?: boolean
 }): Promise<{ success: boolean; error?: string; sessionId?: string }> {
   try {
     await checkAdmin()
@@ -154,6 +155,7 @@ export async function createWorkoutSession(data: {
         title: data.title,
         description: data.description || null,
         estimated_duration: data.estimated_duration || null,
+        is_demo: data.is_demo || false,
       })
       .select()
       .single()

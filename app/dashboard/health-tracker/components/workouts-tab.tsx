@@ -80,12 +80,10 @@ export function WorkoutsTab() {
           .eq('is_published', true)
           .order('start_date', { ascending: false })
 
-        if (weeksError) throw weeksError
-        if (!weeks || weeks.length === 0) {
-          setWeekData(null)
-          return
+        if (weeksError) {
+          console.error('[WorkoutsTab] Weeks fetch error:', weeksError)
         }
-
+        
         // 3. Получаем завершенные тренировки
         const { data: completions } = await supabase
           .from('user_workout_completions')
@@ -93,31 +91,73 @@ export function WorkoutsTab() {
           .eq('user_id', user.id)
 
         // 4. Определяем текущую неделю
-        let currentWeek = getCurrentWeek(weeks as any, profileData as Profile)
-        if (!currentWeek && weeks.length > 0) {
+        let currentWeek = weeks ? getCurrentWeek(weeks as any, profileData as Profile) : null
+        if (!currentWeek && weeks && weeks.length > 0) {
           currentWeek = weeks[0] as any
         }
 
+        // 5. Формируем данные сессий
+        let sessionsWithAccess: WorkoutSessionWithAccess[] = []
+        
         if (currentWeek) {
-          // 5. Формируем данные с правами доступа
-          const sessionsWithAccess: WorkoutSessionWithAccess[] = (currentWeek as any).sessions.map((session: any) => {
-            const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
-            const completion = completions?.find(c => c.workout_session_id === session.id)
+          sessionsWithAccess = (currentWeek as any).sessions
+            .filter((s: any) => !s.is_demo) // Исключаем демо из списка недели, если они там есть
+            .map((session: any) => {
+              const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
+              const completion = completions?.find(c => c.workout_session_id === session.id)
 
-            return {
-              ...session,
-              hasAccess: access.hasAccess,
-              accessReason: access.reason as any,
+              return {
+                ...session,
+                hasAccess: access.hasAccess,
+                accessReason: access.reason as any,
+                isCompleted: !!completion,
+                userCompletion: completion || null,
+              }
+            })
+        }
+
+        // 6. Добавляем демо-тренировку ТОЛЬКО для Free пользователей
+        if (profileData?.subscription_tier === 'free') {
+          const { data: demoSessions } = await supabase
+            .from('workout_sessions')
+            .select(`
+              *,
+              exercises:workout_exercises(
+                *,
+                exercise_library(*)
+              )
+            `)
+            .eq('is_demo', true)
+            .limit(1)
+
+          if (demoSessions && demoSessions.length > 0) {
+            const demoSession = demoSessions[0]
+            const completion = completions?.find(c => c.workout_session_id === demoSession.id)
+            
+            const demoWithAccess = {
+              ...demoSession,
+              hasAccess: true,
+              accessReason: 'subscription',
               isCompleted: !!completion,
               userCompletion: completion || null,
-            }
-          })
+            } as WorkoutSessionWithAccess
 
+            // Добавляем демо в начало списка
+            sessionsWithAccess = [demoWithAccess, ...sessionsWithAccess]
+          }
+        } else {
+          console.log('DEBUG: User tier is not FREE:', profileData?.subscription_tier)
+        }
+
+        // 7. Устанавливаем данные
+        if (currentWeek || sessionsWithAccess.length > 0) {
           setWeekData({
-            ...currentWeek,
+            ...(currentWeek || { title: 'Программа', description: '', start_date: '', end_date: '', is_published: true }),
             sessions: sessionsWithAccess,
             isCurrent: true,
           } as ContentWeekWithSessions)
+        } else {
+          setWeekData(null)
         }
       } catch (err) {
         console.error('Error loading workouts directly:', err)
@@ -192,7 +232,17 @@ export function WorkoutsTab() {
                     <WorkoutCard 
                       key={session.id} 
                       session={session} 
-                      onClick={() => session.hasAccess && setSelectedSessionId(session.id)}
+                      profile={profile}
+                      onClick={() => {
+                        if (session.hasAccess) {
+                          setSelectedSessionId(session.id)
+                        } else {
+                          // Эмитим событие для открытия модалки апгрейда в родительском компоненте
+                          window.dispatchEvent(new CustomEvent('open-upgrade-modal', { 
+                            detail: { tier: session.required_tier } 
+                          }))
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -230,8 +280,10 @@ export function WorkoutsTab() {
   )
 }
 
-function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, onClick: () => void }) {
+function WorkoutCard({ session, onClick, profile }: { session: WorkoutSessionWithAccess, onClick: () => void, profile: Profile | null }) {
   const isLocked = !session.hasAccess
+  const isDemo = session.is_demo || session.required_tier === 'free'
+  const isPro = session.required_tier === 'pro'
 
   return (
     <button 
@@ -239,13 +291,18 @@ function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, 
       className={cn(
         "relative group overflow-hidden rounded-[2.5rem] border transition-all duration-500 text-left w-full",
         isLocked 
-          ? "bg-white/[0.02] border-white/5 opacity-60 grayscale-[0.5] cursor-not-allowed" 
-          : "bg-white/[0.03] border-white/10 hover:border-cyan-500/30 hover:bg-white/[0.05] shadow-xl hover:shadow-cyan-500/10",
+          ? "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04] cursor-pointer" 
+          : isDemo
+            ? "bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40"
+            : "bg-white/[0.03] border-white/10 hover:border-cyan-500/30 hover:bg-white/[0.05] shadow-xl hover:shadow-cyan-500/10",
         session.isCompleted && "border-emerald-500/30 bg-emerald-500/[0.02]"
       )}
     >
       {!isLocked && (
-        <div className="absolute -inset-24 bg-cyan-500/5 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className={cn(
+          "absolute -inset-24 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700",
+          isDemo ? "bg-emerald-500/10" : "bg-cyan-500/5"
+        )} />
       )}
 
       <div className="relative p-8 flex flex-col h-full min-h-[280px]">
@@ -253,17 +310,19 @@ function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, 
           <div className="flex items-center gap-2">
             <div className={cn(
               "w-10 h-10 rounded-2xl flex items-center justify-center border transition-colors",
-              isLocked ? "bg-white/5 border-white/10" : "bg-cyan-500/10 border-cyan-500/20"
+              isLocked ? "bg-white/5 border-white/10" : isDemo ? "bg-emerald-500/10 border-emerald-500/20" : "bg-cyan-500/10 border-cyan-500/20"
             )}>
-              {isLocked ? <Lock className="size-5 text-white/20" /> : <Dumbbell className="size-5 text-cyan-400" />}
+              {isLocked ? <Lock className="size-5 text-white/20" /> : isDemo ? <Sparkles className="size-5 text-emerald-400" /> : <Dumbbell className="size-5 text-cyan-400" />}
             </div>
             <div>
-              <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Тренировка {session.session_number}</div>
+              <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
+                {isDemo ? 'Демонстрация' : `Тренировка ${session.session_number}`}
+              </div>
               <Badge variant="outline" className={cn(
                 "text-[9px] font-mono px-1.5 py-0 uppercase tracking-tighter",
-                session.required_tier === 'pro' ? "text-purple-400 border-purple-400/30" : "text-cyan-400 border-cyan-400/30"
+                isDemo ? "text-emerald-400 border-emerald-400/30" : isPro ? "text-purple-400 border-purple-400/30" : "text-cyan-400 border-cyan-400/30"
               )}>
-                {session.required_tier === 'pro' ? 'Pro+' : 'Basic'}
+                {isDemo ? 'FREE' : isPro ? 'Pro+' : 'Basic'}
               </Badge>
             </div>
           </div>
@@ -277,7 +336,10 @@ function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, 
         </div>
 
         <div className="flex-1">
-          <h3 className="text-2xl font-oswald font-black text-white uppercase tracking-tight mb-3 group-hover:text-cyan-400 transition-colors">
+          <h3 className={cn(
+            "text-2xl font-oswald font-black text-white uppercase tracking-tight mb-3 transition-colors",
+            !isLocked && (isDemo ? "group-hover:text-emerald-400" : "group-hover:text-cyan-400")
+          )}>
             {session.title}
           </h3>
           <div className="flex items-center gap-4 text-white/40">
@@ -294,12 +356,15 @@ function WorkoutCard({ session, onClick }: { session: WorkoutSessionWithAccess, 
 
         <div className="mt-8">
           {isLocked ? (
-            <div className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/20 font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+            <div className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
               Открыть доступ
               <ChevronRight className="size-4" />
             </div>
           ) : (
-            <div className="w-full py-4 rounded-2xl bg-cyan-500 text-black font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 group-hover:scale-[1.02] transition-transform">
+            <div className={cn(
+              "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg transition-transform",
+              isDemo ? "bg-emerald-500 text-black shadow-emerald-500/20" : "bg-cyan-500 text-black shadow-cyan-500/20"
+            )}>
               <Play className="size-4 fill-current" />
               Начать тренировку
             </div>
