@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getDashboardWorkouts } from '@/lib/actions/dashboard-workouts'
-import type { ContentWeekWithSessions, WorkoutSessionWithAccess } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
+import { getCurrentWeek, checkWorkoutAccess } from '@/lib/access-control'
+import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import WorkoutCompleteButton from '@/app/workouts/[id]/workout-complete-button'
 
@@ -16,6 +17,7 @@ export function WorkoutsTab() {
   const [loading, setLoading] = useState(true)
   const [weekData, setWeekData] = useState<ContentWeekWithSessions | null>(null)
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
     const handleReset = () => setSelectedSessionId(null)
@@ -27,14 +29,77 @@ export function WorkoutsTab() {
     async function loadData() {
       try {
         setLoading(true)
-        const result = await getDashboardWorkouts()
-        if (result.success) {
-          setWeekData(result.data)
-        } else {
-          console.error('Failed to load workouts:', result.error)
+        const supabase = createClient()
+
+        // 1. Получаем профиль пользователя
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        
+        if (profileData) setProfile(profileData as Profile)
+
+        // 2. Получаем недели и сразу джойним сессии и упражнения
+        const { data: weeks, error: weeksError } = await supabase
+          .from('content_weeks')
+          .select(`
+            *,
+            sessions:workout_sessions(
+              *,
+              exercises:workout_exercises(
+                *,
+                exercise_library(*)
+              )
+            )
+          `)
+          .eq('is_published', true)
+          .order('start_date', { ascending: false })
+
+        if (weeksError) throw weeksError
+        if (!weeks || weeks.length === 0) {
+          setWeekData(null)
+          return
+        }
+
+        // 3. Получаем завершенные тренировки
+        const { data: completions } = await supabase
+          .from('user_workout_completions')
+          .select('*')
+          .eq('user_id', user.id)
+
+        // 4. Определяем текущую неделю
+        let currentWeek = getCurrentWeek(weeks as any, profileData as Profile)
+        if (!currentWeek && weeks.length > 0) {
+          currentWeek = weeks[0] as any
+        }
+
+        if (currentWeek) {
+          // 5. Формируем данные с правами доступа
+          const sessionsWithAccess: WorkoutSessionWithAccess[] = (currentWeek as any).sessions.map((session: any) => {
+            const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
+            const completion = completions?.find(c => c.workout_session_id === session.id)
+
+            return {
+              ...session,
+              hasAccess: access.hasAccess,
+              accessReason: access.reason as any,
+              isCompleted: !!completion,
+              userCompletion: completion || null,
+            }
+          })
+
+          setWeekData({
+            ...currentWeek,
+            sessions: sessionsWithAccess,
+            isCurrent: true,
+          } as ContentWeekWithSessions)
         }
       } catch (err) {
-        console.error('Runtime error loading workouts:', err)
+        console.error('Error loading workouts directly:', err)
       } finally {
         setLoading(false)
       }
