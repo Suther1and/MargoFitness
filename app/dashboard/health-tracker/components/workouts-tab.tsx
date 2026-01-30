@@ -12,6 +12,27 @@ import WorkoutCompleteButton from '@/app/workouts/[id]/workout-complete-button'
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives'
 
+// Хелпер для получения чистой категории и её цвета
+function getCategoryInfo(category: string) {
+  // Очищаем от английского текста в скобках
+  const cleanName = category.split('(')[0].trim();
+  
+  const lowerName = cleanName.toLowerCase();
+  
+  // Карта цветов по паттернам
+  if (lowerName.includes('приседания')) return { name: cleanName, color: 'bg-orange-500/20 text-orange-400' };
+  if (lowerName.includes('выпады')) return { name: cleanName, color: 'bg-yellow-500/20 text-yellow-400' };
+  if (lowerName.includes('тяга') || lowerName.includes('румынская')) return { name: cleanName, color: 'bg-cyan-500/20 text-cyan-400' };
+  if (lowerName.includes('мостик')) return { name: cleanName, color: 'bg-pink-500/20 text-pink-400' };
+  if (lowerName.includes('отведения')) return { name: cleanName, color: 'bg-rose-500/20 text-rose-400' };
+  if (lowerName.includes('отжимания') || lowerName.includes('жим')) return { name: cleanName, color: 'bg-emerald-500/20 text-emerald-400' };
+  if (lowerName.includes('планка') || lowerName.includes('кор') || lowerName.includes('скручивания')) return { name: cleanName, color: 'bg-purple-500/20 text-purple-400' };
+  if (lowerName.includes('бицепс') || lowerName.includes('трицепс') || lowerName.includes('плечи') || lowerName.includes('разводка')) return { name: cleanName, color: 'bg-blue-500/20 text-blue-400' };
+  if (lowerName.includes('кардио') || lowerName.includes('комплексные')) return { name: cleanName, color: 'bg-red-500/20 text-red-400' };
+
+  return { name: cleanName, color: 'bg-white/10 text-white/60' };
+}
+
 export function WorkoutsTab() {
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
   const [loading, setLoading] = useState(true)
@@ -383,17 +404,14 @@ function WorkoutDetail({ session, onBack }: { session: WorkoutSessionWithAccess,
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <Badge className={cn(
-                          "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 border-none shadow-sm",
-                          exercise.exercise_library.name.includes('Приседания') ? "bg-orange-500/20 text-orange-400" :
-                          exercise.exercise_library.name.includes('Тяга') ? "bg-cyan-500/20 text-cyan-400" :
-                          exercise.exercise_library.name.includes('Выпады') ? "bg-yellow-500/20 text-yellow-400" :
-                          exercise.exercise_library.name.includes('Планка') ? "bg-purple-500/20 text-purple-400" :
-                          exercise.exercise_library.name.includes('Отжимания') ? "bg-emerald-500/20 text-emerald-400" :
-                          "bg-white/10 text-white/60"
-                        )}>
-                          {exercise.exercise_library.name.split(' ')[0]}
-                        </Badge>
+                        {exercise.exercise_library.category && (
+                          <Badge className={cn(
+                            "text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 border-none shadow-sm",
+                            getCategoryInfo(exercise.exercise_library.category).color
+                          )}>
+                            {getCategoryInfo(exercise.exercise_library.category).name}
+                          </Badge>
+                        )}
                       </div>
                       <h3 className="text-3xl md:text-5xl font-oswald font-black text-white uppercase tracking-tight leading-[0.9] mb-4">
                         {exercise.exercise_library.name}
