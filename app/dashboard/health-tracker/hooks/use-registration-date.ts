@@ -21,6 +21,7 @@ export function useRegistrationDate(userId: string | null) {
         .single()
       
       if (error) {
+        if (error.code === 'PGRST116') return null
         console.error('Error fetching registration date:', error.message || error)
         return null
       }

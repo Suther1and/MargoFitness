@@ -119,8 +119,14 @@ export function useTrackerSettings(userId: string | null) {
         .maybeSingle()
 
       if (error) {
-        console.error('[useTrackerSettings] Error loading settings:', error)
-        return DEFAULT_SETTINGS
+        // Если ошибка "JSON object requested, multiple (or no) rows returned", значит записи нет
+        if (error.code === 'PGRST116') {
+          console.log('[useTrackerSettings] No settings found, creating defaults...')
+          // ... остальная логика создания дефолтов
+        } else {
+          console.error('[useTrackerSettings] Error loading settings:', error)
+          return DEFAULT_SETTINGS
+        }
       }
 
       if (!data) {

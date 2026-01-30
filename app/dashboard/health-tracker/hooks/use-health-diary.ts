@@ -50,6 +50,7 @@ export function useHealthDiary({ userId, selectedDate }: UseHealthDiaryOptions) 
         .maybeSingle()
       
       if (error) {
+        if (error.code === 'PGRST116') return null
         console.error('Error loading diary entry:', error)
         return null
       }

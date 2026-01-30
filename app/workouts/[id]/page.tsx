@@ -3,10 +3,10 @@ import { getWorkoutSessionById, getWorkoutExercises, getUserCompletions } from "
 import { getCurrentWeek, checkWorkoutAccess } from "@/lib/access-control"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Clock, Dumbbell, Play, CheckCircle2, AlertTriangle, Info, ChevronRight, Sparkles, Repeat, Zap } from "lucide-react"
-import WorkoutCompleteButton from "./workout-complete-button"
+import { ArrowLeft, Clock, Dumbbell, Play, CheckCircle2, AlertTriangle, Info, ChevronRight, Sparkles, Repeat, Zap, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { WorkoutCompletionBlock } from "./workout-completion-block"
 
 interface WorkoutPageProps {
   params: {
@@ -73,7 +73,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
             {isCompleted && (
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                 <CheckCircle2 className="size-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Завершено</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Выполнена</span>
               </div>
             )}
           </div>
@@ -84,12 +84,21 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4 max-w-2xl">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                  <Dumbbell className="size-6 text-cyan-400" />
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center border",
+                  isCompleted ? "bg-emerald-500/10 border-emerald-500/20" : "bg-cyan-500/10 border-cyan-500/20"
+                )}>
+                  <Dumbbell className={cn("size-6", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold text-cyan-500/50 uppercase tracking-[0.2em] leading-none mb-1">Тренировка {workout.session_number}</div>
-                  <h1 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter leading-none">
+                  <div className={cn(
+                    "text-[10px] font-bold uppercase tracking-[0.2em] leading-none mb-1",
+                    isCompleted ? "text-emerald-500/50" : "text-cyan-500/50"
+                  )}>Тренировка {workout.session_number}</div>
+                  <h1 className={cn(
+                    "text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter leading-none transition-colors",
+                    isCompleted ? "hover:text-emerald-400" : "hover:text-cyan-400"
+                  )}>
                     {workout.title}
                   </h1>
                 </div>
@@ -140,8 +149,14 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                   {/* Left: Info (7/12) */}
                   <div className="lg:col-span-7 space-y-8">
                     <div className="flex items-start gap-6">
-                      <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-colors">
-                        <span className="text-2xl font-oswald font-black text-white/20 group-hover:text-cyan-400 transition-colors">{index + 1}</span>
+                      <div className={cn(
+                        "w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border shrink-0 transition-colors",
+                        isCompleted ? "group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20" : "group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20"
+                      )}>
+                        <span className={cn(
+                          "text-2xl font-oswald font-black text-white/20 transition-colors",
+                          isCompleted ? "group-hover:text-emerald-400" : "group-hover:text-cyan-400"
+                        )}>{index + 1}</span>
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-3 mb-2">
@@ -149,7 +164,10 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                             {exercise.exercise_library.category}
                           </Badge>
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-4">
+                        <h3 className={cn(
+                          "text-2xl md:text-3xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-4 transition-colors",
+                          isCompleted ? "group-hover:text-emerald-400" : "group-hover:text-cyan-400"
+                        )}>
                           {exercise.exercise_library.name}
                         </h3>
                         <p className="text-sm text-white/50 leading-relaxed italic border-l-2 border-white/10 pl-4">
@@ -197,7 +215,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                     {/* Technique Steps */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
-                        <Info className="size-4 text-cyan-400" />
+                        <Info className={cn("size-4", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
                         <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/80">Техника выполнения</h4>
                       </div>
                       <div className="text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
@@ -254,8 +272,11 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                         {exercise.video_kinescope_id ? (
                           <div className="flex h-full items-center justify-center">
                             <div className="text-center space-y-4 p-8">
-                              <div className="w-20 h-20 rounded-full bg-cyan-500/20 flex items-center justify-center mx-auto ring-4 ring-cyan-500/10 group-hover/video:scale-110 transition-transform duration-500">
-                                <Play className="size-8 text-cyan-400 fill-current" />
+                              <div className={cn(
+                                "w-20 h-20 rounded-full flex items-center justify-center mx-auto ring-4 transition-transform duration-500",
+                                isCompleted ? "bg-emerald-500/20 ring-emerald-500/10 group-hover/video:scale-110" : "bg-cyan-500/20 ring-cyan-500/10 group-hover/video:scale-110"
+                              )}>
+                                <Play className={cn("size-8 fill-current", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
                               </div>
                               <div className="space-y-2">
                                 <div className="text-sm font-bold text-white uppercase tracking-widest">Видео-инструкция</div>
@@ -296,40 +317,12 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
         </div>
 
         {/* Completion Section */}
-        <div className="mt-20">
-          <div className="relative overflow-hidden rounded-[3.5rem] bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-transparent border border-white/10 p-10 md:p-16 text-center">
-            <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]" />
-            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px]" />
-            
-            <div className="relative space-y-8 max-w-xl mx-auto">
-              <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 flex items-center justify-center mx-auto border border-white/10 shadow-2xl">
-                <CheckCircle2 className={cn("size-10", isCompleted ? "text-emerald-400" : "text-white/20")} />
-              </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight">
-                  {isCompleted ? 'Тренировка завершена!' : 'Завершили тренировку?'}
-                </h3>
-                <p className="text-white/40 font-medium">
-                  {isCompleted 
-                    ? 'Отличная работа! Вы можете обновить свою оценку или пройти тренировку заново.' 
-                    : 'Отметьте свой прогресс, поставьте оценку и двигайтесь к цели!'}
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <WorkoutCompleteButton 
-                  sessionId={id} 
-                  isRetake={isCompleted}
-                />
-                <Link 
-                  href="/dashboard?tab=workouts"
-                  className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 border border-white/10"
-                >
-                  В личный кабинет
-                </Link>
-              </div>
-            </div>
+        <div className="mt-12 md:mt-16">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-8 md:p-12">
+            <WorkoutCompletionBlock 
+              sessionId={id} 
+              isCompleted={isCompleted} 
+            />
           </div>
         </div>
       </div>

@@ -246,6 +246,14 @@ export async function completeWorkout(
     return { success: false, error: error.message }
   }
 
+  // Проверяем достижения после завершения тренировки
+  try {
+    const { checkAndUnlockAchievements } = await import('./achievements')
+    await checkAndUnlockAchievements(profile.id)
+  } catch (achError) {
+    console.error('Error checking achievements after workout:', achError)
+  }
+
   return { success: true }
 }
 
