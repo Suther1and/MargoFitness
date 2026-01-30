@@ -1491,15 +1491,17 @@ export default function HomeNewPage({ initialProfile = null }: HomeNewPageProps)
         onClose={() => setSignInOpen(false)} 
       />
 
-      {profile && profile.subscription_status === 'active' && !isSubscriptionExpired(profile.subscription_expires_at) && (
+      {profile && (
         <>
-          <SubscriptionRenewalModal
-            open={renewalModalOpen}
-            onOpenChange={setRenewalModalOpen}
-            currentTier={profile.subscription_tier}
-            currentExpires={profile.subscription_expires_at}
-            userId={profile.id}
-          />
+          {profile.subscription_tier?.toUpperCase() !== 'FREE' && (
+            <SubscriptionRenewalModal
+              open={renewalModalOpen}
+              onOpenChange={setRenewalModalOpen}
+              currentTier={profile.subscription_tier}
+              currentExpires={profile.subscription_expires_at}
+              userId={profile.id}
+            />
+          )}
 
           <SubscriptionUpgradeModal
             open={upgradeModalOpen}

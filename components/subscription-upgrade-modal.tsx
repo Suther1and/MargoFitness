@@ -4,8 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Product, SubscriptionTier, TIER_LEVELS, TIER_NAMES } from '@/types/database'
-import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus } from 'lucide-react'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Gift, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SUBSCRIPTION_PLANS, SubscriptionLevel } from '@/lib/constants/subscriptions'
+import { cn } from '@/lib/utils'
 
 // Базовые цены за месяц (без скидок) - для конвертации
 const BASE_PRICES_PER_MONTH: Record<number, number> = {
@@ -362,13 +364,13 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
+  const isFreeUser = profileDataRef.current?.currentTier?.toUpperCase() === 'FREE' || currentTier?.toUpperCase() === 'FREE'
   const currentConfig = selectedTier 
     ? tierConfig[selectedTier as keyof typeof tierConfig] 
     : (availableTiersData.length === 0 ? tierConfig.elite : null)
   const products = availableTiersData.find(t => t.tier === selectedTier)?.products || []
   
-  const metadata = selectedProduct?.metadata as { benefits?: string[] } | null
-  const productBenefits = metadata?.benefits || currentConfig?.benefits || []
+  const selectedPlanInfo = selectedTier ? SUBSCRIPTION_PLANS[selectedTier.toUpperCase() as SubscriptionLevel] : null
 
   return (
     <>
@@ -477,13 +479,15 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         {currentConfig?.icon || <Sparkles className={`w-6 h-6 md:w-6 md:h-6 transition-colors duration-300 ${currentConfig?.color || 'text-purple-300'}`} />}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl md:text-2xl font-oswald uppercase leading-none text-white">Апгрейд</h3>
+                        <h3 className="text-xl md:text-2xl font-oswald uppercase leading-none text-white">
+                          {isFreeUser ? 'Выбор тарифа' : 'Апгрейд'}
+                        </h3>
                         <p className="text-xs md:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 md:hidden">
                           <button 
                             onClick={() => setShowMobileTooltip(!showMobileTooltip)}
                             className="underline hover:text-white/60 transition-colors"
                           >
-                            как это работает?
+                            {isFreeUser ? 'что я получу?' : 'как это работает?'}
                           </button>
                         </p>
                         <p className="text-[10px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1 hidden md:block">New Level</p>
@@ -493,7 +497,16 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                     {/* Mobile tooltip */}
                     {showMobileTooltip && (
                       <div className="md:hidden mt-4 p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                        {(availableTiersData.length === 0 
+                        {isFreeUser && selectedPlanInfo ? (
+                          selectedPlanInfo.benefits.map((benefit, i) => (
+                            <div key={i} className={`flex items-center gap-2 text-xs ${benefit.included ? 'text-white/70' : 'text-white/30'}`}>
+                              <div className={`flex-shrink-0 w-3 h-3 rounded-full ${benefit.included ? (currentConfig?.bg || 'bg-white/10') : 'bg-white/5'} flex items-center justify-center`}>
+                                <CheckCircle2 className={`w-2 h-2 ${benefit.included ? (currentConfig?.color || 'text-white/40') : 'text-white/10'}`} />
+                              </div>
+                              <span className="leading-tight">{benefit.text}</span>
+                            </div>
+                          ))
+                        ) : (availableTiersData.length === 0 
                           ? [
                               'У тебя максимальный уровень подписки Elite',
                               'Все функции и личное ведение уже доступны',
@@ -515,14 +528,23 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                       </div>
                     )}
                     
-                    {/* Как это работает - скрыто на мобильных */}
+                    {/* Как это работает / Преимущества - скрыто на мобильных */}
                     <div className="space-y-4 flex-1 hidden md:block pt-8">
                       <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                        {availableTiersData.length === 0 ? 'Твой статус:' : 'Как это работает:'}
+                        {isFreeUser ? `Преимущества ${selectedTier}:` : (availableTiersData.length === 0 ? 'Твой статус:' : 'Как это работает:')}
                       </p>
                       <div className="relative min-h-[220px]">
                         <div className="space-y-3">
-                          {(availableTiersData.length === 0 
+                          {isFreeUser && selectedPlanInfo ? (
+                            selectedPlanInfo.benefits.map((benefit, i) => (
+                              <div key={i} className={`flex items-center gap-3 text-sm ${benefit.included ? 'text-white/70' : 'text-white/20'}`}>
+                                <div className={`flex-shrink-0 w-4 h-4 rounded-full ${benefit.included ? (currentConfig?.bg || 'bg-white/10') : 'bg-white/5'} flex items-center justify-center`}>
+                                  <CheckCircle2 className={`w-3 h-3 ${benefit.included ? (currentConfig?.color || 'text-white/40') : 'text-white/10'}`} />
+                                </div>
+                                <span className={`leading-tight ${benefit.highlight ? 'text-white font-bold' : ''}`}>{benefit.text}</span>
+                              </div>
+                            ))
+                          ) : (availableTiersData.length === 0 
                             ? [
                                 'У тебя максимальный уровень подписки Elite',
                                 'Все функции и личное ведение уже доступны',
@@ -553,7 +575,9 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                       <div className="mt-auto space-y-2 pt-4">
                         {[
                           { icon: Zap, text: 'Моментальный доступ', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-                          { icon: ArrowRight, text: 'Умная конвертация', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                          isFreeUser 
+                            ? { icon: Gift, text: 'Бонусная программа', color: 'text-purple-400', bg: 'bg-purple-500/10' }
+                            : { icon: ArrowRight, text: 'Умная конвертация', color: 'text-blue-400', bg: 'bg-blue-500/10' },
                           { icon: CheckCircle2, text: 'Безопасная оплата', color: 'text-orange-400', bg: 'bg-orange-500/10' }
                         ].map((item, idx) => (
                           <div key={idx} className="flex items-center gap-3 p-2 rounded-2xl bg-white/[0.03] border border-white/5">
@@ -608,40 +632,42 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         })}
                       </div>
 
-                      <div className="mb-5 md:mb-5">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                            <Zap className="w-3 h-3 text-emerald-400" />
-                            <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
+                      {!isFreeUser && (
+                        <div className="mb-5 md:mb-5">
+                          <div className="flex items-center justify-between mb-2 px-2">
+                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                              <Zap className="w-3 h-3 text-emerald-400" />
+                              <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
+                            </div>
+                            <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
                           </div>
-                          <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/20 uppercase tracking-widest">Автоматический пересчет</p>
+                          
+                          <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
+                            <div className="flex-1 flex flex-col items-center">
+                              <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
+                                Осталось дней <span className={conversionData?.currentTier === 'pro' ? 'text-purple-400' : conversionData?.currentTier === 'elite' ? 'text-yellow-400' : 'text-amber-600'}>{conversionData?.currentTier?.toUpperCase() || currentTier.toUpperCase()}</span>:
+                              </p>
+                              <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
+                                <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
+                              </p>
+                            </div>
+                            <div className="w-px h-8 md:h-8 bg-white/5" />
+                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 rounded-full bg-[#1a1a24] border border-white/5 flex items-center justify-center z-10">
+                              <ArrowBigRightDash className="w-4 h-4 md:w-4 md:h-4 text-white/20" />
+                            </div>
+                            <div className="flex-1 flex flex-col items-center">
+                              <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
+                                Будет добавлено <span className={currentConfig?.color}>{selectedTier}</span>:
+                              </p>
+                              <p className={`text-xl md:text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
+                                <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        
-                        <div className="flex items-center gap-4 p-4 md:p-3.5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 relative w-full">
-                          <div className="flex-1 flex flex-col items-center">
-                            <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
-                              Осталось дней <span className={conversionData?.currentTier === 'pro' ? 'text-purple-400' : conversionData?.currentTier === 'elite' ? 'text-yellow-400' : 'text-amber-600'}>{conversionData?.currentTier?.toUpperCase() || currentTier.toUpperCase()}</span>:
-                            </p>
-                            <p className="text-xl md:text-xl font-oswald font-bold text-white/40 line-through leading-none">
-                              <AnimatedNumber value={conversionData?.remainingDays || 0} /> дн.
-                            </p>
-                          </div>
-                          <div className="w-px h-8 md:h-8 bg-white/5" />
-                          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 rounded-full bg-[#1a1a24] border border-white/5 flex items-center justify-center z-10">
-                            <ArrowBigRightDash className="w-4 h-4 md:w-4 md:h-4 text-white/20" />
-                          </div>
-                          <div className="flex-1 flex flex-col items-center">
-                            <p className="text-[10px] md:text-[9px] font-bold text-white/50 md:text-white/30 uppercase mb-1">
-                              Будет добавлено <span className={currentConfig?.color}>{selectedTier}</span>:
-                            </p>
-                            <p className={`text-xl md:text-xl font-oswald font-bold ${currentConfig?.color} leading-none`}>
-                              <AnimatedNumber value={conversionData?.convertedDays || 0} /> дн.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      )}
 
-                      <div className="mb-5 md:mb-5">
+                      <div className={cn("mb-5 md:mb-5", isFreeUser && "mt-4")}>
                         <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-3 md:p-3 backdrop-blur-sm">
                           <div className="grid grid-cols-2 gap-3 md:gap-3" key={`products-${selectedTier}`}>
                             {products.map((p) => {
@@ -654,7 +680,11 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                   style={{ touchAction: 'manipulation' }}
                                 >
                                   {p.discount_percentage > 0 && (
-                                    <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 'bg-purple-500/20 text-purple-100 ring-purple-400/40'}`}>
+                                    <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${
+                                      selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 
+                                      selectedTier === 'pro' ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :
+                                      'bg-amber-600/20 text-amber-100 ring-amber-600/40'
+                                    }`}>
                                       −{p.discount_percentage}%
                                     </span>
                                   )}
@@ -672,47 +702,96 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                       </div>
 
                       <div className="mt-auto pt-4 md:pt-4 border-t border-white/5">
-                        <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 md:p-4 relative backdrop-blur-sm mb-4 md:mb-4 overflow-hidden">
-                          <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
-                            <div className="flex flex-col">
-                              <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
-                              <div className="flex items-baseline gap-2">
-                                <span className={`text-3xl md:text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
-                                  <AnimatedNumber value={conversionData?.totalDays || 0} />
-                                </span>
-                                <div className="flex flex-col leading-none">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>{selectedTier}</span>
-                                  </div>
-                                  <span className="text-[11px] md:text-[9px] font-medium text-white/40 md:text-white/20 mt-1">
-                                    до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                        {isFreeUser ? (
+                          <div className="mb-4">
+                            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-5 flex items-center justify-between relative overflow-hidden">
+                              <div className={`absolute left-0 top-0 bottom-0 w-1 ${currentConfig?.bg?.replace('bg-', 'bg-') || 'bg-white/10'}`} />
+                              
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Срок доступа</span>
+                                <div className="flex items-baseline gap-2">
+                                  <span className={`text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
+                                    <AnimatedNumber value={selectedProduct?.duration_months ? selectedProduct.duration_months * 30 : 0} />
                                   </span>
+                                  <span className="text-sm font-medium text-white/50">дней</span>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Тариф</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-lg font-oswald font-bold uppercase tracking-wide ${currentConfig?.color}`}>
+                                    {selectedTier}
+                                  </span>
+                                  {selectedProduct && selectedProduct.discount_percentage > 0 && (
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ring-1 ${
+                                      selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 
+                                      selectedTier === 'pro' ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :
+                                      'bg-amber-600/20 text-amber-100 ring-amber-600/40'
+                                    }`}>
+                                      -{selectedProduct.discount_percentage}%
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 md:gap-2.5 py-1.5 px-2 md:py-2 md:px-3 rounded-2xl bg-white/[0.04] border border-white/10">
-                              <div className="text-center">
-                                <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Конв.</p>
-                                <p className={`font-oswald font-bold ${currentConfig?.color} text-lg md:text-lg leading-none`}>
-                                  +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
-                                </p>
-                              </div>
-                              <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
-                              <div className="text-center">
-                                <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Новый</p>
-                                <p className="text-white font-oswald font-bold text-lg md:text-lg leading-none">
-                                  +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
-                                </p>
+                            
+                            <div className="flex justify-center mt-3">
+                              <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/30">
+                                <Calendar className="w-3 h-3" />
+                                <span>Доступ до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}</span>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 md:p-4 relative backdrop-blur-sm mb-4 md:mb-4 overflow-hidden">
+                            <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
+                              <div className="flex flex-col">
+                                <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
+                                <div className="flex items-baseline gap-2">
+                                  <span className={`text-3xl md:text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
+                                    <AnimatedNumber value={conversionData?.totalDays || 0} />
+                                  </span>
+                                  <div className="flex flex-col leading-none">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">дней</span>
+                                      <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${currentConfig?.color}`}>{selectedTier}</span>
+                                    </div>
+                                    <span className="text-[11px] md:text-[9px] font-medium text-white/40 md:text-white/20 mt-1">
+                                      до {conversionData ? formatDate(conversionData.newExpirationDate) : '...'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 md:gap-2.5 py-1.5 px-2 md:py-2 md:px-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                                <div className="text-center">
+                                  <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Конв.</p>
+                                  <p className={`font-oswald font-bold ${currentConfig?.color} text-lg md:text-lg leading-none`}>
+                                    +<AnimatedNumber value={conversionData?.convertedDays || 0} format={false} />
+                                  </p>
+                                </div>
+                                <Plus className="w-3 h-3 text-white/10 mt-2 flex-shrink-0" />
+                                <div className="text-center">
+                                  <p className="text-[10px] md:text-[9px] font-bold text-white/40 md:text-white/20 uppercase mb-0.5">Новый</p>
+                                  <p className="text-white font-oswald font-bold text-lg md:text-lg leading-none">
+                                    +<AnimatedNumber value={conversionData?.newProductDays || 0} format={false} />
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <button
                           onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
                           disabled={calculating || !selectedProduct}
-                          className={`w-full py-4 md:py-3.5 rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${selectedTier === 'pro' ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' : selectedTier === 'elite' ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-500/25' : 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-blue-500/25'} ${calculating || !selectedProduct ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl hover:brightness-110 active:scale-[0.98]'}`}
+                          className={`w-full py-4 md:py-3.5 rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${
+                            selectedTier === 'pro' 
+                              ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' 
+                              : selectedTier === 'elite' 
+                                ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-500/25' 
+                                : 'bg-gradient-to-r from-amber-700 to-amber-600 shadow-amber-700/25'
+                          } ${calculating || !selectedProduct ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl hover:brightness-110 active:scale-[0.98]'}`}
                         >
                           <span className="relative z-10">{calculating ? 'Подсчет...' : `Перейти на ${selectedTier}`}</span>
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />

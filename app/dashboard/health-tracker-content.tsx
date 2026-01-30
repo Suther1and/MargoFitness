@@ -1222,13 +1222,15 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             }}
           />
           
-          <SubscriptionRenewalModal
-            open={renewalModalOpen}
-            onOpenChange={setRenewalModalOpen}
-            currentTier={profile.subscription_tier}
-            currentExpires={profile.subscription_expires_at}
-            userId={profile.id}
-          />
+          {profile.subscription_tier?.toUpperCase() !== 'FREE' && (
+            <SubscriptionRenewalModal
+              open={renewalModalOpen}
+              onOpenChange={setRenewalModalOpen}
+              currentTier={profile.subscription_tier}
+              currentExpires={profile.subscription_expires_at}
+              userId={profile.id}
+            />
+          )}
           
           <SubscriptionUpgradeModal
             open={upgradeModalOpen}
