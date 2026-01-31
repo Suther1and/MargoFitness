@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle, RotateCcw } from 'lucide-react'
+import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle, RotateCcw, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek, checkWorkoutAccess } from '@/lib/access-control'
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
 import { AchievementPattern } from '@/app/workouts/[id]/achievement-pattern'
 
-type WorkoutSubTab = 'workouts' | 'materials' | 'intensives'
+type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
 
 // Хелпер для получения чистой категории и её цвета
 function getCategoryInfo(category: string) {
@@ -176,6 +176,7 @@ export function WorkoutsTab() {
     { id: 'workouts' as WorkoutSubTab, label: 'Тренировки', icon: Dumbbell, color: 'bg-cyan-500', shadow: 'shadow-cyan-500/20' },
     { id: 'materials' as WorkoutSubTab, label: 'Материалы', icon: BookOpen, color: 'bg-slate-400', shadow: 'shadow-slate-400/20' },
     { id: 'intensives' as WorkoutSubTab, label: 'Интенсивы', icon: Zap, color: 'bg-yellow-500', shadow: 'shadow-yellow-500/20' },
+    { id: 'marathons' as WorkoutSubTab, label: 'Марафоны', icon: Trophy, color: 'bg-red-500/80', shadow: 'shadow-red-500/10' },
   ]
 
   if (selectedSession) {
@@ -276,6 +277,15 @@ export function WorkoutsTab() {
               title="Интенсивы готовятся"
               description="Скоро запустим специальные программы для быстрого достижения конкретных целей"
               gradient="from-purple-500 to-pink-500"
+            />
+          )}
+
+          {activeSubTab === 'marathons' && (
+            <EmptyState
+              icon={Trophy}
+              title="Марафоны в разработке"
+              description="Здесь будут масштабные челленджи и марафоны с призами и общим рейтингом участников"
+              gradient="from-red-500/40 to-rose-500/40"
             />
           )}
         </motion.div>
