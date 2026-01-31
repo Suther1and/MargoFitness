@@ -9,10 +9,12 @@ import { MDXRemote } from "next-mdx-remote";
 import { Callout, ExpertTip, Checklist, Row, Col, FullWidth, StatCard } from "@/components/articles/mdx-components";
 import { InteractiveChart } from "@/components/articles/interactive-chart";
 
+import { SubscriptionTier, Article } from "@/types/database";
+
 interface ArticleRendererProps {
   article: any;
   hasAccess: boolean;
-  userTier: string;
+  userTier: SubscriptionTier;
   onBack: () => void;
 }
 
@@ -178,8 +180,10 @@ export const ArticleRenderer = ({
               Обновите подписку, чтобы открыть доступ ко всей базе знаний.
             </p>
             <SubscriptionUpgradeModal 
+              open={false}
               currentTier={userTier} 
-              onUpgrade={() => {}} 
+              userId={""}
+              onOpenChange={() => {}} 
             />
           </div>
         )}

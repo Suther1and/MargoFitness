@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
+import { Article, ArticleInsert, ArticleUpdate } from "@/types/database";
 
-export async function getAllArticlesAdmin() {
+export async function getAllArticlesAdmin(): Promise<Article[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
@@ -12,14 +13,14 @@ export async function getAllArticlesAdmin() {
     return [];
   }
 
-  return data;
+  return data as Article[];
 }
 
-export async function upsertArticle(article: any) {
+export async function upsertArticle(article: ArticleInsert | ArticleUpdate) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
-    .upsert(article)
+    .upsert(article as any)
     .select()
     .single();
 
@@ -28,7 +29,7 @@ export async function upsertArticle(article: any) {
     return { success: false, error };
   }
 
-  return { success: true, data };
+  return { success: true, data: data as Article };
 }
 
 export async function deleteArticle(id: string) {

@@ -21,6 +21,7 @@ export type DiarySettings = Database['public']['Tables']['diary_settings']['Row'
 export type DiaryEntry = Database['public']['Tables']['diary_entries']['Row']
 export type Achievement = Database['public']['Tables']['achievements']['Row']
 export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
+export type Article = Database['public']['Tables']['articles']['Row']
 
 // ============================================
 // Типы для вставки (Insert)
@@ -43,6 +44,7 @@ export type DiarySettingsInsert = Database['public']['Tables']['diary_settings']
 export type DiaryEntryInsert = Database['public']['Tables']['diary_entries']['Insert']
 export type AchievementInsert = Database['public']['Tables']['achievements']['Insert']
 export type UserAchievementInsert = Database['public']['Tables']['user_achievements']['Insert']
+export type ArticleInsert = Database['public']['Tables']['articles']['Insert']
 
 // ============================================
 // Типы для обновления (Update)
@@ -65,6 +67,7 @@ export type DiarySettingsUpdate = Database['public']['Tables']['diary_settings']
 export type DiaryEntryUpdate = Database['public']['Tables']['diary_entries']['Update']
 export type AchievementUpdate = Database['public']['Tables']['achievements']['Update']
 export type UserAchievementUpdate = Database['public']['Tables']['user_achievements']['Update']
+export type ArticleUpdate = Database['public']['Tables']['articles']['Update']
 
 export type { Database }
 

@@ -49,7 +49,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["achievement_category"]
           color_class?: string
           created_at?: string | null
-          description?: string
+          description?: string | null
           icon?: string
           icon_url?: string | null
           id?: string
@@ -59,6 +59,48 @@ export type Database = {
           secret_hint?: string | null
           sort_order?: number
           title?: string
+        }
+        Relationships: []
+      }
+      articles: {
+        Row: {
+          access_level: string
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean | null
+          reading_time: number | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          access_level?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          reading_time?: number | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          reading_time?: number | null
+          slug?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -365,7 +407,7 @@ export type Database = {
           title?: string
           video_kinescope_id?: string
           video_thumbnail_url?: string | null
-          workout_session_id: string
+          workout_session_id?: string
         }
         Relationships: [
           {
@@ -376,42 +418,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      free_content: {
-        Row: {
-          content: string
-          created_at: string | null
-          description: string | null
-          id: string
-          is_published: boolean | null
-          order_index: number | null
-          title: string
-          updated_at: string | null
-          video_url: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_published?: boolean | null
-          order_index?: number | null
-          title: string
-          updated_at?: string | null
-          video_url?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_published?: boolean | null
-          order_index?: number | null
-          title?: string
-          updated_at?: string | null
-          video_url?: string | null
-        }
-        Relationships: []
       }
       payment_transactions: {
         Row: {
@@ -465,6 +471,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_products_view"
             referencedColumns: ["id"]
           },
           {
@@ -846,6 +859,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_products_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_purchases_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1056,18 +1076,89 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
-          video_kinescope_id: string
+          video_kinescope_id?: string
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      subscription_products_view: {
+        Row: {
+          base_price: number | null
+          created_at: string | null
+          description: string | null
+          discount_percentage: number | null
+          duration_months: number | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          price: number | null
+          price_per_day: number | null
+          savings_amount: number | null
+          tier_level: number | null
+          tier_name: string | null
+        }
+        Insert: {
+          base_price?: never
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          duration_months?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          price?: number | null
+          price_per_day?: never
+          savings_amount?: never
+          tier_level?: number | null
+          tier_name?: never
+        }
+        Update: {
+          base_price?: never
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          duration_months?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          price?: number | null
+          price_per_day?: never
+          savings_amount?: never
+          tier_level?: number | null
+          tier_name?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      calculate_max_streak_for_habit: {
+        Args: {
+          p_days_of_week: string[]
+          p_habit_id: string
+          p_user_id: string
+        }
+        Returns: number
+      }
       check_email_exists: {
         Args: { current_user_id: string; email_to_check: string }
         Returns: boolean
+      }
+      cleanup_expired_exchange_codes: { Args: never; Returns: undefined }
+      create_bonus_account_for_user: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
+      get_product_by_tier_and_duration: {
+        Args: { p_duration_months: number; p_tier_level: number }
+        Returns: {
+          discount_percentage: number
+          duration_months: number
+          id: string
+          name: string
+          price: number
+          tier_level: number
+        }[]
       }
       get_user_metrics_stats: {
         Args: { p_user_id: string }
@@ -1078,6 +1169,16 @@ export type Database = {
           total_water: number
         }[]
       }
+      is_admin: { Args: never; Returns: boolean }
+      unlock_achievement_for_user: {
+        Args: { p_achievement_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      update_diary_streaks: {
+        Args: { p_entry_date: string; p_user_id: string }
+        Returns: undefined
+      }
+      update_habits_with_streak_fields: { Args: never; Returns: undefined }
     }
     Enums: {
       achievement_category:
@@ -1229,3 +1330,38 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      achievement_category: [
+        "streaks",
+        "metrics",
+        "habits",
+        "weight",
+        "consistency",
+        "workouts",
+        "social",
+        "common",
+        "rare",
+        "epic",
+        "legendary",
+        "absolute",
+      ],
+      bonus_transaction_type: [
+        "welcome",
+        "cashback",
+        "referral_bonus",
+        "referral_first",
+        "spent",
+        "admin_adjustment",
+        "achievement",
+      ],
+      promo_discount_type: ["percent", "fixed_amount"],
+      referral_status: ["registered", "first_purchase_made"],
+      subscription_status_enum: ["active", "inactive", "canceled"],
+      subscription_tier: ["free", "basic", "pro", "elite"],
+      user_role: ["user", "admin"],
+    },
+  },
+} as const

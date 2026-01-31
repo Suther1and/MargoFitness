@@ -2,6 +2,7 @@ import { getAllArticlesAdmin } from "@/lib/actions/articles-admin";
 import ArticlesAdminClient from "./articles-admin-client";
 import { getCurrentProfile } from "@/lib/actions/profile";
 import { redirect } from "next/navigation";
+import { Article } from "@/types/database";
 
 export default async function ArticlesAdminPage() {
   const profile = await getCurrentProfile();
@@ -13,6 +14,6 @@ export default async function ArticlesAdminPage() {
   const articles = await getAllArticlesAdmin();
 
   return (
-    <ArticlesAdminClient initialArticles={articles} />
+    <ArticlesAdminClient initialArticles={articles as any} />
   );
 }

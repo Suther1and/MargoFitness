@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
+import { Article } from "@/types/database";
 
-export async function getArticles() {
+export async function getArticles(): Promise<Article[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
@@ -13,10 +14,10 @@ export async function getArticles() {
     return [];
   }
 
-  return data;
+  return data as Article[];
 }
 
-export async function getArticleBySlug(slug: string) {
+export async function getArticleBySlug(slug: string): Promise<Article | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
@@ -29,5 +30,5 @@ export async function getArticleBySlug(slug: string) {
     return null;
   }
 
-  return data;
+  return data as Article;
 }
