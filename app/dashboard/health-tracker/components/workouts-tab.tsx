@@ -11,6 +11,9 @@ import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from 
 import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
 import { AchievementPattern } from '@/app/workouts/[id]/achievement-pattern'
+import { ArticlesList } from './articles/articles-list'
+import { ArticleRenderer } from './articles/article-renderer'
+import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
 
@@ -35,12 +38,59 @@ function getCategoryInfo(category: string) {
   return { name: cleanName, color: 'bg-white/10 text-white/60' };
 }
 
+const TIER_WEIGHTS = {
+  free: 0,
+  basic: 1,
+  pro: 2,
+  elite: 3,
+};
+
 export function WorkoutsTab() {
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
   const [loading, setLoading] = useState(true)
   const [weekData, setWeekData] = useState<ContentWeekWithSessions | null>(null)
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [articles, setArticles] = useState<any[]>([])
+  const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
+  const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
+  const [mdxContent, setMdxContent] = useState<React.ReactNode>(null)
+  const [loadingArticle, setLoadingArticle] = useState(false)
+
+  useEffect(() => {
+    async function loadArticles() {
+      const data = await getArticles()
+      setArticles(data)
+    }
+    loadArticles()
+  }, [])
+
+  useEffect(() => {
+    async function loadFullArticle() {
+      if (!selectedArticleSlug) {
+        setSelectedArticleData(null)
+        setMdxContent(null)
+        return
+      }
+
+      setLoadingArticle(true)
+      try {
+        // В клиентском компоненте мы не можем использовать compileMDX напрямую (он для RSC)
+        // Поэтому мы будем использовать упрощенный подход или динамический импорт
+        const articleData = await getArticleBySlug(selectedArticleSlug)
+        setSelectedArticleData(articleData)
+        
+        // Для MVP мы можем просто отображать описание или использовать 
+        // специальный API роут для рендеринга MDX если нужно.
+        // Пока оставим заглушку, которую позже заменим на реальный рендер.
+      } catch (err) {
+        console.error('Error loading article:', err)
+      } finally {
+        setLoadingArticle(false)
+      }
+    }
+    loadFullArticle()
+  }, [selectedArticleSlug])
 
   useEffect(() => {
     const handleReset = () => setSelectedSessionId(null)
@@ -191,6 +241,17 @@ export function WorkoutsTab() {
     )
   }
 
+  if (selectedArticleSlug && selectedArticleData) {
+    return (
+      <ArticleRenderer
+        article={selectedArticleData}
+        hasAccess={TIER_WEIGHTS[profile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS]}
+        userTier={profile?.subscription_tier || 'free'}
+        onBack={() => setSelectedArticleSlug(null)}
+      />
+    )
+  }
+
   return (
     <div className="space-y-6 pb-24 md:pb-10 text-left">
       <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 mb-4">
@@ -263,11 +324,10 @@ export function WorkoutsTab() {
           )}
           
           {activeSubTab === 'materials' && (
-            <EmptyState
-              icon={BookOpen}
-              title="Материалы в разработке"
-              description="Здесь будут полезные статьи, гайды по питанию, технике выполнения упражнений и многое другое"
-              gradient="from-blue-500 to-indigo-500"
+            <ArticlesList 
+              articles={articles} 
+              userTier={profile?.subscription_tier || 'free'} 
+              onSelectArticle={(slug) => setSelectedArticleSlug(slug)}
             />
           )}
           
