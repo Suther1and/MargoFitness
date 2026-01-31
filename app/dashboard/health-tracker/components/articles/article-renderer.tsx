@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, ChevronLeft, Lock, Sparkles, Share2, Loader2 } from "lucide-react";
 import { SubscriptionUpgradeModal } from "@/components/subscription-upgrade-modal";
 import { MDXRemote } from "next-mdx-remote";
-import { Callout, ExpertTip, Checklist, Row, Col, FullWidth, StatCard } from "@/components/articles/mdx-components";
+import { Callout, ExpertTip, Checklist, Row, Col, FullWidth, StatCard, ArticleLink } from "@/components/articles/mdx-components";
 import { InteractiveChart } from "@/components/articles/interactive-chart";
 
 import { SubscriptionTier, Article } from "@/types/database";
@@ -27,6 +27,7 @@ const components = {
   Col,
   FullWidth,
   StatCard,
+  ArticleLink,
 };
 
 export const ArticleRenderer = ({

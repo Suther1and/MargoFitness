@@ -38,6 +38,11 @@ export const InteractiveChart = ({
     },
   },
 }: InteractiveChartProps) => {
+  const chartData = data.map(item => ({
+    ...item,
+    name: item.name || item.label || item.category || ""
+  }));
+
   return (
     <div className="my-12 rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 md:p-10 shadow-2xl backdrop-blur-sm overflow-hidden">
       {title && (
@@ -48,7 +53,7 @@ export const InteractiveChart = ({
       <div className="h-[400px] w-full pb-6">
         <ChartContainer config={config}>
           {type === "bar" && (
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis
                 dataKey="name"
@@ -76,7 +81,7 @@ export const InteractiveChart = ({
             </BarChart>
           )}
           {type === "line" && (
-            <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis
                 dataKey="name"
@@ -109,7 +114,7 @@ export const InteractiveChart = ({
           {type === "pie" && (
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
@@ -118,7 +123,7 @@ export const InteractiveChart = ({
                 outerRadius={100}
                 paddingAngle={8}
               >
-                {data.map((_, index) => (
+                {chartData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={index === 0 ? "#22d3ee" : index === 1 ? "#fbbf24" : index === 2 ? "#f43f5e" : "#a855f7"}

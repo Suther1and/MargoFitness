@@ -2,7 +2,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Info, AlertTriangle, CheckCircle, Quote, Sparkles, TrendingUp, Zap, Target } from "lucide-react";
+import { Info, AlertTriangle, CheckCircle, Quote, Sparkles, TrendingUp, Zap, Target, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface CalloutProps {
   children: React.ReactNode;
@@ -78,6 +79,24 @@ export const StatCard = ({ label, value, description, iconType }: { label: strin
       <div className="text-5xl font-black font-oswald text-white tracking-tighter">{value}</div>
       {description && <div className="text-white/60 leading-relaxed">{description}</div>}
     </div>
+  );
+};
+
+export const ArticleLink = ({ href, title }: { href: string; title: string }) => {
+  return (
+    <Link href={href} className="group my-12 block overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 transition-all hover:border-orange-500/30 hover:bg-white/[0.05] max-w-4xl mx-auto">
+      <div className="flex items-center justify-between gap-6">
+        <div className="space-y-2">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400">Читать далее</div>
+          <h4 className="text-2xl font-oswald font-black uppercase tracking-tight text-white group-hover:text-orange-300 transition-colors">
+            {title}
+          </h4>
+        </div>
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg shadow-orange-500/20 transition-transform group-hover:translate-x-2">
+          <ArrowRight className="h-6 w-6" />
+        </div>
+      </div>
+    </Link>
   );
 };
 
