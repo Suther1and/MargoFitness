@@ -260,7 +260,7 @@ export default function ArticlesAdminClient({ initialArticles }: ArticlesAdminCl
                         <Button
                           variant="ghost"
                           onClick={() => openEdit(article)}
-                          className="flex-1 bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all active:scale-95 rounded-xl py-2.5"
+                          className="flex-1 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-95 rounded-xl py-2.5"
                         >
                           <Edit2 className="size-4 mr-2" /> Изменить
                         </Button>
