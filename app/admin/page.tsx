@@ -99,9 +99,9 @@ export default async function AdminPage() {
       accent: 'from-emerald-500/10'
     },
     {
-      title: 'Бесплатные материалы',
-      description: 'Управление контентом для всех пользователей',
-      href: '/admin/free-content',
+      title: 'Материалы (Статьи)',
+      description: 'Управление базой знаний, статьями и уровнями доступа',
+      href: '/admin/articles',
       icon: BookOpen,
       color: 'text-orange-300',
       bg: 'bg-orange-500/10',

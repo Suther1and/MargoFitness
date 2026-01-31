@@ -1,19 +1,18 @@
 import { getAllArticlesAdmin } from "@/lib/actions/articles-admin";
-import { ArticlesAdminClient } from "./articles-admin-client";
+import ArticlesAdminClient from "./articles-admin-client";
+import { getCurrentProfile } from "@/lib/actions/profile";
+import { redirect } from "next/navigation";
 
 export default async function ArticlesAdminPage() {
+  const profile = await getCurrentProfile();
+
+  if (!profile || profile.role !== 'admin') {
+    redirect('/');
+  }
+
   const articles = await getAllArticlesAdmin();
 
   return (
-    <div className="p-6">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Управление статьями</h1>
-          <p className="text-gray-600">Создание, редактирование и публикация материалов.</p>
-        </div>
-      </div>
-
-      <ArticlesAdminClient initialArticles={articles} />
-    </div>
+    <ArticlesAdminClient initialArticles={articles} />
   );
 }
