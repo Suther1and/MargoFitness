@@ -10,6 +10,7 @@ import { completeWorkout } from '@/lib/actions/content'
 import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
+import { AchievementPattern } from '@/app/workouts/[id]/achievement-pattern'
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives'
 
@@ -665,7 +666,10 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
 
       <div className="mt-12 md:mt-16">
         {isDemo ? (
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0f0f12] border border-white/5 p-8 md:p-12 text-center">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 p-8 md:p-12 text-center min-h-[460px] flex items-center justify-center">
+            {/* Background Pattern */}
+            <AchievementPattern />
+            
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-purple-500/5 via-transparent to-transparent pointer-events-none" />
             
             <div className="relative space-y-8 max-w-xl mx-auto">
@@ -704,7 +708,12 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
             </div>
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-8 md:p-12">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-8 md:p-12 min-h-[460px] flex items-center justify-center">
+            {/* Background Pattern */}
+            <AchievementPattern />
+            
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
+
             <WorkoutCompletionBlock 
               sessionId={session.id} 
               isCompleted={isCompleted}

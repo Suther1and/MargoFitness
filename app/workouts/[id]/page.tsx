@@ -1,12 +1,13 @@
 import { getCurrentProfile } from "@/lib/actions/profile"
-import { getWorkoutSessionById, getWorkoutExercises, getUserCompletions } from "@/lib/actions/content"
+import { getWorkoutSessionById, getUserCompletions } from "@/lib/actions/content"
 import { getCurrentWeek, checkWorkoutAccess } from "@/lib/access-control"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Clock, Dumbbell, Play, CheckCircle2, AlertTriangle, Info, ChevronRight, Sparkles, Repeat, Zap, Star } from "lucide-react"
+import { ArrowLeft, Clock, Dumbbell, Play, CheckCircle2, Repeat, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { WorkoutCompletionBlock } from "./workout-completion-block"
+import { AchievementPattern } from "./achievement-pattern"
 
 interface WorkoutPageProps {
   params: {
@@ -28,7 +29,6 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
     notFound()
   }
 
-  // Проверить доступ через getCurrentWeekWithAccess логику
   const supabase = await (await import('@/lib/supabase/server')).createClient()
   const { data: weeks } = await supabase
     .from('content_weeks')
@@ -145,8 +145,6 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
             >
               <div className="p-8 md:p-10">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                  
-                  {/* Left: Info (7/12) */}
                   <div className="lg:col-span-7 space-y-8">
                     <div className="flex items-start gap-6">
                       <div className={cn(
@@ -176,7 +174,6 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                       </div>
                     </div>
 
-                    {/* Params Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
                         <div className="flex items-center justify-center gap-1.5 text-white/20">
@@ -187,7 +184,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                       </div>
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
                         <div className="flex items-center justify-center gap-1.5 text-white/20">
-                          <Sparkles className="size-3" />
+                          <Zap className="size-3" />
                           <span className="text-[9px] font-bold uppercase tracking-widest">Повторы</span>
                         </div>
                         <div className="text-xl font-oswald font-bold text-white">{exercise.reps}</div>
@@ -212,100 +209,32 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
                       )}
                     </div>
 
-                    {/* Technique Steps */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
-                        <Info className={cn("size-4", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
+                        <Zap className={cn("size-4", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
                         <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/80">Техника выполнения</h4>
                       </div>
                       <div className="text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
                         {exercise.exercise_library.technique_steps}
-                        
-                        {/* Альтернатива и облегченная версия */}
-                        {(exercise.exercise_library.inventory_alternative || exercise.exercise_library.light_version) && (
-                          <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {exercise.exercise_library.inventory_alternative && (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-white/20">
-                                  <Dumbbell className="size-3" />
-                                  <span className="text-[9px] font-bold uppercase tracking-widest">Чем заменить инвентарь</span>
-                                </div>
-                                <p className="text-xs text-white/40 italic">
-                                  {exercise.exercise_library.inventory_alternative}
-                                </p>
-                              </div>
-                            )}
-                            {exercise.exercise_library.light_version && (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-emerald-400/30">
-                                  <Zap className="size-3" />
-                                  <span className="text-[9px] font-bold uppercase tracking-widest">Облегченная версия</span>
-                                </div>
-                                <p className="text-xs text-emerald-200/40 italic">
-                                  {exercise.exercise_library.light_version}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
-
-                    {/* Typical Mistakes */}
-                    {exercise.exercise_library.typical_mistakes && (
-                      <div className="p-6 rounded-[2rem] bg-rose-500/5 border border-rose-500/10 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle className="size-4 text-rose-400/50" />
-                          <span className="text-[10px] font-bold text-rose-400/50 uppercase tracking-widest">Типичные ошибки</span>
-                        </div>
-                        <p className="text-xs text-rose-200/40 leading-relaxed whitespace-pre-line">
-                          {exercise.exercise_library.typical_mistakes}
-                        </p>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Right: Video (5/12) */}
                   <div className="lg:col-span-5">
                     <div className="sticky top-8">
                       <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto overflow-hidden rounded-[3rem] bg-white/5 border border-white/10 shadow-2xl group/video">
                         {exercise.video_kinescope_id ? (
-                          <div className="flex h-full items-center justify-center">
-                            <div className="text-center space-y-4 p-8">
-                              <div className={cn(
-                                "w-20 h-20 rounded-full flex items-center justify-center mx-auto ring-4 transition-transform duration-500",
-                                isCompleted ? "bg-emerald-500/20 ring-emerald-500/10 group-hover/video:scale-110" : "bg-cyan-500/20 ring-cyan-500/10 group-hover/video:scale-110"
-                              )}>
-                                <Play className={cn("size-8 fill-current", isCompleted ? "text-emerald-400" : "text-cyan-400")} />
-                              </div>
-                              <div className="space-y-2">
-                                <div className="text-sm font-bold text-white uppercase tracking-widest">Видео-инструкция</div>
-                                <div className="text-[10px] text-white/20 font-mono uppercase truncate px-4">
-                                  ID: {exercise.video_kinescope_id}
-                                </div>
-                              </div>
-                              <p className="text-[10px] text-white/30 leading-relaxed">
-                                Плеер Kinescope будет интегрирован в следующем обновлении
-                              </p>
+                          <div className="flex h-full items-center justify-center text-center p-8 space-y-4">
+                            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto bg-white/10", isCompleted ? "text-emerald-400" : "text-cyan-400")}>
+                              <Play className="size-8 fill-current" />
                             </div>
+                            <div className="text-sm font-bold uppercase tracking-widest text-white/40">Видео доступно</div>
                           </div>
                         ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <div className="text-center space-y-4 p-8">
-                              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto border border-white/10">
-                                <Play className="size-8 text-white/10" />
-                              </div>
-                              <div className="space-y-2">
-                                <div className="text-sm font-bold text-white/20 uppercase tracking-widest">Видео готовится</div>
-                                <p className="text-[10px] text-white/10 leading-relaxed">
-                                  Мы скоро добавим видео для этого упражнения
-                                </p>
-                              </div>
-                            </div>
+                          <div className="flex h-full items-center justify-center text-center p-8">
+                            <div className="text-sm font-bold uppercase tracking-widest text-white/10">Видео готовится</div>
                           </div>
                         )}
-                        
-                        {/* Decorative Overlay */}
                         <div className="absolute inset-0 pointer-events-none border-[12px] border-black/20 rounded-[3rem]" />
                       </div>
                     </div>
@@ -318,7 +247,10 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
 
         {/* Completion Section */}
         <div className="mt-12 md:mt-16">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-8 md:p-12">
+          <div className="relative overflow-hidden rounded-[3rem] border border-white/5 p-8 md:p-12 text-center bg-transparent">
+            {/* Background Pattern */}
+            <AchievementPattern />
+            
             <WorkoutCompletionBlock 
               sessionId={id} 
               isCompleted={isCompleted} 
@@ -328,15 +260,4 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
       </div>
     </div>
   )
-}
-
-function getDifficultyEmoji(rating: number): string {
-  const emojis: Record<number, string> = {
-    1: '😊 Легко',
-    2: '🙂 Нормально',
-    3: '😐 Средне',
-    4: '😅 Тяжело',
-    5: '😰 Очень тяжело',
-  }
-  return emojis[rating] || 'Не оценено'
 }

@@ -26,7 +26,6 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
       if (onComplete) {
         onComplete()
       } else {
-        // Добавляем небольшую задержку перед редиректом, чтобы избежать мерцания
         setTimeout(() => {
           router.push('/dashboard?tab=workouts')
           router.refresh()
@@ -47,17 +46,13 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
   ]
 
   const ratingLabels: Record<number, string> = {
-    1: 'Очень плохо',
-    2: 'Плохо',
-    3: 'Средне',
-    4: 'Нормально',
-    5: 'Отлично'
+    1: 'Очень плохо', 2: 'Плохо', 3: 'Средне', 4: 'Нормально', 5: 'Отлично'
   }
 
   return (
-    <div className="relative max-w-2xl mx-auto text-center">
-      <div className="space-y-8">
-        <div className="space-y-2">
+    <div className="relative z-10 w-full flex flex-col items-center">
+      <div className="w-full max-w-xl space-y-8">
+        <div className="space-y-2 text-center">
           <h3 className="text-3xl md:text-5xl font-oswald font-black uppercase tracking-tight text-white leading-none">
             {isCompleted ? 'Тренировка выполнена!' : 'Завершили тренировку?'}
           </h3>
@@ -66,7 +61,7 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
           {/* Общая оценка */}
           <div className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 flex flex-col items-center justify-between min-h-[140px]">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 block mb-4">
@@ -83,9 +78,7 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
                   <Star
                     className={cn(
                       "size-10 transition-colors",
-                      value <= rating
-                        ? "fill-emerald-400 text-emerald-400"
-                        : "text-white/10 hover:text-white/20"
+                      value <= rating ? "fill-emerald-400 text-emerald-400" : "text-white/10 hover:text-white/20"
                     )}
                   />
                 </button>
@@ -118,9 +111,7 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
                   >
                     <div className={cn(
                       "w-10 h-10 rounded-xl border flex items-center justify-center transition-all",
-                      difficulty === item.value 
-                        ? "bg-white/10 border-white/20" 
-                        : "bg-white/5 border-transparent"
+                      difficulty === item.value ? "bg-white/10 border-white/20" : "bg-white/5 border-transparent"
                     )}>
                       <Icon className={cn("size-5", difficulty === item.value ? item.color : "text-white")} />
                     </div>
@@ -136,29 +127,15 @@ export function WorkoutCompletionBlock({ sessionId, isCompleted, onComplete }: W
           </div>
         </div>
 
-        <div className="pt-4">
+        <div className="pt-4 flex justify-center">
           <button
             onClick={handleComplete}
             disabled={loading}
-            className={cn(
-              "group relative w-full sm:w-auto px-12 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all active:scale-95 overflow-hidden",
-              loading 
-                ? "bg-white/10 text-white/40 cursor-not-allowed" 
-                : "bg-emerald-500 text-black shadow-2xl shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5"
-            )}
+            className="group relative w-full sm:w-auto px-12 py-5 rounded-2xl bg-emerald-500 text-black font-black text-sm uppercase tracking-[0.2em] transition-all active:scale-95 overflow-hidden shadow-2xl shadow-emerald-500/20 hover:shadow-emerald-500/40"
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
-              {loading ? (
-                <>
-                  <div className="size-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                  Сохранение...
-                </>
-              ) : (
-                <>
-                  Завершить тренировку
-                  <Play className="size-4 fill-current" />
-                </>
-              )}
+              {loading ? 'Сохранение...' : 'Завершить тренировку'}
+              {!loading && <Play className="size-4 fill-current" />}
             </span>
           </button>
         </div>
