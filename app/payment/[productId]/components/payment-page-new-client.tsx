@@ -141,10 +141,10 @@ export function PaymentPageNewClient({
       const now = new Date()
       const baseDate = currentExpires > now ? currentExpires : now
       const newDate = new Date(baseDate)
-      newDate.setDate(newDate.getDate() + (product.duration_months * 30))
+      newDate.setDate(newDate.getDate() + ((product.duration_months || 1) * 30))
       return newDate
     } else if (action === 'upgrade' && conversionData) {
-      const totalDays = (product.duration_months * 30) + conversionData.convertedDays
+      const totalDays = ((product.duration_months || 1) * 30) + conversionData.convertedDays
       const newDate = new Date()
       newDate.setDate(newDate.getDate() + totalDays)
       return newDate
@@ -168,7 +168,7 @@ export function PaymentPageNewClient({
   }
 
   const currentRemainingDays = getRemainingDays()
-  const addedDays = product.duration_months * 30
+  const addedDays = (product.duration_months || 1) * 30
   const totalDaysAfterRenewal = currentRemainingDays + addedDays
 
   // Динамические цвета для апгрейда
@@ -298,7 +298,7 @@ export function PaymentPageNewClient({
                       <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] leading-none mb-2">Итоговый срок</span>
                       <div className="flex items-baseline gap-1.5">
                         <span className={`text-4xl font-bold font-oswald leading-none ${tierColor}`}>
-                          {(product.duration_months * 30) + conversionData.convertedDays}
+                          {((product.duration_months || 1) * 30) + conversionData.convertedDays}
                         </span>
                         <span className={`text-sm font-bold uppercase ${tierColor} opacity-30`}>дней</span>
                       </div>
@@ -433,7 +433,7 @@ export function PaymentPageNewClient({
                   <div className="text-right flex flex-col items-end">
                     <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">Итого</span>
                     <span className={`text-2xl font-bold font-oswald leading-none ${tierColor}`}>
-                      {(product.duration_months * 30) + conversionData.convertedDays} дней
+                      {((product.duration_months || 1) * 30) + conversionData.convertedDays} дней
                     </span>
                   </div>
                 </div>

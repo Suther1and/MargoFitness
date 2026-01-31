@@ -55,7 +55,7 @@ export async function getDiarySettings(userId: string) {
       console.log(`[Diary Action] No settings found for ${userId}, creating defaults...`)
       const defaultSettings: DiarySettingsInsert = {
         user_id: userId,
-        enabled_metrics: ['weight', 'steps', 'water', 'calories', 'mood'],
+        enabled_widgets: ['weight', 'steps', 'water', 'calories', 'mood'],
         goals: {},
         streaks: { current: 0, longest: 0, last_entry_date: null }
       }

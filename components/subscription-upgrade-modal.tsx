@@ -174,7 +174,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     
     // Если конвертация дает 0, но есть оставшиеся дни - даем минимум 1 день
     const convertedDays = roundedConvertedDays === 0 ? 1 : roundedConvertedDays
-    const newProductDays = productDurationMonths * 30
+    const newProductDays = (productDurationMonths || 1) * 30
     
     return {
       convertedDays: Math.max(0, convertedDays),
@@ -278,7 +278,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         const initialProd = targetTier.products.find(p => p.duration_months === 6) || targetTier.products[0]
         
         // ЛОКАЛЬНЫЙ расчет без Server Action!
-        const conversion = calculateConversion(initialProd.tier_level || 0, initialProd.duration_months)
+        const conversion = calculateConversion(initialProd.tier_level || 0, initialProd.duration_months || 0)
         
         setSelectedTier(targetTier.tier)
         setSelectedProduct(initialProd)
@@ -321,7 +321,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     setSelectedProduct(prod)
     
     // ЛОКАЛЬНЫЙ расчет без Server Action!
-    const conversion = calculateConversion(prod.tier_level || 0, prod.duration_months)
+    const conversion = calculateConversion(prod.tier_level || 0, prod.duration_months || 0)
     
     if (conversion) {
       setConversionData({
@@ -344,7 +344,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     setSelectedProduct(product)
     
     // ЛОКАЛЬНЫЙ расчет без Server Action!
-    const conversion = calculateConversion(product.tier_level || 0, product.duration_months)
+    const conversion = calculateConversion(product.tier_level || 0, product.duration_months || 0)
     
     if (conversion) {
       setConversionData({
@@ -679,7 +679,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                   className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-white/10'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-white/20'} shadow-lg ${currentConfig?.shadow || ''}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
                                   style={{ touchAction: 'manipulation' }}
                                 >
-                                  {p.discount_percentage > 0 && (
+                                  {(p.discount_percentage || 0) > 0 && (
                                     <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${
                                       selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 
                                       selectedTier === 'pro' ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :
@@ -711,7 +711,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Срок доступа</span>
                                 <div className="flex items-baseline gap-2">
                                   <span className={`text-3xl font-oswald font-bold leading-none ${currentConfig?.color}`}>
-                                    <AnimatedNumber value={selectedProduct?.duration_months ? selectedProduct.duration_months * 30 : 0} />
+                                    <AnimatedNumber value={selectedProduct?.duration_months ? (selectedProduct.duration_months || 1) * 30 : 0} />
                                   </span>
                                   <span className="text-sm font-medium text-white/50">дней</span>
                                 </div>
@@ -723,7 +723,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                   <span className={`text-lg font-oswald font-bold uppercase tracking-wide ${currentConfig?.color}`}>
                                     {selectedTier}
                                   </span>
-                                  {selectedProduct && selectedProduct.discount_percentage > 0 && (
+                                  {selectedProduct && (selectedProduct.discount_percentage || 0) > 0 && (
                                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ring-1 ${
                                       selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 
                                       selectedTier === 'pro' ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :

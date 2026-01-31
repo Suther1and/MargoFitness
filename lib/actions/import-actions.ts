@@ -128,7 +128,7 @@ export async function importWorkoutsFromMarkdown(weekId: string, markdown: strin
 
       const { error: exercisesError } = await supabase
         .from('workout_exercises')
-        .insert(workoutExercises)
+        .insert(workoutExercises as any)
 
       if (exercisesError) throw exercisesError
     }

@@ -9,8 +9,11 @@ import type {
   WorkoutSessionInsert,
   WorkoutSessionUpdate,
   WorkoutExerciseInsert,
-  WorkoutExerciseUpdate
+  WorkoutExerciseUpdate,
+  Database
 } from '@/types/database'
+
+type WorkoutSessionInsertCustom = Omit<WorkoutSessionInsert, 'week_id'> & { week_id: string | null }
 
 /**
  * Проверка прав администратора
@@ -133,30 +136,14 @@ export async function deleteWeek(weekId: string): Promise<{ success: boolean; er
 /**
  * Создать тренировку
  */
-export async function createWorkoutSession(data: {
-  week_id: string
-  session_number: number
-  required_tier: 'free' | 'basic' | 'pro' | 'elite'
-  title: string
-  description?: string
-  estimated_duration?: number
-  is_demo?: boolean
-}): Promise<{ success: boolean; error?: string; sessionId?: string }> {
+export async function createWorkoutSession(data: WorkoutSessionInsertCustom): Promise<{ success: boolean; error?: string; sessionId?: string }> {
   try {
     await checkAdmin()
     const supabase = await createClient()
 
     const { data: session, error } = await supabase
       .from('workout_sessions')
-      .insert({
-        week_id: data.week_id,
-        session_number: data.session_number,
-        required_tier: data.required_tier,
-        title: data.title,
-        description: data.description || null,
-        estimated_duration: data.estimated_duration || null,
-        is_demo: data.is_demo || false,
-      })
+      .insert(data as any)
       .select()
       .single()
 
@@ -286,7 +273,7 @@ export async function createExercise(data: {
  */
 export async function updateExercise(
   exerciseId: string,
-  data: any
+  data: WorkoutExerciseUpdate
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await checkAdmin()
@@ -294,7 +281,7 @@ export async function updateExercise(
 
     const { error } = await supabase
       .from('workout_exercises')
-      .update(data)
+      .update(data as any)
       .eq('id', exerciseId)
 
     if (error) {
@@ -338,3 +325,25 @@ export async function deleteExercise(exerciseId: string): Promise<{ success: boo
   }
 }
 
+/**
+ * Получить настройки Health Tracker для пользователя
+ */
+export async function getDiarySettings(userId: string) {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('diary_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
+    return data
+  } catch (error) {
+    console.error('Error in getDiarySettings:', error)
+    return null
+  }
+}

@@ -19,7 +19,6 @@ export type Referral = Database['public']['Tables']['referrals']['Row']
 export type PromoCode = Database['public']['Tables']['promo_codes']['Row']
 export type DiarySettings = Database['public']['Tables']['diary_settings']['Row']
 export type DiaryEntry = Database['public']['Tables']['diary_entries']['Row']
-export type ProgressPhoto = Database['public']['Tables']['progress_photos']['Row']
 export type Achievement = Database['public']['Tables']['achievements']['Row']
 export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
 
@@ -42,7 +41,6 @@ export type ReferralInsert = Database['public']['Tables']['referrals']['Insert']
 export type PromoCodeInsert = Database['public']['Tables']['promo_codes']['Insert']
 export type DiarySettingsInsert = Database['public']['Tables']['diary_settings']['Insert']
 export type DiaryEntryInsert = Database['public']['Tables']['diary_entries']['Insert']
-export type ProgressPhotoInsert = Database['public']['Tables']['progress_photos']['Insert']
 export type AchievementInsert = Database['public']['Tables']['achievements']['Insert']
 export type UserAchievementInsert = Database['public']['Tables']['user_achievements']['Insert']
 
@@ -65,9 +63,10 @@ export type ReferralUpdate = Database['public']['Tables']['referrals']['Update']
 export type PromoCodeUpdate = Database['public']['Tables']['promo_codes']['Update']
 export type DiarySettingsUpdate = Database['public']['Tables']['diary_settings']['Update']
 export type DiaryEntryUpdate = Database['public']['Tables']['diary_entries']['Update']
-export type ProgressPhotoUpdate = Database['public']['Tables']['progress_photos']['Update']
 export type AchievementUpdate = Database['public']['Tables']['achievements']['Update']
 export type UserAchievementUpdate = Database['public']['Tables']['user_achievements']['Update']
+
+export type { Database }
 
 // ============================================
 // ENUM типы

@@ -148,7 +148,7 @@ export async function calculateFinalPrice(params: {
       product,
       basePrice: Math.round(basePrice),
       
-      durationDiscountPercent: product.discount_percentage,
+      durationDiscountPercent: product.discount_percentage || 0,
       durationDiscountAmount: Math.round(durationDiscountAmount),
       
       promoCode: params.promoCode,

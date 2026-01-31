@@ -134,7 +134,7 @@ export function PromoCodesList({ promoCodes: initialPromoCodes }: PromoCodesList
               
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">
-                  Создан: {new Date(promo.created_at).toLocaleDateString('ru-RU')}
+                  Создан: {promo.created_at ? new Date(promo.created_at).toLocaleDateString('ru-RU') : '—'}
                 </span>
                 <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse-glow' : 'bg-rose-500'}`} />
               </div>

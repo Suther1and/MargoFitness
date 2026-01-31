@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
             userName: profile.full_name || undefined,
             planName: product.name,
             amount: Number(transaction.amount),
-            duration: product.duration_months,
+            duration: product.duration_months || 1,
             expiresAt: profile.subscription_expires_at!
           }).catch(err => {
             console.error('[Webhook] Failed to send payment success email:', err)

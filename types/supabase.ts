@@ -6,864 +6,1059 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
   public: {
     Tables: {
-      profiles: {
+      achievements: {
         Row: {
-          id: string
-          email: string | null
-          full_name: string | null
-          avatar_url: string | null
-          phone: string | null
-          profile_completed_at: string | null
-          role: 'user' | 'admin'
-          subscription_status: 'active' | 'inactive' | 'canceled'
-          subscription_tier: Database['public']['Enums']['subscription_tier']
-          subscription_expires_at: string | null
-          payment_method_info: Json | null
-          // Новые поля для ЮKassa
-          payment_method_id: string | null
-          auto_renew_enabled: boolean
-          subscription_duration_months: number
-          next_billing_date: string | null
-          failed_payment_attempts: number
-          last_payment_date: string | null
-          // Telegram авторизация
-          telegram_id: string | null
-          telegram_username: string | null
-          // Yandex авторизация
-          yandex_id: string | null
-          // Бонусная система
-          bonus_balance: number
-          cashback_level: number
-          total_spent_for_cashback: number
-          referral_link: string | null
-          referral_level: number
-          total_referral_earnings: number
-          referred_by_id: string | null
-          stats: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          email?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          phone?: string | null
-          profile_completed_at?: string | null
-          role?: 'user' | 'admin'
-          subscription_status?: 'active' | 'inactive' | 'canceled'
-          subscription_tier?: Database['public']['Enums']['subscription_tier']
-          subscription_expires_at?: string | null
-          payment_method_info?: Json | null
-          // Новые поля для ЮKassa
-          payment_method_id?: string | null
-          auto_renew_enabled?: boolean
-          subscription_duration_months?: number
-          next_billing_date?: string | null
-          failed_payment_attempts?: number
-          last_payment_date?: string | null
-          // Telegram авторизация
-          telegram_id?: string | null
-          telegram_username?: string | null
-          // Yandex авторизация
-          yandex_id?: string | null
-          // Бонусная система
-          bonus_balance?: number
-          cashback_level?: number
-          total_spent_for_cashback?: number
-          referral_link?: string | null
-          referral_level?: number
-          total_referral_earnings?: number
-          referred_by_id?: string | null
-          stats?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          phone?: string | null
-          profile_completed_at?: string | null
-          role?: 'user' | 'admin'
-          subscription_status?: 'active' | 'inactive' | 'canceled'
-          subscription_tier?: Database['public']['Enums']['subscription_tier']
-          subscription_expires_at?: string | null
-          payment_method_info?: Json | null
-          // Новые поля для ЮKassa
-          payment_method_id?: string | null
-          auto_renew_enabled?: boolean
-          subscription_duration_months?: number
-          next_billing_date?: string | null
-          failed_payment_attempts?: number
-          last_payment_date?: string | null
-          // Telegram авторизация
-          telegram_id?: string | null
-          telegram_username?: string | null
-          // Yandex авторизация
-          yandex_id?: string | null
-          // Бонусная система
-          bonus_balance?: number
-          cashback_level?: number
-          total_spent_for_cashback?: number
-          referral_link?: string | null
-          referral_level?: number
-          total_referral_earnings?: number
-          referred_by_id?: string | null
-          stats?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      products: {
-        Row: {
-          id: string
-          type: 'subscription_tier' | 'one_time_pack'
-          name: string
-          description: string | null
-          price: number
-          tier_level: number | null
-          duration_months: number
-          discount_percentage: number
-          is_active: boolean
-          metadata: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          type: 'subscription_tier' | 'one_time_pack'
-          name: string
-          description?: string | null
-          price: number
-          tier_level?: number | null
-          duration_months?: number
-          discount_percentage?: number
-          is_active?: boolean
-          metadata?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          type?: 'subscription_tier' | 'one_time_pack'
-          name?: string
-          description?: string | null
-          price?: number
-          tier_level?: number | null
-          duration_months?: number
-          discount_percentage?: number
-          is_active?: boolean
-          metadata?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_purchases: {
-        Row: {
-          id: string
-          user_id: string
-          product_id: string
-          payment_provider: string | null
-          payment_id: string | null
-          amount: number
-          actual_paid_amount: number
-          purchased_days: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          product_id: string
-          payment_provider?: string | null
-          payment_id?: string | null
-          amount: number
-          actual_paid_amount?: number
-          purchased_days?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          product_id?: string
-          payment_provider?: string | null
-          payment_id?: string | null
-          amount?: number
-          actual_paid_amount?: number
-          purchased_days?: number
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_purchases_product_id_fkey"
-            columns: ["product_id"]
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_purchases_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      content_weeks: {
-        Row: {
-          id: string
-          start_date: string
-          end_date: string
-          title: string | null
-          description: string | null
-          is_published: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          start_date: string
-          end_date: string
-          title?: string | null
-          description?: string | null
-          is_published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          start_date?: string
-          end_date?: string
-          title?: string | null
-          description?: string | null
-          is_published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      workout_sessions: {
-        Row: {
-          id: string
-          week_id: string
-          session_number: number
-          required_tier: Database['public']['Enums']['subscription_tier']
-          title: string
-          description: string | null
-          cover_image_url: string | null
-          estimated_duration: number | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          week_id: string
-          session_number: number
-          required_tier?: Database['public']['Enums']['subscription_tier']
-          title: string
-          description?: string | null
-          cover_image_url?: string | null
-          estimated_duration?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          week_id?: string
-          session_number?: number
-          required_tier?: Database['public']['Enums']['subscription_tier']
-          title?: string
-          description?: string | null
-          cover_image_url?: string | null
-          estimated_duration?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workout_sessions_week_id_fkey"
-            columns: ["week_id"]
-            referencedRelation: "content_weeks"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      exercises: {
-        Row: {
-          id: string
-          workout_session_id: string
-          order_index: number
-          title: string
+          category: Database["public"]["Enums"]["achievement_category"]
+          color_class: string
+          created_at: string | null
           description: string
-          video_kinescope_id: string
-          video_thumbnail_url: string | null
-          sets: number | null
-          reps: string | null
-          rest_seconds: number | null
-          created_at: string
+          icon: string
+          icon_url: string | null
+          id: string
+          is_secret: boolean
+          metadata: Json | null
+          reward_amount: number | null
+          secret_hint: string | null
+          sort_order: number
+          title: string
         }
         Insert: {
-          id?: string
-          workout_session_id: string
-          order_index: number
-          title: string
+          category: Database["public"]["Enums"]["achievement_category"]
+          color_class: string
+          created_at?: string | null
           description: string
-          video_kinescope_id: string
-          video_thumbnail_url?: string | null
-          sets?: number | null
-          reps?: string | null
-          rest_seconds?: number | null
-          created_at?: string
+          icon: string
+          icon_url?: string | null
+          id?: string
+          is_secret?: boolean
+          metadata?: Json | null
+          reward_amount?: number | null
+          secret_hint?: string | null
+          sort_order?: number
+          title: string
         }
         Update: {
-          id?: string
-          workout_session_id?: string
-          order_index?: number
-          title?: string
+          category?: Database["public"]["Enums"]["achievement_category"]
+          color_class?: string
+          created_at?: string | null
           description?: string
-          video_kinescope_id?: string
-          video_thumbnail_url?: string | null
-          sets?: number | null
-          reps?: string | null
-          rest_seconds?: number | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exercises_workout_session_id_fkey"
-            columns: ["workout_session_id"]
-            referencedRelation: "workout_sessions"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      user_workout_completions: {
-        Row: {
-          id: string
-          user_id: string
-          workout_session_id: string
-          completed_at: string
-          rating: number | null
-          difficulty_rating: number | null
-        }
-        Insert: {
+          icon?: string
+          icon_url?: string | null
           id?: string
-          user_id: string
-          workout_session_id: string
-          completed_at?: string
-          rating?: number | null
-          difficulty_rating?: number | null
+          is_secret?: boolean
+          metadata?: Json | null
+          reward_amount?: number | null
+          secret_hint?: string | null
+          sort_order?: number
+          title?: string
         }
-        Update: {
-          id?: string
-          user_id?: string
-          workout_session_id?: string
-          completed_at?: string
-          rating?: number | null
-          difficulty_rating?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_workout_completions_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_workout_completions_workout_session_id_fkey"
-            columns: ["workout_session_id"]
-            referencedRelation: "workout_sessions"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      payment_transactions: {
-        Row: {
-          id: string
-          user_id: string
-          product_id: string | null
-          yookassa_payment_id: string
-          amount: number
-          currency: string
-          status: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
-          payment_method_id: string | null
-          error_message: string | null
-          metadata: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          product_id?: string | null
-          yookassa_payment_id: string
-          amount: number
-          currency?: string
-          status: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
-          payment_method_id?: string | null
-          error_message?: string | null
-          metadata?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          product_id?: string | null
-          yookassa_payment_id?: string
-          amount?: number
-          currency?: string
-          status?: 'pending' | 'succeeded' | 'canceled' | 'failed'
-          payment_type?: 'initial' | 'recurring' | 'upgrade' | 'one_time' | 'renewal' | null
-          payment_method_id?: string | null
-          error_message?: string | null
-          metadata?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payment_transactions_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_transactions_product_id_fkey"
-            columns: ["product_id"]
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       auth_exchange_codes: {
         Row: {
-          id: string
           code: string
-          user_id: string
+          created_at: string | null
           expires_at: string
-          used: boolean
-          created_at: string
+          id: string
+          used: boolean | null
+          user_id: string
         }
         Insert: {
-          id?: string
           code: string
-          user_id: string
+          created_at?: string | null
           expires_at: string
-          used?: boolean
-          created_at?: string
+          id?: string
+          used?: boolean | null
+          user_id: string
         }
         Update: {
-          id?: string
           code?: string
-          user_id?: string
+          created_at?: string | null
           expires_at?: string
-          used?: boolean
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "auth_exchange_codes_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "auth.users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      free_content: {
-        Row: {
-          id: string
-          title: string
-          description: string | null
-          content: string
-          video_url: string | null
-          is_published: boolean
-          order_index: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
           id?: string
-          title: string
-          description?: string | null
-          content: string
-          video_url?: string | null
-          is_published?: boolean
-          order_index?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          title?: string
-          description?: string | null
-          content?: string
-          video_url?: string | null
-          is_published?: boolean
-          order_index?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_bonuses: {
-        Row: {
-          id: string
-          user_id: string
-          balance: number
-          cashback_level: number
-          total_spent_for_cashback: number
-          referral_level: number
-          total_referral_earnings: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          balance?: number
-          cashback_level?: number
-          total_spent_for_cashback?: number
-          referral_level?: number
-          total_referral_earnings?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
+          used?: boolean | null
           user_id?: string
-          balance?: number
-          cashback_level?: number
-          total_spent_for_cashback?: number
-          referral_level?: number
-          total_referral_earnings?: number
-          created_at?: string
-          updated_at?: string
         }
         Relationships: []
       }
       bonus_transactions: {
         Row: {
-          id: string
-          user_id: string
           amount: number
-          type: Database['public']['Enums']['bonus_transaction_type']
-          description: string | null
-          related_transaction_id: string | null
-          created_at: string
+          created_at: string | null
+          description: string
+          id: string
+          metadata: Json | null
+          related_payment_id: string | null
+          related_user_id: string | null
+          type: Database["public"]["Enums"]["bonus_transaction_type"]
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
           amount: number
-          type: Database['public']['Enums']['bonus_transaction_type']
-          description?: string | null
-          related_transaction_id?: string | null
-          created_at?: string
+          created_at?: string | null
+          description: string
+          id?: string
+          metadata?: Json | null
+          related_payment_id?: string | null
+          related_user_id?: string | null
+          type: Database["public"]["Enums"]["bonus_transaction_type"]
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
           amount?: number
-          type?: Database['public']['Enums']['bonus_transaction_type']
-          description?: string | null
-          related_transaction_id?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      referrals: {
-        Row: {
-          id: string
-          referrer_id: string
-          referred_id: string
-          status: Database['public']['Enums']['referral_status']
-          created_at: string
-          first_purchase_at: string | null
-        }
-        Insert: {
+          created_at?: string | null
+          description?: string
           id?: string
-          referrer_id: string
-          referred_id: string
-          status?: Database['public']['Enums']['referral_status']
-          created_at?: string
-          first_purchase_at?: string | null
-        }
-        Update: {
-          id?: string
-          referrer_id?: string
-          referred_id?: string
-          status?: Database['public']['Enums']['referral_status']
-          created_at?: string
-          first_purchase_at?: string | null
-        }
-        Relationships: []
-      }
-      referral_codes: {
-        Row: {
-          id: string
-          user_id: string
-          code: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          code: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
+          metadata?: Json | null
+          related_payment_id?: string | null
+          related_user_id?: string | null
+          type?: Database["public"]["Enums"]["bonus_transaction_type"]
           user_id?: string
-          code?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      promo_codes: {
-        Row: {
-          id: string
-          code: string
-          discount_type: Database['public']['Enums']['promo_discount_type']
-          discount_value: number
-          applicable_products: string[] | null
-          usage_limit: number | null
-          usage_count: number
-          expires_at: string | null
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          code: string
-          discount_type: Database['public']['Enums']['promo_discount_type']
-          discount_value: number
-          applicable_products?: string[] | null
-          usage_limit?: number | null
-          usage_count?: number
-          expires_at?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          code?: string
-          discount_type?: Database['public']['Enums']['promo_discount_type']
-          discount_value?: number
-          applicable_products?: string[] | null
-          usage_limit?: number | null
-          usage_count?: number
-          expires_at?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      diary_settings: {
-        Row: {
-          user_id: string
-          enabled_metrics: string[]
-          goals: Json
-          streaks: Json
-          user_params: Json | null
-          habits: Json | null
-          widgets_in_daily_plan: string[] | null
-          widget_goals: Json | null
-          updated_at: string
-        }
-        Insert: {
-          user_id: string
-          enabled_metrics?: string[]
-          goals?: Json
-          streaks?: Json
-          user_params?: Json | null
-          habits?: Json | null
-          widgets_in_daily_plan?: string[] | null
-          widget_goals?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          user_id?: string
-          enabled_metrics?: string[]
-          goals?: Json
-          streaks?: Json
-          user_params?: Json | null
-          habits?: Json | null
-          widgets_in_daily_plan?: string[] | null
-          widget_goals?: Json | null
-          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "diary_settings_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "bonus_transactions_related_user_id_fkey"
+            columns: ["related_user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "bonus_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      diary_entries: {
+      content_weeks: {
         Row: {
-          id: string
-          user_id: string
-          date: string
-          metrics: Json
-          habits_completed: Json | null
-          notes: string | null
           created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          is_published: boolean
+          start_date: string
+          title: string | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          date?: string
-          metrics?: Json
-          habits_completed?: Json | null
-          notes?: string | null
           created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          is_published?: boolean
+          start_date: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          date?: string
-          metrics?: Json
-          habits_completed?: Json | null
-          notes?: string | null
           created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_published?: boolean
+          start_date?: string
+          title?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      diary_entries: {
+        Row: {
+          created_at: string
+          date: string
+          habits_completed: Json | null
+          id: string
+          metrics: Json
+          notes: string | null
+          photo_urls: string[] | null
+          updated_at: string
+          user_id: string
+          weekly_measurements: Json | null
+          weekly_photos: Json | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          habits_completed?: Json | null
+          id?: string
+          metrics?: Json
+          notes?: string | null
+          photo_urls?: string[] | null
+          updated_at?: string
+          user_id: string
+          weekly_measurements?: Json | null
+          weekly_photos?: Json | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          habits_completed?: Json | null
+          id?: string
+          metrics?: Json
+          notes?: string | null
+          photo_urls?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weekly_measurements?: Json | null
+          weekly_photos?: Json | null
         }
         Relationships: [
           {
             foreignKeyName: "diary_entries_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      progress_photos: {
+      diary_settings: {
         Row: {
-          id: string
+          enabled_widgets: string[] | null
+          goals: Json | null
+          habits: Json | null
+          streaks: Json | null
+          updated_at: string
           user_id: string
-          date: string
-          image_url: string
-          created_at: string
+          user_params: Json | null
+          widget_goals: Json | null
+          widgets_in_daily_plan: string[] | null
         }
         Insert: {
-          id?: string
+          enabled_widgets?: string[] | null
+          goals?: Json | null
+          habits?: Json | null
+          streaks?: Json | null
+          updated_at?: string
           user_id: string
-          date?: string
-          image_url: string
-          created_at?: string
+          user_params?: Json | null
+          widget_goals?: Json | null
+          widgets_in_daily_plan?: string[] | null
         }
         Update: {
-          id?: string
+          enabled_widgets?: string[] | null
+          goals?: Json | null
+          habits?: Json | null
+          streaks?: Json | null
+          updated_at?: string
           user_id?: string
-          date?: string
-          image_url?: string
-          created_at?: string
+          user_params?: Json | null
+          widget_goals?: Json | null
+          widgets_in_daily_plan?: string[] | null
         }
         Relationships: [
           {
-            foreignKeyName: "progress_photos_user_id_fkey"
+            foreignKeyName: "diary_settings_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      achievements: {
+      exercise_library: {
         Row: {
+          category: string | null
+          created_at: string | null
+          default_reps: string | null
+          default_rest_seconds: number | null
+          default_sets: number | null
+          description: string | null
           id: string
-          title: string
-          description: string
-          category: Database['public']['Enums']['achievement_category']
-          is_secret: boolean
-          reward_amount: number | null
-          icon: string
-          icon_url: string | null
-          color_class: string
-          metadata: Json
-          sort_order: number
-          secret_hint: string | null
-          created_at: string
+          inventory: string | null
+          inventory_alternative: string | null
+          light_version: string | null
+          metadata: Json | null
+          name: string
+          target_muscles: string[] | null
+          technique_steps: string | null
+          typical_mistakes: string | null
+          updated_at: string | null
+          video_script: string | null
         }
         Insert: {
-          id?: string
-          title: string
-          description: string
-          category: Database['public']['Enums']['achievement_category']
-          is_secret?: boolean
-          reward_amount?: number | null
-          icon: string
-          icon_url?: string | null
-          color_class: string
-          metadata?: Json
-          sort_order?: number
-          secret_hint?: string | null
-          created_at?: string
+          category?: string | null
+          created_at?: string | null
+          default_reps?: string | null
+          default_rest_seconds?: number | null
+          default_sets?: number | null
+          description?: string | null
+          id: string
+          inventory?: string | null
+          inventory_alternative?: string | null
+          light_version?: string | null
+          metadata?: Json | null
+          name: string
+          target_muscles?: string[] | null
+          technique_steps?: string | null
+          typical_mistakes?: string | null
+          updated_at?: string | null
+          video_script?: string | null
         }
         Update: {
+          category?: string | null
+          created_at?: string | null
+          default_reps?: string | null
+          default_rest_seconds?: number | null
+          default_sets?: number | null
+          description?: string | null
           id?: string
-          title?: string
-          description?: string
-          category?: Database['public']['Enums']['achievement_category']
-          is_secret?: boolean
-          reward_amount?: number | null
-          icon?: string
-          icon_url?: string | null
-          color_class?: string
-          metadata?: Json
-          sort_order?: number
-          secret_hint?: string | null
-          created_at?: string
+          inventory?: string | null
+          inventory_alternative?: string | null
+          light_version?: string | null
+          metadata?: Json | null
+          name?: string
+          target_muscles?: string[] | null
+          technique_steps?: string | null
+          typical_mistakes?: string | null
+          updated_at?: string | null
+          video_script?: string | null
         }
         Relationships: []
       }
-      user_achievements: {
+      exercises: {
         Row: {
+          created_at: string
+          description: string
           id: string
-          user_id: string
-          achievement_id: string
-          unlocked_at: string
+          order_index: number
+          reps: string | null
+          rest_seconds: number | null
+          sets: number | null
+          title: string
+          video_kinescope_id: string
+          video_thumbnail_url: string | null
+          workout_session_id: string
         }
         Insert: {
+          created_at?: string
+          description: string
           id?: string
-          user_id: string
-          achievement_id: string
-          unlocked_at?: string
+          order_index: number
+          reps?: string | null
+          rest_seconds?: number | null
+          sets?: number | null
+          title: string
+          video_kinescope_id: string
+          video_thumbnail_url?: string | null
+          workout_session_id: string
         }
         Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          order_index?: number
+          reps?: string | null
+          rest_seconds?: number | null
+          sets?: number | null
+          title?: string
+          video_kinescope_id?: string
+          video_thumbnail_url?: string | null
+          workout_session_id: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      free_content: {
+        Row: {
+          content: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_published: boolean | null
+          order_index: number | null
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          payment_method_id: string | null
+          payment_type: string | null
+          product_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          yookassa_payment_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method_id?: string | null
+          payment_type?: string | null
+          product_id?: string | null
+          status: string
+          updated_at?: string | null
+          user_id: string
+          yookassa_payment_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method_id?: string | null
+          payment_type?: string | null
+          product_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          yookassa_payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_percentage: number | null
+          duration_months: number | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          name: string
+          price: number
+          tier_level: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          duration_months?: number | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name: string
+          price: number
+          tier_level?: number | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          duration_months?: number | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          price?: number
+          tier_level?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          auto_renew_enabled: boolean | null
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          failed_payment_attempts: number | null
+          full_name: string | null
+          id: string
+          last_payment_date: string | null
+          next_billing_date: string | null
+          payment_method_id: string | null
+          payment_method_info: Json | null
+          phone: string | null
+          profile_completed_at: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          stats: Json
+          subscription_duration_months: number | null
+          subscription_expires_at: string | null
+          subscription_status: Database["public"]["Enums"]["subscription_status_enum"]
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          telegram_id: string | null
+          telegram_username: string | null
+          updated_at: string
+          yandex_id: string | null
+        }
+        Insert: {
+          auto_renew_enabled?: boolean | null
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          failed_payment_attempts?: number | null
+          full_name?: string | null
+          id: string
+          last_payment_date?: string | null
+          next_billing_date?: string | null
+          payment_method_id?: string | null
+          payment_method_info?: Json | null
+          phone?: string | null
+          profile_completed_at?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          stats?: Json
+          subscription_duration_months?: number | null
+          subscription_expires_at?: string | null
+          subscription_status?: Database["public"]["Enums"]["subscription_status_enum"]
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          telegram_id?: string | null
+          telegram_username?: string | null
+          updated_at?: string
+          yandex_id?: string | null
+        }
+        Update: {
+          auto_renew_enabled?: boolean | null
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          failed_payment_attempts?: number | null
+          full_name?: string | null
+          id?: string
+          last_payment_date?: string | null
+          next_billing_date?: string | null
+          payment_method_id?: string | null
+          payment_method_info?: Json | null
+          phone?: string | null
+          profile_completed_at?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          stats?: Json
+          subscription_duration_months?: number | null
+          subscription_expires_at?: string | null
+          subscription_status?: Database["public"]["Enums"]["subscription_status_enum"]
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          telegram_id?: string | null
+          telegram_username?: string | null
+          updated_at?: string
+          yandex_id?: string | null
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          applicable_products: Json | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          discount_type: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          updated_at: string | null
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          applicable_products?: Json | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          discount_type: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string | null
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          applicable_products?: Json | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          discount_type?: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string | null
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
           id?: string
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          first_purchase_at: string | null
+          id: string
+          referred_id: string
+          referrer_id: string
+          status: Database["public"]["Enums"]["referral_status"]
+        }
+        Insert: {
+          created_at?: string | null
+          first_purchase_at?: string | null
+          id?: string
+          referred_id: string
+          referrer_id: string
+          status?: Database["public"]["Enums"]["referral_status"]
+        }
+        Update: {
+          created_at?: string | null
+          first_purchase_at?: string | null
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+          status?: Database["public"]["Enums"]["referral_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
           achievement_id?: string
-          unlocked_at?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "user_achievements_achievement_id_fkey"
             columns: ["achievement_id"]
+            isOneToOne: false
             referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_achievements_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
         ]
+      }
+      user_bonuses: {
+        Row: {
+          balance: number
+          cashback_level: number
+          created_at: string | null
+          id: string
+          referral_level: number
+          total_referral_earnings: number
+          total_spent_for_cashback: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          cashback_level?: number
+          created_at?: string | null
+          id?: string
+          referral_level?: number
+          total_referral_earnings?: number
+          total_spent_for_cashback?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          cashback_level?: number
+          created_at?: string | null
+          id?: string
+          referral_level?: number
+          total_referral_earnings?: number
+          total_spent_for_cashback?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bonuses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_purchases: {
+        Row: {
+          actual_paid_amount: number
+          amount: number
+          created_at: string
+          id: string
+          payment_id: string | null
+          payment_provider: string | null
+          product_id: string
+          purchased_days: number
+          user_id: string
+        }
+        Insert: {
+          actual_paid_amount?: number
+          amount: number
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          product_id: string
+          purchased_days?: number
+          user_id: string
+        }
+        Update: {
+          actual_paid_amount?: number
+          amount?: number
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          product_id?: string
+          purchased_days?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_workout_completions: {
+        Row: {
+          completed_at: string
+          difficulty_rating: number | null
+          id: string
+          rating: number | null
+          user_id: string
+          workout_session_id: string
+        }
+        Insert: {
+          completed_at?: string
+          difficulty_rating?: number | null
+          id?: string
+          rating?: number | null
+          user_id: string
+          workout_session_id: string
+        }
+        Update: {
+          completed_at?: string
+          difficulty_rating?: number | null
+          id?: string
+          rating?: number | null
+          user_id?: string
+          workout_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_workout_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_workout_completions_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_exercises: {
+        Row: {
+          created_at: string | null
+          exercise_library_id: string
+          id: string
+          order_index: number
+          reps: string | null
+          rest_seconds: number | null
+          session_id: string
+          sets: number | null
+          updated_at: string | null
+          video_kinescope_id: string | null
+          video_script: string | null
+          video_thumbnail_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exercise_library_id: string
+          id?: string
+          order_index?: number
+          reps?: string | null
+          rest_seconds?: number | null
+          session_id: string
+          sets?: number | null
+          updated_at?: string | null
+          video_kinescope_id?: string | null
+          video_script?: string | null
+          video_thumbnail_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exercise_library_id?: string
+          id?: string
+          order_index?: number
+          reps?: string | null
+          rest_seconds?: number | null
+          session_id?: string
+          sets?: number | null
+          updated_at?: string | null
+          video_kinescope_id?: string | null
+          video_script?: string | null
+          video_thumbnail_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_exercises_exercise_library_id_fkey"
+            columns: ["exercise_library_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_exercises_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_sessions: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          is_demo: boolean | null
+          required_tier: Database["public"]["Enums"]["subscription_tier"]
+          session_number: number
+          title: string
+          updated_at: string
+          week_id: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_demo?: boolean | null
+          required_tier?: Database["public"]["Enums"]["subscription_tier"]
+          session_number: number
+          title: string
+          updated_at?: string
+          week_id?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_demo?: boolean | null
+          required_tier?: Database["public"]["Enums"]["subscription_tier"]
+          session_number?: number
+          title?: string
+          updated_at?: string
+          week_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_week_id_fkey"
+            columns: ["week_id"]
+            isOneToOne: false
+            referencedRelation: "content_weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workouts: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          duration_minutes: number | null
+          id: string
+          is_free: boolean
+          is_published: boolean
+          linked_product_id: string | null
+          order_index: number | null
+          required_tier: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_kinescope_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_free?: boolean
+          is_published?: boolean
+          linked_product_id?: string | null
+          order_index?: number | null
+          required_tier?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_kinescope_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_free?: boolean
+          is_published?: boolean
+          linked_product_id?: string | null
+          order_index?: number | null
+          required_tier?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_kinescope_id: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -871,32 +1066,166 @@ export interface Database {
     }
     Functions: {
       check_email_exists: {
-        Args: {
-          email_to_check: string
-          current_user_id: string
-        }
+        Args: { current_user_id: string; email_to_check: string }
         Returns: boolean
       }
       get_user_metrics_stats: {
-        Args: {
-          p_user_id: string
-        }
+        Args: { p_user_id: string }
         Returns: {
-          total_water: number | null
-          total_steps: number | null
-          energy_max_count: number | null
+          energy_max_count: number
+          total_habit_completions: number
+          total_steps: number
+          total_water: number
         }[]
       }
     }
     Enums: {
-      subscription_tier: 'free' | 'basic' | 'pro' | 'elite'
-      bonus_transaction_type: 'welcome' | 'cashback' | 'referral_bonus' | 'referral_first' | 'spent' | 'admin_adjustment' | 'achievement'
-      referral_status: 'registered' | 'first_purchase_made'
-      promo_discount_type: 'percent' | 'fixed_amount'
-      achievement_category: 'common' | 'rare' | 'epic' | 'legendary' | 'absolute' | 'streaks' | 'metrics' | 'habits' | 'weight' | 'consistency' | 'workouts' | 'social'
+      achievement_category:
+        | "streaks"
+        | "metrics"
+        | "habits"
+        | "weight"
+        | "consistency"
+        | "workouts"
+        | "social"
+        | "common"
+        | "rare"
+        | "epic"
+        | "legendary"
+        | "absolute"
+      bonus_transaction_type:
+        | "welcome"
+        | "cashback"
+        | "referral_bonus"
+        | "referral_first"
+        | "spent"
+        | "admin_adjustment"
+        | "achievement"
+      promo_discount_type: "percent" | "fixed_amount"
+      referral_status: "registered" | "first_purchase_made"
+      subscription_status_enum: "active" | "inactive" | "canceled"
+      subscription_tier: "free" | "basic" | "pro" | "elite"
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, ProgressPhoto, PhotoType, WeeklyPhotoSet, getWeekKey, getWeekLabel, getCurrentWeekKey } from '@/types/database'
+import { DiarySettings, DiarySettingsInsert, DiarySettingsUpdate, DiaryEntry, PhotoType, WeeklyPhotoSet, getWeekKey, getWeekLabel, getCurrentWeekKey } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 import { checkAndUnlockAchievements } from './achievements'
 

@@ -103,7 +103,7 @@ export function WorkoutsTab() {
         
         if (currentWeek) {
           const weekSessions = (currentWeek as any).sessions || []
-          sessionsWithAccess = weekSessions
+          sessionsWithAccess = (weekSessions as any[])
             .filter((s: any) => !s.is_demo)
             .map((session: any) => {
               const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
@@ -113,7 +113,7 @@ export function WorkoutsTab() {
                 ...session,
                 hasAccess: access.hasAccess,
                 accessReason: access.reason as any,
-                isCompleted: !!completion,
+                isCompleted: !!completion as boolean,
                 userCompletion: completion || null,
               }
             })
@@ -137,13 +137,14 @@ export function WorkoutsTab() {
             const demoSession = demoSessions[0]
             const completion = completions?.find(c => c.workout_session_id === demoSession.id)
             
-            const demoWithAccess = {
+            const demoWithAccess: WorkoutSessionWithAccess = {
               ...demoSession,
               hasAccess: true,
               accessReason: 'subscription',
               isCompleted: !!completion,
               userCompletion: completion || null,
-            } as WorkoutSessionWithAccess
+              exercises: (demoSession as any).exercises || []
+            }
 
             // Добавляем демо в начало списка
             sessionsWithAccess = [demoWithAccess, ...sessionsWithAccess]
@@ -527,7 +528,7 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                       {[
                         { label: 'Подходы', val: exercise.sets, icon: RotateCcw, unit: 'x' },
-                        { label: 'Повторы', val: exercise.reps, icon: Zap, unit: !exercise.reps.toLowerCase().includes('ногу') && !exercise.reps.toLowerCase().includes('секунд') ? 'раз' : '' },
+                        { label: 'Повторы', val: exercise.reps, icon: Zap, unit: exercise.reps && !exercise.reps.toLowerCase().includes('ногу') && !exercise.reps.toLowerCase().includes('секунд') ? 'раз' : '' },
                         { label: 'Отдых', val: exercise.rest_seconds, icon: Clock, unit: 'сек' },
                         { label: 'Инвентарь', val: exercise.exercise_library.inventory || 'Нет', icon: Dumbbell, isInventory: true }
                       ].map((item, i) => (
@@ -716,7 +717,7 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
 
             <WorkoutCompletionBlock 
               sessionId={session.id} 
-              isCompleted={isCompleted}
+              isCompleted={!!isCompleted as boolean}
               onComplete={handleComplete}
             />
           </div>

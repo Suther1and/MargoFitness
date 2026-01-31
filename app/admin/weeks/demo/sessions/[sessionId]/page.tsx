@@ -50,7 +50,6 @@ export default async function AdminSessionPage({ params }: AdminSessionPageProps
             </p>
           </div>
         </div>
-        <CreateExerciseButton sessionId={sessionId} />
       </div>
 
       {/* Упражнения */}
@@ -63,30 +62,19 @@ export default async function AdminSessionPage({ params }: AdminSessionPageProps
           </span>
         </div>
         
-        {workout.exercises && workout.exercises.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {workout.exercises.map((exercise: any, index: number) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                index={index}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10 p-12 text-center">
-            <div className="max-w-xs mx-auto space-y-6">
-              <div className="w-16 h-16 rounded-2xl bg-white/5 ring-1 ring-white/10 flex items-center justify-center mx-auto text-white/20">
-                <ArrowLeft className="size-8 rotate-90" />
-              </div>
-              <div className="space-y-2">
-                <p className="text-white/60 font-medium">Упражнений пока нет</p>
-                <p className="text-xs text-white/30 leading-relaxed">Добавьте упражнения из библиотеки для этой демо-тренировки</p>
-              </div>
-              <CreateExerciseButton sessionId={sessionId} />
-            </div>
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-4">
+          {workout.exercises && workout.exercises.length > 0 && workout.exercises.map((exercise: any, index: number) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              index={index}
+            />
+          ))}
+          <CreateExerciseButton 
+            sessionId={sessionId} 
+            nextOrderIndex={(workout.exercises?.length || 0) + 1} 
+          />
+        </div>
       </div>
     </div>
   )

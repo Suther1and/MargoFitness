@@ -156,13 +156,13 @@ export function BonusHistory({ transactions: initialTransactions, userId }: Bonu
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-white truncate">{tx.description}</div>
                   <div className="text-xs text-white/60">
-                    {new Date(tx.created_at).toLocaleString('ru-RU', {
+                    {tx.created_at ? new Date(tx.created_at).toLocaleString('ru-RU', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                    })}
+                    }) : '—'}
                   </div>
                 </div>
 

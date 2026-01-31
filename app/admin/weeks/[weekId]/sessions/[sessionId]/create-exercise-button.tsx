@@ -41,7 +41,7 @@ export default function CreateExerciseButton({ sessionId, nextOrderIndex }: Crea
 
   const filteredExercises = exercises.filter(ex => 
     ex.name.toLowerCase().includes(search.toLowerCase()) ||
-    ex.category.toLowerCase().includes(search.toLowerCase()) ||
+    (ex.category && ex.category.toLowerCase().includes(search.toLowerCase())) ||
     ex.id.toLowerCase().includes(search.toLowerCase())
   )
 

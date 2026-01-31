@@ -134,6 +134,7 @@ export async function getCurrentWeekWithAccess(): Promise<ContentWeekWithSession
   )
 
   // Получить демо-тренировку (статическая, не привязана к неделе)
+  const supabase = await createClient()
   const { data: demoSessions, error: demoError } = await supabase
     .from('workout_sessions')
     .select('*')

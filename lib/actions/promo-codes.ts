@@ -45,8 +45,12 @@ export async function validatePromoCode(
     }
 
     // Проверяем применимость к продукту
-    if (productId && promo.applicable_products && promo.applicable_products.length > 0) {
-      if (!promo.applicable_products.includes(productId)) {
+    if (productId && promo.applicable_products) {
+      const applicableProducts = Array.isArray(promo.applicable_products) 
+        ? promo.applicable_products as string[] 
+        : []
+        
+      if (applicableProducts.length > 0 && !applicableProducts.includes(productId)) {
         return { success: false, error: 'Промокод не применим к этому продукту' }
       }
     }

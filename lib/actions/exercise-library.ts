@@ -1,8 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { ExerciseLibrary, ExerciseLibraryUpdate } from '@/types/database'
 
-export async function getExerciseLibrary() {
+export async function getExerciseLibrary(): Promise<ExerciseLibrary[]> {
   const supabase = await createClient()
   
   const { data, error } = await supabase
@@ -15,10 +16,10 @@ export async function getExerciseLibrary() {
     return []
   }
   
-  return data
+  return data || []
 }
 
-export async function updateExerciseLibrary(id: string, data: any) {
+export async function updateExerciseLibrary(id: string, data: ExerciseLibraryUpdate) {
   const supabase = await createClient()
   
   const { error } = await supabase

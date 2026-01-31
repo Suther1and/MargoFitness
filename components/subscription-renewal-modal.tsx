@@ -190,12 +190,12 @@ export function SubscriptionRenewalModal({
       ? new Date(currentExpires)
       : new Date()
     const newDate = new Date(baseDate)
-    newDate.setDate(newDate.getDate() + (product.duration_months * 30))
+    newDate.setDate(newDate.getDate() + ((product.duration_months || 1) * 30))
     return newDate
   }
 
   const newExpiryDate = getNewExpiryDate(selectedProduct)
-  const newTotalDays = selectedProduct ? remainingDays + (selectedProduct.duration_months * 30) : 0
+  const newTotalDays = selectedProduct ? remainingDays + ((selectedProduct.duration_months || 1) * 30) : 0
 
   const currentConfig = tierConfig[currentTier as keyof typeof tierConfig] || tierConfig.free
 
@@ -382,7 +382,7 @@ export function SubscriptionRenewalModal({
                           className={`relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition ${isSelected ? `bg-gradient-to-br ${currentConfig.bg.replace('20', '15')} ${currentConfig.ring.replace('30', '50')} ring-2 ${currentConfig.ring} shadow-lg ${currentConfig.bg.replace('bg-', 'shadow-').replace('20', '10')}` : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'}`}
                           style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
                         >
-                          {p.discount_percentage > 0 && (
+                          {(p.discount_percentage || 0) > 0 && (
                             <span className={`absolute top-2 right-2 inline-flex items-center rounded-full ${currentConfig.bg} px-2 py-0.5 text-xs text-white ring-1 ${currentConfig.ring} font-medium overflow-hidden`}>
                               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
                               <span className="relative">−{p.discount_percentage}%</span>

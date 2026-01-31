@@ -63,7 +63,7 @@ export async function getDashboardWorkouts(): Promise<{
       if (exercisesError) {
         console.error('Error fetching exercises for dashboard:', exercisesError)
       } else {
-        allExercises = exercisesData || []
+        allExercises = (exercisesData as any[]) || []
       }
     }
 

@@ -4,33 +4,17 @@ import { useState, useMemo } from 'react'
 import { Search, Info, X, BookOpen, Dumbbell, Timer, Repeat, Zap, Edit2, Save, ChevronRight } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { ExerciseLibrary } from '@/types/database'
 
-interface Exercise {
-  id: string
-  name: string
-  description: string | null
-  category: string | null
-  target_muscles: string[] | null
-  default_sets: number | null
-  default_reps: string | null
-  default_rest_seconds: number | null
-  technique_steps: string | null
-  typical_mistakes: string | null
-  video_script: string | null
-  inventory: string | null
-  inventory_alternative: string | null
-  light_version: string | null
-}
-
-export default function ExerciseLibraryContent({ exercises }: { exercises: Exercise[] }) {
+export default function ExerciseLibraryContent({ exercises }: { exercises: ExerciseLibrary[] }) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseLibrary | null>(null)
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState<Partial<Exercise>>({})
+  const [formData, setFormData] = useState<Partial<ExerciseLibrary>>({})
   const [isSaving, setIsSaving] = useState(false)
 
-  const handleExerciseClick = (exercise: Exercise) => {
+  const handleExerciseClick = (exercise: ExerciseLibrary) => {
     setSelectedExercise(exercise)
     setIsEditing(false)
     // Открываем диалог только если ширина экрана меньше 1024px (lg)
@@ -55,7 +39,7 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
       
       if (result.success) {
         // Обновляем локальное состояние (в реальном приложении лучше через router.refresh() или react-query)
-        setSelectedExercise({ ...selectedExercise, ...formData } as Exercise)
+        setSelectedExercise({ ...selectedExercise, ...formData } as ExerciseLibrary)
         setIsEditing(false)
       } else {
         alert('Ошибка при сохранении: ' + result.error)
@@ -69,7 +53,7 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
   }
 
   const categories = useMemo(() => {
-    const cats: Record<string, Exercise[]> = {}
+    const cats: Record<string, ExerciseLibrary[]> = {}
     exercises.forEach(ex => {
       const cat = ex.category || 'Другое'
       if (!cats[cat]) cats[cat] = []
@@ -79,15 +63,15 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
   }, [exercises])
 
   const filteredCategories = useMemo(() => {
-    const filtered: Record<string, Exercise[]> = {}
+    const filtered: Record<string, ExerciseLibrary[]> = {}
     const query = searchQuery.toLowerCase()
 
     Object.entries(categories).forEach(([cat, items]) => {
       const matchingItems = items.filter(
-        ex => 
+        (ex: ExerciseLibrary) => 
           ex.name.toLowerCase().includes(query) || 
           ex.id.toLowerCase().includes(query) ||
-          (ex.target_muscles?.some(m => m.toLowerCase().includes(query)))
+          (ex.target_muscles?.some((m: string) => m.toLowerCase().includes(query)))
       )
       if (matchingItems.length > 0) {
         filtered[cat] = matchingItems
@@ -211,7 +195,7 @@ export default function ExerciseLibraryContent({ exercises }: { exercises: Exerc
               )}
               
               <div className="flex flex-wrap gap-4">
-                {selectedExercise.target_muscles && selectedExercise.target_muscles.map(muscle => (
+                {selectedExercise.target_muscles && selectedExercise.target_muscles.map((muscle: string) => (
                   <Badge key={muscle} className="bg-white/5 hover:bg-white/10 text-white/40 border-none text-[10px] uppercase tracking-wider">
                     {muscle}
                   </Badge>
