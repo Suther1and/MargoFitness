@@ -1,7 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 
 export async function getAllArticlesAdmin() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
     .select("*")
@@ -16,7 +16,7 @@ export async function getAllArticlesAdmin() {
 }
 
 export async function upsertArticle(article: any) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("articles")
     .upsert(article)
@@ -32,7 +32,7 @@ export async function upsertArticle(article: any) {
 }
 
 export async function deleteArticle(id: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("articles")
     .delete()
