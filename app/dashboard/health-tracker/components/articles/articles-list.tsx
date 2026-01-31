@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Lock, ArrowRight, BookOpen, Search } from "lucide-react";
+import { Clock, Lock, ArrowRight, BookOpen, Search, Sparkles } from "lucide-react";
 
 interface Article {
   id: string;
@@ -28,6 +28,13 @@ const TIER_WEIGHTS = {
   basic: 1,
   pro: 2,
   elite: 3,
+};
+
+const TIER_COLORS = {
+  free: "text-emerald-400 border-emerald-400/30 bg-emerald-500/10",
+  basic: "text-cyan-400 border-cyan-400/30 bg-cyan-500/10",
+  pro: "text-purple-400 border-purple-400/30 bg-purple-500/10",
+  elite: "text-amber-400 border-amber-400/30 bg-amber-500/10",
 };
 
 export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesListProps) => {
@@ -83,8 +90,8 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
         </div>
       </div>
 
-      {/* Сетка статей */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Сетка статей - 2 колонки на мобилках */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {filteredArticles.length > 0 ? (
           filteredArticles.map((article, index) => {
             const locked = !hasAccess(article.access_level);
@@ -96,46 +103,59 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => onSelectArticle(article.slug)}
-                className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:border-slate-400/30 transition-all duration-500 text-left"
+                className={cn(
+                  "group relative flex flex-col overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:border-slate-400/30 transition-all duration-500 text-left",
+                  locked && "opacity-80"
+                )}
               >
                 {/* Изображение */}
-                <div className="relative h-48 w-full overflow-hidden">
-                  <img
-                    src={article.image_url || "/placeholder-article.jpg"}
-                    alt={article.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                <div className="relative aspect-video md:h-48 w-full overflow-hidden">
+                  {article.image_url ? (
+                    <img
+                      src={article.image_url}
+                      alt={article.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                      <BookOpen className="w-8 h-8 text-white/10" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   
-                  <div className="absolute left-4 top-4 flex gap-2">
-                    <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[9px] font-black uppercase tracking-widest">
+                  <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
+                    <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
                       {article.category}
                     </Badge>
-                    {locked && (
-                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-                        <Lock className="h-3 w-3" /> {article.access_level}
+                    {article.access_level !== 'free' && (
+                      <Badge className={cn(
+                        "text-[8px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1 px-1.5 py-0 md:px-2 md:py-0.5 border-none",
+                        TIER_COLORS[article.access_level as keyof typeof TIER_COLORS]
+                      )}>
+                        {locked ? <Lock className="h-2.5 w-2.5" /> : <Sparkles className="h-2.5 w-2.5" />}
+                        {article.access_level}
                       </Badge>
                     )}
                   </div>
                 </div>
 
                 {/* Контент */}
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-oswald font-black text-white uppercase tracking-tight mb-3 group-hover:text-slate-300 transition-colors line-clamp-2">
+                <div className="p-4 md:p-6 flex flex-col flex-1">
+                  <h3 className="text-sm md:text-xl font-oswald font-black text-white uppercase tracking-tight mb-2 md:mb-3 group-hover:text-slate-300 transition-colors line-clamp-2 leading-tight">
                     {article.title}
                   </h3>
-                  <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-6 flex-1">
+                  <p className="hidden md:block text-xs text-white/40 leading-relaxed line-clamp-2 mb-6 flex-1">
                     {article.description}
                   </p>
 
                   <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/20">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" /> {article.reading_time} мин
+                    <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/20">
+                      <span className="flex items-center gap-1 md:gap-1.5">
+                        <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" /> {article.reading_time} мин
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:translate-x-1 transition-transform">
-                      Читать <ArrowRight className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:translate-x-1 transition-transform">
+                      <span className="hidden xs:inline">Читать</span> <ArrowRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
                     </div>
                   </div>
                 </div>

@@ -14,7 +14,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -35,63 +34,75 @@ export const InteractiveChart = ({
   config = {
     value: {
       label: "Значение",
-      color: "hsl(var(--chart-1))",
+      color: "#22d3ee",
     },
   },
 }: InteractiveChartProps) => {
   return (
-    <div className="my-8 rounded-2xl border bg-card p-6 shadow-sm">
-      {title && <h4 className="mb-6 text-center font-semibold text-gray-900">{title}</h4>}
-      <div className="h-[300px] w-full">
+    <div className="my-12 rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 md:p-10 shadow-2xl backdrop-blur-sm overflow-hidden">
+      {title && (
+        <h4 className="mb-10 text-center font-oswald text-xl font-black uppercase tracking-widest text-white/90">
+          {title}
+        </h4>
+      )}
+      <div className="h-[400px] w-full pb-6">
         <ChartContainer config={config}>
           {type === "bar" && (
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis
                 dataKey="name"
-                stroke="#888888"
-                fontSize={12}
+                stroke="rgba(255,255,255,0.3)"
+                fontSize={10}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
+                dy={10}
               />
               <YAxis
-                stroke="#888888"
-                fontSize={12}
+                stroke="rgba(255,255,255,0.3)"
+                fontSize={10}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `${value}`}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent className="bg-[#121214] border-white/10 text-white" />} />
               <Bar
                 dataKey="value"
-                fill="var(--color-value)"
-                radius={[4, 4, 0, 0]}
+                fill="#22d3ee"
+                radius={[6, 6, 0, 0]}
+                className="drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]"
               />
             </BarChart>
           )}
           {type === "line" && (
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis
                 dataKey="name"
-                stroke="#888888"
-                fontSize={12}
+                stroke="rgba(255,255,255,0.3)"
+                fontSize={10}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
+                dy={10}
               />
               <YAxis
-                stroke="#888888"
-                fontSize={12}
+                stroke="rgba(255,255,255,0.3)"
+                fontSize={10}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent className="bg-[#121214] border-white/10 text-white" />} />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="var(--color-value)"
-                strokeWidth={2}
-                dot={{ r: 4, fill: "var(--color-value)" }}
+                stroke="#22d3ee"
+                strokeWidth={3}
+                dot={{ r: 6, fill: "#22d3ee", strokeWidth: 0 }}
+                activeDot={{ r: 8, fill: "#22d3ee", stroke: "#fff", strokeWidth: 2 }}
+                className="drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"
               />
             </LineChart>
           )}
@@ -103,18 +114,18 @@ export const InteractiveChart = ({
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
+                innerRadius={70}
+                outerRadius={100}
+                paddingAngle={8}
               >
                 {data.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={`hsl(var(--chart-${(index % 5) + 1}))`}
+                    fill={index === 0 ? "#22d3ee" : index === 1 ? "#fbbf24" : index === 2 ? "#f43f5e" : "#a855f7"}
                   />
                 ))}
               </Pie>
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent className="bg-[#121214] border-white/10 text-white" />} />
             </PieChart>
           )}
         </ChartContainer>

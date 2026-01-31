@@ -42,7 +42,10 @@ export async function GET(
       return NextResponse.json({ error: "Content file not found" }, { status: 404 });
     }
 
-    const source = fs.readFileSync(filePath, "utf8");
+    let source = fs.readFileSync(filePath, "utf8");
+    
+    // Удаляем заголовок H1, если он есть в начале файла (чтобы не дублировать с шапкой)
+    source = source.replace(/^#\s+.+$/m, "");
     
     // Сериализуем MDX на сервере для передачи на клиент
     const mdxSource = await serialize(source, {
