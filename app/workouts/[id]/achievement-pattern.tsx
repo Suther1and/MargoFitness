@@ -6,10 +6,10 @@ import { motion } from 'framer-motion'
 
 const ACHIEVEMENT_ICONS = [
   'athlete.png', 'collector.png', 'consistency.png', 'energetic.png',
-  'first-workout.png', 'goal-reached.png', 'hundred-percent.png',
-  'iron-will.png', 'legend.png', 'marathon.png', 'perfect-day.png',
+  'first-workout.png', 'goal-reached.png', 'iron-will.png', 
+  'legend.png', 'marathon.png', 'perfect-day.png',
   'perfectionist.png', 'sport-master.png', 'stability.png',
-  'veteran.png', 'weekly-cycle.png'
+  'weekly-cycle.png', 'habit-routine.png', 'habit-palette.png', 'joy-life.png'
 ]
 
 export function AchievementPattern() {
@@ -66,8 +66,8 @@ export function AchievementPattern() {
             scale: item.scale
           }}
           animate={{ 
-            rotate: [item.rotate - 5, item.rotate + 5, item.rotate - 5],
-            y: [0, -10, 0], // Добавляем покачивание по вертикали
+            rotate: [item.rotate - 3, item.rotate + 3, item.rotate - 3],
+            y: [0, -10, 0],
           }}
           transition={{
             duration: item.duration,
@@ -78,9 +78,9 @@ export function AchievementPattern() {
           <Image
             src={`/achievements/${item.icon}`}
             alt=""
-            width={120} // Немного уменьшим базовый размер
-            height={120}
-            className="grayscale brightness-[1.1] contrast-[1.1] mix-blend-screen"
+            width={160}
+            height={160}
+            className="grayscale brightness-[1.1] contrast-[1.2]"
           />
         </motion.div>
       ))}
