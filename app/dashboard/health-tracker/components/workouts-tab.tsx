@@ -68,41 +68,32 @@ export function WorkoutsTab() {
   const [loadingArticle, setLoadingArticle] = useState(false)
 
   const loadArticles = async () => {
-    // Start fetching everything in parallel
-    const dbArticlesPromise = getArticles()
+    // 1. First, quickly load articles from registry and DB without statuses to show them immediately
+    const dbArticles = await getArticles()
+    const allArticlesMap = new Map();
+    dbArticles.forEach(a => allArticlesMap.set(a.slug, { ...a, is_read: false }));
+    ARTICLE_REGISTRY.forEach(a => allArticlesMap.set(a.slug, { ...a, id: a.id || a.slug, is_read: false }));
+    
+    const initialArticles = Array.from(allArticlesMap.values());
+    setArticles(initialArticles);
+
+    // 2. Then, fetch read statuses in the background
     const supabase = createClient()
-    const userPromise = supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     
-    const [dbArticles, { data: { user } }] = await Promise.all([
-      dbArticlesPromise,
-      userPromise
-    ])
-    
-    let readStatuses: any[] = []
     if (user) {
-      const { data } = await supabase
+      const { data: readStatuses } = await supabase
         .from('user_article_progress')
         .select('article_id, is_read')
         .eq('user_id', user.id)
-      readStatuses = data || []
+      
+      if (readStatuses && readStatuses.length > 0) {
+        setArticles(prev => prev.map(article => {
+          const status = readStatuses.find(s => s.article_id === article.id || s.article_id === article.slug)
+          return { ...article, is_read: status?.is_read || false }
+        }))
+      }
     }
-
-    const allArticlesMap = new Map();
-    dbArticles.forEach(a => {
-      const status = readStatuses.find(s => s.article_id === a.id)
-      allArticlesMap.set(a.slug, { ...a, is_read: status?.is_read || false })
-    });
-    
-    ARTICLE_REGISTRY.forEach(a => {
-      const status = readStatuses.find(s => s.article_id === a.id || s.article_id === a.slug)
-      allArticlesMap.set(a.slug, { 
-        ...a, 
-        id: a.id || a.slug,
-        is_read: status?.is_read || false 
-      })
-    });
-    
-    setArticles(Array.from(allArticlesMap.values()))
   }
 
   useEffect(() => {
