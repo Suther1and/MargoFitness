@@ -60,8 +60,8 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
   return (
     <div className="space-y-8">
       {/* Поиск и Фильтры */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex gap-4 items-center justify-between">
+        <div className="flex flex-wrap gap-2 flex-1">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -78,11 +78,11 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
           ))}
         </div>
 
-        <div className="relative w-full md:w-64 group">
+        <div className="relative w-48 md:w-64 group shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-slate-400 transition-colors" />
           <input
             type="text"
-            placeholder="Поиск статей..."
+            placeholder="Поиск..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-slate-400/50 transition-all"
@@ -97,11 +97,8 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
             const locked = !hasAccess(article.access_level);
             
             return (
-              <motion.button
+              <button
                 key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
                 onClick={() => onSelectArticle(article.slug)}
                 className={cn(
                   "group relative flex flex-col overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:border-slate-400/30 transition-all duration-500 text-left",
@@ -159,7 +156,7 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                     </div>
                   </div>
                 </div>
-              </motion.button>
+              </button>
             );
           })
         ) : (
