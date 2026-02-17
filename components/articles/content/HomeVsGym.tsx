@@ -66,17 +66,17 @@ const ConceptItem = ({
 };
 
 const TipBlock = ({ children }: { children: React.ReactNode }) => (
-  <div className="my-10 rounded-2xl bg-amber-500/[0.05] border border-amber-500/15 p-6 md:p-8 text-left">
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
-        <div className="size-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-          <Lightbulb className="size-5 text-amber-400" />
+  <div className="my-10 rounded-[2.5rem] md:rounded-[3.5rem] bg-amber-500/[0.05] border border-amber-500/15 p-6 md:p-8 text-left inline-block w-auto max-w-full">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <div className="size-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <Lightbulb className="size-4 text-amber-400" />
         </div>
-        <p className="text-sm md:text-base font-black uppercase tracking-[0.15em] text-amber-400/90">
+        <p className="text-xs md:text-sm font-black uppercase tracking-[0.15em] text-amber-400/90">
           Совет от Марго
         </p>
       </div>
-      <p className="text-base md:text-lg text-white/70 leading-relaxed">{children}</p>
+      <p className="text-sm md:text-base text-white/70 leading-relaxed">{children}</p>
     </div>
   </div>
 );
