@@ -67,16 +67,48 @@ export function WorkoutsTab() {
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
 
-  useEffect(() => {
-    async function loadArticles() {
-      const dbArticles = await getArticles()
-      const allArticlesMap = new Map();
-      dbArticles.forEach(a => allArticlesMap.set(a.slug, a));
-      ARTICLE_REGISTRY.forEach(a => allArticlesMap.set(a.slug, { ...a, id: a.id || a.slug }));
-      setArticles(Array.from(allArticlesMap.values()))
+  const loadArticles = async () => {
+    const dbArticles = await getArticles()
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    let readStatuses: any[] = []
+    if (user) {
+      const { data } = await supabase
+        .from('user_article_progress')
+        .select('article_id, is_read')
+        .eq('user_id', user.id)
+      readStatuses = data || []
     }
+
+    const allArticlesMap = new Map();
+    dbArticles.forEach(a => {
+      const status = readStatuses.find(s => s.article_id === a.id)
+      allArticlesMap.set(a.slug, { ...a, is_read: status?.is_read || false })
+    });
+    
+    ARTICLE_REGISTRY.forEach(a => {
+      const status = readStatuses.find(s => s.article_id === a.id || s.article_id === a.slug)
+      allArticlesMap.set(a.slug, { 
+        ...a, 
+        id: a.id || a.slug,
+        is_read: status?.is_read || false 
+      })
+    });
+    
+    setArticles(Array.from(allArticlesMap.values()))
+  }
+
+  useEffect(() => {
     loadArticles()
   }, [])
+
+  // Reload articles status when returning from an article
+  useEffect(() => {
+    if (!selectedArticleSlug) {
+      loadArticles()
+    }
+  }, [selectedArticleSlug])
 
   useEffect(() => {
     async function loadFullArticle() {

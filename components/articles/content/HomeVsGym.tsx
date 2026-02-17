@@ -19,6 +19,8 @@ import {
   Flame
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
+import { markArticleAsRead } from "@/lib/actions/articles";
 
 // --- Локальные UI-компоненты для статьи ---
 
@@ -84,6 +86,15 @@ const TipBlock = ({ children }: { children: React.ReactNode }) => (
 // --- Основная статья ---
 
 export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, metadata?: any }) {
+  const { elementRef } = useArticleReadTracking({
+    articleId: metadata?.id || 'home-vs-gym',
+    onRead: async (id) => {
+      console.log('Article read:', id);
+      await markArticleAsRead(id);
+    },
+    threshold: 0.5 // Отмечаем когда 50% "футера" статьи в зоне видимости
+  });
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -333,6 +344,9 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
             Начать тренировку <ArrowRight className="size-4" />
           </button>
         </section>
+        
+        {/* Invisible element to track reading progress */}
+        <div ref={elementRef} className="h-4 w-full" />
       </article>
     </motion.div>
   );

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Lock, ArrowRight, BookOpen, Search, Sparkles } from "lucide-react";
+import { Clock, Lock, ArrowRight, BookOpen, Search, Sparkles, CheckCircle2 } from "lucide-react";
 
 interface Article {
   id: string;
@@ -15,6 +15,7 @@ interface Article {
   category: string;
   access_level: "free" | "basic" | "pro" | "elite";
   reading_time: number;
+  is_read?: boolean;
 }
 
 interface ArticlesListProps {
@@ -41,10 +42,20 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
   const [activeCategory, setActiveCategory] = useState("Все");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categories = ["Все", ...Array.from(new Set(articles.map((a) => a.category)))];
+  const categories = ["Все", "Прочитанные", "Непрочитанные", ...Array.from(new Set(articles.map((a) => a.category)))];
 
   const filteredArticles = articles.filter((a) => {
-    const matchesCategory = activeCategory === "Все" || a.category === activeCategory;
+    let matchesCategory = true;
+    if (activeCategory === "Все") {
+      matchesCategory = true;
+    } else if (activeCategory === "Прочитанные") {
+      matchesCategory = !!a.is_read;
+    } else if (activeCategory === "Непрочитанные") {
+      matchesCategory = !a.is_read;
+    } else {
+      matchesCategory = a.category === activeCategory;
+    }
+
     const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          a.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -85,7 +96,7 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
             placeholder="Поиск..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-slate-400/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs md:text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-slate-400/50 transition-all"
           />
         </div>
       </div>
@@ -121,6 +132,13 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   
                   <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
+                    {article.is_read && (
+                      <div className="absolute right-3 top-3 md:right-4 md:top-4 z-10">
+                        <div className="flex items-center justify-center size-6 md:size-8 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20 border border-emerald-400/20">
+                          <CheckCircle2 className="size-3.5 md:size-5 text-black" />
+                        </div>
+                      </div>
+                    )}
                     <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
                       {article.category}
                     </Badge>
