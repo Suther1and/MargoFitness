@@ -20,6 +20,8 @@ const HardcodedArticles: Record<string, any> = {
   "home-fitness-efficiency": dynamic(() => import("@/components/articles/content/HomeFitnessEfficiency")),
 };
 
+type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
+
 interface ArticleRendererProps {
   article: any;
   hasAccess: boolean;
@@ -46,23 +48,6 @@ const ArticleRendererFallback = ({
     </div>
   );
 };
-
-export function WorkoutsTab() {
-  const cleanName = category.split('(')[0].trim();
-  const lowerName = cleanName.toLowerCase();
-  
-  if (lowerName.includes('приседания')) return { name: cleanName, color: 'bg-orange-500/20 text-orange-400' };
-  if (lowerName.includes('выпады')) return { name: cleanName, color: 'bg-yellow-500/20 text-yellow-400' };
-  if (lowerName.includes('тяга') || lowerName.includes('румынская')) return { name: cleanName, color: 'bg-cyan-500/20 text-cyan-400' };
-  if (lowerName.includes('мостик')) return { name: cleanName, color: 'bg-pink-500/20 text-pink-400' };
-  if (lowerName.includes('отведения')) return { name: cleanName, color: 'bg-rose-500/20 text-rose-400' };
-  if (lowerName.includes('отжимания') || lowerName.includes('жим')) return { name: cleanName, color: 'bg-emerald-500/20 text-emerald-400' };
-  if (lowerName.includes('планка') || lowerName.includes('кор') || lowerName.includes('скручивания')) return { name: cleanName, color: 'bg-purple-500/20 text-purple-400' };
-  if (lowerName.includes('бицепс') || lowerName.includes('трицепс') || lowerName.includes('плечи') || lowerName.includes('разводка')) return { name: cleanName, color: 'bg-blue-500/20 text-blue-400' };
-  if (lowerName.includes('кардио') || lowerName.includes('комплексные')) return { name: cleanName, color: 'bg-red-500/20 text-red-400' };
-
-  return { name: cleanName, color: 'bg-white/10 text-white/60' };
-}
 
 const TIER_WEIGHTS = {
   free: 0,
