@@ -102,7 +102,7 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
-          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-12 md:pt-24 text-left">
+          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-6 md:pt-24 text-left">
             <div className="flex flex-wrap gap-3 mb-6">
               <span className="bg-slate-400 text-black border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Методика
@@ -273,7 +273,7 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
           </TipBlock>
         </section>
 
-        <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5">
+        <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-20">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
             Готова начать?
           </h2>

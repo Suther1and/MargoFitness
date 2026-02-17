@@ -233,7 +233,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
       >
         <button
           onClick={() => mobileMenuOpen ? handleCloseMobileMenu() : setMobileMenuOpen(true)}
-          className="p-3 rounded-xl transition-all active:scale-95 shadow-lg"
+          className="size-10 flex items-center justify-center rounded-xl transition-all active:scale-95 shadow-lg"
           style={{
             background: colors.navbarBg,
             border: `1px solid ${colors.cardBorder}`,
@@ -241,7 +241,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
           }}
           aria-label="Toggle menu"
         >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
 

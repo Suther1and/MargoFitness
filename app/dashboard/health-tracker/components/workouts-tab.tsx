@@ -248,11 +248,11 @@ export function WorkoutsTab() {
 
     if (HardcodedComponent && hasAccess) {
       return (
-        <div className="fixed inset-0 z-[100] bg-[#09090b] overflow-y-auto md:relative md:inset-auto md:z-0 md:bg-transparent md:overflow-visible">
-          <div className="relative min-h-screen md:min-h-0">
+        <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">
+          <div className="relative h-full overflow-y-auto md:overflow-visible min-h-screen md:min-h-0 pt-16 pb-8 md:py-0">
             <button 
               onClick={() => setSelectedArticleSlug(null)}
-              className="fixed top-5 left-4 z-[110] flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md md:hidden"
+              className="fixed top-[15px] left-4 z-[110] flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md md:hidden shadow-lg"
             >
               <ArrowLeft className="size-5 text-white" />
             </button>
