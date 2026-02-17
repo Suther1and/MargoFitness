@@ -248,7 +248,17 @@ export function WorkoutsTab() {
 
     if (HardcodedComponent && hasAccess) {
       return (
-        <HardcodedComponent onBack={() => setSelectedArticleSlug(null)} />
+        <div className="fixed inset-0 z-[100] bg-[#09090b] overflow-y-auto md:relative md:inset-auto md:z-0 md:bg-transparent md:overflow-visible">
+          <div className="relative min-h-screen md:min-h-0">
+            <button 
+              onClick={() => setSelectedArticleSlug(null)}
+              className="fixed top-5 left-4 z-[110] flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md md:hidden"
+            >
+              <ArrowLeft className="size-5 text-white" />
+            </button>
+            <HardcodedComponent onBack={() => setSelectedArticleSlug(null)} />
+          </div>
+        </div>
       );
     }
 

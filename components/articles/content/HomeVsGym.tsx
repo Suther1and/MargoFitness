@@ -66,7 +66,7 @@ const ConceptItem = ({
 };
 
 const TipBlock = ({ children }: { children: React.ReactNode }) => (
-  <div className="my-10 rounded-[2.5rem] md:rounded-[3.5rem] bg-amber-500/[0.05] border border-amber-500/15 p-6 md:p-8 text-left inline-block w-auto max-w-full">
+  <div className="my-6 md:my-10 rounded-[2.5rem] md:rounded-[3.5rem] bg-amber-500/[0.05] border border-amber-500/15 p-6 md:p-8 text-left inline-block w-auto max-w-full">
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <div className="size-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
@@ -92,7 +92,7 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
     >
       {/* HERO SECTION */}
       <div className="relative w-full overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16">
-        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20 hidden md:block">
           <button
             onClick={onBack}
             className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
@@ -102,7 +102,7 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
-          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-20 md:pt-24 text-left">
+          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-12 md:pt-24 text-left">
             <div className="flex flex-wrap gap-3 mb-6">
               <span className="bg-slate-400 text-black border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Методика
@@ -176,10 +176,6 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
             </ConceptItem>
           </div>
         </section>
-
-        <TipBlock>
-          В домашнем формате мы используем <strong>прогрессивную перегрузку</strong> через усложнение движений, изменение темпа и сокращение отдыха, а не через бесконечное увеличение веса. Это безопаснее для суставов и эффективнее для создания подтянутого, женственного тела.
-        </TipBlock>
 
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
@@ -277,14 +273,14 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
           </TipBlock>
         </section>
 
-        <section className="mb-14 text-center py-12 border-t border-white/5">
+        <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
             Готова начать?
           </h2>
           <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
             Не жди понедельника. Твой результат начинается с первого движения в твоей гостиной.
           </p>
-          <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-rose-500/15 mb-4">
+          <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-rose-500/15 mb-2">
             Начать тренировку <ArrowRight className="size-4" />
           </button>
         </section>
