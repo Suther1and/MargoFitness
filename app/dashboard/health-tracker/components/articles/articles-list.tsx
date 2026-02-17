@@ -42,7 +42,7 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
   const [activeCategory, setActiveCategory] = useState("Все");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categories = ["Все", "Прочитанные", "Непрочитанные", ...Array.from(new Set(articles.map((a) => a.category)))];
+  const categories = ["Все", "Прочитанные", "Непрочитанные"];
 
   const filteredArticles = articles.filter((a) => {
     let matchesCategory = true;
@@ -52,8 +52,6 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
       matchesCategory = !!a.is_read;
     } else if (activeCategory === "Непрочитанные") {
       matchesCategory = !a.is_read;
-    } else {
-      matchesCategory = a.category === activeCategory;
     }
 
     const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -71,14 +69,14 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
   return (
     <div className="space-y-8">
       {/* Поиск и Фильтры */}
-      <div className="flex gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-2 flex-1">
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <div className="flex overflow-x-auto no-scrollbar gap-2 w-full md:w-auto pb-2 md:pb-0">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all",
+                "rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0",
                 activeCategory === cat
                   ? "bg-slate-400 text-black shadow-lg shadow-slate-400/20"
                   : "bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10"
@@ -89,14 +87,14 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
           ))}
         </div>
 
-        <div className="relative w-48 md:w-64 group shrink-0">
+        <div className="relative w-full md:w-auto md:min-w-[200px] lg:min-w-[250px] group shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-slate-400 transition-colors" />
           <input
             type="text"
             placeholder="Поиск..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs md:text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-slate-400/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-base md:text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-slate-400/50 transition-all"
           />
         </div>
       </div>
@@ -131,14 +129,16 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   
-                  <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
-                    {article.is_read && (
-                      <div className="absolute right-3 top-3 md:right-4 md:top-4 z-10">
-                        <div className="flex items-center justify-center size-6 md:size-8 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20 border border-emerald-400/20">
-                          <CheckCircle2 className="size-3.5 md:size-5 text-black" />
-                        </div>
+                  {/* Read Status Icon - Frosted Glass Style */}
+                  {article.is_read && (
+                    <div className="absolute right-3 top-3 md:right-4 md:top-4 z-20">
+                      <div className="flex items-center justify-center size-7 md:size-9 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                        <CheckCircle2 className="size-4 md:size-5 text-emerald-400" />
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
                     <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
                       {article.category}
                     </Badge>
