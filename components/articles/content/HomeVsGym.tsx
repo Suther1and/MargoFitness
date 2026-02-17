@@ -233,62 +233,60 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start mb-14">
-          <section className="text-left">
-            <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-              Миф про «несерьёзные» веса
-            </h2>
-            <p className="text-lg text-white/60 leading-relaxed mb-6">
-              «С гантелями по 2-4 кг ничего не накачаешь» — самый живучий миф. Исследование в <em>Journal of Applied Physiology</em> показало: тренировки с лёгкими весами (30% от максимума) до отказа дают <strong className="text-white/80">сопоставимый рост мышечной массы</strong> с тяжёлыми весами.
-            </p>
+        <section className="mb-14 text-left">
+          <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
+            Миф про «несерьёзные» веса
+          </h2>
+          <p className="text-lg text-white/60 leading-relaxed mb-6">
+            «С гантелями по 2-4 кг ничего не накачаешь» - самый живучий миф. Исследование в <em>Journal of Applied Physiology</em> показало: тренировки с лёгкими весами (30% от максимума) до отказа дают <strong className="text-white/80">сопоставимый рост мышечной массы</strong> с тяжёлыми весами.
+          </p>
 
-            <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">Минуты реальной мышечной работы за 40-минутную сессию</p>
-              <div className="space-y-5">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <Building2 className="size-4 text-white/20" />
-                      <span className="text-sm font-medium text-white/50">Зал (с паузами)</span>
-                    </div>
-                    <span className="text-sm font-bold text-white/40 tabular-nums">18 мин</span>
+          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">Минуты реальной мышечной работы за 40-минутную сессию</p>
+            <div className="space-y-5">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <Building2 className="size-4 text-white/20" />
+                    <span className="text-sm font-medium text-white/50">Зал (с паузами)</span>
                   </div>
-                  <div className="h-3 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} whileInView={{ width: "45%" }} viewport={{ once: true }} transition={{ duration: 1 }} className="h-full bg-white/15 rounded-full" />
-                  </div>
+                  <span className="text-sm font-bold text-white/40 tabular-nums">18 мин</span>
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <Home className="size-4 text-rose-400" />
-                      <span className="text-sm font-medium text-white/70">Дом (интенсив)</span>
-                    </div>
-                    <span className="text-sm font-bold text-rose-400 tabular-nums">34 мин</span>
+                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: "45%" }} viewport={{ once: true }} transition={{ duration: 1 }} className="h-full bg-white/15 rounded-full" />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <Home className="size-4 text-rose-400" />
+                    <span className="text-sm font-medium text-white/70">Дом (интенсив)</span>
                   </div>
-                  <div className="h-3 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} whileInView={{ width: "85%" }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.2 }} className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" />
-                  </div>
+                  <span className="text-sm font-bold text-rose-400 tabular-nums">34 мин</span>
+                </div>
+                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: "85%" }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.2 }} className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" />
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="text-left">
-            <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-              Главное преимущество, о котором не говорят
-            </h2>
-            <p className="text-lg text-white/60 leading-relaxed mb-6">
-              Знаешь, что убивает результат больше всего? Не маленькие гантели, не отсутствие тренажёра для ягодиц. <strong>Пропущенные тренировки.</strong>
-            </p>
-            <p className="text-lg text-white/60 leading-relaxed mb-8">
-              Я строю MargoFitness именно на этом принципе: максимум результата при минимуме барьеров. Потому что лучшая тренировка — это та, которую ты реально делаешь. Не та, о которой мечтаешь, глядя на абонемент в сумке.
-            </p>
+        <section className="mb-14 text-left">
+          <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
+            Главное преимущество, о котором не говорят
+          </h2>
+          <p className="text-lg text-white/60 leading-relaxed mb-6">
+            Знаешь, что убивает результат больше всего? Не маленькие гантели, не отсутствие тренажёра для ягодиц. <strong>Пропущенные тренировки.</strong>
+          </p>
+          <p className="text-lg text-white/60 leading-relaxed mb-8">
+            Я строю MargoFitness именно на этом принципе: максимум результата при минимуме барьеров. Потому что лучшая тренировка - это та, которую ты реально делаешь. Не та, о которой мечтаешь, глядя на абонемент в сумке.
+          </p>
 
-            <TipBlock>
-              Не сравнивай свой старт с чьей-то серединой пути. Ты начинаешь — и это уже сильнее, чем ты думаешь. Каждая тренировка, даже самая первая, запускает процессы, которые меняют тело изнутри. Просто доверься процессу и будь последовательной.
-            </TipBlock>
-          </section>
-        </div>
+          <TipBlock>
+            Не сравнивай свой старт с чьей-то серединой пути. Ты начинаешь - и это уже сильнее, чем ты думаешь. Каждая тренировка, даже самая первая, запускает процессы, которые меняют тело изнутри. Просто доверься процессу и будь последовательной.
+          </TipBlock>
+        </section>
 
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
