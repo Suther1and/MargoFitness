@@ -150,14 +150,20 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           </p>
         </div>
 
-        <blockquote className="relative my-14 py-8 pl-8 border-l-2 border-rose-500/40 text-left">
+        <blockquote className="relative my-14 pl-8 text-left">
+          <div className="absolute left-0 top-0 bottom-[-8px] w-0.5 bg-rose-500/40" />
           <Quote className="absolute -left-3 -top-1 size-6 text-rose-500/30 bg-[#09090b] p-0.5" />
-          <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-4">
+          <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
             «Твоим мышцам безразлично, стоит ли рядом с тобой хромированная стойка с блинами. Им важно одно - получили ли они достаточный стимул для роста. И это полностью в твоих руках.»
           </p>
-          <footer className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center font-bold text-white text-sm">M</div>
-            <span className="text-sm font-semibold text-white/40 uppercase tracking-wider">Марго</span>
+          <footer className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center font-black text-white overflow-hidden shadow-lg shadow-rose-500/20">
+              M
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black uppercase tracking-widest text-white/90 leading-none">Марго</span>
+              <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30 mt-1">Основатель MargoFitness</span>
+            </div>
           </footer>
         </blockquote>
 
@@ -171,13 +177,13 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <ConceptItem icon={Shield} title="Механическое напряжение" color="rose">
-              Это не про большие веса. Это про то, как долго и под каким углом мышца находится под нагрузкой. Замедли движение, задержись в нижней точке приседа на две секунды - и гантель в 3 кг даст нагрузку, сопоставимую с тренажёром.
+              Это про то, как долго и под каким углом мышца находится под нагрузкой. Замедли движение, задержись в нижней точке приседа на две секунды - и гантель даже в 3 кг даст нужную нагрузку.
             </ConceptItem>
             <ConceptItem icon={Flame} title="Метаболический стресс" color="orange">
-              Жжение в мышцах при интенсивной работе с короткими паузами запускает мощный гормональный отклик: выброс гормона роста и тестостерона, которые отвечают за сжигание жира. Дома его создать проще - тебе не нужно ждать свободный тренажёр.
+              Жжение в мышцах при интенсивной работе с короткими паузами запускает мощный гормональный отклик: выброс гормона роста и тестостерона, которые отвечают за сжигание жира.
             </ConceptItem>
             <ConceptItem icon={TrendingUp} title="Мышечное повреждение" color="emerald">
-              Микроразрывы волокон, после заживления которых мышца становится сильнее. Для этого достаточно регулярно менять паттерны движения и увеличивать сложность - что мы и делаем каждую тренировочную неделю.
+              Микроразрывы волокон, после заживления которых мышца становится сильнее. Для этого достаточно регулярно менять паттерны движения и увеличивать сложность.
             </ConceptItem>
           </div>
         </section>
