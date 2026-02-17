@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/actions/profile";
 import { getArticles } from "@/lib/actions/articles";
 import { ArticlesList } from "./articles-list";
+import { ARTICLE_REGISTRY } from "@/lib/config/articles";
 
 export default async function ArticlesPage() {
   const profile = await getCurrentProfile();
@@ -10,7 +11,28 @@ export default async function ArticlesPage() {
     redirect("/auth/login");
   }
 
-  const articles = await getArticles();
+  // Получаем статьи из БД
+  const dbArticles = await getArticles();
+  
+  // Объединяем с хардкодными статьями из конфига
+  // Используем Map для дедупликации по slug (хардкод имеет приоритет)
+  const allArticlesMap = new Map();
+  
+  // Сначала добавляем из БД
+  dbArticles.forEach(article => {
+    allArticlesMap.set(article.slug, article);
+  });
+  
+  // Затем перезаписываем/добавляем из хардкодного реестра
+  ARTICLE_REGISTRY.forEach(article => {
+    allArticlesMap.set(article.slug, {
+      ...article,
+      // Добавляем id если его нет в метаданных реестра, для совместимости с интерфейсом Article
+      id: article.id || article.slug 
+    });
+  });
+
+  const combinedArticles = Array.from(allArticlesMap.values());
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -21,7 +43,7 @@ export default async function ArticlesPage() {
         </p>
       </div>
 
-      <ArticlesList articles={articles} userTier={profile.subscription_tier} />
+      <ArticlesList articles={combinedArticles} userTier={profile.subscription_tier} />
     </div>
   );
 }

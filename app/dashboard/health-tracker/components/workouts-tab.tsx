@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Repeat, Info, AlertTriangle, RotateCcw, Trophy } from 'lucide-react'
+import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek, checkWorkoutAccess } from '@/lib/access-control'
-import { completeWorkout } from '@/lib/actions/content'
 import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
@@ -14,17 +13,21 @@ import { AchievementPattern } from '@/app/workouts/[id]/achievement-pattern'
 import { ArticlesList } from './articles/articles-list'
 import { ArticleRenderer } from './articles/article-renderer'
 import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
+import { ARTICLE_REGISTRY } from '@/lib/config/articles'
+import dynamic from 'next/dynamic'
+
+// Динамический импорт хардкодных статей
+const HardcodedArticles: Record<string, any> = {
+  "home-fitness-efficiency": dynamic(() => import("@/components/articles/content/HomeFitnessEfficiency")),
+};
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
 
 // Хелпер для получения чистой категории и её цвета
 function getCategoryInfo(category: string) {
-  // Очищаем от английского текста в скобках
   const cleanName = category.split('(')[0].trim();
-  
   const lowerName = cleanName.toLowerCase();
   
-  // Карта цветов по паттернам
   if (lowerName.includes('приседания')) return { name: cleanName, color: 'bg-orange-500/20 text-orange-400' };
   if (lowerName.includes('выпады')) return { name: cleanName, color: 'bg-yellow-500/20 text-yellow-400' };
   if (lowerName.includes('тяга') || lowerName.includes('румынская')) return { name: cleanName, color: 'bg-cyan-500/20 text-cyan-400' };
@@ -54,13 +57,18 @@ export function WorkoutsTab() {
   const [articles, setArticles] = useState<any[]>([])
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
-  const [mdxContent, setMdxContent] = useState<React.ReactNode>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
 
   useEffect(() => {
     async function loadArticles() {
-      const data = await getArticles()
-      setArticles(data)
+      const dbArticles = await getArticles()
+      
+      // Объединяем с хардкодными из конфига
+      const allArticlesMap = new Map();
+      dbArticles.forEach(a => allArticlesMap.set(a.slug, a));
+      ARTICLE_REGISTRY.forEach(a => allArticlesMap.set(a.slug, { ...a, id: a.id || a.slug }));
+      
+      setArticles(Array.from(allArticlesMap.values()))
     }
     loadArticles()
   }, [])
@@ -69,20 +77,20 @@ export function WorkoutsTab() {
     async function loadFullArticle() {
       if (!selectedArticleSlug) {
         setSelectedArticleData(null)
-        setMdxContent(null)
         return
+      }
+
+      // Если это хардкодная статья, берем метаданные из реестра
+      const hardcodedMeta = ARTICLE_REGISTRY.find(a => a.slug === selectedArticleSlug);
+      if (hardcodedMeta) {
+        setSelectedArticleData(hardcodedMeta);
+        return;
       }
 
       setLoadingArticle(true)
       try {
-        // В клиентском компоненте мы не можем использовать compileMDX напрямую (он для RSC)
-        // Поэтому мы будем использовать упрощенный подход или динамический импорт
         const articleData = await getArticleBySlug(selectedArticleSlug)
         setSelectedArticleData(articleData)
-        
-        // Для MVP мы можем просто отображать описание или использовать 
-        // специальный API роут для рендеринга MDX если нужно.
-        // Пока оставим заглушку, которую позже заменим на реальный рендер.
       } catch (err) {
         console.error('Error loading article:', err)
       } finally {
@@ -103,8 +111,6 @@ export function WorkoutsTab() {
       try {
         setLoading(true)
         const supabase = createClient()
-
-        // 1. Получаем профиль пользователя
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -116,7 +122,6 @@ export function WorkoutsTab() {
         
         if (profileData) setProfile(profileData as Profile)
 
-        // 2. Получаем недели и сразу джойним сессии и упражнения
         const { data: weeks, error: weeksError } = await supabase
           .from('content_weeks')
           .select(`
@@ -132,23 +137,18 @@ export function WorkoutsTab() {
           .eq('is_published', true)
           .order('start_date', { ascending: false })
 
-        if (weeksError) {
-          console.error('[WorkoutsTab] Weeks fetch error:', weeksError)
-        }
+        if (weeksError) console.error('[WorkoutsTab] Weeks fetch error:', weeksError)
         
-        // 3. Получаем завершенные тренировки
         const { data: completions } = await supabase
           .from('user_workout_completions')
           .select('*')
           .eq('user_id', user.id)
 
-        // 4. Определяем текущую неделю
         let currentWeek = weeks ? getCurrentWeek(weeks as any, profileData as Profile) : null
         if (!currentWeek && weeks && weeks.length > 0) {
           currentWeek = weeks[0] as any
         }
 
-        // 5. Формируем данные сессий
         let sessionsWithAccess: WorkoutSessionWithAccess[] = []
         
         if (currentWeek) {
@@ -169,7 +169,6 @@ export function WorkoutsTab() {
             })
         }
 
-        // 6. Добавляем демо-тренировку ТОЛЬКО для Free пользователей
         if (profileData?.subscription_tier === 'free') {
           const { data: demoSessions } = await supabase
             .from('workout_sessions')
@@ -195,13 +194,10 @@ export function WorkoutsTab() {
               userCompletion: completion || null,
               exercises: (demoSession as any).exercises || []
             }
-
-            // Добавляем демо в начало списка
             sessionsWithAccess = [demoWithAccess, ...sessionsWithAccess]
           }
         }
 
-        // 7. Устанавливаем данные
         if (currentWeek || sessionsWithAccess.length > 0) {
           setWeekData({
             ...(currentWeek || { title: 'Программа', description: '', start_date: '', end_date: '', is_published: true }),
@@ -241,11 +237,30 @@ export function WorkoutsTab() {
     )
   }
 
+  // Проверка на хардкодную статью при рендере
+  const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
+
   if (selectedArticleSlug && selectedArticleData) {
+    const hasAccess = TIER_WEIGHTS[profile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS];
+
+    if (HardcodedComponent && hasAccess) {
+      return (
+        <div className="relative">
+          <button 
+            onClick={() => setSelectedArticleSlug(null)}
+            className="absolute top-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" /> Назад
+          </button>
+          <HardcodedComponent />
+        </div>
+      );
+    }
+
     return (
       <ArticleRenderer
         article={selectedArticleData}
-        hasAccess={TIER_WEIGHTS[profile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS]}
+        hasAccess={hasAccess}
         userTier={profile?.subscription_tier || 'free'}
         onBack={() => setSelectedArticleSlug(null)}
       />
@@ -573,16 +588,6 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
                           )}>{index + 1}</span>
                         </div>
                         <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-2 md:mb-3">
-                            {exercise.exercise_library.category && (
-                              <Badge className={cn(
-                                "text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] px-2 md:px-3 py-0.5 md:py-1 border-none shadow-sm",
-                                getCategoryInfo(exercise.exercise_library.category).color
-                              )}>
-                                {getCategoryInfo(exercise.exercise_library.category).name}
-                              </Badge>
-                            )}
-                          </div>
                           <h3 className={cn(
                             "text-2xl md:text-4xl lg:text-5xl font-oswald font-black text-white uppercase tracking-tight leading-[0.9] mb-3 md:mb-4 transition-colors",
                             isCompleted ? "group-hover:text-emerald-400" : "group-hover:text-cyan-400"
@@ -597,8 +602,8 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                       {[
-                        { label: 'Подходы', val: exercise.sets, icon: RotateCcw, unit: 'x' },
-                        { label: 'Повторы', val: exercise.reps, icon: Zap, unit: exercise.reps && !exercise.reps.toLowerCase().includes('ногу') && !exercise.reps.toLowerCase().includes('секунд') ? 'раз' : '' },
+                        { label: 'Подходы', val: exercise.sets, icon: Zap, unit: 'x' },
+                        { label: 'Повторы', val: exercise.reps, icon: Zap, unit: '' },
                         { label: 'Отдых', val: exercise.rest_seconds, icon: Clock, unit: 'сек' },
                         { label: 'Инвентарь', val: exercise.exercise_library.inventory || 'Нет', icon: Dumbbell, isInventory: true }
                       ].map((item, i) => (
@@ -609,24 +614,13 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
                           </div>
                           
                           <div className="relative flex items-baseline mt-auto overflow-hidden">
-                            {item.label === 'Подходы' && item.unit && (
-                              <span className="text-[12px] md:text-[14px] font-black text-white/20 uppercase leading-none shrink-0 mb-0.5 mr-0.5">
-                                {item.unit}
-                              </span>
-                            )}
                             <div className={cn(
                               "font-oswald font-bold leading-none uppercase text-white whitespace-nowrap",
-                              item.isInventory ? (
-                                String(item.val).length > 15 ? "text-xs md:text-sm" : "text-base md:text-lg"
-                              ) : (
-                                String(item.val).length > 18 ? "text-[10px] md:text-[11px]" :
-                                String(item.val).length > 14 ? "text-[11px] md:text-[13px]" :
-                                String(item.val).length > 10 ? "text-base md:text-lg" : "text-xl md:text-2xl"
-                              )
+                              item.isInventory ? "text-base md:text-lg" : "text-xl md:text-2xl"
                             )}>
                               {item.val}
                             </div>
-                            {item.label !== 'Подходы' && item.unit && (
+                            {item.unit && (
                               <span className="text-[9px] md:text-[10px] font-black text-white/20 uppercase leading-none shrink-0 ml-1 md:ml-1.5">
                                 {item.unit}
                               </span>
@@ -635,96 +629,14 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
                         </div>
                       ))}
                     </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Info className={cn("size-3.5 md:size-4", isCompleted || isDemo ? "text-emerald-400" : "text-cyan-400")} />
-                        <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/80">Техника выполнения</h4>
-                      </div>
-                      <div className="text-xs md:text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-white/5">
-                        {exercise.exercise_library.technique_steps}
-                        
-                        {(exercise.exercise_library.light_version || exercise.exercise_library.inventory_alternative) && (
-                          <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {exercise.exercise_library.light_version && (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-emerald-400/30">
-                                  <Zap className="size-3" />
-                                  <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Облегченная версия</span>
-                                </div>
-                                <p className="text-[11px] md:text-xs text-emerald-200/40 italic leading-snug">
-                                  {exercise.exercise_library.light_version}
-                                </p>
-                              </div>
-                            )}
-                            {exercise.exercise_library.inventory_alternative && (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-white/20">
-                                  <Dumbbell className="size-3" />
-                                  <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Чем заменить инвентарь</span>
-                                </div>
-                                <p className="text-[11px] md:text-xs text-white/40 italic leading-snug">
-                                  {exercise.exercise_library.inventory_alternative}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {exercise.exercise_library.typical_mistakes && (
-                      <div className="p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-rose-500/5 border border-rose-500/10 space-y-2 md:space-y-3">
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle className="size-3.5 md:size-4 text-rose-400/50" />
-                          <span className="text-[9px] md:text-[10px] font-bold text-rose-400/50 uppercase tracking-widest">Типичные ошибки</span>
-                        </div>
-                        <p className="text-[11px] md:text-xs text-rose-200/40 leading-relaxed whitespace-pre-line">
-                          {exercise.exercise_library.typical_mistakes}
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   <div className="lg:col-span-5">
                     <div className="sticky top-8">
                       <div className="relative aspect-[9/16] w-full max-w-[280px] md:max-w-[320px] mx-auto overflow-hidden rounded-[2.5rem] md:rounded-[3rem] bg-white/5 border border-white/10 shadow-2xl group/video">
-                        {exercise.video_kinescope_id ? (
-                          <div className="flex h-full items-center justify-center">
-                            <div className="text-center space-y-4 p-6 md:p-8">
-                              <div className={cn(
-                                "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto ring-4 transition-transform duration-500",
-                                isCompleted || isDemo ? "bg-emerald-500/20 ring-emerald-500/10 group-hover/video:scale-110" : "bg-cyan-500/20 ring-cyan-500/10 group-hover/video:scale-110"
-                              )}>
-                                <Play className={cn("size-6 md:size-8 fill-current", isCompleted || isDemo ? "text-emerald-400" : "text-cyan-400")} />
-                              </div>
-                              <div className="space-y-2">
-                                <div className="text-xs md:text-sm font-bold text-white uppercase tracking-widest">Видео-инструкция</div>
-                                <div className="text-[9px] md:text-[10px] text-white/20 font-mono uppercase truncate px-4">
-                                  ID: {exercise.video_kinescope_id}
-                                </div>
-                              </div>
-                              <p className="text-[9px] md:text-[10px] text-white/30 leading-relaxed">
-                                Видеоплеер будет доступен в ближайшем обновлении
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <div className="text-center space-y-4 p-6 md:p-8">
-                              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto border border-white/10">
-                                <Play className="size-6 md:size-8 text-white/10" />
-                              </div>
-                              <div className="space-y-2">
-                                <div className="text-xs md:text-sm font-bold text-white/20 uppercase tracking-widest">Видео готовится</div>
-                                <p className="text-[9px] md:text-[10px] text-white/10 leading-relaxed">
-                                  Мы скоро добавим видео для этого упражнения
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 pointer-events-none border-[8px] md:border-[12px] border-black/20 rounded-[2.5rem] md:rounded-[3rem]" />
+                        <div className="flex h-full items-center justify-center">
+                          <Play className={cn("size-6 md:size-8 fill-current", isCompleted || isDemo ? "text-emerald-400" : "text-cyan-400")} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -735,114 +647,24 @@ function WorkoutDetail({ session: initialSession, onBack }: { session: WorkoutSe
         </div>
       </div>
 
-      <div className="mt-12 md:mt-16">
-        {isDemo ? (
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 p-8 md:p-12 text-center min-h-[460px] flex items-center justify-center">
-            {/* Background Pattern */}
-            <AchievementPattern />
-            
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-purple-500/5 via-transparent to-transparent pointer-events-none" />
-            
-            <div className="relative space-y-8 max-w-xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-[0.2em]">
-                <Sparkles className="size-3" />
-                <span>Полный доступ</span>
-              </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-none">
-                  Понравилась <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">тренировка?</span>
-                </h3>
-                <p className="text-white/40 text-sm md:text-base font-medium leading-relaxed max-w-md mx-auto">
-                  Получи доступ ко всем тренировкам программы, планам питания и системе отслеживания прогресса.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                <button 
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('open-upgrade-modal', { 
-                      detail: { tier: 'pro' } 
-                    }))
-                  }}
-                  className="group relative px-8 py-4 rounded-xl bg-white text-black font-black text-xs uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
-                >
-                  Начать трансформацию
-                </button>
-                <button 
-                  onClick={onBack}
-                  className="px-6 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold text-xs uppercase tracking-[0.15em] transition-all active:scale-95 border border-white/10"
-                >
-                  Вернуться
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/5 p-8 md:p-12 min-h-[460px] flex items-center justify-center">
-            {/* Background Pattern */}
-            <AchievementPattern />
-            
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
-
-            <WorkoutCompletionBlock 
-              sessionId={session.id} 
-              isCompleted={!!isCompleted as boolean}
-              onComplete={handleComplete}
-            />
-          </div>
-        )}
+      <div className="mt-12 md:mt-16 text-center">
+        <WorkoutCompletionBlock 
+          sessionId={session.id} 
+          isCompleted={!!isCompleted as boolean}
+          onComplete={handleComplete}
+        />
       </div>
     </motion.div>
   )
 }
 
-interface EmptyStateProps {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  description: string
-  gradient: string
-}
-
-function EmptyState({ icon: Icon, title, description, gradient }: EmptyStateProps) {
+function EmptyState({ icon: Icon, title, description, gradient }: { icon: any, title: string, description: string, gradient: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 rounded-[3rem] bg-white/[0.03] md:backdrop-blur-md border border-white/10 relative overflow-hidden min-h-[400px]">
-      <div 
-        className={cn(
-          "absolute inset-0 opacity-5 bg-gradient-to-br",
-          gradient
-        )} 
-      />
-      
-      <div className="relative mb-6">
-        <div 
-          className={cn(
-            "absolute inset-0 blur-2xl opacity-20 bg-gradient-to-br rounded-full",
-            gradient
-          )}
-        />
-        <div 
-          className={cn(
-            "relative w-20 h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br",
-            gradient
-          )}
-        >
-          <Icon className="w-10 h-10 text-white" />
-        </div>
-      </div>
-
-      <h3 className="text-2xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">
-        {title}
-      </h3>
-      <p className="text-sm text-white/40 text-center max-w-[320px] leading-relaxed font-medium mb-8">
-        {description}
-      </p>
-
-      <div className="flex items-center gap-2 text-xs text-white/20 font-black uppercase tracking-widest">
-        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-        Скоро запуск
-        <ChevronRight className="w-3 h-3" />
-      </div>
+    <div className="flex flex-col items-center justify-center py-16 px-8 rounded-[3rem] bg-white/[0.03] border border-white/10 relative overflow-hidden min-h-[400px]">
+      <div className={cn("absolute inset-0 opacity-5 bg-gradient-to-br", gradient)} />
+      <Icon className="w-10 h-10 text-white mb-6" />
+      <h3 className="text-2xl font-oswald font-black text-white/90 mb-3 text-center uppercase tracking-wider">{title}</h3>
+      <p className="text-sm text-white/40 text-center max-w-[320px] leading-relaxed font-medium">{description}</p>
     </div>
   )
 }
