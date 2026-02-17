@@ -4,9 +4,6 @@ import { getArticleBySlug } from "@/lib/actions/articles";
 import { ArticleRenderer } from "./article-renderer";
 import fs from "fs";
 import path from "path";
-import { compileMDX } from "next-mdx-remote/rsc";
-import { Callout, ExpertTip, Checklist } from "@/components/articles/mdx-components";
-import { InteractiveChart } from "@/components/articles/interactive-chart";
 import { ARTICLE_REGISTRY } from "@/lib/config/articles";
 import dynamic from "next/dynamic";
 
@@ -24,13 +21,6 @@ const TIER_WEIGHTS = {
   basic: 1,
   pro: 2,
   elite: 3,
-};
-
-const components = {
-  Callout,
-  ExpertTip,
-  Checklist,
-  InteractiveChart,
 };
 
 export default async function ArticlePage({ params }: PageProps) {
@@ -64,29 +54,11 @@ export default async function ArticlePage({ params }: PageProps) {
     return <HardcodedComponent />;
   }
 
-  // 4. Если это MDX статья (fallback)
-  let mdxContent = null;
-  if (hasAccess && !HardcodedComponent) {
-    try {
-      const filePath = path.join(process.cwd(), "content/articles", `${slug}.mdx`);
-      if (fs.existsSync(filePath)) {
-        const source = fs.readFileSync(filePath, "utf8");
-        const { content } = await compileMDX({
-          source,
-          components,
-          options: { parseFrontmatter: true },
-        });
-        mdxContent = content;
-      }
-    } catch (error) {
-      console.error("Error processing MDX:", error);
-    }
-  }
-
+  // 4. Fallback для старых статей (если остались в БД, но нет хардкода)
   return (
     <ArticleRenderer 
       article={article} 
-      mdxContent={mdxContent} 
+      mdxContent={null} 
       hasAccess={hasAccess} 
       userTier={profile.subscription_tier}
     />

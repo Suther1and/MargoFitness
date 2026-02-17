@@ -106,10 +106,10 @@ export default function HomeFitnessEfficiency({ onBack }: { onBack: () => void }
       </div>
 
       {/* CONTENT BODY */}
-      <div className="max-w-5xl mx-auto">
-        <Section>
+      <div className="w-full">
+        <Section className="px-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 px-6 md:px-0">
               <h2 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tight leading-none mb-8">
                 Биологии <br /> всё равно
               </h2>
@@ -163,7 +163,7 @@ export default function HomeFitnessEfficiency({ onBack }: { onBack: () => void }
         </Section>
 
         {/* SECTION 2: Инфографика */}
-        <Section className="bg-white/[0.02] rounded-[3rem] border border-white/5 px-8 md:px-16 my-12">
+        <Section className="bg-white/[0.02] rounded-[3rem] border border-white/5 px-8 md:px-16 my-12 mx-0">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl font-oswald font-black uppercase tracking-tight mb-6 text-white">
               Эффект EPOC
@@ -211,7 +211,7 @@ export default function HomeFitnessEfficiency({ onBack }: { onBack: () => void }
         </Section>
 
         {/* FINAL CTA */}
-        <Section className="text-center py-24">
+        <Section className="text-center py-24 px-6 md:px-0">
           <div className="max-w-2xl mx-auto space-y-10">
             <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white leading-none">
               Готова начать <br /> по-настоящему?

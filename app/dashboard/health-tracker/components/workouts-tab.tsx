@@ -10,21 +10,44 @@ import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from 
 import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
 import { AchievementPattern } from '@/app/workouts/[id]/achievement-pattern'
+import { ARTICLE_REGISTRY } from "@/lib/config/articles";
+import dynamic from "next/dynamic";
 import { ArticlesList } from './articles/articles-list'
-import { ArticleRenderer } from './articles/article-renderer'
 import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
-import { ARTICLE_REGISTRY } from '@/lib/config/articles'
-import dynamic from 'next/dynamic'
 
 // Динамический импорт хардкодных статей
 const HardcodedArticles: Record<string, any> = {
   "home-fitness-efficiency": dynamic(() => import("@/components/articles/content/HomeFitnessEfficiency")),
 };
 
-type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
+interface ArticleRendererProps {
+  article: any;
+  hasAccess: boolean;
+  userTier: string;
+  onBack: () => void;
+}
 
-// Хелпер для получения чистой категории и её цвета
-function getCategoryInfo(category: string) {
+const ArticleRendererFallback = ({
+  article,
+  hasAccess,
+  userTier,
+  onBack,
+}: ArticleRendererProps) => {
+  return (
+    <div className="min-h-screen bg-[#09090b] pb-20 text-left">
+      <div className="p-8 md:p-16">
+        <button onClick={onBack} className="mb-8 text-white/40 hover:text-white">← Назад</button>
+        <h1 className="text-4xl font-oswald font-black text-white uppercase">{article.title}</h1>
+        <p className="mt-4 text-white/60 italic">{article.description}</p>
+        <div className="mt-12 p-10 border border-dashed border-white/10 rounded-[2rem] text-center">
+          <p className="text-white/20">Контент этой статьи находится в процессе переноса в новый формат.</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export function WorkoutsTab() {
   const cleanName = category.split('(')[0].trim();
   const lowerName = cleanName.toLowerCase();
   
@@ -245,7 +268,7 @@ export function WorkoutsTab() {
     }
 
     return (
-      <ArticleRenderer
+      <ArticleRendererFallback
         article={selectedArticleData}
         hasAccess={hasAccess}
         userTier={profile?.subscription_tier || 'free'}
