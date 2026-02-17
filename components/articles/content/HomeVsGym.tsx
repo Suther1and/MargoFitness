@@ -46,20 +46,20 @@ const ConceptItem = ({
   };
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 hover:bg-white/[0.03] transition-colors text-left">
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 hover:bg-white/[0.03] transition-colors text-left h-full">
       <div className="flex flex-col gap-4">
-        <div
-          className={cn(
-            "size-9 rounded-lg flex items-center justify-center shrink-0 border",
-            colors[color]
-          )}
-        >
-          <Icon className={cn("size-4.5", iconColors[color])} />
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "size-9 rounded-lg flex items-center justify-center shrink-0 border",
+              colors[color]
+            )}
+          >
+            <Icon className={cn("size-4.5", iconColors[color])} />
+          </div>
+          <h3 className="text-base font-bold text-white/90 leading-tight">{title}</h3>
         </div>
-        <div className="min-w-0">
-          <h3 className="text-base font-bold text-white/90 mb-1.5">{title}</h3>
-          <p className="text-sm text-white/45 leading-relaxed">{children}</p>
-        </div>
+        <p className="text-sm text-white/45 leading-relaxed">{children}</p>
       </div>
     </div>
   );
@@ -151,8 +151,8 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
         </div>
 
         <blockquote className="relative my-14 pl-8 text-left">
-          <div className="absolute left-0 top-0 bottom-[-8px] w-0.5 bg-rose-500/40" />
-          <Quote className="absolute -left-3 -top-1 size-6 text-rose-500/30 bg-[#09090b] p-0.5" />
+          <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-rose-500/40" />
+          <Quote className="absolute -left-3 -top-1 size-6 text-rose-500/30 p-0.5" />
           <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
             «Твоим мышцам безразлично, стоит ли рядом с тобой хромированная стойка с блинами. Им важно одно - получили ли они достаточный стимул для роста. И это полностью в твоих руках.»
           </p>
