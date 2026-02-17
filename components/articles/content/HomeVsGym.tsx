@@ -66,7 +66,7 @@ const ConceptItem = ({
 };
 
 const TipBlock = ({ children }: { children: React.ReactNode }) => (
-  <div className="my-6 md:my-10 rounded-[2.5rem] md:rounded-[3.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 p-6 md:p-8 text-left inline-block w-auto max-w-full">
+  <div className="my-6 lg:my-0 rounded-[2.5rem] md:rounded-[3.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 p-6 md:p-8 text-left inline-block w-auto max-w-full">
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <div className="size-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -237,35 +237,55 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             Миф про «несерьёзные» веса
           </h2>
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
+          <p className="text-lg text-white/60 leading-relaxed mb-8">
             «С гантелями по 2-4 кг ничего не накачаешь» - самый живучий миф. Исследование в <em>Journal of Applied Physiology</em> показало: тренировки с лёгкими весами (30% от максимума) до отказа дают <strong className="text-white/80">сопоставимый рост мышечной массы</strong> с тяжёлыми весами.
           </p>
 
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">Минуты реальной мышечной работы за 40-минутную сессию</p>
-            <div className="space-y-5">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <Building2 className="size-4 text-white/20" />
-                    <span className="text-sm font-medium text-white/50">Зал (с паузами)</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch mb-14">
+            <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">Минуты реальной мышечной работы за 40-минутную сессию</p>
+              <div className="space-y-5">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <Building2 className="size-4 text-white/20" />
+                      <span className="text-sm font-medium text-white/50">Зал (с паузами)</span>
+                    </div>
+                    <span className="text-sm font-bold text-white/40 tabular-nums">18 мин</span>
                   </div>
-                  <span className="text-sm font-bold text-white/40 tabular-nums">18 мин</span>
+                  <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} whileInView={{ width: "45%" }} viewport={{ once: true }} transition={{ duration: 1 }} className="h-full bg-white/15 rounded-full" />
+                  </div>
                 </div>
-                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} whileInView={{ width: "45%" }} viewport={{ once: true }} transition={{ duration: 1 }} className="h-full bg-white/15 rounded-full" />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <Home className="size-4 text-rose-400" />
+                      <span className="text-sm font-medium text-white/70">Дом (интенсив)</span>
+                    </div>
+                    <span className="text-sm font-bold text-rose-400 tabular-nums">34 мин</span>
+                  </div>
+                  <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} whileInView={{ width: "85%" }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.2 }} className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" />
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <Home className="size-4 text-rose-400" />
-                    <span className="text-sm font-medium text-white/70">Дом (интенсив)</span>
+            </div>
+
+            <div className="hidden lg:block">
+              <div className="h-full rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 p-6 md:p-8 flex flex-col justify-center">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                      <Lightbulb className="size-4 text-emerald-400/80" />
+                    </div>
+                    <p className="text-xs md:text-sm font-black uppercase tracking-[0.15em] text-emerald-400/70">
+                      Совет от Марго
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-rose-400 tabular-nums">34 мин</span>
-                </div>
-                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} whileInView={{ width: "85%" }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.2 }} className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" />
+                  <p className="text-sm md:text-base text-white/60 leading-relaxed">
+                    Не сравнивай свой старт с чьей-то серединой пути. Каждая тренировка, даже самая первая, запускает процессы, которые меняют тело изнутри. Просто доверься процессу и будь последовательной.
+                  </p>
                 </div>
               </div>
             </div>
@@ -283,9 +303,23 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
             Я строю MargoFitness именно на этом принципе: максимум результата при минимуме барьеров. Потому что лучшая тренировка - это та, которую ты реально делаешь. Не та, о которой мечтаешь, глядя на абонемент в сумке.
           </p>
 
-          <TipBlock>
-            Не сравнивай свой старт с чьей-то серединой пути. Ты начинаешь - и это уже сильнее, чем ты думаешь. Каждая тренировка, даже самая первая, запускает процессы, которые меняют тело изнутри. Просто доверься процессу и будь последовательной.
-          </TipBlock>
+          <div className="lg:hidden">
+            <div className="rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 p-6 md:p-8 flex flex-col justify-center">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Lightbulb className="size-4 text-emerald-400/80" />
+                  </div>
+                  <p className="text-xs md:text-sm font-black uppercase tracking-[0.15em] text-emerald-400/70">
+                    Совет от Марго
+                  </p>
+                </div>
+                <p className="text-sm md:text-base text-white/60 leading-relaxed">
+                  Не сравнивай свой старт с чьей-то серединой пути. Каждая тренировка, даже самая первая, запускает процессы, которые меняют тело изнутри. Просто доверься процессу и будь последовательной.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
