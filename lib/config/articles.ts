@@ -13,13 +13,13 @@ export interface ArticleMetadata {
 
 export const ARTICLE_REGISTRY: ArticleMetadata[] = [
   {
-    id: "home-fitness-efficiency",
-    slug: "home-fitness-efficiency",
-    title: "Домашний фитнес: Как превратить 40 минут в результат, сопоставимый с залом",
-    description: "Развенчиваем миф о том, что для крутого тела нужен зал. Научный подход к домашним тренировкам: от механики мышц до гормонального отклика.",
+    id: "home-vs-gym",
+    slug: "home-vs-gym",
+    title: "Домашние тренировки VS Зал: почему это работает",
+    description: "Разбираемся, почему домашние тренировки дают реальный результат и в чём их честное преимущество перед залом. Наука, практика, ноль мифов.",
     category: "Методика",
-    reading_time: 7,
+    reading_time: 6,
     access_level: "free",
-    image_url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop"
+    image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop"
   }
 ];

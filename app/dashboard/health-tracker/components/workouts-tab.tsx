@@ -17,7 +17,7 @@ import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 
 // Динамический импорт хардкодных статей
 const HardcodedArticles: Record<string, any> = {
-  "home-fitness-efficiency": dynamic(() => import("@/components/articles/content/HomeFitnessEfficiency")),
+  "home-vs-gym": dynamic(() => import("@/components/articles/content/HomeVsGym")),
 };
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
