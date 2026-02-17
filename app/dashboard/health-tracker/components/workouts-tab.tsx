@@ -268,7 +268,10 @@ export function WorkoutsTab() {
               </div>
             </div>
 
-            <HardcodedComponent onBack={() => setSelectedArticleSlug(null)} />
+            <HardcodedComponent 
+              onBack={() => setSelectedArticleSlug(null)} 
+              metadata={selectedArticleData}
+            />
           </div>
         </div>
       );

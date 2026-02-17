@@ -83,7 +83,7 @@ const TipBlock = ({ children }: { children: React.ReactNode }) => (
 
 // --- Основная статья ---
 
-export default function HomeVsGym({ onBack }: { onBack: () => void }) {
+export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, metadata?: any }) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -95,7 +95,7 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
         <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20 hidden md:block">
           <button
             onClick={onBack}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
           >
             <ChevronLeft className="h-4 w-4" /> Назад к материалам
           </button>
@@ -107,6 +107,11 @@ export default function HomeVsGym({ onBack }: { onBack: () => void }) {
               <span className="bg-slate-400 text-black border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Методика
               </span>
+              {metadata?.access_level && (
+                <span className="hidden md:inline-block bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                  {metadata.access_level}
+                </span>
+              )}
               <span className="bg-white/10 backdrop-blur-md text-white/80 border border-white/10 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 <Clock className="h-3.5 w-3.5" /> 6 мин чтения
               </span>
