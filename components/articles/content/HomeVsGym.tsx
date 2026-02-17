@@ -284,7 +284,7 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           </TipBlock>
         </section>
 
-        <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-20">
+        <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
             Готова начать?
           </h2>
