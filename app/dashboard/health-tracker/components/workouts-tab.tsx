@@ -68,9 +68,15 @@ export function WorkoutsTab() {
   const [loadingArticle, setLoadingArticle] = useState(false)
 
   const loadArticles = async () => {
-    const dbArticles = await getArticles()
+    // Start fetching everything in parallel
+    const dbArticlesPromise = getArticles()
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const userPromise = supabase.auth.getUser()
+    
+    const [dbArticles, { data: { user } }] = await Promise.all([
+      dbArticlesPromise,
+      userPromise
+    ])
     
     let readStatuses: any[] = []
     if (user) {
