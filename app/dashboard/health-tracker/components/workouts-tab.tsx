@@ -105,7 +105,10 @@ export function WorkoutsTab() {
   }, [selectedArticleSlug])
 
   useEffect(() => {
-    const handleReset = () => setSelectedSessionId(null)
+    const handleReset = () => {
+      setSelectedSessionId(null)
+      setSelectedArticleSlug(null)
+    }
     window.addEventListener('reset-workout-selection', handleReset)
     return () => window.removeEventListener('reset-workout-selection', handleReset)
   }, [])

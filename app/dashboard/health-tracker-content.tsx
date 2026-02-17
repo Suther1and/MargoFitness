@@ -422,6 +422,16 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   // Функция переключения табов с принудительным сохранением данных
   const handleTabChange = async (tab: string) => {
     console.log('[HealthTracker] Manual tab change to:', tab)
+    
+    // Если таб уже активен, сбрасываем внутреннее состояние (например, закрываем статью)
+    if (tab === activeTab) {
+      if (tab === 'workouts') {
+        // Генерируем событие для сброса выбора тренировки/статьи
+        window.dispatchEvent(new CustomEvent('reset-workout-selection'))
+      }
+      return
+    }
+
     // Если переходим в статистику, принудительно сохраняем данные и ждем завершения
     if (tab === 'stats') {
       await forceSave()
