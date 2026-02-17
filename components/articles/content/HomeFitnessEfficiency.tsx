@@ -60,20 +60,20 @@ export default function HomeFitnessEfficiency({ onBack }: { onBack: () => void }
       animate={{ opacity: 1, y: 0 }}
       className="text-white selection:bg-rose-500/30"
     >
-      {/* Кнопка назад */}
-      <div className="mb-8">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
-        >
-          <ChevronLeft className="h-4 w-4" /> Назад к материалам
-        </button>
-      </div>
-
       {/* HERO SECTION - Возвращаем старую структуру заголовка */}
       <div className="relative w-full overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16">
+        {/* Кнопка назад - Абсолютное позиционирование для точности */}
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
+          >
+            <ChevronLeft className="h-4 w-4" /> Назад к материалам
+          </button>
+        </div>
+
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
-          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16">
+          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-20 md:pt-24">
             <div className="flex flex-wrap gap-3 mb-6">
               <span className="bg-slate-400 text-black border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Методика
@@ -88,7 +88,7 @@ export default function HomeFitnessEfficiency({ onBack }: { onBack: () => void }
               <span className="text-rose-500">Больше чем зал</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/60 leading-relaxed font-medium border-l-4 border-slate-400/30 pl-8 italic">
+            <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-rose-500/30 pl-8 italic">
               Развенчиваем миф о том, что для крутого тела нужен абонемент. Научный подход к тренировкам, где твоя гостиная становится местом силы.
             </p>
           </div>
