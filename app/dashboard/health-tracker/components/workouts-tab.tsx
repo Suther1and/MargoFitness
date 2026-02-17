@@ -62,12 +62,9 @@ export function WorkoutsTab() {
   useEffect(() => {
     async function loadArticles() {
       const dbArticles = await getArticles()
-      
-      // Объединяем с хардкодными из конфига
       const allArticlesMap = new Map();
       dbArticles.forEach(a => allArticlesMap.set(a.slug, a));
       ARTICLE_REGISTRY.forEach(a => allArticlesMap.set(a.slug, { ...a, id: a.id || a.slug }));
-      
       setArticles(Array.from(allArticlesMap.values()))
     }
     loadArticles()
@@ -80,7 +77,6 @@ export function WorkoutsTab() {
         return
       }
 
-      // Если это хардкодная статья, берем метаданные из реестра
       const hardcodedMeta = ARTICLE_REGISTRY.find(a => a.slug === selectedArticleSlug);
       if (hardcodedMeta) {
         setSelectedArticleData(hardcodedMeta);
@@ -237,7 +233,6 @@ export function WorkoutsTab() {
     )
   }
 
-  // Проверка на хардкодную статью при рендере
   const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
 
   if (selectedArticleSlug && selectedArticleData) {
@@ -245,15 +240,7 @@ export function WorkoutsTab() {
 
     if (HardcodedComponent && hasAccess) {
       return (
-        <div className="relative">
-          <button 
-            onClick={() => setSelectedArticleSlug(null)}
-            className="absolute top-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" /> Назад
-          </button>
-          <HardcodedComponent />
-        </div>
+        <HardcodedComponent onBack={() => setSelectedArticleSlug(null)} />
       );
     }
 
