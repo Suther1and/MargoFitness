@@ -247,18 +247,7 @@ export default function HabitMagic({
           </p>
 
           {/* Петля привычки — Инфографика */}
-          <div className="relative mb-32 max-w-[1000px] mx-auto px-4 md:px-0">
-            <div className="text-center mb-12 md:mb-20">
-              <h3 className="text-3xl md:text-5xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
-                Механика <span className="text-rose-500">нейронной петли</span>
-              </h3>
-              <p className="text-white/40 text-sm md:text-base max-w-lg mx-auto leading-relaxed">
-                Привычка — это не магия, а четкий алгоритм мозга. 
-                <br className="hidden md:block" />
-                Измени один элемент, и ты изменишь всё поведение.
-              </p>
-            </div>
-
+          <div className="relative mb-20 md:mb-32 max-w-[1000px] mx-auto px-4 md:px-0">
             <div className="relative flex items-center justify-center min-h-[500px] md:min-h-[650px]">
               {/* Фоновое свечение */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[250px] md:size-[600px] bg-rose-500/[0.02] blur-[80px] md:blur-[120px] pointer-events-none" />
@@ -328,7 +317,7 @@ export default function HabitMagic({
                     </div>
                   </div>
                   <p className="text-[10px] md:text-base text-white/40 leading-relaxed max-w-[140px] md:max-w-[320px] group-hover:text-white/60 transition-colors hidden sm:block ml-auto">
-                    Конкретный триггер: время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».
+                    Время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».
                   </p>
                 </motion.div>
 
@@ -378,7 +367,7 @@ export default function HabitMagic({
                     </div>
                   </div>
                   <p className="text-[10px] md:text-base text-white/40 leading-relaxed max-w-[140px] md:max-w-[320px] group-hover:text-white/60 transition-colors hidden sm:block ml-auto">
-                    Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие сразу после.
+                    Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие.
                   </p>
                 </motion.div>
 
@@ -403,7 +392,7 @@ export default function HabitMagic({
                     </div>
                   </div>
                   <p className="text-[10px] md:text-base text-white/40 leading-relaxed max-w-[140px] md:max-w-[320px] group-hover:text-white/60 transition-colors hidden sm:block mr-auto">
-                    Максимально простое начало. Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.
+                    Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.
                   </p>
                 </motion.div>
               </div>
