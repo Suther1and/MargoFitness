@@ -419,7 +419,7 @@ function CalorieCalculator() {
   const hasInput = height || weight || age;
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8">
+    <div className="max-w-[600px] mx-auto rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8 shadow-xl">
       {/* Header + Inputs — single compact strip */}
       <div className="flex items-stretch border-b border-white/5">
         <div className="flex items-center flex-1 p-0.5">
