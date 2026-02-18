@@ -344,12 +344,18 @@ export default function SafetyBasics({
             </div>
           </div>
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Пример: приседание. Опускаешься вниз — вдох. Встаёшь — выдох.
-            Отжимание: опускаешься к полу — вдох. Выжимаешь себя вверх — выдох.
-            Просто? Да. Но это правило защищает от скачков давления и
-            головокружения, а ещё добавляет примерно 10–15% к твоей силе.
-          </p>
+          <div className="text-lg text-white/60 leading-relaxed mb-6 space-y-2">
+            <p>
+              Пример: приседание. Опускаешься вниз — <strong className="text-white/90">вдох</strong>. Встаёшь — <strong className="text-white/90">выдох</strong>.
+            </p>
+            <p>
+              Отжимание: опускаешься к полу — <strong className="text-white/90">вдох</strong>. Выжимаешь себя вверх — <strong className="text-white/90">выдох</strong>.
+            </p>
+            <p className="pt-4">
+              Просто? Да. Но это правило защищает от скачков давления и
+              головокружения, а ещё добавляет примерно 10–15% к твоей силе.
+            </p>
+          </div>
         </section>
 
         {/* Секция 5 — Красные флаги */}
@@ -579,20 +585,20 @@ function OptionCard({
 }) {
   const borderColor = color === "sky" ? "border-sky-500/15" : "border-blue-500/15";
   const bgColor = color === "sky" ? "bg-sky-500/[0.04]" : "bg-blue-500/[0.04]";
-  const textColor = color === "sky" ? "text-sky-400" : "text-blue-400";
+  const textColor = color === "sky" ? "text-sky-400" : "text-blue-400/40";
   const dotColor = color === "sky" ? "text-sky-500/50" : "text-blue-500/50";
 
   return (
-    <div className={cn("rounded-2xl border p-5 md:p-6 text-left flex flex-col", borderColor, bgColor)}>
-      <p className={cn("text-xs font-bold uppercase tracking-widest mb-1", textColor + "/70")}>
+    <div className={cn("rounded-2xl border p-5 md:p-6 text-left flex flex-col h-full", borderColor, bgColor)}>
+      <p className={cn("text-[10px] font-black uppercase tracking-[0.15em] mb-2", textColor)}>
         {subtitle}
       </p>
-      <h4 className="text-base font-bold text-white/85 mb-4">{title}</h4>
-      <ul className="space-y-2 mb-4 flex-1">
+      <h4 className="text-lg font-black font-oswald uppercase tracking-tight text-white/90 mb-5 leading-tight">{title}</h4>
+      <ul className="space-y-3 mb-6 flex-1">
         {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm text-white/50 leading-relaxed">
-            <span className={cn("mt-1 shrink-0", dotColor)}>•</span>
-            {item}
+          <li key={i} className="flex items-center gap-3 text-sm text-white/50 leading-relaxed group">
+            <div className={cn("size-1.5 rounded-full shrink-0 transition-colors", color === "sky" ? "bg-sky-500/40" : "bg-blue-500/40")} />
+            <span className="translate-y-[0.5px]">{item}</span>
           </li>
         ))}
       </ul>
