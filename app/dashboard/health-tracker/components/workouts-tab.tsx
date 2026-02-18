@@ -275,6 +275,15 @@ export function WorkoutsTab() {
     )
   }
 
+  useEffect(() => {
+    if (selectedArticleSlug) {
+      document.body.classList.add('article-open');
+    } else {
+      document.body.classList.remove('article-open');
+    }
+    return () => document.body.classList.remove('article-open');
+  }, [selectedArticleSlug]);
+
   const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
 
   if (selectedArticleSlug && selectedArticleData) {
@@ -283,7 +292,7 @@ export function WorkoutsTab() {
     if (HardcodedComponent && hasAccess) {
       return (
         <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent overflow-hidden md:overflow-visible">
-          <div className="relative h-full overflow-y-auto min-h-screen md:min-h-0 pt-16 pb-24 md:py-0 overscroll-contain">
+          <div className="relative h-full overflow-y-auto scrollbar-hide min-h-screen md:min-h-0 pt-16 pb-24 md:py-0 overscroll-contain">
             {/* Мобильная шапка статьи */}
             <div className="absolute top-0 left-0 right-0 h-[70px] z-[110] flex items-center justify-center px-4 md:hidden">
               <div className="fixed top-[15px] left-4 z-[120]">

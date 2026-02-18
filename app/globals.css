@@ -135,15 +135,19 @@
     @apply border-border outline-ring/50;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-user-drag: none;
   }
 
   input, textarea, [contenteditable="true"] {
     user-select: text;
     -webkit-user-select: text;
+  }
+  
+  /* Отключаем выделение текста глобально, но разрешаем его в статьях для работы скролла в Chrome */
+  body:not(.article-open) * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
   }
   body {
     overflow-x: hidden;
@@ -173,6 +177,7 @@
     overflow-x: hidden;
     overscroll-behavior-x: none;
     background: #0C0C11;
+    scroll-behavior: smooth;
   }
   
   /* Webkit browsers (Chrome, Safari, Yandex) - transparent background */
