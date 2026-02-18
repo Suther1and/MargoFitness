@@ -344,12 +344,15 @@ export default function SafetyBasics({
             </div>
           </div>
 
-          <div className="text-lg text-white/60 leading-relaxed mb-6 space-y-2">
+          <div className="text-lg text-white/60 leading-relaxed mb-6">
             <p>
-              Пример: приседание. Опускаешься вниз — <strong className="text-white/90">вдох</strong>. Встаёшь — <strong className="text-white/90">выдох</strong>.
+              Приседание: опускаешься вниз — <strong className="text-white/80">вдох</strong>, встаёшь — <strong className="text-white/80">выдох</strong>.
             </p>
             <p>
-              Отжимание: опускаешься к полу — <strong className="text-white/90">вдох</strong>. Выжимаешь себя вверх — <strong className="text-white/90">выдох</strong>.
+              Отжимание: опускаешься к полу — <strong className="text-white/80">вдох</strong>, выжимаешь себя вверх — <strong className="text-white/80">выдох</strong>.
+            </p>
+            <p>
+              Планка: не задерживай дыхание, делай ровные <strong className="text-white/80">вдохи</strong> и <strong className="text-white/80">выдохи</strong>.
             </p>
             <p className="pt-4">
               Просто? Да. Но это правило защищает от скачков давления и
