@@ -394,9 +394,9 @@ function CalorieCalculator() {
   const [activityLevel, setActivityLevel] = React.useState<number>(1.55);
 
   const activityOptions = [
-    { label: "Низкая", value: 1.375, desc: "1-2 тренировки в неделю" },
-    { label: "Средняя", value: 1.55, desc: "3-4 тренировки в неделю" },
-    { label: "Высокая", value: 1.725, desc: "5+ тренировок в неделю" },
+    { label: "Низкая", value: 1.375, desc: ">1 тренировки в неделю" },
+    { label: "Средняя", value: 1.55, desc: "2-3 тренировки в неделю" },
+    { label: "Высокая", value: 1.725, desc: "3+ тренировки в неделю" },
   ];
 
   const norms = React.useMemo(() => {
