@@ -258,33 +258,67 @@ export default function SafetyBasics({
           </p>
         </section>
 
-        {/* Цитата */}
-        <blockquote className="relative my-14 pl-8 text-left">
-          <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-sky-400/40" />
-          <Quote className="absolute -left-3 -top-1 size-6 text-sky-400/30 p-0.5" />
-          <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
-            «Профессионал отличается от новичка не тем, что делает сложные
-            упражнения. А тем, что никогда не пропускает разминку и умеет
-            слушать своё тело.»
-          </p>
-          <footer className="flex items-center gap-4">
-            <div className="relative w-14 h-14 -ml-1 -my-2 shrink-0 rounded-full border-2 border-sky-500/20 overflow-hidden shadow-lg shadow-sky-500/20">
-              <img
-                src="/images/avatars/margo.png"
-                alt="Марго"
-                className="w-full h-full object-cover"
-              />
+        {/* Блок преимуществ платформы */}
+        <section className="my-16 text-left">
+          <div className="relative overflow-hidden rounded-3xl bg-sky-500/[0.03] border border-sky-500/10 p-8 md:p-12">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-10 items-center">
+              <div className="lg:col-span-3 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
+                  <ShieldCheck className="size-3.5 text-sky-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Твоя безопасность — наш приоритет</span>
+                </div>
+                
+                <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
+                  Как MargoFitness <span className="text-sky-400">страхует тебя</span> на каждой тренировке
+                </h2>
+                
+                <p className="text-lg text-white/60 leading-relaxed">
+                  Мы понимаем, что дома нет тренера, который поправит твою спину. Поэтому мы встроили систему безопасности прямо в интерфейс платформы.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <Activity className="size-4 text-sky-400" />
+                      </div>
+                      <h4 className="font-bold text-white/90">Разбор техники</h4>
+                    </div>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      Каждое упражнение сопровождается детальным текстовым описанием ключевых точек контроля.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <Eye className="size-4 text-sky-400" />
+                      </div>
+                      <h4 className="font-bold text-white/90">Видео-инструкции</h4>
+                    </div>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      Наглядные видео с правильной амплитудой и акцентами на дыхании и положении суставов.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 relative">
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-sky-500/20 to-transparent border border-white/5 flex items-center justify-center overflow-hidden group hover:border-sky-500/30 transition-all duration-500">
+                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-20 grayscale group-hover:scale-110 transition-transform duration-700" />
+                  <div className="relative size-20 rounded-full bg-sky-500 flex items-center justify-center shadow-2xl shadow-sky-500/40 group-hover:scale-110 transition-transform duration-500 cursor-pointer">
+                    <div className="absolute inset-0 rounded-full bg-sky-500 animate-ping opacity-20" />
+                    <ArrowRight className="size-8 text-black" />
+                  </div>
+                </div>
+                
+                {/* Декоративные элементы */}
+                <div className="absolute -top-4 -right-4 size-24 bg-sky-500/10 blur-3xl rounded-full" />
+                <div className="absolute -bottom-4 -left-4 size-24 bg-blue-500/10 blur-3xl rounded-full" />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-black uppercase tracking-widest text-white/90 leading-none">
-                Марго
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30 mt-1">
-                Основатель MargoFitness
-              </span>
-            </div>
-          </footer>
-        </blockquote>
+          </div>
+        </section>
 
         {/* Секция 4 — Дыхание */}
         <section className="mb-14 text-left">
@@ -432,23 +466,23 @@ export default function SafetyBasics({
             безопасности в машине.
           </p>
 
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-4 md:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
               {[
                 { icon: Home, label: "Пространство", desc: "2×2 м, коврик, без препятствий" },
-                { icon: ThermometerSun, label: "Разминка", desc: "5–7 мин перед каждой тренировкой" },
-                { icon: Footprints, label: "Стопы", desc: "Босиком на коврике, кроссовки для прыжков" },
+                { icon: ThermometerSun, label: "Разминка", desc: "5–7 мин перед тренировкой" },
+                { icon: Footprints, label: "Стопы", desc: "Босиком или в кроссовках" },
                 { icon: Wind, label: "Дыхание", desc: "Выдох на усилие, вдох на возврат" },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center text-center gap-3 p-4">
-                  <div className="size-11 rounded-xl bg-sky-500/10 border border-sky-500/15 flex items-center justify-center">
+                <div key={i} className="flex items-center sm:flex-col sm:text-center gap-4 p-3 md:p-4 rounded-xl hover:bg-white/[0.02] transition-colors">
+                  <div className="size-10 md:size-11 rounded-xl bg-sky-500/10 border border-sky-500/15 flex items-center justify-center shrink-0">
                     <item.icon className="size-5 text-sky-400" />
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-white/80 mb-0.5">
+                  <div className="flex flex-col sm:items-center">
+                    <p className="text-sm font-bold text-white/90 mb-0.5">
                       {item.label}
                     </p>
-                    <p className="text-[11px] text-white/30 leading-snug">
+                    <p className="text-[11px] text-white/40 leading-snug">
                       {item.desc}
                     </p>
                   </div>
