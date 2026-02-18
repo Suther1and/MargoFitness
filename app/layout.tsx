@@ -35,6 +35,8 @@ export const metadata: Metadata = {
   description: "Современная платформа для онлайн-тренировок с персонализированными программами и отслеживанием прогресса",
 };
 
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -60,6 +62,7 @@ export default async function RootLayout({
           <AnimationProvider>
             <ReferralCodeCapture />
             <ReferralProcessor />
+            <ScrollToTopButton />
             <div className="flex flex-col items-center w-full p-0 xl:pt-2 xl:pr-4 xl:pb-8 xl:pl-4">
             <div 
               className="relative w-full xl:max-w-[96rem] xl:rounded-[3rem] rounded-b-[3rem] overflow-hidden" 
