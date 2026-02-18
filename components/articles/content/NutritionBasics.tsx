@@ -432,9 +432,14 @@ function CalorieCalculator() {
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] mb-0.5">{field.label}</label>
               <div className="flex items-baseline gap-0.5">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={field.value}
-                  onChange={(e) => field.set(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 3);
+                    field.set(val);
+                  }}
                   placeholder={field.ph}
                   className="w-full bg-transparent text-[22px] md:text-[26px] font-oswald font-black text-white focus:outline-none placeholder:text-white/10 leading-none min-w-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
