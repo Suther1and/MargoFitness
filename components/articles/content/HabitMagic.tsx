@@ -312,7 +312,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-right md:translate-x-[-140px] md:translate-y-[-130px] md:pr-12"
+                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-right md:translate-x-[-80px] md:translate-y-[-80px] md:pr-12"
                 >
                   <div className="flex items-center gap-3 md:gap-5 flex-row-reverse">
                     <div className="size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-rose-500/50 group-hover:shadow-[0_0_30px_rgba(244,63,94,0.1)] transition-all duration-500 shadow-2xl">
@@ -337,7 +337,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-left md:translate-x-[140px] md:translate-y-[-130px] md:pl-12"
+                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-left md:translate-x-[80px] md:translate-y-[-80px] md:pl-12"
                 >
                   <div className="flex items-center gap-3 md:gap-5 flex-row">
                     <div className="size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-rose-500/50 group-hover:shadow-[0_0_30px_rgba(244,63,94,0.1)] transition-all duration-500 shadow-2xl">
@@ -362,7 +362,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-right md:translate-x-[-140px] md:translate-y-[130px] md:pr-12"
+                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-right md:translate-x-[-80px] md:translate-y-[80px] md:pr-12"
                 >
                   <div className="flex items-center gap-3 md:gap-5 flex-row-reverse">
                     <div className="size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-rose-500/50 group-hover:shadow-[0_0_30px_rgba(244,63,94,0.1)] transition-all duration-500 shadow-2xl">
@@ -387,7 +387,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-left md:translate-x-[140px] md:translate-y-[130px] md:pl-12"
+                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-left md:translate-x-[80px] md:translate-y-[80px] md:pl-12"
                 >
                   <div className="flex items-center gap-3 md:gap-5 flex-row">
                     <div className="size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-rose-500/50 group-hover:shadow-[0_0_30px_rgba(244,63,94,0.1)] transition-all duration-500 shadow-2xl">
