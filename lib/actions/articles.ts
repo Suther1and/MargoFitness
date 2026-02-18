@@ -40,7 +40,7 @@ export async function markArticleAsRead(articleId: string) {
   if (!user) return { error: "User not authenticated" };
 
   const { data, error } = await supabase
-    .from("user_article_progress")
+    .from("user_article_progress" as any)
     .upsert({
       user_id: user.id,
       article_id: articleId,
@@ -66,11 +66,11 @@ export async function getArticleReadStatus(articleId: string) {
   if (!user) return false;
 
   const { data, error } = await supabase
-    .from("user_article_progress")
+    .from("user_article_progress" as any)
     .select("is_read")
     .eq("user_id", user.id)
     .eq("article_id", articleId)
-    .single();
+    .single() as { data: { is_read: boolean } | null, error: any };
 
   if (error || !data) return false;
 

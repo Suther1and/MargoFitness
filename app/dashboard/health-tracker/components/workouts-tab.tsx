@@ -85,9 +85,9 @@ export function WorkoutsTab() {
     
     if (user) {
       const { data: readStatuses } = await supabase
-        .from('user_article_progress')
+        .from('user_article_progress' as any)
         .select('article_id, is_read')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id) as { data: { article_id: string, is_read: boolean }[] | null }
       
       if (readStatuses && readStatuses.length > 0) {
         setArticles(prev => prev.map(article => {
