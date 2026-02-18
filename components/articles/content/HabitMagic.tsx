@@ -283,7 +283,7 @@ export default function HabitMagic({
               <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
                 <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
-                    <linearGradient id="infinity-grad-new" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <linearGradient id="infinity-grad-new" gradientTransform="rotate(90)">
                       <stop offset="0%" stopColor="rgba(244, 63, 94, 0)" />
                       <stop offset="50%" stopColor="rgba(244, 63, 94, 0.5)" />
                       <stop offset="100%" stopColor="rgba(244, 63, 94, 0)" />
@@ -305,7 +305,7 @@ export default function HabitMagic({
                     cx="400"
                     cy="300"
                     r="180"
-                    stroke="url(#infinity-grad-new)"
+                    stroke="rgba(244, 63, 94, 0.5)"
                     strokeWidth="4"
                     strokeLinecap="round"
                     strokeDasharray="300 830"
