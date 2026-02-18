@@ -330,21 +330,21 @@ export default function HabitMagic({
                   },
                   {
                     step: "03",
-                    title: "Награда",
-                    subtitle: "РЕЗУЛЬТАТ",
-                    desc: "Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие сразу после.",
-                    icon: Sparkles,
-                    align: "text-left",
-                    pos: "md:translate-x-[-20px] md:translate-y-[20px]"
-                  },
-                  {
-                    step: "04",
                     title: "Действие",
                     subtitle: "РЕАКЦИЯ",
                     desc: "Максимально простое начало. Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.",
                     icon: Target,
                     align: "text-right",
                     pos: "md:translate-x-[20px] md:translate-y-[20px]"
+                  },
+                  {
+                    step: "04",
+                    title: "Награда",
+                    subtitle: "РЕЗУЛЬТАТ",
+                    desc: "Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие сразу после.",
+                    icon: Sparkles,
+                    align: "text-left",
+                    pos: "md:translate-x-[-20px] md:translate-y-[20px]"
                   },
                 ].map((item, i) => (
                   <motion.div 
