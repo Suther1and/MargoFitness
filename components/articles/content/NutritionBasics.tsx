@@ -451,9 +451,14 @@ function CalorieCalculator() {
       </div>
 
       {/* Activity selector — compact row */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5">
-        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest shrink-0 hidden md:block">Активность</span>
-        <div className="flex flex-1 bg-black/20 rounded-lg p-0.5 border border-white/5">
+      <div className="flex flex-col gap-2 px-4 py-2.5 border-b border-white/5">
+        <div className="flex items-center justify-between">
+          <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Активность</span>
+          <span className="text-[8px] font-bold text-amber-400/60 uppercase tracking-tight italic">
+            {activityOptions.find((o) => o.value === activityLevel)?.desc}
+          </span>
+        </div>
+        <div className="flex bg-black/20 rounded-lg p-0.5 border border-white/5">
           {activityOptions.map((opt) => (
             <button
               key={opt.value}
