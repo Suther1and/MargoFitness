@@ -77,7 +77,7 @@ export default function HabitMagic({
 
             <h1 className="text-3xl md:text-6xl font-oswald font-black text-white uppercase tracking-tighter leading-[0.95] mb-8">
               Магия привычек:{" "}
-              <span className="text-rose-400">
+              <span className="text-rose-400 block md:inline">
                 как не бросить тренировки через неделю
               </span>
             </h1>
@@ -246,54 +246,179 @@ export default function HabitMagic({
             чистить зубы каждое утро, ты просто делаешь это.
           </p>
 
-          {/* Петля привычки — 4 шага */}
-          <div className="relative rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-10 mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-              {[
-                {
-                  step: "1",
-                  title: "Сигнал",
-                  subtitle: "Что запускает",
-                  desc: "Конкретный триггер: время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».",
-                  icon: Zap,
-                  color: "rose",
-                },
-                {
-                  step: "2",
-                  title: "Желание",
-                  subtitle: "Что мотивирует",
-                  desc: "Не сама тренировка, а чувство после неё: энергия, гордость, спокойствие. Визуализируй результат, а не процесс.",
-                  icon: Heart,
-                  color: "rose",
-                },
-                {
-                  step: "3",
-                  title: "Действие",
-                  subtitle: "Что делаешь",
-                  desc: "Максимально простое начало. Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.",
-                  icon: Target,
-                  color: "rose",
-                },
-                {
-                  step: "4",
-                  title: "Награда",
-                  subtitle: "Что получаешь",
-                  desc: "Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие сразу после.",
-                  icon: Sparkles,
-                  color: "rose",
-                },
-              ].map((item, i) => (
-                <HabitLoopCard key={i} {...item} />
-              ))}
+          {/* Петля привычки — Информативная инфографика */}
+          <div className="relative mb-32 max-w-[900px] mx-auto px-4 md:px-0">
+            <div className="text-center mb-12 md:mb-20">
+              <h3 className="text-3xl md:text-5xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
+                Механика <span className="text-rose-500">нейронной петли</span>
+              </h3>
+              <p className="text-white/40 text-sm md:text-base max-w-lg mx-auto leading-relaxed">
+                Привычка — это не магия, а четкий алгоритм мозга. 
+                <br className="hidden md:block" />
+                Измени один элемент, и ты изменишь всё поведение.
+              </p>
             </div>
 
-            {/* Стрелка цикла */}
-            <div className="hidden md:flex items-center justify-center mt-6">
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/15">
-                <Repeat className="size-3.5 text-rose-400/60" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400/50">
-                  Повторяй → Автоматизируй → Не думай
-                </span>
+            <div className="relative flex items-center justify-center min-h-[450px] md:min-h-[600px]">
+              {/* Фоновое свечение */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[250px] md:size-[600px] bg-rose-500/[0.02] blur-[80px] md:blur-[120px] pointer-events-none" />
+
+              {/* SVG Контейнер — Perfect Circle Animation */}
+              <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="infinity-grad-new" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="rgba(244, 63, 94, 0)" />
+                      <stop offset="50%" stopColor="rgba(244, 63, 94, 0.5)" />
+                      <stop offset="100%" stopColor="rgba(244, 63, 94, 0)" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Основной контур петли (статичный круг) */}
+                  <circle 
+                    cx="400" 
+                    cy="300" 
+                    r="180" 
+                    stroke="rgba(255,255,255,0.03)" 
+                    strokeWidth="2" 
+                    fill="none" 
+                    className="md:r-[220]"
+                  />
+                  
+                  {/* Анимированный поток (Circle Loop) */}
+                  <motion.circle
+                    cx="400"
+                    cy="300"
+                    r="180"
+                    stroke="url(#infinity-grad-new)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="100 1000"
+                    animate={{ 
+                      strokeDashoffset: [0, -1100],
+                    }}
+                    transition={{ 
+                      duration: 4, 
+                      repeat: Infinity, 
+                      ease: "linear" 
+                    }}
+                    className="md:r-[220]"
+                  />
+                </svg>
+              </div>
+
+              {/* Сетка элементов — 2x2 на всех устройствах */}
+              <div className="grid grid-cols-2 gap-x-8 gap-y-16 md:gap-x-48 md:gap-y-32 relative z-10 w-full max-w-[350px] md:max-w-none">
+                {[
+                  {
+                    step: "01",
+                    title: "Сигнал",
+                    subtitle: "ТРИГГЕР",
+                    desc: "Внешний или внутренний раздражитель.",
+                    icon: Zap,
+                    align: "text-left",
+                    pos: "md:translate-x-[-20px] md:translate-y-[-20px]"
+                  },
+                  {
+                    step: "02",
+                    title: "Желание",
+                    subtitle: "МОТИВАЦИЯ",
+                    desc: "Предвкушение награды и чувства.",
+                    icon: Heart,
+                    align: "text-right",
+                    pos: "md:translate-x-[20px] md:translate-y-[-20px]"
+                  },
+                  {
+                    step: "03",
+                    title: "Действие",
+                    subtitle: "РЕАКЦИЯ",
+                    desc: "Сама привычка. Конкретное действие.",
+                    icon: Target,
+                    align: "text-left",
+                    pos: "md:translate-x-[-20px] md:translate-y-[20px]"
+                  },
+                  {
+                    step: "04",
+                    title: "Награда",
+                    subtitle: "РЕЗУЛЬТАТ",
+                    desc: "Удовлетворение, закрепляющее цикл.",
+                    icon: Sparkles,
+                    align: "text-right",
+                    pos: "md:translate-x-[20px] md:translate-y-[20px]"
+                  },
+                ].map((item, i) => (
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className={cn("group relative flex flex-col gap-2 md:gap-4", item.align, item.pos)}
+                  >
+                    <div className={cn(
+                      "flex items-center gap-3 md:gap-5",
+                      item.align.includes("right") ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className="size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 group-hover:border-rose-500/50 group-hover:shadow-[0_0_30px_rgba(244,63,94,0.1)] transition-all duration-500 shadow-2xl">
+                        <item.icon className="size-5 md:size-7 text-rose-500" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[8px] md:text-[10px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
+                          {item.step} {item.subtitle}
+                        </span>
+                        <h4 className="text-base md:text-3xl font-oswald font-black uppercase text-white tracking-tight leading-none group-hover:text-rose-500 transition-colors">
+                          {item.title}
+                        </h4>
+                      </div>
+                    </div>
+                    <p className="text-[10px] md:text-base text-white/40 leading-relaxed max-w-[140px] md:max-w-[320px] mx-0 md:ml-auto md:mr-0 group-hover:text-white/60 transition-colors hidden sm:block">
+                      {item.desc}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Информативный центр — Адаптивный размер */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-20">
+                  <div className="relative size-24 md:size-40 rounded-full bg-[#09090b] border border-white/5 flex flex-col items-center justify-center text-center p-4 md:p-6 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
+                    <div className="absolute inset-0 rounded-full border border-rose-500/10 animate-pulse" />
+                    
+                    {/* Анимированный внутренний круг */}
+                    <svg className="absolute inset-[-4px] md:inset-[-8px] size-[calc(100%+8px)] md:size-[calc(100%+16px)] pointer-events-none" viewBox="0 0 100 100">
+                      <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="48"
+                        stroke="url(#infinity-grad-new)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeDasharray="20 60"
+                        animate={{ strokeDashoffset: [0, -80] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        fill="none"
+                      />
+                    </svg>
+                    
+                    <Repeat className="size-4 md:size-6 text-rose-500/60 mb-1 md:mb-3 animate-spin-slow" />
+                  <span className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/70 leading-tight">
+                    НЕЙРОННАЯ <br /> СВЯЗЬ
+                  </span>
+                  <div className="mt-1.5 md:mt-3 flex gap-1 md:gap-1.5">
+                    {[1, 2, 3].map(j => (
+                      <div key={j} className="size-1 md:size-1.5 rounded-full bg-rose-500/40 animate-bounce" style={{ animationDelay: `${j * 0.2}s` }} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Мобильная подсказка — Теперь более лаконичная */}
+            <div className="mt-12 md:hidden flex flex-col items-center gap-4">
+              <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] text-center max-w-[200px]">
+                Нажми на элементы, чтобы узнать больше
+              </p>
+              <div className="px-5 py-2 rounded-full bg-rose-500/5 border border-rose-500/10 flex items-center gap-2 shadow-lg shadow-rose-500/5">
+                <div className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">Цикл замкнут</span>
               </div>
             </div>
           </div>
@@ -632,40 +757,38 @@ function SectionHeader({
   );
 }
 
+function HabitStep({
+  step,
+  title,
+  desc,
+  icon: Icon,
+  className,
+}: {
+  step: string;
+  title: string;
+  desc: string;
+  icon: React.ElementType;
+  className?: string;
+}) {
+  return null; // Больше не используется
+}
+
 function HabitLoopCard({
   step,
   title,
   subtitle,
   desc,
   icon: Icon,
+  position,
 }: {
   step: string;
   title: string;
   subtitle: string;
   desc: string;
   icon: React.ElementType;
-  color: string;
+  position: string;
 }) {
-  return (
-    <div className="rounded-xl bg-white/[0.02] border border-white/8 p-5 md:p-6 hover:bg-white/[0.04] transition-colors text-left">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="size-8 rounded-lg bg-rose-500/10 border border-rose-500/15 flex items-center justify-center">
-          <span className="text-xs font-oswald font-black text-rose-400">
-            {step}
-          </span>
-        </div>
-        <div>
-          <h4 className="text-base font-bold text-white/85 leading-none">
-            {title}
-          </h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mt-0.5">
-            {subtitle}
-          </p>
-        </div>
-      </div>
-      <p className="text-sm text-white/40 leading-relaxed">{desc}</p>
-    </div>
-  );
+  return null; // Больше не используется в новой концепции
 }
 
 function TimelinePhase({
