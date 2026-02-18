@@ -291,30 +291,32 @@ export function WorkoutsTab() {
 
     if (HardcodedComponent && hasAccess) {
       return (
-        <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent overflow-hidden md:overflow-visible">
-          <div className="relative h-full overflow-y-auto scrollbar-hide min-h-screen md:min-h-0 pt-16 pb-24 md:py-0 overscroll-contain">
-            {/* Мобильная шапка статьи */}
-            <div className="absolute top-0 left-0 right-0 h-[70px] z-[110] flex items-center justify-center px-4 md:hidden">
-              <div className="fixed top-[15px] left-4 z-[120]">
-                <button 
-                  onClick={() => setSelectedArticleSlug(null)}
-                  className="flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
-                >
-                  <ArrowLeft className="size-5 text-white" />
-                </button>
+        <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">
+          <div className="h-full overflow-y-auto md:overflow-visible md:h-auto scrollbar-hide md:scrollbar-default overscroll-contain isolation-auto touch-pan-y">
+            <div className="relative min-h-full pt-16 pb-24 md:py-0">
+              {/* Мобильная шапка статьи */}
+              <div className="absolute top-0 left-0 right-0 h-[70px] z-[110] flex items-center justify-center px-4 md:hidden">
+                <div className="fixed top-[15px] left-4 z-[120]">
+                  <button 
+                    onClick={() => setSelectedArticleSlug(null)}
+                    className="flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
+                  >
+                    <ArrowLeft className="size-5 text-white" />
+                  </button>
+                </div>
+                
+                <div className="text-center">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                    Статья <span className="text-rose-500">{selectedArticleData.access_level.toUpperCase()}</span>
+                  </span>
+                </div>
               </div>
-              
-              <div className="text-center">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                  Статья <span className="text-rose-500">{selectedArticleData.access_level.toUpperCase()}</span>
-                </span>
-              </div>
-            </div>
 
-            <HardcodedComponent 
-              onBack={() => setSelectedArticleSlug(null)} 
-              metadata={selectedArticleData}
-            />
+              <HardcodedComponent 
+                onBack={() => setSelectedArticleSlug(null)} 
+                metadata={selectedArticleData}
+              />
+            </div>
           </div>
         </div>
       );

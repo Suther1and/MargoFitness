@@ -137,18 +137,39 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  input, textarea, [contenteditable="true"] {
-    user-select: text;
-    -webkit-user-select: text;
-  }
-  
-  /* Отключаем выделение текста глобально, но разрешаем его в статьях для работы скролла в Chrome */
-  body:not(.article-open) * {
+  /* Глобальный запрет выделения, кроме инпутов */
+  body:not(.article-open) {
     user-select: none;
     -webkit-user-select: none;
+  }
+  
+  body:not(.article-open) * {
     -webkit-touch-callout: none;
     -webkit-user-drag: none;
   }
+
+  input, textarea, [contenteditable="true"] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+  
+  /* Исправление для Chrome: разрешаем взаимодействие с текстом, но запрещаем его выделение */
+  body.article-open,
+  body.article-open * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    /* Разрешаем браузеру обрабатывать события мыши на тексте для скролла */
+    pointer-events: auto !important;
+  }
+
+  /* Блокировка скролла на body при открытой статье только на мобилках */
+  @media (max-width: 767px) {
+    body.article-open {
+      overflow: hidden !important;
+      height: 100% !important;
+    }
+  }
+
   body {
     overflow-x: hidden;
     overscroll-behavior-x: none;
