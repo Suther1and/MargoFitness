@@ -1,25 +1,22 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
   ChevronLeft,
   Quote,
   ArrowRight,
   AlertTriangle,
-  Scale,
   Utensils,
   Dumbbell,
-  Heart,
-  TrendingDown,
-  Minus,
   ShieldAlert,
   Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
 import { markArticleAsRead } from "@/lib/actions/articles";
+import { calculateBMI, getBMICategory, calculateCalorieNorms } from "@/app/dashboard/health-tracker/utils/bmi-utils";
 
 export default function NutritionBasics({
   onBack,
@@ -128,49 +125,8 @@ export default function NutritionBasics({
             тело начинает использовать свои запасы.
           </p>
 
-          {/* Визуальная метафора баланса */}
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6 text-center">
-              Энергетический баланс
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-              <BalanceCard
-                icon={Utensils}
-                label="Потребление"
-                value="~1800 ккал"
-                sublabel="еда и напитки"
-                color="amber"
-              />
-
-              <div className="flex flex-col items-center gap-2 py-2">
-                <div className="hidden md:flex items-center gap-2 text-white/20">
-                  <Minus className="size-4" />
-                  <Minus className="size-4" />
-                  <Minus className="size-4" />
-                </div>
-                <div className="size-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <TrendingDown className="size-5 text-emerald-400" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">
-                  Дефицит ~300 ккал
-                </span>
-              </div>
-
-              <BalanceCard
-                icon={Heart}
-                label="Расход"
-                value="~2100 ккал"
-                sublabel="жизнь + тренировки"
-                color="rose"
-              />
-            </div>
-
-            <p className="text-xs text-white/25 mt-6 leading-relaxed text-center">
-              Цифры приблизительные и зависят от твоего роста, веса, активности.
-              Суть не в точных числах, а в принципе.
-            </p>
-          </div>
+          {/* Интерактивный калькулятор калорий */}
+          <CalorieCalculator />
 
           <p className="text-lg text-white/60 leading-relaxed mb-6">
             И вот что важно: для этого не нужно считать каждую калорию.
@@ -431,6 +387,166 @@ export default function NutritionBasics({
 
 /* --- Локальные компоненты --- */
 
+function CalorieCalculator() {
+  const [height, setHeight] = React.useState<string>("");
+  const [weight, setWeight] = React.useState<string>("");
+  const [age, setAge] = React.useState<string>("");
+  const [activityLevel, setActivityLevel] = React.useState<number>(1.55);
+
+  const activityOptions = [
+    { label: "Низкая", value: 1.375, desc: "1-2 тренировки в неделю" },
+    { label: "Средняя", value: 1.55, desc: "3-4 тренировки в неделю" },
+    { label: "Высокая", value: 1.725, desc: "5+ тренировок в неделю" },
+  ];
+
+  const norms = React.useMemo(() => {
+    const h = parseFloat(height);
+    const w = parseFloat(weight);
+    const a = parseFloat(age);
+    if (isNaN(h) || isNaN(w) || isNaN(a)) return null;
+    return calculateCalorieNorms(w, h, a, activityLevel);
+  }, [height, weight, age, activityLevel]);
+
+  const bmiValue = React.useMemo(() => {
+    const h = parseFloat(height);
+    const w = parseFloat(weight);
+    if (isNaN(h) || isNaN(w)) return null;
+    return calculateBMI(h, w);
+  }, [height, weight]);
+
+  const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null;
+
+  const hasInput = height || weight || age;
+
+  return (
+    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8">
+      {/* Header + Inputs — single compact strip */}
+      <div className="flex items-stretch border-b border-white/5">
+        <div className="flex items-center flex-1 p-0.5">
+          {[
+            { label: "Рост", unit: "см", value: height, set: setHeight, ph: "170" },
+            { label: "Вес", unit: "кг", value: weight, set: setWeight, ph: "60" },
+            { label: "Возраст", unit: "лет", value: age, set: setAge, ph: "25" },
+          ].map((field, i) => (
+            <div key={field.label} className={cn("flex flex-col px-3 md:px-4 py-2 flex-1 min-w-0", i < 2 && "border-r border-white/5")}>
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] mb-0.5">{field.label}</label>
+              <div className="flex items-baseline gap-0.5">
+                <input
+                  type="number"
+                  value={field.value}
+                  onChange={(e) => field.set(e.target.value)}
+                  placeholder={field.ph}
+                  className="w-full bg-transparent text-[22px] md:text-[26px] font-oswald font-black text-white focus:outline-none placeholder:text-white/10 leading-none min-w-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-[8px] font-bold text-white/15 uppercase shrink-0">{field.unit}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Activity selector — compact row */}
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5">
+        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest shrink-0 hidden md:block">Активность</span>
+        <div className="flex flex-1 bg-black/20 rounded-lg p-0.5 border border-white/5">
+          {activityOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setActivityLevel(opt.value)}
+              className={cn(
+                "flex-1 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all relative",
+                activityLevel === opt.value ? "text-amber-400" : "text-white/20 hover:text-white/40"
+              )}
+            >
+              {activityLevel === opt.value && (
+                <motion.div
+                  layoutId="calc-activity"
+                  className="absolute inset-0 bg-amber-500/10 border border-amber-500/20 rounded-md"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                />
+              )}
+              <span className="relative z-10">{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results */}
+      <AnimatePresence mode="wait">
+        {!norms ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="px-4 py-5 flex items-center justify-center gap-2"
+          >
+            <Utensils className="size-3.5 text-white/10" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/15">
+              {hasInput ? "Заполни все поля" : "Введи свои параметры"}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="results"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="px-3 md:px-4 py-4 space-y-3"
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "Похудение", value: norms.loss, color: "emerald" },
+                { label: "Баланс", value: norms.maintain, color: "violet" },
+                { label: "Набор", value: norms.gain, color: "orange" },
+              ].map((goal) => (
+                <div
+                  key={goal.label}
+                  className={cn(
+                    "py-3 px-2 rounded-xl border flex flex-col items-center text-center",
+                    goal.color === "emerald" && "bg-emerald-500/5 border-emerald-500/10",
+                    goal.color === "violet" && "bg-violet-500/5 border-violet-500/10",
+                    goal.color === "orange" && "bg-orange-500/5 border-orange-500/10"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[7px] md:text-[8px] font-black uppercase tracking-widest mb-1",
+                    goal.color === "emerald" && "text-emerald-400/80",
+                    goal.color === "violet" && "text-violet-400/80",
+                    goal.color === "orange" && "text-orange-400/80"
+                  )}>
+                    {goal.label}
+                  </span>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-2xl md:text-3xl font-oswald font-black text-white leading-none">
+                      {goal.value}
+                    </span>
+                    <span className="text-[7px] font-bold text-white/20 uppercase">ккал</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {bmiValue && (
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <span className="text-[9px] font-bold text-white/25">ИМТ</span>
+                <span className="text-sm font-oswald font-black text-white/70">{bmiValue}</span>
+                <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5", bmiCategory?.color)}>
+                  {bmiCategory?.label}
+                </span>
+              </div>
+            )}
+
+            <p className="text-[9px] text-white/15 italic text-center">
+              *Миффлин-Сан Жеор · BMR × PAL
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function RuleSection({
   number,
   title,
@@ -459,57 +575,6 @@ function RuleSection({
   );
 }
 
-function BalanceCard({
-  icon: Icon,
-  label,
-  value,
-  sublabel,
-  color,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  sublabel: string;
-  color: "amber" | "rose";
-}) {
-  const colors = {
-    amber: "text-amber-400 bg-amber-500/10 border-amber-500/15",
-    rose: "text-rose-400 bg-rose-500/10 border-rose-500/15",
-  };
-  const iconColor = {
-    amber: "text-amber-400",
-    rose: "text-rose-400",
-  };
-
-  return (
-    <div className="flex flex-col items-center gap-3 p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-      <div
-        className={cn(
-          "size-10 rounded-xl flex items-center justify-center border",
-          colors[color]
-        )}
-      >
-        <Icon className={cn("size-5", iconColor[color])} />
-      </div>
-      <div className="text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-1">
-          {label}
-        </p>
-        <p
-          className={cn(
-            "text-xl font-oswald font-black",
-            iconColor[color]
-          )}
-        >
-          {value}
-        </p>
-        <p className="text-[10px] text-white/20 uppercase tracking-wider mt-0.5">
-          {sublabel}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function CascadeStep({
   step,
