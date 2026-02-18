@@ -293,12 +293,12 @@ export default function HabitMagic({
                     stroke="url(#infinity-grad-new)"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    strokeDasharray="100 1000"
+                    strokeDasharray="250 880"
                     animate={{ 
-                      strokeDashoffset: [0, -1100],
+                      strokeDashoffset: [0, -1130],
                     }}
                     transition={{ 
-                      duration: 4, 
+                      duration: 8, 
                       repeat: Infinity, 
                       ease: "linear" 
                     }}
@@ -314,7 +314,7 @@ export default function HabitMagic({
                     step: "01",
                     title: "Сигнал",
                     subtitle: "ТРИГГЕР",
-                    desc: "Внешний или внутренний раздражитель.",
+                    desc: "Конкретный триггер: время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».",
                     icon: Zap,
                     align: "text-left",
                     pos: "md:translate-x-[-20px] md:translate-y-[-20px]"
@@ -323,26 +323,26 @@ export default function HabitMagic({
                     step: "02",
                     title: "Желание",
                     subtitle: "МОТИВАЦИЯ",
-                    desc: "Предвкушение награды и чувства.",
+                    desc: "Не сама тренировка, а чувство после неё: энергия, гордость, спокойствие. Визуализируй результат, а не процесс.",
                     icon: Heart,
                     align: "text-right",
                     pos: "md:translate-x-[20px] md:translate-y-[-20px]"
                   },
                   {
                     step: "03",
-                    title: "Действие",
-                    subtitle: "РЕАКЦИЯ",
-                    desc: "Сама привычка. Конкретное действие.",
-                    icon: Target,
+                    title: "Награда",
+                    subtitle: "РЕЗУЛЬТАТ",
+                    desc: "Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие сразу после.",
+                    icon: Sparkles,
                     align: "text-left",
                     pos: "md:translate-x-[-20px] md:translate-y-[20px]"
                   },
                   {
                     step: "04",
-                    title: "Награда",
-                    subtitle: "РЕЗУЛЬТАТ",
-                    desc: "Удовлетворение, закрепляющее цикл.",
-                    icon: Sparkles,
+                    title: "Действие",
+                    subtitle: "РЕАКЦИЯ",
+                    desc: "Максимально простое начало. Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.",
+                    icon: Target,
                     align: "text-right",
                     pos: "md:translate-x-[20px] md:translate-y-[20px]"
                   },
@@ -381,22 +381,7 @@ export default function HabitMagic({
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-20">
                   <div className="relative size-24 md:size-40 rounded-full bg-[#09090b] border border-white/5 flex flex-col items-center justify-center text-center p-4 md:p-6 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
                     <div className="absolute inset-0 rounded-full border border-rose-500/10 animate-pulse" />
-                    
-                    {/* Анимированный внутренний круг */}
-                    <svg className="absolute inset-[-4px] md:inset-[-8px] size-[calc(100%+8px)] md:size-[calc(100%+16px)] pointer-events-none" viewBox="0 0 100 100">
-                      <motion.circle
-                        cx="50"
-                        cy="50"
-                        r="48"
-                        stroke="url(#infinity-grad-new)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeDasharray="20 60"
-                        animate={{ strokeDashoffset: [0, -80] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        fill="none"
-                      />
-                    </svg>
+                    <div className="absolute inset-[-4px] md:inset-[-8px] rounded-full border border-rose-500/5" />
                     
                     <Repeat className="size-4 md:size-6 text-rose-500/60 mb-1 md:mb-3 animate-spin-slow" />
                   <span className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/70 leading-tight">
