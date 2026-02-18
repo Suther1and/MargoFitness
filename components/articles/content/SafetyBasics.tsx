@@ -117,6 +117,88 @@ export default function SafetyBasics({
           </p>
         </div>
 
+        {/* Блок преимуществ платформы */}
+        <section className="mb-14 text-left">
+          <div className="relative overflow-hidden rounded-3xl bg-sky-500/[0.03] border border-sky-500/10 p-8 md:p-12">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-10 items-center">
+              <div className="lg:col-span-3 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
+                  <ShieldCheck className="size-3.5 text-sky-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Твоя безопасность — наш приоритет</span>
+                </div>
+                
+                <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
+                  Как MargoFitness <span className="text-sky-400">страхует тебя</span> на каждой тренировке
+                </h2>
+                
+                <p className="text-lg text-white/60 leading-relaxed">
+                  Мы понимаем, что дома нет тренера, который поправит твою спину. Поэтому мы встроили систему безопасности прямо в интерфейс платформы.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <Activity className="size-4 text-sky-400" />
+                      </div>
+                      <h4 className="font-bold text-white/90">Разбор техники</h4>
+                    </div>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      Каждое упражнение сопровождается детальным текстовым описанием ключевых точек контроля.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <Eye className="size-4 text-sky-400" />
+                      </div>
+                      <h4 className="font-bold text-white/90">Видео-инструкции</h4>
+                    </div>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      Наглядные видео с правильной амплитудой и акцентами на дыхании и положении суставов.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden lg:block lg:col-span-2 relative">
+                <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-5 font-montserrat shadow-2xl shadow-black/50 overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3">
+                    <div className="size-1.5 rounded-full bg-sky-500 animate-pulse" />
+                  </div>
+                  
+                  <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-400/50 mb-4">Техника выполнения</h5>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <p className="text-[11px] font-bold text-white/80 uppercase tracking-tight">1. Исходное положение</p>
+                      <p className="text-[10px] text-white/40 leading-relaxed">Стопы на ширине плеч, носки слегка развернуты. Спина прямая, лопатки приведены.</p>
+                    </div>
+                    
+                    <div className="space-y-1.5 border-l border-sky-500/30 pl-3 bg-sky-500/[0.02] py-1">
+                      <p className="text-[11px] font-bold text-sky-400 uppercase tracking-tight">2. Движение</p>
+                      <p className="text-[10px] text-white/40 leading-relaxed">На вдохе опускайся вниз, отводя таз назад. Колени не выходят за носки.</p>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <p className="text-[11px] font-bold text-white/80 uppercase tracking-tight">3. Точка контроля</p>
+                      <p className="text-[10px] text-white/40 leading-relaxed">В нижней точке бедро параллельно полу. Вес тела на пятках.</p>
+                    </div>
+                  </div>
+
+                  {/* Декоративный блюр */}
+                  <div className="absolute -bottom-10 -right-10 size-32 bg-sky-500/5 blur-3xl rounded-full group-hover:bg-sky-500/10 transition-colors" />
+                </div>
+                
+                {/* Внешние декоративные элементы */}
+                <div className="absolute -top-4 -right-4 size-24 bg-sky-500/10 blur-3xl rounded-full" />
+                <div className="absolute -bottom-4 -left-4 size-24 bg-blue-500/10 blur-3xl rounded-full" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Секция 1 — Пространство */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Home} title="Подготовь пространство" />
@@ -162,7 +244,7 @@ export default function SafetyBasics({
           </p>
 
           {/* Пошаговая разминка */}
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-8">
+          <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8 mb-6">
             <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">
               Структура разминки перед каждой тренировкой
             </p>
@@ -200,18 +282,12 @@ export default function SafetyBasics({
           </div>
 
           {/* Предупреждение о статической растяжке */}
-          <div className="rounded-2xl bg-amber-500/[0.04] border border-amber-500/12 p-5 md:p-6 text-left">
-            <div className="flex gap-3.5">
-              <AlertTriangle className="size-5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-white/55 leading-relaxed">
-                <strong className="text-amber-400/80">Не путай разминку со
-                статической растяжкой.</strong> Садиться в шпагат или тянуться к
-                носкам по 30 секунд — это заминка, а не разминка. Перед
-                тренировкой нужны динамические движения, которые разогревают, а не
-                расслабляют мышцы.
-              </p>
-            </div>
-          </div>
+          <p className="text-sm text-white/30 italic leading-relaxed px-2">
+            Не путай разминку со статической растяжкой. Садиться в шпагат или
+            тянуться к носкам по 30 секунд — это заминка, а не разминка. Перед
+            тренировкой нужны динамические движения, которые разогревают, а не
+            расслабляют мышцы.
+          </p>
         </section>
 
         {/* Секция 3 — Обувь */}
@@ -256,68 +332,6 @@ export default function SafetyBasics({
             точками. Если в тренировке есть прыжковый блок — обувай кроссовки на
             это время.
           </p>
-        </section>
-
-        {/* Блок преимуществ платформы */}
-        <section className="my-16 text-left">
-          <div className="relative overflow-hidden rounded-3xl bg-sky-500/[0.03] border border-sky-500/10 p-8 md:p-12">
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-10 items-center">
-              <div className="lg:col-span-3 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
-                  <ShieldCheck className="size-3.5 text-sky-400" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Твоя безопасность — наш приоритет</span>
-                </div>
-                
-                <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
-                  Как MargoFitness <span className="text-sky-400">страхует тебя</span> на каждой тренировке
-                </h2>
-                
-                <p className="text-lg text-white/60 leading-relaxed">
-                  Мы понимаем, что дома нет тренера, который поправит твою спину. Поэтому мы встроили систему безопасности прямо в интерфейс платформы.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
-                        <Activity className="size-4 text-sky-400" />
-                      </div>
-                      <h4 className="font-bold text-white/90">Разбор техники</h4>
-                    </div>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                      Каждое упражнение сопровождается детальным текстовым описанием ключевых точек контроля.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
-                        <Eye className="size-4 text-sky-400" />
-                      </div>
-                      <h4 className="font-bold text-white/90">Видео-инструкции</h4>
-                    </div>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                      Наглядные видео с правильной амплитудой и акцентами на дыхании и положении суставов.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-2 relative">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-sky-500/20 to-transparent border border-white/5 flex items-center justify-center overflow-hidden group hover:border-sky-500/30 transition-all duration-500">
-                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-20 grayscale group-hover:scale-110 transition-transform duration-700" />
-                  <div className="relative size-20 rounded-full bg-sky-500 flex items-center justify-center shadow-2xl shadow-sky-500/40 group-hover:scale-110 transition-transform duration-500 cursor-pointer">
-                    <div className="absolute inset-0 rounded-full bg-sky-500 animate-ping opacity-20" />
-                    <ArrowRight className="size-8 text-black" />
-                  </div>
-                </div>
-                
-                {/* Декоративные элементы */}
-                <div className="absolute -top-4 -right-4 size-24 bg-sky-500/10 blur-3xl rounded-full" />
-                <div className="absolute -bottom-4 -left-4 size-24 bg-blue-500/10 blur-3xl rounded-full" />
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* Секция 4 — Дыхание */}
