@@ -536,10 +536,6 @@ function CalorieCalculator() {
                 </span>
               </div>
             )}
-
-            <p className="text-[9px] text-white/15 italic text-center">
-              *Миффлин-Сан Жеор · BMR × PAL
-            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -574,7 +570,6 @@ function RuleSection({
     </section>
   );
 }
-
 
 function CascadeStep({
   step,
