@@ -31,5 +31,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 7,
     access_level: "free",
     image_url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "safety-basics",
+    slug: "safety-basics",
+    title: "Техника безопасности: как тренироваться дома без травм",
+    description: "Разминка, обувь, дыхание, красные флаги. Простые привычки, которые защитят от 95% домашних травм и сделают каждую тренировку эффективнее.",
+    category: "Тренировки",
+    reading_time: 6,
+    access_level: "free",
+    image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop"
   }
 ];

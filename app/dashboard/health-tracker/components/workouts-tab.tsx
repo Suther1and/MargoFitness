@@ -19,6 +19,7 @@ import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 const HardcodedArticles: Record<string, any> = {
   "home-vs-gym": dynamic(() => import("@/components/articles/content/HomeVsGym")),
   "nutrition-basics": dynamic(() => import("@/components/articles/content/NutritionBasics")),
+  "safety-basics": dynamic(() => import("@/components/articles/content/SafetyBasics")),
 };
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'
