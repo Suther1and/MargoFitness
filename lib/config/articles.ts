@@ -41,5 +41,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 6,
     access_level: "free",
     image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "habit-magic",
+    slug: "habit-magic",
+    title: "Магия привычек: как не бросить тренировки через неделю",
+    description: "Почему сила воли не работает, как устроена петля привычки и 5 стратегий, которые помогут превратить тренировки из «надо» в часть жизни.",
+    category: "Основы",
+    reading_time: 8,
+    access_level: "free",
+    image_url: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2070&auto=format&fit=crop"
   }
 ];
