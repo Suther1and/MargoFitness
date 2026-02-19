@@ -140,7 +140,7 @@ export default function HabitMagic({
       // Получаем текущий strokeDashoffset из вычисленных стилей анимации
       const style = window.getComputedStyle(pathRef.current);
       const offset = parseFloat(style.strokeDashoffset);
-      const totalLength = 880; // 2 * PI * 140
+      const totalLength = 750; // 2 * PI * 120
       
       // Нормализуем прогресс (от 0 до 1)
       // В SVG круг начинается справа (3 часа), а наша полоска визуально идет по часовой стрелке.
@@ -370,10 +370,10 @@ export default function HabitMagic({
           </p>
 
           {/* Петля привычки — Инфографика */}
-          <div className="relative mb-12 md:mb-20 max-w-[900px] mx-auto px-4 md:px-0">
-            <div className="relative flex items-center justify-center min-h-[400px] md:min-h-[500px]">
+          <div className="relative mb-12 md:mb-20 max-w-[1000px] mx-auto px-4 md:px-0">
+            <div className="relative flex items-center justify-center min-h-[550px] md:min-h-[650px]">
               {/* Фоновое свечение */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[200px] md:size-[450px] bg-rose-500/[0.02] blur-[60px] md:blur-[100px] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[350px] md:size-[600px] bg-rose-500/[0.02] blur-[80px] md:blur-[120px] pointer-events-none" />
 
               {/* SVG Контейнер */}
               <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
@@ -389,61 +389,59 @@ export default function HabitMagic({
                   <circle 
                     cx="400" 
                     cy="300" 
-                    r="140" 
+                    r="180" 
                     stroke="rgba(255,255,255,0.03)" 
                     strokeWidth="2" 
                     fill="none" 
-                    className="md:r-[180]"
                   />
                   
                   <motion.circle
                     ref={pathRef}
-                    cx="400"
-                    cy="300"
-                    r="140"
+                    cx="400" 
+                    cy="300" 
+                    r="180" 
                     stroke="rgba(244, 63, 94, 0.5)"
-                    strokeWidth="3"
+                    strokeWidth="4"
                     strokeLinecap="round"
-                    strokeDasharray="250 630"
+                    strokeDasharray="300 830"
                     animate={{ 
-                      strokeDashoffset: [0, -880],
+                      strokeDashoffset: [0, -1130],
                     }}
                     transition={{ 
                       duration: 8, 
                       repeat: Infinity, 
                       ease: "linear" 
                     }}
-                    className="md:r-[180]"
                   />
                 </svg>
               </div>
 
               {/* Сетка элементов */}
-              <div className="grid grid-cols-2 gap-0 relative z-10 w-full max-w-[320px] md:max-w-none">
+              <div className="grid grid-cols-2 gap-0 relative z-10 w-full max-w-[380px] md:max-w-none">
                 {/* 01: Слева вверху */}
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-2 md:gap-3 w-full text-right md:translate-x-[-60px] md:translate-y-[-60px] md:pr-10"
+                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-right translate-x-[-30px] translate-y-[-60px] md:translate-x-[-80px] md:translate-y-[-80px] pr-6 md:pr-12"
                 >
-                  <div className="flex items-center gap-2.5 md:gap-4 flex-row-reverse">
+                  <div className="flex items-center gap-3 md:gap-5 flex-row-reverse">
                     <div className={cn(
-                      "size-8 md:size-12 rounded-lg md:rounded-xl bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
-                      activeStep === 1 && "border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.1)]"
+                      "size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
+                      activeStep === 1 && "border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]"
                     )}>
-                      <Zap className={cn("size-4 md:size-6 transition-colors duration-500", activeStep === 1 ? "text-rose-500" : "text-rose-500/40")} />
+                      <Zap className={cn("size-5 md:size-7 transition-colors duration-500", activeStep === 1 ? "text-rose-500" : "text-rose-500/40")} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[7px] md:text-[9px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
+                      <span className="text-[8px] md:text-[10px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
                         01 ТРИГГЕР
                       </span>
-                      <h4 className={cn("text-sm md:text-2xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 1 ? "text-rose-500" : "text-white")}>
+                      <h4 className={cn("text-base md:text-3xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 1 ? "text-rose-500" : "text-white")}>
                         Сигнал
                       </h4>
                     </div>
                   </div>
-                  <p className={cn("text-[9px] md:text-sm leading-relaxed max-w-[120px] md:max-w-[280px] transition-colors duration-500 hidden sm:block ml-auto", activeStep === 1 ? "text-white/60" : "text-white/40")}>
+                  <p className={cn("text-[10px] md:text-base leading-relaxed max-w-[140px] md:max-w-[320px] transition-colors duration-500 ml-auto", activeStep === 1 ? "text-white/60" : "text-white/40")}>
                     Время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».
                   </p>
                 </motion.div>
@@ -453,53 +451,53 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-2 md:gap-3 w-full text-left md:translate-x-[60px] md:translate-y-[-60px] md:pl-10"
+                  className="group relative flex flex-col-reverse gap-3 md:gap-5 w-full text-left translate-x-[30px] translate-y-[-60px] md:translate-x-[80px] md:translate-y-[-80px] pl-6 md:pl-12"
                 >
-                  <div className="flex items-center gap-2.5 md:gap-4 flex-row">
+                  <div className="flex items-center gap-3 md:gap-5 flex-row">
                     <div className={cn(
-                      "size-8 md:size-12 rounded-lg md:rounded-xl bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
-                      activeStep === 2 && "border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.1)]"
+                      "size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
+                      activeStep === 2 && "border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]"
                     )}>
-                      <Heart className={cn("size-4 md:size-6 transition-colors duration-500", activeStep === 2 ? "text-rose-500" : "text-rose-500/40")} />
+                      <Heart className={cn("size-5 md:size-7 transition-colors duration-500", activeStep === 2 ? "text-rose-500" : "text-rose-500/40")} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[7px] md:text-[9px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
+                      <span className="text-[8px] md:text-[10px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
                         02 МОТИВАЦИЯ
                       </span>
-                      <h4 className={cn("text-sm md:text-2xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 2 ? "text-rose-500" : "text-white")}>
+                      <h4 className={cn("text-base md:text-3xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 2 ? "text-rose-500" : "text-white")}>
                         Желание
                       </h4>
                     </div>
                   </div>
-                  <p className={cn("text-[9px] md:text-sm leading-relaxed max-w-[120px] md:max-w-[280px] transition-colors duration-500 hidden sm:block mr-auto", activeStep === 2 ? "text-white/60" : "text-white/40")}>
+                  <p className={cn("text-[10px] md:text-base leading-relaxed max-w-[140px] md:max-w-[320px] transition-colors duration-500 mr-auto", activeStep === 2 ? "text-white/60" : "text-white/40")}>
                     Не сама тренировка, а чувство после неё: энергия, гордость, спокойствие. Визуализируй результат, а не процесс.
                   </p>
                 </motion.div>
 
-                {/* 04: Слева внизу (порядок 01-02-04-03 в сетке для визуального 01-02-03-04) */}
+                {/* 04: Слева внизу */}
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-3 w-full text-right md:translate-x-[-60px] md:translate-y-[60px] md:pr-10"
+                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-right translate-x-[-30px] translate-y-[60px] md:translate-x-[-80px] md:translate-y-[80px] pr-6 md:pr-12"
                 >
-                  <div className="flex items-center gap-2.5 md:gap-4 flex-row-reverse">
+                  <div className="flex items-center gap-3 md:gap-5 flex-row-reverse">
                     <div className={cn(
-                      "size-8 md:size-12 rounded-lg md:rounded-xl bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
-                      activeStep === 4 && "border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.1)]"
+                      "size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
+                      activeStep === 4 && "border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]"
                     )}>
-                      <Sparkles className={cn("size-4 md:size-6 transition-colors duration-500", activeStep === 4 ? "text-rose-500" : "text-rose-500/40")} />
+                      <Sparkles className={cn("size-5 md:size-7 transition-colors duration-500", activeStep === 4 ? "text-rose-500" : "text-rose-500/40")} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[7px] md:text-[9px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
+                      <span className="text-[8px] md:text-[10px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
                         04 РЕЗУЛЬТАТ
                       </span>
-                      <h4 className={cn("text-sm md:text-2xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 4 ? "text-rose-500" : "text-white")}>
+                      <h4 className={cn("text-base md:text-3xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 4 ? "text-rose-500" : "text-white")}>
                         Награда
                       </h4>
                     </div>
                   </div>
-                  <p className={cn("text-[9px] md:text-sm leading-relaxed max-w-[120px] md:max-w-[280px] transition-colors duration-500 hidden sm:block ml-auto", activeStep === 4 ? "text-white/60" : "text-white/40")}>
+                  <p className={cn("text-[10px] md:text-base leading-relaxed max-w-[140px] md:max-w-[320px] transition-colors duration-500 ml-auto", activeStep === 4 ? "text-white/60" : "text-white/40")}>
                     Мозгу нужно подкрепление. Отметка в трекере, чашка любимого чая, 5 минут с книгой — маленькое удовольствие.
                   </p>
                 </motion.div>
@@ -509,25 +507,25 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-3 w-full text-left md:translate-x-[60px] md:translate-y-[60px] md:pl-10"
+                  className="group relative flex flex-col gap-3 md:gap-5 w-full text-left translate-x-[30px] translate-y-[60px] md:translate-x-[80px] md:translate-y-[80px] pl-6 md:pl-12"
                 >
-                  <div className="flex items-center gap-2.5 md:gap-4 flex-row">
+                  <div className="flex items-center gap-3 md:gap-5 flex-row">
                     <div className={cn(
-                      "size-8 md:size-12 rounded-lg md:rounded-xl bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
-                      activeStep === 3 && "border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.1)]"
+                      "size-10 md:size-16 rounded-xl md:rounded-[1.25rem] bg-[#09090b] border border-white/10 flex items-center justify-center shrink-0 transition-all duration-500 shadow-2xl",
+                      activeStep === 3 && "border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]"
                     )}>
-                      <Target className={cn("size-4 md:size-6 transition-colors duration-500", activeStep === 3 ? "text-rose-500" : "text-rose-500/40")} />
+                      <Target className={cn("size-5 md:size-7 transition-colors duration-500", activeStep === 3 ? "text-rose-500" : "text-rose-500/40")} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[7px] md:text-[9px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
+                      <span className="text-[8px] md:text-[10px] font-black text-rose-500/50 uppercase tracking-[0.25em] leading-none mb-1 md:mb-1.5">
                         03 РЕАКЦИЯ
                       </span>
-                      <h4 className={cn("text-sm md:text-2xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 3 ? "text-rose-500" : "text-white")}>
+                      <h4 className={cn("text-base md:text-3xl font-oswald font-black uppercase tracking-tight leading-none transition-colors duration-500", activeStep === 3 ? "text-rose-500" : "text-white")}>
                         Действие
                       </h4>
                     </div>
                   </div>
-                  <p className={cn("text-[9px] md:text-sm leading-relaxed max-w-[120px] md:max-w-[280px] transition-colors duration-500 hidden sm:block mr-auto", activeStep === 3 ? "text-white/60" : "text-white/40")}>
+                  <p className={cn("text-[10px] md:text-base leading-relaxed max-w-[140px] md:max-w-[320px] transition-colors duration-500 mr-auto", activeStep === 3 ? "text-white/60" : "text-white/40")}>
                     Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.
                   </p>
                 </motion.div>
@@ -535,17 +533,17 @@ export default function HabitMagic({
 
               {/* Информативный центр */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-20">
-                <div className="relative size-20 md:size-32 rounded-full bg-[#09090b] border border-white/5 flex flex-col items-center justify-center text-center p-3 md:p-5 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+                <div className="relative size-24 md:size-40 rounded-full bg-[#09090b] border border-white/5 flex flex-col items-center justify-center text-center p-4 md:p-6 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
                   <div className="absolute inset-0 rounded-full border border-rose-500/10 animate-pulse" />
-                  <div className="absolute inset-[-3px] md:inset-[-6px] rounded-full border border-rose-500/5" />
+                  <div className="absolute inset-[-4px] md:inset-[-8px] rounded-full border border-rose-500/5" />
                   
-                  <Repeat className="size-3 md:size-5 text-rose-500/60 mb-1 md:mb-2 animate-spin-slow" />
-                  <span className="text-[6px] md:text-[8px] font-black uppercase tracking-[0.2em] text-white/70 leading-tight">
+                  <Repeat className="size-4 md:size-6 text-rose-500/60 mb-1 md:mb-3 animate-spin-slow" />
+                  <span className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/70 leading-tight">
                     НЕЙРОННАЯ <br /> СВЯЗЬ
                   </span>
-                  <div className="mt-1 md:mt-2 flex gap-0.5 md:gap-1">
+                  <div className="mt-1.5 md:mt-3 flex gap-1 md:gap-1.5">
                     {[1, 2, 3].map(j => (
-                      <div key={j} className="size-0.5 md:size-1 rounded-full bg-rose-500/40 animate-bounce" style={{ animationDelay: `${j * 0.2}s` }} />
+                      <div key={j} className="size-1 md:size-1.5 rounded-full bg-rose-500/40 animate-bounce" style={{ animationDelay: `${j * 0.2}s` }} />
                     ))}
                   </div>
                 </div>
@@ -553,13 +551,10 @@ export default function HabitMagic({
             </div>
 
             {/* Мобильная подсказка */}
-            <div className="mt-8 md:hidden flex flex-col items-center gap-3">
-              <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] text-center max-w-[180px]">
-                Нажми на элементы, чтобы узнать больше
-              </p>
-              <div className="px-4 py-1.5 rounded-full bg-rose-500/5 border border-rose-500/10 flex items-center gap-2 shadow-lg shadow-rose-500/5">
-                <div className="size-1 rounded-full bg-rose-500 animate-pulse" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-rose-400">Цикл замкнут</span>
+            <div className="mt-12 md:hidden flex flex-col items-center gap-4">
+              <div className="px-5 py-2 rounded-full bg-rose-500/5 border border-rose-500/10 flex items-center gap-2 shadow-lg shadow-rose-500/5">
+                <div className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">Цикл замкнут</span>
               </div>
             </div>
           </div>
