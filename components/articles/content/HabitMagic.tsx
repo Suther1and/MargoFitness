@@ -137,18 +137,14 @@ export default function HabitMagic({
     const interval = setInterval(() => {
       if (!pathRef.current) return;
       
-      // Получаем текущий strokeDashoffset из вычисленных стилей анимации
       const style = window.getComputedStyle(pathRef.current);
       const offset = parseFloat(style.strokeDashoffset);
-      const totalLength = 750; // 2 * PI * 120
+      const radius = 180;
+      const totalLength = 2 * Math.PI * radius;
       
-      // Нормализуем прогресс (от 0 до 1)
-      // В SVG круг начинается справа (3 часа), а наша полоска визуально идет по часовой стрелке.
-      // Добавляем смещение 0.25, чтобы синхронизировать 0 с верхней точкой (12 часов)
       const rawProgress = (Math.abs(offset) % totalLength) / totalLength;
       const progress = (rawProgress + 0.25) % 1;
       
-      // Сдвигаем пороги активации еще на ~0.05 назад, чтобы активация была еще раньше
       if (progress >= 0.575 && progress < 0.825) setActiveStep(1); 
       else if (progress >= 0.825 || progress < 0.075) setActiveStep(2); 
       else if (progress >= 0.075 && progress < 0.325) setActiveStep(3); 
@@ -393,6 +389,8 @@ export default function HabitMagic({
                     stroke="rgba(255,255,255,0.03)" 
                     strokeWidth="2" 
                     fill="none" 
+                    className="md:r-[180]"
+                    style={{ r: typeof window !== 'undefined' && window.innerWidth < 768 ? 180 : 180 }}
                   />
                   
                   <motion.circle
@@ -403,14 +401,18 @@ export default function HabitMagic({
                     stroke="rgba(244, 63, 94, 0.5)"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    strokeDasharray="300 830"
                     animate={{ 
-                      strokeDashoffset: [0, -1130],
+                      strokeDashoffset: [0, -(2 * Math.PI * 180)],
                     }}
                     transition={{ 
                       duration: 8, 
                       repeat: Infinity, 
                       ease: "linear" 
+                    }}
+                    className="md:r-[180]"
+                    style={{ 
+                      r: 180,
+                      strokeDasharray: `${(2 * Math.PI * 180) * 0.25} ${(2 * Math.PI * 180) * 0.75}`
                     }}
                   />
                 </svg>
