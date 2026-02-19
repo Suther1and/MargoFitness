@@ -444,7 +444,7 @@ export default function HabitMagic({
                     </div>
                   </div>
                   <p className={cn("text-[11px] md:text-base leading-relaxed max-w-[160px] md:max-w-[320px] transition-colors duration-500 ml-auto", activeStep === 1 ? "text-white/60" : "text-white/40")}>
-                    Время, место, действие. Например: «После того как отведу ребёнка в сад» или «Будильник в 7:15».
+                    Время, место или действие. Например: «После того как отведу ребёнка в сад» или «Будильник ровно в 7:15».
                   </p>
                 </motion.div>
 
@@ -481,7 +481,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[35px] md:translate-x-[-80px] md:translate-y-[-80px] pr-2 md:pr-12"
+                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[35px] md:translate-x-[-80px] md:translate-y-[80px] pr-2 md:pr-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row-reverse">
                     <div className={cn(
@@ -528,7 +528,7 @@ export default function HabitMagic({
                     </div>
                   </div>
                   <p className={cn("text-[11px] md:text-base leading-relaxed max-w-[160px] md:max-w-[320px] transition-colors duration-500 mr-auto", activeStep === 3 ? "text-white/60" : "text-white/40")}>
-                    Не «часовая тренировка», а «надеть кроссовки и сделать 5 приседаний». Порог входа = ноль.
+                    Не «часовая тренировка», а «надеть кроссовки и сделать всего 5 приседаний». Твой порог входа равен нулю.
                   </p>
                 </motion.div>
               </div>
@@ -549,14 +549,6 @@ export default function HabitMagic({
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Мобильная подсказка */}
-            <div className="mt-12 md:hidden flex flex-col items-center gap-4">
-              <div className="px-5 py-2 rounded-full bg-rose-500/5 border border-rose-500/10 flex items-center gap-2 shadow-lg shadow-rose-500/5">
-                <div className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">Цикл замкнут</span>
               </div>
             </div>
           </div>
