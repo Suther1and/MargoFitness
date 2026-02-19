@@ -12,6 +12,9 @@ import {
   Dumbbell,
   ShieldAlert,
   Lightbulb,
+  Flame,
+  Check,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -310,60 +313,235 @@ export default function NutritionBasics({
           </div>
         </RuleSection>
 
-        {/* Резюме — собираем всё вместе */}
+        {/* КБЖУ — Разбираемся раз и навсегда */}
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-            Собираем всё вместе
+            КБЖУ: разбираемся раз и навсегда
           </h2>
 
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Три правила. Простые, но фундаментальные. Если ты запомнишь только
-            их — ты уже будешь знать больше, чем 90% девушек, которые ищут ответы
-            в TikTok.
+          <p className="text-lg text-white/60 leading-relaxed mb-6">
+            КБЖУ — четыре буквы, которые определяют всё, что происходит с твоим
+            телом. Это не диета, не система и не тренд. Это просто описание того,
+            что и сколько ты ешь.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <SummaryCard
-              number="01"
-              text="Дефицит калорий — единственный механизм похудения. Не продукты, не время суток, не магические диеты."
-            />
-            <SummaryCard
-              number="02"
-              text="Тренировки нужны не для сжигания калорий, а для защиты мышц, метаболизма и формы тела."
-            />
-            <SummaryCard
-              number="03"
-              text="Резкое ограничение еды без тренировок ведёт к потере мышц, замедлению метаболизма и эффекту йо-йо."
-            />
+          <p className="text-lg text-white/60 leading-relaxed mb-8">
+            <strong className="text-white/80">К</strong> — калории, общая
+            энергия из пищи.{" "}
+            <strong className="text-white/80">Б</strong>,{" "}
+            <strong className="text-white/80">Ж</strong>,{" "}
+            <strong className="text-white/80">У</strong> — белки, жиры и
+            углеводы, то есть{" "}
+            <em className="text-white/70">из чего</em> эти калории состоят.
+            Калории определяют, будешь ты худеть или набирать. БЖУ определяют,
+            как ты будешь при этом выглядеть и чувствовать себя.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+            {(
+              [
+                {
+                  letter: "К",
+                  name: "Калории",
+                  value: "= общая энергия",
+                  desc: "Определяют, худеешь ты, держишь вес или набираешь",
+                  color: "amber",
+                },
+                {
+                  letter: "Б",
+                  name: "Белки",
+                  value: "4 ккал / 1 г",
+                  desc: "Мышцы, кожа, волосы, гормоны. Строительный материал тела",
+                  color: "rose",
+                },
+                {
+                  letter: "Ж",
+                  name: "Жиры",
+                  value: "9 ккал / 1 г",
+                  desc: "Гормоны, мозг, витамины. Самый калорийный макронутриент",
+                  color: "violet",
+                },
+                {
+                  letter: "У",
+                  name: "Углеводы",
+                  value: "4 ккал / 1 г",
+                  desc: "Топливо для мозга и мышц. Главный источник энергии",
+                  color: "sky",
+                },
+              ] as const
+            ).map((item) => (
+              <div
+                key={item.letter}
+                className={cn(
+                  "p-4 rounded-xl border text-center",
+                  item.color === "amber" &&
+                    "bg-amber-500/[0.04] border-amber-500/10",
+                  item.color === "rose" &&
+                    "bg-rose-500/[0.04] border-rose-500/10",
+                  item.color === "violet" &&
+                    "bg-violet-500/[0.04] border-violet-500/10",
+                  item.color === "sky" &&
+                    "bg-sky-500/[0.04] border-sky-500/10"
+                )}
+              >
+                <span
+                  className={cn(
+                    "text-4xl font-oswald font-black leading-none",
+                    item.color === "amber" && "text-amber-400",
+                    item.color === "rose" && "text-rose-400",
+                    item.color === "violet" && "text-violet-400",
+                    item.color === "sky" && "text-sky-400"
+                  )}
+                >
+                  {item.letter}
+                </span>
+                <p className="text-xs font-bold uppercase tracking-wider text-white/70 mt-2">
+                  {item.name}
+                </p>
+                <p className="text-[10px] font-bold text-white/30 mt-0.5">
+                  {item.value}
+                </p>
+                <p className="text-xs text-white/40 leading-relaxed mt-2">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
           </div>
 
-          <p className="text-lg text-white/60 leading-relaxed">
-            Не нужно перестраивать жизнь за один день. Начни с одного изменения
-            на этой неделе. Замени один перекус. Добавь одну тренировку. Дай телу
-            сигнал, что ты меняешь правила игры — мягко, но уверенно.
-          </p>
-        </section>
-
-        {/* Совет от Марго */}
-        <div className="my-10 rounded-[2.5rem] md:rounded-[3.5rem] bg-amber-500/[0.04] border border-amber-500/10 p-6 md:p-8 text-left">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="size-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                <Lightbulb className="size-4 text-amber-400/80" />
+          {/* Парадокс пончика */}
+          <div className="my-10 rounded-2xl overflow-hidden border border-white/10">
+            <div className="bg-amber-500/[0.06] border-b border-amber-500/10 p-6">
+              <div className="flex items-start gap-3">
+                <Flame className="size-5 text-amber-400 shrink-0 mt-1" />
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-wider text-amber-400/80 mb-2">
+                    Парадокс пончика
+                  </p>
+                  <p className="text-base text-white/70 leading-relaxed">
+                    Да, можно похудеть на пончиках и бургерах. Профессор Марк
+                    Хауб доказал это в 2010&nbsp;году — сбросил 12&nbsp;кг за
+                    2&nbsp;месяца на диете из снеков и сладостей. Потому что
+                    дефицит калорий — это физика, и она работает с любой едой.
+                  </p>
+                </div>
               </div>
-              <p className="text-xs md:text-sm font-black uppercase tracking-[0.15em] text-amber-400/70">
-                Совет от Марго
-              </p>
             </div>
-            <p className="text-sm md:text-base text-white/60 leading-relaxed">
-              Если ты только в начале пути — не пытайся быть идеальной. Идеально
-              — это враг хорошо. Одна тренировка в неделю лучше нуля. Один
-              здоровый ужин лучше, чем ещё одна неделя откладывания «на
-              понедельник». Твоё тело благодарит за каждый шаг, даже самый
-              маленький.
+
+            <div className="bg-rose-500/[0.03] p-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="size-5 text-rose-400 shrink-0 mt-1" />
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-wider text-rose-400/80 mb-3">
+                    Но вот что будет с телом
+                  </p>
+                  <div className="space-y-2">
+                    {[
+                      "Потеря мышц — без белка тело разрушает само себя",
+                      "Постоянный голод — сахарные качели и неизбежные срывы",
+                      "Волосы, кожа, ногти — без витаминов всё разваливается",
+                      "Гормональный хаос — нет здоровых жиров, нет баланса",
+                      "Нулевая энергия — ни на тренировку, ни на жизнь",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <X className="size-3.5 text-rose-400/60 shrink-0 mt-0.5" />
+                        <p className="text-sm text-white/50 leading-relaxed">
+                          {item}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="my-10 pl-6 border-l-2 border-amber-400/30">
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed font-medium italic">
+              Количество калорий решает, будешь ты худеть или нет. Качество
+              питания решает, будешь ты при этом здоровой и энергичной — или
+              уставшей и больной.
             </p>
           </div>
-        </div>
+
+          {/* Инфографика — 6 сценариев */}
+          <h3 className="text-xl md:text-2xl font-oswald font-black uppercase tracking-tight text-white mb-3 mt-14">
+            Что будет с твоим телом: 6&nbsp;сценариев
+          </h3>
+
+          <p className="text-base text-white/50 leading-relaxed mb-6">
+            Дефицит калорий, отслеживание БЖУ и тренировки — три переменные. Вот
+            что происходит с телом при каждой комбинации:
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(
+              [
+                {
+                  deficit: true,
+                  macros: true,
+                  training: true,
+                  title: "Идеальная трансформация",
+                  description:
+                    "Жир уходит, мышцы сохраняются. Тело подтянутое, рельефное. Энергия стабильная, настроение отличное. Золотой стандарт.",
+                  rating: 5,
+                  accent: "emerald",
+                },
+                {
+                  deficit: true,
+                  macros: true,
+                  training: false,
+                  title: "Стройность без формы",
+                  description:
+                    "Вес уходит, белок защищает мышцы. Но без тренировок тело «плоское» — стройное, но без рельефа и тонуса.",
+                  rating: 3.5,
+                  accent: "sky",
+                },
+                {
+                  deficit: true,
+                  macros: false,
+                  training: true,
+                  title: "Тренировки вхолостую",
+                  description:
+                    "Тренируешься, но без белка тело не восстанавливается. Мышцы разрушаются, результат от зала минимальный.",
+                  rating: 2.5,
+                  accent: "amber",
+                },
+                {
+                  deficit: true,
+                  macros: false,
+                  training: false,
+                  title: "Путь к skinny-fat",
+                  description:
+                    "Вес падает, но уходят и мышцы, и жир. Тело легче, но рыхлое и дряблое. Метаболизм замедляется.",
+                  rating: 1.5,
+                  accent: "orange",
+                },
+                {
+                  deficit: false,
+                  macros: true,
+                  training: true,
+                  title: "Сильнее, но не стройнее",
+                  description:
+                    "Мышцы растут, сила увеличивается. Но без дефицита жир остаётся. Визуально — мало изменений на весах.",
+                  rating: 2,
+                  accent: "violet",
+                },
+                {
+                  deficit: false,
+                  macros: false,
+                  training: false,
+                  title: "Ничего не меняется",
+                  description:
+                    "Нет дефицита, нет тренировок, питание без контроля. Тело остаётся таким же. Каждый день — повтор предыдущего.",
+                  rating: 0,
+                  accent: "zinc",
+                },
+              ] as const
+            ).map((scenario, i) => (
+              <ScenarioCard key={i} {...scenario} />
+            ))}
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
@@ -616,13 +794,107 @@ function CascadeStep({
   );
 }
 
-function SummaryCard({ number, text }: { number: string; text: string }) {
+const scenarioAccentStyles = {
+  emerald: {
+    border: "border-emerald-500/15",
+    bg: "bg-emerald-500/[0.03]",
+    bar: "bg-emerald-400",
+    title: "text-emerald-400/90",
+  },
+  sky: {
+    border: "border-sky-500/15",
+    bg: "bg-sky-500/[0.03]",
+    bar: "bg-sky-400",
+    title: "text-sky-400/90",
+  },
+  amber: {
+    border: "border-amber-500/15",
+    bg: "bg-amber-500/[0.03]",
+    bar: "bg-amber-400",
+    title: "text-amber-400/90",
+  },
+  orange: {
+    border: "border-orange-500/15",
+    bg: "bg-orange-500/[0.03]",
+    bar: "bg-orange-400",
+    title: "text-orange-400/90",
+  },
+  violet: {
+    border: "border-violet-500/15",
+    bg: "bg-violet-500/[0.03]",
+    bar: "bg-violet-400",
+    title: "text-violet-400/90",
+  },
+  zinc: {
+    border: "border-zinc-500/15",
+    bg: "bg-zinc-500/[0.03]",
+    bar: "bg-zinc-500",
+    title: "text-zinc-400/90",
+  },
+} as const;
+
+function ScenarioCard({
+  deficit,
+  macros,
+  training,
+  title,
+  description,
+  rating,
+  accent,
+}: {
+  deficit: boolean;
+  macros: boolean;
+  training: boolean;
+  title: string;
+  description: string;
+  rating: number;
+  accent: keyof typeof scenarioAccentStyles;
+}) {
+  const styles = scenarioAccentStyles[accent];
+
   return (
-    <div className="p-5 rounded-xl border border-amber-500/10 bg-amber-500/[0.03] text-left">
-      <span className="text-3xl font-oswald font-black text-amber-400/30 leading-none">
-        {number}
-      </span>
-      <p className="text-sm text-white/55 leading-relaxed mt-3">{text}</p>
+    <div
+      className={cn(
+        "rounded-2xl border p-5 text-left",
+        styles.border,
+        styles.bg
+      )}
+    >
+      <div className="h-1 rounded-full bg-white/5 mb-4">
+        {rating > 0 && (
+          <div
+            className={cn("h-full rounded-full", styles.bar)}
+            style={{ width: `${rating * 20}%` }}
+          />
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        <FactorBadge active={deficit} label="Дефицит" />
+        <FactorBadge active={macros} label="БЖУ" />
+        <FactorBadge active={training} label="Тренировки" />
+      </div>
+
+      <h4 className={cn("text-base font-bold mb-1.5", styles.title)}>
+        {title}
+      </h4>
+      <p className="text-sm text-white/45 leading-relaxed">{description}</p>
     </div>
+  );
+}
+
+function FactorBadge({ active, label }: { active: boolean; label: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border",
+        active
+          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400/80"
+          : "bg-white/[0.02] border-white/[0.06] text-white/20"
+      )}
+    >
+      {active ? <Check className="size-2.5" /> : <X className="size-2.5" />}
+      {label}
+    </span>
   );
 }
