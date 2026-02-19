@@ -112,10 +112,20 @@ export default function HabitMagic({
 
   const handleScroll = () => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth, scrollWidth } = scrollRef.current;
-      const cardWidth = window.innerWidth >= 768 ? (clientWidth - 16) / 2 : clientWidth;
-      const index = Math.round(scrollLeft / (cardWidth + 16));
-      setCurrentSlide(Math.min(index, strategies.length - 1));
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const isMobile = window.innerWidth < 768;
+      
+      if (isMobile) {
+        // На мобильном: ширина карточки 85vw + gap (16px)
+        const cardWidth = window.innerWidth * 0.85;
+        const index = Math.round(scrollLeft / (cardWidth + 16));
+        setCurrentSlide(Math.min(index, strategies.length - 1));
+      } else {
+        // На десктопе: 2 карточки, ширина фиксированная 380px + gap (16px)
+        const cardWidth = 380;
+        const index = Math.round(scrollLeft / (cardWidth + 16));
+        setCurrentSlide(Math.min(index, strategies.length - 1));
+      }
     }
   };
 
@@ -681,18 +691,18 @@ export default function HabitMagic({
               onMouseLeave={onMouseUp}
               onMouseMove={onMouseMove}
               className={cn(
-                "flex gap-4 overflow-x-auto pb-8 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x snap-mandatory select-none transition-transform duration-75",
+                "flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x snap-mandatory select-none transition-transform duration-75",
                 isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x"
               )}
             >
               {strategies.map((strategy, i) => (
-                <div key={i} className="min-w-[300px] md:min-w-[380px] snap-start">
+                <div key={i} className="min-w-[85vw] md:min-w-[380px] snap-start">
                   <StrategyCard {...strategy} />
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-2 mt-2">
               {(typeof window !== 'undefined' && window.innerWidth >= 768 ? [0, 1, 2, 3] : [0, 1, 2, 3, 4]).map((i) => {
                 // На десктопе (2 карточки) активной считается одна точка i, 
                 // но она визуально длиннее, показывая что охватывает 2 слайда
