@@ -77,7 +77,7 @@ export default function NutritionBasics({
             </h1>
 
             <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-amber-400/30 pl-8 italic">
-              Без подсчёта каждой калории и сложных формул. Простые принципы,
+              Простые принципы,
               которые работают и которые ты сможешь применить уже сегодня.
             </p>
           </div>
@@ -476,34 +476,14 @@ export default function NutritionBasics({
             {(
               [
                 {
-                  deficit: true,
-                  macros: true,
-                  training: true,
-                  title: "Идеальная трансформация",
-                  description:
-                    "Жир уходит, мышцы сохраняются. Тело подтянутое, рельефное. Энергия стабильная, настроение отличное. Золотой стандарт.",
-                  rating: 5,
-                  accent: "emerald",
-                },
-                {
-                  deficit: true,
-                  macros: true,
-                  training: false,
-                  title: "Стройность без формы",
-                  description:
-                    "Вес уходит, белок защищает мышцы. Но без тренировок тело «плоское» — стройное, но без рельефа и тонуса.",
-                  rating: 3.5,
-                  accent: "sky",
-                },
-                {
-                  deficit: true,
+                  deficit: false,
                   macros: false,
-                  training: true,
-                  title: "Тренировки вхолостую",
+                  training: false,
+                  title: "Ничего не меняется",
                   description:
-                    "Тренируешься, но без белка тело не восстанавливается. Мышцы разрушаются, результат от зала минимальный.",
-                  rating: 2.5,
-                  accent: "amber",
+                    "Нет дефицита, нет тренировок, питание без контроля. Тело остаётся таким же. Каждый день — повтор предыдущего.",
+                  rating: 0,
+                  accent: "zinc",
                 },
                 {
                   deficit: true,
@@ -526,14 +506,34 @@ export default function NutritionBasics({
                   accent: "violet",
                 },
                 {
-                  deficit: false,
+                  deficit: true,
                   macros: false,
-                  training: false,
-                  title: "Ничего не меняется",
+                  training: true,
+                  title: "Тренировки вхолостую",
                   description:
-                    "Нет дефицита, нет тренировок, питание без контроля. Тело остаётся таким же. Каждый день — повтор предыдущего.",
-                  rating: 0,
-                  accent: "zinc",
+                    "Тренируешься, но без белка тело не восстанавливается. Мышцы разрушаются, результат от зала минимальный.",
+                  rating: 2.5,
+                  accent: "amber",
+                },
+                {
+                  deficit: true,
+                  macros: true,
+                  training: false,
+                  title: "Стройность без формы",
+                  description:
+                    "Вес уходит, белок защищает мышцы. Но без тренировок тело «плоское» — стройное, но без рельефа и тонуса.",
+                  rating: 3.5,
+                  accent: "sky",
+                },
+                {
+                  deficit: true,
+                  macros: true,
+                  training: true,
+                  title: "Идеальная трансформация",
+                  description:
+                    "Жир уходит, мышцы сохраняются. Тело подтянутое, рельефное. Энергия стабильная, настроение отличное. Золотой стандарт.",
+                  rating: 5,
+                  accent: "emerald",
                 },
               ] as const
             ).map((scenario, i) => (
