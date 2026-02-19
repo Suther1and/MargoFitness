@@ -293,6 +293,12 @@ export default function EquipmentGuide({
               <EquipmentCard key={i} item={item} />
             ))}
           </div>
+
+          <p className="text-sm text-white/30 italic leading-relaxed px-2 mt-6">
+            Замены работают на старте, но для долгосрочного прогресса
+            гантели стоит приобрести. Бутылки не дают точного контроля
+            веса, а неудобный хват ухудшает технику и снижает эффективность.
+          </p>
         </section>
 
         {/* Секция — Как выбрать вес гантелей */}
@@ -396,120 +402,6 @@ export default function EquipmentGuide({
           </div>
         </section>
 
-        {/* Секция — Замены */}
-        <section className="mb-14 text-left">
-          <div className="flex items-center gap-3.5 mb-6">
-            <div className="size-10 rounded-xl bg-rose-500/10 border border-rose-500/15 flex items-center justify-center shrink-0">
-              <Replace className="size-5 text-rose-400" />
-            </div>
-            <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white">
-              Чем заменить, если нет возможности купить
-            </h2>
-          </div>
-
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Отсутствие оборудования — не повод не начинать. В тренировках
-            MargoFitness для каждого упражнения есть альтернатива с подручными
-            средствами. Вот самые надёжные замены:
-          </p>
-
-          <div className="rounded-2xl border border-white/10 overflow-hidden mb-8">
-            {[
-              {
-                original: "Гантели 1–3 кг",
-                substitute: "Бутылки с водой 0.5–1.5 л",
-                note: "Неудобно держать — обмотай полотенцем для хвата",
-              },
-              {
-                original: "Гантели 4–6 кг",
-                substitute: "Бутылка 5 л с водой / рюкзак с книгами",
-                note: "Подходит для приседаний и становых",
-              },
-              {
-                original: "Бодибар",
-                substitute: "Швабра + рюкзак на середине для веса",
-                note: "Или просто замени на гантели в упражнении",
-              },
-              {
-                original: "Фитнес-резинка",
-                substitute: "Плотные колготки, завязанные узлом",
-                note: "Минимальное сопротивление, но для активации хватит",
-              },
-              {
-                original: "Стул / опора",
-                substitute: "Диван, кровать, устойчивая тумба",
-                note: "Убедись, что не скользит по полу",
-              },
-            ].map((row, i, arr) => (
-              <div
-                key={i}
-                className={cn(
-                  "grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-0 p-4 md:p-0",
-                  i < arr.length - 1 && "border-b border-white/5"
-                )}
-              >
-                <div className="md:p-4 md:border-r border-white/10 text-sm font-medium text-white/50">
-                  <span className="md:hidden text-[10px] font-bold uppercase tracking-widest text-white/20 block mb-0.5">
-                    Оригинал:
-                  </span>
-                  {row.original}
-                </div>
-                <div className="md:p-4 md:border-r border-white/10 text-sm font-medium text-rose-400/70">
-                  <span className="md:hidden text-[10px] font-bold uppercase tracking-widest text-white/20 block mb-0.5">
-                    Замена:
-                  </span>
-                  {row.substitute}
-                </div>
-                <div className="md:p-4 text-xs text-white/30 leading-relaxed flex items-center">
-                  <span className="md:hidden text-[10px] font-bold uppercase tracking-widest text-white/20 mr-1">
-                    ℹ{" "}
-                  </span>
-                  {row.note}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="rounded-xl bg-amber-500/[0.04] border border-amber-500/12 p-5 text-left">
-            <div className="flex gap-3.5">
-              <Info className="size-5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-white/50 leading-relaxed">
-                Замены работают на старте, но для долгосрочного прогресса
-                гантели стоит приобрести. Бутылки не дают точного контроля
-                веса, а неудобный хват ухудшает технику и снижает эффективность.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Цитата */}
-        <blockquote className="relative my-14 pl-8 text-left">
-          <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-rose-400/40" />
-          <Quote className="absolute -left-3 -top-1 size-6 text-rose-400/30 p-0.5" />
-          <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
-            «Мне часто пишут: "Марго, у меня нет гантелей, я не могу
-            начать". Можешь. Бутылка воды, стул и коврик — этого достаточно
-            для первой недели. А потом ты уже не захочешь останавливаться.»
-          </p>
-          <footer className="flex items-center gap-4">
-            <div className="relative w-14 h-14 -ml-1 -my-2 shrink-0 rounded-full border-2 border-rose-500/20 overflow-hidden shadow-lg shadow-rose-500/20">
-              <img
-                src="/images/avatars/margo.png"
-                alt="Марго"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-black uppercase tracking-widest text-white/90 leading-none">
-                Марго
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30 mt-1">
-                Основатель MargoFitness
-              </span>
-            </div>
-          </footer>
-        </blockquote>
-
         {/* Секция — Ошибки при покупке */}
         <section className="mb-14 text-left">
           <div className="flex items-center gap-3.5 mb-6">
@@ -546,52 +438,6 @@ export default function EquipmentGuide({
             ].map((item, i) => (
               <MistakeCard key={i} index={i + 1} {...item} />
             ))}
-          </div>
-        </section>
-
-        {/* Итоговый чеклист покупок */}
-        <section className="mb-14 text-left">
-          <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-            Чеклист покупок
-          </h2>
-
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Три этапа. Не покупай следующий, пока не отзанималась с текущим
-            минимум месяц.
-          </p>
-
-          <div className="space-y-4">
-            <ShoppingPhase
-              phase="Этап 1"
-              subtitle="Первый день"
-              items={[
-                "Коврик 8–12 мм",
-                "Гантели 2 кг (пара)",
-                "Гантели 4 кг (пара)",
-              ]}
-              total="2 300–6 000 ₽"
-              color="rose"
-            />
-            <ShoppingPhase
-              phase="Этап 2"
-              subtitle="Через 2–3 месяца"
-              items={[
-                "Гантели 5–6 кг (пара)",
-                "Фитнес-резинки (набор из 3)",
-              ]}
-              total="2 000–4 500 ₽"
-              color="rose"
-            />
-            <ShoppingPhase
-              phase="Этап 3"
-              subtitle="Через 6+ месяцев (по желанию)"
-              items={[
-                "Гантели 7–8 кг (пара)",
-                "Бодибар 5–7 кг",
-              ]}
-              total="2 500–5 000 ₽"
-              color="rose"
-            />
           </div>
         </section>
 
@@ -821,42 +667,6 @@ function MistakeCard({
           <p className="text-sm text-white/40 leading-relaxed">{fix}</p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ShoppingPhase({
-  phase,
-  subtitle,
-  items,
-  total,
-  color,
-}: {
-  phase: string;
-  subtitle: string;
-  items: string[];
-  total: string;
-  color: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 md:p-6 text-left">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-md">
-            {phase}
-          </span>
-          <span className="text-xs text-white/30">{subtitle}</span>
-        </div>
-        <span className="text-sm font-bold text-white/40">{total}</span>
-      </div>
-      <ul className="space-y-2">
-        {items.map((item, i) => (
-          <li key={i} className="flex items-center gap-2.5 text-sm text-white/55">
-            <Check className="size-3.5 text-rose-400/50 shrink-0" />
-            {item}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
