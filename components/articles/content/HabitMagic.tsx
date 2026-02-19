@@ -102,11 +102,15 @@ export default function HabitMagic({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      // На десктопе clientWidth / 2 — это ширина одной карточки (так как их две)
-      const cardWidth = window.innerWidth >= 768 ? clientWidth / 2 : clientWidth;
-      const scrollTo = direction === "left" ? scrollLeft - cardWidth : scrollLeft + cardWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
+      const { scrollLeft } = scrollRef.current;
+      const isMobile = window.innerWidth < 768;
+      const cardWidth = isMobile ? window.innerWidth * 0.85 : 380;
+      const scrollTo = direction === "left" ? scrollLeft - (cardWidth + 16) : scrollLeft + (cardWidth + 16);
+      
+      scrollRef.current.scrollTo({ 
+        left: scrollTo, 
+        behavior: "smooth" 
+      });
     }
   };
 
