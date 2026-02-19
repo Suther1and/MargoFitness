@@ -165,7 +165,7 @@ export default function HabitMagic({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-white selection:bg-rose-500/30"
+      className="text-white selection:bg-rose-500/30 overflow-x-hidden"
     >
       {/* HERO */}
       <div className="relative w-full overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16">
@@ -358,7 +358,7 @@ export default function HabitMagic({
             number="02"
           />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
+          <p className="text-lg text-white/60 leading-relaxed mb-8 md:mb-12">
             Любая привычка — это цикл из четырёх элементов. Понимая этот
             механизм, ты можешь «запрограммировать» тренировку так же, как
             сейчас запрограммирована чистка зубов — ты не принимаешь решение
@@ -366,8 +366,15 @@ export default function HabitMagic({
           </p>
 
           {/* Петля привычки — Инфографика */}
-          <div className="relative mb-12 md:mb-20 max-w-[1000px] mx-auto px-4 md:px-0">
-            <div className="relative flex items-center justify-center min-h-[550px] md:min-h-[650px]">
+          <div className="relative max-w-[1000px] mx-auto px-4 md:px-0 mb-12">
+            {/* Верхний горизонтальный разделитель */}
+            <div className="flex items-center justify-center gap-4 mb-0">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-500/20 to-transparent" />
+              <div className="size-1.5 rounded-full bg-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]" />
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-rose-500/20 to-transparent" />
+            </div>
+
+            <div className="relative flex items-center justify-center min-h-[450px] md:min-h-[650px]">
               {/* Фоновое свечение */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[350px] md:size-[600px] bg-rose-500/[0.02] blur-[80px] md:blur-[120px] pointer-events-none" />
 
@@ -509,7 +516,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[35px] md:translate-x-[80px] md:translate-y-[80px] pl-2 md:pl-12"
+                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[35px] md:translate-x-[-80px] md:translate-y-[80px] pl-2 md:pl-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row">
                     <div className={cn(
@@ -551,36 +558,15 @@ export default function HabitMagic({
                 </div>
               </div>
             </div>
+
+            {/* Нижний горизонтальный разделитель */}
+            <div className="flex items-center justify-center gap-4 mt-0">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-500/20 to-transparent" />
+              <div className="size-1.5 rounded-full bg-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]" />
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-rose-500/20 to-transparent" />
+            </div>
           </div>
         </section>
-
-        {/* Цитата */}
-        <blockquote className="relative my-14 pl-8 text-left">
-          <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-rose-400/40" />
-          <Quote className="absolute -left-3 -top-1 size-6 text-rose-400/30 p-0.5" />
-          <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
-            «Я не тренирую людей через силу. Я помогаю встроить движение в жизнь
-            так, чтобы оно стало таким же естественным, как утренний кофе. Когда
-            тренировка перестаёт быть подвигом — начинается настоящий прогресс.»
-          </p>
-          <footer className="flex items-center gap-4">
-            <div className="relative w-14 h-14 -ml-1 -my-2 shrink-0 rounded-full border-2 border-rose-500/20 overflow-hidden shadow-lg shadow-rose-500/20">
-              <img
-                src="/images/avatars/margo.png"
-                alt="Марго"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-black uppercase tracking-widest text-white/90 leading-none">
-                Марго
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30 mt-1">
-                Основатель MargoFitness
-              </span>
-            </div>
-          </footer>
-        </blockquote>
 
         {/* Секция 3 — Правило 66 дней */}
         <section className="mb-14 text-left">
@@ -640,7 +626,7 @@ export default function HabitMagic({
         </section>
 
         {/* Секция 4 — 5 стратегий */}
-        <section className="mb-14 text-left group/slider">
+        <section className="mb-14 text-left group/slider overflow-hidden">
           <div className="flex items-end justify-between mb-8">
             <div className="flex-1">
               <SectionHeader
