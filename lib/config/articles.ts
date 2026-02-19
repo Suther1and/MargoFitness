@@ -51,5 +51,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 8,
     access_level: "free",
     image_url: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "equipment-guide",
+    slug: "equipment-guide",
+    title: "Гид по оборудованию: как собрать домашний зал",
+    description: "Полный список инвентаря MargoFitness — что купить обязательно, чем заменить, как выбрать вес гантелей и не переплатить.",
+    category: "Основы",
+    reading_time: 9,
+    access_level: "basic",
+    image_url: "https://images.unsplash.com/photo-1637666062717-1c6bcfa4a4df?q=80&w=2070&auto=format&fit=crop"
   }
 ];
