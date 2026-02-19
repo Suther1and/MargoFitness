@@ -425,7 +425,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[-70px] md:translate-x-[-80px] md:translate-y-[-80px] pr-2 md:pr-12"
+                  className="group relative flex flex-col-reverse gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[-35px] md:translate-x-[-80px] md:translate-y-[-80px] pr-2 md:pr-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row-reverse">
                     <div className={cn(
@@ -453,7 +453,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col-reverse gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[-70px] md:translate-x-[80px] md:translate-y-[-80px] pl-2 md:pl-12"
+                  className="group relative flex flex-col-reverse gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[-35px] md:translate-x-[80px] md:translate-y-[-80px] pl-2 md:pl-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row">
                     <div className={cn(
@@ -481,7 +481,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[70px] md:translate-x-[-80px] md:translate-y-[80px] pr-2 md:pr-12"
+                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-right translate-x-[-35px] translate-y-[35px] md:translate-x-[-80px] md:translate-y-[-80px] pr-2 md:pr-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row-reverse">
                     <div className={cn(
@@ -509,7 +509,7 @@ export default function HabitMagic({
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[70px] md:translate-x-[80px] md:translate-y-[80px] pl-2 md:pl-12"
+                  className="group relative flex flex-col gap-2 md:gap-5 w-full text-left translate-x-[35px] translate-y-[35px] md:translate-x-[80px] md:translate-y-[80px] pl-2 md:pl-12"
                 >
                   <div className="flex items-center gap-2 md:gap-5 flex-row">
                     <div className={cn(
