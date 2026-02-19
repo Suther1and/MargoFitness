@@ -38,6 +38,34 @@ export default function HabitMagic({
   const [currentSlide, setCurrentSlide] = useState(0);
   const pathRef = React.useRef<SVGCircleElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Оптимальная скорость для плавности
+    
+    // Используем requestAnimationFrame для синхронизации с частотой обновления экрана
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollLeft - walk;
+      }
+    });
+  };
 
   const strategies = [
     {
@@ -648,7 +676,14 @@ export default function HabitMagic({
             <div 
               ref={scrollRef}
               onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto pb-8 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={onMouseDown}
+              onMouseUp={onMouseUp}
+              onMouseLeave={onMouseUp}
+              onMouseMove={onMouseMove}
+              className={cn(
+                "flex gap-4 overflow-x-auto pb-8 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x snap-mandatory select-none transition-transform duration-75",
+                isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x"
+              )}
             >
               {strategies.map((strategy, i) => (
                 <div key={i} className="min-w-[300px] md:min-w-[380px] snap-start">
