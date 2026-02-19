@@ -704,8 +704,9 @@ export default function HabitMagic({
 
             <div className="flex justify-center gap-2 mt-2">
               {(typeof window !== 'undefined' && window.innerWidth >= 768 ? [0, 1, 2, 3] : [0, 1, 2, 3, 4]).map((i) => {
-                // На десктопе (2 карточки) активной считается одна точка i, 
-                // но она визуально длиннее, показывая что охватывает 2 слайда
+                const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+                // На мобильном активна строго текущая точка
+                // На десктопе активна одна точка, но она длинная (показывает охват 2 слайдов)
                 const isActive = currentSlide === i;
                 
                 return (
@@ -713,9 +714,10 @@ export default function HabitMagic({
                     key={i}
                     onClick={() => {
                       if (scrollRef.current) {
-                        const cardWidth = window.innerWidth >= 768 
-                          ? (scrollRef.current.clientWidth - 16) / 2 
-                          : scrollRef.current.clientWidth;
+                        const isMobileView = window.innerWidth < 768;
+                        const cardWidth = isMobileView 
+                          ? window.innerWidth * 0.85
+                          : 380;
                         scrollRef.current.scrollTo({ 
                           left: i * (cardWidth + 16), 
                           behavior: "smooth" 
@@ -725,7 +727,7 @@ export default function HabitMagic({
                     className={cn(
                       "size-1.5 rounded-full transition-all duration-500",
                       isActive 
-                        ? "w-8 bg-rose-500" 
+                        ? (isMobile ? "w-4 bg-rose-500" : "w-8 bg-rose-500") 
                         : "bg-white/10 hover:bg-white/20"
                     )}
                   />
