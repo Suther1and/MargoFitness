@@ -1181,139 +1181,114 @@ function GuestTabs() {
 }
 
 function VacationWeekComparison() {
-  const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-  const withoutStrategy = [
-    { food: "high", activity: "none", alcohol: true },
-    { food: "high", activity: "none", alcohol: false },
-    { food: "high", activity: "none", alcohol: true },
-    { food: "high", activity: "none", alcohol: true },
-    { food: "high", activity: "none", alcohol: false },
-    { food: "high", activity: "none", alcohol: true },
-    { food: "high", activity: "none", alcohol: true },
+  const timeSlots = [
+    { time: "Завтрак", icon: "☀️" },
+    { time: "День", icon: "🏖" },
+    { time: "Обед", icon: "🍽" },
+    { time: "Вечер", icon: "🌅" },
+    { time: "Ужин", icon: "🥂" },
   ];
 
-  const withStrategy = [
-    { food: "balanced", activity: "walk", alcohol: false },
-    { food: "balanced", activity: "swim", alcohol: false },
-    { food: "flexible", activity: "walk", alcohol: true },
-    { food: "balanced", activity: "none", alcohol: false },
-    { food: "balanced", activity: "walk", alcohol: false },
-    { food: "flexible", activity: "swim", alcohol: true },
-    { food: "balanced", activity: "walk", alcohol: false },
+  const chaotic: { action: string; problem?: string }[] = [
+    { action: "Шведский стол: 2 тарелки + выпечка + сок", problem: "~1 200 ккал за один завтрак" },
+    { action: "Лежишь у бассейна, коктейль в 12:00", problem: "Алкоголь на жаре + обезвоживание" },
+    { action: "Шведский стол снова: паста, пицца, десерт", problem: "Ещё 1 000–1 400 ккал" },
+    { action: "Сон → снова бассейн → мороженое", problem: "Нулевая активность, скачки сахара" },
+    { action: "Ресторан: закуски + основное + вино + десерт", problem: "~1 500 ккал + алкоголь" },
   ];
 
-  const foodColors = {
-    high: "bg-rose-500/60",
-    flexible: "bg-amber-500/60",
-    balanced: "bg-emerald-500/60",
-  };
-  const activityColors = {
-    none: "bg-white/10",
-    walk: "bg-sky-500/50",
-    swim: "bg-blue-500/50",
-  };
+  const strategic: { action: string; why?: string }[] = [
+    { action: "1 тарелка: яйца, овощи, сыр, кофе", why: "Белок с утра = сытость до обеда" },
+    { action: "Прогулка 30 мин или плавание", why: "Метаболизм не «засыпает»" },
+    { action: "1 тарелка: мясо/рыба + овощи + гарнир", why: "Белок в каждый приём — защита мышц" },
+    { action: "Активность: пляж, волейбол, прогулка", why: "Движение вместо тренировки" },
+    { action: "Ресторан: основное + бокал вина", why: "Наслаждаешься, но без «добивки» десертом" },
+  ];
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-8">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">
-        Неделя отпуска: два подхода
-      </p>
+    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
+      <div className="p-5 md:p-6 pb-3 md:pb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-white/30">
+          Типичный день отпуска: два подхода
+        </p>
+      </div>
 
-      <div className="space-y-6">
-        {/* Без стратегии */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <X className="size-3.5 text-rose-400/50" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400/50">
+      {/* Заголовки колонок */}
+      <div className="grid grid-cols-[100px_1fr_1fr] md:grid-cols-[120px_1fr_1fr] border-b border-white/10">
+        <div className="p-3 md:p-4" />
+        <div className="p-3 md:p-4 border-l border-white/10 bg-rose-500/[0.04]">
+          <div className="flex items-center gap-2">
+            <X className="size-3.5 text-rose-400/60" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400/60">
               Без стратегии
             </span>
-            <span className="text-[10px] text-white/15 ml-auto">
-              Результат: +3–4 кг, откат на 2 недели
-            </span>
-          </div>
-          <div className="grid grid-cols-7 gap-1.5">
-            {days.map((day, i) => (
-              <div key={i} className="text-center">
-                <span className="text-[9px] font-bold text-white/20 block mb-1.5">
-                  {day}
-                </span>
-                <div className="space-y-1">
-                  <div
-                    className={cn(
-                      "h-6 rounded-md",
-                      foodColors[withoutStrategy[i].food as keyof typeof foodColors]
-                    )}
-                  />
-                  <div
-                    className={cn(
-                      "h-3 rounded-sm",
-                      activityColors[withoutStrategy[i].activity as keyof typeof activityColors]
-                    )}
-                  />
-                  {withoutStrategy[i].alcohol && (
-                    <div className="h-2 rounded-sm bg-violet-500/50" />
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
-
-        {/* Со стратегией */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Check className="size-3.5 text-emerald-400/50" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/50">
+        <div className="p-3 md:p-4 border-l border-white/10 bg-emerald-500/[0.04]">
+          <div className="flex items-center gap-2">
+            <Check className="size-3.5 text-emerald-400/60" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">
               Со стратегией
             </span>
-            <span className="text-[10px] text-white/15 ml-auto">
-              Результат: +0.5–1 кг (вода), откат — 0
-            </span>
-          </div>
-          <div className="grid grid-cols-7 gap-1.5">
-            {days.map((day, i) => (
-              <div key={i} className="text-center">
-                <span className="text-[9px] font-bold text-white/20 block mb-1.5">
-                  {day}
-                </span>
-                <div className="space-y-1">
-                  <div
-                    className={cn(
-                      "h-6 rounded-md",
-                      foodColors[withStrategy[i].food as keyof typeof foodColors]
-                    )}
-                  />
-                  <div
-                    className={cn(
-                      "h-3 rounded-sm",
-                      activityColors[withStrategy[i].activity as keyof typeof activityColors]
-                    )}
-                  />
-                  {withStrategy[i].alcohol && (
-                    <div className="h-2 rounded-sm bg-violet-500/50" />
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
+      </div>
 
-        {/* Легенда */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-3 border-t border-white/5">
-          {[
-            { color: "bg-emerald-500/60", label: "Сбалансированно" },
-            { color: "bg-amber-500/60", label: "Гибко (ресторан)" },
-            { color: "bg-rose-500/60", label: "Без контроля" },
-            { color: "bg-sky-500/50", label: "Прогулка" },
-            { color: "bg-blue-500/50", label: "Бассейн" },
-            { color: "bg-violet-500/50", label: "Алкоголь" },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              <div className={cn("size-2 rounded-sm", item.color)} />
-              <span className="text-[9px] text-white/25">{item.label}</span>
-            </div>
-          ))}
+      {/* Строки */}
+      {timeSlots.map((slot, i) => (
+        <div
+          key={i}
+          className="grid grid-cols-[100px_1fr_1fr] md:grid-cols-[120px_1fr_1fr] border-b border-white/5 last:border-b-0"
+        >
+          <div className="p-3 md:p-4 flex items-start gap-2">
+            <span className="text-sm">{slot.icon}</span>
+            <span className="text-xs font-bold text-white/30 pt-0.5">
+              {slot.time}
+            </span>
+          </div>
+
+          <div className="p-3 md:p-4 border-l border-white/5">
+            <p className="text-xs text-white/50 leading-relaxed">
+              {chaotic[i].action}
+            </p>
+            {chaotic[i].problem && (
+              <p className="text-[10px] text-rose-400/50 mt-1 leading-snug">
+                {chaotic[i].problem}
+              </p>
+            )}
+          </div>
+
+          <div className="p-3 md:p-4 border-l border-white/5">
+            <p className="text-xs text-white/50 leading-relaxed">
+              {strategic[i].action}
+            </p>
+            {strategic[i].why && (
+              <p className="text-[10px] text-emerald-400/50 mt-1 leading-snug">
+                {strategic[i].why}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Итог */}
+      <div className="grid grid-cols-[100px_1fr_1fr] md:grid-cols-[120px_1fr_1fr] border-t border-white/10">
+        <div className="p-3 md:p-4">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+            Итог дня
+          </span>
+        </div>
+        <div className="p-3 md:p-4 border-l border-white/10 bg-rose-500/[0.03]">
+          <p className="text-xs font-bold text-rose-400/70">~4 500–5 000 ккал</p>
+          <p className="text-[10px] text-white/25 mt-0.5">
+            Движение: минимум. Алкоголь: ежедневно. За неделю: +3–4 кг.
+          </p>
+        </div>
+        <div className="p-3 md:p-4 border-l border-white/10 bg-emerald-500/[0.03]">
+          <p className="text-xs font-bold text-emerald-400/70">~2 200–2 800 ккал</p>
+          <p className="text-[10px] text-white/25 mt-0.5">
+            Движение: 30–40 мин. Алкоголь: через день. За неделю: +0.5–1 кг (вода).
+          </p>
         </div>
       </div>
     </div>
