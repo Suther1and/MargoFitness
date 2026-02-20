@@ -771,8 +771,8 @@ function TierComparisonGrid() {
     { label: "Виджеты здоровья", mobileLabel: "Виджеты", values: ["1", "6", "8", "8"] },
     { label: "Привычки", values: ["1", "6", "10", "15"] },
     { label: "Статьи", values: ["Демо", "Расш.", "Все", "Все"] },
-    { label: "Статистика", values: [false, true, true, true] },
     { label: "Telegram-сообщество", mobileLabel: "Telegram", values: [true, true, true, true] },
+    { label: "Статистика", values: [false, true, true, true] },
     { label: "Личное ведение", values: [false, false, false, true] },
   ];
 
@@ -786,9 +786,9 @@ function TierComparisonGrid() {
                 <span className="text-[15px] md:text-sm font-oswald font-bold uppercase text-white/30">Уровень</span>
               </th>
               {tiers.map((t, i) => (
-                <th key={i} className={cn("px-0.5 py-3 text-center", t.popular && "bg-purple-500/[0.05]")}>
+                <th key={i} className={cn("px-0.5 py-3 text-center relative", t.popular && "bg-purple-500/[0.05]")}>
                   {t.popular && (
-                    <span className="block text-[7px] font-bold uppercase tracking-tight text-purple-400/70 mb-1 leading-none">
+                    <span className="absolute top-1.5 left-0 right-0 text-[7px] font-bold uppercase tracking-tight text-purple-400/70 leading-none">
                       Best
                     </span>
                   )}
