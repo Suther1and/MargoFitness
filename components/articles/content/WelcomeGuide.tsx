@@ -69,7 +69,7 @@ export default function WelcomeGuide({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-white selection:bg-orange-500/30"
+      className="text-white selection:bg-orange-500/30 overflow-x-clip"
     >
       {/* HERO */}
       <div className="relative w-full overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16">
@@ -841,6 +841,9 @@ function TierComparisonGrid() {
 }
 
 function AchievementShowcase() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const categories = [
     { name: "Обычное", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
     { name: "Редкое", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
@@ -857,19 +860,31 @@ function AchievementShowcase() {
     { img: "/achievements/collector.png", name: "Коллекционер", cat: 4, reward: 1000 },
   ];
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const scrollLeft = el.scrollLeft;
+    const itemWidth = 280 + 20; // w-[280px] + gap-5
+    const index = Math.round(scrollLeft / itemWidth);
+    if (index !== activeSlide) setActiveSlide(index);
+  };
+
   return (
-    <div className="py-2">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-8 px-1">
+    <div className="py-2 overflow-x-hidden">
+      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-5 px-1">
         5 категорий редкости
       </p>
 
       {/* Мобильная версия: Горизонтальный скролл карточек редкости */}
-      <div className="md:hidden -mx-5 px-5 mb-8">
-        <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
+      <div className="md:hidden -mx-5 px-5 mb-4 overflow-visible">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory touch-pan-x"
+        >
           {examples.map((a, i) => (
             <div 
               key={i} 
-              className="relative w-[280px] shrink-0 snap-center p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col items-center text-center group"
+              className="relative w-[280px] shrink-0 snap-center p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col items-center text-center group select-none"
             >
               {/* Фоновое свечение и паттерн */}
               <div className={cn(
@@ -886,11 +901,12 @@ function AchievementShowcase() {
                 )} />
                 
                 {/* Иконка достижения */}
-                <div className="relative z-10 size-32 flex items-center justify-center">
+                <div className="relative z-10 size-36 flex items-center justify-center">
                   <img
                     src={a.img}
                     alt={a.name}
-                    className="max-w-full max-h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                    className="max-w-full max-h-full object-contain"
+                    style={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.2))' }}
                   />
                 </div>
 
@@ -928,9 +944,9 @@ function AchievementShowcase() {
         </div>
         
         {/* Индикатор скролла */}
-        <div className="flex justify-center gap-1.5 mt-2">
+        <div className="flex justify-center gap-1.5 -mt-2">
           {examples.map((_, i) => (
-            <div key={i} className={cn("h-1 rounded-full transition-all duration-300", i === 0 ? "w-6 bg-orange-400/60" : "w-1.5 bg-white/10")} />
+            <div key={i} className={cn("h-1 rounded-full transition-all duration-300", i === activeSlide ? "w-6 bg-orange-400/60" : "w-1.5 bg-white/10")} />
           ))}
         </div>
       </div>
