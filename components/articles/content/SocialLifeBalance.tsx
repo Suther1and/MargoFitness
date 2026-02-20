@@ -1041,16 +1041,16 @@ function GuestTabs() {
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        <div className="relative">
+      <div className="relative overflow-hidden min-h-[520px] md:min-h-[440px]">
+        <AnimatePresence mode="wait">
           {activeTab === "visiting" ? (
             <motion.div
               key="visiting"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-4"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="space-y-4 absolute inset-0"
             >
               {[
                 {
@@ -1097,11 +1097,11 @@ function GuestTabs() {
           ) : (
             <motion.div
               key="hosting"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-4"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="space-y-4 absolute inset-0"
             >
               {[
                 {
