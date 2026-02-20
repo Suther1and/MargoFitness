@@ -32,6 +32,7 @@ import {
   Salad,
   Ham,
   Martini,
+  Utensils,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -418,41 +419,9 @@ export default function SocialLifeBalance({
           {/* Визуальная неделя отпуска */}
           <VacationWeekComparison />
 
-          <p className="text-lg text-white/60 leading-relaxed mt-8 mb-6">
-            Стратегия отпуска — не контроль, а баланс. Вот конкретные правила:
+          <p className="text-xs text-white/20 mt-4 text-center italic">
+            Стратегия отпуска — не контроль, а баланс.
           </p>
-
-          <div className="space-y-3 mb-8">
-            {[
-              {
-                rule: "Правило одной тарелки",
-                detail:
-                  "На шведском столе набирай одну тарелку, не две. Пусть на ней будет всё — но один заход. Это автоматически ограничивает объём без подсчёта калорий.",
-              },
-              {
-                rule: "Белок в каждый приём",
-                detail:
-                  "Яйца на завтрак, рыба или мясо на обед и ужин. Белок даёт сытость и защищает мышцы. Всё остальное — гарниры, десерты, фрукты — дополнение.",
-              },
-              {
-                rule: "Движение вместо тренировки",
-                detail:
-                  "Не нужно искать зал в отеле. Ходи пешком, плавай, играй в пляжный волейбол. 30–40 минут активности в день достаточно, чтобы метаболизм не «уснул».",
-              },
-              {
-                rule: "Алкоголь — осознанно",
-                detail:
-                  "Если хочешь коктейль — выпей. Но не три в день каждый день. Чередуй: день с алкоголем, день без. Выбирай сухое вино или чистые напитки вместо сладких коктейлей.",
-              },
-              {
-                rule: "Вода — главный напиток",
-                detail:
-                  "На жаре тело теряет воду быстрее. 2.5–3 литра в день — минимум. Это снижает аппетит, защищает от обезвоживания и улучшает самочувствие.",
-              },
-            ].map((item, i) => (
-              <VacationRuleCard key={i} index={i + 1} {...item} />
-            ))}
-          </div>
 
           <blockquote className="relative my-10 pl-8 text-left">
             <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-amber-400/40" />
@@ -1182,11 +1151,11 @@ function GuestTabs() {
 
 function VacationWeekComparison() {
   const timeSlots = [
-    { time: "Завтрак", icon: "☀️" },
-    { time: "День", icon: "🏖" },
-    { time: "Обед", icon: "🍽" },
-    { time: "Вечер", icon: "🌅" },
-    { time: "Ужин", icon: "🥂" },
+    { time: "Завтрак", icon: <Utensils className="size-3.5" /> },
+    { time: "День", icon: <Plane className="size-3.5" /> },
+    { time: "Обед", icon: <Salad className="size-3.5" /> },
+    { time: "Вечер", icon: <Moon className="size-3.5" /> },
+    { time: "Ужин", icon: <Wine className="size-3.5" /> },
   ];
 
   const chaotic: { action: string; problem?: string }[] = [
@@ -1240,9 +1209,11 @@ function VacationWeekComparison() {
           key={i}
           className="grid grid-cols-[100px_1fr_1fr] md:grid-cols-[120px_1fr_1fr] border-b border-white/5 last:border-b-0"
         >
-          <div className="p-3 md:p-4 flex items-start gap-2">
-            <span className="text-sm">{slot.icon}</span>
-            <span className="text-xs font-bold text-white/30 pt-0.5">
+          <div className="p-3 md:p-4 flex items-center gap-3">
+            <div className="flex items-center justify-center shrink-0">
+              <span className="text-white/40">{slot.icon}</span>
+            </div>
+            <span className="text-xs font-bold text-white/30">
               {slot.time}
             </span>
           </div>
