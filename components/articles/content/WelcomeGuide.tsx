@@ -1172,17 +1172,29 @@ function IntensiveCardsMockup() {
     if (!isMobile) {
       const el = scrollRef.current;
       const maxScroll = el.scrollWidth - el.clientWidth;
-      const currentScroll = el.scrollLeft;
       
-      let newScroll;
+      // Определяем 3 фиксированных положения:
+      // 0: Начало (левая карточка прижата, правая обрезана)
+      // 1: Середина (скролл на одну карточку)
+      // 2: Конец (правая карточка прижата, левая обрезана)
+      const positions = [0, cardW + gap, maxScroll];
+      
+      // Находим текущую позицию (индекс ближайшей точки)
+      const currentScroll = el.scrollLeft;
+      let currentIndex = positions.findIndex(pos => Math.abs(pos - currentScroll) < 10);
+      if (currentIndex === -1) {
+        currentIndex = Math.round(currentScroll / (cardW + gap));
+      }
+
+      let nextIndex;
       if (dir === "left") {
-        newScroll = Math.max(0, currentScroll - (cardW + gap));
+        nextIndex = Math.max(0, currentIndex - 1);
       } else {
-        newScroll = Math.min(maxScroll, currentScroll + (cardW + gap));
+        nextIndex = Math.min(positions.length - 1, currentIndex + 1);
       }
       
       el.scrollTo({
-        left: newScroll,
+        left: positions[nextIndex],
         behavior: "smooth",
       });
     } else {
