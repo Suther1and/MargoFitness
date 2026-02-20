@@ -91,5 +91,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 8,
     access_level: "basic",
     image_url: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "welcome-guide",
+    slug: "welcome-guide",
+    title: "Добро пожаловать в MargoFitness: твой личный план трансформации",
+    description: "Полный гид по платформе — тренировки, трекер здоровья, тарифы, достижения, бонусы, интенсивы и марафоны. Всё, что нужно знать новому пользователю.",
+    category: "Основы",
+    reading_time: 15,
+    access_level: "free",
+    image_url: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=2070&auto=format&fit=crop"
   }
 ];
