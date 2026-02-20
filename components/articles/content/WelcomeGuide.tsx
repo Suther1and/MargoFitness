@@ -15,11 +15,13 @@ import {
   Flame,
   Medal,
   Play,
+  Repeat,
   Heart,
   BookOpen,
   Users,
   Sparkles,
   Star,
+  Zap,
   Check,
   Droplets,
   Footprints,
@@ -141,9 +143,6 @@ export default function WelcomeGuide({
           </p>
         </div>
 
-        {/* Содержание статьи — статичный обзор */}
-        <ArticleOverview />
-
         {/* === СЕКЦИИ КОНТЕНТА === */}
 
         {/* Секция 1 — Что доступно сразу */}
@@ -180,10 +179,10 @@ export default function WelcomeGuide({
 
           <p className="text-lg text-white/60 leading-relaxed mt-8 mb-6">
             Каждая сессия состоит из 4–6 упражнений. К каждому прикреплена
-            видео-инструкция с разбором техники и амплитуды — это основной
-            контент платформы. Ты всегда видишь, как правильно выполнять
-            движение. Помимо видео указаны подходы, повторения, время отдыха и
-            описание техники — всё на экране, запоминать ничего не нужно.
+            видео-инструкция с разбором техники и амплитуды. Ты всегда видишь,
+            как правильно выполнять движение. Помимо видео указаны подходы,
+            повторения, время отдыха и описание техники — всё на экране,
+            запоминать ничего не нужно.
           </p>
 
           <ExerciseBreakdown />
@@ -215,11 +214,9 @@ export default function WelcomeGuide({
           <WidgetShowcase />
 
           <p className="text-lg text-white/60 leading-relaxed mt-8 mb-8">
-            Каждый виджет — полноценный инструмент. Ты задаёшь цель по
-            каждому показателю, и все они складываются в общую «цель дня» —
-            один прогресс-бар, который показывает, насколько ты сегодня
-            закрыла все свои метрики. Виджет веса рассчитывает ИМТ и строит
-            тренд. Виджет фото сравнивает снимки «до» и «после» в один клик.
+            Каждый виджет — полноценный инструмент. Виджет веса рассчитывает ИМТ
+            и строит тренд. Виджет фото сравнивает снимки «до» и «после» в один
+            клик.
           </p>
 
           <HabitDayExample />
@@ -387,24 +384,7 @@ function SectionHeader({
 }
 
 function ArticleOverview() {
-  return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-8 mb-14">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-5">
-        Что внутри этой статьи
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-        {OVERVIEW_SECTIONS.map((s) => (
-          <div key={s.num} className="flex items-center gap-3 py-1.5">
-            <span className="text-[11px] font-oswald font-black text-orange-400/40 w-5 text-right shrink-0">
-              {s.num}
-            </span>
-            <s.icon className="size-4 text-white/20 shrink-0" />
-            <span className="text-sm text-white/55">{s.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function FreeValueGrid() {
@@ -555,89 +535,100 @@ function WeeklyWorkoutFlow() {
 
 function ExerciseBreakdown() {
   return (
-    <div className="rounded-[2rem] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden">
-      <div className="p-5 md:p-8">
-        <p className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-5">
-          Пример упражнения из демо-тренировки
-        </p>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-          {/* Левая часть — информация */}
-          <div className="lg:col-span-7 space-y-5">
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
-                <span className="text-lg font-oswald font-black text-white/20">1</span>
+    <div className="group relative overflow-hidden rounded-[3rem] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-500">
+      <div className="p-8 md:p-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7 space-y-8">
+            <div className="flex items-start gap-6">
+              <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border shrink-0 transition-colors group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20">
+                <span className="text-2xl font-oswald font-black text-white/20 transition-colors group-hover:text-cyan-400">
+                  1
+                </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-xl md:text-2xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center px-1.5 py-0 rounded border border-white/10 text-[9px] font-mono text-white/30 uppercase">
+                    Базовое
+                  </span>
+                </div>
+                <h3 className="text-2xl md:text-3xl font-oswald font-bold text-white uppercase tracking-tight leading-tight mb-4 transition-colors group-hover:text-cyan-400">
                   Приседания с гантелями
-                </h4>
-                <p className="text-xs text-white/40 leading-relaxed italic border-l-2 border-white/10 pl-3">
+                </h3>
+                <p className="text-sm text-white/50 leading-relaxed italic border-l-2 border-white/10 pl-4">
                   Базовое многосуставное упражнение на нижнюю часть тела. Включает квадрицепсы, ягодичные и кор.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { label: "Подходы", val: "3", unit: "×" },
-                { label: "Повторы", val: "12", unit: "" },
-                { label: "Отдых", val: "60", unit: "сек" },
-                { label: "Инвентарь", val: "Гантели", unit: "", inv: true },
-              ].map((m, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "p-3 rounded-xl border flex flex-col justify-between min-h-[72px]",
-                    m.inv
-                      ? "bg-amber-500/[0.04] border-amber-500/10"
-                      : "bg-white/[0.03] border-white/5"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "text-[8px] font-black uppercase tracking-widest",
-                      m.inv ? "text-amber-400/40" : "text-white/20"
-                    )}
-                  >
-                    {m.label}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                <div className="flex items-center justify-center gap-1.5 text-white/20">
+                  <Repeat className="size-3" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    Подходы
                   </span>
-                  <div className="flex items-baseline mt-auto">
-                    <span
-                      className={cn(
-                        "font-oswald font-bold leading-none text-white",
-                        m.inv ? "text-[11px] uppercase text-amber-200/70" : "text-xl"
-                      )}
-                    >
-                      {m.val}
-                    </span>
-                    {m.unit && (
-                      <span className="text-[9px] font-black text-white/20 uppercase ml-1">
-                        {m.unit}
-                      </span>
-                    )}
-                  </div>
                 </div>
-              ))}
+                <div className="text-xl font-oswald font-bold text-white">3</div>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                <div className="flex items-center justify-center gap-1.5 text-white/20">
+                  <Zap className="size-3" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    Повторы
+                  </span>
+                </div>
+                <div className="text-xl font-oswald font-bold text-white">12</div>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
+                <div className="flex items-center justify-center gap-1.5 text-white/20">
+                  <Clock className="size-3" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    Отдых
+                  </span>
+                </div>
+                <div className="text-xl font-oswald font-bold text-white">
+                  60 <span className="text-[10px] text-white/40 uppercase">сек</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 text-center space-y-1">
+                <div className="flex items-center justify-center gap-1.5 text-amber-400/40">
+                  <Dumbbell className="size-3" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    Инвентарь
+                  </span>
+                </div>
+                <div className="text-[11px] font-bold text-amber-200/70 leading-tight uppercase line-clamp-2">
+                  Гантели
+                </div>
+              </div>
             </div>
 
-            <div className="text-sm text-white/35 leading-relaxed bg-white/[0.02] p-4 rounded-xl border border-white/5">
-              <span className="text-white/50 font-medium">Техника: </span>
-              Стопы на ширине плеч, колени в направлении носков. Опускайся до параллели бедра с полом, сохраняя нейтральное положение спины. На выдохе поднимайся, давя через пятки.
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Zap className="size-4 text-cyan-400" />
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/80">
+                  Техника выполнения
+                </h4>
+              </div>
+              <div className="text-sm text-white/40 leading-relaxed whitespace-pre-line bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
+                Стопы на ширине плеч, колени в направлении носков. Опускайся до параллели бедра с полом, сохраняя нейтральное положение спины. На выдохе поднимайся, давя через пятки.
+              </div>
             </div>
           </div>
 
-          {/* Правая часть — видео */}
           <div className="lg:col-span-5">
-            <div className="relative aspect-[9/16] w-full max-w-[240px] mx-auto overflow-hidden rounded-[2rem] bg-white/5 border border-white/10 shadow-2xl">
-              <div className="flex h-full flex-col items-center justify-center gap-3 p-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/10">
-                  <Play className="size-7 text-orange-400 fill-current" />
+            <div className="sticky top-8">
+              <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto overflow-hidden rounded-[3rem] bg-white/5 border border-white/10 shadow-2xl group/video">
+                <div className="flex h-full flex-col items-center justify-center text-center p-8 space-y-4">
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto bg-white/10 text-cyan-400">
+                    <Play className="size-8 fill-current" />
+                  </div>
+                  <div className="text-sm font-bold uppercase tracking-widest text-white/40">
+                    Видео доступно
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">
-                  Видео с техникой
-                </span>
+                <div className="absolute inset-0 pointer-events-none border-[12px] border-black/20 rounded-[3rem]" />
               </div>
-              <div className="absolute inset-0 pointer-events-none border-[10px] border-black/20 rounded-[2rem]" />
             </div>
           </div>
         </div>
@@ -662,10 +653,10 @@ function WidgetShowcase() {
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
       <div className="flex items-center justify-between mb-4">
         <p className="text-xs font-bold uppercase tracking-widest text-white/30">
-          8 виджетов здоровья
+          8 виджетов <span className="hidden md:inline">здоровья</span>
         </p>
         <span className="text-[10px] text-orange-400/50 font-bold uppercase tracking-wider">
-          Free: 1 · Basic: 6 · Pro: 8 · Elite: 8
+          Free: 1 · Basic: 6 · Pro+: 8
         </span>
       </div>
 
@@ -720,9 +711,9 @@ function HabitDayExample() {
           <div
             key={i}
             className={cn(
-              "flex items-center gap-3 px-3.5 py-2.5 rounded-xl border",
+              "flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all duration-300",
               h.done
-                ? "bg-orange-500/[0.05] border-orange-500/10"
+                ? "bg-orange-500/[0.03] border-orange-500/10 opacity-80"
                 : "bg-white/[0.01] border-white/[0.05]"
             )}
           >
@@ -734,7 +725,7 @@ function HabitDayExample() {
             >
               {h.done && <Check className="size-3.5 text-orange-400" />}
             </div>
-            <span className={cn("text-sm flex-1", h.done ? "text-white/60" : "text-white/35")}>
+            <span className={cn("text-sm flex-1 transition-all font-bold", h.done ? "text-white/40 line-through" : "text-white/35")}>
               {h.name}
             </span>
             {h.streak > 0 && (
@@ -749,9 +740,10 @@ function HabitDayExample() {
       <div className="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
         <BarChart3 className="size-4 text-orange-400/50 shrink-0 mt-0.5" />
         <p className="text-sm text-white/40 leading-relaxed">
-          Ты создаёшь любую привычку, задаёшь расписание — и она появляется
-          в личном кабинете именно в те дни, когда нужна. Серии, тепловая
-          карта, статистика — считаются автоматически.
+          Ты сама решаешь, какие привычки отслеживать и в какие дни. Задаёшь
+          расписание — привычка появляется в личном кабинете именно тогда,
+          когда нужна. Утро, день, вечер или «в любое время» — всё
+          настраивается под твой ритм.
         </p>
       </div>
     </div>
