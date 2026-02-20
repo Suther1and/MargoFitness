@@ -167,21 +167,21 @@ export default function WomensBodyMyths({
             «Я хочу просто привести мышцы в тонус» — фраза, не имеющая медицинского смысла. В физиологии нет процесса «тонизирования». Есть только два состояния: мышца либо растёт (гипертрофия), либо разрушается (атрофия), либо сохраняет текущий объём при снижении жировой прослойки.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <MythBusterCard 
-              myth="От силовых я стану квадратной и массивной."
+              myth="От силовых я стану квадратной и массивной"
               reality="Массивность даёт жир поверх мышц, а не сами мышцы. Силовые уплотняют мышечную ткань и сжигают жир — ты становишься компактнее."
             />
             <MythBusterCard 
-              myth="Чтобы похудеть, нужно делать 50 повторений с лёгким весом."
-              reality="Многоповторка с лёгким весом тренирует выносливость. Для рельефа и упругости нужны веса, с которыми тебе тяжело на 12-15 повторении."
+              myth="Для похудения нужны легкие веса на 50 раз"
+              reality="Многоповторка с лёгким весом тренирует только выносливость. Для рельефа нужны веса, с которыми тебе тяжело на 12-15 повторении."
             />
             <MythBusterCard 
-              myth="Если я брошу качаться, мышцы превратятся в жир."
-              reality="Мышцы и жир — это разные ткани. Они не могут превращаться друг в друга. Без нагрузки мышцы просто уменьшатся в объёме."
+              myth="Если бросить, мышцы превратятся в жир"
+              reality="Мышцы и жир — разные ткани. Они не могут превращаться друг в друга. Без нагрузки мышцы просто уменьшатся в объёме."
             />
             <MythBusterCard 
-              myth="Кардио лучше сжигает жир, чем силовые."
+              myth="Кардио лучше сжигает жир, чем силовые"
               reality="Кардио сжигает калории только пока ты бежишь. Силовые разгоняют метаболизм: ты будешь тратить больше энергии даже во сне."
             />
           </div>
@@ -261,20 +261,20 @@ export default function WomensBodyMyths({
                 </div>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 mt-1 shrink-0">—</span>
-                    Спрячь весы на первый месяц
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span>Спрячь весы на первый месяц</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 mt-1 shrink-0">—</span>
-                    Сделай фото «до» в белье
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span>Сделай фото «до» в белье</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 mt-1 shrink-0">—</span>
-                    Замеряй объемы (талия, бёдра) раз в 2 недели
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span>Замеряй объемы (талия, бёдра) раз в 2 недели</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 mt-1 shrink-0">—</span>
-                    Ориентируйся на то, как сидит одежда
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span>Ориентируйся на то, как сидит одежда</span>
                   </li>
                 </ul>
               </div>
@@ -328,73 +328,73 @@ export default function WomensBodyMyths({
 
         {/* Секция 5 — Блок платформы */}
         <section className="mb-14 text-left">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-500/[0.08] via-sky-500/[0.02] to-transparent border border-sky-500/10 p-8 md:p-12">
-            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-sky-500/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="relative overflow-hidden rounded-3xl bg-sky-500/[0.03] border border-sky-500/10 p-6 md:p-10">
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-sky-500/5 blur-[80px] rounded-full pointer-events-none" />
             
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
                   <Activity className="size-3.5 text-sky-400" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Прогресс без весов</span>
                 </div>
                 
-                <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
-                  Как MargoFitness помогает <br /> <span className="text-sky-400">отслеживать реальные</span> изменения
+                <h2 className="text-3xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
+                  Отслеживай <span className="text-sky-400">реальные</span> изменения
                 </h2>
                 
-                <p className="text-lg text-white/60 leading-relaxed">
-                  Мы знаем, как цифра на весах может демотивировать. Поэтому в наш трекер здоровья встроены инструменты, которые показывают настоящую трансформацию тела, даже если вес стоит на месте.
+                <p className="text-base text-white/60 leading-relaxed">
+                  Мы знаем, как цифра на весах может демотивировать. В наш трекер встроены инструменты, которые показывают настоящую трансформацию тела.
                 </p>
 
-                <ul className="space-y-4 pt-4">
+                <ul className="space-y-4 pt-2">
                   <li className="flex items-start gap-3">
-                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="size-3.5 text-sky-400" />
+                    <div className="size-5 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="size-3 text-sky-400" />
                     </div>
                     <div>
-                      <span className="font-bold text-white/90">Сравнение фото До/После:</span>
-                      <p className="text-sm text-white/50 mt-1">Визуальный прогресс часто опережает цифры. Загружай фото каждую неделю и сравнивай изменения в специальном виджете.</p>
+                      <span className="text-sm font-bold text-white/90">Сравнение фото До/После:</span>
+                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Визуальный прогресс часто опережает цифры. Сравнивай изменения в виджете.</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="size-3.5 text-sky-400" />
+                    <div className="size-5 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="size-3 text-sky-400" />
                     </div>
                     <div>
-                      <span className="font-bold text-white/90">Трекинг объёмов:</span>
-                      <p className="text-sm text-white/50 mt-1">Вноси замеры груди, талии и бёдер. Платформа сама построит графики и покажет, как уходят сантиметры.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="size-3.5 text-sky-400" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-white/90">График веса с трендами:</span>
-                      <p className="text-sm text-white/50 mt-1">Если ты всё-таки используешь весы, мы сглаживаем дневные колебания воды и показываем реальный долгосрочный тренд.</p>
+                      <span className="text-sm font-bold text-white/90">Трекинг объёмов:</span>
+                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Вноси замеры. Платформа сама построит графики и покажет, как уходят сантиметры.</p>
                     </div>
                   </li>
                 </ul>
+                
+                <div className="pt-2">
+                  <button onClick={() => {
+                     document.querySelector('[data-tab="workouts"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 text-sky-400 font-bold text-xs uppercase tracking-widest transition-all">
+                    Перейти к трекеру <ArrowRight className="size-3.5" />
+                  </button>
+                </div>
               </div>
 
-              <div className="relative">
+              <div className="relative mt-4 lg:mt-0">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent z-10 lg:hidden" />
                 <div className="relative rounded-2xl border border-white/10 bg-[#09090b]/80 shadow-2xl overflow-hidden backdrop-blur-xl">
                   {/* Мокап интерфейса */}
-                  <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                  <div className="p-3 md:p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                     <div className="flex items-center gap-2">
-                      <Scale className="size-4 text-sky-400" />
+                      <Scale className="size-3.5 text-sky-400" />
                       <span className="text-xs font-bold text-white/80">Твои замеры</span>
                     </div>
                     <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Март</span>
                   </div>
-                  <div className="p-6 space-y-6">
+                  <div className="p-5 md:p-6 space-y-5">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-white/60">Талия</span>
                         <span className="text-sky-400 font-bold">-4 см</span>
                       </div>
-                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-sky-500 w-[75%] rounded-full" />
                       </div>
                     </div>
@@ -403,17 +403,17 @@ export default function WomensBodyMyths({
                         <span className="text-white/60">Бёдра</span>
                         <span className="text-sky-400 font-bold">-2.5 см</span>
                       </div>
-                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-sky-500 w-[45%] rounded-full" />
                       </div>
                     </div>
-                    <div className="pt-4 border-t border-white/5">
+                    <div className="pt-3 border-t border-white/5">
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-white/40 uppercase tracking-widest">Текущий вес</span>
-                          <span className="text-xl font-oswald font-black text-white">64.2 кг</span>
+                          <span className="text-lg font-oswald font-black text-white">64.2 кг</span>
                         </div>
-                        <div className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+                        <div className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
                           В норме (ИМТ 21.5)
                         </div>
                       </div>
@@ -467,23 +467,26 @@ function SectionHeader({
 
 function MythBusterCard({ myth, reality }: { myth: string; reality: string }) {
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col h-full">
-      <div className="p-5 bg-rose-500/[0.05] border-b border-white/5">
-        <div className="flex items-start gap-3">
-          <XCircle className="size-5 text-rose-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-rose-400/70 mb-1">Миф</p>
-            <p className="text-sm font-bold text-white/90">{myth}</p>
-          </div>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden flex flex-col h-full hover:border-sky-500/30 transition-colors group">
+      <div className="p-6 md:p-8 flex flex-col h-full relative">
+        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+          <Zap className="size-24 text-sky-500" />
         </div>
-      </div>
-      <div className="p-5 flex-1 bg-sky-500/[0.02]">
-        <div className="flex items-start gap-3">
-          <CheckCircle2 className="size-5 text-sky-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-sky-400/70 mb-1">Правда</p>
-            <p className="text-sm text-white/60 leading-relaxed">{reality}</p>
+        
+        <div className="relative z-10 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 mb-4">
+            <XCircle className="size-3.5 text-rose-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-rose-400">Миф</span>
           </div>
+          <p className="text-lg md:text-xl font-oswald font-black uppercase tracking-tight text-white/90 leading-tight">{myth}</p>
+        </div>
+        
+        <div className="relative z-10 mt-auto pt-6 border-t border-white/10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 mb-4">
+            <CheckCircle2 className="size-3.5 text-sky-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Реальность</span>
+          </div>
+          <p className="text-sm text-white/60 leading-relaxed">{reality}</p>
         </div>
       </div>
     </div>
@@ -514,7 +517,7 @@ function StrategyCard({ step, title, desc }: { step: string; title: string; desc
         {step}
       </div>
       <div className="mb-6 relative z-10">
-        <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Шаг {step}</span>
+        <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Правило {step}</span>
       </div>
       <h4 className="text-lg font-bold font-oswald uppercase tracking-tight text-white/90 mb-3 relative z-10">{title}</h4>
       <p className="text-sm text-white/50 leading-relaxed relative z-10">{desc}</p>
