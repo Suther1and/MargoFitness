@@ -670,8 +670,8 @@ export default function HabitMagic({
               onMouseLeave={onMouseUp}
               onMouseMove={onMouseMove}
               className={cn(
-                "flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide snap-x snap-mandatory select-none transition-transform duration-75",
-                isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x"
+                "flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide select-none transition-transform duration-75",
+                isDragging ? "cursor-grabbing" : "cursor-grab md:snap-none snap-x snap-mandatory"
               )}
             >
               {strategies.map((strategy, i) => (

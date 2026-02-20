@@ -1166,19 +1166,22 @@ function IntensiveCardsMockup() {
   const scroll = useCallback((dir: "left" | "right") => {
     if (!scrollRef.current) return;
     const isMobile = window.innerWidth < 768;
-    const cardW = isMobile ? window.innerWidth * 0.8 : 280;
-    const gap = isMobile ? 24 : 16; // +2 к отступу (было 16, стало 24 для мобилки)
+    const cardW = isMobile ? window.innerWidth * 0.8 : 290;
+    const gap = isMobile ? 24 : 16;
     
     if (!isMobile) {
-      // На десктопе 5 карточек, по 3 на экране. Максимум 2 шага прокрутки (0, 1, 2)
-      const maxScroll = (cardW + gap) * 2;
-      const currentScroll = scrollRef.current.scrollLeft;
-      let newScroll = dir === "left" ? currentScroll - (cardW + gap) : currentScroll + (cardW + gap);
+      const el = scrollRef.current;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const currentScroll = el.scrollLeft;
       
-      // Ограничиваем прокрутку
-      newScroll = Math.max(0, Math.min(newScroll, maxScroll));
+      let newScroll;
+      if (dir === "left") {
+        newScroll = Math.max(0, currentScroll - (cardW + gap));
+      } else {
+        newScroll = Math.min(maxScroll, currentScroll + (cardW + gap));
+      }
       
-      scrollRef.current.scrollTo({
+      el.scrollTo({
         left: newScroll,
         behavior: "smooth",
       });
@@ -1194,7 +1197,7 @@ function IntensiveCardsMockup() {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
     const isMobile = window.innerWidth < 768;
-    const cardW = isMobile ? window.innerWidth * 0.8 : 280;
+    const cardW = isMobile ? window.innerWidth * 0.8 : 290;
     const gap = isMobile ? 24 : 16;
     setCurrentSlide(Math.round(el.scrollLeft / (cardW + gap)));
   }, []);
@@ -1204,6 +1207,7 @@ function IntensiveCardsMockup() {
       title: "Утренняя зарядка",
       desc: "Короткие бодрые сессии для энергичного старта дня без инвентаря",
       difficulty: 1,
+      inventory: "Нет",
       price: "990 ₽",
       videos: 12,
       duration: "180 мин",
@@ -1213,6 +1217,7 @@ function IntensiveCardsMockup() {
       title: "Йога и растяжка",
       desc: "Глубокая работа с подвижностью, восстановление и расслабление",
       difficulty: 2,
+      inventory: "Коврик",
       price: "1 490 ₽",
       videos: 16,
       duration: "480 мин",
@@ -1222,6 +1227,7 @@ function IntensiveCardsMockup() {
       title: "Пилатес",
       desc: "Контроль тела, глубокие мышцы и осанка. Мягко, но эффективно",
       difficulty: 2,
+      inventory: "Коврик",
       price: "1 490 ₽",
       videos: 14,
       duration: "520 мин",
@@ -1231,6 +1237,7 @@ function IntensiveCardsMockup() {
       title: "Функциональный тренинг",
       desc: "Комплексные упражнения на силу, координацию и выносливость",
       difficulty: 3,
+      inventory: "Гантели",
       price: "1 990 ₽",
       videos: 20,
       duration: "750 мин",
@@ -1240,6 +1247,7 @@ function IntensiveCardsMockup() {
       title: "Тренировки на воздухе",
       desc: "Программы для улицы и парка — кардио и работа с весом тела",
       difficulty: 2,
+      inventory: "Нет",
       price: "1 290 ₽",
       videos: 10,
       duration: "280 мин",
@@ -1275,8 +1283,8 @@ function IntensiveCardsMockup() {
           onMouseLeave={onMouseUp}
           onMouseMove={onMouseMove}
           className={cn(
-            "flex overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory select-none",
-            isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x"
+            "flex overflow-x-auto pb-6 scrollbar-hide select-none",
+            isDragging ? "cursor-grabbing" : "cursor-grab md:snap-none snap-x snap-mandatory"
           )}
           style={{ 
             gap: window.innerWidth < 768 ? '24px' : '16px',
@@ -1289,7 +1297,7 @@ function IntensiveCardsMockup() {
           {intensives.map((item, i) => (
             <div
               key={i}
-              className="w-[80vw] md:w-[280px] shrink-0 snap-start rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col hover:border-white/20 transition-all"
+              className="w-[80vw] md:w-[290px] shrink-0 snap-start rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col hover:border-white/20 transition-all"
             >
               <div className="relative aspect-[16/10] overflow-hidden">
                 <img
@@ -1316,22 +1324,32 @@ function IntensiveCardsMockup() {
                   {item.desc}
                 </p>
 
-                <div className="mb-3">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-white/25 block mb-1">
-                    Сложность
-                  </span>
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, si) => (
-                      <Star
-                        key={si}
-                        className={cn(
-                          "size-3.5",
-                          si < item.difficulty
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-yellow-500/20"
-                        )}
-                      />
-                    ))}
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-white/25 block">
+                      Сложность
+                    </span>
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, si) => (
+                        <Star
+                          key={si}
+                          className={cn(
+                            "size-3.5",
+                            si < item.difficulty
+                              ? "text-yellow-500 fill-yellow-500"
+                              : "text-yellow-500/20"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 text-right">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-white/25 block">
+                      Инвентарь
+                    </span>
+                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider leading-[14px]">
+                      {item.inventory}
+                    </span>
                   </div>
                 </div>
 
@@ -1357,11 +1375,11 @@ function IntensiveCardsMockup() {
       {/* Dots */}
       <div className="flex justify-center gap-1.5 mt-2">
         {intensives.map((_, i) => {
-          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
           
           // На мобильном 5 точек (по одной на каждую карточку)
           // На десктопе 3 точки (так как всего 3 шага прокрутки для 5 карточек при 3 видимых)
-          if (!isMobile && i > 2) return null;
+          if (!isMobileView && i > 2) return null;
 
           const isActive = currentSlide === i;
 
@@ -1371,7 +1389,7 @@ function IntensiveCardsMockup() {
               onClick={() => {
                 if (!scrollRef.current) return;
                 const isMobileView = window.innerWidth < 768;
-                const cardW = isMobileView ? window.innerWidth * 0.8 : 280;
+                const cardW = isMobileView ? window.innerWidth * 0.8 : 290;
                 const gap = isMobileView ? 24 : 16;
                 scrollRef.current.scrollTo({
                   left: i * (cardW + gap),
@@ -1381,7 +1399,7 @@ function IntensiveCardsMockup() {
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
                 isActive
-                  ? (isMobile ? "w-6 bg-orange-400/60" : "w-10 bg-orange-400/60")
+                  ? (isMobileView ? "w-6 bg-orange-400/60" : "w-10 bg-orange-400/60")
                   : "w-1.5 bg-white/15"
               )}
             />
