@@ -879,7 +879,7 @@ function AchievementShowcase() {
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory touch-pan-x"
+          className="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory"
         >
           {examples.map((a, i) => (
             <div 
@@ -946,7 +946,15 @@ function AchievementShowcase() {
         {/* Индикатор скролла */}
         <div className="flex justify-center gap-1.5 -mt-2">
           {examples.map((_, i) => (
-            <div key={i} className={cn("h-1 rounded-full transition-all duration-300", i === activeSlide ? "w-6 bg-orange-400/60" : "w-1.5 bg-white/10")} />
+            <div 
+              key={i} 
+              className={cn(
+                "h-1 rounded-full transition-all duration-500", 
+                i === activeSlide 
+                  ? cn("w-6 opacity-60", categories[examples[i].cat].color.replace('text-', 'bg-')) 
+                  : "w-1.5 bg-white/10"
+              )} 
+            />
           ))}
         </div>
       </div>
