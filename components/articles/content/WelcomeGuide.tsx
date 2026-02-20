@@ -251,8 +251,9 @@ export default function WelcomeGuide({
           <TierComparisonGrid />
 
           <p className="text-lg text-white/60 leading-relaxed mt-8">
-            Elite — тариф с ограниченным числом мест. Включает всё из Pro
-            плюс индивидуальное ведение от Марго. Подходит тем, кому нужен
+            <span className="text-amber-400 font-bold uppercase tracking-tight">Elite</span> — тариф с ограниченным числом
+            мест. Включает всё из <span className="text-purple-400 font-bold uppercase tracking-tight">Pro</span> плюс
+            индивидуальное ведение от Марго. Подходит тем, кому нужен
             персональный подход.
           </p>
         </section>
@@ -910,85 +911,149 @@ function AchievementShowcase() {
 function BonusSystemOverview() {
   return (
     <div className="space-y-4">
-      {/* Бонусная карточка — стиль платформы */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/30 to-orange-900/30 ring-1 ring-amber-700/40 p-4 md:p-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-700/15 blur-3xl pointer-events-none" />
-
-        <div className="rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] p-4 ring-1 ring-white/10 backdrop-blur relative">
-          <div className="flex items-center gap-4 md:gap-5">
-            <div className="shrink-0">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-600 to-orange-700 p-[2px] shadow-lg shadow-amber-700/20">
-                <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center">
-                  <span className="text-2xl">🥉</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 min-w-0 space-y-2">
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-white font-oswald tracking-tight">
-                    250
-                  </span>
-                  <span className="text-xl">👟</span>
-                </div>
-                <p className="text-xs text-white/50 uppercase tracking-wider font-medium mt-0.5">
-                  Стартовый баланс
-                </p>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs text-white/60">
-                  <span>До Silver</span>
-                  <span className="font-medium">10 000 ₽</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/15 overflow-hidden">
-                  <div className="h-full w-[2%] rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="shrink-0 text-right space-y-2">
-              <div className="inline-flex items-center rounded-full bg-amber-700/30 px-3 py-1 text-xs text-amber-200 ring-1 ring-amber-600/50 font-semibold">
-                Bronze
-              </div>
-              <div className="rounded-xl bg-white/10 ring-1 ring-white/20 px-3 py-1.5">
-                <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">
-                  Кешбэк
-                </p>
-                <p className="text-xl font-bold text-white font-oswald">3%</p>
-              </div>
-            </div>
+      {/* Уровни кешбэка */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-white/30">
+            4 уровня кешбэка — растёт с покупками
+          </p>
+          <div className="flex gap-1 md:hidden">
+            <div className="size-1 rounded-full bg-orange-500" />
+            <div className="size-1 rounded-full bg-white/20" />
+            <div className="size-1 rounded-full bg-white/20" />
           </div>
         </div>
-      </div>
+        
+        <div className="relative -mx-4 px-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory">
+          <div className="flex gap-3 min-w-max md:grid md:grid-cols-2 md:min-w-0 md:gap-4">
+            {[
+              { 
+                icon: "🥉", 
+                name: "Bronze", 
+                pct: "3%", 
+                gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
+                pattern: 'rgba(255, 255, 255, 0.15)',
+                points: 'text-[#1e0f04]',
+                subtext: 'text-[#4a2e19]/70',
+                badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
+                ring: "ring-orange-900/30",
+                progressTrack: 'bg-[#2d1a0a]/10',
+                progressBar: 'bg-[#2d1a0a]',
+                progress: 75,
+                goal: "0 ₽" 
+              },
+              { 
+                icon: "🥈", 
+                name: "Silver", 
+                pct: "5%", 
+                gradient: 'linear-gradient(135deg, #8e9196 0%, #ffffff 35%, #5c5f66 75%, #2a2c30 100%)',
+                pattern: 'rgba(15, 23, 42, 0.08)',
+                points: 'text-[#0f172a]',
+                subtext: 'text-slate-600',
+                badge: 'bg-slate-900/90 border-white/10 text-slate-50',
+                ring: "ring-slate-500/30",
+                progressTrack: 'bg-slate-900/10',
+                progressBar: 'bg-slate-900',
+                progress: 65,
+                goal: "10 000 ₽" 
+              },
+              { 
+                icon: "🥇", 
+                name: "Gold", 
+                pct: "7%", 
+                gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
+                pattern: 'rgba(69, 26, 3, 0.12)',
+                points: 'text-[#2d1a0a]',
+                subtext: 'text-amber-900/70',
+                badge: 'bg-amber-950/90 border-white/10 text-amber-50',
+                ring: "ring-yellow-700/30",
+                progressTrack: 'bg-amber-950/10',
+                progressBar: 'bg-amber-950',
+                progress: 40,
+                goal: "30 000 ₽" 
+              },
+              { 
+                icon: "💎", 
+                name: "Platinum", 
+                pct: "10%", 
+                gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
+                pattern: 'rgba(15, 23, 42, 0.1)',
+                points: 'text-[#020617]',
+                subtext: 'text-slate-600',
+                badge: 'bg-slate-900/90 border-white/10 text-white',
+                ring: "ring-cyan-700/30",
+                progressTrack: 'bg-slate-950/10',
+                progressBar: 'bg-slate-900',
+                progress: 15,
+                goal: "100 000 ₽" 
+              },
+            ].map((l, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "relative w-[82vw] md:w-auto overflow-hidden rounded-[2rem] p-5 shadow-xl snap-center transition-all duration-300",
+                  l.ring
+                )}
+                style={{ background: l.gradient }}
+              >
+                {/* Premium Inner Glow */}
+                <div className="absolute inset-0 rounded-[2rem] ring-1 ring-white/20 inset-shadow-sm pointer-events-none" />
+                
+                {/* Geometric Patterns overlay - matching reference exactly */}
+                <div 
+                  className="absolute inset-0 pointer-events-none opacity-40" 
+                  style={{ 
+                    backgroundImage: `radial-gradient(circle at 1px 1px, ${l.pattern} 1px, transparent 0)`, 
+                    backgroundSize: '20px 20px' 
+                  }}
+                />
+                
+                <div className="relative z-10 flex flex-col h-full justify-between gap-5">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <Trophy className={cn("w-4 h-4", l.points)} />
+                      <span className={cn("text-[9px] font-bold uppercase tracking-[0.2em] opacity-90 font-montserrat", l.points)}>Бонусы</span>
+                    </div>
+                    
+                    <div className={cn("relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center", l.badge)}>
+                      <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
+                        {l.name}
+                      </span>
+                    </div>
+                  </div>
 
-      {/* Уровни кешбэка */}
-      <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">
-          4 уровня кешбэка — растёт с покупками
-        </p>
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { icon: "🥉", name: "Bronze", pct: "3%", grad: "from-amber-700/20 to-orange-800/20", ring: "ring-amber-700/30" },
-            { icon: "🥈", name: "Silver", pct: "5%", grad: "from-slate-500/20 to-slate-600/20", ring: "ring-slate-500/30" },
-            { icon: "🥇", name: "Gold", pct: "7%", grad: "from-yellow-500/20 to-amber-600/20", ring: "ring-yellow-500/30" },
-            { icon: "💎", name: "Platinum", pct: "10%", grad: "from-cyan-600/20 to-blue-700/20", ring: "ring-cyan-500/30" },
-          ].map((l, i) => (
-            <div
-              key={i}
-              className={cn(
-                "rounded-xl bg-gradient-to-br p-3 text-center ring-1",
-                l.grad, l.ring
-              )}
-            >
-              <span className="text-lg">{l.icon}</span>
-              <p className="text-lg font-oswald font-bold text-white mt-1">{l.pct}</p>
-              <p className="text-[9px] text-white/35 font-bold uppercase tracking-wider">
-                {l.name}
-              </p>
-            </div>
-          ))}
+                  <div className="space-y-3">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <span className={cn("text-[9px] font-bold uppercase tracking-widest block mb-0.5 font-montserrat leading-none", l.subtext)}>кешбэк</span>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-3xl font-black font-oswald tracking-tight leading-none", l.points)}>
+                            {l.pct}
+                          </span>
+                          <Sparkles className={cn("w-4 h-4", l.subtext)} />
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className={cn("text-[9px] font-bold uppercase tracking-widest block mb-1 font-montserrat leading-none", l.points)}>порог</p>
+                        <div className={cn("px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-tight font-montserrat bg-white/10", l.badge)}>
+                          {l.goal}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar - matching real cards */}
+                    <div className={cn("h-1.5 w-full rounded-full overflow-hidden", l.progressTrack)}>
+                      <div 
+                        className={cn("h-full rounded-full transition-all duration-500", l.progressBar)}
+                        style={{ width: `${l.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
