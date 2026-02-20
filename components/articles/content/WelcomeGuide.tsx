@@ -909,6 +909,89 @@ function AchievementShowcase() {
 }
 
 function BonusSystemOverview() {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const levels = [
+    { 
+      icon: "🥉", 
+      name: "Bronze", 
+      pct: "3%", 
+      gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
+      pattern: 'rgba(255, 255, 255, 0.15)',
+      points: 'text-[#1e0f04]',
+      subtext: 'text-[#4a2e19]/70',
+      badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
+      ring: "ring-orange-900/30",
+      progressTrack: 'bg-[#2d1a0a]/10',
+      progressBar: 'bg-[#2d1a0a]',
+      progress: 75,
+      goal: "0 ₽" 
+    },
+    { 
+      icon: "🥈", 
+      name: "Silver", 
+      pct: "5%", 
+      gradient: 'linear-gradient(135deg, #8e9196 0%, #ffffff 35%, #5c5f66 75%, #2a2c30 100%)',
+      pattern: 'rgba(15, 23, 42, 0.08)',
+      points: 'text-[#0f172a]',
+      subtext: 'text-slate-600',
+      badge: 'bg-slate-900/90 border-white/10 text-slate-50',
+      ring: "ring-slate-500/30",
+      progressTrack: 'bg-slate-900/10',
+      progressBar: 'bg-slate-900',
+      progress: 65,
+      goal: "10 000 ₽" 
+    },
+    { 
+      icon: "🥇", 
+      name: "Gold", 
+      pct: "7%", 
+      gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
+      pattern: 'rgba(69, 26, 3, 0.12)',
+      points: 'text-[#2d1a0a]',
+      subtext: 'text-amber-900/70',
+      badge: 'bg-amber-950/90 border-white/10 text-amber-50',
+      ring: "ring-yellow-700/30",
+      progressTrack: 'bg-amber-950/10',
+      progressBar: 'bg-amber-950',
+      progress: 40,
+      goal: "30 000 ₽" 
+    },
+    { 
+      icon: "💎", 
+      name: "Platinum", 
+      pct: "10%", 
+      gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
+      pattern: 'rgba(15, 23, 42, 0.1)',
+      points: 'text-[#020617]',
+      subtext: 'text-slate-600',
+      badge: 'bg-slate-900/90 border-white/10 text-white',
+      ring: "ring-cyan-700/30",
+      progressTrack: 'bg-slate-950/10',
+      progressBar: 'bg-slate-900',
+      progress: 15,
+      goal: "100 000 ₽" 
+    },
+  ];
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    const width = e.currentTarget.offsetWidth;
+    const index = Math.round(scrollLeft / (width * 0.8));
+    if (index !== activeIndex) setActiveIndex(index);
+  };
+
+  const scrollTo = (index: number) => {
+    if (scrollRef.current) {
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollTo({
+        left: index * (width * 0.8),
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Уровни кешбэка */}
@@ -917,81 +1000,31 @@ function BonusSystemOverview() {
           <p className="text-xs font-bold uppercase tracking-widest text-white/30">
             4 уровня кешбэка — растёт с покупками
           </p>
-          <div className="flex gap-1 md:hidden">
-            <div className="size-1 rounded-full bg-orange-500" />
-            <div className="size-1 rounded-full bg-white/20" />
-            <div className="size-1 rounded-full bg-white/20" />
+          <div className="flex gap-1.5 md:hidden">
+            {levels.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollTo(i)}
+                className={cn(
+                  "size-1.5 rounded-full transition-all duration-300",
+                  activeIndex === i ? "bg-orange-500 w-3" : "bg-white/20"
+                )}
+              />
+            ))}
           </div>
         </div>
         
-        <div className="relative -mx-4 px-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="relative -mx-4 px-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory"
+        >
           <div className="flex gap-3 min-w-max md:grid md:grid-cols-2 md:min-w-0 md:gap-4">
-            {[
-              { 
-                icon: "🥉", 
-                name: "Bronze", 
-                pct: "3%", 
-                gradient: 'linear-gradient(135deg, #b46d3e 0%, #dfa579 25%, #8c4a20 50%, #5d2e12 100%)',
-                pattern: 'rgba(255, 255, 255, 0.15)',
-                points: 'text-[#1e0f04]',
-                subtext: 'text-[#4a2e19]/70',
-                badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
-                ring: "ring-orange-900/30",
-                progressTrack: 'bg-[#2d1a0a]/10',
-                progressBar: 'bg-[#2d1a0a]',
-                progress: 75,
-                goal: "0 ₽" 
-              },
-              { 
-                icon: "🥈", 
-                name: "Silver", 
-                pct: "5%", 
-                gradient: 'linear-gradient(135deg, #8e9196 0%, #ffffff 35%, #5c5f66 75%, #2a2c30 100%)',
-                pattern: 'rgba(15, 23, 42, 0.08)',
-                points: 'text-[#0f172a]',
-                subtext: 'text-slate-600',
-                badge: 'bg-slate-900/90 border-white/10 text-slate-50',
-                ring: "ring-slate-500/30",
-                progressTrack: 'bg-slate-900/10',
-                progressBar: 'bg-slate-900',
-                progress: 65,
-                goal: "10 000 ₽" 
-              },
-              { 
-                icon: "🥇", 
-                name: "Gold", 
-                pct: "7%", 
-                gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #aa771c 100%)',
-                pattern: 'rgba(69, 26, 3, 0.12)',
-                points: 'text-[#2d1a0a]',
-                subtext: 'text-amber-900/70',
-                badge: 'bg-amber-950/90 border-white/10 text-amber-50',
-                ring: "ring-yellow-700/30",
-                progressTrack: 'bg-amber-950/10',
-                progressBar: 'bg-amber-950',
-                progress: 40,
-                goal: "30 000 ₽" 
-              },
-              { 
-                icon: "💎", 
-                name: "Platinum", 
-                pct: "10%", 
-                gradient: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 25%, #dbeafe 50%, #94a3b8 100%)',
-                pattern: 'rgba(15, 23, 42, 0.1)',
-                points: 'text-[#020617]',
-                subtext: 'text-slate-600',
-                badge: 'bg-slate-900/90 border-white/10 text-white',
-                ring: "ring-cyan-700/30",
-                progressTrack: 'bg-slate-950/10',
-                progressBar: 'bg-slate-900',
-                progress: 15,
-                goal: "100 000 ₽" 
-              },
-            ].map((l, i) => (
+            {levels.map((l, i) => (
               <div
                 key={i}
                 className={cn(
-                  "relative w-[82vw] md:w-auto overflow-hidden rounded-[2rem] p-5 shadow-xl snap-center transition-all duration-300",
+                  "relative w-[80vw] md:w-auto overflow-hidden rounded-[2rem] p-5 shadow-xl snap-center transition-all duration-300",
                   l.ring
                 )}
                 style={{ background: l.gradient }}
@@ -1053,6 +1086,9 @@ function BonusSystemOverview() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
           </div>
         </div>
       </div>
