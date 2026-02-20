@@ -211,8 +211,51 @@ export default function SocialLifeBalance({
             Вот что происходит с организмом после того, как ты выпила:
           </p>
 
-          {/* Таймлайн метаболизма алкоголя */}
-          <AlcoholTimeline />
+          {/* Таймлайн метаболизма алкоголя (в новом дизайне каскада) */}
+          <div className="relative pl-8 md:pl-10 mb-10 text-left">
+            <div className="absolute left-3 md:left-4 top-2 bottom-2 w-px bg-gradient-to-b from-amber-500/30 via-amber-500/20 to-transparent" />
+
+            {[
+              {
+                step: "0–30 мин",
+                title: "Попадание в кровь",
+                text: "Алкоголь всасывается через стенки желудка. На пустой желудок — за 15 минут. С едой — за 30–45.",
+                severity: "low" as const,
+              },
+              {
+                step: "30 мин – 2 часа",
+                title: "Пик концентрации",
+                text: "Печень начинает расщеплять этанол. Скорость — ~10 мл чистого спирта в час. Всё остальное «ждёт в очереди».",
+                severity: "medium" as const,
+              },
+              {
+                step: "2–6 часов",
+                title: "Активная переработка",
+                text: "Печень работает на полную. Жиросжигание полностью заблокировано — все ресурсы уходят на алкоголь.",
+                severity: "high" as const,
+              },
+              {
+                step: "6–12 часов",
+                title: "Обезвоживание и токсины",
+                text: "Ацетальдегид (продукт распада) отравляет клетки. Головная боль, тошнота, слабость — это его работа.",
+                severity: "critical" as const,
+              },
+              {
+                step: "12–24 часа",
+                title: "Восстановление",
+                text: "Тело всё ещё компенсирует урон. Мышечный синтез подавлен. Гормон роста снижен. Сон предыдущей ночи — нерестаоративный.",
+                severity: "medium" as const,
+              },
+              {
+                step: "24–48 часов",
+                title: "Возврат к норме",
+                text: "Метаболизм постепенно нормализуется. Жиросжигание возобновляется. Полное восстановление гормонального фона.",
+                severity: "low" as const,
+              },
+            ].map((item, i) => (
+              <CascadeStep key={i} {...item} />
+            ))}
+          </div>
 
           <p className="text-lg text-white/60 leading-relaxed mt-8 mb-6">
             Но это ещё не всё. Алкоголь бьёт по тренировочному процессу
@@ -332,48 +375,6 @@ export default function SocialLifeBalance({
               </div>
             </div>
           </div>
-
-          {/* Практическая шкала */}
-          <h3 className="text-xl md:text-2xl font-oswald font-black uppercase tracking-tight text-white mb-3">
-            Практическая шкала: сколько можно
-          </h3>
-
-          <p className="text-base text-white/50 leading-relaxed mb-6">
-            Если ты решила выпить — вот ориентиры, которые минимизируют ущерб:
-          </p>
-
-          <div className="space-y-2 mb-6">
-            {[
-              {
-                level: "Зелёная зона",
-                amount: "1 бокал вина / 1 коктейль",
-                impact:
-                  "Минимальное влияние на прогресс. Жиросжигание замедляется на 6–12 часов. Тренировка на следующий день — пропустить.",
-                color: "emerald" as const,
-              },
-              {
-                level: "Жёлтая зона",
-                amount: "2–3 порции",
-                impact:
-                  "Ощутимый удар по восстановлению. Жиросжигание блокируется на 24–36 часов. Сон нарушен. 1–2 дня без тренировок.",
-                color: "amber" as const,
-              },
-              {
-                level: "Красная зона",
-                amount: "4+ порций / сильное опьянение",
-                impact:
-                  "Полный откат на 3–5 дней. Мышечный катаболизм, обезвоживание, гормональный сбой. Возврат к тренировкам — не раньше чем через 2 дня.",
-                color: "rose" as const,
-              },
-            ].map((item, i) => (
-              <DrinkZoneCard key={i} {...item} />
-            ))}
-          </div>
-
-          <p className="text-sm text-white/30 italic leading-relaxed">
-            Одна порция = 150 мл вина, 330 мл пива, 45 мл крепкого алкоголя.
-            Коктейли обычно содержат 1.5–2 порции + сахар.
-          </p>
         </section>
 
         {/* Секция 3 — В гостях */}
@@ -758,8 +759,6 @@ function MenuNavigator() {
     },
   ];
 
-  const cat = categories[activeCategory];
-
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
       <div className="flex border-b border-white/5">
@@ -799,175 +798,104 @@ function MenuNavigator() {
             className="p-5 md:p-6 absolute inset-0"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="size-2 rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/70">
-                  Хороший выбор
-                </span>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="size-2 rounded-full bg-emerald-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/70">
+                    Хороший выбор
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {categories[activeCategory].good.map((item, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
+                    >
+                      <Check className="size-3 text-emerald-400/50 shrink-0 mt-1" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2">
-                {cat.good.map((item, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
-                  >
-                    <Check className="size-3 text-emerald-400/50 shrink-0 mt-1" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="size-2 rounded-full bg-amber-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400/70">
-                  С оговорками
-                </span>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="size-2 rounded-full bg-amber-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400/70">
+                    С оговорками
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {categories[activeCategory].caution.map((item, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
+                    >
+                      <AlertTriangle className="size-3 text-amber-400/50 shrink-0 mt-1" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2">
-                {cat.caution.map((item, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
-                  >
-                    <AlertTriangle className="size-3 text-amber-400/50 shrink-0 mt-1" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="size-2 rounded-full bg-rose-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400/70">
-                  Лучше обойти
-                </span>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="size-2 rounded-full bg-rose-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400/70">
+                    Лучше обойти
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {categories[activeCategory].avoid.map((item, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
+                    >
+                      <X className="size-3 text-rose-400/50 shrink-0 mt-1" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2">
-                {cat.avoid.map((item, i) => (
-                  <li
-                    key={i}
-                    className="text-sm text-white/50 leading-relaxed flex items-start gap-2"
-                  >
-                    <X className="size-3 text-rose-400/50 shrink-0 mt-1" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
-function AlcoholTimeline() {
-  const phases = [
-    {
-      time: "0–30 мин",
-      title: "Попадание в кровь",
-      desc: "Алкоголь всасывается через стенки желудка. На пустой желудок — за 15 минут. С едой — за 30–45.",
-      intensity: 20,
-    },
-    {
-      time: "30 мин – 2 часа",
-      title: "Пик концентрации",
-      desc: "Печень начинает расщеплять этанол. Скорость — ~10 мл чистого спирта в час. Всё остальное «ждёт в очереди».",
-      intensity: 80,
-    },
-    {
-      time: "2–6 часов",
-      title: "Активная переработка",
-      desc: "Печень работает на полную. Жиросжигание полностью заблокировано — все ресурсы уходят на алкоголь.",
-      intensity: 100,
-    },
-    {
-      time: "6–12 часов",
-      title: "Обезвоживание и токсины",
-      desc: "Ацетальдегид (продукт распада) отравляет клетки. Головная боль, тошнота, слабость — это его работа.",
-      intensity: 60,
-    },
-    {
-      time: "12–24 часа",
-      title: "Восстановление",
-      desc: "Тело всё ещё компенсирует урон. Мышечный синтез подавлен. Гормон роста снижен. Сон предыдущей ночи — нерестаоративный.",
-      intensity: 30,
-    },
-    {
-      time: "24–48 часов",
-      title: "Возврат к норме",
-      desc: "Метаболизм постепенно нормализуется. Жиросжигание возобновляется. Полное восстановление гормонального фона.",
-      intensity: 10,
-    },
-  ];
+function CascadeStep({
+  step,
+  title,
+  text,
+  severity,
+}: {
+  step: string;
+  title: string;
+  text: string;
+  severity: "low" | "medium" | "high" | "critical";
+}) {
+  const dotColors = {
+    low: "bg-amber-400 shadow-amber-400/30",
+    medium: "bg-orange-400 shadow-orange-400/30",
+    high: "bg-rose-400 shadow-rose-400/30",
+    critical: "bg-red-500 shadow-red-500/30",
+  };
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-8">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">
-        Что происходит с телом после бокала вина
+    <div className="relative pb-8 last:pb-0">
+      <div
+        className={cn(
+          "absolute -left-[25px] md:absolute md:-left-[29px] top-2 size-3 rounded-full shadow-[0_0_8px]",
+          dotColors[severity]
+        )}
+      />
+      <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">
+        {step}
       </p>
-
-      <div className="relative">
-        {/* Горизонтальная линия нагрузки */}
-        <div className="hidden md:flex items-end gap-1 mb-6 h-16">
-          {phases.map((phase, i) => (
-            <motion.div
-              key={i}
-              initial={{ height: 0 }}
-              whileInView={{ height: `${phase.intensity}%` }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="flex-1 rounded-t bg-gradient-to-t from-amber-500/20 to-amber-500/50"
-            />
-          ))}
-        </div>
-
-        <div className="space-y-0">
-          {phases.map((phase, i) => (
-            <div
-              key={i}
-              className="flex gap-4 py-3 border-b border-white/5 last:border-b-0"
-            >
-              <div className="w-24 md:w-28 shrink-0">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400/50">
-                  {phase.time}
-                </span>
-              </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-bold text-white/70 mb-0.5">
-                  {phase.title}
-                </h4>
-                <p className="text-xs text-white/35 leading-relaxed">
-                  {phase.desc}
-                </p>
-              </div>
-              <div className="hidden md:flex items-center w-16 shrink-0">
-                <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${phase.intensity}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: i * 0.1 }}
-                    className={cn(
-                      "h-full rounded-full",
-                      phase.intensity >= 80
-                        ? "bg-rose-400"
-                        : phase.intensity >= 50
-                          ? "bg-amber-400"
-                          : "bg-emerald-400"
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <h4 className="text-base font-bold text-white/85 mb-1.5">{title}</h4>
+      <p className="text-sm text-white/45 leading-relaxed">{text}</p>
     </div>
   );
 }
@@ -1114,103 +1042,111 @@ function GuestTabs() {
       </div>
 
       <AnimatePresence mode="wait">
-        {activeTab === "visiting" ? (
-          <motion.div
-            key="visiting"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="space-y-4"
-          >
-            {[
-              {
-                title: "Поешь до выхода",
-                desc: "Лёгкий перекус с белком за час до мероприятия. Творог, яйца, горсть орехов. Ты придёшь не голодной и не набросишься на канапе.",
-              },
-              {
-                title: "Не извиняйся за выбор",
-                desc: "«Спасибо, мне достаточно» — это полное предложение. Ты никому не обязана объяснять, почему не хочешь третий кусок торта. Если спрашивают — «я слежу за питанием» звучит нормально.",
-              },
-              {
-                title: "Выбирай белок и овощи",
-                desc: "На любом столе есть мясо, рыба, салаты. Положи их в основу тарелки. Оливье и шуба — в дополнение, не наоборот.",
-              },
-              {
-                title: "Алкоголь — осознанно",
-                desc: "Один бокал сухого вина за весь вечер. Между алкогольными порциями — стакан воды. Это снижает общий объём выпитого и замедляет опьянение.",
-              },
-              {
-                title: "Не компенсируй потом",
-                desc: "Переела в гостях? Нормально. Завтра — обычный день, обычная еда, обычная тренировка (если не пила). Никаких «разгрузочных дней» и голодания.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex gap-4 p-4 md:p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.03] transition-colors text-left"
-              >
-                <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs font-oswald font-black text-amber-400">
-                    {i + 1}
-                  </span>
+        <div className="relative">
+          {activeTab === "visiting" ? (
+            <motion.div
+              key="visiting"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              {[
+                {
+                  title: "Поешь до выхода",
+                  desc: "Лёгкий перекус с белком за час до мероприятия. Творог, яйца, горсть орехов. Ты придёшь не голодной и не набросишься на канапе.",
+                },
+                {
+                  title: "Не извиняйся за выбор",
+                  desc: "«Спасибо, мне достаточно» — это полное предложение. Ты никому не обязана объяснять, почему не хочешь третий кусок торта. Если спрашивают — «я слежу за питанием» звучит нормально.",
+                },
+                {
+                  title: "Выбирай белок и овощи",
+                  desc: "На любом столе есть мясо, рыба, салаты. Положи их в основу тарелки. Оливье и шуба — в дополнение, не наоборот.",
+                },
+                {
+                  title: "Алкоголь — осознанно",
+                  desc: "Один бокал сухого вина за весь вечер. Между алкогольными порциями — стакан воды. Это снижает общий объём выпитого и замедляет опьянение.",
+                },
+                {
+                  title: "Не компенсируй потом",
+                  desc: "Переела в гостях? Нормально. Завтра — обычный день, обычная еда, обычная тренировка (если не пила). Никаких «разгрузочных дней» и голодания.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 p-4 md:p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.03] transition-colors text-left"
+                >
+                  <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-oswald font-black text-amber-400">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white/85 mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-base font-bold text-white/85 mb-1">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm text-white/40 leading-relaxed">
-                    {item.desc}
-                  </p>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="hosting"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              {[
+                {
+                  title: "Готовь то, что подходит и тебе",
+                  desc: "Запечённое мясо, рыба на гриле, овощные салаты, фрукты — это нормальный праздничный стол. Гости не заметят, что ты «на режиме», а ты будешь есть то, что не противоречит целям.",
+                },
+                {
+                  title: "Десерт — один, но хороший",
+                  desc: "Один красивый торт лучше, чем пять видов печенья. И гостям приятнее, и ты контролируешь порцию.",
+                },
+                {
+                  title: "Напитки — предложи альтернативу",
+                  desc: "Поставь на стол воду с мятой и лимоном, домашний лимонад без сахара. Многие гости сами рады, когда есть безалкогольный вариант.",
+                },
+                {
+                  title: "Не бойся быть «скучной хозяйкой»",
+                  desc: "Здоровая еда — не скучная. Стейк с овощами гриль впечатляет больше, чем тазик оливье. Качество вместо количества.",
+                },
+                {
+                  title: "Контейнеры для гостей",
+                  desc: "Если после праздника осталось много еды, которую тебе не стоит есть всю неделю — раздай её гостям с собой. И им приятно, и у тебя дома не будет лишних соблазнов.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 p-4 md:p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.03] transition-colors text-left"
+                >
+                  <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-oswald font-black text-amber-400">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white/85 mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="hosting"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="space-y-4"
-          >
-            {[
-              {
-                title: "Готовь то, что подходит и тебе",
-                desc: "Запечённое мясо, рыба на гриле, овощные салаты, фрукты — это нормальный праздничный стол. Гости не заметят, что ты «на режиме», а ты будешь есть то, что не противоречит целям.",
-              },
-              {
-                title: "Десерт — один, но хороший",
-                desc: "Один красивый торт лучше, чем пять видов печенья. И гостям приятнее, и ты контролируешь порцию.",
-              },
-              {
-                title: "Напитки — предложи альтернативу",
-                desc: "Поставь на стол воду с мятой и лимоном, домашний лимонад без сахара. Многие гости сами рады, когда есть безалкогольный вариант.",
-              },
-              {
-                title: "Не бойся быть «скучной хозяйкой»",
-                desc: "Здоровая еда — не скучная. Стейк с овощами гриль впечатляет больше, чем тазик оливье. Качество вместо количества.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex gap-4 p-4 md:p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.03] transition-colors text-left"
-              >
-                <div className="size-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs font-oswald font-black text-amber-400">
-                    {i + 1}
-                  </span>
-                </div>
-                <div>
-                  <h4 className="text-base font-bold text-white/85 mb-1">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm text-white/40 leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        )}
+              ))}
+            </motion.div>
+          )}
+        </div>
       </AnimatePresence>
     </div>
   );
