@@ -782,15 +782,17 @@ function TierComparisonGrid() {
         <table className="w-full table-fixed border-collapse">
           <thead>
             <tr className="border-b border-white/10">
-              <th className="text-left px-2 py-3 w-[28%] md:w-auto" />
+              <th className="text-left px-2 py-3 w-[32%] md:w-auto">
+                <span className="text-[15px] md:text-sm font-oswald font-bold uppercase text-white/30">Уровень</span>
+              </th>
               {tiers.map((t, i) => (
-                <th key={i} className={cn("px-1 py-3 text-center", t.popular && "bg-purple-500/[0.05]")}>
+                <th key={i} className={cn("px-0.5 py-3 text-center", t.popular && "bg-purple-500/[0.05]")}>
                   {t.popular && (
                     <span className="block text-[7px] font-bold uppercase tracking-tight text-purple-400/70 mb-1 leading-none">
                       Best
                     </span>
                   )}
-                  <span className={cn("text-[10px] md:text-sm font-oswald font-bold uppercase leading-none", t.color)}>
+                  <span className={cn("text-[15px] md:text-sm font-oswald font-bold uppercase leading-none", t.color)}>
                     {t.name}
                   </span>
                 </th>
@@ -800,26 +802,31 @@ function TierComparisonGrid() {
           <tbody>
             {features.map((f, fi) => (
               <tr key={fi} className="border-b border-white/[0.04] last:border-none">
-                <td className="py-2.5 px-2">
-                  <span className="text-[10px] md:text-sm text-white/50 md:hidden leading-tight block">{f.mobileLabel || f.label}</span>
+                <td className="py-2 px-2">
+                  <span className={cn(
+                    "md:text-sm text-white/50 md:hidden leading-tight block font-medium",
+                    f.label === "Личное ведение" ? "text-[13px]" : "text-[15px]"
+                  )}>
+                    {f.mobileLabel || f.label}
+                  </span>
                   <span className="text-sm text-white/50 hidden md:inline">{f.label}</span>
                 </td>
                 {f.values.map((v, vi) => (
                   <td
                     key={vi}
                     className={cn(
-                      "py-2.5 px-1 text-center",
+                      "py-2 px-0.5 text-center",
                       vi === 2 && "bg-purple-500/[0.05]"
                     )}
                   >
                     {typeof v === "boolean" ? (
                       v ? (
-                        <Check className="size-3 md:size-4 text-emerald-400/70 mx-auto" />
+                        <Check className="size-3.5 md:size-4 text-emerald-400/70 mx-auto" />
                       ) : (
                         <span className="text-white/10 text-[10px]">—</span>
                       )
                     ) : (
-                      <span className="text-[10px] md:text-sm font-bold text-white/65 leading-none">{v}</span>
+                      <span className="text-[15px] md:text-sm font-bold text-white/65 leading-none">{v}</span>
                     )}
                   </td>
                 ))}
