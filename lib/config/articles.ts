@@ -71,5 +71,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 7,
     access_level: "basic",
     image_url: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "social-life-balance",
+    slug: "social-life-balance",
+    title: "Социальная жизнь и режим: рестораны, гости и отпуск без вреда",
+    description: "Как совмещать тренировки, питание и нормальную социальную жизнь. Рестораны, алкоголь, праздники и отпуск — без жертв и чувства вины.",
+    category: "Питание",
+    reading_time: 9,
+    access_level: "basic",
+    image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop"
   }
 ];
