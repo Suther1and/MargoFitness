@@ -858,47 +858,86 @@ function AchievementShowcase() {
   ];
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">
+    <div className="py-2">
+      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-8 px-1">
         5 категорий редкости
       </p>
 
-      {/* Мобильная версия: вертикальный список с иконками */}
-      <div className="flex flex-col gap-4 md:hidden mb-8">
-        {examples.map((a, i) => (
-          <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-            <div className="relative shrink-0">
-              <img
-                src={a.img}
-                alt={a.name}
-                className="size-14 object-contain drop-shadow-lg"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <div className="flex items-center gap-2">
+      {/* Мобильная версия: Горизонтальный скролл карточек редкости */}
+      <div className="md:hidden -mx-5 px-5 mb-8">
+        <div className="flex gap-5 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
+          {examples.map((a, i) => (
+            <div 
+              key={i} 
+              className="relative w-[280px] shrink-0 snap-center p-8 rounded-[3rem] bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col items-center text-center group"
+            >
+              {/* Фоновое свечение и паттерн */}
+              <div className={cn(
+                "absolute inset-0 opacity-10 bg-gradient-to-b from-transparent to-current",
+                categories[a.cat].color
+              )} />
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                   style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+              
+              <div className="relative mb-8">
+                <div className={cn(
+                  "absolute inset-0 blur-3xl opacity-20 scale-150",
+                  categories[a.cat].color.replace('text-', 'bg-')
+                )} />
+                
+                {/* Иконка достижения */}
+                <div className="relative z-10 size-32 flex items-center justify-center">
+                  <img
+                    src={a.img}
+                    alt={a.name}
+                    className="max-w-full max-h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                  />
+                </div>
+
+                {/* Награда в верхнем правом углу (наезжает на иконку) */}
+                <div className={cn(
+                  "absolute -top-2 -right-6 z-20 px-3 py-1.5 rounded-xl border bg-black/60 backdrop-blur-md shadow-xl flex items-center gap-1.5",
+                  categories[a.cat].border
+                )}>
+                  <span className={cn("text-xs font-black tracking-tight", categories[a.cat].color)}>
+                    +{a.reward}
+                  </span>
+                  <span className="text-[9px] text-white/40 uppercase font-bold">шагов</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 space-y-4 w-full">
                 <span
                   className={cn(
-                    "text-[10px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                    "inline-block text-[10px] font-black px-4 py-1 rounded-full border uppercase tracking-[0.15em]",
                     categories[a.cat].color, categories[a.cat].bg, categories[a.cat].border
                   )}
                 >
                   {categories[a.cat].name}
                 </span>
-                <span className={cn("text-[10px] font-bold", categories[a.cat].color)}>
-                  +{a.reward} шагов
-                </span>
+                
+                <div className="flex items-center justify-center gap-2.5">
+                  <div className={cn("size-2 rounded-full animate-pulse shrink-0", categories[a.cat].color.replace('text-', 'bg-'))} />
+                  <h4 className="text-xl font-oswald font-bold text-white uppercase tracking-tight leading-tight">
+                    {a.name}
+                  </h4>
+                </div>
               </div>
-              <p className="text-sm text-white/70 font-bold leading-tight truncate">
-                {a.name}
-              </p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        {/* Индикатор скролла */}
+        <div className="flex justify-center gap-1.5 mt-2">
+          {examples.map((_, i) => (
+            <div key={i} className={cn("h-1 rounded-full transition-all duration-300", i === 0 ? "w-6 bg-orange-400/60" : "w-1.5 bg-white/10")} />
+          ))}
+        </div>
       </div>
 
       {/* Десктопная версия: старый вариант */}
       <div className="hidden md:block">
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((c, i) => (
             <span
               key={i}
@@ -912,14 +951,16 @@ function AchievementShowcase() {
           ))}
         </div>
 
-        <div className="grid grid-cols-5 gap-3 md:gap-4 mb-4">
+        <div className="grid grid-cols-5 gap-3 md:gap-4 mb-8">
           {examples.map((a, i) => (
             <div key={i} className="flex flex-col items-center gap-2 text-center">
-              <img
-                src={a.img}
-                alt={a.name}
-                className="size-16 md:size-20 object-contain drop-shadow-lg"
-              />
+              <div className="size-16 md:size-20 flex items-center justify-center">
+                <img
+                  src={a.img}
+                  alt={a.name}
+                  className="max-w-full max-h-full object-contain drop-shadow-lg"
+                />
+              </div>
               <div>
                 <p className="text-[10px] text-white/50 font-medium leading-tight">
                   {a.name}
@@ -933,7 +974,7 @@ function AchievementShowcase() {
         </div>
       </div>
 
-      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+      <div className="flex items-start gap-2.5 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
         <Sparkles className="size-4 text-yellow-400/50 shrink-0 mt-0.5" />
         <p className="text-sm text-white/40 leading-relaxed">
           Награды за достижения — от 50 до 1 000 шагов. Абсолютные достижения
