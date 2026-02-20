@@ -998,7 +998,7 @@ function BonusSystemOverview() {
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <p className="text-xs font-bold uppercase tracking-widest text-white/30">
-            4 уровня кешбэка — растёт с покупками
+            4 уровня кешбэка <span className="hidden md:inline">— растёт с покупками</span>
           </p>
           <div className="flex gap-1.5 md:hidden">
             {levels.map((_, i) => (
@@ -1089,9 +1089,10 @@ function BonusSystemOverview() {
           </div>
         </div>
       </div>
-          </div>
-        </div>
-      </div>
+
+      <p className="text-sm text-white/30 italic leading-relaxed px-1 -mt-2 mb-8">
+        Потратив суммарно 10 000 ₽, ты переходишь на уровень Silver. Теперь твой кешбэк 5% вместо 3% с каждой покупки.
+      </p>
 
       {/* Реферальная программа */}
       <div className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-5 md:p-6">
