@@ -29,6 +29,9 @@ import {
   Check,
   X,
   CircleAlert,
+  Salad,
+  Ham,
+  Martini,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -696,7 +699,7 @@ function MenuNavigator() {
   const categories = [
     {
       name: "Закуски",
-      icon: "🥗",
+      icon: <Salad className="size-3.5" />,
       good: [
         "Карпаччо из говядины",
         "Тартар из тунца",
@@ -716,7 +719,7 @@ function MenuNavigator() {
     },
     {
       name: "Основное",
-      icon: "🥩",
+      icon: <Ham className="size-3.5" />,
       good: [
         "Стейк (любой прожарки)",
         "Рыба на гриле",
@@ -736,7 +739,7 @@ function MenuNavigator() {
     },
     {
       name: "Напитки",
-      icon: "🥂",
+      icon: <Martini className="size-3.5" />,
       good: [
         "Вода (с лимоном, мятой)",
         "Чай / американо без сахара",
@@ -778,23 +781,24 @@ function MenuNavigator() {
                 transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
               />
             )}
-            <span className="relative z-10">
+            <span className="relative z-10 flex items-center gap-2">
               {c.icon} {c.name}
             </span>
           </button>
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeCategory}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.2 }}
-          className="p-5 md:p-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="relative min-h-[280px] md:min-h-[200px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="p-5 md:p-6 absolute inset-0"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="size-2 rounded-full bg-emerald-400" />
@@ -857,6 +861,7 @@ function MenuNavigator() {
           </div>
         </motion.div>
       </AnimatePresence>
+      </div>
     </div>
   );
 }
