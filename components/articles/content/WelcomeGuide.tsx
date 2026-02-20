@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -310,7 +310,7 @@ export default function WelcomeGuide({
             нему когда удобно — без ограничений по времени.
           </p>
 
-          <IntensiveExamples />
+          <IntensiveCardsMockup />
 
           <p className="text-lg text-white/60 leading-relaxed mt-8">
             Интенсивы доступны вне зависимости от подписки. Можно быть на
@@ -1133,54 +1133,260 @@ function BonusSystemOverview() {
   );
 }
 
-function IntensiveExamples() {
-  const examples = [
+function IntensiveCardsMockup() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollLeft - walk;
+      }
+    });
+  };
+
+  const scroll = useCallback((dir: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const isMobile = window.innerWidth < 768;
+    const cardW = isMobile ? window.innerWidth * 0.8 : 280;
+    const gap = isMobile ? 24 : 16; // +2 к отступу (было 16, стало 24 для мобилки)
+    
+    if (!isMobile) {
+      // На десктопе 5 карточек, по 3 на экране. Максимум 2 шага прокрутки (0, 1, 2)
+      const maxScroll = (cardW + gap) * 2;
+      const currentScroll = scrollRef.current.scrollLeft;
+      let newScroll = dir === "left" ? currentScroll - (cardW + gap) : currentScroll + (cardW + gap);
+      
+      // Ограничиваем прокрутку
+      newScroll = Math.max(0, Math.min(newScroll, maxScroll));
+      
+      scrollRef.current.scrollTo({
+        left: newScroll,
+        behavior: "smooth",
+      });
+    } else {
+      scrollRef.current.scrollBy({
+        left: dir === "left" ? -(cardW + gap) : (cardW + gap),
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    const isMobile = window.innerWidth < 768;
+    const cardW = isMobile ? window.innerWidth * 0.8 : 280;
+    const gap = isMobile ? 24 : 16;
+    setCurrentSlide(Math.round(el.scrollLeft / (cardW + gap)));
+  }, []);
+
+  const intensives = [
     {
-      icon: "☀️",
       title: "Утренняя зарядка",
-      desc: "Набор коротких утренних сессий для бодрого старта дня. 10–15 минут без инвентаря.",
+      desc: "Короткие бодрые сессии для энергичного старта дня без инвентаря",
+      difficulty: 1,
+      price: "990 ₽",
+      videos: 12,
+      duration: "180 мин",
+      img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80&auto=format&fit=crop",
     },
     {
-      icon: "🧘",
       title: "Йога и растяжка",
-      desc: "Глубокая растяжка, восстановление после тренировок и работа с подвижностью суставов.",
+      desc: "Глубокая работа с подвижностью, восстановление и расслабление",
+      difficulty: 2,
+      price: "1 490 ₽",
+      videos: 16,
+      duration: "480 мин",
+      img: "https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=600&q=80&auto=format&fit=crop",
     },
     {
-      icon: "🏕",
-      title: "Тренировки на воздухе",
-      desc: "Программы для улицы и парка — кардио, функциональные упражнения, работа с весом тела.",
-    },
-    {
-      icon: "🩰",
       title: "Пилатес",
-      desc: "Контроль тела, глубокие мышцы, осанка. Мягкая, но эффективная нагрузка для любого уровня.",
+      desc: "Контроль тела, глубокие мышцы и осанка. Мягко, но эффективно",
+      difficulty: 2,
+      price: "1 490 ₽",
+      videos: 14,
+      duration: "520 мин",
+      img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80&auto=format&fit=crop",
+    },
+    {
+      title: "Функциональный тренинг",
+      desc: "Комплексные упражнения на силу, координацию и выносливость",
+      difficulty: 3,
+      price: "1 990 ₽",
+      videos: 20,
+      duration: "750 мин",
+      img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=600&q=80&auto=format&fit=crop",
+    },
+    {
+      title: "Тренировки на воздухе",
+      desc: "Программы для улицы и парка — кардио и работа с весом тела",
+      difficulty: 2,
+      price: "1 290 ₽",
+      videos: 10,
+      duration: "280 мин",
+      img: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&q=80&auto=format&fit=crop",
     },
   ];
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-white/30">
-          Примеры интенсивов
-        </p>
-        <span className="text-[10px] text-orange-400/50 font-bold uppercase tracking-wider">
-          Разовая покупка · навсегда
-        </span>
+    <div className="overflow-visible">
+      {/* Arrows — desktop */}
+      <div className="hidden md:flex items-center justify-end gap-2 mb-3">
+        <button
+          onClick={() => scroll("left")}
+          className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <button
+          onClick={() => scroll("right")}
+          className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <ArrowRight className="size-4" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {examples.map((e, i) => (
-          <div
-            key={i}
-            className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05]"
-          >
-            <span className="text-xl shrink-0 mt-0.5">{e.icon}</span>
-            <div>
-              <p className="text-sm font-bold text-white/70 mb-0.5">{e.title}</p>
-              <p className="text-xs text-white/35 leading-relaxed">{e.desc}</p>
+      {/* Cards */}
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+          onMouseMove={onMouseMove}
+          className={cn(
+            "flex overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory select-none",
+            isDragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x"
+          )}
+          style={{ 
+            gap: window.innerWidth < 768 ? '24px' : '16px',
+            paddingBottom: '24px',
+            marginBottom: '-24px',
+            paddingLeft: window.innerWidth < 768 ? '20px' : '0px',
+            paddingRight: window.innerWidth < 768 ? '20px' : '0px'
+          }}
+        >
+          {intensives.map((item, i) => (
+            <div
+              key={i}
+              className="w-[80vw] md:w-[280px] shrink-0 snap-start rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col hover:border-white/20 transition-all"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden">
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="w-full h-full object-cover pointer-events-none"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute top-3 left-3 flex gap-1.5">
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-black/50 backdrop-blur-sm text-white/80 px-2 py-1 rounded-full">
+                    {item.videos} видео
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-black/50 backdrop-blur-sm text-white/80 px-2 py-1 rounded-full">
+                    {item.duration}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 flex flex-col flex-1">
+                <h4 className="text-sm font-bold text-white/80 mb-1 leading-snug">
+                  {item.title}
+                </h4>
+                <p className="text-xs text-white/35 leading-relaxed mb-3 flex-1">
+                  {item.desc}
+                </p>
+
+                <div className="mb-3">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-white/25 block mb-1">
+                    Сложность
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, si) => (
+                      <Star
+                        key={si}
+                        className={cn(
+                          "size-3.5",
+                          si < item.difficulty
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-yellow-500/20"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg font-oswald font-bold text-white leading-none">
+                      {item.price}
+                    </span>
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-white/20">
+                      / навсегда
+                    </span>
+                  </div>
+                  <button className="text-[10px] font-bold uppercase tracking-wider text-orange-400/70 hover:text-orange-400 transition-colors px-3 py-1.5 rounded-lg bg-orange-500/[0.06] border border-orange-500/10">
+                    Подробнее
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center gap-1.5 mt-2">
+        {intensives.map((_, i) => {
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          
+          // На мобильном 5 точек (по одной на каждую карточку)
+          // На десктопе 3 точки (так как всего 3 шага прокрутки для 5 карточек при 3 видимых)
+          if (!isMobile && i > 2) return null;
+
+          const isActive = currentSlide === i;
+
+          return (
+            <button
+              key={i}
+              onClick={() => {
+                if (!scrollRef.current) return;
+                const isMobileView = window.innerWidth < 768;
+                const cardW = isMobileView ? window.innerWidth * 0.8 : 280;
+                const gap = isMobileView ? 24 : 16;
+                scrollRef.current.scrollTo({
+                  left: i * (cardW + gap),
+                  behavior: "smooth",
+                });
+              }}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                isActive
+                  ? (isMobile ? "w-6 bg-orange-400/60" : "w-10 bg-orange-400/60")
+                  : "w-1.5 bg-white/15"
+              )}
+            />
+          );
+        })}
       </div>
     </div>
   );
