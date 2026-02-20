@@ -236,14 +236,16 @@ export default function WelcomeGuide({
           <SectionHeader icon={Layers} title="Тарифы подписки" />
 
           <p className="text-lg text-white/60 leading-relaxed mb-4">
-            На платформе MARGOFITNESS доступно четыре уровня подписки: Free, Basic, Pro и Elite. Бесплатный
+            На платформе <span className="text-orange-400/80 font-semibold">MARGOFITNESS</span> доступно четыре уровня подписки:{" "}
+            <span className="text-white/40 font-bold">Free</span>,{" "}
+            <span className="text-orange-400 font-bold">Basic</span>,{" "}
+            <span className="text-purple-400 font-bold">Pro</span> и{" "}
+            <span className="text-amber-400 font-bold">Elite</span>. Бесплатный
             аккаунт остаётся навсегда и даёт попробовать платформу. Подписка
             расширяет доступ к тренировкам, трекеру и материалам.
           </p>
           <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Ниже — что именно доступно на каждом уровне. Pro — оптимальный
-            выбор: 3 тренировки, полный трекер и все материалы. Актуальные
-            цены и скидки за длительный период — на главной странице.
+            Подписка расширяет доступ к тренировкам, трекеру и материалам.
           </p>
 
           <TierComparisonGrid />
@@ -762,32 +764,33 @@ function TierComparisonGrid() {
 
   const features: {
     label: string;
+    mobileLabel?: string;
     values: (string | boolean)[];
   }[] = [
-    { label: "Тренировки в неделю", values: ["Демо", "2", "3", "3"] },
-    { label: "Виджеты здоровья", values: ["1", "6", "8", "8"] },
+    { label: "Тренировки в неделю", mobileLabel: "Тренировок", values: ["Демо", "2", "3", "3"] },
+    { label: "Виджеты здоровья", mobileLabel: "Виджеты", values: ["1", "6", "8", "8"] },
     { label: "Привычки", values: ["1", "6", "10", "15"] },
     { label: "Статьи", values: ["Демо", "Расш.", "Все", "Все"] },
     { label: "Статистика", values: [false, true, true, true] },
-    { label: "Telegram-сообщество", values: [true, true, true, true] },
+    { label: "Telegram-сообщество", mobileLabel: "Telegram", values: [true, true, true, true] },
     { label: "Личное ведение", values: [false, false, false, true] },
   ];
 
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px]">
+      <div className="w-full overflow-x-hidden">
+        <table className="w-full table-fixed border-collapse">
           <thead>
             <tr className="border-b border-white/10">
-              <th className="text-left px-4 py-3 w-[130px] md:w-auto" />
+              <th className="text-left px-2 py-3 w-[28%] md:w-auto" />
               {tiers.map((t, i) => (
-                <th key={i} className={cn("px-3 py-3 text-center", t.popular && "bg-purple-500/[0.05]")}>
+                <th key={i} className={cn("px-1 py-3 text-center", t.popular && "bg-purple-500/[0.05]")}>
                   {t.popular && (
-                    <span className="block text-[8px] font-bold uppercase tracking-wider text-purple-400/70 mb-1">
-                      Оптимальный
+                    <span className="block text-[7px] font-bold uppercase tracking-tight text-purple-400/70 mb-1 leading-none">
+                      Best
                     </span>
                   )}
-                  <span className={cn("text-sm font-oswald font-bold uppercase", t.color)}>
+                  <span className={cn("text-[10px] md:text-sm font-oswald font-bold uppercase leading-none", t.color)}>
                     {t.name}
                   </span>
                 </th>
@@ -797,25 +800,26 @@ function TierComparisonGrid() {
           <tbody>
             {features.map((f, fi) => (
               <tr key={fi} className="border-b border-white/[0.04] last:border-none">
-                <td className="py-3 px-4">
-                  <span className="text-sm text-white/50">{f.label}</span>
+                <td className="py-2.5 px-2">
+                  <span className="text-[10px] md:text-sm text-white/50 md:hidden leading-tight block">{f.mobileLabel || f.label}</span>
+                  <span className="text-sm text-white/50 hidden md:inline">{f.label}</span>
                 </td>
                 {f.values.map((v, vi) => (
                   <td
                     key={vi}
                     className={cn(
-                      "py-3 px-3 text-center",
+                      "py-2.5 px-1 text-center",
                       vi === 2 && "bg-purple-500/[0.05]"
                     )}
                   >
                     {typeof v === "boolean" ? (
                       v ? (
-                        <Check className="size-4 text-emerald-400/70 mx-auto" />
+                        <Check className="size-3 md:size-4 text-emerald-400/70 mx-auto" />
                       ) : (
-                        <span className="text-white/10">—</span>
+                        <span className="text-white/10 text-[10px]">—</span>
                       )
                     ) : (
-                      <span className="text-sm font-bold text-white/65">{v}</span>
+                      <span className="text-[10px] md:text-sm font-bold text-white/65 leading-none">{v}</span>
                     )}
                   </td>
                 ))}
