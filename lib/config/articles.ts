@@ -61,5 +61,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 9,
     access_level: "basic",
     image_url: "https://images.unsplash.com/photo-1637666062717-1c6bcfa4a4df?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "womens-body-myths",
+    slug: "womens-body-myths",
+    title: "Мифы о женском теле: Почему ты не «перекачаешься»",
+    description: "Разбираем главные страхи перед силовыми тренировками. Почему женская физиология не позволит стать похожей на мужчину и почему именно гантели делают тело упругим.",
+    category: "Тренировки",
+    reading_time: 7,
+    access_level: "basic",
+    image_url: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2070&auto=format&fit=crop"
   }
 ];
