@@ -366,20 +366,11 @@ export default function WomensBodyMyths({
                     </div>
                   </li>
                 </ul>
-                
-                <div className="pt-2">
-                  <button onClick={() => {
-                     document.querySelector('[data-tab="workouts"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 text-sky-400 font-bold text-xs uppercase tracking-widest transition-all">
-                    Перейти к трекеру <ArrowRight className="size-3.5" />
-                  </button>
-                </div>
               </div>
 
-              <div className="relative mt-4 lg:mt-0">
+              <div className="relative mt-4 lg:-mt-6 flex flex-col lg:items-end">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent z-10 lg:hidden" />
-                <div className="relative rounded-2xl border border-white/10 bg-[#09090b]/80 shadow-2xl overflow-hidden backdrop-blur-xl">
+                <div className="relative w-full rounded-2xl border border-white/10 bg-[#09090b]/80 shadow-2xl overflow-hidden backdrop-blur-xl max-w-sm lg:ml-auto mb-4">
                   {/* Мокап интерфейса */}
                   <div className="p-3 md:p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                     <div className="flex items-center gap-2">
@@ -420,6 +411,16 @@ export default function WomensBodyMyths({
                     </div>
                   </div>
                 </div>
+                
+                <button onClick={() => {
+                   document.querySelector('[data-tab="workouts"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} className="inline-flex justify-between items-center px-5 py-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-sky-500/10 hover:border-sky-500/30 text-white hover:text-sky-400 font-bold text-xs uppercase tracking-widest transition-all w-full max-w-sm lg:ml-auto group">
+                  Перейти к трекеру 
+                  <div className="size-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-sky-500/20 transition-colors">
+                    <ArrowRight className="size-3.5" />
+                  </div>
+                </button>
               </div>
             </div>
           </div>
