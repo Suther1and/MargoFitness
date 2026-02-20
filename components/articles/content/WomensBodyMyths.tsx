@@ -326,6 +326,105 @@ export default function WomensBodyMyths({
           </div>
         </section>
 
+        {/* Секция 5 — Блок платформы */}
+        <section className="mb-14 text-left">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-500/[0.08] via-sky-500/[0.02] to-transparent border border-sky-500/10 p-8 md:p-12">
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-sky-500/10 blur-[100px] rounded-full pointer-events-none" />
+            
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
+                  <Activity className="size-3.5 text-sky-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Прогресс без весов</span>
+                </div>
+                
+                <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
+                  Как MargoFitness помогает <br /> <span className="text-sky-400">отслеживать реальные</span> изменения
+                </h2>
+                
+                <p className="text-lg text-white/60 leading-relaxed">
+                  Мы знаем, как цифра на весах может демотивировать. Поэтому в наш трекер здоровья встроены инструменты, которые показывают настоящую трансформацию тела, даже если вес стоит на месте.
+                </p>
+
+                <ul className="space-y-4 pt-4">
+                  <li className="flex items-start gap-3">
+                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="size-3.5 text-sky-400" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-white/90">Сравнение фото До/После:</span>
+                      <p className="text-sm text-white/50 mt-1">Визуальный прогресс часто опережает цифры. Загружай фото каждую неделю и сравнивай изменения в специальном виджете.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="size-3.5 text-sky-400" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-white/90">Трекинг объёмов:</span>
+                      <p className="text-sm text-white/50 mt-1">Вноси замеры груди, талии и бёдер. Платформа сама построит графики и покажет, как уходят сантиметры.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="size-6 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="size-3.5 text-sky-400" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-white/90">График веса с трендами:</span>
+                      <p className="text-sm text-white/50 mt-1">Если ты всё-таки используешь весы, мы сглаживаем дневные колебания воды и показываем реальный долгосрочный тренд.</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent z-10 lg:hidden" />
+                <div className="relative rounded-2xl border border-white/10 bg-[#09090b]/80 shadow-2xl overflow-hidden backdrop-blur-xl">
+                  {/* Мокап интерфейса */}
+                  <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <div className="flex items-center gap-2">
+                      <Scale className="size-4 text-sky-400" />
+                      <span className="text-xs font-bold text-white/80">Твои замеры</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Март</span>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/60">Талия</span>
+                        <span className="text-sky-400 font-bold">-4 см</span>
+                      </div>
+                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-sky-500 w-[75%] rounded-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/60">Бёдра</span>
+                        <span className="text-sky-400 font-bold">-2.5 см</span>
+                      </div>
+                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-sky-500 w-[45%] rounded-full" />
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-white/5">
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-white/40 uppercase tracking-widest">Текущий вес</span>
+                          <span className="text-xl font-oswald font-black text-white">64.2 кг</span>
+                        </div>
+                        <div className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+                          В норме (ИМТ 21.5)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
