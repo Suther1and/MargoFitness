@@ -24,6 +24,7 @@ const HardcodedArticles: Record<string, any> = {
   "equipment-guide": dynamic(() => import("@/components/articles/content/EquipmentGuide")),
   "womens-body-myths": dynamic(() => import("@/components/articles/content/WomensBodyMyths")),
   "social-life-balance": dynamic(() => import("@/components/articles/content/SocialLifeBalance")),
+  "movement-basics": dynamic(() => import("@/components/articles/content/MovementBasics")),
 };
 
 type WorkoutSubTab = 'workouts' | 'materials' | 'intensives' | 'marathons'

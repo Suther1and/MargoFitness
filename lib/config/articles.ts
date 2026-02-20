@@ -81,5 +81,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 9,
     access_level: "basic",
     image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "movement-basics",
+    slug: "movement-basics",
+    title: "Азбука движений: разбор главных упражнений MargoFitness",
+    description: "6 базовых паттернов движения, вариации и точки контроля. Вводный гайд, после которого ты будешь понимать каждую тренировку.",
+    category: "Тренировки",
+    reading_time: 8,
+    access_level: "basic",
+    image_url: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=2070&auto=format&fit=crop"
   }
 ];
