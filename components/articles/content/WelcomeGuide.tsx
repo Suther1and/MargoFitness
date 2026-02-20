@@ -859,42 +859,78 @@ function AchievementShowcase() {
 
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">
+      <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-6">
         5 категорий редкости
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-5">
-        {categories.map((c, i) => (
-          <span
-            key={i}
-            className={cn(
-              "text-[11px] font-bold px-2.5 py-1 rounded-full border",
-              c.color, c.bg, c.border
-            )}
-          >
-            {c.name}
-          </span>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-5 gap-3 md:gap-4 mb-4">
+      {/* Мобильная версия: вертикальный список с иконками */}
+      <div className="flex flex-col gap-4 md:hidden mb-8">
         {examples.map((a, i) => (
-          <div key={i} className="flex flex-col items-center gap-2 text-center">
-            <img
-              src={a.img}
-              alt={a.name}
-              className="size-16 md:size-20 object-contain drop-shadow-lg"
-            />
-            <div>
-              <p className="text-[10px] text-white/50 font-medium leading-tight">
+          <div key={i} className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+            <div className="relative shrink-0">
+              <img
+                src={a.img}
+                alt={a.name}
+                className="size-14 object-contain drop-shadow-lg"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "text-[10px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                    categories[a.cat].color, categories[a.cat].bg, categories[a.cat].border
+                  )}
+                >
+                  {categories[a.cat].name}
+                </span>
+                <span className={cn("text-[10px] font-bold", categories[a.cat].color)}>
+                  +{a.reward} шагов
+                </span>
+              </div>
+              <p className="text-sm text-white/70 font-bold leading-tight truncate">
                 {a.name}
-              </p>
-              <p className={cn("text-[9px] font-bold", categories[a.cat].color)}>
-                +{a.reward} шагов
               </p>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Десктопная версия: старый вариант */}
+      <div className="hidden md:block">
+        <div className="flex flex-wrap gap-2 mb-5">
+          {categories.map((c, i) => (
+            <span
+              key={i}
+              className={cn(
+                "text-[11px] font-bold px-2.5 py-1 rounded-full border",
+                c.color, c.bg, c.border
+              )}
+            >
+              {c.name}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-5 gap-3 md:gap-4 mb-4">
+          {examples.map((a, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 text-center">
+              <img
+                src={a.img}
+                alt={a.name}
+                className="size-16 md:size-20 object-contain drop-shadow-lg"
+              />
+              <div>
+                <p className="text-[10px] text-white/50 font-medium leading-tight">
+                  {a.name}
+                </p>
+                <p className={cn("text-[9px] font-bold", categories[a.cat].color)}>
+                  +{a.reward} шагов
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
