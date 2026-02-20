@@ -402,6 +402,83 @@ export default function EquipmentGuide({
           </div>
         </section>
 
+        {/* Блок связи с программой */}
+        <section className="mb-14">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.03] border border-white/10 p-8 md:p-12 text-left group">
+            <div className="absolute -inset-24 bg-rose-500/5 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
+                  <Sparkles className="size-3.5 text-rose-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-rose-400">Твой следующий шаг</span>
+                </div>
+                
+                <h2 className="text-3xl md:text-5xl font-oswald font-black uppercase tracking-tight text-white leading-[0.95]">
+                  Инвентарь готов? <br />
+                  <span className="text-rose-400">Пора в дело</span>
+                </h2>
+                
+                <p className="text-lg text-white/60 leading-relaxed">
+                  Все тренировки MargoFitness адаптированы под тот набор оборудования, о котором мы только что говорили. Никаких лишних тренажёров — только ты, гантели и результат.
+                </p>
+
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                    <Check className="size-4 text-rose-400" />
+                    <span className="text-xs font-bold text-white/70">Видео-инструкции</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                    <Check className="size-4 text-rose-400" />
+                    <span className="text-xs font-bold text-white/70">Таймеры отдыха</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="rounded-3xl bg-white/[0.02] border border-white/10 p-6 md:p-8 shadow-2xl shadow-black/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="size-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                      <Dumbbell className="size-6 text-rose-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Ближайшая цель</p>
+                      <h4 className="text-xl font-oswald font-black text-white uppercase">Full Body: Сила и Рельеф</h4>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <span className="text-sm text-white/40">Длительность</span>
+                      <span className="text-sm font-bold text-white/80">45 мин</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <span className="text-sm text-white/40">Сложность</span>
+                      <div className="flex gap-1">
+                        <Star className="size-3 fill-rose-500 text-rose-500" />
+                        <Star className="size-3 fill-rose-500 text-rose-500" />
+                        <Star className="size-3 text-white/20" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={onBack}
+                    className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl shadow-rose-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Перейти к тренировкам
+                    <ArrowRight className="size-4" />
+                  </button>
+                </div>
+
+                {/* Декоративные элементы */}
+                <div className="absolute -top-6 -right-6 size-32 bg-rose-500/10 blur-3xl rounded-full -z-10" />
+                <div className="absolute -bottom-6 -left-6 size-32 bg-rose-500/5 blur-3xl rounded-full -z-10" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Секция — Ошибки при покупке */}
         <section className="mb-14 text-left">
           <div className="flex items-center gap-3.5 mb-6">
