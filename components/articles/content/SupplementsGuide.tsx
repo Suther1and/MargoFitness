@@ -217,6 +217,13 @@ const categoryGradients: Record<string, string> = {
   default: "from-white/[0.04] to-white/[0.01]",
 };
 
+const categoryColors: Record<string, { subtitle: string; brands: string }> = {
+  fundamentals: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
+  beauty: { subtitle: "text-pink-400/70", brands: "text-pink-400/70" },
+  sport: { subtitle: "text-blue-400/70", brands: "text-blue-400/70" },
+  default: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
+};
+
 function SupplementCard({ 
   data, 
   category = "default" 
@@ -225,6 +232,7 @@ function SupplementCard({
   category?: "fundamentals" | "beauty" | "sport" | "default";
 }) {
   const gradientClass = categoryGradients[category] || categoryGradients.default;
+  const colors = categoryColors[category] || categoryColors.default;
 
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col h-full hover:border-white/20 transition-all group">
@@ -257,7 +265,7 @@ function SupplementCard({
         <h4 className="text-sm font-bold text-white/90 mb-0.5">
           {data.name}
         </h4>
-        <p className="text-[11px] text-cyan-400/70 font-medium mb-3">
+        <p className={cn("text-[11px] font-medium mb-3", colors.subtitle)}>
           {data.subtitle}
         </p>
 
@@ -298,7 +306,7 @@ function SupplementCard({
               <span className="text-white/25 font-bold uppercase tracking-wider">
                 Бренды
               </span>
-              <p className="text-cyan-400/70 font-medium mt-0.5">
+              <p className={cn("font-medium mt-0.5", colors.brands)}>
                 {data.brands}
               </p>
             </div>
@@ -406,6 +414,8 @@ function EvidenceTierList() {
     emerald: { border: "border-emerald-500/15", bg: "bg-emerald-500/[0.04]", text: "text-emerald-400", dot: "bg-emerald-400" },
     amber: { border: "border-amber-500/15", bg: "bg-amber-500/[0.04]", text: "text-amber-400", dot: "bg-amber-400" },
     zinc: { border: "border-white/10", bg: "bg-white/[0.02]", text: "text-white/40", dot: "bg-white/30" },
+    pink: { border: "border-pink-500/15", bg: "bg-pink-500/[0.04]", text: "text-pink-400", dot: "bg-pink-400" },
+    blue: { border: "border-blue-500/15", bg: "bg-blue-500/[0.04]", text: "text-blue-400", dot: "bg-blue-400" },
   };
 
   return (
@@ -534,8 +544,8 @@ const beauty: SupplementData[] = [
     whatItDoes: "Витамин B7 - участвует в метаболизме и влияет на рост волос, крепость ногтей. Эффект заметен через 2-3 месяца регулярного приёма.",
     whoNeeds: "При выпадении волос, ломких ногтях",
     dosage: "5 000 мкг/день",
-    form: "Капсулы",
-    brands: "GLS, Solgar, Now Foods",
+    form: "Шипучка",
+    brands: "GLS, Mein Herz, Эвалар",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/biotin.png",
@@ -546,8 +556,8 @@ const beauty: SupplementData[] = [
     whatItDoes: "Комплекс из 23 витаминов и минералов, разработанный для женщин с активным образом жизни. Покрывает базовые потребности одной капсулой.",
     whoNeeds: "Как базовое покрытие дефицитов",
     dosage: "1 капсула/день",
-    form: "Мультивитаминный комплекс",
-    brands: "Optimum Nutrition, Now Eve, Solgar",
+    form: "Комплекс",
+    brands: "Optimum Nutrition",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/opti-women.png",
@@ -580,6 +590,18 @@ const sportSupps: SupplementData[] = [
     image: "/supplements/creatine.png",
   },
   {
+    name: "Электролиты",
+    subtitle: "Баланс при нагрузках",
+    whatItDoes: "Натрий, калий, магний - теряются с потом. Дефицит = судороги, головокружение, падение работоспособности. Особенно важны летом и при интенсивных тренировках.",
+    whoNeeds: "При интенсивном потоотделении",
+    dosage: "1 порция во время тренировки",
+    form: "Порошок для растворения",
+    brands: "Primecraft, GLS, Liquid IV",
+    wbLink: "#",
+    ozonLink: "#",
+    image: "/supplements/electrolytes.png",
+  },
+  {
     name: "BCAA",
     subtitle: "Честный разбор",
     whatItDoes: "Три аминокислоты (лейцин, изолейцин, валин). Если ты ешь достаточно белка (1.6+ г/кг) - BCAA бесполезны, так как ты получаешь их из еды. Имеют смысл только при низком потреблении белка.",
@@ -602,18 +624,6 @@ const sportSupps: SupplementData[] = [
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/l-carnitine.png",
-  },
-  {
-    name: "Электролиты",
-    subtitle: "Баланс при нагрузках",
-    whatItDoes: "Натрий, калий, магний - теряются с потом. Дефицит = судороги, головокружение, падение работоспособности. Особенно важны летом и при интенсивных тренировках.",
-    whoNeeds: "При интенсивном потоотделении",
-    dosage: "1 порция во время тренировки",
-    form: "Порошок для растворения",
-    brands: "Primecraft, GLS, Liquid IV",
-    wbLink: "#",
-    ozonLink: "#",
-    image: "/supplements/electrolytes.png",
   },
 ];
 
