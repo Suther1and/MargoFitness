@@ -98,34 +98,25 @@ export default function NutritionBasics({
       <article className="max-w-[860px] mx-auto px-4 md:px-0">
         {/* Вступление */}
         <div className="space-y-6 mb-14 text-left">
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Давай я скажу тебе кое-что, что тебе, возможно, не говорили: ни одна
-            тренировка в мире не «сожжёт» плохое питание. Ты можешь пахать в
-            зале или дома по часу каждый день — но если твоё тело получает больше
-            энергии, чем тратит, оно будет запасать. Это не мнение, это физика.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Давай я скажу тебе кое-что: ни одна тренировка в мире не «сожжёт» плохое питание. Если твоё тело получает <span className="text-white/90 font-bold">больше энергии</span>, чем тратит, оно будет запасать. Это не мнение, это <span className="text-amber-400/85 font-bold underline decoration-amber-500/30 underline-offset-4">физика</span>.
           </p>
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Но у этой медали есть и обратная сторона: просто меньше есть — тоже
-            не решение. И сейчас я объясню почему, а заодно дам три
-            фундаментальных правила, которые реально работают. Без трекеров, без
-            взвешивания еды, без ощущения, что ты на диете.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Но просто меньше есть - тоже не решение. Я дам три фундаментальных правила, которые <span className="text-white/90 font-bold">реально работают</span>. Без трекеров и взвешивания еды.
           </p>
         </div>
 
-        {/* ПРАВИЛО 1 — Дефицит калорий */}
-        <RuleSection number={1} title="Дефицит калорий — единственная причина похудения" accentColor="amber">
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Представь своё тело как банковский счёт. Еда — это доход. Всё, что
-            ты делаешь в течение дня — от дыхания до тренировки — это расходы.
-            Если доход больше расходов, остаток откладывается в «сбережения».
-            Только вместо денег — жир.
+        {/* ПРАВИЛО 1 - Дефицит калорий */}
+        <RuleSection number={1} title="Дефицит калорий - единственная причина похудения" accentColor="amber">
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Представь своё тело как банковский счёт. Еда - это доход. Всё, что
+            ты делаешь - от дыхания до тренировки - это расходы.
           </p>
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            <strong className="text-white/80">Дефицит калорий</strong> — это
-            когда ты тратишь чуть больше энергии, чем получаешь с едой. Не
-            голодание. Не «мало ем». А мягкая, устойчивая разница, при которой
-            тело начинает использовать свои запасы.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            <span className="text-amber-400/85 font-bold underline decoration-amber-500/20 underline-offset-4">Дефицит калорий</span> - это
+            когда ты тратишь чуть больше энергии, чем получаешь. Не
+            голодание. А <span className="text-white/85 font-bold">мягкая разница</span>, при которой тело начинает использовать запасы.
           </p>
 
           {/* Интерактивный калькулятор калорий */}
@@ -134,7 +125,7 @@ export default function NutritionBasics({
           <p className="text-lg text-white/60 leading-relaxed mb-6">
             И вот что важно: для этого не нужно считать каждую калорию.
             Достаточно понимать принцип и менять привычки постепенно. Убрала
-            сладкий кофе утром — минус 200 ккал. Заменила белый хлеб на цельнозерновой — ещё минус
+            сладкий кофе утром - минус 200 ккал. Заменила белый хлеб на цельнозерновой - ещё минус
             80. Уже дефицит. Без страданий.
           </p>
         </RuleSection>
@@ -163,25 +154,20 @@ export default function NutritionBasics({
             </div>
             <p className="text-base text-white/50 leading-relaxed">
               40 минут интенсивной тренировки сжигают ~300–400 ккал. Одна
-              шоколадка — 550. Тренировками невозможно компенсировать
+              шоколадка - 550. Тренировками невозможно компенсировать
               систематическое переедание.
             </p>
           </div>
         </div>
 
-        {/* ПРАВИЛО 2 — Почему тренировки не для похудения */}
+        {/* ПРАВИЛО 2 - Почему тренировки не для похудения */}
         <RuleSection number={2} title="Тренировки не для похудения. Но без них нельзя" accentColor="amber">
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Звучит как противоречие? Сейчас объясню. Тренировки сжигают
-            сравнительно мало калорий — гораздо меньше, чем кажется. Основной
-            расход энергии идёт на поддержание жизни: работу сердца, мозга,
-            температуру тела. Это называется{" "}
-            <strong className="text-white/80">базовый метаболизм</strong>, и на
-            него уходит 60–70% всей энергии за день.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Тренировки сжигают сравнительно мало калорий. Основной расход энергии идёт на поддержание жизни. Это называется <span className="text-amber-400/85 font-bold underline decoration-amber-500/20 underline-offset-4">базовый метаболизм</span>.
           </p>
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Но вот что тренировки делают по-настоящему:
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Но вот что тренировки делают <span className="text-white/85 font-bold">по-настоящему</span>:
           </p>
 
           <div className="space-y-3 mb-8">
@@ -192,7 +178,7 @@ export default function NutritionBasics({
               },
               {
                 title: "Разгоняют метаболизм",
-                text: "Мышечная ткань потребляет энергию даже в покое. Чем больше мышц — тем больше калорий ты сжигаешь, просто сидя на диване. Тренировки увеличивают твой «базовый расход».",
+                text: "Мышечная ткань потребляет энергию даже в покое. Чем больше мышц - тем больше калорий ты сжигаешь, просто сидя на диване. Тренировки увеличивают твой «базовый расход».",
               },
               {
                 title: "Формируют тело",
@@ -224,7 +210,7 @@ export default function NutritionBasics({
             <Quote className="absolute -left-3 -top-1 size-6 text-amber-400/30 p-0.5" />
             <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
               «Питание решает, сколько ты весишь. Тренировки решают, как ты
-              выглядишь. Одно без другого — это половина пути.»
+              выглядишь. Одно без другого - это половина пути.»
             </p>
             <footer className="flex items-center gap-4">
               <div className="relative w-14 h-14 -ml-1 -my-2 shrink-0 rounded-full border-2 border-amber-500/20 overflow-hidden shadow-lg shadow-amber-500/20">
@@ -246,17 +232,10 @@ export default function NutritionBasics({
           </blockquote>
         </RuleSection>
 
-        {/* ПРАВИЛО 3 — Почему нельзя просто мало есть */}
-        <RuleSection number={3} title="Почему «просто меньше есть» — это ловушка" accentColor="amber">
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Вот тут начинается самое интересное. Ты думаешь: «Окей, мне нужен
-            дефицит. Значит, буду есть совсем мало — и похудею быстрее». Логично?
-            Нет. Это ловушка, в которую попадают миллионы девушек.
-          </p>
-
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Когда ты резко урезаешь калории без тренировок, тело включает
-            аварийный режим. И вот что происходит:
+        {/* ПРАВИЛО 3 - Почему нельзя просто мало есть */}
+        <RuleSection number={3} title="Почему «просто меньше есть» - это ловушка" accentColor="amber">
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Ты думаешь: «Буду есть совсем мало - и похудею быстрее». Это <span className="text-white/85 font-bold">ловушка</span>. Когда ты резко урезаешь калории без тренировок, тело включает <span className="text-amber-400/85 font-semibold italic underline decoration-amber-500/20 underline-offset-4">аварийный режим</span>.
           </p>
 
           {/* Каскад последствий */}
@@ -267,7 +246,7 @@ export default function NutritionBasics({
               {
                 step: "1–2 неделя",
                 title: "Тело теряет воду и мышцы",
-                text: "Вес падает быстро, и ты радуешься. Но это не жир — это вода и мышечная ткань. Зеркало пока не меняется.",
+                text: "Вес падает быстро, и ты радуешься. Но это не жир - это вода и мышечная ткань. Зеркало пока не меняется.",
                 severity: "low" as const,
               },
               {
@@ -279,13 +258,13 @@ export default function NutritionBasics({
               {
                 step: "1–2 месяц",
                 title: "Плато и срыв",
-                text: "Вес встаёт, хотя ты ешь мало. Тело адаптировалось. Настроение на нуле, энергии нет. И однажды ты срываешься — потому что организм требует еду.",
+                text: "Вес встаёт, хотя ты ешь мало. Тело адаптировалось. Настроение на нуле, энергии нет. И однажды ты срываешься - потому что организм требует еду.",
                 severity: "high" as const,
               },
               {
                 step: "После срыва",
                 title: "Вес возвращается с запасом",
-                text: "Метаболизм ещё замедлен, а ты ешь как раньше. Результат — ты набираешь больше, чем потеряла. Мышц стало меньше, жира — больше. Это называется эффект йо-йо.",
+                text: "Метаболизм ещё замедлен, а ты ешь как раньше. Результат - ты набираешь больше, чем потеряла. Мышц стало меньше, жира - больше. Это называется эффект йо-йо.",
                 severity: "critical" as const,
               },
             ].map((item, i) => (
@@ -302,10 +281,10 @@ export default function NutritionBasics({
                   Важно понимать
                 </p>
                 <p className="text-base text-white/60 leading-relaxed">
-                  Диеты на 800–1200 ккал без физической нагрузки — это не
+                  Диеты на 800–1200 ккал без физической нагрузки - это не
                   похудение, а разрушение. Ты теряешь мышцы, замедляешь
                   метаболизм и создаёшь условия для набора веса в будущем.
-                  Правильный подход — мягкий дефицит + тренировки, которые
+                  Правильный подход - мягкий дефицит + тренировки, которые
                   защищают мышцы.
                 </p>
               </div>
@@ -313,28 +292,20 @@ export default function NutritionBasics({
           </div>
         </RuleSection>
 
-        {/* КБЖУ — Разбираемся раз и навсегда */}
+        {/* КБЖУ - Разбираемся раз и навсегда */}
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             КБЖУ: разбираемся раз и навсегда
           </h2>
 
           <p className="text-lg text-white/60 leading-relaxed mb-6">
-            КБЖУ — четыре буквы, которые определяют всё, что происходит с твоим
+            КБЖУ - четыре буквы, которые определяют всё, что происходит с твоим
             телом. Это не диета, не система и не тренд. Это просто описание того,
             что и сколько ты ешь.
           </p>
 
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            <strong className="text-white/80">К</strong> — калории, общая
-            энергия из пищи.{" "}
-            <strong className="text-white/80">Б</strong>,{" "}
-            <strong className="text-white/80">Ж</strong>,{" "}
-            <strong className="text-white/80">У</strong> — белки, жиры и
-            углеводы, то есть{" "}
-            <em className="text-white/70">из чего</em> эти калории состоят.
-            Калории определяют, будешь ты худеть или набирать. БЖУ определяют,
-            как ты будешь при этом выглядеть и чувствовать себя.
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            <span className="text-amber-400/85 font-bold">К</span> - калории, энергия. <span className="text-white/85 font-bold">Б, Ж, У</span> - белки, жиры и углеводы. Калории определяют, будешь ты худеть или нет. БЖУ определяют, <span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">как ты будешь выглядеть</span>.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
@@ -418,10 +389,10 @@ export default function NutritionBasics({
                     Парадокс пончика
                   </p>
                   <p className="text-base text-white/70 leading-relaxed">
-                    <strong className="text-amber-400/90">Не важно, что именно ты ешь: если есть дефицит калорий — ты будешь худеть.</strong> Это база. Профессор Марк
-                    Хауб доказал это в 2010&nbsp;году — сбросил 12&nbsp;кг за
+                    <strong className="text-amber-400/90">Не важно, что именно ты ешь: если есть дефицит калорий - ты будешь худеть.</strong> Это база. Профессор Марк
+                    Хауб доказал это в 2010&nbsp;году - сбросил 12&nbsp;кг за
                     2&nbsp;месяца на диете из снеков и сладостей. Потому что
-                    дефицит калорий — это физика, и она работает с любой едой.
+                    дефицит калорий - это физика, и она работает с любой едой.
                   </p>
                 </div>
               </div>
@@ -436,10 +407,10 @@ export default function NutritionBasics({
                   </p>
                   <div className="space-y-2">
                     {[
-                      "Потеря мышц — без белка тело разрушает само себя",
-                      "Постоянный голод — сахарные качели и неизбежные срывы",
-                      "Волосы, кожа, ногти — без витаминов всё разваливается",
-                      "Гормональный хаос — нет здоровых жиров, нет баланса",
+                      "Потеря мышц - без белка тело разрушает само себя",
+                      "Постоянный голод - сахарные качели и неизбежные срывы",
+                      "Волосы, кожа, ногти - без витаминов всё разваливается",
+                      "Гормональный хаос - нет здоровых жиров, нет баланса",
                     ].map((item, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <X className="size-3.5 text-rose-400/60 shrink-0 mt-0.5" />
@@ -457,18 +428,18 @@ export default function NutritionBasics({
           <div className="my-10 pl-6 border-l-2 border-amber-400/30">
             <p className="text-lg md:text-xl text-white/70 leading-relaxed font-medium italic">
               Количество калорий решает, будешь ты худеть или нет. Качество
-              питания решает, будешь ты при этом здоровой и энергичной — или
+              питания решает, будешь ты при этом здоровой и энергичной - или
               уставшей и больной.
             </p>
           </div>
 
-          {/* Инфографика — 6 сценариев */}
+          {/* Инфографика - 6 сценариев */}
           <h3 className="text-xl md:text-2xl font-oswald font-black uppercase tracking-tight text-white mb-3 mt-14">
             Что будет с твоим телом: 6&nbsp;сценариев
           </h3>
 
           <p className="text-base text-white/50 leading-relaxed mb-6">
-            Дефицит калорий, отслеживание БЖУ и тренировки — три переменные. Вот
+            Дефицит калорий, отслеживание БЖУ и тренировки - три переменные. Вот
             что происходит с телом при каждой комбинации:
           </p>
 
@@ -481,7 +452,7 @@ export default function NutritionBasics({
                   training: false,
                   title: "Ничего не меняется",
                   description:
-                    "Нет дефицита, нет тренировок, питание без контроля. Тело остаётся таким же. Каждый день — повтор предыдущего.",
+                    "Нет дефицита, нет тренировок, питание без контроля. Тело остаётся таким же. Каждый день - повтор предыдущего.",
                   rating: 0,
                   accent: "zinc",
                 },
@@ -501,7 +472,7 @@ export default function NutritionBasics({
                   training: true,
                   title: "Сильнее, но не стройнее",
                   description:
-                    "Мышцы растут, сила увеличивается. Но без дефицита жир остаётся. Визуально — мало изменений на весах.",
+                    "Мышцы растут, сила увеличивается. Но без дефицита жир остаётся. Визуально - мало изменений на весах.",
                   rating: 2,
                   accent: "violet",
                 },
@@ -521,7 +492,7 @@ export default function NutritionBasics({
                   training: false,
                   title: "Стройность без формы",
                   description:
-                    "Вес уходит, белок защищает мышцы. Но без тренировок тело «плоское» — стройное, но без рельефа и тонуса.",
+                    "Вес уходит, белок защищает мышцы. Но без тренировок тело «плоское» - стройное, но без рельефа и тонуса.",
                   rating: 3.5,
                   accent: "sky",
                 },
@@ -545,11 +516,11 @@ export default function NutritionBasics({
         {/* CTA */}
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
-            Первый шаг — самый важный
+            Первый шаг - самый важный
           </h2>
           <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
             Теория без практики не стоит ничего. Попробуй свою первую тренировку
-            — и почувствуй разницу.
+            - и почувствуй разницу.
           </p>
           <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-amber-500/15 mb-2">
             Начать тренировку <ArrowRight className="size-4" />
@@ -597,7 +568,7 @@ function CalorieCalculator() {
 
   return (
     <div className="max-w-[600px] mx-auto rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8 shadow-xl">
-      {/* Header + Inputs — single compact strip */}
+      {/* Header + Inputs - single compact strip */}
       <div className="flex items-stretch border-b border-white/5">
         <div className="flex items-center flex-1 p-0.5">
           {[
@@ -627,7 +598,7 @@ function CalorieCalculator() {
         </div>
       </div>
 
-      {/* Activity selector — compact row */}
+      {/* Activity selector - compact row */}
       <div className="flex flex-col gap-2 px-4 py-2.5 border-b border-white/5">
         <div className="flex items-center justify-between">
           <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Активность</span>
