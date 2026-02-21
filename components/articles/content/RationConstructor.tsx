@@ -26,6 +26,7 @@ import {
   Search,
   Database,
   Activity,
+  Infinity as InfinityIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -749,8 +750,10 @@ export default function RationConstructor({
                   <p className="text-2xl font-bold text-amber-400 mb-1">80%</p>
                   <p className="text-xs text-white/40">точности достаточно</p>
                 </div>
-                <div className="rounded-xl bg-white/[0.04] p-3 text-center">
-                  <p className="text-2xl font-bold text-amber-400 mb-1">∞</p>
+                <div className="rounded-xl bg-white/[0.04] p-3 text-center flex flex-col justify-center">
+                  <div className="flex items-center justify-center h-[32px] mb-1">
+                    <InfinityIcon className="size-8 text-amber-400" strokeWidth={3} />
+                  </div>
                   <p className="text-xs text-white/40">пищевая грамотность навсегда</p>
                 </div>
               </div>
