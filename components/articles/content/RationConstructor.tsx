@@ -695,7 +695,7 @@ export default function RationConstructor({
         {/* Секция 4: Инструменты */}
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-            Инструменты: <span className="text-emerald-400">FatSecret</span> vs <span className="text-violet-400">CalAI</span>
+            Инструменты: <span className="text-emerald-400">FatSecret</span> vs <span className="text-violet-400">CalAI</span>. Как выбрать?
           </h2>
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
