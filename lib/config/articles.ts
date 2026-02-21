@@ -111,5 +111,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 8,
     access_level: "basic",
     image_url: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?q=80&w=2080&auto=format&fit=crop"
+  },
+  {
+    id: "supplements-guide",
+    slug: "supplements-guide",
+    title: "Гид по добавкам: что реально работает и стоит ли тратить деньги",
+    description: "Научный разбор БАДов и спортпита без маркетинга. Витамин D, Омега-3, креатин, протеин, коллаген — конкретные дозировки, бренды и ссылки.",
+    category: "Биохакинг",
+    reading_time: 12,
+    access_level: "pro",
+    image_url: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=2070&auto=format&fit=crop"
   }
 ];
