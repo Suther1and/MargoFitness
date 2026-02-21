@@ -153,11 +153,11 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
       {/* ARTICLE BODY */}
       <article className="max-w-[860px] mx-auto px-4 md:px-0">
         <div className="space-y-6 mb-14 text-left">
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Давай начистоту. Ты наверняка хотя бы раз слышала: «Дома нормально не потренируешься», «Без тренажёров результата не будет», «Это всё для тех, кому лень дойти до зала». Я слышала это сотни раз - и от подруг, и от коллег по индустрии. И каждый раз улыбалась, потому что знаю: за этими фразами стоит не наука, а привычка.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Давай начистоту. Ты наверняка хотя бы раз слышала: «Дома нормально не потренируешься», «Без тренажёров результата не будет». Я слышала это сотни раз - и каждый раз улыбалась, потому что знаю: за этими фразами стоит не наука, а <span className="text-white/90 font-bold">привычка</span>.
           </p>
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Сегодня я хочу разложить всё по полочкам. Без розовых очков, без агрессивного маркетинга. Просто факты о том, как работает твоё тело и почему ему всё равно, где ты тренируешься - в зале за пять тысяч в месяц или в своей гостиной.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Сегодня я хочу разложить всё по полочкам. Просто факты о том, как работает твоё тело и почему ему <span className="text-rose-400/85 font-bold underline decoration-rose-500/30 underline-offset-4">всё равно</span>, где ты тренируешься - в зале или в своей гостиной.
           </p>
         </div>
 
@@ -186,8 +186,8 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             Что на самом деле нужно мышцам
           </h2>
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Когда мы говорим о результате - подтянутом теле, тонусе, сжигании жира - всё сводится к трём вещам: <strong className="text-white/80">механическое напряжение</strong>, <strong className="text-white/80">метаболический стресс</strong> и <strong className="text-white/80">мышечное повреждение</strong>. Это три кита адаптации, о которых говорит спортивная физиология. И ни один из них не требует абонемента в зал.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Когда мы говорим о результате - подтянутом теле, тонусе, сжигании жира - всё сводится к трём вещам: <span className="text-rose-400/85 font-bold">механическое напряжение</span>, <span className="text-rose-400/85 font-bold">метаболический стресс</span> и <span className="text-rose-400/85 font-bold">мышечное повреждение</span>. Это три кита адаптации, и ни один из них <span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">не требует</span> абонемента в зал.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -207,8 +207,8 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             Честное сравнение: зал vs дом
           </h2>
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            <strong className="text-white/80">Зал в теории:</strong> ты приходишь 3 раза в неделю, выполняешь чёткую программу, работаешь с тренером, прогрессируешь. <strong className="text-white/80">Зал в реальности:</strong> 40 минут на дорогу, 15 минут на переодевание, 10 минут ждёшь свободный тренажёр, отвлекаешься на телефон между подходами, ещё 40 минут обратно. Из 60 минут тренировки эффективных остаётся 25-30.
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            <span className="text-white/85 font-bold italic">Зал в реальности:</span> 40 минут на дорогу, 15 минут на переодевание, очереди к тренажёрам. Из часа тренировки эффективных остаётся <span className="text-rose-400/85 font-bold underline decoration-rose-500/20 underline-offset-4">меньше половины</span>. Дома же каждая минута работает на тебя.
           </p>
 
           <div className="rounded-2xl border border-white/10 overflow-hidden mb-8">
@@ -248,8 +248,8 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             Миф про «несерьёзные» веса
           </h2>
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            «С гантелями по 2-4 кг ничего не накачаешь» - самый живучий миф. Исследование в <em>Journal of Applied Physiology</em> показало: тренировки с лёгкими весами (30% от максимума) до отказа дают <strong className="text-white/80">сопоставимый рост мышечной массы</strong> с тяжёлыми весами.
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            «С гантелями по 2-4 кг ничего не накачаешь» - самый живучий миф. Исследования показывают: тренировки с лёгкими весами до отказа дают <span className="text-rose-400/85 font-bold">сопоставимый рост</span> мышечной массы. Главное - <span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">интенсивность</span>.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch mb-14">
@@ -307,11 +307,11 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
             Главное преимущество, о котором не говорят
           </h2>
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Знаешь, что убивает результат больше всего? Не маленькие гантели, не отсутствие тренажёра для ягодиц. <strong>Пропущенные тренировки.</strong>
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Знаешь, что убивает результат больше всего? Не маленькие гантели, не отсутствие тренажёра. <span className="text-rose-400/85 font-bold">Пропущенные тренировки</span>.
           </p>
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Я строю MargoFitness именно на этом принципе: максимум результата при минимуме барьеров. Потому что лучшая тренировка - это та, которую ты реально делаешь. Не та, о которой мечтаешь, глядя на абонемент в сумке.
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            Я строю MargoFitness на принципе: максимум результата при <span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">минимуме барьеров</span>. Потому что лучшая тренировка - это та, которую ты реально делаешь.
           </p>
 
           <div className="lg:hidden">

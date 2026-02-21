@@ -225,13 +225,7 @@ export default function SafetyBasics({
           <SectionHeader icon={ThermometerSun} title="Разминка - не опция, а защита" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
-            Холодные мышцы - жёсткие мышцы. Жёсткие мышцы - это мышцы, которые <span className="text-white/85 font-bold">рвутся</span>. Разминка занимает <span className="text-sky-400/85 font-bold underline decoration-sky-500/20 underline-offset-4">5-7 минут</span>. Она поднимает температуру тканей и «включает» нервную систему.
-          </p>
-
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Разминка занимает 5–7 минут. Она поднимает температуру мышц,
-            увеличивает приток крови к суставам и «включает» нервную систему.
-            После неё ты двигаешься точнее, сильнее и безопаснее.
+            Холодные мышцы - жёсткие мышцы. Жёсткие мышцы - это мышцы, которые <span className="text-white/90 font-bold">рвутся</span>. Разминка занимает <span className="text-sky-400/85 font-bold underline decoration-sky-500/20 underline-offset-4">5-7 минут</span>, но именно они защищают тебя от травм. Она поднимает температуру тканей, увеличивает приток крови к суставам и «включает» нервную систему. После неё ты двигаешься точнее, сильнее и безопаснее.
           </p>
 
           {/* Пошаговая разминка */}
