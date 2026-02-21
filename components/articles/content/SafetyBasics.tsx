@@ -81,7 +81,7 @@ export default function SafetyBasics({
             </h1>
 
             <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-sky-400/30 pl-8 italic">
-              Твоя гостиная — это не зал с тренером и зеркалами. Здесь ты сама
+              Твоя гостиная - это не зал с тренером и зеркалами. Здесь ты сама
               отвечаешь за свою безопасность. Простые правила, которые защитят
               тебя от 95% домашних травм.
             </p>
@@ -103,17 +103,14 @@ export default function SafetyBasics({
       <article className="max-w-[860px] mx-auto px-4 md:px-0">
         {/* Вступление */}
         <div className="space-y-6 mb-14 text-left">
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Дома кажется, что травмироваться невозможно. Нет тяжёлых штанг, нет
-            чужих людей, которые могут задеть. Но статистика говорит обратное:
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Дома кажется, что травмироваться невозможно. Но статистика говорит обратное:
             большинство бытовых спортивных травм происходят именно дома. И не
-            из-за сложных упражнений, а из-за мелочей — холодных мышц, скользкого
+            из-за сложных упражнений, а <span className="text-white/90 font-bold">из-за мелочей</span> - холодных мышц, скользкого
             пола, неправильного дыхания.
           </p>
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Я собрала всё, что нужно знать, в одну статью. Это не параноидальный
-            список запретов, а простой набор привычек, которые за пять минут
-            станут частью твоей тренировки и защитят от 95% возможных проблем.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Я собрала всё, что нужно знать, в одну статью. Это не список запретов, а простой <span className="text-sky-400/85 font-bold underline decoration-sky-500/30 underline-offset-4">набор привычек</span>, которые за пять минут станут частью твоей тренировки и <span className="text-white/90 font-bold">защитят тебя</span>.
           </p>
         </div>
 
@@ -124,7 +121,7 @@ export default function SafetyBasics({
               <div className="lg:col-span-3 space-y-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20">
                   <ShieldCheck className="size-3.5 text-sky-400" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Твоя безопасность — наш приоритет</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Твоя безопасность - наш приоритет</span>
                 </div>
                 
                 <h2 className="text-3xl md:text-4xl font-oswald font-black uppercase tracking-tight text-white leading-tight">
@@ -199,42 +196,36 @@ export default function SafetyBasics({
           </div>
         </section>
 
-        {/* Секция 1 — Пространство */}
+        {/* Секция 1 - Пространство */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Home} title="Подготовь пространство" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Прежде чем начать — оглянись. Тренировка дома требует минимум 2×2
-            метра свободного пространства. Звучит очевидно, но углы столов,
-            ножки стульев и лежащие на полу игрушки — это топ причин ушибов и
-            подвёрнутых голеностопов при домашних тренировках.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Прежде чем начать - оглянись. Тренировка дома требует минимум <span className="text-white/85 font-bold">2x2 метра</span> свободного пространства. Углы столов и лежащие на полу игрушки - это <span className="text-sky-400/85 font-semibold">топ причин</span> ушибов.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <DoCard items={[
               "Убери всё лишнее из зоны тренировки",
               "Проверь, что пол сухой и не скользкий",
-              "Используй коврик — он даёт сцепление и защищает суставы",
+              "Используй коврик - он даёт сцепление и защищает суставы",
               "Убедись, что потолок позволяет поднять руки вверх",
             ]} />
             <DontCard items={[
               "Тренироваться на кафельном полу без коврика",
-              "Заниматься в носках на гладком полу — опасно скользить",
+              "Заниматься в носках на гладком полу - опасно скользить",
               "Ставить стакан воды на полу рядом с ковриком",
               "Игнорировать мебель «где-то сзади»",
             ]} />
           </div>
         </section>
 
-        {/* Секция 2 — Разминка */}
+        {/* Секция 2 - Разминка */}
         <section className="mb-14 text-left">
-          <SectionHeader icon={ThermometerSun} title="Разминка — не опция, а защита" />
+          <SectionHeader icon={ThermometerSun} title="Разминка - не опция, а защита" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Холодные мышцы — жёсткие мышцы. Жёсткие мышцы — это мышцы, которые
-            рвутся. Это не метафора: при резкой нагрузке без разогрева
-            микроволокна буквально получают повреждения, на которые тело не было
-            готово. Результат — боль, растяжение, откат на неделю-две.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Холодные мышцы - жёсткие мышцы. Жёсткие мышцы - это мышцы, которые <span className="text-white/85 font-bold">рвутся</span>. Разминка занимает <span className="text-sky-400/85 font-bold underline decoration-sky-500/20 underline-offset-4">5-7 минут</span>. Она поднимает температуру тканей и «включает» нервную систему.
           </p>
 
           <p className="text-lg text-white/60 leading-relaxed mb-8">
@@ -254,19 +245,19 @@ export default function SafetyBasics({
                 {
                   time: "0–2 мин",
                   title: "Общий разогрев",
-                  desc: "Ходьба на месте, лёгкие прыжки, подъёмы коленей. Цель — повысить пульс до 100–110 ударов.",
+                  desc: "Ходьба на месте, лёгкие прыжки, подъёмы коленей. Цель - повысить пульс до 100–110 ударов.",
                   color: "sky" as const,
                 },
                 {
                   time: "2–4 мин",
                   title: "Суставная гимнастика",
-                  desc: "Вращения в голеностопах, коленях, тазобедренных, плечевых суставах. Каждый сустав — по 10 вращений в каждую сторону.",
+                  desc: "Вращения в голеностопах, коленях, тазобедренных, плечевых суставах. Каждый сустав - по 10 вращений в каждую сторону.",
                   color: "sky" as const,
                 },
                 {
                   time: "4–5 мин",
                   title: "Динамическая растяжка",
-                  desc: "Махи ногами, выпады с поворотом корпуса, наклоны. Не статика — а движение с полной амплитудой.",
+                  desc: "Махи ногами, выпады с поворотом корпуса, наклоны. Не статика - а движение с полной амплитудой.",
                   color: "sky" as const,
                 },
                 {
@@ -284,13 +275,13 @@ export default function SafetyBasics({
           {/* Предупреждение о статической растяжке */}
           <p className="text-sm text-white/30 italic leading-relaxed px-2">
             Не путай разминку со статической растяжкой. Садиться в шпагат или
-            тянуться к носкам по 30 секунд — это заминка, а не разминка. Перед
+            тянуться к носкам по 30 секунд - это заминка, а не разминка. Перед
             тренировкой нужны динамические движения, которые разогревают, а не
             расслабляют мышцы.
           </p>
         </section>
 
-        {/* Секция 3 — Обувь */}
+        {/* Секция 3 - Обувь */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Footprints} title="Обувь: босиком или в кроссовках?" />
 
@@ -327,22 +318,19 @@ export default function SafetyBasics({
           </div>
 
           <p className="text-sm text-white/30 italic leading-relaxed">
-            В тренировках MargoFitness основной формат — силовые с гантелями на
+            В тренировках MargoFitness основной формат - силовые с гантелями на
             коврике. Для них идеально подходит босиком или носки с силиконовыми
-            точками. Если в тренировке есть прыжковый блок — обувай кроссовки на
+            точками. Если в тренировке есть прыжковый блок - обувай кроссовки на
             это время.
           </p>
         </section>
 
-        {/* Секция 4 — Дыхание */}
+        {/* Секция 4 - Дыхание */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Wind} title="Дыхание: простое правило, которое меняет всё" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Ты удивишься, но большинство новичков задерживают дыхание во время
-            упражнений. Это рефлекс — тело напрягается и «забывает» дышать. Но
-            именно это повышает давление, вызывает головокружение и снижает
-            силу.
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Большинство новичков <span className="text-white/85 font-semibold italic">задерживают дыхание</span>. Это рефлекс, но именно он повышает давление и снижает силу. Правило максимально простое: <span className="text-sky-400/85 font-bold underline decoration-sky-500/20 underline-offset-4">выдох на усилии</span>.
           </p>
 
           <p className="text-lg text-white/60 leading-relaxed mb-8">
@@ -366,7 +354,7 @@ export default function SafetyBasics({
                 Выдох
               </p>
               <p className="text-sm text-white/40 leading-relaxed">
-                Когда ты преодолеваешь нагрузку — выдыхай. Это стабилизирует
+                Когда ты преодолеваешь нагрузку - выдыхай. Это стабилизирует
                 корпус и помогает развить максимальное усилие.
               </p>
             </div>
@@ -386,7 +374,7 @@ export default function SafetyBasics({
                 Вдох
               </p>
               <p className="text-sm text-white/40 leading-relaxed">
-                Когда возвращаешь вес в исходное положение — вдыхай. Тело
+                Когда возвращаешь вес в исходное положение - вдыхай. Тело
                 расслабляется и набирает воздух для следующего повторения.
               </p>
             </div>
@@ -394,10 +382,10 @@ export default function SafetyBasics({
 
           <div className="text-lg text-white/60 leading-relaxed mb-6">
             <p>
-              Приседание: опускаешься вниз — <strong className="text-white/80">вдох</strong>, встаёшь — <strong className="text-white/80">выдох</strong>.
+              Приседание: опускаешься вниз - <strong className="text-white/80">вдох</strong>, встаёшь - <strong className="text-white/80">выдох</strong>.
             </p>
             <p>
-              Отжимание: опускаешься к полу — <strong className="text-white/80">вдох</strong>, выжимаешь себя вверх — <strong className="text-white/80">выдох</strong>.
+              Отжимание: опускаешься к полу - <strong className="text-white/80">вдох</strong>, выжимаешь себя вверх - <strong className="text-white/80">выдох</strong>.
             </p>
             <p>
               Планка: не задерживай дыхание, делай ровные <strong className="text-white/80">вдохи</strong> и <strong className="text-white/80">выдохи</strong>.
@@ -409,34 +397,31 @@ export default function SafetyBasics({
           </div>
         </section>
 
-        {/* Секция 5 — Красные флаги */}
+        {/* Секция 5 - Красные флаги */}
         <section className="mb-14 text-left">
           <SectionHeader icon={OctagonAlert} title="Красные флаги: когда немедленно остановиться" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            Есть разница между «тяжело» и «опасно». Жжение в мышцах на
-            последних повторениях — это нормально, это тот самый метаболический
-            стресс, о котором мы говорили. А вот следующие сигналы — это причина
-            остановить тренировку сразу:
+          <p className="text-lg text-white/70 leading-relaxed mb-6">
+            Есть разница между «тяжело» и <span className="text-rose-400/90 font-bold">«опасно»</span>. Жжение в мышцах - это норма. А следующие сигналы - это причина <span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">остановить тренировку</span> сразу:
           </p>
 
           <div className="space-y-3 mb-8">
             {[
               {
                 signal: "Острая боль в суставе",
-                why: "Жжение в мышце — норма. Резкая, стреляющая боль в колене, плече, запястье — стоп. Это может быть повреждение связки или хряща.",
+                why: "Жжение в мышце - норма. Резкая, стреляющая боль в колене, плече, запястье - стоп. Это может быть повреждение связки или хряща.",
               },
               {
                 signal: "Головокружение или потемнение в глазах",
-                why: "Признак скачка давления или гипогликемии. Сядь, выпей воды, подожди. Если повторяется — обратись к врачу.",
+                why: "Признак скачка давления или гипогликемии. Сядь, выпей воды, подожди. Если повторяется - обратись к врачу.",
               },
               {
                 signal: "Онемение или покалывание",
-                why: "Это нервный сигнал. Пережатый нерв или неправильная позиция. Не «разрабатывай» — останови движение и скорректируй технику.",
+                why: "Это нервный сигнал. Пережатый нерв или неправильная позиция. Не «разрабатывай» - останови движение и скорректируй технику.",
               },
               {
                 signal: "Щелчок с болью",
-                why: "Безболезненные щелчки в суставах — часто норма. Но если за щелчком следует боль или ограничение движения — заканчивай упражнение.",
+                why: "Безболезненные щелчки в суставах - часто норма. Но если за щелчком следует боль или ограничение движения - заканчивай упражнение.",
               },
               {
                 signal: "Тошнота или предобморочное состояние",
@@ -458,9 +443,9 @@ export default function SafetyBasics({
                 </p>
               </div>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
-                Правило «лучше недоделать, чем переделать» — это не слабость, а
-                зрелость. Одна пропущенная тренировка из-за предосторожности —
-                это ноль потерь. Одна травма из-за упрямства — это минус 2–6
+                Правило «лучше недоделать, чем переделать» - это не слабость, а
+                зрелость. Одна пропущенная тренировка из-за предосторожности -
+                это ноль потерь. Одна травма из-за упрямства - это минус 2–6
                 недель прогресса. Считай сама.
               </p>
             </div>
@@ -474,9 +459,9 @@ export default function SafetyBasics({
           </h2>
 
           <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Безопасность — это не отдельный навык. Это привычка, которая
+            Безопасность - это не отдельный навык. Это привычка, которая
             встраивается в тренировку за пару недель. Через месяц ты не будешь
-            думать о ней сознательно — она станет автоматической, как ремень
+            думать о ней сознательно - она станет автоматической, как ремень
             безопасности в машине.
           </p>
 
@@ -512,7 +497,7 @@ export default function SafetyBasics({
             Теперь ты готова
           </h2>
           <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
-            Безопасность — это фундамент. А фундамент на месте. Время
+            Безопасность - это фундамент. А фундамент на месте. Время
             тренироваться.
           </p>
           <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-sky-500 hover:bg-sky-600 text-black font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-sky-500/15 mb-2">
