@@ -398,7 +398,7 @@ function EvidenceTierList() {
     },
     {
       label: "Работает в контексте",
-      color: "amber",
+      color: "cyan",
       icon: AlertTriangle,
       items: [
         { name: "Железо", note: "только при подтверждённом дефиците (анализ!)" },
@@ -408,7 +408,7 @@ function EvidenceTierList() {
       ],
     },
     {
-      label: "Маркетинг больше науки",
+      label: "Маркетинг",
       color: "zinc",
       icon: MinusCircle,
       items: [
@@ -425,6 +425,7 @@ function EvidenceTierList() {
     zinc: { border: "border-white/10", bg: "bg-white/[0.02]", text: "text-white/40", dot: "bg-white/30" },
     pink: { border: "border-pink-500/15", bg: "bg-pink-500/[0.04]", text: "text-pink-400", dot: "bg-pink-400" },
     blue: { border: "border-blue-500/15", bg: "bg-blue-500/[0.04]", text: "text-blue-400", dot: "bg-blue-400" },
+    cyan: { border: "border-cyan-500/15", bg: "bg-cyan-500/[0.04]", text: "text-cyan-400", dot: "bg-cyan-400" },
   };
 
   return (
@@ -767,11 +768,11 @@ export default function SupplementsGuide({
             Не все добавки одинаково полезны. Одни подтверждены десятками мета-анализов, другие - только маркетинговыми бюджетами. Вот <span className="text-white/85 font-bold">честная классификация</span> по уровню научной доказательности.
           </p>
 
-          <p className="text-lg text-white/70 leading-relaxed mb-8">
-            Важно: «маркетинг больше науки» не значит «вредно». Это значит, что <span className="text-cyan-400/85 font-bold underline decoration-cyan-500/20 underline-offset-4">деньги лучше потратить на другое</span> - например, на качественный протеин или хорошую еду.
-          </p>
-
           <EvidenceTierList />
+
+          <p className="text-sm text-white/35 mt-4 italic text-center">
+            Важно: «маркетинг» не значит «вредно». Это значит, что деньги лучше потратить на другое — например, на качественный протеин или хорошую еду.
+          </p>
         </section>
 
         {/* Секция 3: Фундамент */}
