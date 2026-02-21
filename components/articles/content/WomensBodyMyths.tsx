@@ -76,7 +76,7 @@ export default function WomensBodyMyths({
             </h1>
 
             <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-sky-400/30 pl-8 italic">
-              Страх взять в руки гантели тяжелее розовых 2-килограммовых — главный враг упругого тела. Разбираем физиологию, разбиваем стереотипы и объясняем, почему силовые тренировки делают тебя более женственной.
+              Страх взять в руки гантели тяжелее розовых 2-килограммовых - главный враг упругого тела. Разбираем физиологию, разбиваем стереотипы и объясняем, почему силовые тренировки делают тебя более женственной.
             </p>
           </div>
 
@@ -96,20 +96,20 @@ export default function WomensBodyMyths({
       <article className="max-w-[860px] mx-auto px-4 md:px-0">
         {/* Вступление */}
         <div className="space-y-6 mb-14 text-left">
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            <span className="font-bold text-white/90">«Я не хочу быть похожей на мужика»</span>, <span className="font-bold text-white/90">«мне бы только чуть-чуть подтянуть, без объёмов»</span>, <span className="font-bold text-white/90">«от приседаний у меня сразу растут огромные ноги»</span>. Это топ-3 страха, которые заставляют женщин часами бегать на эллипсе и избегать силовых тренировок.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            <span className="font-bold text-white/90">«Я не хочу быть похожей на мужика»</span>, <span className="font-bold text-white/90">«мне бы только чуть-чуть подтянуть»</span>, <span className="font-bold text-white/90">«от приседаний у меня растут огромные ноги»</span>. Это топ-3 страха, которые заставляют женщин избегать силовых тренировок.
           </p>
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed">
-            Но физиология работает иначе. Женское тело создано не для того, чтобы обрастать горами мышц, а для выносливости и сохранения энергии. Давай посмотрим на факты, а не на глянцевые журналы из 2000-х.
+          <p className="text-lg md:text-xl text-white/75 leading-relaxed">
+            Но физиология работает иначе. Женское тело создано для <span className="text-white/90 font-bold underline decoration-sky-500/30 underline-offset-4">выносливости</span> и сохранения энергии. Давай посмотрим на <span className="text-sky-400/85 font-bold">факты</span>, а не на глянцевые журналы из 2000-х.
           </p>
         </div>
 
-        {/* Секция 1 — Гормоны */}
+        {/* Секция 1 - Гормоны */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Activity} title="Главный ограничитель: Тестостерон" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            Мышцы не растут просто от того, что ты подняла гантель. Для их гипертрофии (значительного увеличения в объёме) нужен мужской половой гормон — тестостерон. И вот здесь кроется главный секрет:
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            Мышцы не растут просто от того, что ты подняла гантель. Для их гипертрофии нужен мужской половой гормон - <span className="text-white/85 font-bold">тестостерон</span>. И вот здесь кроется главный секрет:
           </p>
 
           <div className="rounded-3xl bg-white/[0.02] border border-white/10 p-6 md:p-10 mb-8 overflow-hidden relative">
@@ -159,18 +159,18 @@ export default function WomensBodyMyths({
           </div>
         </section>
 
-        {/* Секция 2 — Миф против Реальности */}
+        {/* Секция 2 - Миф против Реальности */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Zap} title="Разрушитель мифов: Тонус против Массы" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-8">
-            «Я хочу просто привести мышцы в тонус» — фраза, не имеющая медицинского смысла. В физиологии нет процесса «тонизирования». Есть только два состояния: мышца либо растёт (гипертрофия), либо разрушается (атрофия), либо сохраняет текущий объём при снижении жировой прослойки.
+          <p className="text-lg text-white/70 leading-relaxed mb-8">
+            «Я хочу просто привести мышцы в тонус» - фраза, не имеющая медицинского смысла. Есть только два состояния: мышца либо <span className="text-sky-400/85 font-bold">растёт</span>, либо <span className="text-sky-400/85 font-bold">разрушается</span>.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <MythBusterCard 
               myth="От силовых я стану «квадратной»"
-              reality="Массивность даёт жир поверх мышц, а не сами мышцы. Силовые уплотняют мышечную ткань и сжигают жир — ты становишься компактнее."
+              reality="Массивность даёт жир поверх мышц, а не сами мышцы. Силовые уплотняют мышечную ткань и сжигают жир - ты становишься компактнее."
             />
             <MythBusterCard 
               myth="Для рельефа нужны легкие веса"
@@ -178,7 +178,7 @@ export default function WomensBodyMyths({
             />
             <MythBusterCard 
               myth="Если бросить, мышцы станут жиром"
-              reality="Мышцы и жир — разные ткани. Они не могут превращаться друг в друга. Без нагрузки мышцы просто уменьшатся в объёме."
+              reality="Мышцы и жир - разные ткани. Они не могут превращаться друг в друга. Без нагрузки мышцы просто уменьшатся в объёме."
             />
             <MythBusterCard 
               myth="Кардио лучше сжигает жир"
@@ -187,7 +187,7 @@ export default function WomensBodyMyths({
           </div>
         </section>
 
-        {/* Секция 5 — Блок платформы */}
+        {/* Секция 5 - Блок платформы */}
         <section className="mb-14 text-left">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-500/[0.08] via-sky-500/[0.02] to-transparent border border-sky-500/10 p-6 md:p-10">
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-sky-500/10 blur-[80px] rounded-full pointer-events-none" />
@@ -302,12 +302,12 @@ export default function WomensBodyMyths({
           </div>
         </section>
 
-        {/* Секция 3 — Таймлайн трансформации */}
+        {/* Секция 3 - Таймлайн трансформации */}
         <section className="mb-14 text-left">
           <SectionHeader icon={TrendingUp} title="Что на самом деле произойдёт с твоим телом" />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-10">
-            Если ты начнёшь регулярно делать силовые тренировки дома (даже с обычными гантелями по 3–5 кг), твоя трансформация будет выглядеть так:
+          <p className="text-lg text-white/70 leading-relaxed mb-10">
+            Если ты начнёшь регулярно делать силовые тренировки дома, твоя <span className="text-sky-400/85 font-bold underline decoration-sky-500/20 underline-offset-4">трансформация</span> будет выглядеть так:
           </p>
 
           <div className="flex flex-col">
@@ -327,26 +327,26 @@ export default function WomensBodyMyths({
               step="03"
               time="Месяцы 4-6"
               title="Рекомпозиция"
-              desc="Жировая прослойка истончается, а под ней — красивый мышечный корсет. Ты можешь весить столько же, но носить одежду на размер меньше, так как мышцы компактнее жира."
+              desc="Жировая прослойка истончается, а под ней - красивый мышечный корсет. Ты можешь весить столько же, но носить одежду на размер меньше, так как мышцы компактнее жира."
               isLast
             />
           </div>
         </section>
 
-        {/* Секция 4 — Весы */}
+        {/* Секция 4 - Весы */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Scale} title="Почему после тренировок весы могут показать плюс" />
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
             <div className="lg:col-span-3 space-y-6">
-              <p className="text-lg text-white/60 leading-relaxed">
-                Самая частая причина паники: «Я начала заниматься с гантелями, и через неделю прибавила 1.5 кг! Я перекачалась!». 
+              <p className="text-lg text-white/70 leading-relaxed">
+                Самая частая причина паники: <span className="text-white/85 font-bold italic">«Я начала заниматься, и прибавила 1.5 кг!»</span>. 
               </p>
-              <p className="text-lg text-white/60 leading-relaxed">
-                Нет, ты не нарастила 1.5 кг мышц за неделю (вспомни график тестостерона). То, что ты видишь на весах — это вода. Силовые тренировки вызывают микроповреждения мышечных волокон. В ответ на это тело запускает процесс восстановления, который всегда сопровождается локальным воспалением и задержкой жидкости.
+              <p className="text-lg text-white/70 leading-relaxed">
+                Нет, ты не нарастила мышцы за неделю. То, что ты видишь на весах - это <span className="text-sky-400/85 font-bold">вода</span>. Силовые тренировки вызывают микроповреждения волокон, что сопровождается <span className="text-white/85 font-semibold underline decoration-white/10 underline-offset-4">задержкой жидкости</span>.
               </p>
-              <p className="text-lg text-white/60 leading-relaxed">
-                Кроме того, мышцы запасают гликоген (энергию) для будущих тренировок, а каждый грамм гликогена связывает 3 грамма воды. Это естественный, здоровый процесс. Через 2-3 недели адаптации водный баланс нормализуется, отёк уйдет, и ты увидишь реальный результат.
+              <p className="text-lg text-white/70 leading-relaxed">
+                Через 2-3 недели адаптации водный баланс нормализуется, отёк уйдет, и ты увидишь <span className="text-sky-400/85 font-bold">реальный результат</span>.
               </p>
             </div>
             
@@ -358,19 +358,19 @@ export default function WomensBodyMyths({
                 </div>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">-</span>
                     <span>Спрячь весы на первый месяц</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">-</span>
                     <span>Сделай фото «до» в белье</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">-</span>
                     <span>Замеряй объемы (талия, бёдра) раз в 2 недели</span>
                   </li>
                   <li className="flex items-start gap-2.5 text-sm text-white/60 leading-relaxed">
-                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">—</span>
+                    <span className="text-sky-500/50 shrink-0 flex items-center justify-center h-5">-</span>
                     <span>Ориентируйся на то, как сидит одежда</span>
                   </li>
                 </ul>
@@ -391,7 +391,7 @@ export default function WomensBodyMyths({
               </p>
             </div>
             <p className="text-sm md:text-base text-white/60 leading-relaxed">
-              Не бойся увеличивать рабочие веса. Если ты легко делаешь 20 приседаний с 5 кг — это уже кардио. Чтобы ягодицы обрели форму, им нужен стимул. Бери 8 кг и делай 12 качественных, тяжелых повторений. Именно это строит упругое тело.
+              Не бойся увеличивать рабочие веса. Если ты легко делаешь 20 приседаний с 5 кг - это уже кардио. Чтобы ягодицы обрели форму, им нужен стимул. Бери 8 кг и делай 12 качественных, тяжелых повторений. Именно это строит упругое тело.
             </p>
           </div>
         </div>
@@ -413,7 +413,7 @@ export default function WomensBodyMyths({
             <StrategyItem 
               step="02"
               title="Прогрессивная нагрузка"
-              desc="Тело быстро привыкает к рутине. Если месяц подряд ты делаешь приседания с гантелью 5 кг — мышцы перестанут реагировать. Увеличивай вес, добавляй повторения или замедляй темп выполнения."
+              desc="Тело быстро привыкает к рутине. Если месяц подряд ты делаешь приседания с гантелью 5 кг - мышцы перестанут реагировать. Увеличивай вес, добавляй повторения или замедляй темп выполнения."
             />
             <StrategyItem 
               step="03"
@@ -428,7 +428,7 @@ export default function WomensBodyMyths({
           <div className="absolute left-0 top-6 bottom-[-8px] w-0.5 bg-sky-400/40" />
           <Quote className="absolute -left-3 -top-1 size-6 text-sky-400/30 p-0.5" />
           <p className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed italic mb-8">
-            «Женщины-бодибилдеры из интернета, которых все так боятся, годами сидят на строжайших диетах, тренируются по 3 часа в день и используют гормональную терапию. Случайно "перекачаться", тренируясь дома 3 раза в неделю — это как случайно стать космонавтом, пару раз посмотрев на звёзды.»
+            «Женщины-бодибилдеры из интернета, которых все так боятся, годами сидят на строжайших диетах, тренируются по 3 часа в день и используют гормональную терапию. Случайно "перекачаться", тренируясь дома 3 раза в неделю - это как случайно стать космонавтом, пару раз посмотрев на звёзды.»
           </p>
           <footer className="flex items-center gap-4">
             <div className="relative w-14 h-14 -ml-1 -my-2 shrink-0 rounded-full border-2 border-sky-500/20 overflow-hidden shadow-lg shadow-sky-500/20">
