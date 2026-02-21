@@ -42,8 +42,7 @@ interface SupplementData {
   whoNeeds: string;
   dosage: string;
   form: string;
-  brand: string;
-  alternatives: string;
+  brands: string;
   wbLink: string;
   ozonLink: string;
   image?: string;
@@ -266,56 +265,69 @@ function SupplementCard({
           {data.whatItDoes}
         </p>
 
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-3 text-[10px]">
-          <div>
-            <span className="text-white/25 font-bold uppercase tracking-wider">
-              Кому
-            </span>
-            <p className="text-white/50 mt-0.5">{data.whoNeeds}</p>
+        <div className="flex flex-col gap-3 mb-4 text-[10px]">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex flex-col">
+              <span className="text-white/25 font-bold uppercase tracking-wider">
+                Кому
+              </span>
+              <p className="text-white/50 mt-0.5">
+                {data.whoNeeds}
+              </p>
+            </div>
+            <div className="flex flex-col text-right shrink-0">
+              <span className="text-white/25 font-bold uppercase tracking-wider">
+                Дозировка
+              </span>
+              <p className="text-white/50 mt-0.5">
+                {data.dosage}
+              </p>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-white/25 font-bold uppercase tracking-wider">
-              Дозировка
-            </span>
-            <p className="text-white/50 mt-0.5">{data.dosage}</p>
-          </div>
-          <div>
-            <span className="text-white/25 font-bold uppercase tracking-wider">
-              Форма
-            </span>
-            <p className="text-white/50 mt-0.5">{data.form}</p>
-          </div>
-          <div className="text-right">
-            <span className="text-white/25 font-bold uppercase tracking-wider">
-              Бренд
-            </span>
-            <p className="text-white/50 mt-0.5">{data.brand}</p>
+
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex flex-col">
+              <span className="text-white/25 font-bold uppercase tracking-wider">
+                Форма
+              </span>
+              <p className="text-white/50 mt-0.5">
+                {data.form}
+              </p>
+            </div>
+            <div className="flex flex-col text-right">
+              <span className="text-white/25 font-bold uppercase tracking-wider">
+                Бренды
+              </span>
+              <p className="text-cyan-400/70 font-medium mt-0.5">
+                {data.brands}
+              </p>
+            </div>
           </div>
         </div>
 
-        <p className="text-[10px] text-white/30 mb-3 leading-relaxed">
-          Альтернативы: {data.alternatives}
-        </p>
-
         <div className="mt-auto flex gap-2">
-          <a
-            href={data.wbLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-violet-500/10 border border-violet-500/15 text-violet-400/80 text-[10px] font-bold uppercase tracking-wider hover:bg-violet-500/20 transition-colors"
-          >
-            Wildberries
-            <ExternalLink className="size-2.5" />
-          </a>
-          <a
-            href={data.ozonLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500/10 border border-blue-500/15 text-blue-400/80 text-[10px] font-bold uppercase tracking-wider hover:bg-blue-500/20 transition-colors"
-          >
-            Ozon
-            <ExternalLink className="size-2.5" />
-          </a>
+          {data.wbLink && data.wbLink !== "#" && (
+            <a
+              href={data.wbLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-violet-500/10 border border-violet-500/15 text-violet-400/80 text-[10px] font-bold uppercase tracking-wider hover:bg-violet-500/20 transition-colors group/btn"
+            >
+              Wildberries
+              <ExternalLink className="size-2.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+            </a>
+          )}
+          {data.ozonLink && data.ozonLink !== "#" && (
+            <a
+              href={data.ozonLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-blue-500/10 border border-blue-500/15 text-blue-400/80 text-[10px] font-bold uppercase tracking-wider hover:bg-blue-500/20 transition-colors group/btn"
+            >
+              Ozon
+              <ExternalLink className="size-2.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+            </a>
+          )}
         </div>
       </div>
     </div>
@@ -436,8 +448,7 @@ const fundamentals: SupplementData[] = [
     whoNeeds: "Практически всем",
     dosage: "2 000-5 000 МЕ/день",
     form: "D3 + K2 (MK-7)",
-    brand: "GLS",
-    alternatives: "Solgar, Now Foods",
+    brands: "GLS, Solgar, Now Foods",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/d3-k2.png",
@@ -449,8 +460,7 @@ const fundamentals: SupplementData[] = [
     whoNeeds: "Если ешь рыбу < 3 раз/нед",
     dosage: "1 000-2 000 мг EPA+DHA",
     form: "Триглицеридная",
-    brand: "GLS",
-    alternatives: "Solgar, Nordic Naturals",
+    brands: "GLS, Solgar, Nordic Naturals",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/omega3.png",
@@ -462,8 +472,7 @@ const fundamentals: SupplementData[] = [
     whoNeeds: "При стрессе, судорогах, бессоннице",
     dosage: "300-400 мг/день",
     form: "Цитрат или бисглицинат",
-    brand: "GLS",
-    alternatives: "Now Foods, Doctor's Best",
+    brands: "GLS, Now Foods, Doctor's Best",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/magnesium.png",
@@ -475,8 +484,7 @@ const fundamentals: SupplementData[] = [
     whoNeeds: "При дефиците (ферритин < 30)",
     dosage: "25-50 мг/день",
     form: "Бисглицинат (мягкая)",
-    brand: "GLS",
-    alternatives: "Solgar Gentle Iron",
+    brands: "GLS, Solgar Gentle Iron",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/iron.png",
@@ -488,8 +496,7 @@ const fundamentals: SupplementData[] = [
     whoNeeds: "При высоком стрессе, вегетарианцам",
     dosage: "1 капсула/день",
     form: "B-комплекс",
-    brand: "GLS",
-    alternatives: "Now B-50, Solgar B-Complex",
+    brands: "GLS, Now B-50, Solgar B-Complex",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/b-complex.png",
@@ -504,8 +511,7 @@ const beauty: SupplementData[] = [
     whoNeeds: "После 25 лет, при нагрузке на суставы",
     dosage: "5-10 г/день",
     form: "Гидролизованный (пептиды)",
-    brand: "GLS",
-    alternatives: "Solgar, Sports Research",
+    brands: "GLS, Solgar, Sports Research",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/collagen.png",
@@ -517,8 +523,7 @@ const beauty: SupplementData[] = [
     whoNeeds: "При частых простудах, проблемной коже",
     dosage: "15-25 мг/день",
     form: "Пиколинат или бисглицинат",
-    brand: "GLS",
-    alternatives: "Now Foods, Solgar",
+    brands: "GLS, Now Foods, Solgar",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/zinc.png",
@@ -530,8 +535,7 @@ const beauty: SupplementData[] = [
     whoNeeds: "При выпадении волос, ломких ногтях",
     dosage: "5 000 мкг/день",
     form: "Капсулы",
-    brand: "GLS",
-    alternatives: "Solgar, Now Foods",
+    brands: "GLS, Solgar, Now Foods",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/biotin.png",
@@ -543,8 +547,7 @@ const beauty: SupplementData[] = [
     whoNeeds: "Как базовое покрытие дефицитов",
     dosage: "1 капсула/день",
     form: "Мультивитаминный комплекс",
-    brand: "Optimum Nutrition",
-    alternatives: "Now Eve, Solgar Female Multiple",
+    brands: "Optimum Nutrition, Now Eve, Solgar",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/opti-women.png",
@@ -559,8 +562,7 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "Если не добираешь 1.6 г белка/кг",
     dosage: "1-2 порции/день",
     form: "Whey / Whey Isolate",
-    brand: "Optimum Nutrition Gold Standard",
-    alternatives: "Primecraft, S.A.N.",
+    brands: "Optimum Nutrition, Primecraft, S.A.N.",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/whey-protein.png",
@@ -572,8 +574,7 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "Всем, кто тренируется с весами",
     dosage: "3-5 г/день, каждый день",
     form: "Моногидрат (порошок)",
-    brand: "Optimum Nutrition",
-    alternatives: "Primecraft, Now Foods",
+    brands: "Optimum Nutrition, Primecraft, Now Foods",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/creatine.png",
@@ -585,8 +586,7 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "Только при дефиците белка",
     dosage: "5-10 г/тренировку",
     form: "Порошок или капсулы",
-    brand: "Optimum Nutrition",
-    alternatives: "Primecraft, GLS",
+    brands: "Optimum Nutrition, Primecraft, GLS",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/bcaa.png",
@@ -598,8 +598,7 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "При активном жиросжигании",
     dosage: "1 000-2 000 мг/день",
     form: "L-тартрат или ацетил",
-    brand: "GLS",
-    alternatives: "Now Foods, Primecraft",
+    brands: "GLS, Now Foods, Primecraft",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/l-carnitine.png",
@@ -611,8 +610,7 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "При интенсивном потоотделении",
     dosage: "1 порция во время тренировки",
     form: "Порошок для растворения",
-    brand: "Primecraft",
-    alternatives: "GLS, Liquid IV",
+    brands: "Primecraft, GLS, Liquid IV",
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/electrolytes.png",
