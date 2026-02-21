@@ -106,7 +106,7 @@ export default function WelcomeGuide({
             </h1>
 
             <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-orange-400/30 pl-8 italic">
-              Полный гид по платформе — от первой тренировки до продвинутых
+              Полный гид по платформе - от первой тренировки до продвинутых
               инструментов. Всё, что нужно знать, чтобы начать и не
               останавливаться.
             </p>
@@ -129,15 +129,15 @@ export default function WelcomeGuide({
         {/* Вступление */}
         <div className="space-y-6 mb-14 text-left">
           <p className="text-lg md:text-xl text-white/75 leading-relaxed">
-            Ты здесь — и это уже <span className="text-white/90 font-bold">больше</span>, чем большинство людей когда-либо
-            сделают. Регистрация на фитнес-платформе — не формальность. Это
+            Ты здесь - и это уже <span className="text-white/90 font-bold">больше</span>, чем большинство людей когда-либо
+            сделают. Регистрация на фитнес-платформе - не формальность. Это
             <span className="text-orange-400/85 font-semibold"> решение</span>, за которым стоит желание изменить что-то в своей жизни.
             Мы хотим, чтобы это решение привело к результату.
           </p>
           <p className="text-lg md:text-xl text-white/75 leading-relaxed">
-            MargoFitness — это не просто набор тренировок. Это <span className="text-white/90 font-bold underline decoration-orange-500/30 underline-offset-4">система</span>:
+            MargoFitness - это не просто набор тренировок. Это <span className="text-white/90 font-bold underline decoration-orange-500/30 underline-offset-4">система</span>:
             программы, трекеры, аналитика, достижения, бонусы, сообщество.
-            Много инструментов — и все они работают вместе. В этой статье мы
+            Много инструментов - и все они работают вместе. В этой статье мы
             проведём тебя по каждому из них, чтобы ты точно знала, как
             пользоваться платформой на <span className="text-orange-400/85 font-bold">максимум</span>.
           </p>
@@ -145,12 +145,12 @@ export default function WelcomeGuide({
 
         {/* === СЕКЦИИ КОНТЕНТА === */}
 
-        {/* Секция 1 — Что доступно сразу */}
+        {/* Секция 1 - Что доступно сразу */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Gift} title="Что доступно сразу после регистрации" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
-            Бесплатный аккаунт — <span className="text-white/85 font-semibold">не демо-версия</span> с заглушками. Ты получаешь
+            Бесплатный аккаунт - <span className="text-white/85 font-semibold">не демо-версия</span> с заглушками. Ты получаешь
             реальные инструменты, которые уже работают. Вот что доступно с
             <span className="text-orange-400/85 font-bold"> первого дня</span>:
           </p>
@@ -159,29 +159,29 @@ export default function WelcomeGuide({
 
           <p className="text-lg text-white/70 leading-relaxed mt-8">
             Это не «пробный период». Бесплатный доступ остаётся <span className="text-white/85 font-bold underline decoration-white/15 underline-offset-4">навсегда</span>. А
-            когда захочешь больше тренировок, виджетов и привычек — подписка
+            когда захочешь больше тренировок, виджетов и привычек - подписка
             расширит возможности. Но начать можно <span className="text-orange-400/85 font-bold">прямо сейчас</span>, без вложений.
           </p>
         </section>
 
-        {/* Секция 2 — Тренировки */}
+        {/* Секция 2 - Тренировки */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Dumbbell} title="Как устроены тренировки" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
-            Каждый понедельник для тебя готовится <span className="text-white/85 font-bold">новая программа</span> из 2–3 сессий
+            Каждый понедельник для тебя готовится <span className="text-white/85 font-bold">новая программа</span> из 2-3 сессий
             на неделю. Ты сама выбираешь, в какие дни тебе удобно
-            тренироваться — платформа <span className="text-orange-400/85 font-semibold">подстраивается под твой график</span>. Программа
-            уже составлена, твоя задача — открыть тренировку и следовать плану.
+            тренироваться - платформа <span className="text-orange-400/85 font-semibold">подстраивается под твой график</span>. Программа
+            уже составлена, твоя задача - открыть тренировку и следовать плану.
           </p>
 
           <WeeklyWorkoutFlow />
 
           <p className="text-lg text-white/70 leading-relaxed mt-8 mb-6">
-            Каждая сессия состоит из 4–6 упражнений. К каждому прикреплена
+            Каждая сессия состоит из 4-6 упражнений. К каждому прикреплена
             <span className="text-white/85 font-bold"> видео-инструкция</span> с разбором техники и амплитуды. Ты всегда видишь,
             как правильно выполнять движение. Помимо видео указаны подходы,
-            повторения, время отдыха и описание техники — <span className="text-orange-400/85 font-semibold italic">всё на экране</span>,
+            повторения, время отдыха и описание техники - <span className="text-orange-400/85 font-semibold italic">всё на экране</span>,
             запоминать ничего не нужно.
           </p>
 
@@ -191,30 +191,30 @@ export default function WelcomeGuide({
             После завершения ты оцениваешь тренировку: насколько было тяжело и
             насколько понравилось. Тренировка отмечается как <span className="text-emerald-400/85 font-bold">выполненная</span>, а
             результат сохраняется в статистике. Каждый понедельник цикл
-            повторяется — <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">новые упражнения</span>, новые акценты, постоянная динамика.
+            повторяется - <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">новые упражнения</span>, новые акценты, постоянная динамика.
           </p>
         </section>
 
-        {/* Секция 3 — Трекер здоровья */}
+        {/* Секция 3 - Трекер здоровья */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Activity} title="Трекер здоровья" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            Тренировки — это только часть результата. <span className="text-white/85 font-bold">Сон, вода, питание, вес,
-            настроение</span> — всё влияет на прогресс. Трекер здоровья объединяет все
+            Тренировки - это только часть результата. <span className="text-white/85 font-bold">Сон, вода, питание, вес,
+            настроение</span> - всё влияет на прогресс. Трекер здоровья объединяет все
             эти метрики в одном месте, чтобы ты видела <span className="text-orange-400/85 font-semibold">полную картину</span>, а не
             только количество отжиманий.
           </p>
           <p className="text-lg text-white/70 leading-relaxed mb-8">
             Трекер состоит из двух систем: <span className="text-white/85 font-bold underline decoration-white/15 underline-offset-4">виджеты</span> и <span className="text-white/85 font-bold underline decoration-white/15 underline-offset-4">привычки</span>. Виджеты
-            отслеживают измеримые показатели. Привычки — ежедневные действия,
+            отслеживают измеримые показатели. Привычки - ежедневные действия,
             которые ты хочешь закрепить.
           </p>
 
           <WidgetShowcase />
 
           <p className="text-lg text-white/70 leading-relaxed mt-8 mb-8">
-            Каждый виджет — полноценный инструмент. Виджет воды помогает
+            Каждый виджет - полноценный инструмент. Виджет воды помогает
             поддерживать оптимальный гидробаланс. Виджет веса
             рассчитывает <span className="text-white/85 font-bold">ИМТ</span> и строит тренд, а виджет фото позволяет наглядно
             сравнивать снимки <span className="text-orange-400/85 font-bold">«до» и «после»</span> в один клик.
@@ -231,7 +231,7 @@ export default function WelcomeGuide({
           </p>
         </section>
 
-        {/* Секция 4 — Тарифы */}
+        {/* Секция 4 - Тарифы */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Layers} title="Тарифы подписки" />
 
@@ -250,63 +250,63 @@ export default function WelcomeGuide({
           <TierComparisonGrid />
 
           <p className="text-lg text-white/70 leading-relaxed mt-8">
-            <span className="text-amber-400/85 font-black uppercase tracking-tight">Elite</span> — тариф с ограниченным числом
+            <span className="text-amber-400/85 font-black uppercase tracking-tight">Elite</span> - тариф с ограниченным числом
             мест. Включает всё из <span className="text-purple-400/85 font-bold uppercase tracking-tight">Pro</span> плюс
             <span className="text-white/85 font-bold"> индивидуальное ведение</span> от Марго. Подходит тем, кому нужен
             персональный подход.
           </p>
         </section>
 
-        {/* Секция 5 — Достижения */}
+        {/* Секция 5 - Достижения */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Trophy} title="Система достижений" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            За активность на платформе ты получаешь <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">достижения</span> — от первой
+            За активность на платформе ты получаешь <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">достижения</span> - от первой
             тренировки до многомесячных серий. Каждое достижение относится к
             одной из пяти категорий редкости, а некоторые начисляют <span className="text-orange-400/85 font-bold">бонусные
             шаги</span>, которые можно потратить на оплату подписки.
           </p>
           <p className="text-lg text-white/70 leading-relaxed mb-8">
             Всего на платформе <span className="text-white/85 font-bold">более 50 достижений</span>. Они открываются
-            автоматически, когда ты достигаешь условия — не нужно ничего
+            автоматически, когда ты достигаешь условия - не нужно ничего
             запрашивать вручную.
           </p>
 
           <AchievementShowcase />
         </section>
 
-        {/* Секция 6 — Бонусы и рефералы */}
+        {/* Секция 6 - Бонусы и рефералы */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Coins} title="Бонусы и реферальная программа" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            На MargoFitness есть внутренняя валюта — <span className="text-orange-400/85 font-bold">«шаги»</span>. <span className="text-white/45 italic">1 шаг = 1 рубль</span>.
+            На MargoFitness есть внутренняя валюта - <span className="text-orange-400/85 font-bold">«шаги»</span>. <span className="text-white/45 italic">1 шаг = 1 рубль</span>.
             Шаги начисляются за достижения, кешбэк с покупок и реферальную
-            программу. Тратить их можно на оплату подписки — <span className="text-white/85 font-bold underline decoration-white/15 underline-offset-4">до 30% от суммы</span>.
+            программу. Тратить их можно на оплату подписки - <span className="text-white/85 font-bold underline decoration-white/15 underline-offset-4">до 30% от суммы</span>.
           </p>
           <p className="text-lg text-white/70 leading-relaxed mb-8">
-            При регистрации ты сразу получаешь <span className="text-orange-400/85 font-bold">250 шагов</span> — приветственный
-            бонус. Если пришла по реферальной ссылке — ещё 250 сверху.
+            При регистрации ты сразу получаешь <span className="text-orange-400/85 font-bold">250 шагов</span> - приветственный
+            бонус. Если пришла по реферальной ссылке - ещё 250 сверху.
           </p>
 
           <BonusSystemOverview />
         </section>
 
-        {/* Секция 7 — Интенсивы */}
+        {/* Секция 7 - Интенсивы */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Flame} title="Интенсивы" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            Интенсивы — это готовые <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">тематические пакеты</span> тренировок, которые
+            Интенсивы - это готовые <span className="text-white/85 font-bold underline decoration-orange-500/25 underline-offset-4">тематические пакеты</span> тренировок, которые
             можно купить один раз и получить доступ <span className="text-orange-400/85 font-bold">навсегда</span>. В отличие от
-            еженедельных программ по подписке, интенсив — самостоятельный
+            еженедельных программ по подписке, интенсив - самостоятельный
             продукт с фокусом на конкретную задачу.
           </p>
           <p className="text-lg text-white/70 leading-relaxed mb-8">
             Каждый интенсив содержит набор сессий с видео-инструкциями,
             техникой и программой. Ты покупаешь его <span className="text-white/85 font-bold">один раз</span> и возвращаешься к
-            нему когда удобно — без ограничений по времени.
+            нему когда удобно - без ограничений по времени.
           </p>
 
           <IntensiveCardsMockup />
@@ -314,18 +314,18 @@ export default function WelcomeGuide({
           <p className="text-lg text-white/70 leading-relaxed mt-8">
             Интенсивы доступны <span className="text-orange-400/80 font-semibold">вне зависимости от подписки</span>. Можно быть на
             бесплатном тарифе и при этом иметь доступ к нескольким интенсивам.
-            Это отдельная покупка — не влияет на подписку и не привязана к ней.
+            Это отдельная покупка - не влияет на подписку и не привязана к ней.
           </p>
         </section>
 
-        {/* Секция 8 — Марафоны */}
+        {/* Секция 8 - Марафоны */}
         <section className="mb-14 text-left">
           <SectionHeader icon={Medal} title="Марафоны" />
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            Марафоны — это тематические <span className="text-white/85 font-bold">фитнес-челленджи</span> длительностью 3–4
+            Марафоны - это тематические <span className="text-white/85 font-bold">фитнес-челленджи</span> длительностью 3-4
             недели, которые проводятся на платформе периодически. Это не
-            самостоятельная тренировка, а <span className="text-orange-400/85 font-bold underline decoration-orange-500/15 underline-offset-4">group-событие</span> с общей целью,
+            самостоятельная тренировка, а <span className="text-orange-400/85 font-bold underline decoration-orange-500/15 underline-offset-4">групповое событие</span> с общей целью,
             сроками и мотивацией от сообщества.
           </p>
           <p className="text-lg text-white/70 leading-relaxed mb-8">
@@ -338,7 +338,7 @@ export default function WelcomeGuide({
 
           <p className="text-lg text-white/70 leading-relaxed mt-8">
             Информация о предстоящих марафонах публикуется в личном кабинете
-            и <span className="text-orange-400/85 font-bold">Telegram-сообществе</span>. Следи за анонсами — количество мест может
+            и <span className="text-orange-400/85 font-bold">Telegram-сообществе</span>. Следи за анонсами - количество мест может
             быть ограничено.
           </p>
         </section>
@@ -352,7 +352,7 @@ export default function WelcomeGuide({
           </h2>
           <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
             Платформа настроена, инструменты ждут, программа готова.
-            Первый шаг — самый важный.
+            Первый шаг - самый важный.
           </p>
           <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-orange-500/15 mb-2">
             Начать тренировку <ArrowRight className="size-4" />
@@ -404,7 +404,7 @@ function FreeValueGrid() {
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
       <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">
-        Доступно бесплатно — навсегда
+        Доступно бесплатно - навсегда
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
         {items.map((item, i) => (
@@ -683,7 +683,7 @@ function WidgetShowcase() {
           Для каждого виджета можно задать{" "}
           <span className="text-white/60 font-medium">персональную цель</span>.
           Все виджеты формируют{" "}
-          <span className="text-white/60 font-medium">цель дня</span> —
+          <span className="text-white/60 font-medium">цель дня</span> -
           единый прогресс-бар из всех активных показателей.
         </p>
       </div>
@@ -744,8 +744,8 @@ function HabitDayExample() {
         <BarChart3 className="size-4 text-orange-400/50 shrink-0 mt-0.5" />
         <p className="text-sm text-white/40 leading-relaxed">
           Ты сама решаешь, какие привычки отслеживать и в какие дни. Задаёшь
-          расписание — привычка появляется в личном кабинете именно тогда,
-          когда нужна. Утро, день, вечер или «в любое время» — всё
+          расписание - привычка появляется в личном кабинете именно тогда,
+          когда нужна. Утро, день, вечер или «в любое время» - всё
           настраивается под твой ритм.
         </p>
       </div>
@@ -822,7 +822,7 @@ function TierComparisonGrid() {
                       v ? (
                         <Check className="size-3.5 md:size-4 text-emerald-400/70 mx-auto" />
                       ) : (
-                        <span className="text-white/10 text-[10px]">—</span>
+                        <span className="text-white/10 text-[10px]">-</span>
                       )
                     ) : (
                       <span className="text-[15px] md:text-sm font-bold text-white/65 leading-none">{v}</span>
@@ -999,7 +999,7 @@ function AchievementShowcase() {
       <div className="flex items-start gap-2.5 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
         <Sparkles className="size-4 text-yellow-400/50 shrink-0 mt-0.5" />
         <p className="text-sm text-white/40 leading-relaxed">
-          Награды за достижения — от 50 до 1 000 шагов. Абсолютные достижения
+          Награды за достижения - от 50 до 1 000 шагов. Абсолютные достижения
           требуют месяцев активности, но дают максимальный бонус.
         </p>
       </div>
@@ -1097,7 +1097,7 @@ function BonusSystemOverview() {
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <p className="text-xs font-bold uppercase tracking-widest text-white/30">
-            4 уровня кешбэка <span className="hidden md:inline">— растёт с покупками</span>
+            4 уровня кешбэка <span className="hidden md:inline">- растёт с покупками</span>
           </p>
           <div className="flex gap-1.5 md:hidden">
             {levels.map((l, i) => (
@@ -1208,7 +1208,7 @@ function BonusSystemOverview() {
             {[
               { step: "1", text: "Друг регистрируется по твоей ссылке → получает 250 шагов" },
               { step: "2", text: "Друг покупает подписку → ты получаешь 500 шагов (за первого)" },
-              { step: "3", text: "С каждой его покупки тебе начисляется 3–10% шагами" },
+              { step: "3", text: "С каждой его покупки тебе начисляется 3-10% шагами" },
             ].map((s, i) => (
               <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
                 <div className="size-6 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5">
@@ -1225,7 +1225,7 @@ function BonusSystemOverview() {
               Шагами можно оплатить до{" "}
               <span className="text-white/60 font-medium">30% стоимости</span>{" "}
               любой подписки. 1 шаг = 1 рубль. Реферальный процент растёт
-              с общей суммой покупок рефералов — от 3% до 10%.
+              с общей суммой покупок рефералов - от 3% до 10%.
             </p>
           </div>
         </div>
@@ -1358,7 +1358,7 @@ function IntensiveCardsMockup() {
     },
     {
       title: "Тренировки на воздухе",
-      desc: "Программы для улицы и парка — кардио и работа с весом тела",
+      desc: "Программы для улицы и парка - кардио и работа с весом тела",
       difficulty: 2,
       inventory: "Нет",
       price: "1 290 ₽",
@@ -1370,7 +1370,7 @@ function IntensiveCardsMockup() {
 
   return (
     <div className="overflow-visible">
-      {/* Arrows — desktop */}
+      {/* Arrows - desktop */}
       <div className="hidden md:flex items-center justify-end gap-2 mb-3">
         <button
           onClick={() => scroll("left")}
@@ -1526,7 +1526,7 @@ function IntensiveCardsMockup() {
 function MarathonFormat() {
   const features = [
     {
-      title: "3–4 недели",
+      title: "3-4 недели",
       desc: "Структурированная программа с нарастающей нагрузкой и чёткими целями на каждую неделю.",
     },
     {
