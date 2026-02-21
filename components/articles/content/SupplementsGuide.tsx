@@ -265,9 +265,9 @@ function SupplementCard({
           {data.whatItDoes}
         </p>
 
-        <div className="flex flex-col gap-3 mb-4 text-[10px]">
+        <div className="flex flex-col gap-3 mb-4 text-[10px] mt-auto">
           <div className="flex justify-between items-start gap-4">
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="text-white/25 font-bold uppercase tracking-wider">
                 Кому
               </span>
@@ -275,7 +275,7 @@ function SupplementCard({
                 {data.whoNeeds}
               </p>
             </div>
-            <div className="flex flex-col text-right shrink-0">
+            <div className="flex flex-col text-right shrink-0 min-w-[80px]">
               <span className="text-white/25 font-bold uppercase tracking-wider">
                 Дозировка
               </span>
@@ -286,7 +286,7 @@ function SupplementCard({
           </div>
 
           <div className="flex justify-between items-start gap-4">
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="text-white/25 font-bold uppercase tracking-wider">
                 Форма
               </span>
@@ -294,7 +294,7 @@ function SupplementCard({
                 {data.form}
               </p>
             </div>
-            <div className="flex flex-col text-right">
+            <div className="flex flex-col text-right min-w-0">
               <span className="text-white/25 font-bold uppercase tracking-wider">
                 Бренды
               </span>
