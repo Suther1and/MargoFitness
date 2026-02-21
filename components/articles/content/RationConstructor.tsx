@@ -47,105 +47,86 @@ function MacroImpactBars() {
       icon: Zap,
       caloriesOnly: 35,
       withMacros: 78,
-      desc: "Только калории дают скачки сахара. Баланс БЖУ — стабильная энергия весь день.",
+      desc: "Только дефицит дает скачки сахара. Баланс БЖУ — стабильная энергия весь день.",
     },
     {
       label: "Настроение и сон",
       icon: Heart,
       caloriesOnly: 40,
       withMacros: 72,
-      desc: "Дефицит жиров убивает гормоны и сон. С макросами — спокойствие и восстановление.",
+      desc: "Дефицит жиров убивает гормоны. С макросами — спокойствие и восстановление.",
     },
   ];
 
   return (
-    <div className="rounded-[2rem] bg-white/[0.03] border border-white/10 p-6 md:p-8 overflow-hidden relative">
-      {/* Background glow */}
-      <div className="absolute -top-24 -right-24 size-48 bg-amber-500/10 blur-[60px] rounded-full pointer-events-none" />
+    <div className="rounded-[2rem] bg-white/[0.03] border border-white/10 p-6 md:p-8 relative overflow-hidden">
+      <div className="absolute -top-24 -right-24 size-48 bg-amber-500/5 blur-[60px] rounded-full pointer-events-none" />
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-          <h3 className="text-lg font-bold text-white mb-1">Эффективность подхода</h3>
-          <p className="text-xs text-white/40">Сравнение результатов за 3 месяца</p>
+          <h3 className="text-xl font-oswald font-black uppercase tracking-tight text-white mb-1">Эффективность подхода</h3>
+          <p className="text-xs text-white/30 uppercase tracking-widest font-bold">Сравнение результатов за 3 месяца</p>
         </div>
-        <div className="flex items-center gap-5 text-[10px] font-bold uppercase tracking-widest">
-          <div className="flex items-center gap-2 text-white/40">
-            <div className="size-2 rounded-full bg-white/20" />
-            <span>Только калории</span>
+        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.15em]">
+          <div className="flex items-center gap-2 text-white/30">
+            <div className="size-1.5 rounded-full bg-white/20" />
+            <span>Только дефицит</span>
           </div>
-          <div className="flex items-center gap-2 text-amber-400">
-            <div className="size-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-            <span>Калории + БЖУ</span>
+          <div className="flex items-center gap-2 text-amber-400/80">
+            <div className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
+            <span>Дефицит + БЖУ</span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {metrics.map((m, i) => (
-          <div key={i} className="group">
+          <div key={i} className="group relative bg-white/[0.02] border border-white/5 rounded-2xl p-4 md:p-5 hover:bg-white/[0.04] transition-all">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="size-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                  <m.icon className="size-4 text-white/60 group-hover:text-amber-400 transition-colors" />
+                <div className="size-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-amber-500/30 transition-colors">
+                  <m.icon className="size-4.5 text-white/40 group-hover:text-amber-400 transition-colors" />
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-white/80 block">{m.label}</span>
-                  <p className="text-[11px] text-white/30 leading-relaxed mt-0.5 max-w-[280px] md:max-w-none">
+                  <span className="text-sm font-bold text-white/90 block uppercase tracking-tight">{m.label}</span>
+                  <p className="text-[11px] text-white/30 leading-relaxed mt-0.5 max-w-[400px]">
                     {m.desc}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0">
                 <span className="text-xs font-black text-amber-400 tabular-nums">+{m.withMacros - m.caloriesOnly}%</span>
-                <p className="text-[9px] uppercase tracking-tighter text-white/20 font-bold">прогресс</p>
+                <p className="text-[8px] uppercase tracking-tighter text-white/20 font-bold">эффект</p>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-white/20" />
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Только калории</span>
-                </div>
-                <span className="text-[10px] font-bold text-white/40 tabular-nums">{m.caloriesOnly}%</span>
-              </div>
-              <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${m.caloriesOnly}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: i * 0.1 }}
-                  className="h-full bg-white/20 rounded-full"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Калории + БЖУ</span>
-                </div>
-                <span className="text-[10px] font-bold text-amber-400 tabular-nums">{m.withMacros}%</span>
-              </div>
-              <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${m.withMacros}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1, delay: i * 0.1 + 0.2 }}
-                  className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.2)]"
-                />
-              </div>
+            <div className="relative h-2.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/5">
+              {/* Foreground layer (With Macros) */}
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${m.withMacros}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: i * 0.1 + 0.2 }}
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-600 to-amber-400 rounded-full"
+              />
+              {/* Background layer (Calories Only) - Now using a distinct gray color */}
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${m.caloriesOnly}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: i * 0.1 }}
+                style={{ zIndex: 20 }}
+                className="absolute inset-y-0 left-0 bg-[#3f3f46] rounded-l-full border-r border-white/20"
+              />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 pt-6 border-t border-white/5 flex items-center gap-3">
-        <div className="size-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-          <CheckCircle2 className="size-3 text-amber-500/60" />
-        </div>
-        <p className="text-[11px] text-white/40 leading-relaxed">
-          Данные подтверждены мета-анализом <span className="text-white/60 font-medium">JISSN (2021)</span>: группа с контролем БЖУ показала на <span className="text-amber-400/80 font-bold">40% лучший результат</span> в сохранении мышц.
+      <div className="mt-8 pt-5 border-t border-white/5 flex items-center gap-3 opacity-60">
+        <CheckCircle2 className="size-3.5 text-amber-500" />
+        <p className="text-[10px] text-white/50 leading-relaxed uppercase tracking-wide font-bold">
+          JISSN (2021): <span className="text-amber-400">Подсчет БЖУ дает +40%</span> к сохранению мышц
         </p>
       </div>
     </div>
