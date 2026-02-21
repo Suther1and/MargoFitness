@@ -38,6 +38,40 @@ export default function NutritionBasics({
     threshold: 0.5,
   });
 
+  // Используем useLayoutEffect для мгновенного скролла до отрисовки
+  const [showBackLink, setShowBackLink] = React.useState(false);
+  const [backArticleName, setBackArticleName] = React.useState("");
+
+  React.useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const target = window.sessionStorage.getItem('pending-scroll-target');
+    const from = window.sessionStorage.getItem('pending-scroll-from');
+    
+    if (target === 'calorie-calculator') {
+      const element = document.getElementById('calorie-calculator');
+      if (element) {
+        const offset = 100;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'instant'
+        });
+
+        if (from === 'ration-constructor') {
+          setShowBackLink(true);
+          setBackArticleName('Конструктор рациона');
+        }
+        
+        // Очищаем после использования
+        window.sessionStorage.removeItem('pending-scroll-target');
+        window.sessionStorage.removeItem('pending-scroll-from');
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const handleScrollToCalculator = (e: any) => {
       const element = document.getElementById('calorie-calculator');
@@ -148,7 +182,12 @@ export default function NutritionBasics({
             </p>
 
           {/* Интерактивный калькулятор калорий */}
-          <CalorieCalculator onBack={onBack} onBackToArticle={onBackToArticle} />
+          <CalorieCalculator 
+            onBack={onBack} 
+            onBackToArticle={onBackToArticle} 
+            showBackLink={showBackLink} 
+            backArticleName={backArticleName} 
+          />
 
             <p className="text-lg text-white/60 leading-relaxed mb-6">
               И вот что важно: для этого не нужно считать каждую калорию.
@@ -564,23 +603,11 @@ export default function NutritionBasics({
 
 /* --- Локальные компоненты --- */
 
-function CalorieCalculator({ onBack, onBackToArticle }: { onBack: () => void, onBackToArticle?: (slug: string) => void }) {
+function CalorieCalculator({ onBack, onBackToArticle, showBackLink, backArticleName }: { onBack: () => void, onBackToArticle?: (slug: string) => void, showBackLink: boolean, backArticleName: string }) {
   const [height, setHeight] = React.useState<string>("");
   const [weight, setWeight] = React.useState<string>("");
   const [age, setAge] = React.useState<string>("");
   const [activityLevel, setActivityLevel] = React.useState<number>(1.55);
-
-  const [showBackLink, setShowBackLink] = React.useState(false);
-  const [backArticleName, setBackArticleName] = React.useState("");
-
-  useEffect(() => {
-    const handleShowBack = (e: any) => {
-      setShowBackLink(true);
-      setBackArticleName(e.detail?.articleName || "");
-    };
-    window.addEventListener('show-back-to-article', handleShowBack);
-    return () => window.removeEventListener('show-back-to-article', handleShowBack);
-  }, []);
 
   const activityOptions = [
     { label: "Низкая", value: 1.375, desc: ">1 тренировки в неделю" },

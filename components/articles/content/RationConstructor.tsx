@@ -477,6 +477,28 @@ export default function RationConstructor({
     threshold: 0.5,
   });
 
+  // Используем useLayoutEffect для мгновенного скролла до отрисовки
+  React.useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const target = window.sessionStorage.getItem('pending-scroll-target');
+    if (target === 'ration-constructor-link') {
+      const element = document.getElementById('nutrition-basics-link');
+      if (element) {
+        const offset = 150;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'instant'
+        });
+        
+        window.sessionStorage.removeItem('pending-scroll-target');
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const handleScrollToLink = () => {
       const element = document.getElementById('nutrition-basics-link');
