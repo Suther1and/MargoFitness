@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -461,10 +461,12 @@ function MistakeImpact() {
 export default function RationConstructor({
   onBack,
   onNavigate,
+  onBackToArticle,
   metadata,
 }: {
   onBack: () => void;
   onNavigate?: (slug: string) => void;
+  onBackToArticle?: (slug: string) => void;
   metadata?: any;
 }) {
   const { elementRef } = useArticleReadTracking({
@@ -474,6 +476,24 @@ export default function RationConstructor({
     },
     threshold: 0.5,
   });
+
+  useEffect(() => {
+    const handleScrollToLink = () => {
+      const element = document.getElementById('nutrition-basics-link');
+      if (element) {
+        const offset = 150;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'instant'
+        });
+      }
+    };
+    window.addEventListener('scroll-to-ration-constructor-link', handleScrollToLink);
+    return () => window.removeEventListener('scroll-to-ration-constructor-link', handleScrollToLink);
+  }, []);
 
   return (
     <motion.div
@@ -573,6 +593,7 @@ export default function RationConstructor({
           <p className="text-lg text-white/70 leading-relaxed mb-4">
             Сначала тебе нужно знать свою <span className="text-amber-400/85 font-bold">норму калорий</span>. Если ты ещё не считала — в нашей статье{" "}
             <button 
+              id="nutrition-basics-link"
               onClick={() => onNavigate ? onNavigate("nutrition-basics") : onBack()} 
               className="text-amber-400 hover:text-amber-300 underline decoration-amber-500/30 underline-offset-4 transition-colors font-bold"
             >

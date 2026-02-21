@@ -23,9 +23,11 @@ import { calculateBMI, getBMICategory, calculateCalorieNorms } from "@/app/dashb
 
 export default function NutritionBasics({
   onBack,
+  onBackToArticle,
   metadata,
 }: {
   onBack: () => void;
+  onBackToArticle?: (slug: string) => void;
   metadata?: any;
 }) {
   const { elementRef } = useArticleReadTracking({
@@ -145,8 +147,8 @@ export default function NutritionBasics({
               голодание. А <span className="text-white/85 font-bold">мягкая разница</span>, при которой тело начинает использовать запасы.
             </p>
 
-            {/* Интерактивный калькулятор калорий */}
-            <CalorieCalculator />
+          {/* Интерактивный калькулятор калорий */}
+          <CalorieCalculator onBack={onBack} onBackToArticle={onBackToArticle} />
 
             <p className="text-lg text-white/60 leading-relaxed mb-6">
               И вот что важно: для этого не нужно считать каждую калорию.
@@ -562,7 +564,7 @@ export default function NutritionBasics({
 
 /* --- Локальные компоненты --- */
 
-function CalorieCalculator({ onBack }: { onBack: () => void }) {
+function CalorieCalculator({ onBack, onBackToArticle }: { onBack: () => void, onBackToArticle?: (slug: string) => void }) {
   const [height, setHeight] = React.useState<string>("");
   const [weight, setWeight] = React.useState<string>("");
   const [age, setAge] = React.useState<string>("");
@@ -606,145 +608,147 @@ function CalorieCalculator({ onBack }: { onBack: () => void }) {
   const hasInput = height || weight || age;
 
   return (
-    <div className="max-w-[600px] mx-auto relative">
+    <div className="max-w-[600px] mx-auto relative pt-8">
       {showBackLink && (
         <button
-          onClick={() => onBack()}
-          className="absolute -top-8 left-0 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400/60 hover:text-amber-400 transition-colors"
+          onClick={() => onBackToArticle ? onBackToArticle('ration-constructor') : onBack()}
+          className="absolute top-0 left-0 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400/60 hover:text-amber-400 transition-colors group"
         >
-          <ChevronLeft className="size-3" /> Вернуться к статье «{backArticleName}»
+          <ChevronLeft className="size-3 group-hover:-translate-x-0.5 transition-transform" /> 
+          <span>Вернуться к статье «{backArticleName}»</span>
         </button>
       )}
       <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8 shadow-xl">
-      {/* Header + Inputs - single compact strip */}
-      <div className="flex items-stretch border-b border-white/5">
-        <div className="flex items-center flex-1 p-0.5">
-          {[
-            { label: "Рост", unit: "см", value: height, set: setHeight, ph: "170" },
-            { label: "Вес", unit: "кг", value: weight, set: setWeight, ph: "60" },
-            { label: "Возраст", unit: "лет", value: age, set: setAge, ph: "25" },
-          ].map((field, i) => (
-            <div key={field.label} className={cn("flex flex-col px-3 md:px-4 py-2 flex-1 min-w-0", i < 2 && "border-r border-white/5")}>
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] mb-0.5">{field.label}</label>
-              <div className="flex items-baseline gap-0.5">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={field.value}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "").slice(0, 3);
-                    field.set(val);
-                  }}
-                  placeholder={field.ph}
-                  className="w-full bg-transparent text-[22px] md:text-[26px] font-oswald font-black text-white focus:outline-none placeholder:text-white/10 leading-none min-w-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <span className="text-[8px] font-bold text-white/15 uppercase shrink-0">{field.unit}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Activity selector - compact row */}
-      <div className="flex flex-col gap-2 px-4 py-2.5 border-b border-white/5">
-        <div className="flex items-center justify-between">
-          <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Активность</span>
-          <span className="text-[8px] font-bold text-amber-400/60 uppercase tracking-tight italic">
-            {activityOptions.find((o) => o.value === activityLevel)?.desc}
-          </span>
-        </div>
-        <div className="flex bg-black/20 rounded-lg p-0.5 border border-white/5">
-          {activityOptions.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setActivityLevel(opt.value)}
-              className={cn(
-                "flex-1 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all relative",
-                activityLevel === opt.value ? "text-amber-400" : "text-white/20 hover:text-white/40"
-              )}
-            >
-              {activityLevel === opt.value && (
-                <motion.div
-                  layoutId="calc-activity"
-                  className="absolute inset-0 bg-amber-500/10 border border-amber-500/20 rounded-md"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                />
-              )}
-              <span className="relative z-10">{opt.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Results */}
-      <AnimatePresence mode="wait">
-        {!norms ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="px-4 py-5 flex items-center justify-center gap-2"
-          >
-            <Utensils className="size-3.5 text-white/10" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/15">
-              {hasInput ? "Заполни все поля" : "Введи свои параметры"}
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="px-3 md:px-4 py-4 space-y-3"
-          >
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "Похудение", value: norms.loss, color: "emerald" },
-                { label: "Баланс", value: norms.maintain, color: "violet" },
-                { label: "Набор", value: norms.gain, color: "orange" },
-              ].map((goal) => (
-                <div
-                  key={goal.label}
-                  className={cn(
-                    "py-3 px-2 rounded-xl border flex flex-col items-center text-center",
-                    goal.color === "emerald" && "bg-emerald-500/5 border-emerald-500/10",
-                    goal.color === "violet" && "bg-violet-500/5 border-violet-500/10",
-                    goal.color === "orange" && "bg-orange-500/5 border-orange-500/10"
-                  )}
-                >
-                  <span className={cn(
-                    "text-[7px] md:text-[8px] font-black uppercase tracking-widest mb-1",
-                    goal.color === "emerald" && "text-emerald-400/80",
-                    goal.color === "violet" && "text-violet-400/80",
-                    goal.color === "orange" && "text-orange-400/80"
-                  )}>
-                    {goal.label}
-                  </span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-2xl md:text-3xl font-oswald font-black text-white leading-none">
-                      {goal.value}
-                    </span>
-                    <span className="text-[7px] font-bold text-white/20 uppercase">ккал</span>
-                  </div>
+        {/* Header + Inputs - single compact strip */}
+        <div className="flex items-stretch border-b border-white/5">
+          <div className="flex items-center flex-1 p-0.5">
+            {[
+              { label: "Рост", unit: "см", value: height, set: setHeight, ph: "170" },
+              { label: "Вес", unit: "кг", value: weight, set: setWeight, ph: "60" },
+              { label: "Возраст", unit: "лет", value: age, set: setAge, ph: "25" },
+            ].map((field, i) => (
+              <div key={field.label} className={cn("flex flex-col px-3 md:px-4 py-2 flex-1 min-w-0", i < 2 && "border-r border-white/5")}>
+                <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] mb-0.5">{field.label}</label>
+                <div className="flex items-baseline gap-0.5">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={field.value}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 3);
+                      field.set(val);
+                    }}
+                    placeholder={field.ph}
+                    className="w-full bg-transparent text-[22px] md:text-[26px] font-oswald font-black text-white focus:outline-none placeholder:text-white/10 leading-none min-w-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-[8px] font-bold text-white/15 uppercase shrink-0">{field.unit}</span>
                 </div>
-              ))}
-            </div>
-
-            {bmiValue && (
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <span className="text-[9px] font-bold text-white/25">ИМТ</span>
-                <span className="text-sm font-oswald font-black text-white/70">{bmiValue}</span>
-                <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5", bmiCategory?.color)}>
-                  {bmiCategory?.label}
-                </span>
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+
+        {/* Activity selector - compact row */}
+        <div className="flex flex-col gap-2 px-4 py-2.5 border-b border-white/5">
+          <div className="flex items-center justify-between">
+            <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Активность</span>
+            <span className="text-[8px] font-bold text-amber-400/60 uppercase tracking-tight italic">
+              {activityOptions.find((o) => o.value === activityLevel)?.desc}
+            </span>
+          </div>
+          <div className="flex bg-black/20 rounded-lg p-0.5 border border-white/5">
+            {activityOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setActivityLevel(opt.value)}
+                className={cn(
+                  "flex-1 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all relative",
+                  activityLevel === opt.value ? "text-amber-400" : "text-white/20 hover:text-white/40"
+                )}
+              >
+                {activityLevel === opt.value && (
+                  <motion.div
+                    layoutId="calc-activity"
+                    className="absolute inset-0 bg-amber-500/10 border border-amber-500/20 rounded-md"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                  />
+                )}
+                <span className="relative z-10">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Results */}
+        <AnimatePresence mode="wait">
+          {!norms ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="px-4 py-5 flex items-center justify-center gap-2"
+            >
+              <Utensils className="size-3.5 text-white/10" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/15">
+                {hasInput ? "Заполни все поля" : "Введи свои параметры"}
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="results"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="px-3 md:px-4 py-4 space-y-3"
+            >
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Похудение", value: norms.loss, color: "emerald" },
+                  { label: "Баланс", value: norms.maintain, color: "violet" },
+                  { label: "Набор", value: norms.gain, color: "orange" },
+                ].map((goal) => (
+                  <div
+                    key={goal.label}
+                    className={cn(
+                      "py-3 px-2 rounded-xl border flex flex-col items-center text-center",
+                      goal.color === "emerald" && "bg-emerald-500/5 border-emerald-500/10",
+                      goal.color === "violet" && "bg-violet-500/5 border-violet-500/10",
+                      goal.color === "orange" && "bg-orange-500/5 border-orange-500/10"
+                    )}
+                  >
+                    <span className={cn(
+                      "text-[7px] md:text-[8px] font-black uppercase tracking-widest mb-1",
+                      goal.color === "emerald" && "text-emerald-400/80",
+                      goal.color === "violet" && "text-violet-400/80",
+                      goal.color === "orange" && "text-orange-400/80"
+                    )}>
+                      {goal.label}
+                    </span>
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-2xl md:text-3xl font-oswald font-black text-white leading-none">
+                        {goal.value}
+                      </span>
+                      <span className="text-[7px] font-bold text-white/20 uppercase">ккал</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {bmiValue && (
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <span className="text-[9px] font-bold text-white/25">ИМТ</span>
+                  <span className="text-sm font-oswald font-black text-white/70">{bmiValue}</span>
+                  <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5", bmiCategory?.color)}>
+                    {bmiCategory?.label}
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

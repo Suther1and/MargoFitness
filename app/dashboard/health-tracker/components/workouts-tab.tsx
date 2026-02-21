@@ -77,14 +77,19 @@ export function WorkoutsTab() {
   const [loadingArticle, setLoadingArticle] = useState(false)
 
   const handleNavigate = (slug: string) => {
-    setSelectedArticleSlug(slug);
     if (slug === 'nutrition-basics') {
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('scroll-to-calorie-calculator', { 
-          detail: { fromArticle: 'ration-constructor' } 
-        }));
-      }, 50);
+      // Сначала готовим данные для скролла, чтобы они были доступны сразу при рендере
+      window.sessionStorage.setItem('pending-scroll-target', 'calorie-calculator');
+      window.sessionStorage.setItem('pending-scroll-from', 'ration-constructor');
     }
+    setSelectedArticleSlug(slug);
+  };
+
+  const handleBackToArticle = (slug: string) => {
+    if (slug === 'ration-constructor') {
+      window.sessionStorage.setItem('pending-scroll-target', 'ration-constructor-link');
+    }
+    setSelectedArticleSlug(slug);
   };
 
   const loadArticles = async () => {
@@ -333,6 +338,7 @@ export function WorkoutsTab() {
               <HardcodedComponent 
                 onBack={() => setSelectedArticleSlug(null)} 
                 onNavigate={handleNavigate}
+                onBackToArticle={handleBackToArticle}
                 metadata={selectedArticleData}
               />
             </div>
