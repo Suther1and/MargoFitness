@@ -638,7 +638,7 @@ export default function RationConstructor({
         {/* Секция 3: Практика */}
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-            Практика: как считать и не умереть
+            Практика: как считать и не сойти с ума
           </h2>
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
@@ -681,7 +681,7 @@ export default function RationConstructor({
                   <Utensils className="size-4.5 text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white/90 mb-2">Метод «готовка блока»</h3>
+                  <h3 className="text-base font-bold text-white/90 mb-2">Метод «сложных блюд»</h3>
                   <p className="text-sm text-white/60 leading-relaxed">
                     Приготовь блюдо целиком, взвесь <span className="text-white/80 font-medium">общий вес</span>, посчитай общее КБЖУ всех ингредиентов и раздели на порции. Теперь ты знаешь точное КБЖУ каждой порции. Это работает для супов, каш, запеканок - всего, где ингредиенты смешиваются.
                   </p>
@@ -690,17 +690,12 @@ export default function RationConstructor({
             </div>
           </div>
 
-          <p className="text-lg text-white/70 leading-relaxed mb-4">
-            А вот насколько сильно <span className="text-amber-400/85 font-bold">глазомер отличается от реальности</span>. Эти цифры - не для запугивания, а чтобы ты понимала, зачем первые недели стоит взвешивать.
-          </p>
-
-          <PortionReality />
         </section>
 
         {/* Секция 4: Инструменты */}
         <section className="mb-14 text-left">
           <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-6">
-            Инструменты: FatSecret, CalAI и как выбрать
+            Инструменты: <span className="text-emerald-400">FatSecret</span> vs <span className="text-violet-400">CalAI</span>
           </h2>
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
