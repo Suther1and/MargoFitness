@@ -185,7 +185,7 @@ rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16
 
 Каждая секция — это `<section className="mb-14 text-left">` с:
 - Заголовком секции (H2): `text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white`
-- Текстом: `text-lg text-white/60 leading-relaxed`
+- Текстом: `text-lg text-white/70 leading-relaxed`
 - Визуальными элементами (инфографика, карточки, таблицы)
 
 ### 4. Блок платформы (обязательный)
@@ -449,9 +449,69 @@ rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16
 ### Типографика
 - Заголовки: `font-oswald font-black uppercase tracking-tight text-white`
 - Подзаголовки секций: `text-2xl md:text-3xl`
-- Основной текст: `text-lg text-white/60 leading-relaxed`
+- Основной текст: `text-lg text-white/70 leading-relaxed`
 - Мелкий текст / подписи: `text-sm text-white/40 leading-relaxed`
 - Метки: `text-[10px] font-bold uppercase tracking-widest text-white/30`
+
+### Форматирование текста (акценты)
+
+В основном тексте статьи используются inline-акценты для выделения ключевых слов и понятий. Это делает текст живым, помогает сканированию и расставляет смысловые ударения.
+
+**Цветовой акцент (ключевые понятия):**
+```html
+<span className="text-{accentColor}-400/85 font-bold">ключевое слово</span>
+```
+Используется для терминов, важных концепций, цифр. Цвет соответствует категории статьи (rose, sky, amber, cyan).
+
+**Цветовой акцент + подчёркивание (максимальный акцент):**
+```html
+<span className="text-{accentColor}-400/85 font-bold underline decoration-{accentColor}-500/30 underline-offset-4">текст</span>
+```
+Для самых важных выводов, ключевых фраз. Подчёркивание полупрозрачное, с отступом.
+
+**Белый акцент (усиление без цвета):**
+```html
+<span className="text-white/90 font-bold">текст</span>
+```
+или
+```html
+<span className="text-white/85 font-bold">текст</span>
+```
+Для выделения слов, которые важны, но не являются терминами.
+
+**Белый акцент + подчёркивание:**
+```html
+<span className="text-white/85 font-bold underline decoration-white/10 underline-offset-4">текст</span>
+```
+Мягкое подчёркивание для логических ударений.
+
+**Мягкий акцент (italic + semibold):**
+```html
+<span className="text-white/85 font-semibold italic">текст</span>
+```
+или
+```html
+<span className="text-{accentColor}-400/85 font-semibold italic underline decoration-{accentColor}-500/20 underline-offset-4">текст</span>
+```
+Для метафор, образных выражений, мягких акцентов.
+
+**Inline bold (`<strong>`):**
+```html
+<strong className="text-white/80">слово</strong>
+```
+Для коротких выделений внутри списков и описаний.
+
+**Правила использования акцентов:**
+- В каждом абзаце 1-3 акцента, не больше. Перебор убивает эффект.
+- Цветовые акценты - для терминов и ключевых понятий статьи.
+- Белые акценты - для логических ударений и контрастов.
+- Подчёркивание - спарингово, только для самых важных фраз (1-2 на секцию).
+- Не выделяй предлоги, союзы и общие слова.
+
+### Тире и пунктуация
+
+- Используй **короткое тире** `-` вместо длинного тире `—` во всех текстах статей.
+- Пример: «Это не мнение, это - физика» (НЕ «Это не мнение, это — физика»)
 
 ### Контейнеры
 - Карточки: `rounded-2xl bg-white/[0.03] border border-white/10 p-6 md:p-8`
@@ -463,7 +523,7 @@ rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16
 - Фон страницы: `#09090b` (через bg-[#09090b])
 - Полупрозрачный белый: `bg-white/[0.02]`, `bg-white/[0.03]`
 - Границы: `border-white/10`, `border-white/5`
-- Текст: `text-white/70` (основной), `text-white/60` (обычный), `text-white/40` (вторичный), `text-white/25` (приглушённый)
+- Текст: `text-white/90` (акцент bold), `text-white/85` (акцент мягкий), `text-white/80` (inline strong), `text-white/70` (основной), `text-white/40` (вторичный), `text-white/25` (приглушённый)
 
 ### Анимации
 - Вход страницы: `initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}`

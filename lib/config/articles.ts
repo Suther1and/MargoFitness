@@ -101,5 +101,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 15,
     access_level: "free",
     image_url: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "ration-constructor",
+    slug: "ration-constructor",
+    title: "Конструктор рациона: как считать КБЖУ и не сойти с ума",
+    description: "Практический гайд по подсчёту макронутриентов — формулы, инструменты (FatSecret, CalAI), типичные ошибки и правило 80/20, которое спасёт от фанатизма.",
+    category: "Питание",
+    reading_time: 8,
+    access_level: "basic",
+    image_url: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?q=80&w=2080&auto=format&fit=crop"
   }
 ];
