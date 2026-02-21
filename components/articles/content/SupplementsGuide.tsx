@@ -128,6 +128,15 @@ function SupplementSlider({
     return cards.length;
   };
 
+  const dotColors: Record<string, string> = {
+    fundamentals: "bg-cyan-500",
+    beauty: "bg-pink-500",
+    sport: "bg-blue-500",
+    default: "bg-cyan-500",
+  };
+
+  const activeDotColor = dotColors[category] || dotColors.default;
+
   return (
     <div className="relative">
       <div className="hidden md:flex items-center gap-2 justify-end mb-3">
@@ -198,7 +207,7 @@ function SupplementSlider({
             className={cn(
               "h-1.5 rounded-full transition-all duration-500",
               currentSlide === i
-                ? "w-5 bg-cyan-500"
+                ? cn("w-5", activeDotColor)
                 : "w-1.5 bg-white/10 hover:bg-white/20"
             )}
           />
@@ -515,6 +524,18 @@ const fundamentals: SupplementData[] = [
 
 const beauty: SupplementData[] = [
   {
+    name: "Opti-Women",
+    subtitle: "Мультивитамин для активных",
+    whatItDoes: "Комплекс из 23 витаминов и минералов, разработанный для женщин с активным образом жизни. Покрывает базовые потребности одной капсулой.",
+    whoNeeds: "Как базовое покрытие дефицитов",
+    dosage: "1 капсула/день",
+    form: "Комплекс",
+    brands: "Optimum Nutrition",
+    wbLink: "#",
+    ozonLink: "#",
+    image: "/supplements/opti-women.png",
+  },
+  {
     name: "Коллаген",
     subtitle: "Кожа, суставы, связки",
     whatItDoes: "Основной белок соединительной ткани. Исследования показывают улучшение эластичности кожи и уменьшение морщин при приёме 5-10 г/день. Принимай с витамином C для усвоения.",
@@ -549,18 +570,6 @@ const beauty: SupplementData[] = [
     wbLink: "#",
     ozonLink: "#",
     image: "/supplements/biotin.png",
-  },
-  {
-    name: "Opti-Women",
-    subtitle: "Мультивитамин для активных",
-    whatItDoes: "Комплекс из 23 витаминов и минералов, разработанный для женщин с активным образом жизни. Покрывает базовые потребности одной капсулой.",
-    whoNeeds: "Как базовое покрытие дефицитов",
-    dosage: "1 капсула/день",
-    form: "Комплекс",
-    brands: "Optimum Nutrition",
-    wbLink: "#",
-    ozonLink: "#",
-    image: "/supplements/opti-women.png",
   },
 ];
 
