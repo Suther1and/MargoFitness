@@ -46,6 +46,7 @@ interface SupplementData {
   alternatives: string;
   wbLink: string;
   ozonLink: string;
+  image?: string;
 }
 
 // --- SupplementSlider ---
@@ -53,9 +54,11 @@ interface SupplementData {
 function SupplementSlider({
   cards,
   accentColor = "cyan",
+  category = "default",
 }: {
   cards: SupplementData[];
   accentColor?: string;
+  category?: "fundamentals" | "beauty" | "sport" | "default";
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -168,11 +171,11 @@ function SupplementSlider({
             className="snap-start shrink-0 first:ml-0"
             style={{
               width: typeof window !== "undefined" && window.innerWidth < 768 
-                ? "calc(100vw - 48px)" 
+                ? "calc(100vw - 64px)" 
                 : "376px"
             }}
           >
-            <SupplementCard data={card} />
+            <SupplementCard data={card} category={category} />
           </div>
         ))}
         <div className="md:hidden w-4 shrink-0" />
@@ -208,16 +211,47 @@ function SupplementSlider({
 
 // --- SupplementCard ---
 
-function SupplementCard({ data }: { data: SupplementData }) {
+const categoryGradients: Record<string, string> = {
+  fundamentals: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+  beauty: "from-pink-500/20 via-pink-500/5 to-transparent",
+  sport: "from-blue-600/25 via-blue-600/5 to-transparent",
+  default: "from-white/[0.04] to-white/[0.01]",
+};
+
+function SupplementCard({ 
+  data, 
+  category = "default" 
+}: { 
+  data: SupplementData;
+  category?: "fundamentals" | "beauty" | "sport" | "default";
+}) {
+  const gradientClass = categoryGradients[category] || categoryGradients.default;
+
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col h-full hover:border-white/20 transition-all">
-      <div className="h-36 bg-gradient-to-br from-white/[0.04] to-white/[0.01] flex items-center justify-center border-b border-white/5">
-        <div className="flex flex-col items-center gap-2 text-white/15">
-          <ImageIcon className="size-8" />
-          <span className="text-[9px] font-bold uppercase tracking-widest">
-            Фото продукта
-          </span>
-        </div>
+    <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex flex-col h-full hover:border-white/20 transition-all group">
+      <div className={cn(
+        "h-56 flex items-center justify-center border-b border-white/5 relative overflow-hidden bg-gradient-to-br",
+        gradientClass
+      )}>
+        {data.image ? (
+          <div className="relative w-full h-full flex items-center justify-center p-6">
+            <img
+              src={data.image}
+              alt={data.name}
+              className="h-full w-auto object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] will-change-transform backface-hidden"
+              style={{ transform: "translateZ(0)" }}
+            />
+            {/* Световой блик на фоне для объема */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/10 blur-[50px] rounded-full pointer-events-none" />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-white/15">
+            <ImageIcon className="size-8" />
+            <span className="text-[9px] font-bold uppercase tracking-widest">
+              Фото продукта
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="p-4 flex flex-col flex-1">
@@ -406,6 +440,7 @@ const fundamentals: SupplementData[] = [
     alternatives: "Solgar, Now Foods",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/d3-k2.png",
   },
   {
     name: "Омега-3 (EPA/DHA)",
@@ -418,6 +453,7 @@ const fundamentals: SupplementData[] = [
     alternatives: "Solgar, Nordic Naturals",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/omega3.png",
   },
   {
     name: "Магний",
@@ -430,6 +466,7 @@ const fundamentals: SupplementData[] = [
     alternatives: "Now Foods, Doctor's Best",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/magnesium.png",
   },
   {
     name: "Железо",
@@ -442,6 +479,7 @@ const fundamentals: SupplementData[] = [
     alternatives: "Solgar Gentle Iron",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/iron.png",
   },
   {
     name: "Витамины группы B",
@@ -454,6 +492,7 @@ const fundamentals: SupplementData[] = [
     alternatives: "Now B-50, Solgar B-Complex",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/b-complex.png",
   },
 ];
 
@@ -469,6 +508,7 @@ const beauty: SupplementData[] = [
     alternatives: "Solgar, Sports Research",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/collagen.png",
   },
   {
     name: "Цинк",
@@ -481,6 +521,7 @@ const beauty: SupplementData[] = [
     alternatives: "Now Foods, Solgar",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/zinc.png",
   },
   {
     name: "Биотин",
@@ -493,6 +534,7 @@ const beauty: SupplementData[] = [
     alternatives: "Solgar, Now Foods",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/biotin.png",
   },
   {
     name: "Opti-Women",
@@ -505,6 +547,7 @@ const beauty: SupplementData[] = [
     alternatives: "Now Eve, Solgar Female Multiple",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/opti-women.png",
   },
 ];
 
@@ -517,9 +560,10 @@ const sportSupps: SupplementData[] = [
     dosage: "1-2 порции/день",
     form: "Whey / Whey Isolate",
     brand: "Optimum Nutrition Gold Standard",
-    alternatives: "Craft, S.A.N.",
+    alternatives: "Primecraft, S.A.N.",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/whey-protein.png",
   },
   {
     name: "Креатин моногидрат",
@@ -529,9 +573,10 @@ const sportSupps: SupplementData[] = [
     dosage: "3-5 г/день, каждый день",
     form: "Моногидрат (порошок)",
     brand: "Optimum Nutrition",
-    alternatives: "Craft, Now Foods",
+    alternatives: "Primecraft, Now Foods",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/creatine.png",
   },
   {
     name: "BCAA",
@@ -541,9 +586,10 @@ const sportSupps: SupplementData[] = [
     dosage: "5-10 г/тренировку",
     form: "Порошок или капсулы",
     brand: "Optimum Nutrition",
-    alternatives: "Craft, GLS",
+    alternatives: "Primecraft, GLS",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/bcaa.png",
   },
   {
     name: "L-карнитин",
@@ -553,9 +599,10 @@ const sportSupps: SupplementData[] = [
     dosage: "1 000-2 000 мг/день",
     form: "L-тартрат или ацетил",
     brand: "GLS",
-    alternatives: "Now Foods, Craft",
+    alternatives: "Now Foods, Primecraft",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/l-carnitine.png",
   },
   {
     name: "Электролиты",
@@ -564,10 +611,11 @@ const sportSupps: SupplementData[] = [
     whoNeeds: "При интенсивном потоотделении",
     dosage: "1 порция во время тренировки",
     form: "Порошок для растворения",
-    brand: "Craft",
+    brand: "Primecraft",
     alternatives: "GLS, Liquid IV",
     wbLink: "#",
     ozonLink: "#",
+    image: "/supplements/electrolytes.png",
   },
 ];
 
@@ -719,7 +767,7 @@ export default function SupplementsGuide({
             Эти добавки закрывают <span className="text-cyan-400/85 font-bold">базовые дефициты</span>, которые есть у большинства людей в нашем климате и ритме жизни. Начни с них, остальное - по желанию.
           </p>
 
-          <SupplementSlider cards={fundamentals} />
+          <SupplementSlider cards={fundamentals} category="fundamentals" />
         </section>
 
         {/* Секция 4: Красота и молодость */}
@@ -732,7 +780,7 @@ export default function SupplementsGuide({
             Эти добавки работают изнутри: кожа, волосы, суставы. Эффект <span className="text-white/85 font-bold">не мгновенный</span> - заметишь через 2-3 месяца регулярного приёма. Но результат накопительный и стойкий.
           </p>
 
-          <SupplementSlider cards={beauty} />
+          <SupplementSlider cards={beauty} category="beauty" />
         </section>
 
         {/* Секция 5: Спортивное питание */}
@@ -746,10 +794,10 @@ export default function SupplementsGuide({
           </p>
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
-            По спортпиту я рекомендую <span className="text-cyan-400/85 font-bold">Optimum Nutrition</span> как золотой стандарт и <span className="text-cyan-400/85 font-bold">Craft</span> как достойную российскую альтернативу.
+            По спортпиту я рекомендую <span className="text-cyan-400/85 font-bold">Optimum Nutrition</span> как золотой стандарт и <span className="text-cyan-400/85 font-bold">Primecraft</span> как достойную российскую альтернативу.
           </p>
 
-          <SupplementSlider cards={sportSupps} />
+          <SupplementSlider cards={sportSupps} category="sport" />
         </section>
 
         {/* Блок платформы */}
