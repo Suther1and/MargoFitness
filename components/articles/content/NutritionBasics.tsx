@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -35,6 +35,31 @@ export default function NutritionBasics({
     },
     threshold: 0.5,
   });
+
+  useEffect(() => {
+    const handleScrollToCalculator = (e: any) => {
+      const element = document.getElementById('calorie-calculator');
+      if (element) {
+        const offset = 100;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'instant'
+        });
+
+        // Если пришли из другой статьи, показываем кнопку возврата
+        if (e.detail?.fromArticle === 'ration-constructor') {
+          window.dispatchEvent(new CustomEvent('show-back-to-article', { 
+            detail: { articleName: 'Конструктор рациона' } 
+          }));
+        }
+      }
+    };
+    window.addEventListener('scroll-to-calorie-calculator', handleScrollToCalculator);
+    return () => window.removeEventListener('scroll-to-calorie-calculator', handleScrollToCalculator);
+  }, []);
 
   return (
     <motion.div
@@ -107,28 +132,30 @@ export default function NutritionBasics({
         </div>
 
         {/* ПРАВИЛО 1 - Дефицит калорий */}
-        <RuleSection number={1} title="Дефицит калорий - единственная причина похудения" accentColor="amber">
-          <p className="text-lg text-white/70 leading-relaxed mb-6">
-            Представь своё тело как банковский счёт. Еда - это доход. Всё, что
-            ты делаешь - от дыхания до тренировки - это расходы.
-          </p>
+        <div id="calorie-calculator">
+          <RuleSection number={1} title="Дефицит калорий - единственная причина похудения" accentColor="amber">
+            <p className="text-lg text-white/70 leading-relaxed mb-6">
+              Представь своё тело как банковский счёт. Еда - это доход. Всё, что
+              ты делаешь - от дыхания до тренировки - это расходы.
+            </p>
 
-          <p className="text-lg text-white/70 leading-relaxed mb-6">
-            <span className="text-amber-400/85 font-bold underline decoration-amber-500/20 underline-offset-4">Дефицит калорий</span> - это
-            когда ты тратишь чуть больше энергии, чем получаешь. Не
-            голодание. А <span className="text-white/85 font-bold">мягкая разница</span>, при которой тело начинает использовать запасы.
-          </p>
+            <p className="text-lg text-white/70 leading-relaxed mb-6">
+              <span className="text-amber-400/85 font-bold underline decoration-amber-500/20 underline-offset-4">Дефицит калорий</span> - это
+              когда ты тратишь чуть больше энергии, чем получаешь. Не
+              голодание. А <span className="text-white/85 font-bold">мягкая разница</span>, при которой тело начинает использовать запасы.
+            </p>
 
-          {/* Интерактивный калькулятор калорий */}
-          <CalorieCalculator />
+            {/* Интерактивный калькулятор калорий */}
+            <CalorieCalculator />
 
-          <p className="text-lg text-white/60 leading-relaxed mb-6">
-            И вот что важно: для этого не нужно считать каждую калорию.
-            Достаточно понимать принцип и менять привычки постепенно. Убрала
-            сладкий кофе утром - минус 200 ккал. Заменила белый хлеб на цельнозерновой - ещё минус
-            80. Уже дефицит. Без страданий.
-          </p>
-        </RuleSection>
+            <p className="text-lg text-white/60 leading-relaxed mb-6">
+              И вот что важно: для этого не нужно считать каждую калорию.
+              Достаточно понимать принцип и менять привычки постепенно. Убрала
+              сладкий кофе утром - минус 200 ккал. Заменила белый хлеб на цельнозерновой - ещё минус
+              80. Уже дефицит. Без страданий.
+            </p>
+          </RuleSection>
+        </div>
 
         {/* Миф-разбор: блок контраста */}
         <div className="my-14 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -535,11 +562,23 @@ export default function NutritionBasics({
 
 /* --- Локальные компоненты --- */
 
-function CalorieCalculator() {
+function CalorieCalculator({ onBack }: { onBack: () => void }) {
   const [height, setHeight] = React.useState<string>("");
   const [weight, setWeight] = React.useState<string>("");
   const [age, setAge] = React.useState<string>("");
   const [activityLevel, setActivityLevel] = React.useState<number>(1.55);
+
+  const [showBackLink, setShowBackLink] = React.useState(false);
+  const [backArticleName, setBackArticleName] = React.useState("");
+
+  useEffect(() => {
+    const handleShowBack = (e: any) => {
+      setShowBackLink(true);
+      setBackArticleName(e.detail?.articleName || "");
+    };
+    window.addEventListener('show-back-to-article', handleShowBack);
+    return () => window.removeEventListener('show-back-to-article', handleShowBack);
+  }, []);
 
   const activityOptions = [
     { label: "Низкая", value: 1.375, desc: ">1 тренировки в неделю" },
@@ -567,7 +606,16 @@ function CalorieCalculator() {
   const hasInput = height || weight || age;
 
   return (
-    <div className="max-w-[600px] mx-auto rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8 shadow-xl">
+    <div className="max-w-[600px] mx-auto relative">
+      {showBackLink && (
+        <button
+          onClick={() => onBack()}
+          className="absolute -top-8 left-0 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400/60 hover:text-amber-400 transition-colors"
+        >
+          <ChevronLeft className="size-3" /> Вернуться к статье «{backArticleName}»
+        </button>
+      )}
+      <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden mb-8 shadow-xl">
       {/* Header + Inputs - single compact strip */}
       <div className="flex items-stretch border-b border-white/5">
         <div className="flex items-center flex-1 p-0.5">

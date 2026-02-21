@@ -76,6 +76,17 @@ export function WorkoutsTab() {
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
 
+  const handleNavigate = (slug: string) => {
+    setSelectedArticleSlug(slug);
+    if (slug === 'nutrition-basics') {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('scroll-to-calorie-calculator', { 
+          detail: { fromArticle: 'ration-constructor' } 
+        }));
+      }, 50);
+    }
+  };
+
   const loadArticles = async () => {
     // 1. First, quickly load articles from registry and DB without statuses to show them immediately
     const dbArticles = await getArticles()
@@ -321,6 +332,7 @@ export function WorkoutsTab() {
 
               <HardcodedComponent 
                 onBack={() => setSelectedArticleSlug(null)} 
+                onNavigate={handleNavigate}
                 metadata={selectedArticleData}
               />
             </div>

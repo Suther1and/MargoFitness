@@ -109,15 +109,18 @@ function MacroImpactBars() {
                 transition={{ duration: 1, delay: i * 0.1 + 0.2 }}
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-600 to-amber-400 rounded-full"
               />
-              {/* Background layer (Calories Only) - Now using a distinct gray color */}
+              {/* Background layer (Calories Only) - Smooth transition with blur edge */}
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${m.caloriesOnly}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: i * 0.1 }}
                 style={{ zIndex: 20 }}
-                className="absolute inset-y-0 left-0 bg-[#3f3f46] rounded-l-full border-r border-white/20"
-              />
+                className="absolute inset-y-0 left-0 bg-[#3f3f46] rounded-l-full"
+              >
+                {/* Gradient edge for smoother transition */}
+                <div className="absolute inset-y-0 -right-4 w-8 bg-gradient-to-r from-[#3f3f46] to-transparent pointer-events-none" />
+              </motion.div>
             </div>
           </div>
         ))}
@@ -162,15 +165,15 @@ function MacroRatioPresets() {
       accent: "amber",
     },
     {
-      goal: "Рекомпозиция",
-      desc: "Лёгкий дефицит + высокий белок для замены жира мышцами",
-      protein: 40,
+      goal: "Набор",
+      desc: "Профицит 10-15% + силовые тренировки для роста мышц",
+      protein: 30,
       fat: 25,
-      carb: 35,
+      carb: 45,
       gramsP: 128,
       gramsF: 44,
-      gramsC: 140,
-      kcal: "~1 500",
+      gramsC: 190,
+      kcal: "~2 100",
       accent: "sky",
     },
   ];
@@ -213,10 +216,12 @@ function MacroRatioPresets() {
 
             <div className="border-t border-white/5 pt-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">Пример для 60 кг</p>
-              <p className="text-xs text-white/50">
-                {p.gramsP}г Б / {p.gramsF}г Ж / {p.gramsC}г У
-              </p>
-              <p className="text-xs text-white/30 mt-0.5">{p.kcal} ккал</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-white/50 font-medium">
+                  <span className="text-rose-400/60">Б</span> {p.gramsP}г / <span className="text-amber-400/60">Ж</span> {p.gramsF}г / <span className="text-sky-400/60">У</span> {p.gramsC}г
+                </p>
+                <p className="text-[11px] text-white/30 font-bold shrink-0">{p.kcal} ккал</p>
+              </div>
             </div>
           </div>
         );
@@ -455,9 +460,11 @@ function MistakeImpact() {
 
 export default function RationConstructor({
   onBack,
+  onNavigate,
   metadata,
 }: {
   onBack: () => void;
+  onNavigate?: (slug: string) => void;
   metadata?: any;
 }) {
   const { elementRef } = useArticleReadTracking({
@@ -564,7 +571,14 @@ export default function RationConstructor({
           </h2>
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            Сначала тебе нужно знать свою <span className="text-amber-400/85 font-bold">норму калорий</span>. Если ты ещё не считала - в нашей статье «Основы питания» есть удобный калькулятор, который рассчитает всё за тебя за 30 секунд.
+            Сначала тебе нужно знать свою <span className="text-amber-400/85 font-bold">норму калорий</span>. Если ты ещё не считала — в нашей статье{" "}
+            <button 
+              onClick={() => onNavigate ? onNavigate("nutrition-basics") : onBack()} 
+              className="text-amber-400 hover:text-amber-300 underline decoration-amber-500/30 underline-offset-4 transition-colors font-bold"
+            >
+              «Основы питания»
+            </button>{" "}
+            есть удобный калькулятор, который рассчитает всё за тебя за 30 секунд.
           </p>
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
