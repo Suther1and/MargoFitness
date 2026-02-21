@@ -708,11 +708,9 @@ export default function RationConstructor({
 
           <ToolCards />
 
-          <div className="mt-6 rounded-xl bg-amber-500/[0.04] border border-amber-500/12 p-4">
-            <p className="text-sm text-white/50 leading-relaxed">
-              <span className="text-amber-400/70 font-bold text-xs uppercase tracking-wider">Кстати</span>
-              <br />
-              В MargoFitness ты можешь трекать <span className="text-white/70 font-medium">калории</span> и <span className="text-white/70 font-medium">качество питания</span> прямо в виджетах трекера здоровья - для общей картины этого достаточно. Для детального подсчёта БЖУ используй FatSecret или CalAI - они для этого и созданы.
+          <div className="mt-4">
+            <p className="text-sm text-white/30 italic leading-relaxed">
+              В MargoFitness ты можешь трекать калории и качество питания прямо в виджетах трекера здоровья — для общей картины этого достаточно. Для детального подсчёта БЖУ используй FatSecret или CalAI — они для этого и созданы.
             </p>
           </div>
         </section>
