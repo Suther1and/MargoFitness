@@ -105,8 +105,25 @@ function SupplementSlider({
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const cardWidth = getCardWidth();
-    const index = Math.round(scrollRef.current.scrollLeft / (cardWidth + 16));
-    setCurrentSlide(Math.min(index, cards.length - 1));
+    const gap = 16;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    
+    // На мобильных отступ 16px, на десктопе 0
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const offset = isMobile ? 16 : 0;
+    
+    const index = Math.round((scrollLeft - offset) / (cardWidth + gap));
+    setCurrentSlide(Math.max(0, Math.min(index, cards.length - 1)));
+  };
+
+  const getDotsCount = () => {
+    if (typeof window === "undefined") return cards.length;
+    // На десктопе помещается 2 карточки, значит буллетов должно быть N - 1
+    if (window.innerWidth >= 768) {
+      return Math.max(1, cards.length - 1);
+    }
+    // На мобильных одна карточка, значит буллетов N
+    return cards.length;
   };
 
   return (
@@ -138,7 +155,8 @@ function SupplementSlider({
         onMouseLeave={onMouseUp}
         onMouseMove={onMouseMove}
         className={cn(
-          "flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide select-none",
+          "flex gap-4 overflow-x-auto pb-4 scrollbar-hide select-none",
+          "px-4 md:px-0",
           isDragging
             ? "cursor-grabbing"
             : "cursor-grab md:snap-none snap-x snap-mandatory"
@@ -147,25 +165,28 @@ function SupplementSlider({
         {cards.map((card, i) => (
           <div
             key={i}
-            className="snap-start shrink-0"
+            className="snap-start shrink-0 first:ml-0"
             style={{
               width: typeof window !== "undefined" && window.innerWidth < 768 
-                ? "calc((100vw - 32px) / 1.1)" 
+                ? "calc(100vw - 48px)" 
                 : "376px"
             }}
           >
             <SupplementCard data={card} />
           </div>
         ))}
+        <div className="md:hidden w-4 shrink-0" />
       </div>
 
       <div className="flex justify-center gap-1.5 mt-2">
-        {cards.map((_, i) => (
+        {Array.from({ length: getDotsCount() }).map((_, i) => (
           <button
             key={i}
             onClick={() => {
               if (scrollRef.current) {
                 const cardWidth = getCardWidth();
+                const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+                const offset = isMobile ? 16 : 0;
                 scrollRef.current.scrollTo({
                   left: i * (cardWidth + 16),
                   behavior: "smooth",
@@ -218,7 +239,7 @@ function SupplementCard({ data }: { data: SupplementData }) {
             </span>
             <p className="text-white/50 mt-0.5">{data.whoNeeds}</p>
           </div>
-          <div>
+          <div className="text-right">
             <span className="text-white/25 font-bold uppercase tracking-wider">
               Дозировка
             </span>
@@ -230,7 +251,7 @@ function SupplementCard({ data }: { data: SupplementData }) {
             </span>
             <p className="text-white/50 mt-0.5">{data.form}</p>
           </div>
-          <div>
+          <div className="text-right">
             <span className="text-white/25 font-bold uppercase tracking-wider">
               Бренд
             </span>
