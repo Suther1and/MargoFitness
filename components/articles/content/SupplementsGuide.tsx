@@ -85,8 +85,11 @@ function SupplementSlider({
   };
 
   const getCardWidth = useCallback(() => {
-    if (typeof window === "undefined") return 280;
-    return window.innerWidth < 768 ? window.innerWidth * 0.78 : 280;
+    if (typeof window === "undefined") return 376;
+    if (window.innerWidth < 768) {
+      return (window.innerWidth - 32) / 1.1;
+    }
+    return 376;
   }, []);
 
   const scroll = (direction: "left" | "right") => {
@@ -144,7 +147,12 @@ function SupplementSlider({
         {cards.map((card, i) => (
           <div
             key={i}
-            className="min-w-[78vw] md:min-w-[280px] snap-start shrink-0"
+            className="snap-start shrink-0"
+            style={{
+              width: typeof window !== "undefined" && window.innerWidth < 768 
+                ? "calc((100vw - 32px) / 1.1)" 
+                : "376px"
+            }}
           >
             <SupplementCard data={card} />
           </div>
