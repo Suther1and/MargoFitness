@@ -774,7 +774,7 @@ function BiohackingProductItem({ item, index }: { item: typeof biohackingProduct
         {/* Заголовок и категория */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-1">
-            <h4 className="text-xl font-oswald font-black text-white uppercase tracking-tight truncate">
+            <h4 className="text-xl font-oswald font-black text-white uppercase tracking-tight truncate group-hover:text-white transition-colors">
               {item.name}
             </h4>
             <ChevronLeft className={cn(
@@ -787,16 +787,18 @@ function BiohackingProductItem({ item, index }: { item: typeof biohackingProduct
           </p>
         </div>
 
-        {/* Маленькое превью картинки (если закрыто) */}
-        {!isOpen && item.image && !imageError && (
-          <motion.img
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            src={item.image}
-            onError={() => setImageError(true)}
-            alt=""
-            className="size-12 object-contain drop-shadow-lg md:mr-4"
-          />
+        {/* Индикатор раскрытия (динамический) */}
+        {!isOpen && (
+          <div className="hidden md:flex items-center gap-6 overflow-hidden">
+            <div className="flex flex-col items-end">
+              <p className="text-[10px] font-black text-white/5 uppercase tracking-widest group-hover:text-white/20 transition-colors duration-500">
+                {item.subtitle}
+              </p>
+              <div className={cn("h-px w-0 group-hover:w-full transition-all duration-700 ease-out mt-1", 
+                item.color.replace('text-', 'bg-').replace('/10', '')
+              )} />
+            </div>
+          </div>
         )}
       </div>
 
