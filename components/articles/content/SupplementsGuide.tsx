@@ -28,6 +28,13 @@ import {
   Sun,
   Fish,
   Apple,
+  BrainCircuit,
+  Coffee,
+  Leaf,
+  Smile,
+  Focus,
+  Timer,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -57,7 +64,7 @@ function SupplementSlider({
 }: {
   cards: SupplementData[];
   accentColor?: string;
-  category?: "fundamentals" | "beauty" | "sport" | "default";
+  category?: "fundamentals" | "beauty" | "sport" | "biohacking" | "default";
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -132,6 +139,7 @@ function SupplementSlider({
     fundamentals: "bg-cyan-500",
     beauty: "bg-pink-500",
     sport: "bg-blue-500",
+    biohacking: "bg-emerald-500",
     default: "bg-cyan-500",
   };
 
@@ -223,6 +231,7 @@ const categoryGradients: Record<string, string> = {
   fundamentals: "from-cyan-500/20 via-cyan-500/5 to-transparent",
   beauty: "from-pink-500/20 via-pink-500/5 to-transparent",
   sport: "from-blue-600/25 via-blue-600/5 to-transparent",
+  biohacking: "from-emerald-500/20 via-emerald-500/5 to-transparent",
   default: "from-white/[0.04] to-white/[0.01]",
 };
 
@@ -230,6 +239,7 @@ const categoryColors: Record<string, { subtitle: string; brands: string }> = {
   fundamentals: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
   beauty: { subtitle: "text-pink-400/70", brands: "text-pink-400/70" },
   sport: { subtitle: "text-blue-400/70", brands: "text-blue-400/70" },
+  biohacking: { subtitle: "text-emerald-400/70", brands: "text-emerald-400/70" },
   default: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
 };
 
@@ -238,7 +248,7 @@ function SupplementCard({
   category = "default" 
 }: { 
   data: SupplementData;
-  category?: "fundamentals" | "beauty" | "sport" | "default";
+  category?: "fundamentals" | "beauty" | "sport" | "biohacking" | "default";
 }) {
   const gradientClass = categoryGradients[category] || categoryGradients.default;
   const colors = categoryColors[category] || categoryColors.default;
@@ -637,6 +647,205 @@ const sportSupps: SupplementData[] = [
   },
 ];
 
+const biohackingProducts = [
+  {
+    name: "Фисташки",
+    subtitle: "Серотониновая бомба",
+    desc: "Рекордсмен по содержанию триптофана и мелатонина. Помогают выравнивать цикл сна и повышать уровень «гормона счастья» без скачков сахара.",
+    tip: "Съедай 30г за 2 часа до сна для лучшего эффекта.",
+    impact: "Настроение и сон",
+    icon: Smile,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    category: "brain",
+    image: "/supplements/pistachios.png",
+  },
+  {
+    name: "Тёмный шоколад (85%+)",
+    subtitle: "Нейропротектор",
+    desc: "Флавоноиды какао стимулируют выработку BDNF — белка, отвечающего за рост новых нейронов. Улучшает рабочую память и скорость реакции.",
+    tip: "Достаточно 20г в первой половине дня.",
+    impact: "Когнитивные функции",
+    icon: BrainCircuit,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+    category: "brain",
+    image: "/supplements/dark-chocolate.png",
+  },
+  {
+    name: "Зелёный чай (Матча)",
+    subtitle: "Спокойная концентрация",
+    desc: "Комбинация L-теанина и кофеина. Теанин сглаживает «кофеиновый удар», создавая состояние глубокого фокуса без тревожности.",
+    impact: "Фокус и энергия",
+    tip: "Взбей с кокосовым молоком для долгой энергии.",
+    icon: Leaf,
+    color: "text-green-400",
+    bg: "bg-green-500/10",
+    category: "brain",
+    image: "/supplements/matcha.png",
+  },
+  {
+    name: "Жирная дикая рыба",
+    subtitle: "Мембранное топливо",
+    desc: "Источник фосфолипидов и Омега-3, которые максимально эффективно встраиваются в мембраны клеток мозга, ускоряя передачу сигналов.",
+    impact: "Скорость мышления",
+    tip: "Выбирай мелкую рыбу (сельдь, скумбрия) — в ней меньше ртути.",
+    icon: Fish,
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10",
+    category: "brain",
+    image: "/supplements/wild-fish.png",
+  },
+  {
+    name: "Черника / Голубика",
+    subtitle: "Антоциановый щит",
+    desc: "Мощные антиоксиданты, которые проникают через гематоэнцефалический барьер и защищают мозг от окислительного стресса и старения.",
+    impact: "Долголетие мозга",
+    tip: "Замороженная ягода сохраняет все свойства.",
+    icon: ShieldCheck,
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10",
+    category: "health",
+    image: "/supplements/blueberries.png",
+  },
+  {
+    name: "Куркума + Чёрный перец",
+    subtitle: "Природный детокс",
+    desc: "Куркумин в связке with пиперином снижает системное воспаление в организме, которое является главной причиной быстрой утомляемости.",
+    impact: "Противовоспаление",
+    tip: "Перец повышает усвоение куркумина на 2000%.",
+    icon: Flame,
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    category: "health",
+    image: "/supplements/turmeric.png",
+  },
+  {
+    name: "Брокколи (проростки)",
+    subtitle: "Сульфорафановый взрыв",
+    desc: "Содержат сульфорафан — вещество, активирующее путь Nrf2, который запускает мощнейшую внутреннюю систему детоксикации клеток.",
+    impact: "Клеточный детокс",
+    tip: "Ешь сырыми, термическая обработка убивает фермент.",
+    icon: Activity,
+    color: "text-lime-400",
+    bg: "bg-lime-500/10",
+    category: "health",
+    image: "/supplements/broccoli.png",
+  },
+  {
+    name: "Субпродукты (печень)",
+    subtitle: "Мультивитамин от природы",
+    desc: "Концентрат витаминов группы B, железа и витамина A в самой доступной форме. Поддерживают высокий уровень энергии и кроветворение.",
+    impact: "Энергия и кровь",
+    tip: "Достаточно есть 1-2 раза в неделю для закрытия дефицитов.",
+    icon: Activity,
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+    category: "health",
+    image: "/supplements/liver.png",
+  },
+];
+
+// --- BiohackingProductItem ---
+
+function BiohackingProductItem({ item, index }: { item: typeof biohackingProducts[0]; index: number }) {
+  const [isOpen, setIsOpen] = useState(index === 0);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <motion.div
+      layout
+      className="relative border-b border-white/5 last:border-0 overflow-hidden"
+    >
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-4 py-6 cursor-pointer group select-none"
+      >
+        {/* Номер и иконка */}
+        <div className="relative flex items-center justify-center size-12 shrink-0">
+          <span className="absolute inset-0 flex items-center justify-center text-4xl font-oswald font-black text-white/[0.03] group-hover:text-white/[0.06] transition-colors">
+            {index + 1}
+          </span>
+          <div className={cn("size-10 rounded-xl flex items-center justify-center relative z-10 transition-transform duration-500 group-hover:scale-110", item.bg)}>
+            <item.icon className={cn("size-5", item.color)} />
+          </div>
+        </div>
+
+        {/* Заголовок и категория */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-1">
+            <h4 className="text-xl font-oswald font-black text-white uppercase tracking-tight truncate">
+              {item.name}
+            </h4>
+            <ChevronLeft className={cn(
+              "size-4 text-white/20 transition-transform duration-500",
+              isOpen ? "-rotate-90" : "rotate-180"
+            )} />
+          </div>
+          <p className={cn("text-[9px] font-black uppercase tracking-[0.2em]", item.color)}>
+            {item.impact}
+          </p>
+        </div>
+
+        {/* Маленькое превью картинки (если закрыто) */}
+        {!isOpen && item.image && !imageError && (
+          <motion.img
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            src={item.image}
+            onError={() => setImageError(true)}
+            alt=""
+            className="size-12 object-contain drop-shadow-lg md:mr-4"
+          />
+        )}
+      </div>
+
+      {/* Раскрывающаяся часть */}
+      <motion.div
+        initial={false}
+        animate={{ 
+          height: isOpen ? "auto" : 0,
+          opacity: isOpen ? 1 : 0
+        }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="overflow-hidden"
+      >
+        <div className="flex flex-col md:flex-row gap-8 pb-10 pl-16 pr-4">
+          <div className="flex-1">
+            <p className="text-base text-white/50 leading-relaxed mb-6 font-medium">
+              {item.desc}
+            </p>
+            
+            <div className="relative pl-6 border-l-2 border-white/10 py-2">
+              <div className="absolute -left-[2px] top-0 h-1/3 w-[2px] bg-gradient-to-b from-white/40 to-transparent" />
+              <p className="text-sm text-white/40 italic leading-relaxed">
+                <span className={cn("not-italic font-black uppercase tracking-tighter text-[10px] mr-2", item.color)}>
+                  Pro Tip:
+                </span>
+                {item.tip}
+              </p>
+            </div>
+          </div>
+
+          <div className="relative size-48 shrink-0 flex items-center justify-center self-center md:self-start">
+            <div className={cn("absolute inset-0 opacity-20 blur-[40px] rounded-full", item.bg)} />
+            {item.image && !imageError ? (
+              <img
+                src={item.image}
+                alt={item.name}
+                onError={() => setImageError(true)}
+                className="relative z-10 w-full h-full object-contain drop-shadow-2xl"
+              />
+            ) : (
+              <item.icon className={cn("size-24 relative z-10 opacity-20", item.color)} />
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // --- Main Article ---
 
 export default function SupplementsGuide({
@@ -820,6 +1029,60 @@ export default function SupplementsGuide({
           </p>
 
           <SupplementSlider cards={sportSupps} category="sport" />
+        </section>
+
+        {/* Секция 6: Биохакинг через продукты */}
+        <section className="mb-14 text-left">
+          <h2 className="text-2xl md:text-3xl font-oswald font-black uppercase tracking-tight text-white mb-4">
+            Биохакинг через продукты
+          </h2>
+
+          <p className="text-lg text-white/70 leading-relaxed mb-10">
+            Биохакинг — это не только таблетки. Это <span className="text-emerald-400/85 font-bold">функциональное питание</span>. Некоторые привычные продукты содержат такие концентрации активных веществ, что работают на уровне мощных нутрицевтиков.
+          </p>
+
+          <div className="space-y-8">
+            {/* Группа 1: Мозг и когнитивные функции */}
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <h3 className="text-xl font-oswald font-black uppercase tracking-[0.2em] text-amber-500/90 flex items-center gap-3">
+                  <Brain className="size-6" /> Мозг и фокус
+                </h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-amber-500/30 to-transparent" />
+              </div>
+              
+              <div className="flex flex-col border-t border-white/5">
+                {biohackingProducts.filter(p => p.category === 'brain').map((item, i) => (
+                  <BiohackingProductItem key={i} item={item} index={i} />
+                ))}
+              </div>
+            </div>
+
+            {/* Группа 2: Здоровье и долголетие */}
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <h3 className="text-xl font-oswald font-black uppercase tracking-[0.2em] text-emerald-500/90 flex items-center gap-3">
+                  <Heart className="size-6" /> Здоровье и долголетие
+                </h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-emerald-500/30 to-transparent" />
+              </div>
+              
+              <div className="flex flex-col border-t border-white/5">
+                {biohackingProducts.filter(p => p.category === 'health').map((item, i) => (
+                  <BiohackingProductItem key={i} item={item} index={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 p-8 rounded-[2rem] bg-gradient-to-br from-emerald-500/[0.05] via-transparent to-transparent border border-emerald-500/10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Sparkles className="size-12 text-emerald-400" />
+            </div>
+            <p className="text-base text-white/60 leading-relaxed italic text-center relative z-10">
+              «Твоя пища должна быть твоим лекарством, а твоё лекарство — твоей пищей» — Гиппократ был первым биохакером в истории.
+            </p>
+          </div>
         </section>
 
         {/* Блок платформы */}
