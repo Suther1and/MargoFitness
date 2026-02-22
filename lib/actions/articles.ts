@@ -56,7 +56,7 @@ export async function markArticleAsRead(articleId: string) {
 
   if (!user) return { error: "User not authenticated" };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("user_article_progress" as any)
     .upsert({
       user_id: user.id,
@@ -72,6 +72,9 @@ export async function markArticleAsRead(articleId: string) {
     console.error("Error marking article as read:", error);
     return { error };
   }
+
+  // Уведомляем клиент об обновлении статуса — без перезагрузки всего списка
+  window.dispatchEvent(new CustomEvent('article-marked-read', { detail: { articleId } }));
 
   return { success: true };
 }

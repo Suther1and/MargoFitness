@@ -57,7 +57,7 @@ import { useHabits } from './health-tracker/hooks/use-habits'
 import { useStatsDateRange } from './health-tracker/hooks/use-stats-date-range'
 import { useHealthDiary } from './health-tracker/hooks/use-health-diary'
 import { useRegistrationDate } from './health-tracker/hooks/use-registration-date'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { usePrefetchStats } from './health-tracker/hooks/use-prefetch-stats'
 import { getStatsPeriodLabel } from './health-tracker/utils/date-formatters'
 import { hasActiveMainWidgets } from './health-tracker/utils/widget-helpers'
@@ -98,6 +98,28 @@ import { serializeDateRange } from './health-tracker/utils/query-utils'
 export function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonusStats }: { profile: any | null, bonusStats: any | null }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
+  const queryClient = useQueryClient()
+
+  // Оптимистично обновляем read-статус статьи без перезагрузки списка
+  useEffect(() => {
+    const handleArticleRead = (e: Event) => {
+      const { articleId } = (e as CustomEvent).detail;
+      queryClient.setQueryData(['articles-list'], (old: any) => {
+        if (!old) return old;
+        const existing = old.readStatuses.find((s: any) => s.article_id === articleId);
+        if (existing?.is_read) return old;
+        return {
+          ...old,
+          readStatuses: [
+            ...old.readStatuses.filter((s: any) => s.article_id !== articleId),
+            { article_id: articleId, is_read: true },
+          ],
+        };
+      });
+    };
+    window.addEventListener('article-marked-read', handleArticleRead);
+    return () => window.removeEventListener('article-marked-read', handleArticleRead);
+  }, [queryClient]);
 
   // Получаем userId один раз для всех хуков
   const [userId, setUserId] = useState<string | null>(null)
@@ -261,7 +283,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       
       const [{ data: authData }, { data: dbArticles }] = await Promise.all([
         supabase.auth.getSession(),
-        supabase.from("articles").select("slug, sort_order, display_status").neq("display_status", "hidden")
+        supabase.from("articles")
+          .select("slug, sort_order, display_status, is_new, is_updated, image_url")
+          .neq("display_status", "hidden")
       ]);
 
       const userId = authData.session?.user?.id;
@@ -283,12 +307,11 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     refetchOnMount: false,
   })
 
-  // Формируем список статей мгновенно из локального реестра, чтобы текст был сразу
+  // Формируем список статей мгновенно из локального реестра, текст/изображения из Registry
   const finalArticles = useMemo(() => {
     const dbMeta = articlesData?.dbArticles || [];
     const readStatuses = articlesData?.readStatuses || [];
 
-    // 1. Берем все статьи из локального реестра (Registry) - это мгновенно
     const registryArticles = ARTICLE_REGISTRY.map(a => {
       const dbInfo = dbMeta.find((db: any) => db.slug === a.slug);
       const status = readStatuses.find((s: any) => s.article_id === a.id || s.article_id === a.slug);
@@ -299,13 +322,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         is_read: !!status?.is_read,
         sort_order: dbInfo?.sort_order ?? 999,
         display_status: dbInfo?.display_status ?? 'all',
-        is_new: false,
-        is_updated: false,
+        is_new: dbInfo?.is_new ?? false,
+        is_updated: dbInfo?.is_updated ?? false,
+        image_url: dbInfo?.image_url || a.image_url,
         tags: [a.category]
       };
     });
 
-    // 2. Сортируем по порядку из БД (если он уже пришел), иначе оставляем как есть
     return registryArticles.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
   }, [articlesData]);
 

@@ -24,6 +24,7 @@ interface Article {
 
 interface ArticlesListProps {
   articles: Article[];
+  isLoading?: boolean;
   userTier: string;
   onSelectArticle: (slug: string) => void;
 }
@@ -224,6 +225,7 @@ export const ArticlesList = ({ articles, isLoading, userTier, onSelectArticle }:
                     <img
                       src={article.image_url}
                       alt={article.title}
+                      loading={index < 3 ? "eager" : "lazy"}
                       onLoad={() => handleImageLoad(article.id)}
                       className={cn(
                         "h-full w-full object-cover transition-all duration-700 group-hover:scale-110",
