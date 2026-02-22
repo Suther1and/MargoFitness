@@ -885,7 +885,7 @@ export default function SupplementsGuide({
         </div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
-          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-6 md:pt-24 text-left">
+          <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-12 md:pt-24 text-left">
             <div className="flex flex-wrap gap-3 mb-6">
               <span className="bg-white/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Биохакинг
@@ -914,7 +914,7 @@ export default function SupplementsGuide({
 
           <div className="relative h-64 lg:h-auto overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=2070&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2070&auto=format&fit=crop"
               className="h-full w-full object-cover grayscale opacity-60"
               alt="Hero"
             />
