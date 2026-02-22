@@ -312,7 +312,8 @@ export function WorkoutsTab({
         >
           {activeSubTab === 'workouts' && (
             <div className="space-y-6">
-              {isWorkoutsLoading ? (
+              {/* Показываем скелетоны пока userId есть но данных ещё нет (включая восстановление кеша из localStorage) */}
+              {(isWorkoutsLoading || (!workoutsRaw && !!userId)) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <WorkoutCardSkeleton key={i} />
@@ -384,29 +385,30 @@ export function WorkoutsTab({
 
 function WorkoutCardSkeleton() {
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] animate-pulse">
-      <div className="p-8 flex flex-col min-h-[280px]">
-        {/* Icon + badge row */}
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] animate-pulse w-full">
+      <div className="p-8 flex flex-col h-full min-h-[280px]">
+        {/* Шапка: иконка + бейдж — точно как в WorkoutCard */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-2xl bg-white/10" />
-            <div className="space-y-1.5">
-              <div className="h-2.5 w-20 bg-white/10 rounded-full" />
-              <div className="h-4 w-12 bg-white/10 rounded-lg" />
+            <div className="w-10 h-10 rounded-2xl bg-white/10 shrink-0" />
+            <div className="space-y-2">
+              <div className="h-[10px] w-24 bg-white/10 rounded-full" />
+              <div className="h-[18px] w-10 bg-white/10 rounded-md" />
             </div>
           </div>
         </div>
-        {/* Title */}
-        <div className="flex-1 space-y-3">
-          <div className="h-7 w-4/5 bg-white/10 rounded-lg" />
-          <div className="h-7 w-3/5 bg-white/10 rounded-lg" />
-          <div className="flex gap-4 mt-4">
+        {/* Заголовок — text-2xl font-oswald, обычно 1-2 строки */}
+        <div className="flex-1">
+          <div className="h-8 w-[85%] bg-white/10 rounded-lg mb-2" />
+          <div className="h-8 w-[55%] bg-white/10 rounded-lg mb-4" />
+          {/* Время + упражнения */}
+          <div className="flex items-center gap-4">
             <div className="h-4 w-16 bg-white/5 rounded-lg" />
             <div className="h-4 w-16 bg-white/5 rounded-lg" />
           </div>
         </div>
-        {/* Button */}
-        <div className="mt-8 h-12 rounded-2xl bg-white/10 w-full" />
+        {/* Кнопка — py-4 rounded-2xl */}
+        <div className="mt-8 h-[52px] rounded-2xl bg-white/10 w-full" />
       </div>
     </div>
   )
