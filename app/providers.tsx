@@ -1,68 +1,73 @@
 'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState, useEffect } from 'react'
 
-/**
- * Providers компонент для React Query
- * 
- * Настраивает глобальный QueryClient с оптимальными параметрами кэширования
- * для Health Tracker.
- */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      // gcTime должен быть >= maxAge персистера
+      gcTime: 1000 * 60 * 60 * 24,
+      refetchOnWindowFocus: false,
+      retry: 1,
+      refetchOnMount: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+})
+
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Блокировка контекстного меню только на изображениях и видео
     const handleContextMenu = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'IMG' || target.tagName === 'VIDEO' || target.closest('img') || target.closest('video')) {
         e.preventDefault();
       }
     };
-
-    // Блокировка перетаскивания (для изображений и т.д.)
-    const handleDragStart = (e: DragEvent) => {
-      e.preventDefault();
-    };
+    const handleDragStart = (e: DragEvent) => e.preventDefault();
 
     window.addEventListener('contextmenu', handleContextMenu);
     window.addEventListener('dragstart', handleDragStart);
-
     return () => {
       window.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('dragstart', handleDragStart);
     };
   }, []);
 
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        // Данные считаются свежими 5 минут
-        staleTime: 1000 * 60 * 5,
-        // Кэш хранится 30 минут (увеличено для сохранения между переключениями)
-        gcTime: 1000 * 60 * 30,
-        // Не перезагружать при фокусе окна (данные health tracker не меняются извне)
-        refetchOnWindowFocus: false,
-        // Retry только один раз при ошибке
-        retry: 1,
-        // Не перезагружать при монтировании - используем кэш
-        refetchOnMount: false,
-      },
-      mutations: {
-        // Retry для мутаций отключен (чтобы не дублировать запросы)
-        retry: false,
-      },
-    },
-  }))
+  const [persister] = useState(() =>
+    createSyncStoragePersister({
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      key: 'margo-rq-cache',
+      throttleTime: 1000,
+    })
+  )
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        // Кеш живёт 24 часа
+        maxAge: 1000 * 60 * 60 * 24,
+        // Сбрасываем кеш при смене версии
+        buster: 'v1',
+        dehydrateOptions: {
+          // Персистим только успешные запросы с данными
+          shouldDehydrateQuery: (query) => query.state.status === 'success',
+        },
+      }}
+    >
       {children}
-      {/* DevTools только в dev режиме */}
       {process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   )
 }
 
