@@ -68,16 +68,26 @@ const TIER_WEIGHTS = {
   elite: 3,
 };
 
-export function WorkoutsTab() {
+export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloadedArticles?: any[], isArticlesLoading?: boolean }) {
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
   const [loading, setLoading] = useState(true)
   const [weekData, setWeekData] = useState<ContentWeekWithSessions | null>(null)
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [articles, setArticles] = useState<any[]>([])
+  const [articles, setArticles] = useState<any[]>(preloadedArticles || [])
+  const [loadingArticles, setLoadingArticles] = useState(isArticlesLoading ?? !preloadedArticles)
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
+
+  useEffect(() => {
+    if (preloadedArticles) {
+      setArticles(preloadedArticles);
+    }
+    if (isArticlesLoading !== undefined) {
+      setLoadingArticles(isArticlesLoading);
+    }
+  }, [preloadedArticles, isArticlesLoading]);
 
   useLayoutEffect(() => {
     if (selectedArticleSlug) {
@@ -107,7 +117,9 @@ export function WorkoutsTab() {
   };
 
   const loadArticles = async () => {
+    if (preloadedArticles && articles.length > 0) return;
     try {
+      setLoadingArticles(true);
       // 1. Загружаем данные из БД
       const dbArticles = await getArticles();
       
@@ -170,6 +182,8 @@ export function WorkoutsTab() {
     } catch (error) {
       console.error("Error loading articles:", error);
       setArticles(ARTICLE_REGISTRY.map(a => ({ ...a, id: a.id || a.slug, is_read: false })));
+    } finally {
+      setLoadingArticles(false);
     }
   }
 
@@ -472,6 +486,7 @@ export function WorkoutsTab() {
           {activeSubTab === 'materials' && (
             <ArticlesList 
               articles={articles} 
+              isLoading={loadingArticles}
               userTier={profile?.subscription_tier || 'free'} 
               onSelectArticle={(slug) => {
                 setSelectedArticleSlug(slug);

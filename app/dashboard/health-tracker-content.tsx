@@ -67,6 +67,8 @@ import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
 import { getActiveHabitsForDate, calculateHabitStats, shouldShowHabitOnDate } from './health-tracker/utils/habit-scheduler'
 import { getHabitsStats } from '@/lib/actions/health-stats'
+import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
+import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 
 /**
@@ -252,6 +254,77 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     forceSave
   } = useHealthDiary({ userId, selectedDate })
   
+  const { data: articlesData, isLoading: isArticlesLoading } = useQuery({
+    queryKey: ['articles-list'],
+    queryFn: async () => {
+      const dbArticles = await getArticles();
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let readStatuses: any[] = [];
+      if (user) {
+        const { data } = await supabase
+          .from('user_article_progress' as any)
+          .select('article_id, is_read')
+          .eq('user_id', user.id);
+        readStatuses = data || [];
+      }
+      
+      return { dbArticles, readStatuses };
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+
+  // Формируем список статей только когда данные из БД готовы, чтобы избежать прыжков порядка
+  const finalArticles = useMemo(() => {
+    if (!articlesData) return [];
+    
+    const dbArticles = articlesData.dbArticles || [];
+    const readStatuses = articlesData.readStatuses || [];
+
+    // 1. Готовим базовый список из хардкода (Registry)
+    const allArticlesMap = new Map();
+    ARTICLE_REGISTRY.forEach(a => {
+      allArticlesMap.set(a.slug, { 
+        ...a, 
+        id: a.id || a.slug, 
+        is_read: false,
+        is_new: false,
+        is_updated: false,
+        display_status: 'all',
+        sort_order: 999,
+        tags: [a.category]
+      });
+    });
+
+    let combinedArticles = [];
+
+    // 2. Если база вернула статьи, используем их (они приоритетнее для порядка и метаданных)
+    if (dbArticles.length > 0) {
+      combinedArticles = dbArticles.map((dbA: any) => {
+        const registryA = allArticlesMap.get(dbA.slug);
+        return {
+          ...(registryA || {}),
+          ...dbA,
+          is_read: false,
+          image_url: dbA.image_url || registryA?.image_url
+        };
+      });
+    } else {
+      // 3. Иначе используем только Registry
+      combinedArticles = Array.from(allArticlesMap.values());
+    }
+
+    // 4. Добавляем статусы прочитанности
+    const result = combinedArticles.map(article => {
+      const status = readStatuses.find((s: any) => s.article_id === article.id || s.article_id === article.slug);
+      return { ...article, is_read: !!status?.is_read };
+    });
+
+    // 5. Сортировка по sort_order из БД
+    return result.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+  }, [articlesData]);
+
   // Фоновая предзагрузка данных статистики - стартует параллельно
   usePrefetchStats({
     userId,
@@ -453,7 +526,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   }, [isValidTab, activeTab])
 
   // Прогрессивный рендеринг: показываем UI сразу, данные появляются по мере загрузки
-  const isLoading = !isSettingsLoaded || !isHabitsLoaded || isDiaryLoading
+  const isInitialLoading = !isSettingsLoaded || !isHabitsLoaded || isDiaryLoading
 
   return (
     <ToastProvider>
@@ -756,7 +829,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   )}
                   
                   {activeTab === 'workouts' && (
-                    <WorkoutsTab />
+                    <WorkoutsTab 
+                      preloadedArticles={finalArticles} 
+                      isArticlesLoading={isArticlesLoading}
+                    />
                   )}
                   
                   {activeTab === 'goals' && (
@@ -988,7 +1064,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.1 }}
                         >
-                          <WorkoutsTab />
+                          <WorkoutsTab 
+                            preloadedArticles={finalArticles} 
+                            isArticlesLoading={isArticlesLoading}
+                          />
                         </motion.div>
                       )}
 

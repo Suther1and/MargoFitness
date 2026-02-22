@@ -4,47 +4,34 @@ import { Article } from "@/types/database";
 export async function getArticles(): Promise<Article[]> {
   const supabase = createClient();
   
-  // Получаем текущего пользователя через auth.getUser()
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  let userRole = 'user';
-  
-  if (user) {
-    // Получаем роль из таблицы profiles
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    
-    if (profile?.role === 'admin') {
-      userRole = 'admin';
-    }
-  }
-  
-  // Формируем запрос
-  let query = supabase.from("articles").select("*");
-  
-  if (userRole === 'admin') {
-    // Админы видят все, кроме hidden
-    query = query.neq("display_status", "hidden");
-  } else {
-    // Обычные пользователи видят только 'all'
-    query = query.eq("display_status", "all");
-  }
-
-  // Сортировка по sort_order
-  const { data, error } = await query
-    .order("sort_order", { ascending: true });
+  // Параллельно получаем пользователя и статьи
+  const [{ data: authData }, { data: articles, error }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("articles").select("*").neq("display_status", "hidden").order("sort_order", { ascending: true })
+  ]);
 
   if (error) {
     console.error("Error fetching articles:", error);
     return [];
   }
 
-  // ВАЖНО: Если мы под обычным пользователем, и база вернула 0 статей (хотя они там есть),
-  // это может быть из-за RLS политик. Но мы пока просто возвращаем данные.
-  return data as Article[];
+  const user = authData?.user;
+  if (!user) {
+    return (articles || []).filter(a => a.display_status === 'all') as Article[];
+  }
+
+  // Получаем роль из кэша или БД (один запрос)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  
+  if (profile?.role === 'admin') {
+    return (articles || []) as Article[];
+  }
+
+  return (articles || []).filter(a => a.display_status === 'all') as Article[];
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {

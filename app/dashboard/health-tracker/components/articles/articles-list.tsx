@@ -51,10 +51,15 @@ const TIER_LABELS = {
   elite: "Elite",
 };
 
-export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesListProps) => {
+export const ArticlesList = ({ articles, isLoading, userTier, onSelectArticle }: ArticlesListProps) => {
   const [activeCategory, setActiveCategory] = useState("Все");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+
+  const handleImageLoad = (id: string) => {
+    setLoadedImages(prev => ({ ...prev, [id]: true }));
+  };
 
   const categories = ["Все", "Прочитанные", "Непрочитанные"];
 
@@ -168,7 +173,32 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
 
       {/* Сетка статей - 2 колонки на мобилках */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {filteredArticles.length > 0 ? (
+        {isLoading ? (
+          // Скелетоны при загрузке данных
+          Array.from({ length: 6 }).map((_, i) => (
+            <div 
+              key={i} 
+              className="group relative flex flex-col overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-white/[0.03] border border-white/10 animate-pulse"
+            >
+              <div className="relative aspect-video md:h-48 w-full bg-white/5" />
+              <div className="p-4 md:p-6 flex flex-col flex-1">
+                <div className="h-5 md:h-7 bg-white/10 rounded-lg w-full mb-2 md:mb-3" />
+                <div className="h-5 md:h-7 bg-white/10 rounded-lg w-2/3 mb-2 md:mb-3" />
+                <div className="hidden md:block space-y-2 mb-6 flex-1">
+                  <div className="h-3 bg-white/5 rounded-lg w-full" />
+                  <div className="h-3 bg-white/5 rounded-lg w-5/6" />
+                </div>
+                <div className="flex justify-between items-center mt-auto">
+                  <div className="flex gap-2">
+                    <div className="h-4 md:h-5 bg-white/5 rounded-lg w-12 md:w-16" />
+                    <div className="h-4 md:h-5 bg-white/5 rounded-lg w-10 md:w-12" />
+                  </div>
+                  <div className="h-4 bg-white/5 rounded-lg w-12" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : filteredArticles.length > 0 ? (
           filteredArticles.map((article, index) => {
             const locked = !hasAccess(article.access_level);
             
@@ -182,12 +212,23 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                 )}
               >
                 {/* Изображение */}
-                <div className="relative aspect-video md:h-48 w-full overflow-hidden">
+                <div className="relative aspect-video md:h-48 w-full overflow-hidden bg-white/5">
+                  {/* Скелетон для конкретного изображения - показываем пока не загрузилось */}
+                  {!loadedImages[article.id] && (
+                    <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                      <BookOpen className="w-8 h-8 text-white/10" />
+                    </div>
+                  )}
+                  
                   {article.image_url ? (
                     <img
                       src={article.image_url}
                       alt={article.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onLoad={() => handleImageLoad(article.id)}
+                      className={cn(
+                        "h-full w-full object-cover transition-all duration-700 group-hover:scale-110",
+                        loadedImages[article.id] ? "opacity-100 scale-100" : "opacity-0 scale-105"
+                      )}
                     />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
@@ -235,10 +276,9 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   <h3 className="text-sm md:text-xl font-oswald font-black text-white uppercase tracking-tight mb-2 md:mb-3 group-hover:text-slate-300 transition-colors line-clamp-2 leading-tight">
                     {article.title}
                   </h3>
-                  <p className="hidden md:block text-xs text-white/40 leading-relaxed line-clamp-2 mb-6 flex-1">
+                  <p className="hidden md:block text-xs text-white/40 leading-relaxed mb-6 flex-1">
                     {article.description}
                   </p>
-
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex flex-wrap items-center gap-2 md:gap-3">
                       <Badge className={cn(
