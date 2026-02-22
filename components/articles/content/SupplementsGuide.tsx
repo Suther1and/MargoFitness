@@ -59,7 +59,7 @@ interface SupplementData {
 
 function SupplementSlider({
   cards,
-  accentColor = "cyan",
+  accentColor = "emerald",
   category = "default",
 }: {
   cards: SupplementData[];
@@ -140,7 +140,7 @@ function SupplementSlider({
     beauty: "bg-pink-500",
     sport: "bg-blue-500",
     biohacking: "bg-emerald-500",
-    default: "bg-cyan-500",
+    default: "bg-emerald-500",
   };
 
   const activeDotColor = dotColors[category] || dotColors.default;
@@ -231,16 +231,16 @@ const categoryGradients: Record<string, string> = {
   fundamentals: "from-cyan-500/20 via-cyan-500/5 to-transparent",
   beauty: "from-pink-500/20 via-pink-500/5 to-transparent",
   sport: "from-blue-600/25 via-blue-600/5 to-transparent",
-  biohacking: "from-emerald-500/20 via-emerald-500/5 to-transparent",
-  default: "from-white/[0.04] to-white/[0.01]",
+  biohacking: "from-emerald-500/10 via-emerald-500/5 to-transparent",
+  default: "from-emerald-500/10 via-emerald-500/5 to-transparent",
 };
 
 const categoryColors: Record<string, { subtitle: string; brands: string }> = {
   fundamentals: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
   beauty: { subtitle: "text-pink-400/70", brands: "text-pink-400/70" },
   sport: { subtitle: "text-blue-400/70", brands: "text-blue-400/70" },
-  biohacking: { subtitle: "text-emerald-400/70", brands: "text-emerald-400/70" },
-  default: { subtitle: "text-cyan-400/70", brands: "text-cyan-400/70" },
+  biohacking: { subtitle: "text-white/40", brands: "text-emerald-400/60" },
+  default: { subtitle: "text-white/40", brands: "text-emerald-400/60" },
 };
 
 function SupplementCard({ 
@@ -365,10 +365,10 @@ function SupplementCard({
 
 function PriorityPyramid() {
   const levels = [
-    { label: "Добавки", width: "30%", opacity: "bg-cyan-500/15 border-cyan-500/20 text-cyan-400/70", desc: "Вишенка на торте" },
-    { label: "Тренировки", width: "50%", opacity: "bg-cyan-500/20 border-cyan-500/25 text-cyan-400/80", desc: "Стимул для роста" },
-    { label: "Питание", width: "70%", opacity: "bg-cyan-500/25 border-cyan-500/30 text-cyan-400/90", desc: "Строительный материал" },
-    { label: "Сон и восстановление", width: "90%", opacity: "bg-cyan-500/30 border-cyan-500/35 text-cyan-300", desc: "Фундамент всего" },
+    { label: "Добавки", width: "30%", opacity: "bg-white/5 border-white/10 text-emerald-400/70", desc: "Вишенка на торте" },
+    { label: "Тренировки", width: "50%", opacity: "bg-white/[0.07] border-white/10 text-white/80", desc: "Стимул для роста" },
+    { label: "Питание", width: "70%", opacity: "bg-white/10 border-white/10 text-white/90", desc: "Строительный материал" },
+    { label: "Сон и восстановление", width: "90%", opacity: "bg-emerald-500/20 border-emerald-500/20 text-white", desc: "Фундамент всего" },
   ];
 
   return (
@@ -697,18 +697,6 @@ const biohackingProducts = [
     image: "/supplements/wild-fish.png",
   },
   {
-    name: "Черника / Голубика",
-    subtitle: "Антоциановый щит",
-    desc: "Мощные антиоксиданты, которые проникают через гематоэнцефалический барьер и защищают мозг от окислительного стресса и старения.",
-    impact: "Долголетие мозга",
-    tip: "Замороженная ягода сохраняет все свойства.",
-    icon: ShieldCheck,
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10",
-    category: "health",
-    image: "/supplements/blueberries.png",
-  },
-  {
     name: "Куркума + Чёрный перец",
     subtitle: "Природный детокс",
     desc: "Куркумин в связке with пиперином снижает системное воспаление в организме, которое является главной причиной быстрой утомляемости.",
@@ -719,6 +707,18 @@ const biohackingProducts = [
     bg: "bg-orange-500/10",
     category: "health",
     image: "/supplements/turmeric.png",
+  },
+  {
+    name: "Черника / Голубика",
+    subtitle: "Антоциановый щит",
+    desc: "Мощные антиоксиданты, которые проникают через гематоэнцефалический барьер и защищают мозг от окислительного стресса и старения.",
+    impact: "Долголетие мозга",
+    tip: "Замороженная ягода сохраняет все свойства.",
+    icon: ShieldCheck,
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10",
+    category: "health",
+    image: "/supplements/blueberries.png",
   },
   {
     name: "Брокколи (проростки)",
@@ -871,7 +871,7 @@ export default function SupplementsGuide({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-white selection:bg-cyan-500/30"
+      className="text-white selection:bg-emerald-500/30"
     >
       {/* HERO */}
       <div className="relative w-full overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16">
@@ -887,11 +887,11 @@ export default function SupplementsGuide({
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
           <div className="relative z-10 flex flex-col justify-center p-8 md:p-16 pt-6 md:pt-24 text-left">
             <div className="flex flex-wrap gap-3 mb-6">
-              <span className="bg-cyan-400 text-black border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+              <span className="bg-white/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                 Биохакинг
               </span>
               {metadata?.access_level && (
-                <span className="hidden md:inline-block bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                <span className="hidden md:inline-block bg-white/5 text-white/40 border border-white/10 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                   {metadata.access_level}
                 </span>
               )}
@@ -902,12 +902,12 @@ export default function SupplementsGuide({
 
             <h1 className="text-3xl md:text-6xl font-oswald font-black text-white uppercase tracking-tighter leading-[0.95] mb-8">
               Гид по добавкам:{" "}
-              <span className="text-cyan-400">
-                что реально работает и стоит ли тратить деньги
+              <span className="text-white/90">
+                что реально работает и <span className="text-emerald-400">стоит ли тратить деньги</span>
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-cyan-500/30 pl-8 italic">
+            <p className="text-lg md:text-xl text-white/50 leading-relaxed font-montserrat font-medium border-l-2 border-white/10 pl-8 italic">
               Научный разбор БАДов и спортпита - без маркетинга. Конкретные добавки, дозировки и бренды, которым можно доверять.
             </p>
           </div>
@@ -947,7 +947,7 @@ export default function SupplementsGuide({
         {/* Вступление */}
         <div className="space-y-6 mb-14 text-left">
           <p className="text-lg md:text-xl text-white/75 leading-relaxed">
-            Ты только начинаешь тренироваться, заходишь в аптеку или на маркетплейс - и видишь <span className="text-white/90 font-bold">сотни банок</span> с обещаниями: «сжигает жир», «ускоряет рост мышц», «заряжает энергией». Блогеры рекомендуют одно, подруга пьёт другое, а врач говорит третье. <span className="text-cyan-400/85 font-bold underline decoration-cyan-500/30 underline-offset-4">Как разобраться</span>, что из этого реально нужно?
+            Ты только начинаешь тренироваться, заходишь в аптеку или на маркетплейс - и видишь <span className="text-white/90 font-bold">сотни банок</span> с обещаниями: «сжигает жир», «ускоряет рост мышц», «заряжает энергией». Блогеры рекомендуют одно, подруга пьёт другое, а врач говорит третье. <span className="text-emerald-400/85 font-bold underline decoration-emerald-500/30 underline-offset-4">Как разобраться</span>, что из этого реально нужно?
           </p>
           <p className="text-lg md:text-xl text-white/75 leading-relaxed">
             Я хочу дать тебе честную карту. Без рекламы, без завышенных обещаний. Только наука, здравый смысл и конкретные продукты, которые я могу рекомендовать. И сразу главное - <span className="text-white/90 font-bold">добавки не заменят тренировки и питание</span>. Они лишь дополняют то, что ты уже делаешь.
@@ -961,11 +961,11 @@ export default function SupplementsGuide({
           </h2>
 
           <p className="text-lg text-white/70 leading-relaxed mb-4">
-            БАД расшифровывается как <span className="text-cyan-400/85 font-bold">биологически активная добавка</span>. Не лекарство, не замена еде, не волшебная пилюля. Это концентрированные нутриенты, которые ты <span className="text-white/85 font-bold">не добираешь из обычного питания</span>. Не более.
+            БАД расшифровывается как <span className="text-emerald-400/85 font-bold">биологически активная добавка</span>. Не лекарство, не замена еде, не волшебная пилюля. Это концентрированные нутриенты, которые ты <span className="text-white/85 font-bold">не добираешь из обычного питания</span>. Не более.
           </p>
 
           <p className="text-lg text-white/70 leading-relaxed mb-8">
-            Если ты спишь по 5 часов, ешь фастфуд и не тренируешься - никакие добавки не помогут. Вот как устроена <span className="text-cyan-400/85 font-bold underline decoration-cyan-500/20 underline-offset-4">пирамида приоритетов</span>:
+            Если ты спишь по 5 часов, ешь фастфуд и не тренируешься - никакие добавки не помогут. Вот как устроена <span className="text-emerald-400/85 font-bold underline decoration-emerald-500/20 underline-offset-4">пирамида приоритетов</span>:
           </p>
 
           <PriorityPyramid />
@@ -1029,7 +1029,7 @@ export default function SupplementsGuide({
           </p>
 
           <p className="text-lg text-white/70 leading-relaxed mb-6">
-            По спортпиту я рекомендую <span className="text-cyan-400/85 font-bold">Optimum Nutrition</span> как золотой стандарт и <span className="text-cyan-400/85 font-bold">Primecraft</span> как достойную российскую альтернативу.
+            По спортпиту я рекомендую <span className="text-emerald-400/85 font-bold">Optimum Nutrition</span> как золотой стандарт и <span className="text-emerald-400/85 font-bold">Primecraft</span> как достойную российскую альтернативу.
           </p>
 
           <SupplementSlider cards={sportSupps} category="sport" />
@@ -1079,59 +1079,54 @@ export default function SupplementsGuide({
             </div>
           </div>
 
-          <div className="mt-16 p-8 rounded-[2rem] bg-gradient-to-br from-emerald-500/[0.05] via-transparent to-transparent border border-emerald-500/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Sparkles className="size-12 text-emerald-400" />
-            </div>
-            <p className="text-base text-white/60 leading-relaxed italic text-center relative z-10">
-              «Твоя пища должна быть твоим лекарством, а твоё лекарство — твоей пищей» — Гиппократ был первым биохакером в истории.
-            </p>
-          </div>
+          <p className="text-sm text-white/35 mt-16 italic text-center">
+            «Твоя пища должна быть твоим лекарством, а твоё лекарство — твоей пищей» — Гиппократ был первым биохакером в истории.
+          </p>
         </section>
 
         {/* Блок платформы */}
         <section className="mb-14 text-left">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500/[0.06] via-white/[0.02] to-transparent border border-cyan-500/10 p-6 md:p-10">
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-cyan-500/5 blur-[80px] rounded-full" />
+          <div className="relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/10 p-6 md:p-10">
+            <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-500/[0.03] blur-[80px] rounded-full" />
 
             <div className="relative">
               <div className="flex items-center gap-3 mb-4">
-                <div className="size-9 rounded-lg bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center">
-                  <Activity className="size-4.5 text-cyan-400" />
+                <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Activity className="size-4.5 text-white/40" />
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400/70">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
                   MargoFitness
                 </p>
               </div>
 
               <h3 className="text-xl md:text-2xl font-oswald font-bold uppercase tracking-tight text-white mb-3">
                 Отслеживай эффект от добавок{" "}
-                <span className="text-cyan-400">в трекере</span>
+                <span className="text-emerald-400/80">в трекере</span>
               </h3>
 
-              <p className="text-sm text-white/60 leading-relaxed mb-6">
+              <p className="text-sm text-white/40 leading-relaxed mb-6">
                 Начала пить магний и хочешь понять, улучшился ли сон? Добавила креатин и хочешь видеть рост силы? Виджеты трекера здоровья MargoFitness помогают отслеживать изменения и видеть, что реально работает для тебя.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="rounded-xl bg-white/[0.04] border border-white/5 p-4">
-                  <Moon className="size-5 text-cyan-400/60 mb-2" />
+                <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                  <Moon className="size-5 text-white/20 mb-2" />
                   <p className="text-sm font-medium text-white/70 mb-1">Трекер сна</p>
-                  <p className="text-xs text-white/40 leading-relaxed">
+                  <p className="text-xs text-white/30 leading-relaxed">
                     Начала пить магний - видишь, как меняется качество сна по графику
                   </p>
                 </div>
-                <div className="rounded-xl bg-white/[0.04] border border-white/5 p-4">
-                  <Zap className="size-5 text-cyan-400/60 mb-2" />
+                <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                  <Zap className="size-5 text-white/20 mb-2" />
                   <p className="text-sm font-medium text-white/70 mb-1">Энергия и настроение</p>
-                  <p className="text-xs text-white/40 leading-relaxed">
+                  <p className="text-xs text-white/30 leading-relaxed">
                     Ежедневная фиксация уровня энергии показывает тренды за недели и месяцы
                   </p>
                 </div>
-                <div className="rounded-xl bg-white/[0.04] border border-white/5 p-4">
-                  <TrendingUp className="size-5 text-cyan-400/60 mb-2" />
+                <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                  <TrendingUp className="size-5 text-white/20 mb-2" />
                   <p className="text-sm font-medium text-white/70 mb-1">Аналитика</p>
-                  <p className="text-xs text-white/40 leading-relaxed">
+                  <p className="text-xs text-white/30 leading-relaxed">
                     Сравнивай периоды «до» и «после» начала приёма добавок
                   </p>
                 </div>
@@ -1144,12 +1139,12 @@ export default function SupplementsGuide({
         <section className="mb-4 text-center py-8 md:py-12 border-t border-white/5 mt-8 md:mt-20 pb-32">
           <h2 className="text-4xl md:text-6xl font-oswald font-black uppercase tracking-tighter text-white mb-6">
             Добавки - вишенка.{" "}
-            <span className="text-cyan-400">Торт - это ты</span>
+            <span className="text-white/90">Торт - <span className="text-emerald-400">это ты</span></span>
           </h2>
-          <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
+          <p className="text-white/20 text-lg md:text-xl leading-relaxed max-w-xl mx-auto mb-10 px-4">
             Никакая банка не заменит тренировки, сон и нормальную еду. Но когда фундамент есть - правильные добавки дают тот самый последний процент.
           </p>
-          <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-cyan-500/15 mb-2">
+          <button className="inline-flex items-center gap-2.5 px-10 py-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] mb-2">
             Начать тренировку <ArrowRight className="size-4" />
           </button>
         </section>
