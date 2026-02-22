@@ -810,14 +810,16 @@ function BiohackingProductItem({ item, index }: { item: typeof biohackingProduct
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="overflow-hidden"
       >
-        <div className="flex flex-col md:flex-row gap-8 pb-10 pl-16 pr-4">
-          <div className="flex-1">
-            <p className="text-base text-white/50 leading-relaxed mb-6 font-medium">
+        <div className="flex flex-col md:flex-row gap-8 pb-6 pl-16 pr-4">
+          <div className="flex-1 flex flex-col min-h-[140px]">
+            <p className="text-base text-white/50 leading-relaxed mb-8 font-medium">
               {item.desc}
             </p>
             
-            <div className="relative pl-6 border-l-2 border-white/10 py-2">
-              <div className="absolute -left-[2px] top-0 h-1/3 w-[2px] bg-gradient-to-b from-white/40 to-transparent" />
+            <div className="relative pl-6 border-l-2 border-white/10 py-1">
+              <div className={cn("absolute -left-[2px] top-0 h-full w-[2px]", 
+                item.color.replace('text-', 'bg-').replace('/10', '')
+              )} />
               <p className="text-sm text-white/40 italic leading-relaxed">
                 <span className={cn("not-italic font-black uppercase tracking-tighter text-[10px] mr-2", item.color)}>
                   Pro Tip:
@@ -827,7 +829,7 @@ function BiohackingProductItem({ item, index }: { item: typeof biohackingProduct
             </div>
           </div>
 
-          <div className="relative size-48 shrink-0 flex items-center justify-center self-center md:self-start">
+          <div className="relative size-40 shrink-0 flex items-center justify-center self-center md:self-end mb-2">
             <div className={cn("absolute inset-0 opacity-20 blur-[40px] rounded-full", item.bg)} />
             {item.image && !imageError ? (
               <img
@@ -837,7 +839,7 @@ function BiohackingProductItem({ item, index }: { item: typeof biohackingProduct
                 className="relative z-10 w-full h-full object-contain drop-shadow-2xl"
               />
             ) : (
-              <item.icon className={cn("size-24 relative z-10 opacity-20", item.color)} />
+              <item.icon className={cn("size-20 relative z-10 opacity-20", item.color)} />
             )}
           </div>
         </div>
