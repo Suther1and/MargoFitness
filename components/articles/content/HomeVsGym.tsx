@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Zap, 

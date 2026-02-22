@@ -107,31 +107,69 @@ export function WorkoutsTab() {
   };
 
   const loadArticles = async () => {
-    // 1. First, quickly load articles from registry and DB without statuses to show them immediately
-    const dbArticles = await getArticles()
-    const allArticlesMap = new Map();
-    dbArticles.forEach(a => allArticlesMap.set(a.slug, { ...a, is_read: false }));
-    ARTICLE_REGISTRY.forEach(a => allArticlesMap.set(a.slug, { ...a, id: a.id || a.slug, is_read: false }));
-    
-    const initialArticles = Array.from(allArticlesMap.values());
-    setArticles(initialArticles);
-
-    // 2. Then, fetch read statuses in the background
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (user) {
-      const { data: readStatuses } = await supabase
-        .from('user_article_progress' as any)
-        .select('article_id, is_read')
-        .eq('user_id', user.id) as { data: { article_id: string, is_read: boolean }[] | null }
+    try {
+      // 1. Загружаем данные из БД
+      const dbArticles = await getArticles();
       
-      if (readStatuses && readStatuses.length > 0) {
-        setArticles(prev => prev.map(article => {
-          const status = readStatuses.find(s => s.article_id === article.id || s.article_id === article.slug)
-          return { ...article, is_read: status?.is_read || false }
-        }))
+      // 2. Готовим базовый список из хардкода (Registry)
+      const allArticlesMap = new Map();
+      ARTICLE_REGISTRY.forEach(a => {
+        allArticlesMap.set(a.slug, { 
+          ...a, 
+          id: a.id || a.slug, 
+          is_read: false,
+          is_new: false,
+          is_updated: false,
+          display_status: 'all',
+          sort_order: 999,
+          tags: [a.category]
+        });
+      });
+
+      let finalArticles = [];
+
+      // 3. Если база вернула статьи, используем их
+      if (dbArticles && dbArticles.length > 0) {
+        finalArticles = dbArticles.map(dbA => {
+          const registryA = allArticlesMap.get(dbA.slug);
+          return {
+            ...(registryA || {}),
+            ...dbA,
+            is_read: false,
+            image_url: dbA.image_url || registryA?.image_url
+          };
+        });
+      } else {
+        // 4. Если база пуста или не вернула данные (например, для обычного пользователя из-за RLS),
+        // показываем данные из Registry, чтобы не было пустого экрана.
+        finalArticles = Array.from(allArticlesMap.values());
       }
+      
+      // 5. Сортировка
+      finalArticles.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+      
+      setArticles(finalArticles);
+
+      // 6. Статусы прочитанности
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: readStatuses } = await supabase
+          .from('user_article_progress' as any)
+          .select('article_id, is_read')
+          .eq('user_id', user.id);
+        
+        if (readStatuses && readStatuses.length > 0) {
+          setArticles(prev => prev.map(article => {
+            const status = (readStatuses as any[]).find(s => s.article_id === article.id || s.article_id === article.slug);
+            return { ...article, is_read: status?.is_read || false };
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error loading articles:", error);
+      setArticles(ARTICLE_REGISTRY.map(a => ({ ...a, id: a.id || a.slug, is_read: false })));
     }
   }
 

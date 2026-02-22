@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,

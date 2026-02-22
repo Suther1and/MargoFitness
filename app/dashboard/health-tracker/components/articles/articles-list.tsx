@@ -16,6 +16,10 @@ interface Article {
   access_level: "free" | "basic" | "pro" | "elite";
   reading_time: number;
   is_read?: boolean;
+  is_new?: boolean;
+  is_updated?: boolean;
+  tags?: string[];
+  display_status?: string;
 }
 
 interface ArticlesListProps {
@@ -193,9 +197,36 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   
                   <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
-                    <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
-                      {article.category}
-                    </Badge>
+                    {article.tags && article.tags.length > 0 ? (
+                      article.tags.map(tag => (
+                        <Badge key={tag} className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
+                        {article.category}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Бейджи NEW/UPDATED */}
+                  <div className="absolute right-3 top-3 md:right-4 md:top-4 flex flex-col gap-1">
+                    {article.is_new && (
+                      <Badge className="bg-emerald-500 text-black border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 shadow-lg shadow-emerald-500/20">
+                        NEW
+                      </Badge>
+                    )}
+                    {article.is_updated && (
+                      <Badge className="bg-blue-500 text-white border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 shadow-lg shadow-blue-500/20">
+                        UPDATED
+                      </Badge>
+                    )}
+                    {article.display_status === 'admins_only' && (
+                      <Badge className="bg-orange-500 text-black border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 shadow-lg shadow-orange-500/20">
+                        ADMIN ONLY
+                      </Badge>
+                    )}
                   </div>
                 </div>
 

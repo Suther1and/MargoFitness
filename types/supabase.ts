@@ -68,11 +68,16 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          display_status: string
           id: string
           image_url: string | null
+          is_new: boolean
           is_published: boolean | null
+          is_updated: boolean
           reading_time: number | null
           slug: string
+          sort_order: number
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -81,11 +86,16 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          display_status?: string
           id?: string
           image_url?: string | null
+          is_new?: boolean
           is_published?: boolean | null
+          is_updated?: boolean
           reading_time?: number | null
           slug: string
+          sort_order?: number
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -94,11 +104,16 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          display_status?: string
           id?: string
           image_url?: string | null
+          is_new?: boolean
           is_published?: boolean | null
+          is_updated?: boolean
           reading_time?: number | null
           slug?: string
+          sort_order?: number
+          tags?: string[]
           title?: string
           updated_at?: string
         }

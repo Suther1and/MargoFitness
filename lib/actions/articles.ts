@@ -3,17 +3,47 @@ import { Article } from "@/types/database";
 
 export async function getArticles(): Promise<Article[]> {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  
+  // Получаем текущего пользователя через auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let userRole = 'user';
+  
+  if (user) {
+    // Получаем роль из таблицы profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    
+    if (profile?.role === 'admin') {
+      userRole = 'admin';
+    }
+  }
+  
+  // Формируем запрос
+  let query = supabase.from("articles").select("*");
+  
+  if (userRole === 'admin') {
+    // Админы видят все, кроме hidden
+    query = query.neq("display_status", "hidden");
+  } else {
+    // Обычные пользователи видят только 'all'
+    query = query.eq("display_status", "all");
+  }
+
+  // Сортировка по sort_order
+  const { data, error } = await query
+    .order("sort_order", { ascending: true });
 
   if (error) {
     console.error("Error fetching articles:", error);
     return [];
   }
 
+  // ВАЖНО: Если мы под обычным пользователем, и база вернула 0 статей (хотя они там есть),
+  // это может быть из-за RLS политик. Но мы пока просто возвращаем данные.
   return data as Article[];
 }
 

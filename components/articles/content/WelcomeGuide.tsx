@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useLayoutEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Clock,
