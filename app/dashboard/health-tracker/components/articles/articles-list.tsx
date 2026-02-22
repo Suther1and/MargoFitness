@@ -32,10 +32,19 @@ const TIER_WEIGHTS = {
 };
 
 const TIER_COLORS = {
-  free: "text-emerald-400 border-emerald-400/30 bg-emerald-500/10",
-  basic: "text-cyan-400 border-cyan-400/30 bg-cyan-500/10",
+  free: "text-white/40 border-white/10 bg-white/5",
+  basic: "text-orange-400 border-orange-400/30 bg-orange-500/10",
   pro: "text-purple-400 border-purple-400/30 bg-purple-500/10",
   elite: "text-amber-400 border-amber-400/30 bg-amber-500/10",
+  read: "text-emerald-400 border-emerald-400/30 bg-emerald-500/10",
+  time: "text-white/40 border-white/10 bg-white/5",
+};
+
+const TIER_LABELS = {
+  free: "Free",
+  basic: "Basic",
+  pro: "Pro",
+  elite: "Elite",
 };
 
 export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesListProps) => {
@@ -183,28 +192,10 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   
-                  {/* Read Status Icon - Frosted Glass Style */}
-                  {article.is_read && (
-                    <div className="absolute right-3 top-3 md:right-4 md:top-4 z-20">
-                      <div className="flex items-center justify-center size-7 md:size-9 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                        <CheckCircle2 className="size-4 md:size-5 text-emerald-400" />
-                      </div>
-                    </div>
-                  )}
-
                   <div className="absolute left-3 top-3 md:left-4 md:top-4 flex flex-wrap gap-1 md:gap-2">
                     <Badge className="bg-black/40 backdrop-blur-md text-white border-white/10 text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5">
                       {article.category}
                     </Badge>
-                    {article.access_level !== 'free' && (
-                      <Badge className={cn(
-                        "text-[8px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1 px-1.5 py-0 md:px-2 md:py-0.5 border-none",
-                        TIER_COLORS[article.access_level as keyof typeof TIER_COLORS]
-                      )}>
-                        {locked ? <Lock className="h-2.5 w-2.5" /> : <Sparkles className="h-2.5 w-2.5" />}
-                        {article.access_level}
-                      </Badge>
-                    )}
                   </div>
                 </div>
 
@@ -218,12 +209,31 @@ export const ArticlesList = ({ articles, userTier, onSelectArticle }: ArticlesLi
                   </p>
 
                   <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/20">
-                      <span className="flex items-center gap-1 md:gap-1.5">
-                        <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" /> {article.reading_time} мин
-                      </span>
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                      <Badge className={cn(
+                        "text-[7px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 px-1.5 py-0 md:px-2 md:py-0.5 border-none",
+                        TIER_COLORS.time
+                      )}>
+                        <Clock className="h-2.5 w-2.5 md:h-3 md:w-3" /> {article.reading_time} мин
+                      </Badge>
+
+                      <Badge className={cn(
+                        "text-[7px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5 border-none",
+                        TIER_COLORS[article.access_level as keyof typeof TIER_COLORS]
+                      )}>
+                        {TIER_LABELS[article.access_level as keyof typeof TIER_LABELS]}
+                      </Badge>
+
+                      {article.is_read && (
+                        <Badge className={cn(
+                          "text-[7px] md:text-[9px] font-black uppercase tracking-widest px-1.5 py-0 md:px-2 md:py-0.5 border-none",
+                          TIER_COLORS.read
+                        )}>
+                          Прочитано
+                        </Badge>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:translate-x-1 transition-transform">
+                    <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:translate-x-1 transition-transform shrink-0">
                       <span className="hidden xs:inline">Читать</span> <ArrowRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
                     </div>
                   </div>
