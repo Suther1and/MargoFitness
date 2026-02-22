@@ -96,7 +96,7 @@ export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, me
       console.log('Article read:', id);
       await markArticleAsRead(id);
     },
-    threshold: 0.5 // Отмечаем когда 50% "футера" статьи в зоне видимости
+    threshold: 0.8
   });
 
   return (

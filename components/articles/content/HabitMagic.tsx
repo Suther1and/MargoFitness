@@ -158,7 +158,7 @@ export default function HabitMagic({
     onRead: async (id) => {
       await markArticleAsRead(id);
     },
-    threshold: 0.5,
+    threshold: 0.8,
   });
 
   React.useLayoutEffect(() => {
