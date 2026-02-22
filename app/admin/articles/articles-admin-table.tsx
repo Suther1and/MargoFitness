@@ -48,8 +48,23 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
   }, [initialArticles])
 
   const [sortField, setSortField] = useState<keyof Article>('sort_order')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>('asc')
   const { showSuccess, showError } = useToast()
+
+  const ACCESS_LEVEL_ORDER: Record<string, number> = {
+    'free': 0,
+    'basic': 1,
+    'pro': 2,
+    'elite': 3
+  }
+
+  const TAG_COLORS: Record<string, string> = {
+    'БИОХАКИНГ': 'bg-purple-500/20 text-purple-400 border-purple-500/50',
+    'ОСНОВЫ': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
+    'ПИТАНИЕ': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50',
+    'ТРЕНИРОВКИ': 'bg-orange-500/20 text-orange-400 border-orange-500/50',
+    'МЕТОДИКА': 'bg-amber-500/20 text-amber-400 border-amber-500/50',
+  }
 
   // Дебаунс для поиска
   const debouncedSetSearch = useCallback(
@@ -119,9 +134,17 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
     })
 
     // Сортировка
+    if (!sortOrder) return filtered
+
     return filtered.sort((a, b) => {
-      const valA = a[sortField]
-      const valB = b[sortField]
+      let valA: any = a[sortField]
+      let valB: any = b[sortField]
+
+      // Специальная обработка для уровней доступа
+      if (sortField === 'access_level') {
+        valA = ACCESS_LEVEL_ORDER[valA as string] ?? 99
+        valB = ACCESS_LEVEL_ORDER[valB as string] ?? 99
+      }
 
       if (valA === valB) return 0
       if (valA === null || valA === undefined) return 1
@@ -136,7 +159,15 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
 
   const toggleSort = (field: keyof Article) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+      if (sortOrder === 'asc') {
+        setSortOrder('desc')
+      } else if (sortOrder === 'desc') {
+        // Третий клик — сброс на дефолтную сортировку по порядку
+        setSortField('sort_order')
+        setSortOrder('asc')
+      } else {
+        setSortOrder('asc')
+      }
     } else {
       setSortField(field)
       setSortOrder('asc')
@@ -244,18 +275,18 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-4">
+    <div className="space-y-4 p-4 md:p-6">
         {/* Поиск и фильтры */}
-        <div className="space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           {/* Поиск */}
-          <div className="relative">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/40" />
             <input
               type="text"
-              placeholder="Поиск по названию, описанию, тегам..."
+              placeholder="Поиск по статьям..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 transition-colors"
+              className="w-full pl-10 pr-10 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 transition-colors"
             />
             {searchQuery && (
               <button
@@ -268,74 +299,79 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
           </div>
 
           {/* Фильтры */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Теги */}
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => {
-                  setSelectedTags(prev =>
-                    prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-                  )
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${
-                  selectedTags.includes(tag)
-                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
-                    : 'bg-white/5 text-white/40 border border-white/10 hover:border-white/20'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-
-            {/* Access Level фильтр */}
-            <select
-              value={selectedAccessLevel || ''}
-              onChange={(e) => setSelectedAccessLevel(e.target.value || null)}
-              className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-orange-500/50 cursor-pointer"
-            >
-              <option value="">Все уровни</option>
-              <option value="free">Free</option>
-              <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="elite">Elite</option>
-            </select>
-
-            {/* Visibility фильтр */}
-            <select
-              value={selectedVisibility || ''}
-              onChange={(e) => setSelectedVisibility(e.target.value || null)}
-              className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-orange-500/50 cursor-pointer"
-            >
-              <option value="">Вся видимость</option>
-              <option value="all">Видно всем</option>
-              <option value="admins_only">Только админам</option>
-              <option value="hidden">Скрыто</option>
-            </select>
-
-            {/* Сброс фильтров */}
-            {(selectedTags.length > 0 || selectedAccessLevel || selectedVisibility || searchQuery) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('')
-                  setSelectedTags([])
-                  setSelectedAccessLevel(null)
-                  setSelectedVisibility(null)
-                }}
-                className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-rose-500/20 transition-all"
-              >
-                Сбросить
-              </button>
-            )}
-          </div>
-
-          {/* Счетчик результатов */}
-          {(debouncedSearch || selectedTags.length > 0 || selectedAccessLevel || selectedVisibility) && (
-            <div className="text-xs text-white/40">
-              Найдено статей: <span className="text-white/80 font-bold">{sortedArticles.length}</span> из {articles.length}
+            <div className="flex flex-wrap gap-1.5 mr-2">
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => {
+                    setSelectedTags(prev =>
+                      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+                    )
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all border ${
+                    selectedTags.includes(tag)
+                      ? TAG_COLORS[tag.toUpperCase()] || 'bg-orange-500/20 text-orange-400 border-orange-500/50'
+                      : 'bg-white/5 text-white/40 border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
-          )}
+
+            <div className="flex items-center gap-2">
+              {/* Access Level фильтр */}
+              <select
+                value={selectedAccessLevel || ''}
+                onChange={(e) => setSelectedAccessLevel(e.target.value || null)}
+                className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase text-white/60 focus:outline-none focus:border-orange-500/50 cursor-pointer hover:bg-white/10 transition-colors"
+              >
+                <option value="" className="bg-[#1a1a24]">Все уровни</option>
+                <option value="free" className="bg-[#1a1a24]">Free</option>
+                <option value="basic" className="bg-[#1a1a24]">Basic</option>
+                <option value="pro" className="bg-[#1a1a24]">Pro</option>
+                <option value="elite" className="bg-[#1a1a24]">Elite</option>
+              </select>
+
+              {/* Visibility фильтр */}
+              <select
+                value={selectedVisibility || ''}
+                onChange={(e) => setSelectedVisibility(e.target.value || null)}
+                className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase text-white/60 focus:outline-none focus:border-orange-500/50 cursor-pointer hover:bg-white/10 transition-colors"
+              >
+                <option value="" className="bg-[#1a1a24]">Вся видимость</option>
+                <option value="all" className="bg-[#1a1a24]">Видно всем</option>
+                <option value="admins_only" className="bg-[#1a1a24]">Только админам</option>
+                <option value="hidden" className="bg-[#1a1a24]">Скрыто</option>
+              </select>
+
+              {/* Сброс фильтров */}
+              {(selectedTags.length > 0 || selectedAccessLevel || selectedVisibility || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('')
+                    setSelectedTags([])
+                    setSelectedAccessLevel(null)
+                    setSelectedVisibility(null)
+                  }}
+                  className="p-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 transition-all"
+                  title="Сбросить фильтры"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Счетчик результатов */}
+        {(debouncedSearch || selectedTags.length > 0 || selectedAccessLevel || selectedVisibility) && (
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+            Найдено: <span className="text-white/60">{sortedArticles.length}</span> из {articles.length}
+          </div>
+        )}
 
         {/* Панель массовых операций */}
         {selectedArticles.length > 0 && (
@@ -416,8 +452,14 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                   className="w-4 h-4 rounded border-white/20 bg-white/5 text-orange-500 focus:ring-orange-500/50 cursor-pointer"
                 />
               </th>
-              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-16">
-                Порядок
+              <th 
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors w-24"
+                onClick={() => toggleSort('sort_order')}
+              >
+                <div className="flex items-center gap-2">
+                  Порядок
+                  <SortIcon field="sort_order" />
+                </div>
               </th>
               <th 
                 className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors"
@@ -458,11 +500,8 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                   <SortIcon field="view_count" />
                 </div>
               </th>
-              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-center">
-                Бейджи
-              </th>
               <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right">
-                Действия
+                Бейджи
               </th>
             </tr>
           </thead>
@@ -485,7 +524,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
               ))}
               {sortedArticles.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="p-20 text-center">
+                  <td colSpan={8} className="p-20 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="p-4 rounded-full bg-white/5 ring-1 ring-white/10">
                         <BookOpen className="size-8 text-white/20" />

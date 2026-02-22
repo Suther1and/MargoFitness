@@ -25,37 +25,61 @@ export default async function AdminArticlesPage() {
     adminsOnly: 0,
     hidden: 0,
     isNew: 0,
-    isUpdated: 0
+    isUpdated: 0,
+    totalViews: 0
   }
 
   const stats = [
     {
-      label: 'Всего статей',
+      label: 'Статьи',
       value: statsData.total,
       icon: BookOpen,
       color: 'text-blue-400',
       bg: 'bg-blue-500/10',
+      description: 'Всего в базе'
+    },
+    {
+      label: 'Просмотры',
+      value: statsData.totalViews.toLocaleString(),
+      icon: Eye,
+      color: 'text-orange-400',
+      bg: 'bg-orange-500/10',
+      description: 'Общий охват'
     },
     {
       label: 'Видимость',
-      value: `${statsData.visible} / ${statsData.adminsOnly} / ${statsData.hidden}`,
-      icon: Eye,
+      customValue: (
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-emerald-400" title="Всем">{statsData.visible}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-amber-400" title="Админам">{statsData.adminsOnly}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-red-400" title="Скрыто">{statsData.hidden}</span>
+        </div>
+      ),
+      icon: Activity,
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
-      subtitle: 'Всем / Админам / Скрыто'
+      description: 'Всем / Админ / Скрыто'
     },
     {
       label: 'Бейджи',
-      value: `${statsData.isNew} / ${statsData.isUpdated}`,
+      customValue: (
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-purple-400" title="New">{statsData.isNew}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-blue-400" title="Updated">{statsData.isUpdated}</span>
+        </div>
+      ),
       icon: Sparkles,
       color: 'text-purple-400',
       bg: 'bg-purple-500/10',
-      subtitle: 'New / Updated'
+      description: 'New / Updated'
     }
   ]
 
   return (
-    <div className="space-y-10 py-6">
+    <div className="space-y-8 py-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -83,33 +107,33 @@ export default async function AdminArticlesPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat, i) => (
           <div 
             key={i}
-            className="group relative overflow-hidden rounded-3xl bg-white/[0.03] border border-white/5 p-5 transition-all hover:bg-white/[0.06] hover:border-white/10"
+            className="group relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/5 p-4 transition-all hover:bg-white/[0.04] hover:border-white/10"
           >
-            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${stat.bg} blur-2xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none`} />
-            
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-1.5 rounded-lg ${stat.bg}`}>
-                  <stat.icon className={`size-3.5 ${stat.color}`} />
+            <div className="relative z-10 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-lg ${stat.bg}`}>
+                    <stat.icon className={`size-3.5 ${stat.color}`} />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 truncate">
+                    {stat.label}
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 truncate">
-                  {stat.label}
-                </span>
               </div>
               
-              <div className="flex flex-col gap-1">
-                <span className={`text-2xl font-bold font-oswald tracking-tight ${stat.color}`}>
-                  {stat.value}
-                </span>
-                {'subtitle' in stat && (
-                  <span className="text-[9px] font-medium text-white/20 uppercase tracking-wide">
-                    {stat.subtitle}
-                  </span>
-                )}
+              <div>
+                <div className="text-2xl font-bold font-oswald tracking-tight leading-none">
+                  {'customValue' in stat ? stat.customValue : (
+                    <span className={stat.color}>{stat.value}</span>
+                  )}
+                </div>
+                <p className="mt-1.5 text-[9px] font-medium text-white/20 uppercase tracking-wider">
+                  {stat.description}
+                </p>
               </div>
             </div>
           </div>

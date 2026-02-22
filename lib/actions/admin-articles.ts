@@ -74,7 +74,7 @@ export async function getArticleStats() {
   // Проверяем наличие таблицы и данных
   const { data, error } = await supabase
     .from("articles")
-    .select("display_status, is_new, is_updated")
+    .select("display_status, is_new, is_updated, view_count")
 
   if (error) {
     console.error("Error fetching article stats:", JSON.stringify(error, null, 2))
@@ -85,7 +85,8 @@ export async function getArticleStats() {
         adminsOnly: 0,
         hidden: 0,
         isNew: 0,
-        isUpdated: 0
+        isUpdated: 0,
+        totalViews: 0
       }, 
       error 
     }
@@ -99,7 +100,8 @@ export async function getArticleStats() {
         adminsOnly: 0,
         hidden: 0,
         isNew: 0,
-        isUpdated: 0
+        isUpdated: 0,
+        totalViews: 0
       }, 
       error: null 
     }
@@ -111,7 +113,8 @@ export async function getArticleStats() {
     adminsOnly: data.filter(a => a.display_status === 'admins_only').length,
     hidden: data.filter(a => a.display_status === 'hidden').length,
     isNew: data.filter(a => a.is_new).length,
-    isUpdated: data.filter(a => a.is_updated).length
+    isUpdated: data.filter(a => a.is_updated).length,
+    totalViews: data.reduce((acc, a) => acc + (a.view_count || 0), 0)
   }
 
   return { data: stats, error: null }

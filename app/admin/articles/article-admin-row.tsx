@@ -301,20 +301,20 @@ export function ArticleAdminRow({ article, onMoveUp, onMoveDown, isFirst, isLast
 
       {/* Видимость */}
       <td className="p-4">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1 w-fit">
           {DISPLAY_STATUSES.map(status => (
             <button
               key={status.value}
               onClick={() => handleUpdate({ display_status: status.value })}
               className={cn(
-                "flex items-center gap-2 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border",
+                "flex items-center gap-2 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border w-full justify-start",
                 optimisticArticle.display_status === status.value
                   ? cn(status.bg, "border-white/10", status.color)
                   : "bg-transparent border-transparent text-white/20 hover:text-white/40"
               )}
             >
-              <status.icon className="size-3" />
-              {status.label}
+              <status.icon className="size-3 shrink-0" />
+              <span className="truncate">{status.label}</span>
             </button>
           ))}
         </div>
@@ -332,8 +332,8 @@ export function ArticleAdminRow({ article, onMoveUp, onMoveDown, isFirst, isLast
       </td>
 
       {/* Бейджи */}
-      <td className="p-4">
-        <div className="flex items-center gap-3">
+      <td className="p-4 text-right">
+        <div className="flex items-center justify-end gap-3">
           <label className="flex items-center gap-2 cursor-pointer group/label">
             <div className={cn(
               "w-7 h-3.5 rounded-full border border-white/10 relative transition-all",
@@ -377,13 +377,6 @@ export function ArticleAdminRow({ article, onMoveUp, onMoveDown, isFirst, isLast
               optimisticArticle.is_updated ? "text-blue-400" : "text-white/20 group-hover/label:text-white/40"
             )}>UPD</span>
           </label>
-        </div>
-      </td>
-
-      {/* Действия - пусто, можно удалить или добавить функции */}
-      <td className="p-4 text-right">
-        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Здесь можно добавить кнопки в будущем */}
         </div>
       </td>
     </tr>
