@@ -838,9 +838,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   )}
                   
                   {activeTab === 'workouts' && (
-                    <WorkoutsTab 
-                      preloadedArticles={finalArticles} 
+                    <WorkoutsTab
+                      preloadedArticles={finalArticles}
                       isArticlesLoading={isArticlesLoading}
+                      userId={userId}
                     />
                   )}
                   
@@ -1073,9 +1074,10 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.1 }}
                         >
-                          <WorkoutsTab 
-                            preloadedArticles={finalArticles} 
+                          <WorkoutsTab
+                            preloadedArticles={finalArticles}
                             isArticlesLoading={isArticlesLoading}
+                            userId={userId}
                           />
                         </motion.div>
                       )}

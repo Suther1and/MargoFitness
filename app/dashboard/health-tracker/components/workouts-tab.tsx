@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek, checkWorkoutAccess } from '@/lib/access-control'
 import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,7 @@ import { ARTICLE_REGISTRY } from "@/lib/config/articles";
 import dynamic from "next/dynamic";
 import { ArticlesList } from './articles/articles-list'
 import { getArticleBySlug } from '@/lib/actions/articles'
+import { getWorkoutsData } from '@/lib/actions/workouts'
 
 // Динамический импорт хардкодных статей
 const HardcodedArticles: Record<string, any> = {
@@ -68,15 +69,81 @@ const TIER_WEIGHTS = {
   elite: 3,
 };
 
-export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloadedArticles?: any[], isArticlesLoading?: boolean }) {
+export function WorkoutsTab({
+  preloadedArticles,
+  isArticlesLoading,
+  userId,
+}: {
+  preloadedArticles?: any[]
+  isArticlesLoading?: boolean
+  userId: string | null
+}) {
+  const queryClient = useQueryClient()
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
-  const [loading, setLoading] = useState(true)
-  const [weekData, setWeekData] = useState<ContentWeekWithSessions | null>(null)
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
+
+  const { data: workoutsRaw, isLoading: isWorkoutsLoading } = useQuery({
+    queryKey: ['workouts-data', userId],
+    queryFn: () => getWorkoutsData(userId!),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  })
+
+  const { weekData, profile } = useMemo(() => {
+    if (!workoutsRaw) return { weekData: null, profile: null }
+
+    const { weeks, completions, profile: profileData, demoSessions } = workoutsRaw
+
+    let currentWeek = weeks.length ? getCurrentWeek(weeks as any, profileData as Profile) : null
+    if (!currentWeek && weeks.length > 0) currentWeek = weeks[0] as any
+
+    let sessionsWithAccess: WorkoutSessionWithAccess[] = []
+    if (currentWeek) {
+      sessionsWithAccess = ((currentWeek as any).sessions || [])
+        .filter((s: any) => !s.is_demo)
+        .map((session: any) => {
+          const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
+          const completion = completions.find((c: any) => c.workout_session_id === session.id)
+          return {
+            ...session,
+            hasAccess: access.hasAccess,
+            accessReason: access.reason as any,
+            isCompleted: !!completion,
+            userCompletion: completion || null,
+          }
+        })
+    }
+
+    if (demoSessions.length > 0) {
+      const demoSession = demoSessions[0]
+      const completion = completions.find((c: any) => c.workout_session_id === demoSession.id)
+      const demoWithAccess: WorkoutSessionWithAccess = {
+        ...demoSession,
+        hasAccess: true,
+        accessReason: 'subscription' as const,
+        isCompleted: !!completion,
+        userCompletion: completion || null,
+        exercises: demoSession.exercises || [],
+      }
+      sessionsWithAccess = [demoWithAccess, ...sessionsWithAccess]
+    }
+
+    const resolvedWeekData = (currentWeek || sessionsWithAccess.length > 0)
+      ? ({
+          ...(currentWeek || { title: 'Программа', description: '', start_date: '', end_date: '', is_published: true }),
+          sessions: sessionsWithAccess,
+          isCurrent: true,
+        } as ContentWeekWithSessions)
+      : null
+
+    return { weekData: resolvedWeekData, profile: profileData as Profile | null }
+  }, [workoutsRaw])
 
   useLayoutEffect(() => {
     if (selectedArticleSlug) {
@@ -139,117 +206,8 @@ export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloade
     return () => window.removeEventListener('reset-workout-selection', handleReset)
   }, [])
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true)
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
 
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
-        
-        if (profileData) setProfile(profileData as Profile)
-
-        const { data: weeks, error: weeksError } = await supabase
-          .from('content_weeks')
-          .select(`
-            *,
-            sessions:workout_sessions(
-              *,
-              exercises:workout_exercises(
-                *,
-                exercise_library(*)
-              )
-            )
-          `)
-          .eq('is_published', true)
-          .order('start_date', { ascending: false })
-
-        if (weeksError) console.error('[WorkoutsTab] Weeks fetch error:', weeksError)
-        
-        const { data: completions } = await supabase
-          .from('user_workout_completions')
-          .select('*')
-          .eq('user_id', user.id)
-
-        let currentWeek = weeks ? getCurrentWeek(weeks as any, profileData as Profile) : null
-        if (!currentWeek && weeks && weeks.length > 0) {
-          currentWeek = weeks[0] as any
-        }
-
-        let sessionsWithAccess: WorkoutSessionWithAccess[] = []
-        
-        if (currentWeek) {
-          const weekSessions = (currentWeek as any).sessions || []
-          sessionsWithAccess = (weekSessions as any[])
-            .filter((s: any) => !s.is_demo)
-            .map((session: any) => {
-              const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
-              const completion = completions?.find(c => c.workout_session_id === session.id)
-
-              return {
-                ...session,
-                hasAccess: access.hasAccess,
-                accessReason: access.reason as any,
-                isCompleted: !!completion as boolean,
-                userCompletion: completion || null,
-              }
-            })
-        }
-
-        if (profileData?.subscription_tier === 'free') {
-          const { data: demoSessions } = await supabase
-            .from('workout_sessions')
-            .select(`
-              *,
-              exercises:workout_exercises(
-                *,
-                exercise_library(*)
-              )
-            `)
-            .eq('is_demo', true)
-            .limit(1)
-
-          if (demoSessions && demoSessions.length > 0) {
-            const demoSession = demoSessions[0]
-            const completion = completions?.find(c => c.workout_session_id === demoSession.id)
-            
-            const demoWithAccess: WorkoutSessionWithAccess = {
-              ...demoSession,
-              hasAccess: true,
-              accessReason: 'subscription',
-              isCompleted: !!completion,
-              userCompletion: completion || null,
-              exercises: (demoSession as any).exercises || []
-            }
-            sessionsWithAccess = [demoWithAccess, ...sessionsWithAccess]
-          }
-        }
-
-        if (currentWeek || sessionsWithAccess.length > 0) {
-          setWeekData({
-            ...(currentWeek || { title: 'Программа', description: '', start_date: '', end_date: '', is_published: true }),
-            sessions: sessionsWithAccess,
-            isCurrent: true,
-          } as ContentWeekWithSessions)
-        } else {
-          setWeekData(null)
-        }
-      } catch (err) {
-        console.error('Error loading workouts directly:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
-
-  const selectedSession = weekData?.sessions.find(s => s.id === selectedSessionId)
+  const selectedSession = weekData?.sessions.find((s) => s.id === selectedSessionId)
 
   const tabs = [
     { id: 'workouts' as WorkoutSubTab, label: 'Тренировки', icon: Dumbbell, color: 'bg-cyan-500', shadow: 'shadow-cyan-500/20' },
@@ -260,12 +218,13 @@ export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloade
 
   if (selectedSession) {
     return (
-      <WorkoutDetail 
-        session={selectedSession} 
+      <WorkoutDetail
+        session={selectedSession}
         onBack={() => {
           setSelectedSessionId(null)
-          window.location.reload()
-        }} 
+          // Инвалидируем кеш тренировок, чтобы обновить статус выполнения без reload
+          queryClient.invalidateQueries({ queryKey: ['workouts-data', userId] })
+        }}
       />
     )
   }
@@ -353,10 +312,10 @@ export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloade
         >
           {activeSubTab === 'workouts' && (
             <div className="space-y-6">
-              {loading ? (
+              {isWorkoutsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-64 rounded-[2.5rem] bg-white/5 animate-pulse border border-white/10" />
+                  {[1, 2, 3, 4].map((i) => (
+                    <WorkoutCardSkeleton key={i} />
                   ))}
                 </div>
               ) : weekData && weekData.sessions.length > 0 ? (
@@ -419,6 +378,36 @@ export function WorkoutsTab({ preloadedArticles, isArticlesLoading }: { preloade
           )}
         </motion.div>
       </AnimatePresence>
+    </div>
+  )
+}
+
+function WorkoutCardSkeleton() {
+  return (
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] animate-pulse">
+      <div className="p-8 flex flex-col min-h-[280px]">
+        {/* Icon + badge row */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-2xl bg-white/10" />
+            <div className="space-y-1.5">
+              <div className="h-2.5 w-20 bg-white/10 rounded-full" />
+              <div className="h-4 w-12 bg-white/10 rounded-lg" />
+            </div>
+          </div>
+        </div>
+        {/* Title */}
+        <div className="flex-1 space-y-3">
+          <div className="h-7 w-4/5 bg-white/10 rounded-lg" />
+          <div className="h-7 w-3/5 bg-white/10 rounded-lg" />
+          <div className="flex gap-4 mt-4">
+            <div className="h-4 w-16 bg-white/5 rounded-lg" />
+            <div className="h-4 w-16 bg-white/5 rounded-lg" />
+          </div>
+        </div>
+        {/* Button */}
+        <div className="mt-8 h-12 rounded-2xl bg-white/10 w-full" />
+      </div>
     </div>
   )
 }
