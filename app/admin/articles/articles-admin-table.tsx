@@ -59,10 +59,10 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
   }
 
   const TAG_COLORS: Record<string, string> = {
-    'БИОХАКИНГ': 'bg-purple-500/20 text-purple-400 border-purple-500/50',
-    'ОСНОВЫ': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
-    'ПИТАНИЕ': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50',
-    'ТРЕНИРОВКИ': 'bg-orange-500/20 text-orange-400 border-orange-500/50',
+    'БИОХАКИНГ': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50',
+    'ТРЕНИРОВКИ': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
+    'ОСНОВЫ': 'bg-rose-500/20 text-rose-400 border-rose-500/50',
+    'ПИТАНИЕ': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
     'МЕТОДИКА': 'bg-amber-500/20 text-amber-400 border-amber-500/50',
   }
 
@@ -161,11 +161,9 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
     if (sortField === field) {
       if (sortOrder === 'asc') {
         setSortOrder('desc')
-      } else if (sortOrder === 'desc') {
-        // Третий клик — сброс на дефолтную сортировку по порядку
-        setSortField('sort_order')
-        setSortOrder('asc')
       } else {
+        // Сброс на дефолтную сортировку по порядку
+        setSortField('sort_order')
         setSortOrder('asc')
       }
     } else {
@@ -441,10 +439,10 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
 
         {/* Таблица */}
         <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-separate border-spacing-0">
           <thead>
-            <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-12">
+            <tr className="text-left border-b border-white/5 bg-white/[0.02] relative">
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-12 border-b border-white/5">
                 <input
                   type="checkbox"
                   checked={selectedArticles.length === sortedArticles.length && sortedArticles.length > 0}
@@ -453,7 +451,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                 />
               </th>
               <th 
-                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors w-24"
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors w-24 border-b border-white/5"
                 onClick={() => toggleSort('sort_order')}
               >
                 <div className="flex items-center gap-2">
@@ -462,7 +460,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                 </div>
               </th>
               <th 
-                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors"
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
                 onClick={() => toggleSort('title')}
               >
                 <div className="flex items-center gap-2">
@@ -470,11 +468,11 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                   <SortIcon field="title" />
                 </div>
               </th>
-              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 border-b border-white/5">
                 Теги
               </th>
               <th 
-                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors"
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
                 onClick={() => toggleSort('access_level')}
               >
                 <div className="flex items-center gap-2">
@@ -483,7 +481,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                 </div>
               </th>
               <th 
-                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors"
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
                 onClick={() => toggleSort('display_status')}
               >
                 <div className="flex items-center gap-2">
@@ -492,7 +490,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                 </div>
               </th>
               <th 
-                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors"
+                className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
                 onClick={() => toggleSort('view_count')}
               >
                 <div className="flex items-center gap-2">
@@ -500,7 +498,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                   <SortIcon field="view_count" />
                 </div>
               </th>
-              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right">
+              <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right border-b border-white/5">
                 Бейджи
               </th>
             </tr>
