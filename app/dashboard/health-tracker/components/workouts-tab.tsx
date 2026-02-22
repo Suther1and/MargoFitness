@@ -73,10 +73,12 @@ export function WorkoutsTab({
   preloadedArticles,
   isArticlesLoading,
   userId,
+  initialTier,
 }: {
   preloadedArticles?: any[]
   isArticlesLoading?: boolean
   userId: string | null
+  initialTier?: string | null
 }) {
   const queryClient = useQueryClient()
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
@@ -315,7 +317,10 @@ export function WorkoutsTab({
               {/* Показываем скелетоны пока userId есть но данных ещё нет (включая восстановление кеша из localStorage) */}
               {(isWorkoutsLoading || (!workoutsRaw && !!userId)) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4].map((i) => (
+                  {Array.from({
+                    // free видят демо-сессию + сессии недели (обычно 4), остальные — только сессии (обычно 3)
+                    length: (initialTier === 'free' || !initialTier) ? 4 : 3
+                  }).map((_, i) => (
                     <WorkoutCardSkeleton key={i} />
                   ))}
                 </div>

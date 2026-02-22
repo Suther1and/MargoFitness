@@ -842,6 +842,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       preloadedArticles={finalArticles}
                       isArticlesLoading={isArticlesLoading}
                       userId={userId}
+                      initialTier={profile?.subscription_tier}
                     />
                   )}
                   
@@ -1078,6 +1079,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                             preloadedArticles={finalArticles}
                             isArticlesLoading={isArticlesLoading}
                             userId={userId}
+                            initialTier={profile?.subscription_tier}
                           />
                         </motion.div>
                       )}
