@@ -301,10 +301,12 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       
       return { dbArticles: dbArticles || [], readStatuses };
     },
-    staleTime: 1000 * 60 * 30,
-    gcTime: 1000 * 60 * 60,
+    // Данные считаются свежими 5 минут — при заходе на страницу через 5+ мин идёт тихий фоновый refetch
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    // true = перезапрашивает в фоне если данные устарели (пользователь видит старые мгновенно, а новые появляются бесшумно)
+    refetchOnMount: true,
   })
 
   // Формируем список статей мгновенно из локального реестра, текст/изображения из Registry
