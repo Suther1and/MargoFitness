@@ -723,6 +723,10 @@ export default function SupplementsGuide({
               <p className="text-sm text-white/50 leading-relaxed">
                 Эта статья носит <span className="text-white/70 font-medium">информационный характер</span> и не является медицинской рекомендацией. Перед приёмом любых добавок проконсультируйся с врачом. Некоторые добавки могут взаимодействовать с лекарствами или быть противопоказаны при определённых состояниях.
               </p>
+              <div className="h-px w-full bg-amber-500/10 my-4" />
+              <p className="text-sm text-white/50 leading-relaxed italic">
+                Изображения продуктов приведены для примера. Реальный вид упаковки может отличаться в зависимости от производителя, региона и актуальных обновлений бренда.
+              </p>
             </div>
           </div>
         </div>
