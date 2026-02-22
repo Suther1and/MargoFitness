@@ -259,7 +259,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     queryFn: async () => {
       const supabase = createClient();
       
-      // Запрашиваем только ID и статусы прочитанности
       const [{ data: authData }, { data: dbArticles }] = await Promise.all([
         supabase.auth.getSession(),
         supabase.from("articles").select("slug, sort_order, display_status").neq("display_status", "hidden")
@@ -284,7 +283,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     refetchOnMount: false,
   })
 
-  // Формируем список статей мгновенно из локального реестра
+  // Формируем список статей мгновенно из локального реестра, чтобы текст был сразу
   const finalArticles = useMemo(() => {
     const dbMeta = articlesData?.dbArticles || [];
     const readStatuses = articlesData?.readStatuses || [];
@@ -306,7 +305,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       };
     });
 
-    // 2. Сортируем по порядку из БД (если он уже пришел)
+    // 2. Сортируем по порядку из БД (если он уже пришел), иначе оставляем как есть
     return registryArticles.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
   }, [articlesData]);
 
