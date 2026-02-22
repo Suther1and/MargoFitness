@@ -1,9 +1,9 @@
-import { getAdminArticles, getArticleStats } from '@/lib/actions/admin-articles'
+import { getAdminArticles, getArticleStats, ArticleWithStats } from '@/lib/actions/admin-articles'
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
 import { ArticlesAdminTable } from './articles-admin-table'
-import { BookOpen, ArrowLeft, Activity, Eye, EyeOff, Sparkles, RefreshCw } from 'lucide-react'
+import { BookOpen, ArrowLeft, Activity, Eye, Sparkles } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +18,7 @@ export default async function AdminArticlesPage() {
     getArticleStats()
   ])
 
-  const articles = articlesResult.data || []
+  const articles: ArticleWithStats[] = articlesResult.data || []
   const statsData = statsResult.data || {
     total: 0,
     visible: 0,
@@ -26,7 +26,9 @@ export default async function AdminArticlesPage() {
     hidden: 0,
     isNew: 0,
     isUpdated: 0,
-    totalViews: 0
+    totalViews: 0,
+    totalUniqueViews: 0,
+    totalReads: 0
   }
 
   const stats = [
@@ -40,11 +42,19 @@ export default async function AdminArticlesPage() {
     },
     {
       label: 'Просмотры',
-      value: statsData.totalViews.toLocaleString(),
+      customValue: (
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-orange-400" title="Всего просмотров">{statsData.totalViews.toLocaleString()}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-yellow-400" title="Уникальных просмотров">{statsData.totalUniqueViews.toLocaleString()}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-emerald-400" title="Прочитали до конца">{statsData.totalReads.toLocaleString()}</span>
+        </div>
+      ),
       icon: Eye,
       color: 'text-orange-400',
       bg: 'bg-orange-500/10',
-      description: 'Общий охват'
+      description: 'Всего / Уникальных / Прочитали'
     },
     {
       label: 'Видимость',
@@ -83,8 +93,8 @@ export default async function AdminArticlesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <Link 
-            href="/admin" 
+          <Link
+            href="/admin"
             className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white/80 transition-colors mb-4"
           >
             <ArrowLeft className="size-4" />
@@ -109,7 +119,7 @@ export default async function AdminArticlesPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat, i) => (
-          <div 
+          <div
             key={i}
             className="group relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/5 p-4 transition-all hover:bg-white/[0.04] hover:border-white/10"
           >
@@ -124,7 +134,7 @@ export default async function AdminArticlesPage() {
                   </span>
                 </div>
               </div>
-              
+
               <div>
                 <div className="text-2xl font-bold font-oswald tracking-tight leading-none">
                   {'customValue' in stat ? stat.customValue : (

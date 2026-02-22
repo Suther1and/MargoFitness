@@ -80,6 +80,7 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
+          unique_view_count: number
           view_count: number
         }
         Insert: {
@@ -99,6 +100,7 @@ export type Database = {
           tags?: string[]
           title: string
           updated_at?: string
+          unique_view_count?: number
           view_count?: number
         }
         Update: {
@@ -118,6 +120,7 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+          unique_view_count?: number
           view_count?: number
         }
         Relationships: []

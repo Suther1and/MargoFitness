@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import { Article } from '@/types/database'
-import { updateArticle } from '@/lib/actions/admin-articles'
+import { updateArticle, ArticleWithStats } from '@/lib/actions/admin-articles'
 import { useToast } from '@/contexts/toast-context'
 import { cn } from '@/lib/utils'
 import { 
@@ -28,7 +28,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 interface ArticleAdminRowProps {
-  article: Article
+  article: ArticleWithStats
   onMoveUp: () => void
   onMoveDown: () => void
   isFirst: boolean
@@ -323,9 +323,17 @@ export function ArticleAdminRow({ article, onMoveUp, onMoveDown, isFirst, isLast
       {/* Просмотры */}
       <td className="p-4">
         <div className="flex items-center justify-center">
-          <div className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <div className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-baseline gap-1.5" title="Просмотры / Уникальных / Прочитали">
             <span className="text-sm font-bold text-blue-400 font-oswald">
               {optimisticArticle.view_count || 0}
+            </span>
+            <span className="text-white/15 text-xs">/</span>
+            <span className="text-sm font-bold text-yellow-400 font-oswald">
+              {optimisticArticle.unique_view_count || 0}
+            </span>
+            <span className="text-white/15 text-xs">/</span>
+            <span className="text-sm font-bold text-emerald-400 font-oswald">
+              {optimisticArticle.read_count || 0}
             </span>
           </div>
         </div>

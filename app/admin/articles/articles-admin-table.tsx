@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { ArticleAdminRow } from './article-admin-row'
 import { BookOpen, ArrowUpDown, ChevronUp, ChevronDown, Search, X } from 'lucide-react'
 import { Article } from '@/types/database'
-import { reorderArticles, bulkUpdateArticles } from '@/lib/actions/admin-articles'
+import { reorderArticles, bulkUpdateArticles, ArticleWithStats } from '@/lib/actions/admin-articles'
 import { useToast } from '@/contexts/toast-context'
 import debounce from 'lodash.debounce'
 import {
@@ -24,7 +24,7 @@ import {
 } from '@dnd-kit/sortable'
 
 interface ArticlesAdminTableProps {
-  initialArticles: Article[]
+  initialArticles: ArticleWithStats[]
 }
 
 export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps) {
@@ -47,7 +47,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
     setArticles(initialArticles)
   }, [initialArticles])
 
-  const [sortField, setSortField] = useState<keyof Article>('sort_order')
+  const [sortField, setSortField] = useState<keyof ArticleWithStats>('sort_order')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>('asc')
   const { showSuccess, showError } = useToast()
 
@@ -157,7 +157,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
 
   if (!mounted) return null
 
-  const toggleSort = (field: keyof Article) => {
+  const toggleSort = (field: keyof ArticleWithStats) => {
     if (sortField === field) {
       if (sortOrder === 'asc') {
         setSortOrder('desc')
@@ -235,7 +235,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
     }
   }
 
-  const SortIcon = ({ field }: { field: keyof Article }) => {
+  const SortIcon = ({ field }: { field: keyof ArticleWithStats }) => {
     if (sortField !== field) return <ArrowUpDown className="size-3 opacity-20" />
     return sortOrder === 'asc' ? <ChevronUp className="size-3 text-orange-400" /> : <ChevronDown className="size-3 text-orange-400" />
   }
@@ -494,7 +494,7 @@ export function ArticlesAdminTable({ initialArticles }: ArticlesAdminTableProps)
                 onClick={() => toggleSort('view_count')}
               >
                 <div className="flex items-center gap-2">
-                  Просмотры
+                  <span title="Просмотры / Уникальных / Прочитали">Просмотры</span>
                   <SortIcon field="view_count" />
                 </div>
               </th>

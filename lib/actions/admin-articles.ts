@@ -1,22 +1,40 @@
 'use server'
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { Article } from "@/types/database"
 import { revalidatePath } from "next/cache"
 
+export type ArticleWithStats = Article & { read_count: number }
+
 export async function getAdminArticles() {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .order("sort_order", { ascending: true })
+  const adminSupabase = createAdminClient()
 
-  if (error) {
-    console.error("Error fetching admin articles:", error)
-    return { data: [], error }
+  const [articlesResult, readsResult] = await Promise.all([
+    supabase.from("articles").select("*").order("sort_order", { ascending: true }),
+    adminSupabase.from("user_article_progress" as any).select("article_id").eq("is_read", true)
+  ])
+
+  if (articlesResult.error) {
+    console.error("Error fetching admin articles:", articlesResult.error)
+    return { data: [] as ArticleWithStats[], error: articlesResult.error }
   }
 
-  return { data: data as Article[], error: null }
+  const reads = (readsResult.data ?? []) as { article_id: string }[]
+
+  // article_id in user_article_progress can be UUID or slug — match both
+  const readCounts = reads.reduce<Record<string, number>>((acc, r) => {
+    acc[r.article_id] = (acc[r.article_id] || 0) + 1
+    return acc
+  }, {})
+
+  const articles = (articlesResult.data as Article[]).map(a => ({
+    ...a,
+    read_count: (readCounts[a.id] || 0) + (readCounts[a.slug] || 0)
+  }))
+
+  return { data: articles as ArticleWithStats[], error: null }
 }
 
 export async function updateArticle(id: string, patch: Partial<Article>) {
@@ -68,44 +86,33 @@ export async function reorderArticles(updates: { id: string, sort_order: number 
   return { success: true, error: null }
 }
 
+const EMPTY_STATS = {
+  total: 0,
+  visible: 0,
+  adminsOnly: 0,
+  hidden: 0,
+  isNew: 0,
+  isUpdated: 0,
+  totalViews: 0,
+  totalUniqueViews: 0,
+  totalReads: 0
+}
+
 export async function getArticleStats() {
   const supabase = await createClient()
-  
-  // Проверяем наличие таблицы и данных
-  const { data, error } = await supabase
-    .from("articles")
-    .select("display_status, is_new, is_updated, view_count")
+  const adminSupabase = createAdminClient()
 
-  if (error) {
-    console.error("Error fetching article stats:", JSON.stringify(error, null, 2))
-    return { 
-      data: {
-        total: 0,
-        visible: 0,
-        adminsOnly: 0,
-        hidden: 0,
-        isNew: 0,
-        isUpdated: 0,
-        totalViews: 0
-      }, 
-      error 
-    }
+  const [articlesResult, readsResult] = await Promise.all([
+    supabase.from("articles").select("display_status, is_new, is_updated, view_count, unique_view_count"),
+    adminSupabase.from("user_article_progress" as any).select("article_id", { count: "exact", head: true }).eq("is_read", true)
+  ])
+
+  if (articlesResult.error) {
+    console.error("Error fetching article stats:", JSON.stringify(articlesResult.error, null, 2))
+    return { data: EMPTY_STATS, error: articlesResult.error }
   }
 
-  if (!data) {
-    return { 
-      data: {
-        total: 0,
-        visible: 0,
-        adminsOnly: 0,
-        hidden: 0,
-        isNew: 0,
-        isUpdated: 0,
-        totalViews: 0
-      }, 
-      error: null 
-    }
-  }
+  const data = articlesResult.data ?? []
 
   const stats = {
     total: data.length,
@@ -114,17 +121,27 @@ export async function getArticleStats() {
     hidden: data.filter(a => a.display_status === 'hidden').length,
     isNew: data.filter(a => a.is_new).length,
     isUpdated: data.filter(a => a.is_updated).length,
-    totalViews: data.reduce((acc, a) => acc + (a.view_count || 0), 0)
+    totalViews: data.reduce((acc, a) => acc + (a.view_count || 0), 0),
+    totalUniqueViews: data.reduce((acc, a) => acc + (a.unique_view_count || 0), 0),
+    totalReads: readsResult.count ?? 0
   }
 
   return { data: stats, error: null }
 }
 
-export async function incrementArticleView(articleId: string) {
+export async function incrementArticleViewBySlug(slug: string) {
   const supabase = await createClient()
 
+  const [{ data: article }, { data: { user } }] = await Promise.all([
+    supabase.from('articles').select('id').eq('slug', slug).single(),
+    supabase.auth.getUser()
+  ])
+
+  if (!article?.id) return { success: false }
+
   const { error } = await supabase.rpc('increment_article_view', {
-    article_id: articleId
+    p_article_id: article.id,
+    p_user_id: user?.id ?? null
   })
 
   if (error) {
@@ -133,20 +150,6 @@ export async function incrementArticleView(articleId: string) {
   }
 
   return { success: true, error: null }
-}
-
-export async function incrementArticleViewBySlug(slug: string) {
-  const supabase = await createClient()
-
-  const { data } = await supabase
-    .from('articles')
-    .select('id')
-    .eq('slug', slug)
-    .single()
-
-  if (!data?.id) return { success: false }
-
-  return incrementArticleView(data.id)
 }
 
 export async function bulkUpdateArticles(articleIds: string[], patch: Partial<Article>) {
