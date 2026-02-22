@@ -120,6 +120,6 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     category: "Биохакинг",
     reading_time: 12,
     access_level: "pro",
-    image_url: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=2070&auto=format&fit=crop"
+    image_url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2070&auto=format&fit=crop"
   }
 ];
