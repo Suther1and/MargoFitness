@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
 import { ArticlesAdminTable } from './articles-admin-table'
-import { BookOpen, ArrowLeft, Info, Activity, Eye, EyeOff, Sparkles, RefreshCw } from 'lucide-react'
+import { BookOpen, ArrowLeft, Activity, Eye, EyeOff, Sparkles, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,32 +37,20 @@ export default async function AdminArticlesPage() {
       bg: 'bg-blue-500/10',
     },
     {
-      label: 'Видно всем',
-      value: statsData.visible,
+      label: 'Видимость',
+      value: `${statsData.visible} / ${statsData.adminsOnly} / ${statsData.hidden}`,
       icon: Eye,
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
+      subtitle: 'Всем / Админам / Скрыто'
     },
     {
-      label: 'Только админам',
-      value: statsData.adminsOnly,
-      icon: Activity,
-      color: 'text-orange-400',
-      bg: 'bg-orange-500/10',
-    },
-    {
-      label: 'Скрыто',
-      value: statsData.hidden,
-      icon: EyeOff,
-      color: 'text-rose-400',
-      bg: 'bg-rose-500/10',
-    },
-    {
-      label: 'Новые / Обновленные',
+      label: 'Бейджи',
       value: `${statsData.isNew} / ${statsData.isUpdated}`,
       icon: Sparkles,
       color: 'text-purple-400',
       bg: 'bg-purple-500/10',
+      subtitle: 'New / Updated'
     }
   ]
 
@@ -95,7 +83,7 @@ export default async function AdminArticlesPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {stats.map((stat, i) => (
           <div 
             key={i}
@@ -113,29 +101,20 @@ export default async function AdminArticlesPage() {
                 </span>
               </div>
               
-              <div className="flex items-baseline gap-1">
+              <div className="flex flex-col gap-1">
                 <span className={`text-2xl font-bold font-oswald tracking-tight ${stat.color}`}>
                   {stat.value}
                 </span>
+                {'subtitle' in stat && (
+                  <span className="text-[9px] font-medium text-white/20 uppercase tracking-wide">
+                    {stat.subtitle}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Info Note */}
-      <section className="relative overflow-hidden rounded-3xl bg-blue-500/5 ring-1 ring-blue-500/10 p-6 border-l-4 border-blue-500/50">
-        <div className="flex gap-4">
-          <Info className="size-6 text-blue-400 shrink-0" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white uppercase tracking-tight">Логика публикации</h3>
-            <p className="text-sm text-white/60">
-              Новые статьи по умолчанию видны только админам. После проверки измените статус на "Видна всем". 
-              Статьи с флагом "NEW" или "UPDATED" получают соответствующий бейдж в списке материалов.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Articles List */}
       <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10">

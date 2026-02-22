@@ -116,3 +116,36 @@ export async function getArticleStats() {
 
   return { data: stats, error: null }
 }
+
+export async function incrementArticleView(articleId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('increment_article_view', {
+    article_id: articleId
+  })
+
+  if (error) {
+    console.error("Error incrementing article view:", error)
+    return { success: false, error }
+  }
+
+  return { success: true, error: null }
+}
+
+export async function bulkUpdateArticles(articleIds: string[], patch: Partial<Article>) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from("articles")
+    .update(patch)
+    .in('id', articleIds)
+
+  if (error) {
+    console.error("Error bulk updating articles:", error)
+    return { success: false, error }
+  }
+
+  revalidatePath('/admin/articles')
+  revalidatePath('/dashboard/health-tracker')
+  return { success: true, error: null }
+}
