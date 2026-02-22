@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import { ArticlesList } from './articles/articles-list'
 import { getArticleBySlug } from '@/lib/actions/articles'
 import { getWorkoutsData } from '@/lib/actions/workouts'
+import { incrementArticleViewBySlug } from '@/lib/actions/admin-articles'
 
 // Динамический импорт хардкодных статей
 const HardcodedArticles: Record<string, any> = {
@@ -183,6 +184,7 @@ export function WorkoutsTab({
       const hardcodedMeta = ARTICLE_REGISTRY.find(a => a.slug === selectedArticleSlug);
       if (hardcodedMeta) {
         setSelectedArticleData(hardcodedMeta);
+        incrementArticleViewBySlug(selectedArticleSlug);
         return;
       }
 
@@ -190,6 +192,9 @@ export function WorkoutsTab({
       try {
         const articleData = await getArticleBySlug(selectedArticleSlug)
         setSelectedArticleData(articleData)
+        if (articleData?.id) {
+          incrementArticleViewBySlug(selectedArticleSlug);
+        }
       } catch (err) {
         console.error('Error loading article:', err)
       } finally {

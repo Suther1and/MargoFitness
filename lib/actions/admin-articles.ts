@@ -135,6 +135,20 @@ export async function incrementArticleView(articleId: string) {
   return { success: true, error: null }
 }
 
+export async function incrementArticleViewBySlug(slug: string) {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('articles')
+    .select('id')
+    .eq('slug', slug)
+    .single()
+
+  if (!data?.id) return { success: false }
+
+  return incrementArticleView(data.id)
+}
+
 export async function bulkUpdateArticles(articleIds: string[], patch: Partial<Article>) {
   const supabase = await createClient()
 
