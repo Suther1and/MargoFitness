@@ -43,6 +43,10 @@ export default function NutritionBasics({
   const [backArticleName, setBackArticleName] = React.useState("");
 
   React.useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  React.useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
     
     const target = window.sessionStorage.getItem('pending-scroll-target');

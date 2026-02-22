@@ -480,6 +480,11 @@ export default function RationConstructor({
 
   // Используем useLayoutEffect для мгновенного скролла до отрисовки
   React.useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Используем useLayoutEffect для мгновенного скролла до отрисовки
+  React.useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
 
     const target = window.sessionStorage.getItem('pending-scroll-target');

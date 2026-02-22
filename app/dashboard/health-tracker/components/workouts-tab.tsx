@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -48,7 +48,9 @@ const ArticleRendererFallback = ({
   return (
     <div className="min-h-screen bg-[#09090b] pb-20 text-left">
       <div className="p-8 md:p-16">
-        <button onClick={onBack} className="mb-8 text-white/40 hover:text-white">← Назад</button>
+        <button onClick={onBack} className="mb-8 text-white/40 hover:text-white transition-colors flex items-center gap-2">
+          <ArrowLeft className="size-4" /> Назад
+        </button>
         <h1 className="text-4xl font-oswald font-black text-white uppercase">{article.title}</h1>
         <p className="mt-4 text-white/60 italic">{article.description}</p>
         <div className="mt-12 p-10 border border-dashed border-white/10 rounded-[2rem] text-center">
@@ -76,6 +78,17 @@ export function WorkoutsTab() {
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
   const [selectedArticleData, setSelectedArticleData] = useState<any>(null)
   const [loadingArticle, setLoadingArticle] = useState(false)
+
+  useLayoutEffect(() => {
+    if (selectedArticleSlug) {
+      document.body.classList.add('article-open');
+    } else {
+      document.body.classList.remove('article-open');
+    }
+    return () => document.body.classList.remove('article-open');
+  }, [selectedArticleSlug]);
+
+  // Убрали useEffect с window.scrollTo, так как прокрутка теперь внутри компонентов статьи
 
   const handleNavigate = (slug: string) => {
     if (slug === 'nutrition-basics') {
@@ -299,63 +312,52 @@ export function WorkoutsTab() {
     )
   }
 
-  useEffect(() => {
-    if (selectedArticleSlug) {
-      document.body.classList.add('article-open');
-    } else {
-      document.body.classList.remove('article-open');
-    }
-    return () => document.body.classList.remove('article-open');
-  }, [selectedArticleSlug]);
-
   const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
 
   if (selectedArticleSlug && selectedArticleData) {
     const hasAccess = TIER_WEIGHTS[profile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS];
 
-    if (HardcodedComponent && hasAccess) {
-      return (
-        <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">
-          <div className="h-full overflow-y-auto md:overflow-visible md:h-auto scrollbar-hide md:scrollbar-default overscroll-contain isolation-auto touch-pan-y">
-            <div className="relative min-h-full pt-16 pb-24 md:py-0">
-              {/* Мобильная шапка статьи */}
-              <div className="absolute top-0 left-0 right-0 h-[70px] z-[110] flex items-center justify-center px-4 md:hidden">
-                <div className="fixed top-[15px] left-4 z-[120]">
-                  <button 
-                    onClick={() => setSelectedArticleSlug(null)}
-                    className="flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
-                  >
-                    <ArrowLeft className="size-5 text-white" />
-                  </button>
-                </div>
-                
-                <div className="text-center">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                    Статья <span className="text-rose-500">{selectedArticleData.access_level.toUpperCase()}</span>
-                  </span>
-                </div>
+    return (
+      <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">
+        <div className="h-full overflow-y-auto md:overflow-visible md:h-auto scrollbar-hide md:scrollbar-default overscroll-contain isolation-auto touch-pan-y">
+          <div className="relative min-h-full pt-16 pb-24 md:py-0">
+            {/* Мобильная шапка статьи */}
+            <div className="absolute top-0 left-0 right-0 h-[70px] z-[110] flex items-center justify-center px-4 md:hidden">
+              <div className="fixed top-[15px] left-4 z-[120]">
+                <button 
+                  onClick={() => setSelectedArticleSlug(null)}
+                  className="flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
+                >
+                  <ArrowLeft className="size-5 text-white" />
+                </button>
               </div>
+              
+              <div className="text-center">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                  Статья <span className="text-rose-500">{selectedArticleData.access_level.toUpperCase()}</span>
+                </span>
+              </div>
+            </div>
 
+            {HardcodedComponent && hasAccess ? (
               <HardcodedComponent 
                 onBack={() => setSelectedArticleSlug(null)} 
                 onNavigate={handleNavigate}
                 onBackToArticle={handleBackToArticle}
                 metadata={selectedArticleData}
               />
-            </div>
+            ) : (
+              <ArticleRendererFallback
+                article={selectedArticleData}
+                hasAccess={hasAccess}
+                userTier={profile?.subscription_tier || 'free'}
+                onBack={() => setSelectedArticleSlug(null)}
+              />
+            )}
           </div>
         </div>
-      );
-    }
-
-    return (
-      <ArticleRendererFallback
-        article={selectedArticleData}
-        hasAccess={hasAccess}
-        userTier={profile?.subscription_tier || 'free'}
-        onBack={() => setSelectedArticleSlug(null)}
-      />
-    )
+      </div>
+    );
   }
 
   return (
@@ -433,7 +435,9 @@ export function WorkoutsTab() {
             <ArticlesList 
               articles={articles} 
               userTier={profile?.subscription_tier || 'free'} 
-              onSelectArticle={(slug) => setSelectedArticleSlug(slug)}
+              onSelectArticle={(slug) => {
+                setSelectedArticleSlug(slug);
+              }}
             />
           )}
           

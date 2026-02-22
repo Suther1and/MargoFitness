@@ -46,6 +46,10 @@ export default function MovementBasics({
     threshold: 0.5,
   });
 
+  React.useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

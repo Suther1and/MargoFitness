@@ -86,6 +86,10 @@ const TipBlock = ({ children }: { children: React.ReactNode }) => (
 // --- Основная статья ---
 
 export default function HomeVsGym({ onBack, metadata }: { onBack: () => void, metadata?: any }) {
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const { elementRef } = useArticleReadTracking({
     articleId: metadata?.id || 'home-vs-gym',
     onRead: async (id) => {
