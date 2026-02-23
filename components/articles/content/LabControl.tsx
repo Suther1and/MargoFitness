@@ -759,10 +759,7 @@ const prepRules: PrepRule[] = [
 function PreparationChecklist() {
   return (
     <div className="relative mt-12 mb-16 px-2 sm:px-0">
-      {/* Динамическая фоновая линия с градиентом */}
-      <div className="absolute left-[28px] md:left-[32px] top-0 bottom-0 w-px bg-gradient-to-b from-white/5 via-cyan-500/40 to-white/5" />
-
-      <div className="space-y-7 relative">
+      <div className="space-y-0 relative">
         {prepRules.map((rule, i) => {
           const Icon = rule.icon;
           return (
@@ -772,48 +769,60 @@ function PreparationChecklist() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative pl-16 md:pl-20 group"
+              className="relative flex items-stretch group"
             >
-              {/* Индикатор этапа */}
-              <div className="absolute left-0 top-0 flex items-center justify-center size-14 md:size-16">
-                {/* Внешнее свечение для активных/важных элементов */}
+              {/* Левая колонка с линией и иконкой */}
+              <div className="relative w-14 md:w-16 shrink-0 flex flex-col items-center">
+                {/* Линия (одна сплошная на фоне) */}
                 <div className={cn(
-                  "absolute size-14 rounded-full blur-xl transition-opacity duration-500 opacity-0 group-hover:opacity-100",
-                  rule.important ? "bg-cyan-500/20 opacity-40" : "bg-white/5"
+                  "absolute left-1/2 -translate-x-1/2 w-px h-full bg-cyan-500/20",
+                  i === 0 && "top-1/2 h-1/2",
+                  i === prepRules.length - 1 && "bottom-1/2 h-1/2"
                 )} />
-                
+
                 {/* Контейнер иконки */}
-                <div className={cn(
-                  "relative size-14 md:size-16 rounded-2xl border flex items-center justify-center transition-all duration-500 z-10",
-                  rule.important 
-                    ? "bg-[#09090b] border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
-                    : "bg-[#09090b] border-white/10 group-hover:border-white/20"
-                )}>
-                  <Icon className={cn(
-                    "size-6 md:size-7 transition-colors duration-500",
-                    rule.important ? "text-cyan-400" : "text-white/40 group-hover:text-white/80"
-                  )} />
+                <div className="relative z-10 flex items-center justify-center py-4 bg-[#09090b]">
+                  <div className={cn(
+                    "relative size-12 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500",
+                    rule.important 
+                      ? "bg-[#09090b] border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
+                      : "bg-[#09090b] border-white/10 group-hover:border-white/20"
+                  )}>
+                    {/* Внешнее свечение */}
+                    <div className={cn(
+                      "absolute inset-0 rounded-2xl blur-xl transition-opacity duration-500 opacity-0 group-hover:opacity-100",
+                      rule.important ? "bg-cyan-500/20 opacity-40" : "bg-white/5"
+                    )} />
+                    
+                    <Icon className={cn(
+                      "relative z-10 size-5 md:size-6 transition-colors duration-500",
+                      rule.important ? "text-cyan-400" : "text-white/40 group-hover:text-white/80"
+                    )} />
+                  </div>
                 </div>
               </div>
 
               {/* Текстовый блок */}
-              <div className="pt-1 ml-2 md:ml-4">
-                <div className="flex flex-wrap items-center gap-3 mb-1">
-                  <h4 className={cn(
-                    "text-lg md:text-xl font-oswald font-black uppercase tracking-tight transition-colors duration-500",
-                    rule.important ? "text-cyan-400" : "text-white/90 group-hover:text-white"
-                  )}>
-                    {rule.rule}
-                  </h4>
-                  
-                  {rule.important && (
-                    <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black uppercase tracking-widest text-cyan-400 animate-pulse">
-                      Критично
-                    </span>
-                  )}
+              <div className="flex-1 py-4 pl-4 md:pl-6">
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h4 className={cn(
+                      "text-lg md:text-xl font-oswald font-black uppercase tracking-tight transition-colors duration-500",
+                      rule.important ? "text-cyan-400" : "text-white/90 group-hover:text-white"
+                    )}>
+                      {rule.rule}
+                    </h4>
+                    {rule.important && (
+                      <span className="inline-flex px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black uppercase tracking-widest text-cyan-400 animate-pulse">
+                        Критично
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
-                <p className="text-[13px] md:text-sm text-white/40 leading-relaxed max-w-2xl group-hover:text-white/60 transition-colors duration-500">
+                <p className={cn(
+                  "mt-1 text-[13px] md:text-sm text-white/40 leading-relaxed max-w-2xl group-hover:text-white/60 transition-colors duration-500"
+                )}>
                   {rule.detail}
                 </p>
               </div>
