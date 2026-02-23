@@ -480,7 +480,9 @@ function TestCard({ test }: { test: TestCardData }) {
 // --- Symptom Decoder ---
 
 interface SymptomMatch {
+  id: string;
   symptom: string;
+  shortName: string;
   icon: React.ElementType;
   tests: string[];
   color: string;
@@ -488,42 +490,157 @@ interface SymptomMatch {
 
 const symptomDecoder: SymptomMatch[] = [
   {
+    id: "fatigue",
     symptom: "Постоянная усталость, нет сил на тренировку",
+    shortName: "Усталость",
     icon: Zap,
     tests: ["Ферритин", "ТТГ", "Витамин D", "Кортизол"],
     color: "cyan",
   },
   {
+    id: "hair",
     symptom: "Выпадение волос, ломкие ногти",
+    shortName: "Волосы/Ногти",
     icon: Sparkles,
     tests: ["Ферритин", "ТТГ", "Цинк", "Витамин D"],
     color: "cyan",
   },
   {
+    id: "weight",
     symptom: "Вес стоит на месте, несмотря на усилия",
+    shortName: "Вес стоит",
     icon: TrendingUp,
     tests: ["ТТГ", "Глюкоза", "Кортизол", "Инсулин"],
     color: "cyan",
   },
   {
+    id: "immunity",
     symptom: "Частые простуды и долгое восстановление",
+    shortName: "Иммунитет",
     icon: Thermometer,
     tests: ["Витамин D", "Ферритин", "Цинк"],
     color: "cyan",
   },
   {
+    id: "sleep",
     symptom: "Плохой сон, тревожность, судороги",
+    shortName: "Сон/Нервы",
     icon: Moon,
     tests: ["Магний", "Кортизол", "ТТГ", "B12"],
     color: "cyan",
   },
   {
+    id: "cycle",
     symptom: "Нарушения цикла, ПМС",
+    shortName: "Цикл/ПМС",
     icon: CalendarCheck,
     tests: ["Эстрадиол", "ЛГ/ФСГ", "Пролактин", "ТТГ"],
     color: "cyan",
   },
 ];
+
+function SymptomDecoder() {
+  const [activeId, setActiveId] = useState(symptomDecoder[0].id);
+  const activeSymptom = symptomDecoder.find((s) => s.id === activeId)!;
+
+  return (
+    <div className="rounded-3xl bg-white/[0.02] border border-white/10 overflow-hidden">
+      <div className="p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center">
+            <FlaskConical className="size-5 text-cyan-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-oswald font-black uppercase tracking-tight text-white">
+              Декодер симптомов
+            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">
+              Выбери то, что тебя беспокоит
+            </p>
+          </div>
+        </div>
+
+        {/* Сетка иконок */}
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8">
+          {symptomDecoder.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeId === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveId(item.id)}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-500 group",
+                  isActive 
+                    ? "bg-cyan-500/10 border border-cyan-500/20" 
+                    : "bg-white/[0.02] border border-white/5 hover:bg-white/[0.04]"
+                )}
+              >
+                <div className={cn(
+                  "size-10 rounded-xl flex items-center justify-center transition-all duration-500",
+                  isActive ? "bg-cyan-500/20 text-cyan-400 scale-110" : "bg-white/5 text-white/20 group-hover:text-white/40"
+                )}>
+                  <Icon className="size-5" />
+                </div>
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-tighter text-center leading-tight transition-colors duration-500",
+                  isActive ? "text-cyan-400" : "text-white/20 group-hover:text-white/40"
+                )}>
+                  {item.shortName}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Панель результата */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeId}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            className="relative rounded-2xl bg-cyan-500/[0.03] border border-cyan-500/10 p-6 overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500/40" />
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex-1">
+                <p className="text-base md:text-lg font-bold text-white/90 mb-4 leading-tight">
+                  {activeSymptom.symptom}
+                </p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/40 w-full mb-1">
+                    Рекомендуемые анализы:
+                  </span>
+                  {activeSymptom.tests.map((test, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div className="size-1 rounded-full bg-cyan-500/40" />
+                      <span className="text-sm font-bold text-cyan-400/80 uppercase tracking-wider">
+                        {test}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="hidden md:flex flex-col items-center justify-center size-24 rounded-full bg-cyan-500/5 border border-cyan-500/10 shrink-0">
+                <activeSymptom.icon className="size-8 text-cyan-500/20" />
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      
+      <div className="bg-white/[0.02] border-t border-white/5 px-6 py-4">
+        <p className="text-[11px] text-white/25 italic text-center">
+          Нажми на иконку симптома выше, чтобы увидеть список необходимых анализов
+        </p>
+      </div>
+    </div>
+  );
+}
 
 // --- Extended Panel ---
 
@@ -802,49 +919,7 @@ export default function LabControl({
           </p>
 
           {/* Symptom Decoder */}
-          <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-5 md:p-8">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center">
-                <FlaskConical className="size-5 text-cyan-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white/90">Декодер симптомов</h3>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">
-                  Если у тебя... - проверь
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {symptomDecoder.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={i}
-                    className="rounded-xl bg-white/[0.02] border border-white/5 p-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <Icon className="size-4 text-cyan-400/60 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-white/75 mb-2">{item.symptom}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {item.tests.map((test, j) => (
-                            <span
-                              key={j}
-                              className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/70"
-                            >
-                              {test}
-                              {j < item.tests.length - 1 && <span className="text-white/10 mx-1.5">•</span>}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <SymptomDecoder />
         </section>
 
         {/* Секция 2: Дефицитный айсберг */}
