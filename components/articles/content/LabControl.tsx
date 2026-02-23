@@ -302,7 +302,7 @@ const baseTests: TestCardData[] = [
     zones: [
       { label: "Дефицит", color: "bg-rose-500/50", from: 0, to: 30 },
       { label: "Субоптимально", color: "bg-amber-500/40", from: 30, to: 50 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 50, to: 100 },
+      { label: "Норма", color: "bg-emerald-500/50", from: 50, to: 100 },
       { label: "Высокий", color: "bg-amber-500/30", from: 100, to: 150 },
     ],
   },
@@ -322,7 +322,7 @@ const baseTests: TestCardData[] = [
     zones: [
       { label: "Дефицит", color: "bg-rose-500/50", from: 0, to: 20 },
       { label: "Недостаточность", color: "bg-amber-500/40", from: 20, to: 40 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 40, to: 80 },
+      { label: "Норма", color: "bg-emerald-500/50", from: 40, to: 80 },
       { label: "Избыток", color: "bg-amber-500/30", from: 80, to: 120 },
     ],
   },
@@ -341,7 +341,7 @@ const baseTests: TestCardData[] = [
     scaleMax: 4.5,
     zones: [
       { label: "Гипертиреоз", color: "bg-rose-500/40", from: 0, to: 0.4 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 0.4, to: 2.5 },
+      { label: "Норма", color: "bg-emerald-500/50", from: 0.4, to: 2.5 },
       { label: "Субклинический", color: "bg-amber-500/40", from: 2.5, to: 4.0 },
       { label: "Гипотиреоз", color: "bg-rose-500/40", from: 4.0, to: 4.5 },
     ],
@@ -361,7 +361,7 @@ const baseTests: TestCardData[] = [
     scaleMax: 170,
     zones: [
       { label: "Анемия", color: "bg-rose-500/50", from: 90, to: 120 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 120, to: 150 },
+      { label: "Норма", color: "bg-emerald-500/50", from: 120, to: 150 },
       { label: "Повышен", color: "bg-amber-500/30", from: 150, to: 160 },
       { label: "Высокий", color: "bg-rose-500/40", from: 160, to: 170 },
     ],
@@ -381,7 +381,7 @@ const baseTests: TestCardData[] = [
     scaleMax: 7,
     zones: [
       { label: "Гипогликемия", color: "bg-rose-500/40", from: 3, to: 3.3 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 3.3, to: 5.5 },
+      { label: "Норма", color: "bg-emerald-500/50", from: 3.3, to: 5.5 },
       { label: "Преддиабет", color: "bg-amber-500/40", from: 5.5, to: 6.1 },
       { label: "Диабет", color: "bg-rose-500/50", from: 6.1, to: 7 },
     ],
@@ -453,7 +453,7 @@ function ReferenceScale({ test }: { test: TestCardData }) {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+      <div className="grid grid-cols-[110px_1fr] gap-x-2 gap-y-1 mt-2">
         {test.zones.map((zone, i) => (
           <span key={i} className="flex items-center gap-1.5 text-[10px] text-white/30">
             <span className={cn("size-1.5 rounded-full shrink-0", zone.color)} />
