@@ -76,20 +76,20 @@ function DeficiencyChart() {
               <span className="text-sm font-bold text-white/80">{item.label}</span>
               <span className="text-xs text-white/30">{item.note}</span>
             </div>
-            <div className="relative h-7 md:h-8 rounded-lg bg-white/[0.03] overflow-hidden">
+            <div className="relative h-7 md:h-8 rounded-lg bg-white/[0.05] overflow-hidden border border-white/5">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${item.value}%` }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 1, delay: i * 0.15, ease: [0.23, 1, 0.32, 1] }}
-                className="absolute inset-y-0 left-0 rounded-lg bg-gradient-to-r from-cyan-500/40 to-cyan-400/60"
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ duration: 1.5, delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
+                className="absolute inset-y-0 left-0 rounded-lg bg-gradient-to-r from-cyan-600/40 via-cyan-500/50 to-cyan-400/60 z-10"
               />
               <motion.span
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.15 + 0.8 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-cyan-300/90"
+                transition={{ duration: 0.5, delay: i * 0.1 + 1 }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-cyan-300/90 z-20 drop-shadow-sm"
               >
                 {item.value}%
               </motion.span>
