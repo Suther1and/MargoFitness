@@ -494,7 +494,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Постоянная усталость, нет сил на тренировку",
     shortName: "Усталость",
     icon: Zap,
-    tests: ["Ферритин", "ТТГ", "Витамин D", "Кортизол"],
+    tests: ["Ферритин", "Витамин D", "ТТГ", "Кортизол"],
     color: "cyan",
   },
   {
@@ -502,7 +502,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Выпадение волос, ломкие ногти",
     shortName: "Волосы/Ногти",
     icon: Sparkles,
-    tests: ["Ферритин", "ТТГ", "Цинк", "Витамин D"],
+    tests: ["Ферритин", "Витамин D", "ТТГ", "Цинк"],
     color: "cyan",
   },
   {
@@ -510,7 +510,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Вес стоит на месте, несмотря на усилия",
     shortName: "Вес стоит",
     icon: TrendingUp,
-    tests: ["ТТГ", "Глюкоза", "Кортизол", "Инсулин"],
+    tests: ["Глюкоза", "Инсулин", "ТТГ", "Кортизол"],
     color: "cyan",
   },
   {
@@ -518,7 +518,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Частые простуды и долгое восстановление",
     shortName: "Иммунитет",
     icon: Thermometer,
-    tests: ["Витамин D", "Ферритин", "Цинк"],
+    tests: ["Витамин D", "Ферритин", "Цинк", "Магний"],
     color: "cyan",
   },
   {
@@ -526,7 +526,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Плохой сон, тревожность, судороги",
     shortName: "Сон/Нервы",
     icon: Moon,
-    tests: ["Магний", "Кортизол", "ТТГ", "B12"],
+    tests: ["Магний", "B12", "Кортизол", "ТТГ"],
     color: "cyan",
   },
   {
@@ -534,7 +534,7 @@ const symptomDecoder: SymptomMatch[] = [
     symptom: "Нарушения цикла, ПМС",
     shortName: "Цикл/ПМС",
     icon: CalendarCheck,
-    tests: ["Эстрадиол", "ЛГ/ФСГ", "Пролактин", "ТТГ"],
+    tests: ["Эстрадиол", "Пролактин", "ЛГ/ФСГ", "ТТГ"],
     color: "cyan",
   },
 ];
@@ -594,48 +594,52 @@ function SymptomDecoder() {
         </div>
 
         {/* Панель результата */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeId}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="relative rounded-2xl bg-cyan-500/[0.03] border border-cyan-500/10 p-6 overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500/40" />
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex-1">
-                <p className="text-base md:text-lg font-bold text-white/90 mb-4 leading-tight">
-                  {activeSymptom.symptom}
-                </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/40 w-full mb-1">
-                    Рекомендуемые анализы:
-                  </span>
-                  {activeSymptom.tests.map((test, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="size-1 rounded-full bg-cyan-500/40" />
-                      <span className="text-sm font-bold text-cyan-400/80 uppercase tracking-wider">
-                        {test}
-                      </span>
+        <div className="min-h-[180px] md:min-h-0 relative">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeId}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              className="relative rounded-2xl bg-cyan-500/[0.03] border border-cyan-500/10 p-6 overflow-hidden h-full"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500/40" />
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex-1">
+                  <p className="text-base md:text-lg font-bold text-white/90 mb-4 leading-tight">
+                    {activeSymptom.symptom}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/40 mb-1">
+                      Рекомендуемые анализы:
+                    </span>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 max-w-md">
+                      {activeSymptom.tests.map((test, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="size-1 rounded-full bg-cyan-500/40 shrink-0" />
+                          <span className="text-[11px] font-bold text-cyan-400/80 uppercase tracking-wider">
+                            {test}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                </div>
+                
+                <div className="hidden md:flex flex-col items-center justify-center size-24 rounded-full bg-cyan-500/5 border border-cyan-500/10 shrink-0">
+                  <activeSymptom.icon className="size-8 text-cyan-500/20" />
                 </div>
               </div>
-              
-              <div className="hidden md:flex flex-col items-center justify-center size-24 rounded-full bg-cyan-500/5 border border-cyan-500/10 shrink-0">
-                <activeSymptom.icon className="size-8 text-cyan-500/20" />
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
       
       <div className="bg-white/[0.02] border-t border-white/5 px-6 py-4">
         <p className="text-[11px] text-white/25 italic text-center">
-          Нажми на иконку симптома выше, чтобы увидеть список необходимых анализов
+          Нажми на иконку симптома выше, чтобы увидеть список рекомендуемых анализов
         </p>
       </div>
     </div>
