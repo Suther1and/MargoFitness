@@ -756,6 +756,75 @@ const prepRules: PrepRule[] = [
   },
 ];
 
+function PreparationChecklist() {
+  return (
+    <div className="relative mt-12 mb-16 px-2 sm:px-0">
+      {/* Динамическая фоновая линия с градиентом */}
+      <div className="absolute left-[28px] md:left-[32px] top-0 bottom-0 w-px bg-gradient-to-b from-white/5 via-cyan-500/40 to-white/5" />
+
+      <div className="space-y-7 relative">
+        {prepRules.map((rule, i) => {
+          const Icon = rule.icon;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="relative pl-16 md:pl-20 group"
+            >
+              {/* Индикатор этапа */}
+              <div className="absolute left-0 top-0 flex items-center justify-center size-14 md:size-16">
+                {/* Внешнее свечение для активных/важных элементов */}
+                <div className={cn(
+                  "absolute size-14 rounded-full blur-xl transition-opacity duration-500 opacity-0 group-hover:opacity-100",
+                  rule.important ? "bg-cyan-500/20 opacity-40" : "bg-white/5"
+                )} />
+                
+                {/* Контейнер иконки */}
+                <div className={cn(
+                  "relative size-14 md:size-16 rounded-2xl border flex items-center justify-center transition-all duration-500 z-10",
+                  rule.important 
+                    ? "bg-[#09090b] border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
+                    : "bg-[#09090b] border-white/10 group-hover:border-white/20"
+                )}>
+                  <Icon className={cn(
+                    "size-6 md:size-7 transition-colors duration-500",
+                    rule.important ? "text-cyan-400" : "text-white/40 group-hover:text-white/80"
+                  )} />
+                </div>
+              </div>
+
+              {/* Текстовый блок */}
+              <div className="pt-1 ml-2 md:ml-4">
+                <div className="flex flex-wrap items-center gap-3 mb-1">
+                  <h4 className={cn(
+                    "text-lg md:text-xl font-oswald font-black uppercase tracking-tight transition-colors duration-500",
+                    rule.important ? "text-cyan-400" : "text-white/90 group-hover:text-white"
+                  )}>
+                    {rule.rule}
+                  </h4>
+                  
+                  {rule.important && (
+                    <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black uppercase tracking-widest text-cyan-400 animate-pulse">
+                      Критично
+                    </span>
+                  )}
+                </div>
+                
+                <p className="text-[13px] md:text-sm text-white/40 leading-relaxed max-w-2xl group-hover:text-white/60 transition-colors duration-500">
+                  {rule.detail}
+                </p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // --- Main Article ---
 
 export default function LabControl({
@@ -953,49 +1022,9 @@ export default function LabControl({
             Неправильная подготовка = <span className="text-white/85 font-bold">искажённые результаты</span> = ложные выводы. Это как взвешиваться после литра воды и ужина - цифра будет, но бесполезная. Вот <span className="text-cyan-400/85 font-bold">правила</span>, которые сделают твои анализы точными:
           </p>
 
-          <div className="space-y-3">
-            {prepRules.map((rule, i) => {
-              const Icon = rule.icon;
-              return (
-                <div
-                  key={i}
-                  className={cn(
-                    "flex items-start gap-4 rounded-xl p-4",
-                    rule.important
-                      ? "bg-amber-500/[0.04] border border-amber-500/10"
-                      : "bg-white/[0.02] border border-white/5"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "size-8 rounded-lg flex items-center justify-center shrink-0",
-                      rule.important
-                        ? "bg-amber-500/10 border border-amber-500/15"
-                        : "bg-white/[0.04] border border-white/10"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "size-4",
-                        rule.important ? "text-amber-400/70" : "text-white/40"
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <p className={cn(
-                      "text-sm font-bold mb-0.5",
-                      rule.important ? "text-amber-400/80" : "text-white/80"
-                    )}>
-                      {rule.rule}
-                    </p>
-                    <p className="text-xs text-white/40 leading-relaxed">{rule.detail}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <PreparationChecklist />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8">
             <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4">
               <div className="flex items-center gap-2 mb-2">
                 <CircleCheck className="size-4 text-emerald-400/60" />
