@@ -311,7 +311,7 @@ const baseTests: TestCardData[] = [
     subtitle: "25-OH витамин D",
     icon: Sun,
     unit: "нг/мл",
-    why: "Влияет на мышечную силу, плотность костей, иммунитет и настроение. У 80% россиян дефицит из-за географии. При тренировках расход витамина D увеличивается.",
+    why: "Влияет на мышечную силу, плотность костей, иммунитет and настроение. У 80% россиян дефицит из-за географии. При тренировках расход витамина D увеличивается.",
     deficitSymptoms: "Частые простуды, мышечная слабость, боли в костях, подавленное настроение, долгое восстановление после тренировок",
     labMin: 30,
     labMax: 100,
@@ -338,12 +338,12 @@ const baseTests: TestCardData[] = [
     optimalMin: 0.5,
     optimalMax: 2.5,
     scaleMin: 0,
-    scaleMax: 5,
+    scaleMax: 4.5,
     zones: [
       { label: "Гипертиреоз", color: "bg-rose-500/40", from: 0, to: 0.4 },
-      { label: "Оптимум", color: "bg-emerald-500/50", from: 0.5, to: 2.5 },
+      { label: "Оптимум", color: "bg-emerald-500/50", from: 0.4, to: 2.5 },
       { label: "Субклинический", color: "bg-amber-500/40", from: 2.5, to: 4.0 },
-      { label: "Гипотиреоз", color: "bg-rose-500/40", from: 4.0, to: 5 },
+      { label: "Гипотиреоз", color: "bg-rose-500/40", from: 4.0, to: 4.5 },
     ],
   },
   {
@@ -389,6 +389,14 @@ const baseTests: TestCardData[] = [
 
 function ReferenceScale({ test }: { test: TestCardData }) {
   const totalRange = test.scaleMax - test.scaleMin;
+  
+  // Собираем все уникальные точки переходов зон
+  const scalePoints = Array.from(new Set([
+    test.scaleMin,
+    ...test.zones.map(z => z.from),
+    ...test.zones.map(z => z.to),
+    test.scaleMax
+  ])).sort((a, b) => a - b);
 
   return (
     <div className="mt-4">
@@ -397,41 +405,51 @@ function ReferenceScale({ test }: { test: TestCardData }) {
           Шкала ({test.unit})
         </span>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-[10px] text-white/30">
-            <span className="size-2 rounded-full bg-white/20" /> Лаб. норма
-          </span>
-          <span className="flex items-center gap-1.5 text-[10px] text-cyan-400/60">
-            <span className="size-2 rounded-full bg-cyan-400/60" /> Оптимум
+          <span className="flex items-center gap-1.5 text-[10px] text-cyan-400">
+            <span className="size-2 rounded-full bg-cyan-400" /> Оптимум
           </span>
         </div>
       </div>
 
-      <div className="relative h-6 rounded-full overflow-hidden bg-white/[0.03]">
+      {/* Optimal range marker */}
+      <div className="relative h-6 rounded-full overflow-hidden bg-white/[0.03] flex">
         {test.zones.map((zone, i) => {
-          const left = ((zone.from - test.scaleMin) / totalRange) * 100;
           const width = ((zone.to - zone.from) / totalRange) * 100;
           return (
             <div
               key={i}
-              className={cn("absolute inset-y-0", zone.color)}
-              style={{ left: `${left}%`, width: `${width}%` }}
+              className={cn("h-full", zone.color)}
+              style={{ width: `${width}%` }}
             />
           );
         })}
 
-        {/* Optimal range marker */}
+        {/* Optimal range marker overlay */}
         <div
-          className="absolute inset-y-0 border-2 border-cyan-400/50 rounded-full z-10"
+          className="absolute inset-y-0 border-2 border-cyan-400 rounded-full z-10 flex items-center justify-between px-2"
           style={{
             left: `${((test.optimalMin - test.scaleMin) / totalRange) * 100}%`,
             width: `${((test.optimalMax - test.optimalMin) / totalRange) * 100}%`,
           }}
-        />
+        >
+          <span className="text-[8px] font-black text-cyan-400 drop-shadow-md">{test.optimalMin}</span>
+          <span className="text-[8px] font-black text-cyan-400 drop-shadow-md">{test.optimalMax}</span>
+        </div>
       </div>
 
-      <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-white/20">{test.scaleMin}</span>
-        <span className="text-[10px] text-white/20">{test.scaleMax}</span>
+      <div className="relative h-4 mt-1">
+        {scalePoints.map((point, i) => {
+          const left = ((point - test.scaleMin) / totalRange) * 100;
+          return (
+            <span 
+              key={i} 
+              className="absolute text-[9px] text-white/20 -translate-x-1/2 transition-opacity"
+              style={{ left: `${left}%` }}
+            >
+              {point}
+            </span>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
@@ -461,15 +479,17 @@ function TestCard({ test }: { test: TestCardData }) {
         </div>
       </div>
 
-      <p className="text-sm text-white/60 leading-relaxed mb-3">{test.why}</p>
+      <div className="flex-1 flex flex-col">
+        <p className="text-sm text-white/60 leading-relaxed mb-3">{test.why}</p>
 
-      <div className="rounded-xl bg-rose-500/[0.04] border border-rose-500/10 p-3 mb-4 mt-auto">
-        <p className="text-xs text-white/40 leading-relaxed">
-          <span className="text-rose-400/70 font-bold text-[10px] uppercase tracking-wider mr-1.5">
-            Симптомы дефицита:
-          </span>
-          {test.deficitSymptoms}
-        </p>
+        <div className="rounded-xl bg-rose-500/[0.04] border border-rose-500/10 p-3 mb-4 mt-auto">
+          <p className="text-xs text-white/40 leading-relaxed">
+            <span className="text-rose-400/70 font-bold text-[10px] uppercase tracking-wider mr-1.5">
+              Симптомы дефицита:
+            </span>
+            {test.deficitSymptoms}
+          </p>
+        </div>
       </div>
 
       <ReferenceScale test={test} />
@@ -561,7 +581,7 @@ function SymptomDecoder() {
         </div>
 
         {/* Сетка иконок */}
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8">
+        <div className="grid grid-cols-3 gap-2 mb-8">
           {symptomDecoder.map((item) => {
             const Icon = item.icon;
             const isActive = activeId === item.id;
@@ -594,21 +614,21 @@ function SymptomDecoder() {
         </div>
 
         {/* Панель результата */}
-        <div className="min-h-[180px] md:min-h-0 relative">
-          <AnimatePresence mode="wait">
+        <div className="min-h-[200px] md:min-h-[160px] relative">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeId}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="relative rounded-2xl bg-cyan-500/[0.03] border border-cyan-500/10 p-6 overflow-hidden h-full"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500/40" />
               
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex-1">
-                  <p className="text-base md:text-lg font-bold text-white/90 mb-4 leading-tight">
+                  <p className="text-base font-bold text-white/90 mb-4 leading-tight min-h-[3rem] md:min-h-0 flex items-center">
                     {activeSymptom.symptom}
                   </p>
                   <div className="flex flex-col gap-2">
@@ -628,8 +648,8 @@ function SymptomDecoder() {
                   </div>
                 </div>
                 
-                <div className="hidden md:flex flex-col items-center justify-center size-24 rounded-full bg-cyan-500/5 border border-cyan-500/10 shrink-0">
-                  <activeSymptom.icon className="size-8 text-cyan-500/20" />
+                <div className="hidden md:flex flex-col items-center justify-center size-20 rounded-full bg-cyan-500/5 border border-cyan-500/10 shrink-0">
+                  <activeSymptom.icon className="size-7 text-cyan-500/20" />
                 </div>
               </div>
             </motion.div>
@@ -923,7 +943,9 @@ export default function LabControl({
           </p>
 
           {/* Symptom Decoder */}
-          <SymptomDecoder />
+          <div className="max-w-[600px] mx-auto">
+            <SymptomDecoder />
+          </div>
         </section>
 
         {/* Секция 2: Дефицитный айсберг */}
