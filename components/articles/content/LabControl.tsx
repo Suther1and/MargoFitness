@@ -758,12 +758,10 @@ const prepRules: PrepRule[] = [
 
 function PreparationChecklist() {
   return (
-    <div className="relative mt-12 mb-16 -ml-6 sm:ml-0">
+    <div className="relative mt-12 mb-16 -ml-2 sm:ml-0">
       <div className="space-y-0 relative">
         {prepRules.map((rule, i) => {
           const Icon = rule.icon;
-          const dist = Math.abs(i - 2);
-          const opacity = Math.max(0.05, 0.5 * Math.pow(0.5, dist));
           
           return (
             <motion.div
@@ -799,7 +797,6 @@ function PreparationChecklist() {
                       ? "border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
                       : "border-white/10 group-hover:border-white/20"
                   )}
-                  style={{ opacity: opacity * 2 }}
                   >
                     {/* Внешнее свечение */}
                     <div className={cn(
@@ -816,7 +813,7 @@ function PreparationChecklist() {
               </div>
 
               {/* Текстовый блок */}
-              <div className="flex-1 py-4 pl-2 md:pl-6">
+              <div className="flex-1 py-4 pl-3 md:pl-6">
                 <div className="flex flex-col">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <h4 className={cn(
