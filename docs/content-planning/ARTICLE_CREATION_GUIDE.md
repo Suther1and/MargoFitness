@@ -31,14 +31,14 @@ MargoFitness — онлайн-платформа персональных дом
 - Реестр метаданных: `lib/config/articles.ts` → массив `ARTICLE_REGISTRY`
 - Динамический импорт: `app/dashboard/health-tracker/components/workouts-tab.tsx` → объект `HardcodedArticles`
 
-### Регистрация новой статьи (3 шага)
+### Регистрация новой статьи (4 шага)
 
 **1. Создать компонент** в `components/articles/content/{ArticleName}.tsx`
 
 **2. Добавить метаданные** в `lib/config/articles.ts`:
 ```typescript
 {
-  id: "slug-name",
+  id: "slug-name", // Должен совпадать со slug в БД
   slug: "slug-name",
   title: "Заголовок статьи",
   description: "Краткое описание для карточки в списке (1-2 предложения).",
@@ -49,20 +49,27 @@ MargoFitness — онлайн-платформа персональных дом
 }
 ```
 
-**3. Добавить динамический импорт** в `workouts-tab.tsx`:
+**3. Добавить динамический импорт** в `app/dashboard/health-tracker/components/workouts-tab.tsx` в объект `HardcodedArticles`:
 ```typescript
 "slug-name": dynamic(() => import("@/components/articles/content/ArticleName")),
 ```
+
+**4. Добавить запись в базу данных (через SQL или напрямую)**
+Статья не появится в списке, пока её `slug` не будет в таблице `articles`.
+```sql
+INSERT INTO articles (slug, title, description, category, reading_time, access_level, display_status, sort_order)
+VALUES ('slug-name', 'Заголовок', 'Описание', 'Основы', 7, 'free', 'all', 100);
+```
+*После добавления в БД статья сразу появится в админ-панели, где можно будет управлять её видимостью, порядком и бейджами (NEW/UPD).*
 
 ### Обязательная структура компонента
 
 ```typescript
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect } from "react"; // Важно для скролла
 import { motion } from "framer-motion";
-import { Clock, ChevronLeft, ArrowRight, Quote, /* ... */ } from "lucide-react";
-import { cn } from "@/lib/utils";
+// ... импорты иконок
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
 import { markArticleAsRead } from "@/lib/actions/articles";
 
@@ -73,14 +80,20 @@ export default function ArticleName({
   onBack: () => void;
   metadata?: any;
 }) {
+  // Автоматический скролл вверх при открытии
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const { elementRef } = useArticleReadTracking({
     articleId: metadata?.id || "slug-name",
     onRead: async (id) => {
       await markArticleAsRead(id);
     },
-    threshold: 0.5,
+    threshold: 0.8, // Рекомендуется 0.8 для длинных статей
   });
-
+// ...
+```
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -535,11 +548,13 @@ rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-white/[0.02] mb-16
 ## Чеклист перед отправкой статьи
 
 ### Техническое
+- [ ] В БД добавлена запись с соответствующим `slug`
 - [ ] Компонент экспортирует `default function` с пропсами `{ onBack, metadata }`
-- [ ] `useArticleReadTracking` подключён с правильным `articleId`
+- [ ] Добавлен `useLayoutEffect` с `window.scrollTo(0, 0)` для сброса позиции скролла
+- [ ] `useArticleReadTracking` подключён с правильным `articleId` (из метаданных или slug)
 - [ ] `<div ref={elementRef} className="h-4 w-full" />` в конце `<article>`
-- [ ] Метаданные добавлены в `ARTICLE_REGISTRY`
-- [ ] Динамический импорт добавлен в `HardcodedArticles`
+- [ ] Метаданные добавлены в `ARTICLE_REGISTRY` в `lib/config/articles.ts`
+- [ ] Динамический импорт добавлен в `HardcodedArticles` в `workouts-tab.tsx`
 - [ ] Нет ошибок линтера
 - [ ] Все компоненты локальные (определены в том же файле, не импортируются из общих)
 
