@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -98,6 +98,161 @@ function DeficiencyChart() {
       <p className="text-[11px] text-white/25 mt-5 leading-relaxed italic">
         Данные: MDPI Nutrients 2023, Journal of Women&apos;s Sports Medicine 2024. Исследования проведены среди женщин с регулярной физической активностью (3+ тренировки/нед).
       </p>
+    </div>
+  );
+}
+
+// --- LabTestSlider ---
+
+function LabTestSlider({
+  cards,
+  accentColor = "cyan",
+}: {
+  cards: TestCardData[];
+  accentColor?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftPos, setScrollLeftPos] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeftPos(scrollRef.current.scrollLeft);
+  };
+
+  const onMouseUp = () => setIsDragging(false);
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollLeftPos - walk;
+      }
+    });
+  };
+
+  const getCardWidth = useCallback(() => {
+    if (typeof window === "undefined") return 400;
+    if (window.innerWidth < 768) {
+      return (window.innerWidth - 32) * 0.9;
+    }
+    return 400;
+  }, []);
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const cardWidth = getCardWidth();
+    const scrollTo =
+      direction === "left"
+        ? scrollRef.current.scrollLeft - (cardWidth + 16)
+        : scrollRef.current.scrollLeft + (cardWidth + 16);
+    scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
+  };
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const cardWidth = getCardWidth();
+    const gap = 16;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const offset = isMobile ? 16 : 0;
+    
+    const index = Math.round((scrollLeft - offset) / (cardWidth + gap));
+    setCurrentSlide(Math.max(0, Math.min(index, cards.length - 1)));
+  };
+
+  const getDotsCount = () => {
+    if (typeof window === "undefined") return cards.length;
+    if (window.innerWidth >= 768) {
+      return Math.max(1, cards.length - 1);
+    }
+    return cards.length;
+  };
+
+  return (
+    <div className="relative">
+      <div className="hidden md:flex items-center gap-2 justify-end mb-3">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => scroll("left")}
+          className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="size-4" />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => scroll("right")}
+          className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <ArrowRight className="size-4" />
+        </motion.button>
+      </div>
+
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onMouseMove={onMouseMove}
+        className={cn(
+          "flex gap-4 overflow-x-auto pb-4 scrollbar-hide select-none",
+          "px-4 md:px-0",
+          isDragging
+            ? "cursor-grabbing"
+            : "cursor-grab md:snap-none snap-x snap-mandatory"
+        )}
+      >
+        {cards.map((card, i) => (
+          <div
+            key={i}
+            className="snap-start shrink-0 first:ml-0 flex"
+            style={{
+              width: typeof window !== "undefined" && window.innerWidth < 768 
+                ? "calc(85vw)" 
+                : "400px"
+            }}
+          >
+            <TestCard test={card} />
+          </div>
+        ))}
+        <div className="md:hidden w-4 shrink-0" />
+      </div>
+
+      <div className="flex justify-center gap-1.5 mt-2">
+        {Array.from({ length: getDotsCount() }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              if (scrollRef.current) {
+                const cardWidth = getCardWidth();
+                const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+                const offset = isMobile ? 16 : 0;
+                scrollRef.current.scrollTo({
+                  left: i * (cardWidth + 16),
+                  behavior: "smooth",
+                });
+              }
+            }}
+            className={cn(
+              "h-1.5 rounded-full transition-all duration-500",
+              currentSlide === i
+                ? "w-5 bg-cyan-500"
+                : "w-1.5 bg-white/10 hover:bg-white/20"
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -292,7 +447,7 @@ function TestCard({ test }: { test: TestCardData }) {
   const Icon = test.icon;
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
+    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6 flex flex-col w-full h-full">
       <div className="flex items-start gap-3 mb-3">
         <div className="size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center shrink-0">
           <Icon className="size-5 text-cyan-400" />
@@ -305,7 +460,7 @@ function TestCard({ test }: { test: TestCardData }) {
 
       <p className="text-sm text-white/60 leading-relaxed mb-3">{test.why}</p>
 
-      <div className="rounded-xl bg-rose-500/[0.04] border border-rose-500/10 p-3 mb-1">
+      <div className="rounded-xl bg-rose-500/[0.04] border border-rose-500/10 p-3 mb-4 mt-auto">
         <p className="text-xs text-white/40 leading-relaxed">
           <span className="text-rose-400/70 font-bold text-[10px] uppercase tracking-wider mr-1.5">
             Симптомы дефицита:
@@ -646,11 +801,7 @@ export default function LabControl({
             На шкалах ниже: цветные зоны показывают состояние, а бирюзовая рамка - оптимальный диапазон для женщин с регулярными тренировками.
           </p>
 
-          <div className="space-y-4">
-            {baseTests.map((test, i) => (
-              <TestCard key={i} test={test} />
-            ))}
-          </div>
+          <LabTestSlider cards={baseTests} />
         </section>
 
         {/* Секция 4: Расширенная панель */}
