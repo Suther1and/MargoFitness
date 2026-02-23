@@ -627,71 +627,72 @@ function EquipmentCard({ item }: { item: EquipmentItem }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/10 overflow-hidden transition-all",
-        isOpen ? "bg-white/[0.03]" : "bg-white/[0.01] hover:bg-white/[0.02]"
+        "rounded-2xl border border-white/10 overflow-hidden transition-all duration-500",
+        isOpen ? "bg-white/[0.03] border-white/20" : "bg-white/[0.01] hover:bg-white/[0.02]"
       )}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-4 p-5 md:p-6 text-left"
+        className="w-full flex items-start gap-4 p-5 md:p-6 text-left relative z-10"
       >
-        <div className="size-10 rounded-xl bg-rose-500/10 border border-rose-500/15 flex items-center justify-center shrink-0">
-          <Dumbbell className="size-5 text-rose-400" />
+        <div className={cn(
+          "size-10 rounded-xl border flex items-center justify-center shrink-0 transition-all duration-500",
+          isOpen ? "bg-rose-500/20 border-rose-500/40 scale-110" : "bg-rose-500/10 border-rose-500/15"
+        )}>
+          <Dumbbell className={cn("size-5 transition-colors duration-500", isOpen ? "text-rose-300" : "text-rose-400")} />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pt-0.5">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="text-base md:text-lg font-bold text-white/90 truncate">
               {item.name}
             </h4>
             <span
               className={cn(
-                "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0",
-                p.color
+                "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0 transition-opacity duration-500",
+                p.color,
+                isOpen ? "opacity-40" : "opacity-100"
               )}
             >
               {p.text}
             </span>
           </div>
-          <AnimatePresence mode="wait">
-            {!isOpen && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-xs text-white/30 truncate"
-              >
-                {item.description}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          <p className={cn(
+            "text-xs leading-relaxed transition-all duration-500",
+            isOpen ? "text-white/70" : "text-white/30 truncate"
+          )}>
+            {item.description}
+          </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="hidden md:block text-sm font-medium text-white/30">
+        <div className="flex items-center gap-3 shrink-0 pt-1">
+          <span className={cn(
+            "hidden md:block text-sm font-medium transition-opacity duration-500",
+            isOpen ? "opacity-0" : "text-white/30"
+          )}>
             {item.priceRange}
           </span>
-          {isOpen ? (
-            <ChevronUp className="size-4 text-white/20" />
-          ) : (
-            <ChevronDown className="size-4 text-white/20" />
-          )}
+          <div className={cn(
+            "size-6 rounded-full border border-white/5 flex items-center justify-center transition-all duration-500",
+            isOpen ? "bg-white/10 rotate-180" : "bg-white/5"
+          )}>
+            <ChevronDown className="size-3 text-white/20" />
+          </div>
         </div>
       </button>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           >
-            <div className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
-              <div className="h-px bg-white/5" />
+            <div className="px-5 md:px-6 pb-6 pt-2 space-y-5">
+              <div className="h-px bg-gradient-to-r from-white/10 to-transparent ml-14" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="ml-14 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400/50 mb-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-rose-400/50 mb-2">
                     Как выбрать
                   </p>
                   <p className="text-sm text-white/50 leading-relaxed">
@@ -699,7 +700,7 @@ function EquipmentCard({ item }: { item: EquipmentItem }) {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/25 mb-2">
                     Используется для
                   </p>
                   <p className="text-sm text-white/40 leading-relaxed">
@@ -709,8 +710,8 @@ function EquipmentCard({ item }: { item: EquipmentItem }) {
               </div>
 
               {item.alternatives.length > 0 && (
-                <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">
+                <div className="ml-14 rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/25 mb-2">
                     Чем заменить
                   </p>
                   <ul className="space-y-1.5">

@@ -574,67 +574,61 @@ function ExtendedTestCard({ test }: { test: ExtendedTest }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/10 overflow-hidden transition-all",
-        isOpen ? "bg-white/[0.03]" : "bg-white/[0.01] hover:bg-white/[0.02]"
+        "rounded-2xl border border-white/10 overflow-hidden transition-all duration-500",
+        isOpen ? "bg-white/[0.03] border-white/20" : "bg-white/[0.01] hover:bg-white/[0.02]"
       )}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-4 p-5 md:p-6 text-left"
+        className="w-full flex items-start gap-4 p-5 md:p-6 text-left relative z-10"
       >
-        <div className="size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center shrink-0">
-          <Icon className="size-5 text-cyan-400" />
+        <div className={cn(
+          "size-10 rounded-xl border flex items-center justify-center shrink-0 transition-all duration-500",
+          isOpen ? "bg-cyan-500/20 border-cyan-500/40 scale-110" : "bg-cyan-500/10 border-cyan-500/15"
+        )}>
+          <Icon className={cn("size-5 transition-colors duration-500", isOpen ? "text-cyan-300" : "text-cyan-400")} />
         </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-base font-bold text-white/90 truncate">
+        <div className="flex-1 min-w-0 pt-0.5">
+          <h4 className="text-base font-bold text-white/90 mb-1">
             {test.name}
           </h4>
-          <AnimatePresence mode="wait">
-            {!isOpen && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-xs text-white/30 truncate"
-              >
-                {test.what}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          <p className={cn(
+            "text-xs leading-relaxed transition-all duration-500",
+            isOpen ? "text-white/70" : "text-white/30 truncate"
+          )}>
+            {test.what}
+          </p>
         </div>
-        <div className="shrink-0">
-          {isOpen ? (
-            <ChevronUp className="size-4 text-white/20" />
-          ) : (
-            <ChevronDown className="size-4 text-white/20" />
-          )}
+        <div className="shrink-0 pt-1">
+          <div className={cn(
+            "size-6 rounded-full border border-white/5 flex items-center justify-center transition-all duration-500",
+            isOpen ? "bg-white/10 rotate-180" : "bg-white/5"
+          )}>
+            <ChevronDown className="size-3 text-white/20" />
+          </div>
         </div>
       </button>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           >
-            <div className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
-              <div className="h-px bg-white/5" />
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/50 mb-2">
-                  Что это дает
-                </p>
+            <div className="px-5 md:px-6 pb-6 pt-2 space-y-5">
+              <div className="h-px bg-gradient-to-r from-white/10 to-transparent ml-14" />
+              
+              <div className="ml-14 rounded-xl bg-cyan-500/[0.03] border border-cyan-500/10 p-4 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500/40" />
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="size-3.5 text-cyan-400/60" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-cyan-400/50">
+                    Кому необходимо
+                  </p>
+                </div>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  {test.what}
-                </p>
-              </div>
-              <div className="rounded-xl bg-cyan-500/[0.03] border border-cyan-500/5 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">
-                  Кому необходимо
-                </p>
-                <p className="text-sm text-white/40 leading-relaxed">
                   {test.whoNeeds}
                 </p>
               </div>
@@ -837,9 +831,10 @@ export default function LabControl({
                           {item.tests.map((test, j) => (
                             <span
                               key={j}
-                              className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/[0.08] border border-cyan-500/15 text-cyan-400/70"
+                              className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/70"
                             >
                               {test}
+                              {j < item.tests.length - 1 && <span className="text-white/10 mx-1.5">•</span>}
                             </span>
                           ))}
                         </div>
