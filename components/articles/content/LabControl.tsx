@@ -746,8 +746,8 @@ const prepRules: PrepRule[] = [
   },
   {
     icon: Thermometer,
-    rule: "Не на фоне болезни",
-    detail: "ОРВИ, стресс и воспаления искажают большинство показателей. Подожди 2 недели после выздоровления",
+    rule: "Не на фоне болезни и стресса",
+    detail: "ОРВИ, сильный стресс, бессонная ночь и воспаления искажают большинство показателей. Подожди 2 недели после выздоровления",
   },
   {
     icon: Pill,
@@ -758,7 +758,7 @@ const prepRules: PrepRule[] = [
 
 function PreparationChecklist() {
   return (
-    <div className="relative mt-12 mb-16 -ml-2 sm:ml-0">
+    <div className="relative mt-12 mb-8 -ml-2 sm:ml-0">
       <div className="space-y-0 relative">
         {prepRules.map((rule, i) => {
           const Icon = rule.icon;
@@ -839,6 +839,14 @@ function PreparationChecklist() {
             </motion.div>
           );
         })}
+      </div>
+
+      <div className="mt-8 mb-8 flex flex-col items-center">
+        <div className="w-24 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
+        <p className="text-sm text-white/40 leading-relaxed italic px-4 text-center">
+          <span className="text-white/60 font-medium not-italic">Частота контроля:</span>{" "}
+          Базовая панель — 2 раза в год (весна и осень), расширенная — 1 раз в год или при появлении симптомов.
+        </p>
       </div>
     </div>
   );
@@ -1042,32 +1050,6 @@ export default function LabControl({
           </p>
 
           <PreparationChecklist />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8">
-            <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CircleCheck className="size-4 text-emerald-400/60" />
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400/70">
-                  Частота
-                </p>
-              </div>
-              <p className="text-sm text-white/50 leading-relaxed">
-                <span className="text-white/75 font-medium">Базовая панель</span> - 2 раза в год (весна и осень).{" "}
-                <span className="text-white/75 font-medium">Расширенная</span> - 1 раз в год или при появлении симптомов.
-              </p>
-            </div>
-            <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CircleX className="size-4 text-rose-400/60" />
-                <p className="text-xs font-bold uppercase tracking-wider text-rose-400/70">
-                  Когда не сдавать
-                </p>
-              </div>
-              <p className="text-sm text-white/50 leading-relaxed">
-                Во время ОРВИ, в первые 2 дня менструации, после бессонной ночи, в период сильного стресса. Подожди 2 недели после выздоровления.
-              </p>
-            </div>
-          </div>
         </section>
 
         {/* Блок платформы */}
