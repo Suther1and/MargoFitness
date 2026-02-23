@@ -362,7 +362,8 @@ const baseTests: TestCardData[] = [
     zones: [
       { label: "Анемия", color: "bg-rose-500/50", from: 90, to: 120 },
       { label: "Оптимум", color: "bg-emerald-500/50", from: 120, to: 150 },
-      { label: "Повышен", color: "bg-amber-500/30", from: 150, to: 170 },
+      { label: "Повышен", color: "bg-amber-500/30", from: 150, to: 160 },
+      { label: "Высокий", color: "bg-rose-500/40", from: 160, to: 170 },
     ],
   },
   {
@@ -452,11 +453,11 @@ function ReferenceScale({ test }: { test: TestCardData }) {
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
         {test.zones.map((zone, i) => (
           <span key={i} className="flex items-center gap-1.5 text-[10px] text-white/30">
-            <span className={cn("size-1.5 rounded-full", zone.color)} />
-            {zone.label}: {zone.from}-{zone.to}
+            <span className={cn("size-1.5 rounded-full shrink-0", zone.color)} />
+            <span className="truncate">{zone.label}: {zone.from}-{zone.to}</span>
           </span>
         ))}
       </div>
