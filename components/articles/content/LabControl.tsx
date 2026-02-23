@@ -775,15 +775,15 @@ function PreparationChecklist() {
               <div className="relative w-14 md:w-16 shrink-0 flex flex-col items-center">
                 {/* Линия (одна сплошная на фоне) */}
                 <div className={cn(
-                  "absolute left-1/2 -translate-x-1/2 w-px h-full bg-cyan-500/20",
+                  "absolute left-1/2 -translate-x-1/2 w-px h-full bg-cyan-500/40",
                   i === 0 && "top-1/2 h-1/2",
                   i === prepRules.length - 1 && "bottom-1/2 h-1/2"
                 )} />
 
                 {/* Контейнер иконки */}
-                <div className="relative z-10 flex items-center justify-center py-4 bg-[#09090b]">
+                <div className="relative z-10 flex items-center justify-center py-4">
                   <div className={cn(
-                    "relative size-12 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500",
+                    "relative size-12 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500 bg-[#09090b]",
                     rule.important 
                       ? "bg-[#09090b] border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
                       : "bg-[#09090b] border-white/10 group-hover:border-white/20"
