@@ -758,7 +758,7 @@ const prepRules: PrepRule[] = [
 
 function PreparationChecklist() {
   return (
-    <div className="relative mt-12 mb-16 px-2 sm:px-0">
+    <div className="relative mt-12 mb-16 -ml-4 sm:ml-0">
       <div className="space-y-0 relative">
         {prepRules.map((rule, i) => {
           const Icon = rule.icon;
@@ -772,8 +772,8 @@ function PreparationChecklist() {
               className="relative flex items-stretch group"
             >
               {/* Левая колонка с линией и иконкой */}
-              <div className="relative w-14 md:w-16 shrink-0 flex flex-col items-center">
-                {/* Линия (одна сплошная на фоне) */}
+              <div className="relative w-12 md:w-16 shrink-0 flex flex-col items-center">
+                {/* Линия (одна сплошная на фоне всего контейнера) */}
                 <div 
                   className={cn(
                     "absolute left-1/2 -translate-x-1/2 w-px h-full",
@@ -781,18 +781,17 @@ function PreparationChecklist() {
                     i === prepRules.length - 1 && "bottom-1/2 h-1/2"
                   )} 
                   style={{
-                    background: i === 2 
-                      ? 'rgba(6, 182, 212, 0.5)' 
-                      : i < 2 
-                        ? `linear-gradient(to bottom, ${i === 0 ? 'transparent' : 'rgba(6, 182, 212, 0.1)'}, rgba(6, 182, 212, 0.5))`
-                        : `linear-gradient(to top, ${i === prepRules.length - 1 ? 'transparent' : 'rgba(6, 182, 212, 0.1)'}, rgba(6, 182, 212, 0.5))`
+                    background: `linear-gradient(to bottom, 
+                      rgba(6, 182, 212, ${Math.max(0.05, 0.5 - Math.abs(i - 0.5 - 2) * 0.15)}), 
+                      rgba(6, 182, 212, ${Math.max(0.05, 0.5 - Math.abs(i + 0.5 - 2) * 0.15)})
+                    )`
                   }}
                 />
 
                 {/* Контейнер иконки */}
                 <div className="relative z-10 flex items-center justify-center py-4">
                   <div className={cn(
-                    "relative size-12 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500 bg-[#09090b]",
+                    "relative size-10 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500 bg-[#09090b]",
                     rule.important 
                       ? "border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
                       : "border-white/10 group-hover:border-white/20"
@@ -812,11 +811,11 @@ function PreparationChecklist() {
               </div>
 
               {/* Текстовый блок */}
-              <div className="flex-1 py-4 pl-4 md:pl-6">
+              <div className="flex-1 py-4 pl-3 md:pl-6">
                 <div className="flex flex-col">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <h4 className={cn(
-                      "text-lg md:text-xl font-oswald font-black uppercase tracking-tight transition-colors duration-500",
+                      "text-base md:text-xl font-oswald font-black uppercase tracking-tight transition-colors duration-500",
                       rule.important ? "text-cyan-400" : "text-white/90 group-hover:text-white"
                     )}>
                       {rule.rule}
@@ -830,7 +829,7 @@ function PreparationChecklist() {
                 </div>
                 
                 <p className={cn(
-                  "mt-0.5 text-[13px] md:text-sm text-white/40 leading-relaxed max-w-2xl group-hover:text-white/60 transition-colors duration-500"
+                  "mt-0.5 text-[12px] md:text-sm text-white/40 leading-relaxed max-w-2xl group-hover:text-white/60 transition-colors duration-500"
                 )}>
                   {rule.detail}
                 </p>
