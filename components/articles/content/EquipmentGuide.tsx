@@ -652,7 +652,18 @@ function EquipmentCard({ item }: { item: EquipmentItem }) {
               {p.text}
             </span>
           </div>
-          <p className="text-xs text-white/30 truncate">{item.description}</p>
+          <AnimatePresence mode="wait">
+            {!isOpen && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-xs text-white/30 truncate"
+              >
+                {item.description}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <span className="hidden md:block text-sm font-medium text-white/30">

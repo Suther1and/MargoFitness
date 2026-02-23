@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useLayoutEffect, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
   ChevronLeft,
@@ -28,6 +28,9 @@ import {
   Ban,
   Pill,
   Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArticleReadTracking } from "@/app/dashboard/health-tracker/hooks/use-article-read-tracking";
@@ -564,6 +567,85 @@ const extendedTests: ExtendedTest[] = [
   },
 ];
 
+function ExtendedTestCard({ test }: { test: ExtendedTest }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const Icon = test.icon;
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-white/10 overflow-hidden transition-all",
+        isOpen ? "bg-white/[0.03]" : "bg-white/[0.01] hover:bg-white/[0.02]"
+      )}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-4 p-5 md:p-6 text-left"
+      >
+        <div className="size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center shrink-0">
+          <Icon className="size-5 text-cyan-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-base font-bold text-white/90 truncate">
+            {test.name}
+          </h4>
+          <AnimatePresence mode="wait">
+            {!isOpen && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-xs text-white/30 truncate"
+              >
+                {test.what}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+        <div className="shrink-0">
+          {isOpen ? (
+            <ChevronUp className="size-4 text-white/20" />
+          ) : (
+            <ChevronDown className="size-4 text-white/20" />
+          )}
+        </div>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
+              <div className="h-px bg-white/5" />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/50 mb-2">
+                  Что это дает
+                </p>
+                <p className="text-sm text-white/50 leading-relaxed">
+                  {test.what}
+                </p>
+              </div>
+              <div className="rounded-xl bg-cyan-500/[0.03] border border-cyan-500/5 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">
+                  Кому необходимо
+                </p>
+                <p className="text-sm text-white/40 leading-relaxed">
+                  {test.whoNeeds}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // --- Preparation Checklist ---
 
 interface PrepRule {
@@ -815,31 +897,9 @@ export default function LabControl({
           </p>
 
           <div className="space-y-3">
-            {extendedTests.map((test, i) => {
-              const Icon = test.icon;
-              return (
-                <div
-                  key={i}
-                  className="rounded-xl bg-white/[0.02] border border-white/5 p-4 md:p-5"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="size-8 rounded-lg bg-cyan-500/[0.06] border border-cyan-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Icon className="size-4 text-cyan-400/70" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white/85 mb-1">{test.name}</h4>
-                      <p className="text-sm text-white/50 leading-relaxed mb-2">{test.what}</p>
-                      <p className="text-xs text-white/30 leading-relaxed">
-                        <span className="text-cyan-400/50 font-bold uppercase tracking-wider text-[10px] mr-1">
-                          Кому:
-                        </span>
-                        {test.whoNeeds}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {extendedTests.map((test, i) => (
+              <ExtendedTestCard key={i} test={test} />
+            ))}
           </div>
 
           <div className="rounded-xl bg-cyan-500/[0.04] border border-cyan-500/10 p-4 mt-4">
