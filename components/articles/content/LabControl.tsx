@@ -792,7 +792,7 @@ function PreparationChecklist() {
                 {/* Контейнер иконки */}
                 <div className="relative z-10 flex items-center justify-center py-4">
                   <div className={cn(
-                    "relative size-10 md:size-14 rounded-2xl border flex items-center justify-center transition-all duration-500 bg-[#09090b]",
+                    "relative size-10 md:size-14 rounded-xl md:rounded-2xl border flex items-center justify-center transition-all duration-500 bg-[#09090b] shrink-0",
                     rule.important 
                       ? "border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]" 
                       : "border-white/10 group-hover:border-white/20"
