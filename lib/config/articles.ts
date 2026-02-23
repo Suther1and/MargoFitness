@@ -121,5 +121,15 @@ export const ARTICLE_REGISTRY: ArticleMetadata[] = [
     reading_time: 12,
     access_level: "pro",
     image_url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "lab-control",
+    slug: "lab-control",
+    title: "Лабораторный контроль: какие анализы важны для женщины в фитнесе",
+    description: "Какие анализы сдавать, как читать результаты и почему лабораторные нормы — не то же самое, что оптимум. Приборная панель твоего тела.",
+    category: "Биохакинг",
+    reading_time: 10,
+    access_level: "pro",
+    image_url: "https://images.unsplash.com/photo-1579165466741-7f35e4755660?q=80&w=2070&auto=format&fit=crop"
   }
 ];
