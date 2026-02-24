@@ -130,7 +130,6 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
       <SheetContent 
         className="w-full sm:max-w-2xl bg-[#0f0f13] border-white/5 p-0 overflow-hidden flex flex-col"
         onPointerDownOutside={(e) => {
-          // Проверяем, был ли клик по порталу (календарю)
           const target = e.target as HTMLElement;
           if (target?.closest('[data-radix-portal]') || target?.closest('.fixed.inset-0.z-\\[9998\\]')) {
             e.preventDefault();
@@ -153,8 +152,8 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
           </div>
         ) : user ? (
           <>
-            {/* Header Section */}
-            <div className="relative p-8 pb-6 bg-gradient-to-b from-white/[0.05] to-transparent border-b border-white/5">
+            {/* Header Section - Fixed */}
+            <div className="relative p-8 pb-6 bg-gradient-to-b from-white/[0.05] to-transparent border-b border-white/5 flex-shrink-0">
               <div className="flex items-start gap-6">
                 <UserAvatar 
                   fullName={user.full_name}
@@ -233,10 +232,10 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
               </div>
             </div>
 
-            {/* Tabs Section */}
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-                <div className="px-8 pt-4">
+            {/* Tabs Section - Scrollable */}
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+                <div className="px-8 pt-4 flex-shrink-0">
                   <TabsList className="w-full bg-white/[0.03] border border-white/5 p-1 h-12 rounded-2xl">
                     <TabsTrigger value="overview" className="flex-1 gap-2 text-xs uppercase tracking-widest font-bold data-[state=active]:bg-white/5">
                       <UserIcon className="w-3.5 h-3.5" /> Общее
@@ -256,8 +255,8 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                   </TabsList>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 pt-6 custom-scrollbar">
-                  <TabsContent value="overview" className="m-0 space-y-6 pb-20">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <TabsContent value="overview" className="m-0 p-8 pt-6 space-y-6 pb-20">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Системная информация</h3>
@@ -362,7 +361,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="purchases" className="m-0 space-y-4 pb-20">
+                  <TabsContent value="purchases" className="m-0 p-8 pt-6 space-y-4 pb-20">
                     {purchases.length > 0 ? (
                       <div className="space-y-4">
                         {purchases.map((p: any, idx: number) => {
@@ -373,8 +372,8 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                           const isRenewal = p.action === 'renewal' || p.metadata?.is_renewal;
                           
                           // Расчет промокода
-                          const promoDiscount = p.metadata?.promo_discount_amount || 0;
-                          const promoPercent = p.metadata?.promo_percent;
+                          const promoCode = p.promo_code || p.metadata?.promo_code;
+                          const promoPercent = p.metadata?.promo_percent || p.metadata?.discount_percent;
 
                           return (
                             <div key={p.id} className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 group hover:bg-white/[0.04] transition-all">
@@ -426,13 +425,13 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                               {/* Детальная информация о скидках и изменениях */}
                               <div className="grid grid-cols-1 gap-3 pt-4 border-t border-white/5">
                                 <div className="flex flex-wrap gap-2">
-                                  {p.promo_code && (
+                                  {promoCode && (
                                     <div className="bg-purple-500/5 border border-purple-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
                                       <Tag className="w-3.5 h-3.5 text-purple-400" />
                                       <div>
                                         <span className="block text-[8px] text-purple-400/60 uppercase font-bold leading-none mb-0.5">Промокод</span>
                                         <span className="block text-xs text-purple-400 font-bold">
-                                          {p.promo_code} {promoPercent ? `(-${promoPercent}%)` : ''}
+                                          {promoCode} {promoPercent ? `(-${promoPercent}%)` : ''}
                                         </span>
                                       </div>
                                     </div>
@@ -479,17 +478,23 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                   </div>
                                 )}
 
-                                {/* Информация о сроках (если есть в метаданных) */}
-                                {p.metadata?.previous_expiry && (
+                                {/* Информация о сроках */}
+                                {(p.metadata?.previous_expiry || p.metadata?.new_expiry) && (
                                   <div className="bg-white/[0.02] rounded-2xl p-3 flex items-center justify-between border border-white/5">
                                     <div className="flex items-center gap-3">
                                       <Calendar className="w-4 h-4 text-white/20" />
                                       <span className="text-[11px] text-white/40 uppercase font-bold tracking-wider">Срок действия</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                      <span className="text-xs text-white/40">{new Date(p.metadata.previous_expiry).toLocaleDateString('ru-RU')}</span>
-                                      <div className="w-3 h-px bg-white/10" />
-                                      <span className="text-xs text-emerald-400 font-bold">{new Date(p.metadata.new_expiry || p.created_at).toLocaleDateString('ru-RU')}</span>
+                                      {p.metadata.previous_expiry && (
+                                        <>
+                                          <span className="text-xs text-white/40">{new Date(p.metadata.previous_expiry).toLocaleDateString('ru-RU')}</span>
+                                          <div className="w-3 h-px bg-white/10" />
+                                        </>
+                                      )}
+                                      <span className="text-xs text-emerald-400 font-bold">
+                                        {new Date(p.metadata.new_expiry || p.created_at).toLocaleDateString('ru-RU')}
+                                      </span>
                                     </div>
                                   </div>
                                 )}
@@ -506,7 +511,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="intensives" className="m-0 space-y-4 pb-20">
+                  <TabsContent value="intensives" className="m-0 p-8 pt-6 space-y-4 pb-20">
                     {intensives.length > 0 ? (
                       <div className="grid grid-cols-1 gap-4">
                         {intensives.map((i: any) => (
@@ -549,7 +554,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="activity" className="m-0 space-y-6 pb-20">
+                  <TabsContent value="activity" className="m-0 p-8 pt-6 space-y-6 pb-20">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4">
                         <div className="flex items-center gap-3 mb-4">
@@ -604,7 +609,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="bonuses" className="m-0 space-y-4 pb-20">
+                  <TabsContent value="bonuses" className="m-0 p-8 pt-6 space-y-4 pb-20">
                     <div className="bg-yellow-400/5 border border-yellow-400/10 rounded-3xl p-6 mb-6 flex items-center justify-between">
                       <div>
                         <span className="block text-[10px] text-yellow-400/60 uppercase tracking-widest font-bold mb-1">Активные бонусы</span>
