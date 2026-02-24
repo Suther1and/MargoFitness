@@ -6,6 +6,7 @@ import { UserTableRow } from './user-table-row'
 import { Users, Search, X, ChevronLeft, Zap, ShieldCheck, Star } from 'lucide-react'
 import { FilterSelect } from './inline-edit-cell'
 import { Suspense } from 'react'
+import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
