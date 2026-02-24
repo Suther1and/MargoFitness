@@ -108,7 +108,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-      <td className="p-4 w-[25%]">
+      <td className="p-4 w-[30%]">
         <div className="flex items-center gap-3">
           <UserAvatar 
             fullName={user.full_name}
@@ -127,7 +127,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </div>
       </td>
       
-      <td className="p-4 w-[12%]">
+      <td className="p-4 w-[15%]">
         <InlineSelect
           value={user.subscription_tier}
           options={tierOptions}
@@ -136,7 +136,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4 w-[15%]">
+      <td className="p-4 w-[20%]">
         <InlineDateInput
           value={user.subscription_expires_at}
           onSave={(value) => handleUpdate('subscription_expires_at', value)}
@@ -145,7 +145,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4 w-[12%]">
+      <td className="p-4 w-[15%]">
         <InlineNumberInput
           value={user.bonus_balance || 0}
           onSave={(value) => handleUpdate('bonus_balance', value)}
@@ -154,7 +154,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4 w-[12%]">
+      <td className="p-4 w-[10%]">
         <InlineSelect
           value={user.cashback_level?.toString() || '1'}
           options={levelOptions}
@@ -163,17 +163,13 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4 w-[12%]">
+      <td className="p-4 w-[10%]">
         <InlineSelect
           value={user.role}
           options={roleOptions}
           onSave={(value) => handleUpdate('role', value)}
           displayClassName={roleDisplayClass}
         />
-      </td>
-      
-      <td className="p-4 text-right w-[12%]">
-        {/* Кнопка отмены подписки удалена, функционал перенесен в выбор тарифа FREE */}
       </td>
     </tr>
   )

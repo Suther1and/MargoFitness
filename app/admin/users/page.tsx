@@ -52,9 +52,9 @@ export default async function AdminUsersPage({
 
   const statCards = stats ? [
     { label: 'Всего пользователей', value: stats.total, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Администраторы', value: stats.admins, icon: ShieldCheck, color: 'text-purple-400', bg: 'bg-purple-500/10' },
     { label: 'Активные подписки', value: stats.activeSubscriptions, icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Пользователи Pro+', value: stats.tierCounts.pro + stats.tierCounts.elite, icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    { label: 'Выручка (30д)', value: `${(stats as any).monthlyRevenue?.toLocaleString('ru-RU')} ₽`, icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    { label: 'Конверсия', value: `${stats.total > 0 ? ((stats.activeSubscriptions / stats.total) * 100).toFixed(1) : 0}%`, icon: ShieldCheck, color: 'text-purple-400', bg: 'bg-purple-500/10' },
   ] : []
 
   return (
@@ -98,28 +98,23 @@ export default async function AdminUsersPage({
       </div>
 
       {/* Filters */}
-      <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10 p-6 md:p-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Filter className="size-4 text-orange-300" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-white/40">Фильтры поиска</h2>
-        </div>
-
-        <form method="get" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <div className="lg:col-span-2 xl:col-span-2 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/30" />
+      <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10 p-4 md:p-6">
+        <form method="get" className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[240px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20" />
             <input
               type="text"
               name="search"
               placeholder="Поиск по email или имени..."
               defaultValue={filters.search}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/40 transition-all"
             />
           </div>
           
           <select
             name="role"
             defaultValue={filters.role}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none transition-all cursor-pointer"
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
           >
             <option value="all" className="bg-[#1a1a24]">Все роли</option>
             <option value="user" className="bg-[#1a1a24]">Пользователь</option>
@@ -129,7 +124,7 @@ export default async function AdminUsersPage({
           <select
             name="tier"
             defaultValue={filters.tier}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none transition-all cursor-pointer"
+            className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
           >
             <option value="all" className="bg-[#1a1a24]">Все тарифы</option>
             <option value="free" className="bg-[#1a1a24]">Free</option>
@@ -138,26 +133,15 @@ export default async function AdminUsersPage({
             <option value="elite" className="bg-[#1a1a24]">Elite</option>
           </select>
 
-          <select
-            name="status"
-            defaultValue={filters.status}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none transition-all cursor-pointer"
-          >
-            <option value="all" className="bg-[#1a1a24]">Все статусы</option>
-            <option value="active" className="bg-[#1a1a24]">Активна</option>
-            <option value="inactive" className="bg-[#1a1a24]">Неактивна</option>
-            <option value="canceled" className="bg-[#1a1a24]">Отменена</option>
-          </select>
-
-          <div className="flex gap-2">
+          <div className="flex gap-2 ml-auto">
             <button 
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-orange-500/20"
+              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-orange-500/20"
             >
               Найти
             </button>
-            <Link href="/admin/users" className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95 text-white/60">
-              <X className="size-5" />
+            <Link href="/admin/users" className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95 text-white/40">
+              <X className="size-4" />
             </Link>
           </div>
         </form>
@@ -178,13 +162,12 @@ export default async function AdminUsersPage({
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[25%]">Пользователь</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Тариф</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Истекает</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Бонусы</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Уровень</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Роль</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right w-[12%]">Действия</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%]">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Тариф</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%]">Истекает</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Бонусы</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%]">Уровень</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%]">Роль</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">

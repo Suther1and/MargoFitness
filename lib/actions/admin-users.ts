@@ -267,14 +267,27 @@ export async function getUsersStats(): Promise<{
       elite: tiers?.filter(u => u.subscription_tier === 'elite').length || 0,
     }
 
+    // Получаем выручку за последние 30 дней
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    
+    const { data: payments } = await supabase
+      .from('payment_transactions')
+      .select('amount')
+      .eq('status', 'succeeded')
+      .gte('created_at', thirtyDaysAgo.toISOString())
+
+    const monthlyRevenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
     return { 
       success: true, 
       stats: {
         total: total || 0,
         admins: admins || 0,
         activeSubscriptions: active || 0,
+        monthlyRevenue: monthlyRevenue,
         tierCounts
-      } 
+      } as any
     }
   } catch (error: any) {
     return { success: false, error: error.message }
