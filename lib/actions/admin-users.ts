@@ -79,27 +79,15 @@ export async function getAllUsers(filters?: {
     const { data: profiles, error: profileError } = await profileQuery
 
     if (profileError) {
-      console.error('Error fetching users:', {
-        code: profileError.code,
-        message: profileError.message,
-        details: profileError.details,
-        hint: profileError.hint
-      })
+      console.error('Error fetching users:', profileError)
       return { success: false, error: profileError.message }
     }
 
-    // Если профилей нет, возвращаем пустой результат сразу
     if (!profiles || profiles.length === 0) {
       return { success: true, users: [] }
     }
 
-    // Получаем бонусные счета только для найденных пользователей
     const userIds = profiles.map(p => p.id)
-    
-    if (userIds.length === 0) {
-      return { success: true, users: [] }
-    }
-
     const { data: bonuses, error: bonusError } = await supabase
       .from('user_bonuses')
       .select('user_id, balance, cashback_level, total_spent_for_cashback')
@@ -109,12 +97,10 @@ export async function getAllUsers(filters?: {
       console.error('Error fetching bonuses:', bonusError)
     }
 
-    // Создаем Map для быстрого доступа
     const bonusMap = new Map(
       bonuses?.map((b: any) => [b.user_id, b]) || []
     )
 
-    // Объединяем данные
     let usersWithBonuses: ProfileWithBonuses[] = profiles.map((user: any) => {
       const userBonuses = bonusMap.get(user.id)
       return {
@@ -125,7 +111,6 @@ export async function getAllUsers(filters?: {
       }
     })
 
-    // Если есть фильтр по уровню кешбека, фильтруем результат
     if (filters?.cashback_level && filters.cashback_level !== 'all') {
       const targetLevel = parseInt(filters.cashback_level)
       usersWithBonuses = usersWithBonuses.filter((user: any) => user.cashback_level === targetLevel)
@@ -156,7 +141,6 @@ export async function updateUserProfile(
     const adminProfile = await checkAdmin()
     const supabase = await createClient()
 
-    // Обновляем профиль
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -172,11 +156,8 @@ export async function updateUserProfile(
       return { success: false, error: profileError.message }
     }
 
-    // Обновляем бонусы, если указаны
     if (data.bonus_balance !== undefined || data.cashback_level !== undefined) {
-      // Если меняется баланс, создаем транзакцию
       if (data.bonus_balance !== undefined) {
-        // Получаем текущий баланс
         const { data: currentBonus, error: fetchError } = await supabase
           .from('user_bonuses')
           .select('balance')
@@ -191,7 +172,6 @@ export async function updateUserProfile(
         const oldBalance = currentBonus?.balance || 0
         const difference = data.bonus_balance - oldBalance
 
-        // Создаем транзакцию только если есть изменение
         if (difference !== 0) {
           const { error: txError } = await supabase
             .from('bonus_transactions')
@@ -217,7 +197,6 @@ export async function updateUserProfile(
         }
       }
 
-      // Обновляем бонусный счет
       const updateData: any = {}
       if (data.bonus_balance !== undefined) updateData.balance = data.bonus_balance
       if (data.cashback_level !== undefined) updateData.cashback_level = data.cashback_level
@@ -233,9 +212,7 @@ export async function updateUserProfile(
       }
     }
 
-    // Очищаем кэш только страницы пользователей, чтобы изменения сразу отобразились
     revalidatePath('/admin/users', 'page')
-
     return { success: true }
   } catch (error: any) {
     console.error('CRITICAL ERROR in updateUserProfile:', error)
@@ -250,7 +227,8 @@ export async function getUsersStats(): Promise<{
   success: boolean
   stats?: {
     total: number
-    admins: number
+    newToday: number
+    newWeek: number
     activeSubscriptions: number
     tierCounts: Record<string, number>
   }
@@ -260,20 +238,6 @@ export async function getUsersStats(): Promise<{
     await checkAdmin()
     const supabase = await createClient()
 
-    // Используем параллельные запросы count вместо загрузки всех данных
-    const [
-      { count: total },
-      { count: admins },
-      { count: active },
-      { data: tiers }
-    ] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'admin'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active'),
-      supabase.from('profiles').select('subscription_tier')
-    ])
-
-    // Получаем метрики активности пользователей
     const now = new Date()
     const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString()
     const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString()
@@ -307,10 +271,10 @@ export async function getUsersStats(): Promise<{
         newWeek: newWeekCount || 0,
         activeSubscriptions: activeSubsCount || 0,
         tierCounts
-      } as any
+      }
     }
   } catch (error: any) {
+    console.error('Error in getUsersStats:', error)
     return { success: false, error: error.message }
   }
 }
-
