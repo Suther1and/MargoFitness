@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
 import { UserTableRow } from './user-table-row'
-import { Users, Search, X, ChevronLeft } from 'lucide-react'
+import { Users, Search, X, ChevronLeft, Zap, ShieldCheck, Star } from 'lucide-react'
 import { FilterSelect } from './inline-edit-cell'
 import { Suspense } from 'react'
 
@@ -54,17 +54,16 @@ export default async function AdminUsersPage({
   const stats = statsResult.stats
 
   const statCards = stats ? [
-    { label: 'Всего в базе', value: stats.total, color: 'text-white/60' },
-    { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400' },
-    { label: 'За неделю', value: (stats as any).newWeek, color: 'text-blue-400' },
-    { label: 'Активные подписки', value: stats.activeSubscriptions, color: 'text-emerald-400' },
-    { label: 'Pro/Elite', value: (stats as any).tierCounts ? (stats as any).tierCounts.pro + (stats as any).tierCounts.elite : 0, color: 'text-yellow-400' },
+    { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400', icon: Zap },
+    { label: 'За неделю', value: (stats as any).newWeek, color: 'text-blue-400', icon: Users },
+    { label: 'Активные подписки', value: stats.activeSubscriptions, color: 'text-emerald-400', icon: ShieldCheck },
+    { label: 'Pro/Elite', value: (stats as any).tierCounts ? (stats as any).tierCounts.pro + (stats as any).tierCounts.elite : 0, color: 'text-yellow-400', icon: Star },
   ] : []
 
   return (
     <div className="space-y-6 py-4">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Link 
           href="/admin" 
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
@@ -72,7 +71,7 @@ export default async function AdminUsersPage({
           <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
           <span className="text-xs font-bold uppercase tracking-widest">Назад</span>
         </Link>
-        <div>
+        <div className="text-right">
           <h1 className="text-2xl font-bold tracking-tight text-white font-oswald uppercase">
             Пользователи
           </h1>
@@ -82,15 +81,23 @@ export default async function AdminUsersPage({
         </div>
       </div>
 
-      {/* Stats - Ultra Compact */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      {/* Stats - Ultra Compact & Modern */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat, i) => (
           <div 
             key={i}
-            className="bg-white/[0.03] border border-white/5 rounded-2xl p-3 flex flex-col gap-1"
+            className="relative overflow-hidden bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-4 flex items-center gap-4 transition-all hover:bg-white/[0.04] group"
           >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">{stat.label}</span>
-            <div className={`text-xl font-bold font-oswald ${stat.color}`}>{stat.value}</div>
+            <div className={cn(
+              "p-3 rounded-2xl bg-white/5 ring-1 ring-white/10 transition-all group-hover:scale-110",
+              stat.color.replace('text-', 'bg-').replace('400', '500/10')
+            )}>
+              <stat.icon className={cn("size-5", stat.color)} />
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-white/20 mb-0.5">{stat.label}</span>
+              <div className={cn("text-2xl font-bold font-oswald leading-none", stat.color)}>{stat.value}</div>
+            </div>
           </div>
         ))}
       </div>
@@ -172,7 +179,7 @@ export default async function AdminUsersPage({
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%] text-center">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%] pl-12">Пользователь</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Тариф</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%] text-center">Истекает</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Бонусы</th>

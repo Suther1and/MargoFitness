@@ -118,19 +118,25 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-      <td className="p-4 w-[30%] text-center">
-        <div className="flex items-center gap-3 justify-center">
-          <UserAvatar 
-            fullName={user.full_name}
-            avatarUrl={user.avatar_url}
-            email={user.email}
-            className="w-10 h-10 rounded-xl ring-1 ring-white/10"
-          />
+      <td className="p-4 w-[30%]">
+        <div className="flex items-center gap-4 pl-4">
+          <div className="relative flex-shrink-0">
+            <UserAvatar 
+              fullName={user.full_name}
+              avatarUrl={user.avatar_url}
+              email={user.email}
+              className="w-11 h-11 rounded-2xl ring-2 ring-white/5 shadow-2xl"
+            />
+            <div className={cn(
+              "absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-[#0C0C11] ring-1 ring-white/10",
+              user.subscription_status === 'active' ? "bg-emerald-500" : "bg-white/20"
+            )} />
+          </div>
           <div className="flex flex-col min-w-0 text-left">
-            <span className="text-sm font-semibold text-white truncate max-w-[200px]">
+            <span className="text-sm font-bold text-white truncate max-w-[200px] tracking-tight">
               {user.full_name || 'Без имени'}
             </span>
-            <span className="text-xs text-white/40 truncate max-w-[200px]">
+            <span className="text-[11px] text-white/30 truncate max-w-[200px] font-medium">
               {user.email}
             </span>
           </div>
