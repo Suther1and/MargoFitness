@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Calendar as CalendarIcon, Clock, Plus, Minus, X, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar as CalendarIcon, Clock, Plus, Minus, X, Check, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface InlineSelectProps {
@@ -41,10 +42,15 @@ export function InlineSelect({ value, options, onSave, displayClassName }: Inlin
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button 
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all hover:brightness-110 active:scale-95 ring-1 ${displayClassName || 'bg-white/5 text-white ring-white/10'} ${isLoading ? 'opacity-50' : ''}`}
+          className={cn(
+            "px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all hover:brightness-110 active:scale-95 ring-1 flex items-center gap-2",
+            displayClassName || 'bg-white/5 text-white ring-white/10',
+            isLoading && "opacity-50"
+          )}
           disabled={isLoading}
         >
           {isLoading ? '...' : currentOption?.label || value}
+          <ChevronDown className="size-3 opacity-40" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-[#1a1a24] border-white/10 text-white min-w-[160px] p-2 rounded-2xl shadow-[0_16px_32px_-12px_rgba(0,0,0,0.5)]">
@@ -55,6 +61,67 @@ export function InlineSelect({ value, options, onSave, displayClassName }: Inlin
             className={cn(
               "cursor-pointer px-3 py-2.5 rounded-xl text-xs font-medium transition-all mb-1 last:mb-0",
               "hover:bg-white/5 focus:bg-white/5 focus:text-white outline-none",
+              option.className
+            )}
+          >
+            {option.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+interface FilterSelectProps {
+  name: string
+  defaultValue: string
+  options: { value: string; label: string; className?: string }[]
+  placeholder: string
+}
+
+export function FilterSelect({ name, defaultValue, options, placeholder }: FilterSelectProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  const handleSelect = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === 'all') {
+      params.delete(name)
+    } else {
+      params.set(name, value)
+    }
+    router.push(`?${params.toString()}`)
+  }
+
+  const currentOption = options.find(opt => opt.value === defaultValue)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button 
+          className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 transition-all cursor-pointer min-w-[100px] hover:bg-white/10 flex items-center justify-between gap-2"
+        >
+          <span>{currentOption?.label || placeholder}</span>
+          <ChevronDown className="size-3 opacity-40" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-[#1a1a24] border-white/10 text-white min-w-[160px] p-2 rounded-2xl shadow-[0_16px_32px_-12px_rgba(0,0,0,0.5)]">
+        <DropdownMenuItem 
+          onClick={() => handleSelect('all')}
+          className={cn(
+            "cursor-pointer px-3 py-2.5 rounded-xl text-xs font-medium transition-all mb-1 outline-none",
+            defaultValue === 'all' ? "bg-white/10 text-white" : "hover:bg-white/5 text-white/60"
+          )}
+        >
+          {placeholder}
+        </DropdownMenuItem>
+        {options.map(option => (
+          <DropdownMenuItem 
+            key={option.value}
+            onClick={() => handleSelect(option.value)}
+            className={cn(
+              "cursor-pointer px-3 py-2.5 rounded-xl text-xs font-medium transition-all mb-1 last:mb-0 outline-none",
+              defaultValue === option.value ? "bg-white/10 text-white" : "hover:bg-white/5 text-white/60",
               option.className
             )}
           >
@@ -177,19 +244,6 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
     if (isEditing) {
       const initialDate = value ? new Date(value) : new Date()
       setEditValue(formatDate(initialDate))
-      // Блокируем скролл при открытом поп-апе
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth
-      document.body.style.overflow = 'hidden'
-      if (scrollBarWidth > 0) {
-        document.body.style.paddingRight = `${scrollBarWidth}px`
-      }
-    } else {
-      document.body.style.overflow = ''
-      document.body.style.paddingRight = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-      document.body.style.paddingRight = ''
     }
   }, [isEditing, value])
 

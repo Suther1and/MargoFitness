@@ -5,7 +5,9 @@ import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
 import { UserTableRow } from './user-table-row'
-import { Users, ShieldCheck, Zap, Star, Search, Filter, X } from 'lucide-react'
+import { Users, ShieldCheck, Zap, Star, Search, Filter, X, ChevronLeft } from 'lucide-react'
+import { FilterSelect } from './inline-edit-cell'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +47,7 @@ export default async function AdminUsersPage({
     status: filters.status !== 'all' ? filters.status : undefined,
     search: filters.search || undefined,
     cashback_level: filters.cashback_level !== 'all' ? filters.cashback_level : undefined,
-    expired: filters.expired === 'true' ? 'true' : undefined,
+    expired: filters.expired === 'true' ? 'true' : filters.expired === 'false' ? 'false' : undefined,
   })
 
   const statsResult = await getUsersStats()
@@ -75,9 +77,10 @@ export default async function AdminUsersPage({
         </div>
         <Link 
           href="/admin" 
-          className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
         >
-          <X className="size-5" />
+          <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-xs font-bold uppercase tracking-widest">Назад</span>
         </Link>
       </div>
 
@@ -96,8 +99,8 @@ export default async function AdminUsersPage({
 
       {/* Filters */}
       <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10 p-4 md:p-6">
-        <form method="get" className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-[200px] relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <form method="get" className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20" />
             <input
               type="text"
@@ -106,55 +109,105 @@ export default async function AdminUsersPage({
               defaultValue={filters.search}
               className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/40 transition-all"
             />
-          </div>
+            {/* Скрытые поля для сохранения фильтров при поиске */}
+            <input type="hidden" name="role" value={filters.role} />
+            <input type="hidden" name="tier" value={filters.tier} />
+            <input type="hidden" name="expired" value={filters.expired} />
+          </form>
           
           <div className="flex items-center gap-2">
-            <select
-              name="role"
-              defaultValue={filters.role}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px] hover:bg-white/10"
-            >
-              <option value="all" className="bg-[#1a1a24] text-white">Все роли</option>
-              <option value="user" className="bg-[#1a1a24] text-white">Пользователь</option>
-              <option value="admin" className="bg-[#1a1a24] text-white">Админ</option>
-            </select>
+            <Suspense>
+              <FilterSelect 
+                name="role"
+                defaultValue={filters.role}
+                placeholder="Все роли"
+                options={[
+                  { value: 'user', label: 'Пользователь' },
+                  { value: 'admin', label: 'Админ', className: 'text-purple-400' }
+                ]}
+              />
 
-            <select
-              name="tier"
-              defaultValue={filters.tier}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px] hover:bg-white/10"
-            >
-              <option value="all" className="bg-[#1a1a24] text-white">Все тарифы</option>
-              <option value="free" className="bg-[#1a1a24] text-white">Free</option>
-              <option value="basic" className="bg-[#1a1a24] text-white">Basic</option>
-              <option value="pro" className="bg-[#1a1a24] text-white">Pro</option>
-              <option value="elite" className="bg-[#1a1a24] text-white">Elite</option>
-            </select>
+              <FilterSelect 
+                name="tier"
+                defaultValue={filters.tier}
+                placeholder="Все тарифы"
+                options={[
+                  { value: 'free', label: 'Free' },
+                  { value: 'basic', label: 'Basic', className: 'text-orange-400' },
+                  { value: 'pro', label: 'Pro', className: 'text-purple-400' },
+                  { value: 'elite', label: 'Elite', className: 'text-yellow-400' }
+                ]}
+              />
 
-            <select
-              name="expired"
-              defaultValue={filters.expired}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px] hover:bg-white/10"
-            >
-              <option value="all" className="bg-[#1a1a24] text-white">Все сроки</option>
-              <option value="true" className="bg-[#1a1a24] text-white">Истекшие</option>
-              <option value="false" className="bg-[#1a1a24] text-white">Активные</option>
-            </select>
+              <FilterSelect 
+                name="expired"
+                defaultValue={filters.expired}
+                placeholder="Все сроки"
+                options={[
+                  { value: 'true', label: 'Истекшие', className: 'text-rose-400' },
+                  { value: 'false', label: 'Активные', className: 'text-emerald-400' }
+                ]}
+              />
+            </Suspense>
           </div>
 
           <div className="flex gap-2 ml-auto">
-            <button 
-              type="submit"
-              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-orange-500/20"
-            >
-              Найти
-            </button>
             <Link href="/admin/users" className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95 text-white/40">
               <X className="size-4" />
             </Link>
           </div>
-        </form>
+        </div>
       </section>
+
+      {/* Users List */}
+      <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10">
+        <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white font-oswald uppercase tracking-tight">Список пользователей</h2>
+            <span className="px-2 py-0.5 rounded-lg bg-white/5 text-xs font-bold text-white/40 ring-1 ring-white/10">
+              {users.length}
+            </span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-left border-b border-white/5 bg-white/[0.02]">
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%] text-center">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Тариф</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%] text-center">Истекает</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Бонусы</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Уровень</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Роль</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {users.map((user) => (
+                <UserTableRow key={user.id} user={user} />
+              ))}
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 rounded-full bg-white/5 ring-1 ring-white/10">
+                        <Users className="size-8 text-white/20" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-white/80 font-medium">Пользователи не найдены</p>
+                        <p className="text-sm text-white/40">Попробуйте изменить параметры фильтрации</p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  )
+}
 
       {/* Users List */}
       <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10">
