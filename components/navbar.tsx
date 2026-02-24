@@ -178,7 +178,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
             </div>
 
             {/* Auth/Profile */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-[52px] min-h-[52px]">
               {profile ? (
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <div className="relative w-[52px] h-[52px] rounded-[14px] bg-gradient-to-br from-orange-400 to-purple-500 p-[2px] transition-all hover:ring-2 hover:ring-orange-400/50 active:scale-95">
@@ -187,10 +187,10 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
                         <img 
                           src={profile.avatar_url} 
                           alt={profile.full_name || profile.email || 'Avatar'} 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover animate-in fade-in duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
+                        <div className="w-full h-full flex items-center justify-center text-white text-base font-bold animate-in fade-in duration-500">
                           {(profile.full_name || profile.email || 'U').charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -200,7 +200,7 @@ export default function Navbar({ profile, pathname = '' }: NavbarProps) {
               ) : (
                 <button 
                   onClick={handleAuthClick}
-                  className="uppercase hover:opacity-80 transition-all flex text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 gap-2 items-center backdrop-blur flex-shrink-0 active:scale-95" 
+                  className="uppercase hover:opacity-80 transition-all flex text-xs font-semibold tracking-wider rounded-full py-2 px-4 md:px-5 gap-2 items-center backdrop-blur flex-shrink-0 active:scale-95 animate-in fade-in duration-500" 
                   style={{
                     color: colors.textPrimary,
                     border: `1px solid ${colors.cardBorder}`,

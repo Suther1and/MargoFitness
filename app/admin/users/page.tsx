@@ -178,14 +178,13 @@ export default async function AdminUsersPage({
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Пользователь</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Тариф</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Статус</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Истекает</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Бонусы</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Уровень</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30">Роль</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right">Действия</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[25%]">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Тариф</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Истекает</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Бонусы</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Уровень</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[12%]">Роль</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 text-right w-[12%]">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">

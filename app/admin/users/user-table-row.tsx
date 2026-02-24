@@ -17,19 +17,46 @@ export function UserTableRow({ user }: UserTableRowProps) {
     const updateData: any = {}
     updateData[field] = value
 
-    const result = await updateUserProfile(user.id, updateData)
+    // Если мы устанавливаем дату истечения, автоматически ставим статус 'active'
+    if (field === 'subscription_expires_at' && value !== null) {
+      updateData['subscription_status'] = 'active'
+    }
     
-    if (result.success) {
-      // Генерируем событие для обновления профиля в других вкладках/компонентах
-      const updateEvent = { userId: user.id, field, value };
-      window.dispatchEvent(new CustomEvent('subscription-updated', { 
-        detail: updateEvent 
-      }))
+    // Если мы сбрасываем дату истечения, ставим статус 'inactive' и тариф 'free'
+    if (field === 'subscription_expires_at' && value === null) {
+      updateData['subscription_status'] = 'inactive'
+      updateData['subscription_tier'] = 'free'
+    }
+
+    // Если мы меняем тариф на FREE, сбрасываем дату истечения и статус
+    if (field === 'subscription_tier' && value === 'free') {
+      updateData['subscription_expires_at'] = null
+      updateData['subscription_status'] = 'inactive'
+    }
+
+    try {
+      const result = await updateUserProfile(user.id, updateData)
       
-      router.refresh()
-    } else {
-      console.error('Error updating user:', result.error)
-      alert(`Ошибка: ${result.error}`)
+      if (result.success) {
+        // Генерируем событие для обновления профиля в других вкладках/компонентах
+        const updateEvent = { userId: user.id, field, value };
+        window.dispatchEvent(new CustomEvent('subscription-updated', { 
+          detail: updateEvent 
+        }))
+        
+        router.refresh()
+      } else {
+        console.error('Error updating user:', result.error)
+        alert(`Ошибка: ${result.error}`)
+      }
+    } catch (err: any) {
+      console.error('Network or server error:', err)
+      // Если это ошибка fetch (таймаут), данные скорее всего сохранились
+      if (err.message?.includes('fetch failed')) {
+        router.refresh()
+      } else {
+        alert(`Произошла ошибка при связи с сервером. Пожалуйста, обновите страницу.`)
+      }
     }
   }
 
@@ -43,12 +70,6 @@ export function UserTableRow({ user }: UserTableRowProps) {
     { value: 'basic', label: 'BASIC', className: 'text-orange-400 font-bold' },
     { value: 'pro', label: 'PRO', className: 'text-purple-400 font-bold' },
     { value: 'elite', label: 'ELITE', className: 'text-yellow-400 font-bold' },
-  ]
-
-  const statusOptions = [
-    { value: 'active', label: 'Активна', className: 'text-emerald-400 font-bold' },
-    { value: 'inactive', label: 'Неактивна', className: 'text-gray-400' },
-    { value: 'canceled', label: 'Отменена', className: 'text-rose-400 font-bold' },
   ]
 
   const levelOptions = [
@@ -81,7 +102,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-      <td className="p-4">
+      <td className="p-4 w-[25%]">
         <div className="flex items-center gap-3">
           <UserAvatar 
             fullName={user.full_name}
@@ -100,7 +121,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </div>
       </td>
       
-      <td className="p-4">
+      <td className="p-4 w-[12%]">
         <InlineSelect
           value={user.subscription_tier}
           options={tierOptions}
@@ -109,23 +130,16 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4">
-        <InlineSelect
-          value={user.subscription_status}
-          options={statusOptions}
-          onSave={(value) => handleUpdate('subscription_status', value)}
-          displayClassName={statusDisplayClass}
-        />
-      </td>
-      
-      <td className="p-4">
+      <td className="p-4 w-[15%]">
         <InlineDateInput
           value={user.subscription_expires_at}
           onSave={(value) => handleUpdate('subscription_expires_at', value)}
+          disabled={user.subscription_tier === 'free'}
+          disabledMessage="Для тарифа FREE срок не устанавливается"
         />
       </td>
       
-      <td className="p-4">
+      <td className="p-4 w-[12%]">
         <InlineNumberInput
           value={user.bonus_balance || 0}
           onSave={(value) => handleUpdate('bonus_balance', value)}
@@ -134,7 +148,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4">
+      <td className="p-4 w-[12%]">
         <InlineSelect
           value={user.cashback_level?.toString() || '1'}
           options={levelOptions}
@@ -143,7 +157,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4">
+      <td className="p-4 w-[12%]">
         <InlineSelect
           value={user.role}
           options={roleOptions}
@@ -152,7 +166,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         />
       </td>
       
-      <td className="p-4 text-right">
+      <td className="p-4 text-right w-[12%]">
         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <CancelSubscriptionButton 
             userId={user.id}
