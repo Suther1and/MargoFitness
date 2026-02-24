@@ -199,8 +199,8 @@
     overscroll-behavior-x: none;
     background: #0C0C11;
     scroll-behavior: smooth;
-    /* Резервируем место под скроллбар, чтобы страница не дергалась при открытии поп-апов */
-    scrollbar-gutter: stable;
+    /* Резервируем место под скроллбар, чтобы страница не дергалась при открытии поп-апов и выпадающих списков */
+    scrollbar-gutter: stable both-edges;
   }
   
   /* Webkit browsers (Chrome, Safari, Yandex) - transparent background */

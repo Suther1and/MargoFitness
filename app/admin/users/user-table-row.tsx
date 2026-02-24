@@ -108,15 +108,15 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-      <td className="p-4 w-[30%]">
-        <div className="flex items-center gap-3">
+      <td className="p-4 w-[30%] text-center">
+        <div className="flex items-center gap-3 justify-center">
           <UserAvatar 
             fullName={user.full_name}
             avatarUrl={user.avatar_url}
             email={user.email}
             className="w-10 h-10 rounded-xl ring-1 ring-white/10"
           />
-          <div className="flex flex-col min-w-0">
+          <div className="flex flex-col min-w-0 text-left">
             <span className="text-sm font-semibold text-white truncate max-w-[200px]">
               {user.full_name || 'Без имени'}
             </span>
@@ -127,49 +127,59 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </div>
       </td>
       
-      <td className="p-4 w-[15%]">
-        <InlineSelect
-          value={user.subscription_tier}
-          options={tierOptions}
-          onSave={(value) => handleUpdate('subscription_tier', value)}
-          displayClassName={tierDisplayClass}
-        />
+      <td className="p-4 w-[15%] text-center">
+        <div className="flex justify-center">
+          <InlineSelect
+            value={user.subscription_tier}
+            options={tierOptions}
+            onSave={(value) => handleUpdate('subscription_tier', value)}
+            displayClassName={tierDisplayClass}
+          />
+        </div>
       </td>
       
-      <td className="p-4 w-[20%]">
-        <InlineDateInput
-          value={user.subscription_expires_at}
-          onSave={(value) => handleUpdate('subscription_expires_at', value)}
-          disabled={user.subscription_tier === 'free'}
-          disabledMessage="Для тарифа FREE срок не устанавливается"
-        />
+      <td className="p-4 w-[20%] text-center">
+        <div className="flex justify-center">
+          <InlineDateInput
+            value={user.subscription_expires_at}
+            onSave={(value) => handleUpdate('subscription_expires_at', value)}
+            disabled={user.subscription_tier === 'free'}
+            disabledMessage="Для тарифа FREE срок не устанавливается"
+          />
+        </div>
       </td>
       
-      <td className="p-4 w-[15%]">
-        <InlineNumberInput
-          value={user.bonus_balance || 0}
-          onSave={(value) => handleUpdate('bonus_balance', value)}
-          min={0}
-          suffix="👟"
-        />
+      <td className="p-4 w-[15%] text-center">
+        <div className="flex justify-center">
+          <InlineNumberInput
+            value={user.bonus_balance || 0}
+            onSave={(value) => handleUpdate('bonus_balance', value)}
+            min={0}
+            suffix="👟"
+          />
+        </div>
       </td>
       
-      <td className="p-4 w-[10%]">
-        <InlineSelect
-          value={user.cashback_level?.toString() || '1'}
-          options={levelOptions}
-          onSave={(value) => handleUpdate('cashback_level', parseInt(value))}
-          displayClassName={levelDisplayClass}
-        />
+      <td className="p-4 w-[10%] text-center">
+        <div className="flex justify-center">
+          <InlineSelect
+            value={user.cashback_level?.toString() || '1'}
+            options={levelOptions}
+            onSave={(value) => handleUpdate('cashback_level', parseInt(value))}
+            displayClassName={levelDisplayClass}
+          />
+        </div>
       </td>
       
-      <td className="p-4 w-[10%]">
-        <InlineSelect
-          value={user.role}
-          options={roleOptions}
-          onSave={(value) => handleUpdate('role', value)}
-          displayClassName={roleDisplayClass}
-        />
+      <td className="p-4 w-[10%] text-center">
+        <div className="flex justify-center">
+          <InlineSelect
+            value={user.role}
+            options={roleOptions}
+            onSave={(value) => handleUpdate('role', value)}
+            displayClassName={roleDisplayClass}
+          />
+        </div>
       </td>
     </tr>
   )

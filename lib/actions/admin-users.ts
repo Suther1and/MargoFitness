@@ -35,6 +35,7 @@ export async function getAllUsers(filters?: {
   status?: string
   search?: string
   cashback_level?: string
+  expired?: string
 }): Promise<{ success: boolean; users?: ProfileWithBonuses[]; error?: string }> {
   try {
     await checkAdmin()
@@ -56,6 +57,14 @@ export async function getAllUsers(filters?: {
     if (filters?.status && filters.status !== 'all') {
       profileQuery = profileQuery.eq('subscription_status', filters.status)
     }
+    
+    // Фильтр по истекшим подпискам
+    if (filters?.expired === 'true') {
+      profileQuery = profileQuery
+        .eq('subscription_status', 'active')
+        .lt('subscription_expires_at', new Date().toISOString())
+    }
+
     if (filters?.search) {
       const searchTerm = filters.search.trim()
       if (searchTerm) {

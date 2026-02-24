@@ -15,6 +15,7 @@ interface SearchParams {
   status?: string
   search?: string
   cashback_level?: string
+  expired?: string
 }
 
 export default async function AdminUsersPage({
@@ -34,6 +35,7 @@ export default async function AdminUsersPage({
     status: params.status || 'all',
     search: (params.search || '').trim(),
     cashback_level: params.cashback_level || 'all',
+    expired: params.expired || 'all',
   }
 
   // Загружаем данные последовательно, чтобы легче отлавливать ошибки и не перегружать БД
@@ -43,6 +45,7 @@ export default async function AdminUsersPage({
     status: filters.status !== 'all' ? filters.status : undefined,
     search: filters.search || undefined,
     cashback_level: filters.cashback_level !== 'all' ? filters.cashback_level : undefined,
+    expired: filters.expired === 'true' ? 'true' : undefined,
   })
 
   const statsResult = await getUsersStats()
@@ -51,6 +54,7 @@ export default async function AdminUsersPage({
   const stats = statsResult.stats
 
   const statCards = stats ? [
+    { label: 'Всего в базе', value: stats.total, color: 'text-white/60' },
     { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400' },
     { label: 'За неделю', value: (stats as any).newWeek, color: 'text-blue-400' },
     { label: 'Активные подписки', value: stats.activeSubscriptions, color: 'text-emerald-400' },
@@ -78,7 +82,7 @@ export default async function AdminUsersPage({
       </div>
 
       {/* Stats - Ultra Compact */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {statCards.map((stat, i) => (
           <div 
             key={i}
@@ -93,7 +97,7 @@ export default async function AdminUsersPage({
       {/* Filters */}
       <section className="relative overflow-hidden rounded-[2rem] bg-white/[0.04] ring-1 ring-white/10 p-4 md:p-6">
         <form method="get" className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-[240px] relative">
+          <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20" />
             <input
               type="text"
@@ -104,27 +108,38 @@ export default async function AdminUsersPage({
             />
           </div>
           
-          <select
-            name="role"
-            defaultValue={filters.role}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
-          >
-            <option value="all" className="bg-[#1a1a24]">Все роли</option>
-            <option value="user" className="bg-[#1a1a24]">Пользователь</option>
-            <option value="admin" className="bg-[#1a1a24]">Админ</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              name="role"
+              defaultValue={filters.role}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px]"
+            >
+              <option value="all" className="bg-[#1a1a24]">Все роли</option>
+              <option value="user" className="bg-[#1a1a24]">Пользователь</option>
+              <option value="admin" className="bg-[#1a1a24]">Админ</option>
+            </select>
 
-          <select
-            name="tier"
-            defaultValue={filters.tier}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
-          >
-            <option value="all" className="bg-[#1a1a24]">Все тарифы</option>
-            <option value="free" className="bg-[#1a1a24]">Free</option>
-            <option value="basic" className="bg-[#1a1a24]">Basic</option>
-            <option value="pro" className="bg-[#1a1a24]">Pro</option>
-            <option value="elite" className="bg-[#1a1a24]">Elite</option>
-          </select>
+            <select
+              name="tier"
+              defaultValue={filters.tier}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px]"
+            >
+              <option value="all" className="bg-[#1a1a24]">Все тарифы</option>
+              <option value="free" className="bg-[#1a1a24]">Free</option>
+              <option value="basic" className="bg-[#1a1a24]">Basic</option>
+              <option value="pro" className="bg-[#1a1a24]">Pro</option>
+              <option value="elite" className="bg-[#1a1a24]">Elite</option>
+            </select>
+
+            <select
+              name="expired"
+              defaultValue={filters.expired}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
+            >
+              <option value="all" className="bg-[#1a1a24]">Все сроки</option>
+              <option value="true" className="bg-[#1a1a24]">Истекшие</option>
+            </select>
+          </div>
 
           <div className="flex gap-2 ml-auto">
             <button 
@@ -155,12 +170,12 @@ export default async function AdminUsersPage({
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%]">Пользователь</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Тариф</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%]">Истекает</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%]">Бонусы</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%]">Уровень</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%]">Роль</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%] text-center">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Тариф</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%] text-center">Истекает</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Бонусы</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Уровень</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Роль</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
