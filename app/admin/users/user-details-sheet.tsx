@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UserAvatar } from '@/components/user-avatar'
 import { getUserFullDetails } from '@/lib/actions/admin-user-details'
 import { updateUserProfile } from '@/lib/actions/admin-users'
@@ -34,9 +35,12 @@ import {
   Trash2,
   Monitor,
   Smartphone,
-  ChevronRight,
+  ChevronDown,
   ShieldCheck,
   ArrowUpCircle,
+  RefreshCw,
+  Activity,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -44,70 +48,6 @@ import { useRouter } from 'next/navigation'
 interface UserDetailsSheetProps {
   userId: string | null
   onClose: () => void
-}
-
-function SectionLabel({
-  title,
-  count,
-  color,
-}: {
-  title: string
-  count?: number
-  color: string
-}) {
-  return (
-    <div className="flex items-center gap-2 px-4 pt-5 pb-1.5">
-      <div className={cn('w-1 h-3.5 rounded-full', color)} />
-      <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">
-        {title}
-      </span>
-      <div className="flex-1 h-px bg-white/[0.06]" />
-      {count !== undefined && (
-        <span className="text-[10px] font-medium text-white/20 tabular-nums">{count}</span>
-      )}
-    </div>
-  )
-}
-
-function Expandable({
-  title,
-  count,
-  color,
-  children,
-}: {
-  title: string
-  count?: number
-  color: string
-  children: React.ReactNode
-}) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-4 pt-5 pb-1.5 hover:bg-white/[0.01] transition-colors"
-      >
-        <div className={cn('w-1 h-3.5 rounded-full', color)} />
-        <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">
-          {title}
-        </span>
-        <div className="flex-1 h-px bg-white/[0.06]" />
-        {count !== undefined && (
-          <span className="text-[10px] font-medium text-white/20 tabular-nums mr-1">
-            {count}
-          </span>
-        )}
-        <ChevronRight
-          className={cn(
-            'w-3 h-3 text-white/15 transition-transform duration-200',
-            open && 'rotate-90'
-          )}
-        />
-      </button>
-      {open && <div className="px-4 pb-2 pt-1">{children}</div>}
-    </div>
-  )
 }
 
 function fmtDate(
@@ -125,6 +65,46 @@ function fmtDate(
   }
 }
 
+function fmtDateTime(d: string | null | undefined): string {
+  if (!d) return '—'
+  try {
+    return new Date(d).toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return '—'
+  }
+}
+
+function plural(n: number, one: string, few: string, many: string): string {
+  const abs = Math.abs(n) % 100
+  const lastDigit = abs % 10
+  if (abs > 10 && abs < 20) return many
+  if (lastDigit === 1) return one
+  if (lastDigit >= 2 && lastDigit <= 4) return few
+  return many
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <div className="py-8 text-center text-xs text-white/30 italic">{text}</div>
+  )
+}
+
+function purchaseIcon(action: string) {
+  switch (action) {
+    case 'upgrade':
+      return { Icon: ArrowUpCircle, bg: 'bg-purple-500/10', text: 'text-purple-400', label: 'Апгрейд' }
+    case 'renewal':
+      return { Icon: RefreshCw, bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Продление' }
+    default:
+      return { Icon: ShoppingBag, bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Покупка' }
+  }
+}
+
 function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -133,6 +113,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   const [newNote, setNewNote] = useState('')
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [isLogsLoading, setIsLogsLoading] = useState(false)
+  const [logsExpanded, setLogsExpanded] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -246,10 +227,10 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   const bonusTransactions: any[] = data?.bonusTransactions || []
 
   const tierOptions = [
-    { value: 'free', label: 'FREE', className: 'text-white/40' },
-    { value: 'basic', label: 'BASIC', className: 'text-orange-400' },
-    { value: 'pro', label: 'PRO', className: 'text-purple-400' },
-    { value: 'elite', label: 'ELITE', className: 'text-yellow-400' },
+    { value: 'free', label: 'Free', className: 'text-white/50' },
+    { value: 'basic', label: 'Basic', className: 'text-orange-400' },
+    { value: 'pro', label: 'Pro', className: 'text-purple-400' },
+    { value: 'elite', label: 'Elite', className: 'text-yellow-400' },
   ]
 
   const levelOptions = [
@@ -259,11 +240,22 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
     { value: '4', label: '💎 Platinum', className: 'text-purple-400' },
   ]
 
+  const metricBtn = 'h-8 px-3 rounded-lg text-xs font-medium bg-white/[0.05] border border-white/[0.08] ring-0'
+
+  const tierColor =
+    user?.subscription_tier === 'elite'
+      ? 'text-yellow-400'
+      : user?.subscription_tier === 'pro'
+        ? 'text-purple-400'
+        : user?.subscription_tier === 'basic'
+          ? 'text-orange-400'
+          : 'text-white/50'
+
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       <SheetHeader className="sr-only">
         <SheetTitle>Карточка пользователя</SheetTitle>
-        <SheetDescription>Профиль и управление пользователем</SheetDescription>
+        <SheetDescription>Профиль и управление</SheetDescription>
       </SheetHeader>
 
       {loading && !data ? (
@@ -271,10 +263,11 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
           <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent" />
         </div>
       ) : user ? (
-        <div className="flex-1 overflow-y-auto">
-          {/* ═══ Identity ═══ */}
-          <div className="p-4 pb-2">
-            <div className="flex items-start gap-3">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* ═══════════════════════ HEADER ═══════════════════════ */}
+          <div className="shrink-0 px-4 pt-4 pb-0">
+            {/* Identity */}
+            <div className="flex items-start gap-3 pb-3">
               <div className="relative shrink-0">
                 <UserAvatar
                   fullName={user.full_name}
@@ -290,14 +283,13 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                     'absolute -bottom-1 -right-1 w-5 h-5 rounded-md flex items-center justify-center border transition-all active:scale-90',
                     user.role === 'admin'
                       ? 'bg-purple-500 border-purple-400 text-white'
-                      : 'bg-zinc-800 border-white/10 text-white/30 hover:text-white/60'
+                      : 'bg-zinc-800 border-white/10 text-white/40 hover:text-white/70'
                   )}
                   title={user.role === 'admin' ? 'Снять админа' : 'Сделать админом'}
                 >
                   <ShieldCheck className="w-3 h-3" />
                 </button>
               </div>
-
               <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center gap-2 mb-0.5">
                   <h2 className="text-base font-bold text-white truncate leading-tight">
@@ -308,484 +300,568 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                       'text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0',
                       user.role === 'admin'
                         ? 'bg-purple-500/15 text-purple-400'
-                        : 'bg-white/5 text-white/25'
+                        : 'bg-white/5 text-white/30'
                     )}
                   >
                     {user.role === 'admin' ? 'Админ' : 'Клиент'}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-white/40">
-                  <Mail className="w-3 h-3 shrink-0 text-white/20" />
+                <div className="flex items-center gap-1.5 text-xs text-white/50">
+                  <Mail className="w-3 h-3 shrink-0 text-white/25" />
                   <span className="truncate">{user.email}</span>
                 </div>
                 {user.phone && (
-                  <div className="flex items-center gap-1.5 text-xs text-white/30 mt-0.5">
-                    <Phone className="w-3 h-3 shrink-0 text-white/15" />
+                  <div className="flex items-center gap-1.5 text-xs text-white/40 mt-0.5">
+                    <Phone className="w-3 h-3 shrink-0 text-white/20" />
                     <span>{user.phone}</span>
                   </div>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* ═══ Subscription + Loyalty Card ═══ */}
-          <div className="px-4 pb-2">
-            <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
-              <div className="flex items-center gap-2">
+            {/* Subscription + Loyalty — unified button style */}
+            <div className="py-3 border-t border-white/[0.06]">
+              <div className="flex items-center gap-2 flex-wrap">
                 <InlineSelect
                   value={user.subscription_tier}
                   options={tierOptions}
                   onSave={(val) => handleUpdate('subscription_tier', val)}
-                  displayClassName={cn(
-                    'h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider border-0 ring-0',
-                    user.subscription_tier === 'elite'
-                      ? 'bg-yellow-400/15 text-yellow-400'
-                      : user.subscription_tier === 'pro'
-                        ? 'bg-purple-500/15 text-purple-400'
-                        : user.subscription_tier === 'basic'
-                          ? 'bg-orange-500/15 text-orange-400'
-                          : 'bg-white/5 text-white/40'
-                  )}
+                  displayClassName={cn(metricBtn, 'font-bold uppercase tracking-wide text-[10px]', tierColor)}
                 />
                 <InlineDateInput
                   value={user.subscription_expires_at}
                   onSave={(val) => handleUpdate('subscription_expires_at', val)}
                   disabled={user.subscription_tier === 'free'}
                 />
-                <div className="ml-auto text-right shrink-0 pl-2">
-                  <div className="text-[9px] text-white/20 uppercase tracking-wider leading-none">
-                    LTV
-                  </div>
-                  <div
-                    className="text-sm font-bold text-emerald-400 tabular-nums leading-tight font-oswald"
-                    suppressHydrationWarning
-                  >
-                    {user.total_spent_for_cashback?.toLocaleString('ru-RU')} ₽
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/[0.04]">
                 <InlineSelect
                   value={user.cashback_level?.toString() || '1'}
                   options={levelOptions}
                   onSave={(val) => handleUpdate('cashback_level', parseInt(val))}
-                  displayClassName="h-7 px-2.5 rounded-lg border-0 ring-0 text-[11px] font-medium bg-white/[0.04] text-white/60"
+                  displayClassName={cn(metricBtn, 'text-white/60')}
                 />
-                <span className="text-white/[0.08]">·</span>
                 <InlineNumberInput
                   value={user.bonus_balance || 0}
                   onSave={(val) => handleUpdate('bonus_balance', val)}
                   suffix="👟"
                 />
+                <div className="ml-auto shrink-0">
+                  <span className="text-[9px] text-white/25 uppercase tracking-wider">LTV </span>
+                  <span
+                    className="text-sm font-bold text-emerald-400 tabular-nums font-oswald"
+                    suppressHydrationWarning
+                  >
+                    {user.total_spent_for_cashback?.toLocaleString('ru-RU')} ₽
+                  </span>
+                </div>
               </div>
+            </div>
+
+            {/* Stats — 2 rows */}
+            <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed space-y-0.5">
+              <div className="flex items-center gap-x-3">
+                <span className="flex items-center gap-1">
+                  <Dumbbell className="w-3 h-3 text-orange-400/40" />
+                  <b className="text-white/60 font-medium tabular-nums">
+                    {stats?.workoutsCompleted || 0}
+                  </b>{' '}
+                  {plural(stats?.workoutsCompleted || 0, 'тренировка', 'тренировки', 'тренировок')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3 text-blue-400/40" />
+                  <b className="text-white/60 font-medium tabular-nums">
+                    {stats?.articlesRead || 0}
+                  </b>{' '}
+                  {plural(stats?.articlesRead || 0, 'статья', 'статьи', 'статей')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <ShoppingBag className="w-3 h-3 text-emerald-400/40" />
+                  <b className="text-white/60 font-medium tabular-nums">
+                    {purchases.length + intensives.length}
+                  </b>{' '}
+                  {plural(purchases.length + intensives.length, 'покупка', 'покупки', 'покупок')}
+                </span>
+              </div>
+              {(user.age || user.height || user.weight) && (
+                <div className="flex items-center gap-x-3 text-white/35">
+                  {user.age && <span>{user.age} лет</span>}
+                  {user.height && <span>{user.height} см</span>}
+                  {user.weight && <span>{user.weight} кг</span>}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* ═══ Activity & Physical summary line ═══ */}
-          <div className="px-4 pb-3 flex items-center gap-x-3.5 gap-y-1 flex-wrap text-[11px] text-white/30">
-            <span className="flex items-center gap-1">
-              <Dumbbell className="w-3 h-3 text-orange-400/40" />
-              <span className="text-white/50 font-medium tabular-nums">
-                {stats?.workoutsCompleted || 0}
-              </span>{' '}
-              трен.
-            </span>
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-3 h-3 text-blue-400/40" />
-              <span className="text-white/50 font-medium tabular-nums">
-                {stats?.articlesRead || 0}
-              </span>{' '}
-              стат.
-            </span>
-            <span className="flex items-center gap-1">
-              <ShoppingBag className="w-3 h-3 text-emerald-400/40" />
-              <span className="text-white/50 font-medium tabular-nums">
-                {purchases.length}
-              </span>{' '}
-              пок.
-            </span>
-            {(user.age || user.height || user.weight) && (
-              <>
-                <span className="text-white/[0.08]">|</span>
-                {user.age && <span>{user.age} лет</span>}
-                {user.height && (
-                  <span>
-                    {user.age ? '· ' : ''}
-                    {user.height} см
-                  </span>
-                )}
-                {user.weight && (
-                  <span>
-                    {user.age || user.height ? '· ' : ''}
-                    {user.weight} кг
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* ═══ PURCHASES (always visible) ═══ */}
-          <SectionLabel title="Покупки" count={purchases.length} color="bg-emerald-400/60" />
-          <div className="px-4 pb-1">
-            {purchases.length > 0 ? (
-              purchases.map((p: any) => (
-                <div
-                  key={p.id}
-                  className="flex items-center gap-2.5 py-2.5 border-b border-white/[0.04] last:border-0"
+          {/* ═══════════════════════ TABS ═══════════════════════ */}
+          <Tabs defaultValue="info" className="flex-1 flex flex-col min-h-0">
+            <TabsList className="shrink-0 w-full h-10 bg-transparent rounded-none border-y border-white/[0.06] p-0 gap-0">
+              {[
+                { value: 'info', icon: Settings, label: 'Инфо' },
+                { value: 'purchases', icon: ShoppingBag, label: 'Покупки' },
+                { value: 'bonuses', icon: Trophy, label: 'Бонусы' },
+                { value: 'activity', icon: Activity, label: 'Актив.' },
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex-1 h-full gap-1.5 rounded-none text-[10px] uppercase tracking-wider font-semibold text-white/35 data-[state=active]:text-white/80 data-[state=active]:bg-white/[0.03] border-b-2 border-transparent data-[state=active]:border-orange-500 transition-all"
                 >
-                  <div
-                    className={cn(
-                      'w-7 h-7 rounded-lg flex items-center justify-center shrink-0',
-                      p.action === 'upgrade'
-                        ? 'bg-purple-500/10 text-purple-400'
-                        : 'bg-emerald-500/10 text-emerald-400'
-                    )}
-                  >
-                    {p.action === 'upgrade' ? (
-                      <ArrowUpCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                    )}
+                  <tab.icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <div className="flex-1 overflow-y-auto">
+              {/* ── TAB: Info ── */}
+              <TabsContent value="info" className="m-0 p-4 space-y-5">
+                {/* System */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                    Система
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] text-white/70 font-medium truncate leading-tight">
-                      {p.products?.name || p.product_id}
-                    </div>
-                    <div
-                      className="text-[10px] text-white/20 flex items-center gap-1 flex-wrap leading-tight mt-0.5"
-                      suppressHydrationWarning
-                    >
-                      {fmtDate(p.created_at, { day: '2-digit', month: 'short' })}
-                      {p.payment_provider && (
-                        <>
-                          <span className="text-white/[0.08]">·</span>
-                          {p.payment_provider}
-                        </>
-                      )}
-                      {p.promo_code && (
-                        <>
-                          <span className="text-white/[0.08]">·</span>
-                          <span className="text-purple-400/50">{p.promo_code}</span>
-                        </>
-                      )}
-                      {p.bonus_amount_used > 0 && (
-                        <>
-                          <span className="text-white/[0.08]">·</span>
-                          <span className="text-yellow-400/50">-{p.bonus_amount_used}👟</span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex justify-between items-center py-1.5 text-xs">
+                    <span className="text-white/40">Регистрация</span>
+                    <span className="text-white/65" suppressHydrationWarning>
+                      {fmtDate(user.created_at)}
+                    </span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div
-                      className="text-[13px] font-semibold text-emerald-400 tabular-nums leading-tight"
-                      suppressHydrationWarning
-                    >
-                      {p.actual_paid_amount?.toLocaleString('ru-RU')} ₽
-                    </div>
-                    {p.products?.price > p.actual_paid_amount && (
-                      <div
-                        className="text-[10px] text-white/15 line-through tabular-nums leading-tight"
+                  <div className="flex justify-between items-center py-1.5 text-xs">
+                    <span className="text-white/40">ID</span>
+                    <span className="text-white/35 font-mono text-[10px] truncate max-w-[200px]">
+                      {user.id}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1.5 text-xs">
+                    <span className="text-white/40">Последний вход</span>
+                    {authLogs.length > 0 ? (
+                      <span
+                        className="text-white/60 flex items-center gap-1"
                         suppressHydrationWarning
                       >
-                        {p.products.price.toLocaleString('ru-RU')} ₽
+                        {authLogs[0].device_type === 'mobile' ? (
+                          <Smartphone className="w-3 h-3 text-white/25" />
+                        ) : (
+                          <Monitor className="w-3 h-3 text-white/25" />
+                        )}
+                        {authLogs[0].city || '—'} · {fmtDateTime(authLogs[0].created_at)}
+                      </span>
+                    ) : (
+                      <span className="text-white/25">—</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Connected accounts */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                    Связи
+                  </div>
+                  <div className="flex gap-2">
+                    {[
+                      { icon: Send, active: !!user.telegram_id, label: 'Telegram' },
+                      { icon: ExternalLink, active: !!user.yandex_id, label: 'Yandex' },
+                      {
+                        icon: UserIcon,
+                        active: !!user.profile_completed_at,
+                        label: 'Профиль',
+                      },
+                    ].map((s, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-[10px] font-medium',
+                          s.active
+                            ? 'bg-white/[0.04] border-white/10 text-white/60'
+                            : 'border-white/[0.06] text-white/20'
+                        )}
+                      >
+                        <s.icon className="w-3 h-3" />
+                        {s.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Auth logs */}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setLogsExpanded(!logsExpanded)}
+                    className="flex items-center gap-2 w-full"
+                  >
+                    <span className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                      История входов
+                    </span>
+                    <span className="text-[10px] text-white/25 tabular-nums">
+                      {authLogs.length}
+                    </span>
+                    <div className="flex-1" />
+                    <ChevronDown
+                      className={cn(
+                        'w-3 h-3 text-white/25 transition-transform',
+                        logsExpanded && 'rotate-180'
+                      )}
+                    />
+                  </button>
+                  {logsExpanded &&
+                    (authLogs.length > 0 ? (
+                      authLogs.map((log: any) => (
+                        <div
+                          key={log.id}
+                          className="flex items-center gap-2.5 py-1.5 border-b border-white/[0.04] last:border-0"
+                        >
+                          <div className="w-6 h-6 rounded bg-white/[0.04] flex items-center justify-center text-white/25 shrink-0">
+                            {log.device_type === 'mobile' ? (
+                              <Smartphone className="w-3 h-3" />
+                            ) : (
+                              <Monitor className="w-3 h-3" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[11px] text-white/55 font-mono">
+                              {log.ip_address}
+                            </div>
+                            <div className="text-[10px] text-white/30">
+                              {log.browser} · {log.os}
+                            </div>
+                          </div>
+                          <div
+                            className="text-[10px] text-white/35 shrink-0"
+                            suppressHydrationWarning
+                          >
+                            {fmtDateTime(log.created_at)}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-xs text-white/25 italic py-2">
+                        {isLogsLoading ? 'Загрузка...' : 'Нет данных'}
+                      </div>
+                    ))}
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                    Заметки
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Добавить заметку..."
+                      rows={2}
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white resize-none focus:outline-none focus:border-orange-500/30 transition-colors placeholder:text-white/25"
+                    />
+                    <button
+                      onClick={handleSaveNote}
+                      disabled={!newNote.trim() || isSavingNote}
+                      className="absolute bottom-2 right-2 px-3 py-1 rounded-md bg-orange-500 text-white text-[10px] font-semibold active:scale-95 transition-all disabled:opacity-30"
+                    >
+                      {isSavingNote ? '...' : 'Сохранить'}
+                    </button>
+                  </div>
+                  {adminNotes.map((note: any) => (
+                    <div
+                      key={note.id}
+                      className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-2.5 group/note"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span
+                          className="text-[10px] text-white/35"
+                          suppressHydrationWarning
+                        >
+                          {note.admin?.full_name || 'Админ'} ·{' '}
+                          {fmtDate(note.created_at, {
+                            day: '2-digit',
+                            month: 'short',
+                          })}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="p-1 rounded hover:bg-rose-500/10 text-transparent group-hover/note:text-white/30 hover:!text-rose-400 transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-white/70 leading-relaxed">
+                        {note.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Admin actions */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                    Действия
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        confirm('Сбросить пароль?') && alert('В разработке')
+                      }
+                      className="flex-1 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[10px] font-medium text-white/45 hover:text-white/65 hover:bg-white/[0.07] transition-all active:scale-[0.98]"
+                    >
+                      Сброс пароля
+                    </button>
+                    <button
+                      onClick={() =>
+                        prompt('Причина бана:') && alert('Забанен')
+                      }
+                      className="flex-1 py-2 rounded-lg bg-rose-500/[0.05] border border-rose-500/[0.08] text-[10px] font-medium text-rose-400/40 hover:text-rose-400/70 hover:bg-rose-500/10 transition-all active:scale-[0.98]"
+                    >
+                      Бан
+                    </button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* ── TAB: Purchases ── */}
+              <TabsContent value="purchases" className="m-0 p-4 space-y-1">
+                {purchases.length > 0 || intensives.length > 0 ? (
+                  <>
+                    {purchases.map((p: any) => {
+                      const pi = purchaseIcon(p.action)
+                      return (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-2.5 py-2.5 border-b border-white/[0.06] last:border-0"
+                        >
+                          <div
+                            className={cn(
+                              'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                              pi.bg,
+                              pi.text
+                            )}
+                            title={pi.label}
+                          >
+                            <pi.Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[13px] text-white/80 font-medium truncate">
+                              {p.products?.name || p.product_id}
+                            </div>
+                            <div
+                              className="text-[10px] text-white/35 flex items-center gap-1 flex-wrap mt-0.5"
+                              suppressHydrationWarning
+                            >
+                              {fmtDate(p.created_at, { day: '2-digit', month: 'short' })}
+                              {p.payment_provider && (
+                                <>
+                                  <span className="text-white/10">·</span>
+                                  {p.payment_provider}
+                                </>
+                              )}
+                              {p.promo_code && (
+                                <>
+                                  <span className="text-white/10">·</span>
+                                  <span className="text-purple-400/70">
+                                    {p.promo_code}
+                                    {p.promo_percent ? ` -${p.promo_percent}%` : ''}
+                                  </span>
+                                  {p.promo_discount_amount > 0 && (
+                                    <span className="text-purple-400/50">
+                                      (-{p.promo_discount_amount.toLocaleString('ru-RU')} ₽)
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                              {p.bonus_amount_used > 0 && (
+                                <>
+                                  <span className="text-white/10">·</span>
+                                  <span className="text-yellow-400/60">
+                                    -{p.bonus_amount_used}👟
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div
+                              className="text-[13px] font-semibold text-emerald-400 tabular-nums"
+                              suppressHydrationWarning
+                            >
+                              {p.actual_paid_amount?.toLocaleString('ru-RU')} ₽
+                            </div>
+                            {p.products?.price > p.actual_paid_amount && (
+                              <div
+                                className="text-[10px] text-white/25 line-through tabular-nums"
+                                suppressHydrationWarning
+                              >
+                                {p.products.price.toLocaleString('ru-RU')} ₽
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {intensives.length > 0 && purchases.length > 0 && (
+                      <div className="pt-3 pb-1 text-[10px] text-white/30 uppercase tracking-wider font-semibold">
+                        Интенсивы
                       </div>
                     )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-3 text-[11px] text-white/15 italic">Нет покупок</div>
-            )}
-          </div>
 
-          {/* ═══ INTENSIVES (always visible) ═══ */}
-          <SectionLabel title="Интенсивы" count={intensives.length} color="bg-orange-400/60" />
-          <div className="px-4 pb-1">
-            {intensives.length > 0 ? (
-              intensives.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2.5 py-2.5 border-b border-white/[0.04] last:border-0"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0">
-                    <Zap className="w-3.5 h-3.5" />
+                    {intensives.map((item: any) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-2.5 py-2.5 border-b border-white/[0.06] last:border-0"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] text-white/80 font-medium truncate">
+                            {item.products?.name}
+                          </div>
+                          <div
+                            className="text-[10px] text-white/35 mt-0.5"
+                            suppressHydrationWarning
+                          >
+                            {fmtDate(item.created_at, { day: '2-digit', month: 'short' })}
+                          </div>
+                        </div>
+                        <span
+                          className="text-[13px] font-semibold text-white/60 tabular-nums shrink-0"
+                          suppressHydrationWarning
+                        >
+                          {item.actual_paid_amount?.toLocaleString('ru-RU')} ₽
+                        </span>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <EmptyState text="Покупок пока нет" />
+                )}
+              </TabsContent>
+
+              {/* ── TAB: Bonuses ── */}
+              <TabsContent value="bonuses" className="m-0 p-4">
+                <div className="flex items-center justify-between py-3 px-3 rounded-lg bg-yellow-400/[0.05] border border-yellow-400/[0.1] mb-4">
+                  <div>
+                    <div className="text-[9px] text-yellow-400/50 font-medium uppercase tracking-wider leading-none mb-1">
+                      Баланс
+                    </div>
+                    <div className="text-lg font-bold text-white leading-tight font-oswald tabular-nums">
+                      {user.bonus_balance || 0}{' '}
+                      <span className="text-sm">👟</span>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] text-white/70 font-medium truncate leading-tight">
-                      {item.products?.name}
+                  <div className="text-right">
+                    <div className="text-[9px] text-white/25 font-medium uppercase tracking-wider leading-none mb-1">
+                      LTV
                     </div>
                     <div
-                      className="text-[10px] text-white/20 leading-tight mt-0.5"
+                      className="text-lg font-bold text-emerald-400 leading-tight font-oswald tabular-nums"
                       suppressHydrationWarning
                     >
-                      {fmtDate(item.created_at, { day: '2-digit', month: 'short' })}
+                      {user.total_spent_for_cashback?.toLocaleString('ru-RU')} ₽
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span
-                      className="text-[13px] font-semibold text-white/50 tabular-nums"
-                      suppressHydrationWarning
-                    >
-                      {item.actual_paid_amount} ₽
-                    </span>
-                    <span className="text-[9px] font-medium text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                      ✓
-                    </span>
-                  </div>
                 </div>
-              ))
-            ) : (
-              <div className="py-3 text-[11px] text-white/15 italic">Нет интенсивов</div>
-            )}
-          </div>
 
-          {/* ═══ BONUS TRANSACTIONS (always visible) ═══ */}
-          <SectionLabel
-            title="Бонусы"
-            count={bonusTransactions.length}
-            color="bg-yellow-400/60"
-          />
-          <div className="px-4 pb-1">
-            {bonusTransactions.length > 0 ? (
-              bonusTransactions.map((tx: any) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center gap-2.5 py-2 border-b border-white/[0.04] last:border-0"
-                >
-                  <div
-                    className={cn(
-                      'w-5 h-5 rounded flex items-center justify-center shrink-0',
-                      tx.amount > 0
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-rose-500/10 text-rose-400'
-                    )}
-                  >
-                    {tx.amount > 0 ? (
-                      <Plus className="w-3 h-3" />
-                    ) : (
-                      <Minus className="w-3 h-3" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-white/50 truncate leading-tight">
-                      {tx.description || 'Операция'}
-                    </div>
-                    <div
-                      className="text-[10px] text-white/15 leading-tight mt-0.5"
-                      suppressHydrationWarning
-                    >
-                      {fmtDate(tx.created_at, { day: '2-digit', month: 'short' })} ·{' '}
-                      {tx.type}
-                    </div>
-                  </div>
-                  <span
-                    className={cn(
-                      'text-xs font-semibold tabular-nums shrink-0',
-                      tx.amount > 0 ? 'text-emerald-400' : 'text-rose-400'
-                    )}
-                  >
-                    {tx.amount > 0 ? '+' : ''}
-                    {tx.amount}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="py-3 text-[11px] text-white/15 italic">Нет операций</div>
-            )}
-          </div>
-
-          {/* ═══ ACTIVITY (always visible) ═══ */}
-          <SectionLabel title="Активность" color="bg-blue-400/60" />
-          <div className="px-4 pb-1">
-            {data?.lastDiaryEntries?.length > 0 ? (
-              data.lastDiaryEntries.map((entry: any, i: number) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0 text-xs"
-                >
-                  <span className="text-white/35" suppressHydrationWarning>
-                    {fmtDate(entry.date, { day: '2-digit', month: 'short' })}
-                  </span>
-                  <div className="flex gap-3 text-white/45 tabular-nums">
-                    {entry.metrics?.weight && <span>{entry.metrics.weight} кг</span>}
-                    {entry.metrics?.steps && (
-                      <span suppressHydrationWarning>
-                        {entry.metrics.steps.toLocaleString('ru-RU')} шаг.
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-3 text-[11px] text-white/15 italic">Нет записей</div>
-            )}
-          </div>
-
-          {/* ═══ NOTES (expandable) ═══ */}
-          <Expandable
-            title="Заметки"
-            count={adminNotes.length}
-            color="bg-orange-400/40"
-          >
-            <div className="relative mb-3">
-              <textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Заметка..."
-                rows={2}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white resize-none focus:outline-none focus:border-orange-500/30 transition-colors placeholder:text-white/15"
-              />
-              <button
-                onClick={handleSaveNote}
-                disabled={!newNote.trim() || isSavingNote}
-                className="absolute bottom-2 right-2 px-3 py-1 rounded-md bg-orange-500 text-white text-[10px] font-semibold active:scale-95 transition-all disabled:opacity-30"
-              >
-                {isSavingNote ? '...' : 'Сохранить'}
-              </button>
-            </div>
-            {adminNotes.length > 0 && (
-              <div className="space-y-2">
-                {adminNotes.map((note: any) => (
-                  <div
-                    key={note.id}
-                    className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 group/note"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span
-                        className="text-[10px] text-white/25"
-                        suppressHydrationWarning
+                {bonusTransactions.length > 0 ? (
+                  <div className="space-y-0">
+                    {bonusTransactions.map((tx: any) => (
+                      <div
+                        key={tx.id}
+                        className="flex items-center gap-2.5 py-2 border-b border-white/[0.06] last:border-0"
                       >
-                        {note.admin?.full_name || 'Админ'} ·{' '}
-                        {fmtDate(note.created_at, { day: '2-digit', month: 'short' })}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="p-1 rounded hover:bg-rose-500/10 text-transparent group-hover/note:text-white/20 hover:!text-rose-400 transition-all"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-white/55 leading-relaxed">
-                      {note.content}
-                    </p>
+                        <div
+                          className={cn(
+                            'w-6 h-6 rounded flex items-center justify-center shrink-0',
+                            tx.amount > 0
+                              ? 'bg-emerald-500/10 text-emerald-400'
+                              : 'bg-rose-500/10 text-rose-400'
+                          )}
+                        >
+                          {tx.amount > 0 ? (
+                            <Plus className="w-3 h-3" />
+                          ) : (
+                            <Minus className="w-3 h-3" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-white/70 truncate">
+                            {tx.description || 'Операция'}
+                          </div>
+                          <div
+                            className="text-[10px] text-white/30 mt-0.5"
+                            suppressHydrationWarning
+                          >
+                            {fmtDate(tx.created_at, { day: '2-digit', month: 'short' })} ·{' '}
+                            {tx.type}
+                          </div>
+                        </div>
+                        <span
+                          className={cn(
+                            'text-sm font-semibold tabular-nums shrink-0',
+                            tx.amount > 0 ? 'text-emerald-400' : 'text-rose-400'
+                          )}
+                        >
+                          {tx.amount > 0 ? '+' : ''}
+                          {tx.amount}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </Expandable>
+                ) : (
+                  <EmptyState text="Операций пока нет" />
+                )}
+              </TabsContent>
 
-          {/* ═══ AUTH LOGS (expandable) ═══ */}
-          <Expandable
-            title="Входы"
-            count={authLogs.length}
-            color="bg-blue-400/40"
-          >
-            {authLogs.length > 0 ? (
-              authLogs.map((log: any) => (
-                <div
-                  key={log.id}
-                  className="flex items-center gap-2.5 py-2 border-b border-white/[0.04] last:border-0"
-                >
-                  <div className="w-6 h-6 rounded bg-white/[0.03] flex items-center justify-center text-white/15 shrink-0">
-                    {log.device_type === 'mobile' ? (
-                      <Smartphone className="w-3 h-3" />
-                    ) : (
-                      <Monitor className="w-3 h-3" />
-                    )}
+              {/* ── TAB: Activity ── */}
+              <TabsContent value="activity" className="m-0 p-4 space-y-4">
+                <div className="flex gap-2">
+                  <div className="flex-1 p-3 rounded-lg bg-orange-500/[0.05] border border-orange-500/[0.1]">
+                    <Dumbbell className="w-4 h-4 text-orange-400/50 mb-1.5" />
+                    <div className="text-xl font-bold text-white font-oswald leading-none">
+                      {stats?.workoutsCompleted || 0}
+                    </div>
+                    <div className="text-[10px] text-white/35 mt-1">тренировок</div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[11px] text-white/45 font-mono leading-tight">
-                      {log.ip_address}
+                  <div className="flex-1 p-3 rounded-lg bg-blue-500/[0.05] border border-blue-500/[0.1]">
+                    <BookOpen className="w-4 h-4 text-blue-400/50 mb-1.5" />
+                    <div className="text-xl font-bold text-white font-oswald leading-none">
+                      {stats?.articlesRead || 0}
                     </div>
-                    <div className="text-[10px] text-white/15 leading-tight mt-0.5">
-                      {log.browser} · {log.os}
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0" suppressHydrationWarning>
-                    <div className="text-[10px] text-white/25 leading-tight">
-                      {fmtDate(log.created_at, { day: '2-digit', month: 'short' })}
-                    </div>
-                    <div className="text-[10px] text-white/15 leading-tight">
-                      {new Date(log.created_at).toLocaleTimeString('ru-RU', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </div>
+                    <div className="text-[10px] text-white/35 mt-1">статей</div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="py-3 text-[11px] text-white/15 italic">
-                {isLogsLoading ? 'Загрузка...' : 'Нет данных'}
-              </div>
-            )}
-          </Expandable>
 
-          {/* ═══ Footer: system info & actions ═══ */}
-          <div className="px-4 py-4 mt-3 border-t border-white/[0.06] space-y-3">
-            <div className="flex gap-2">
-              {[
-                { icon: Send, active: !!user.telegram_id, label: 'TG' },
-                { icon: ExternalLink, active: !!user.yandex_id, label: 'YA' },
-                {
-                  icon: UserIcon,
-                  active: !!user.profile_completed_at,
-                  label: 'Профиль',
-                },
-              ].map((s, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[10px] font-medium',
-                    s.active
-                      ? 'bg-white/[0.03] border-white/10 text-white/45'
-                      : 'bg-transparent border-white/[0.04] text-white/10'
+                <div>
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold mb-2">
+                    Дневник
+                  </div>
+                  {data?.lastDiaryEntries?.length > 0 ? (
+                    data.lastDiaryEntries.map((entry: any, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between py-2 border-b border-white/[0.06] last:border-0 text-xs"
+                      >
+                        <span className="text-white/45" suppressHydrationWarning>
+                          {fmtDate(entry.date, { day: '2-digit', month: 'short' })}
+                        </span>
+                        <div className="flex gap-3 text-white/60 tabular-nums">
+                          {entry.metrics?.weight && (
+                            <span>{entry.metrics.weight} кг</span>
+                          )}
+                          {entry.metrics?.steps && (
+                            <span suppressHydrationWarning>
+                              {entry.metrics.steps.toLocaleString('ru-RU')} шаг.
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <EmptyState text="Записей в дневнике нет" />
                   )}
-                >
-                  <s.icon className="w-3 h-3" />
-                  {s.label}
                 </div>
-              ))}
+              </TabsContent>
             </div>
-
-            <div
-              className="text-[10px] text-white/15 flex items-center gap-1.5 flex-wrap"
-              suppressHydrationWarning
-            >
-              <span>
-                Рег:{' '}
-                {fmtDate(user.created_at, {
-                  day: '2-digit',
-                  month: 'short',
-                  year: '2-digit',
-                })}
-              </span>
-              <span className="text-white/[0.06]">·</span>
-              <span className="font-mono truncate">{user.id}</span>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() =>
-                  confirm('Сбросить пароль?') && alert('В разработке')
-                }
-                className="flex-1 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10px] font-medium text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all active:scale-[0.98]"
-              >
-                Сброс пароля
-              </button>
-              <button
-                onClick={() =>
-                  prompt('Причина бана:') && alert('Забанен')
-                }
-                className="flex-1 py-1.5 rounded-lg bg-rose-500/[0.03] border border-rose-500/[0.08] text-[10px] font-medium text-rose-400/30 hover:text-rose-400/60 hover:bg-rose-500/10 transition-all active:scale-[0.98]"
-              >
-                Бан
-              </button>
-            </div>
-          </div>
-
-          <div className="h-6" />
+          </Tabs>
         </div>
       ) : null}
     </div>
