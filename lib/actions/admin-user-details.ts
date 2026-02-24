@@ -46,7 +46,7 @@ export async function getUserFullDetails(userId: string) {
 
     if (purchasesError) console.error('Error fetching purchases:', purchasesError)
 
-    // 3. Получаем историю бонусов (транзакции)
+    // 4. Получаем историю бонусов (транзакции)
     const { data: bonusTransactions, error: bonusError } = await supabase
       .from('bonus_transactions')
       .select('*')
@@ -55,24 +55,24 @@ export async function getUserFullDetails(userId: string) {
 
     if (bonusError) console.error('Error fetching bonus transactions:', bonusError)
 
-    // 4. Получаем статистику тренировок (количество выполненных)
-    const { count: workoutsCount, error: workoutsError } = await supabase
+    // 5. Получаем статистику тренировок (количество выполненных)
+    const { data: workoutCompletions, error: workoutsError } = await supabase
       .from('user_workout_completions')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('user_id', userId)
 
     if (workoutsError) console.error('Error fetching workouts count:', workoutsError)
 
-    // 5. Получаем статистику прочитанных статей
-    const { count: articlesCount, error: articlesError } = await supabase
+    // 6. Получаем статистику прочитанных статей
+    const { data: articleProgress, error: articlesError } = await supabase
       .from('user_article_progress')
-      .select('*', { count: 'exact', head: true })
+      .select('user_id')
       .eq('user_id', userId)
       .eq('is_read', true)
 
     if (articlesError) console.error('Error fetching articles count:', articlesError)
 
-    // 6. Получаем последние записи в дневнике (для общей инфо)
+    // 7. Получаем последние записи в дневнике (для общей инфо)
     const { data: lastDiaryEntries, error: diaryError } = await supabase
       .from('diary_entries')
       .select('date, metrics')
@@ -94,8 +94,8 @@ export async function getUserFullDetails(userId: string) {
         purchases: purchases || [],
         bonusTransactions: bonusTransactions || [],
         stats: {
-          workoutsCompleted: workoutsCount || 0,
-          articlesRead: articlesCount || 0,
+          workoutsCompleted: workoutCompletions?.length || 0,
+          articlesRead: articleProgress?.length || 0,
         },
         lastDiaryEntries: lastDiaryEntries || []
       }

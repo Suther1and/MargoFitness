@@ -32,14 +32,14 @@ const SheetContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
-    <SheetPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed z-50 gap-4 bg-[#121214] p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l border-white/10 sm:max-w-2xl",
-        className
-      )}
-      {...props}
-    >
+          <SheetPrimitive.Content
+            ref={ref}
+            className={cn(
+              "fixed z-50 gap-4 bg-[#121214] p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l border-white/10 sm:max-w-2xl overflow-y-auto",
+              className
+            )}
+            {...props}
+          >
       {children}
       <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4 text-white" />

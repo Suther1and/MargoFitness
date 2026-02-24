@@ -174,6 +174,20 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                       onSave={(val) => handleUpdate('subscription_expires_at', val)}
                       disabled={user.subscription_tier === 'free'}
                     />
+                    <div className="flex items-center gap-4 ml-4 px-4 border-l border-white/10">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Возраст</span>
+                        <span className="text-sm font-bold text-white">{user.age || '—'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Рост</span>
+                        <span className="text-sm font-bold text-white">{user.height ? `${user.height} см` : '—'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Вес</span>
+                        <span className="text-sm font-bold text-white">{user.weight ? `${user.weight} кг` : '—'}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -218,7 +232,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 pt-6 custom-scrollbar">
-                  <TabsContent value="overview" className="m-0 space-y-6">
+                  <TabsContent value="overview" className="m-0 space-y-6 pb-8">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Системная информация</h3>
@@ -278,24 +292,6 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     </div>
 
                       <div className="space-y-4">
-                        <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Антропометрия</h3>
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-white/40">Возраст</span>
-                            <span className="text-xs text-white font-bold">{user.age || '—'}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-white/40">Рост</span>
-                            <span className="text-xs text-white font-bold">{user.height ? `${user.height} см` : '—'}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-white/40">Вес</span>
-                            <span className="text-xs text-white font-bold">{user.weight ? `${user.weight} кг` : '—'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
                         <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Связанные аккаунты</h3>
                       <div className="grid grid-cols-3 gap-4">
                         {[
@@ -317,7 +313,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="purchases" className="m-0 space-y-4">
+                  <TabsContent value="purchases" className="m-0 space-y-4 pb-8">
                     {purchases.length > 0 ? (
                       <div className="space-y-3">
                         {purchases.map((p: any) => (
@@ -350,7 +346,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="activity" className="m-0 space-y-6">
+                  <TabsContent value="activity" className="m-0 space-y-6 pb-8">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4">
                         <div className="flex items-center gap-3 mb-4">
@@ -405,10 +401,10 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="bonuses" className="m-0 space-y-4">
+                  <TabsContent value="bonuses" className="m-0 space-y-4 pb-8">
                     <div className="bg-yellow-400/5 border border-yellow-400/10 rounded-3xl p-6 mb-6 flex items-center justify-between">
                       <div>
-                        <span className="block text-[10px] text-yellow-400/60 uppercase tracking-widest font-bold mb-1">Текущий баланс</span>
+                        <span className="block text-[10px] text-yellow-400/60 uppercase tracking-widest font-bold mb-1">Активные бонусы</span>
                         <div className="text-4xl font-bold text-white font-oswald">{user.bonus_balance || 0} <span className="text-yellow-400">👟</span></div>
                       </div>
                       <div className="text-right">

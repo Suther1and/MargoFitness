@@ -264,7 +264,8 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
     setEditValue(formatted)
   }
 
-  const handleSave = async () => {
+  const handleSave = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.stopPropagation()
     const parsed = parseDate(editValue)
     if (!parsed) {
       if (!editValue) {
@@ -295,8 +296,9 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSave()
+      handleSave(e)
     } else if (e.key === 'Escape') {
+      e.stopPropagation()
       setIsEditing(false)
     }
   }
@@ -421,14 +423,17 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
                 
                 <div className="flex gap-4">
                   <Button
-                    onClick={handleSave}
+                    onClick={(e) => handleSave(e)}
                     disabled={isLoading}
                     className="flex-1 h-14 bg-orange-500 hover:bg-orange-600 text-white rounded-[1.25rem] text-base font-bold shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
                   >
                     {isLoading ? '...' : 'Применить'}
                   </Button>
                   <Button
-                    onClick={() => onSave(null).then(() => setIsEditing(false))}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSave(null).then(() => setIsEditing(false))
+                    }}
                     disabled={isLoading}
                     variant="ghost"
                     className="h-14 px-6 hover:bg-rose-500/10 hover:text-rose-400 text-white/20 rounded-[1.25rem] text-sm font-bold transition-all"
