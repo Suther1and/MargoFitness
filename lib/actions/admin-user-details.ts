@@ -44,7 +44,8 @@ export async function getUserFullDetails(userId: string) {
           id,
           name,
           price,
-          type
+          type,
+          duration_months
         )
       `)
       .eq('user_id', userId)
@@ -61,7 +62,17 @@ export async function getUserFullDetails(userId: string) {
 
     if (bonusError) console.error('Error fetching bonus transactions:', bonusError)
 
-    // 4. Получаем статистику тренировок (количество выполненных)
+    // 4. Получаем историю платежных транзакций (для деталей промокодов и бонусов)
+    const { data: paymentTransactions, error: paymentError } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'succeeded')
+      .order('created_at', { ascending: false })
+
+    if (paymentError) console.error('Error fetching payment transactions:', paymentError)
+
+    // 5. Получаем статистику тренировок (количество выполненных)
     const { data: workoutCompletions, error: workoutsError } = await supabase
       .from('user_workout_completions')
       .select('id')
@@ -102,6 +113,23 @@ export async function getUserFullDetails(userId: string) {
     // Фильтруем интенсивы и марафоны из покупок
     const intensives = purchases?.filter((p: any) => p.products?.type === 'one_time_pack') || []
 
+    // Обогащаем покупки данными из транзакций
+    const enrichedPurchases = purchases?.map((p: any) => {
+      const tx = paymentTransactions?.find((t: any) => t.id === p.payment_id || t.metadata?.order_id === p.id);
+      return {
+        ...p,
+        promo_code: p.promo_code || tx?.promo_code || tx?.metadata?.promo_code,
+        promo_discount_amount: tx?.metadata?.promo_discount_amount,
+        promo_percent: tx?.metadata?.promo_percent,
+        bonus_amount_used: p.bonus_amount_used || tx?.bonus_amount_used || tx?.metadata?.bonus_amount_used,
+        action: p.action || tx?.metadata?.action,
+        metadata: {
+          ...p.metadata,
+          ...tx?.metadata
+        }
+      };
+    }) || [];
+
     return {
       success: true,
       data: {
@@ -115,7 +143,7 @@ export async function getUserFullDetails(userId: string) {
           height: diaryParams.height || (profile as any).height,
           weight: diaryParams.weight || (profile as any).weight,
         },
-        purchases: purchases || [],
+        purchases: enrichedPurchases,
         intensives: intensives,
         bonusTransactions: bonusTransactions || [],
         stats: {

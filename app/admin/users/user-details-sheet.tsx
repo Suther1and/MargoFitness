@@ -33,7 +33,9 @@ import {
   Tag,
   Zap,
   Flame,
-  Info
+  Info,
+  ArrowUpCircle,
+  RefreshCw
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -130,13 +132,13 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
         onPointerDownOutside={(e) => {
           // Проверяем, был ли клик по порталу (календарю)
           const target = e.target as HTMLElement;
-          if (target?.closest('[data-radix-portal]')) {
+          if (target?.closest('[data-radix-portal]') || target?.closest('.fixed.inset-0.z-\\[9998\\]')) {
             e.preventDefault();
           }
         }}
         onInteractOutside={(e) => {
           const target = e.target as HTMLElement;
-          if (target?.closest('[data-radix-portal]')) {
+          if (target?.closest('[data-radix-portal]') || target?.closest('.fixed.inset-0.z-\\[9998\\]')) {
             e.preventDefault();
           }
         }}
@@ -277,6 +279,30 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                               displayClassName={user.role === 'admin' ? 'bg-purple-500/10 text-purple-400 ring-purple-500/30' : 'bg-white/5 text-white/60 ring-white/10'}
                             />
                           </div>
+                          <div className="pt-2 border-t border-white/5 flex gap-2">
+                            <button 
+                              onClick={() => {
+                                if (confirm('Вы уверены, что хотите сбросить пароль? Пользователю придет письмо.')) {
+                                  // Здесь будет вызов экшена сброса пароля
+                                  alert('Функционал в разработке');
+                                }
+                              }}
+                              className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-wider text-white/60 transition-all"
+                            >
+                              Сброс пароля
+                            </button>
+                            <button 
+                              onClick={() => {
+                                const reason = prompt('Введите причину блокировки:');
+                                if (reason) {
+                                  alert('Пользователь заблокирован (демо)');
+                                }
+                              }}
+                              className="flex-1 py-2 rounded-xl bg-rose-500/5 hover:bg-rose-500/10 text-[10px] font-bold uppercase tracking-wider text-rose-400/60 transition-all"
+                            >
+                              Бан
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -339,23 +365,43 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                   <TabsContent value="purchases" className="m-0 space-y-4 pb-20">
                     {purchases.length > 0 ? (
                       <div className="space-y-4">
-                        {purchases.map((p: any) => {
+                        {purchases.map((p: any, idx: number) => {
                           const originalPrice = p.products?.price || p.amount;
                           const discount = originalPrice - p.actual_paid_amount;
                           const bonusUsed = p.bonus_amount_used || 0;
+                          const isUpgrade = p.action === 'upgrade' || p.metadata?.is_upgrade;
+                          const isRenewal = p.action === 'renewal' || p.metadata?.is_renewal;
                           
+                          // Расчет промокода
+                          const promoDiscount = p.metadata?.promo_discount_amount || 0;
+                          const promoPercent = p.metadata?.promo_percent;
+
                           return (
                             <div key={p.id} className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 group hover:bg-white/[0.04] transition-all">
                               <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-2xl bg-white/5 text-white/40 group-hover:text-emerald-400 transition-colors">
-                                    <ShoppingBag className="w-6 h-6" />
+                                  <div className={cn(
+                                    "p-3 rounded-2xl bg-white/5 transition-colors",
+                                    isUpgrade ? "text-purple-400 group-hover:bg-purple-500/10" : 
+                                    isRenewal ? "text-blue-400 group-hover:bg-blue-500/10" :
+                                    "text-white/40 group-hover:text-emerald-400"
+                                  )}>
+                                    {isUpgrade ? <ArrowUpCircle className="w-6 h-6" /> : 
+                                     isRenewal ? <RefreshCw className="w-6 h-6" /> :
+                                     <ShoppingBag className="w-6 h-6" />}
                                   </div>
                                   <div>
-                                    <span className="block text-base font-bold text-white mb-1">
-                                      {p.products?.name || p.product_id}
-                                    </span>
                                     <div className="flex items-center gap-2">
+                                      <span className="block text-base font-bold text-white">
+                                        {p.products?.name || p.product_id}
+                                      </span>
+                                      {isUpgrade && (
+                                        <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-400 text-[10px] font-bold uppercase tracking-wider ring-1 ring-purple-500/20">
+                                          Апгрейд
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-0.5">
                                       <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
                                         {new Date(p.created_at).toLocaleDateString('ru-RU')} • {p.payment_provider || 'ЮKassa'}
                                       </span>
@@ -369,7 +415,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                   <div className="text-xl font-bold text-emerald-400 font-oswald">
                                     {p.actual_paid_amount?.toLocaleString('ru-RU')} ₽
                                   </div>
-                                  {discount > 0 && (
+                                  {originalPrice > p.actual_paid_amount && (
                                     <div className="text-xs text-white/20 line-through decoration-rose-500/50">
                                       {originalPrice?.toLocaleString('ru-RU')} ₽
                                     </div>
@@ -377,37 +423,77 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                 </div>
                               </div>
 
-                              {(discount > 0 || bonusUsed > 0 || p.promo_code) && (
-                                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/5">
+                              {/* Детальная информация о скидках и изменениях */}
+                              <div className="grid grid-cols-1 gap-3 pt-4 border-t border-white/5">
+                                <div className="flex flex-wrap gap-2">
                                   {p.promo_code && (
-                                    <div className="bg-purple-500/5 border border-purple-500/10 rounded-xl p-2 flex items-center gap-2">
-                                      <Tag className="w-3 h-3 text-purple-400" />
-                                      <div className="min-w-0">
-                                        <span className="block text-[8px] text-purple-400/60 uppercase font-bold">Промокод</span>
-                                        <span className="block text-[10px] text-purple-400 font-bold truncate">{p.promo_code}</span>
+                                    <div className="bg-purple-500/5 border border-purple-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
+                                      <Tag className="w-3.5 h-3.5 text-purple-400" />
+                                      <div>
+                                        <span className="block text-[8px] text-purple-400/60 uppercase font-bold leading-none mb-0.5">Промокод</span>
+                                        <span className="block text-xs text-purple-400 font-bold">
+                                          {p.promo_code} {promoPercent ? `(-${promoPercent}%)` : ''}
+                                        </span>
                                       </div>
                                     </div>
                                   )}
                                   {bonusUsed > 0 && (
-                                    <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl p-2 flex items-center gap-2">
-                                      <Trophy className="w-3 h-3 text-yellow-400" />
+                                    <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
+                                      <Trophy className="w-3.5 h-3.5 text-yellow-400" />
                                       <div>
-                                        <span className="block text-[8px] text-yellow-400/60 uppercase font-bold">Списано</span>
-                                        <span className="block text-[10px] text-yellow-400 font-bold">-{bonusUsed} 👟</span>
+                                        <span className="block text-[8px] text-yellow-400/60 uppercase font-bold leading-none mb-0.5">Бонусы</span>
+                                        <span className="block text-xs text-yellow-400 font-bold">
+                                          -{bonusUsed} 👟
+                                          {p.metadata?.old_bonus_balance !== undefined && (
+                                            <span className="ml-1 opacity-40 font-medium text-[10px]">
+                                              ({p.metadata.old_bonus_balance} → {p.metadata.new_bonus_balance})
+                                            </span>
+                                          )}
+                                        </span>
                                       </div>
                                     </div>
                                   )}
                                   {discount > 0 && (
-                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-2 flex items-center gap-2">
-                                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
+                                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
                                       <div>
-                                        <span className="block text-[8px] text-emerald-400/60 uppercase font-bold">Экономия</span>
-                                        <span className="block text-[10px] text-emerald-400 font-bold">{discount?.toLocaleString('ru-RU')} ₽</span>
+                                        <span className="block text-[8px] text-emerald-400/60 uppercase font-bold leading-none mb-0.5">Экономия</span>
+                                        <span className="block text-xs text-emerald-400 font-bold">
+                                          {discount?.toLocaleString('ru-RU')} ₽
+                                          {p.metadata?.discount_reason && (
+                                            <span className="ml-1 opacity-60 font-medium">({p.metadata.discount_reason})</span>
+                                          )}
+                                        </span>
                                       </div>
                                     </div>
                                   )}
                                 </div>
-                              )}
+
+                                {/* Информация об апгрейде и изменении баланса */}
+                                {isUpgrade && p.metadata?.converted_days > 0 && (
+                                  <div className="bg-purple-500/5 border border-purple-500/10 rounded-2xl p-3 flex items-center gap-3">
+                                    <ArrowUpCircle className="w-4 h-4 text-purple-400" />
+                                    <span className="text-[10px] text-purple-400/80 font-medium">
+                                      Конвертация остатка: +{p.metadata.converted_days} дн. к новой подписке
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Информация о сроках (если есть в метаданных) */}
+                                {p.metadata?.previous_expiry && (
+                                  <div className="bg-white/[0.02] rounded-2xl p-3 flex items-center justify-between border border-white/5">
+                                    <div className="flex items-center gap-3">
+                                      <Calendar className="w-4 h-4 text-white/20" />
+                                      <span className="text-[11px] text-white/40 uppercase font-bold tracking-wider">Срок действия</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-white/40">{new Date(p.metadata.previous_expiry).toLocaleDateString('ru-RU')}</span>
+                                      <div className="w-3 h-px bg-white/10" />
+                                      <span className="text-xs text-emerald-400 font-bold">{new Date(p.metadata.new_expiry || p.created_at).toLocaleDateString('ru-RU')}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
