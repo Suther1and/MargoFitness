@@ -27,28 +27,27 @@ export async function getUserFullDetails(userId: string) {
 
     if (profileError) throw profileError
 
-    // 2. Получаем ВСЕ покупки, транзакции и промокоды
-    const [purchasesRes, transactionsRes, promoCodesRes] = await Promise.all([
+    // 2. Получаем ВСЕ данные параллельно
+    const [purchasesRes, transactionsRes, promoCodesRes, bonusTransactionsRes] = await Promise.all([
       supabase.from('user_purchases').select('*, products(*)').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
-      supabase.from('promo_codes').select('code, discount_value, discount_type')
+      supabase.from('promo_codes').select('code, discount_value, discount_type'),
+      supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false })
     ])
 
     const purchases = purchasesRes.data || []
     const transactions = transactionsRes.data || []
     const promoCodes = promoCodesRes.data || []
+    const bonusTransactions = bonusTransactionsRes.data || []
 
     const promoMap = new Map(promoCodes.map(p => [p.code.toUpperCase(), p]))
 
-    // 3. Обогащаем данные
+    // 3. Обогащаем данные покупок
     const enrichedPurchases = purchases.map((p: any) => {
       const tx = transactions.find((t: any) => t.yookassa_payment_id === p.payment_id || t.id === p.payment_id);
       const meta = { ...tx?.metadata, ...p.metadata };
 
-      // Берем данные напрямую по ключам
       const promoCode = p.promo_code || meta.promoCode || meta.promo_code;
-      
-      // Ищем процент промокода
       const promoData = promoCode ? promoMap.get(promoCode.toUpperCase()) : null;
       let promoPercent = promoData?.discount_type === 'percent' ? promoData.discount_value : null;
       if (!promoPercent) {
@@ -57,15 +56,11 @@ export async function getUserFullDetails(userId: string) {
 
       const promoDiscountAmount = meta.promoDiscount || meta.promo_discount || meta.promoDiscountAmount || 0;
       const bonusUsed = p.bonus_amount_used || meta.bonusUsed || meta.bonus_amount_used || 0;
-      
-      // Тип операции: СТРОГО из базы данных (поле action)
       const action = p.action || meta.action || 'purchase';
 
-      // Расчет процента шагов от СУММЫ ОПЛАТЫ
       const totalSum = (p.actual_paid_amount || 0) + (bonusUsed || 0);
       const bonusPercentOfTotal = totalSum > 0 ? Math.round((bonusUsed / totalSum) * 100) : 0;
 
-      // Скидка за срок
       const basePrice = p.products?.price || p.amount || 0;
       const periodDiscount = basePrice - ((p.actual_paid_amount || 0) + (bonusUsed || 0) + (promoDiscountAmount || 0));
 
@@ -87,9 +82,17 @@ export async function getUserFullDetails(userId: string) {
     return {
       success: true,
       data: {
-        profile: { ...profile, bonus_balance: userBonuses?.balance ?? 0, age: diaryParams.age || profile.age, height: diaryParams.height || profile.height, weight: diaryParams.weight || profile.weight },
+        profile: { 
+          ...profile, 
+          bonus_balance: userBonuses?.balance ?? 0, 
+          cashback_level: userBonuses?.cashback_level ?? 1,
+          total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
+          age: diaryParams.age || profile.age, 
+          height: diaryParams.height || profile.height, 
+          weight: diaryParams.weight || profile.weight 
+        },
         purchases: enrichedPurchases,
-        bonusTransactions: [],
+        bonusTransactions: bonusTransactions,
         stats: { workoutsCompleted: 0, articlesRead: 0, workoutHistory: [], articleHistory: [] }
       }
     }
