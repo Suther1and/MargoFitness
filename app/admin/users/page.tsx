@@ -54,7 +54,7 @@ export default async function AdminUsersPage({
     { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400' },
     { label: 'За неделю', value: (stats as any).newWeek, color: 'text-blue-400' },
     { label: 'Активные подписки', value: stats.activeSubscriptions, color: 'text-emerald-400' },
-    { label: 'Всего в базе', value: stats.total, color: 'text-white/40' },
+    { label: 'Pro/Elite', value: (stats as any).tierCounts ? (stats as any).tierCounts.pro + (stats as any).tierCounts.elite : 0, color: 'text-yellow-400' },
   ] : []
 
   return (

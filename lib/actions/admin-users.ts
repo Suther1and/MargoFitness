@@ -266,24 +266,34 @@ export async function getUsersStats(): Promise<{
     const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString()
 
     const [
-      { count: total },
-      { count: newToday },
-      { count: newWeek },
-      { count: activeSubs }
+      { count: totalCount },
+      { count: newTodayCount },
+      { count: newWeekCount },
+      { count: activeSubsCount },
+      { data: tiers }
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active')
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active'),
+      supabase.from('profiles').select('subscription_tier')
     ])
+
+    const tierCounts = {
+      free: tiers?.filter(u => u.subscription_tier === 'free').length || 0,
+      basic: tiers?.filter(u => u.subscription_tier === 'basic').length || 0,
+      pro: tiers?.filter(u => u.subscription_tier === 'pro').length || 0,
+      elite: tiers?.filter(u => u.subscription_tier === 'elite').length || 0,
+    }
 
     return { 
       success: true, 
       stats: {
-        total: total || 0,
-        newToday: newToday || 0,
-        newWeek: newWeek || 0,
-        activeSubscriptions: activeSubs || 0
+        total: totalCount || 0,
+        newToday: newTodayCount || 0,
+        newWeek: newWeekCount || 0,
+        activeSubscriptions: activeSubsCount || 0,
+        tierCounts
       } as any
     }
   } catch (error: any) {
