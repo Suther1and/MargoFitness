@@ -260,33 +260,30 @@ export async function getUsersStats(): Promise<{
       supabase.from('profiles').select('subscription_tier')
     ])
 
-    const tierCounts = {
-      free: tiers?.filter(u => u.subscription_tier === 'free').length || 0,
-      basic: tiers?.filter(u => u.subscription_tier === 'basic').length || 0,
-      pro: tiers?.filter(u => u.subscription_tier === 'pro').length || 0,
-      elite: tiers?.filter(u => u.subscription_tier === 'elite').length || 0,
-    }
+    // Получаем метрики активности пользователей
+    const now = new Date()
+    const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString()
+    const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString()
 
-    // Получаем выручку за последние 30 дней
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    
-    const { data: payments } = await supabase
-      .from('payment_transactions')
-      .select('amount')
-      .eq('status', 'succeeded')
-      .gte('created_at', thirtyDaysAgo.toISOString())
-
-    const monthlyRevenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    const [
+      { count: total },
+      { count: newToday },
+      { count: newWeek },
+      { count: activeSubs }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active')
+    ])
 
     return { 
       success: true, 
       stats: {
         total: total || 0,
-        admins: admins || 0,
-        activeSubscriptions: active || 0,
-        monthlyRevenue: monthlyRevenue,
-        tierCounts
+        newToday: newToday || 0,
+        newWeek: newWeek || 0,
+        activeSubscriptions: activeSubs || 0
       } as any
     }
   } catch (error: any) {

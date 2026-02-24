@@ -51,48 +51,41 @@ export default async function AdminUsersPage({
   const stats = statsResult.stats
 
   const statCards = stats ? [
-    { label: 'Всего пользователей', value: stats.total, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Активные подписки', value: stats.activeSubscriptions, icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Выручка (30д)', value: `${(stats as any).monthlyRevenue?.toLocaleString('ru-RU')} ₽`, icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    { label: 'Конверсия', value: `${stats.total > 0 ? ((stats.activeSubscriptions / stats.total) * 100).toFixed(1) : 0}%`, icon: ShieldCheck, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400' },
+    { label: 'За неделю', value: (stats as any).newWeek, color: 'text-blue-400' },
+    { label: 'Активные подписки', value: stats.activeSubscriptions, color: 'text-emerald-400' },
+    { label: 'Всего в базе', value: stats.total, color: 'text-white/40' },
   ] : []
 
   return (
-    <div className="space-y-10 py-6">
+    <div className="space-y-6 py-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex items-center justify-between">
         <div>
-          <Link 
-            href="/admin" 
-            className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white/80 transition-colors mb-4"
-          >
-            <X className="size-4" />
-            <span>Назад в панель</span>
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white font-oswald uppercase">
+          <h1 className="text-2xl font-bold tracking-tight text-white font-oswald uppercase">
             Пользователи
           </h1>
-          <p className="mt-2 text-white/60">
-            Управление всей базой пользователей и их правами доступа
+          <p className="text-xs text-white/40 uppercase tracking-widest font-medium mt-1">
+            Управление доступом и базой
           </p>
         </div>
+        <Link 
+          href="/admin" 
+          className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+        >
+          <X className="size-5" />
+        </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats - Ultra Compact */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {statCards.map((stat, i) => (
           <div 
             key={i}
-            className="relative overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/10 p-6"
+            className="bg-white/[0.03] border border-white/5 rounded-2xl p-3 flex flex-col gap-1"
           >
-            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${stat.bg} blur-2xl pointer-events-none`} />
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-xl ${stat.bg}`}>
-                <stat.icon className={`size-5 ${stat.color}`} />
-              </div>
-              <span className="text-sm font-medium text-white/50">{stat.label}</span>
-            </div>
-            <div className="text-3xl font-bold font-oswald text-white">{stat.value}</div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">{stat.label}</span>
+            <div className={`text-xl font-bold font-oswald ${stat.color}`}>{stat.value}</div>
           </div>
         ))}
       </div>
