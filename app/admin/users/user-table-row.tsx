@@ -1,7 +1,6 @@
 'use client'
 
 import { InlineSelect, InlineNumberInput, InlineDateInput } from './inline-edit-cell'
-import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { updateUserProfile } from '@/lib/actions/admin-users'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/user-avatar'
@@ -39,7 +38,14 @@ export function UserTableRow({ user }: UserTableRowProps) {
       
       if (result.success) {
         // Генерируем событие для обновления профиля в других вкладках/компонентах
-        const updateEvent = { userId: user.id, field, value };
+        const updateEvent: any = { userId: user.id, field, value };
+        
+        // Если мы перешли на FREE, уведомляем о сбросе даты и статуса
+        if (field === 'subscription_tier' && value === 'free') {
+          updateEvent.subscription_expires_at = null;
+          updateEvent.subscription_status = 'inactive';
+        }
+
         window.dispatchEvent(new CustomEvent('subscription-updated', { 
           detail: updateEvent 
         }))
@@ -167,13 +173,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
       </td>
       
       <td className="p-4 text-right w-[12%]">
-        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <CancelSubscriptionButton 
-            userId={user.id}
-            userEmail={user.email || ''}
-            hasActiveSubscription={user.subscription_status === 'active'}
-          />
-        </div>
+        {/* Кнопка отмены подписки удалена, функционал перенесен в выбор тарифа FREE */}
       </td>
     </tr>
   )
