@@ -1,11 +1,9 @@
 import { getAllUsers, getUsersStats } from '@/lib/actions/admin-users'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CancelSubscriptionButton } from './cancel-subscription-button'
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/actions/profile'
 import Link from 'next/link'
 import { UserTableRow } from './user-table-row'
-import { Users, ShieldCheck, Zap, Star, Search, Filter, X, ChevronLeft } from 'lucide-react'
+import { Users, Search, X, ChevronLeft } from 'lucide-react'
 import { FilterSelect } from './inline-edit-cell'
 import { Suspense } from 'react'
 
