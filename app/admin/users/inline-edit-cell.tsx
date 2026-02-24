@@ -306,7 +306,10 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   return (
     <>
       <button
-        onClick={() => !disabled && setIsEditing(true)}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!disabled) setIsEditing(true)
+        }}
         disabled={disabled}
         title={disabled ? disabledMessage : ''}
         className={cn(
