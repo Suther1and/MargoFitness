@@ -112,32 +112,33 @@ export default async function AdminUsersPage({
             <select
               name="role"
               defaultValue={filters.role}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px]"
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px] hover:bg-white/10"
             >
-              <option value="all" className="bg-[#1a1a24]">Все роли</option>
-              <option value="user" className="bg-[#1a1a24]">Пользователь</option>
-              <option value="admin" className="bg-[#1a1a24]">Админ</option>
+              <option value="all" className="bg-[#1a1a24] text-white">Все роли</option>
+              <option value="user" className="bg-[#1a1a24] text-white">Пользователь</option>
+              <option value="admin" className="bg-[#1a1a24] text-white">Админ</option>
             </select>
 
             <select
               name="tier"
               defaultValue={filters.tier}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px]"
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[100px] hover:bg-white/10"
             >
-              <option value="all" className="bg-[#1a1a24]">Все тарифы</option>
-              <option value="free" className="bg-[#1a1a24]">Free</option>
-              <option value="basic" className="bg-[#1a1a24]">Basic</option>
-              <option value="pro" className="bg-[#1a1a24]">Pro</option>
-              <option value="elite" className="bg-[#1a1a24]">Elite</option>
+              <option value="all" className="bg-[#1a1a24] text-white">Все тарифы</option>
+              <option value="free" className="bg-[#1a1a24] text-white">Free</option>
+              <option value="basic" className="bg-[#1a1a24] text-white">Basic</option>
+              <option value="pro" className="bg-[#1a1a24] text-white">Pro</option>
+              <option value="elite" className="bg-[#1a1a24] text-white">Elite</option>
             </select>
 
             <select
               name="expired"
               defaultValue={filters.expired}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px]"
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 appearance-none transition-all cursor-pointer min-w-[120px] hover:bg-white/10"
             >
-              <option value="all" className="bg-[#1a1a24]">Все сроки</option>
-              <option value="true" className="bg-[#1a1a24]">Истекшие</option>
+              <option value="all" className="bg-[#1a1a24] text-white">Все сроки</option>
+              <option value="true" className="bg-[#1a1a24] text-white">Истекшие</option>
+              <option value="false" className="bg-[#1a1a24] text-white">Активные</option>
             </select>
           </div>
 

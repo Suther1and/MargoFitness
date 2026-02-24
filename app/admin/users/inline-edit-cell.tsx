@@ -47,12 +47,16 @@ export function InlineSelect({ value, options, onSave, displayClassName }: Inlin
           {isLoading ? '...' : currentOption?.label || value}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-[#1a1a24] border-white/10 text-white">
+      <DropdownMenuContent className="bg-[#1a1a24] border-white/10 text-white min-w-[160px] p-2 rounded-2xl shadow-[0_16px_32px_-12px_rgba(0,0,0,0.5)]">
         {options.map(option => (
           <DropdownMenuItem 
             key={option.value}
             onClick={() => handleSelect(option.value)}
-            className={`cursor-pointer hover:bg-white/5 focus:bg-white/5 transition-colors ${option.className}`}
+            className={cn(
+              "cursor-pointer px-3 py-2.5 rounded-xl text-xs font-medium transition-all mb-1 last:mb-0",
+              "hover:bg-white/5 focus:bg-white/5 focus:text-white outline-none",
+              option.className
+            )}
           >
             {option.label}
           </DropdownMenuItem>
@@ -174,12 +178,18 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
       const initialDate = value ? new Date(value) : new Date()
       setEditValue(formatDate(initialDate))
       // Блокируем скролл при открытом поп-апе
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth
       document.body.style.overflow = 'hidden'
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = `${scrollBarWidth}px`
+      }
     } else {
       document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
     }
     return () => {
       document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
     }
   }, [isEditing, value])
 

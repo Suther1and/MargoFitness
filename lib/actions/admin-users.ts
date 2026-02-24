@@ -63,6 +63,10 @@ export async function getAllUsers(filters?: {
       profileQuery = profileQuery
         .eq('subscription_status', 'active')
         .lt('subscription_expires_at', new Date().toISOString())
+    } else if (filters?.expired === 'false') {
+      profileQuery = profileQuery
+        .eq('subscription_status', 'active')
+        .gte('subscription_expires_at', new Date().toISOString())
     }
 
     if (filters?.search) {

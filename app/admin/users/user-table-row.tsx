@@ -33,6 +33,11 @@ export function UserTableRow({ user }: UserTableRowProps) {
       updateData['subscription_status'] = 'inactive'
     }
 
+    // Если мы меняем тариф на любой кроме FREE, и даты нет — можно поставить статус active
+    if (field === 'subscription_tier' && value !== 'free' && !user.subscription_expires_at) {
+      updateData['subscription_status'] = 'active'
+    }
+
     try {
       const result = await updateUserProfile(user.id, updateData)
       
