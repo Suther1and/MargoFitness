@@ -127,8 +127,6 @@ export async function getOneTimePacks(): Promise<Product[]> {
  * Получить продукт по ID
  */
 export async function getProductById(productId: string): Promise<Product | null> {
-  console.log('[getProductById] Fetching product with ID:', productId)
-  
   const supabase = await createClient()
 
   const { data: product, error } = await supabase
@@ -138,17 +136,10 @@ export async function getProductById(productId: string): Promise<Product | null>
     .single()
 
   if (error) {
-    console.error('[getProductById] Error fetching product:', {
-      productId,
-      error: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint
-    })
+    console.error('Error getting product:', error)
     return null
   }
 
-  console.log('[getProductById] Product found:', product?.name)
   return product
 }
 

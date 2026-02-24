@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { BONUS_CONSTANTS } from '@/types/database'
+import { logUserAuth } from '@/lib/actions/admin-user-extra'
 
 // Admin client для backend операций
 const getAdminClient = () => {
@@ -149,6 +150,9 @@ export async function POST(request: Request) {
         )
       }
 
+      // Логируем вход
+      await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
+
       return NextResponse.json({
         success: true,
         isNewUser: false,
@@ -181,6 +185,9 @@ export async function POST(request: Request) {
       if (updateError) {
         console.error('Failed to update profile with telegram_id:', updateError)
       }
+
+      // Логируем вход
+      await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
 
       return NextResponse.json({
         success: true,
@@ -352,6 +359,9 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    // Логируем вход
+    await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
 
     return NextResponse.json({
       success: true,

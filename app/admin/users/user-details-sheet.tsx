@@ -12,6 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UserAvatar } from '@/components/user-avatar'
 import { getUserFullDetails } from '@/lib/actions/admin-user-details'
 import { updateUserProfile } from '@/lib/actions/admin-users'
+import { 
+  getUserAuthLogs, 
+  getAdminNotes, 
+  saveAdminNote, 
+  deleteAdminNote 
+} from '@/lib/actions/admin-user-extra'
 import { InlineSelect, InlineNumberInput, InlineDateInput } from './inline-edit-cell'
 import { 
   ShoppingBag, 
@@ -35,7 +41,16 @@ import {
   Flame,
   Info,
   ArrowUpCircle,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  StickyNote,
+  Trash2,
+  Globe,
+  Monitor,
+  Smartphone,
+  Tablet,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -48,11 +63,19 @@ interface UserDetailsSheetProps {
 export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [authLogs, setAuthLogs] = useState<any[]>([])
+  const [adminNotes, setAdminNotes] = useState<any[]>([])
+  const [newNote, setNewNote] = useState('')
+  const [isSavingNote, setIsSavingNote] = useState(false)
+  const [isLogsExpanded, setIsLogsExpanded] = useState(false)
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false)
+  const [isLogsLoading, setIsLogsLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     if (userId) {
       fetchDetails()
+      fetchExtraData()
     }
   }, [userId])
 
@@ -68,6 +91,53 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
       console.error('Error fetching user details:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchExtraData = async () => {
+    if (!userId) return
+    setIsLogsLoading(true)
+    try {
+      const [logsRes, notesRes] = await Promise.all([
+        getUserAuthLogs(userId),
+        getAdminNotes(userId)
+      ])
+      if (logsRes.success) setAuthLogs(logsRes.data || [])
+      if (notesRes.success) setAdminNotes(notesRes.data || [])
+    } catch (error) {
+      console.error('Error fetching extra data:', error)
+    } finally {
+      setIsLogsLoading(false)
+    }
+  }
+
+  const handleSaveNote = async () => {
+    if (!userId || !newNote.trim() || isSavingNote) return
+    setIsSavingNote(true)
+    try {
+      const result = await saveAdminNote(userId, newNote)
+      if (result.success) {
+        setNewNote('')
+        const notesRes = await getAdminNotes(userId)
+        if (notesRes.success) setAdminNotes(notesRes.data || [])
+      }
+    } catch (error) {
+      console.error('Error saving note:', error)
+    } finally {
+      setIsSavingNote(false)
+    }
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm('Удалить заметку?')) return
+    try {
+      const result = await deleteAdminNote(noteId)
+      if (result.success && userId) {
+        const notesRes = await getAdminNotes(userId)
+        if (notesRes.success) setAdminNotes(notesRes.data || [])
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error)
     }
   }
 
@@ -255,7 +325,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                   </TabsList>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto no-scrollbar">
                   <TabsContent value="overview" className="m-0 p-8 pt-6 space-y-6 pb-20">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-4">
@@ -336,11 +406,47 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                             <span className="text-xs font-bold text-emerald-400">{user.total_spent_for_cashback?.toLocaleString('ru-RU')} ₽</span>
                           </div>
                         </div>
+
+                        {/* Блок последнего входа */}
+                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-3">
+                          <h4 className="text-[9px] text-white/20 uppercase tracking-widest font-bold">Последний вход</h4>
+                          {authLogs && authLogs.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] text-white/40">Страна</span>
+                                <div className="flex items-center gap-1.5">
+                                  <Globe className="w-3 h-3 text-blue-400/60" />
+                                  <span className="text-xs text-white/80 font-medium">
+                                    {authLogs[0].country && authLogs[0].country !== 'Unknown' ? authLogs[0].country : 'Неизвестно'}
+                                  </span>
+                                </div>
+                              </div>
+                              {authLogs[0].city && authLogs[0].city !== 'Unknown' && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[11px] text-white/40">Город</span>
+                                  <span className="text-xs text-white/60">{authLogs[0].city}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] text-white/40">IP адрес</span>
+                                <span className="text-[10px] font-mono text-white/40">{authLogs[0].ip_address}</span>
+                              </div>
+                              <div className="pt-1 flex justify-between items-center border-t border-white/5">
+                                <span className="text-[10px] text-white/20 uppercase font-bold">Когда</span>
+                                <span className="text-[10px] text-white/40">{new Date(authLogs[0].created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="py-2 text-center">
+                              <span className="text-[10px] text-white/10 italic">Данные отсутствуют</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                      <div className="space-y-4">
-                        <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Связанные аккаунты</h3>
+                    <div className="space-y-4">
+                      <h3 className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Связанные аккаунты</h3>
                       <div className="grid grid-cols-3 gap-4">
                         {[
                           { label: 'Telegram', value: user.telegram_username ? `@${user.telegram_username}` : 'Не привязан', icon: Send, active: !!user.telegram_id },
@@ -359,6 +465,131 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                         ))}
                       </div>
                     </div>
+
+                    {/* Секция заметок админа */}
+                    <div className="space-y-4 pt-4 border-t border-white/5">
+                      <button 
+                        onClick={() => setIsNotesExpanded(!isNotesExpanded)}
+                        className="w-full flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <StickyNote className="w-3.5 h-3.5 text-orange-400" />
+                          <h3 className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold group-hover:text-white/60 transition-colors">Заметки администратора</h3>
+                          {adminNotes.length > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-[9px] font-bold">
+                              {adminNotes.length}
+                            </span>
+                          )}
+                        </div>
+                        {isNotesExpanded ? <ChevronUp className="w-3.5 h-3.5 text-white/20" /> : <ChevronDown className="w-3.5 h-3.5 text-white/20" />}
+                      </button>
+
+                      {isNotesExpanded && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="relative group">
+                            <textarea
+                              value={newNote}
+                              onChange={(e) => setNewNote(e.target.value)}
+                              placeholder="Напишите что-нибудь о пользователе..."
+                              className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-orange-500/40 min-h-[100px] transition-all"
+                            />
+                            <button
+                              onClick={handleSaveNote}
+                              disabled={!newNote.trim() || isSavingNote}
+                              className="absolute bottom-4 right-4 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:hover:bg-orange-500 text-xs font-bold text-white transition-all active:scale-95"
+                            >
+                              {isSavingNote ? '...' : 'Сохранить'}
+                            </button>
+                          </div>
+
+                          <div className="space-y-3">
+                            {adminNotes.length > 0 ? (
+                              adminNotes.map((note: any) => (
+                                <div key={note.id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-3 group/note">
+                                  <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-2">
+                                      <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
+                                        <UserIcon className="w-3 h-3" />
+                                      </div>
+                                      <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
+                                        {note.admin?.full_name || 'Админ'} • {new Date(note.created_at).toLocaleDateString('ru-RU')}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => handleDeleteNote(note.id)}
+                                      className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/10 hover:text-rose-400 transition-all opacity-0 group-hover/note:opacity-100"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  <p className="text-xs text-white/80 leading-relaxed whitespace-pre-wrap">
+                                    {note.content}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="py-8 text-center text-white/10">
+                                <span className="text-xs font-medium">Заметок пока нет</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Секция логов авторизации */}
+                    <div className="space-y-4 pt-4 border-t border-white/5">
+                      <button 
+                        onClick={() => {
+                          if (!isLogsExpanded) fetchExtraData()
+                          setIsLogsExpanded(!isLogsExpanded)
+                        }}
+                        className="w-full flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-3.5 h-3.5 text-blue-400" />
+                          <h3 className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold group-hover:text-white/60 transition-colors">История входов</h3>
+                          {isLogsLoading && <RefreshCw className="w-3 h-3 text-white/20 animate-spin" />}
+                        </div>
+                        {isLogsExpanded ? <ChevronUp className="w-3.5 h-3.5 text-white/20" /> : <ChevronDown className="w-3.5 h-3.5 text-white/20" />}
+                      </button>
+
+                      {isLogsExpanded && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {authLogs.length > 0 ? (
+                            authLogs.map((log: any) => (
+                              <div key={log.id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex items-center justify-between group/log hover:bg-white/[0.04] transition-all">
+                                <div className="flex items-center gap-4">
+                                  <div className="p-2.5 rounded-xl bg-white/5 text-white/40 group-hover/log:text-white/60 transition-colors">
+                                    {log.device_type === 'mobile' ? <Smartphone className="w-4 h-4" /> : 
+                                     log.device_type === 'tablet' ? <Tablet className="w-4 h-4" /> : 
+                                     <Monitor className="w-4 h-4" />}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="text-xs font-bold text-white">{log.ip_address}</span>
+                                      {log.country && log.country !== 'Unknown' && (
+                                        <span className="px-1.5 py-0.5 rounded bg-white/5 text-[9px] text-white/40 font-bold uppercase tracking-wider flex items-center gap-1">
+                                          <Globe className="w-2.5 h-2.5" />
+                                          {log.country} {log.city && log.city !== 'Unknown' ? `(${log.city})` : ''}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                                      {new Date(log.created_at).toLocaleString('ru-RU')} • {log.browser} on {log.os}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="py-8 text-center text-white/10">
+                              <span className="text-sm font-medium">Логов пока нет</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="purchases" className="m-0 p-8 pt-6 space-y-4 pb-20">
@@ -368,58 +599,68 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                           const originalPrice = p.products?.price || p.amount;
                           const discount = originalPrice - p.actual_paid_amount;
                           const bonusUsed = p.bonus_amount_used || 0;
-                          const isUpgrade = p.action === 'upgrade' || p.metadata?.is_upgrade;
-                          const isRenewal = p.action === 'renewal' || p.metadata?.is_renewal;
+                          const isUpgrade = p.action === 'upgrade';
+                          const isRenewal = p.action === 'renewal';
                           
                           // Расчет промокода
-                          const promoCode = p.promo_code || p.metadata?.promo_code;
-                          const promoPercent = p.metadata?.promo_percent || p.metadata?.discount_percent;
+                          const promoCode = p.promo_code;
+                          const promoPercent = p.promo_percent;
 
                           return (
                             <div key={p.id} className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 group hover:bg-white/[0.04] transition-all">
                               <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-4">
-                                  <div className={cn(
-                                    "p-3 rounded-2xl bg-white/5 transition-colors",
-                                    isUpgrade ? "text-purple-400 group-hover:bg-purple-500/10" : 
-                                    isRenewal ? "text-blue-400 group-hover:bg-blue-500/10" :
-                                    "text-white/40 group-hover:text-emerald-400"
-                                  )}>
-                                    {isUpgrade ? <ArrowUpCircle className="w-6 h-6" /> : 
-                                     isRenewal ? <RefreshCw className="w-6 h-6" /> :
-                                     <ShoppingBag className="w-6 h-6" />}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="block text-base font-bold text-white">
-                                        {p.products?.name || p.product_id}
-                                      </span>
-                                      {isUpgrade && (
-                                        <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-400 text-[10px] font-bold uppercase tracking-wider ring-1 ring-purple-500/20">
-                                          Апгрейд
+                                  <div className="flex items-center gap-4">
+                                    <div className={cn(
+                                      "p-3 rounded-2xl bg-white/5 transition-colors",
+                                      isUpgrade ? "text-purple-400 group-hover:bg-purple-500/10" : 
+                                      isRenewal ? "text-blue-400 group-hover:bg-blue-500/10" :
+                                      "text-emerald-400 group-hover:bg-emerald-500/10"
+                                    )}>
+                                      {isUpgrade ? <ArrowUpCircle className="w-6 h-6" /> : 
+                                       isRenewal ? <RefreshCw className="w-6 h-6" /> :
+                                       <ShoppingBag className="w-6 h-6" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center flex-wrap gap-2">
+                                        <span className="block text-base font-bold text-white truncate">
+                                          {p.products?.name || p.product_id}
                                         </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
-                                        {new Date(p.created_at).toLocaleDateString('ru-RU')} • {p.payment_provider || 'ЮKassa'}
-                                      </span>
-                                      {p.payment_id && (
-                                        <span className="text-[10px] text-white/20 font-mono">#{p.payment_id.slice(-8)}</span>
-                                      )}
+                                        {isUpgrade && (
+                                          <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-400 text-[10px] font-bold uppercase tracking-wider ring-1 ring-purple-500/20">
+                                            Апгрейд
+                                          </span>
+                                        )}
+                                        {isRenewal && (
+                                          <span className="px-2 py-0.5 rounded-lg bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wider ring-1 ring-blue-500/20">
+                                            Продление
+                                          </span>
+                                        )}
+                                        {!isUpgrade && !isRenewal && (
+                                          <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider ring-1 ring-emerald-500/20">
+                                            Покупка
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                                          {new Date(p.created_at).toLocaleDateString('ru-RU')} • {p.payment_provider || 'ЮKassa'}
+                                        </span>
+                                        {p.payment_id && (
+                                          <span className="text-[10px] text-white/20 font-mono">#{p.payment_id.slice(-8)}</span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-xl font-bold text-emerald-400 font-oswald">
-                                    {p.actual_paid_amount?.toLocaleString('ru-RU')} ₽
-                                  </div>
-                                  {originalPrice > p.actual_paid_amount && (
-                                    <div className="text-xs text-white/20 line-through decoration-rose-500/50">
-                                      {originalPrice?.toLocaleString('ru-RU')} ₽
+                                  <div className="text-right shrink-0">
+                                    <div className="text-xl font-bold text-emerald-400 font-oswald whitespace-nowrap">
+                                      {p.actual_paid_amount?.toLocaleString('ru-RU')} ₽
                                     </div>
-                                  )}
-                                </div>
+                                    {originalPrice > p.actual_paid_amount && (
+                                      <div className="text-xs text-white/20 line-through decoration-rose-500/50 whitespace-nowrap">
+                                        {originalPrice?.toLocaleString('ru-RU')} ₽
+                                      </div>
+                                    )}
+                                  </div>
                               </div>
 
                               {/* Детальная информация о скидках и изменениях */}
@@ -429,9 +670,16 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                     <div className="bg-purple-500/5 border border-purple-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
                                       <Tag className="w-3.5 h-3.5 text-purple-400" />
                                       <div>
-                                        <span className="block text-[8px] text-purple-400/60 uppercase font-bold leading-none mb-0.5">Промокод</span>
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                          <span className="text-[8px] text-purple-400/60 uppercase font-bold leading-none">Промокод</span>
+                                          {p.promo_percent && (
+                                            <span className="text-[8px] px-1 py-0.5 rounded bg-purple-500/10 text-purple-400 font-bold leading-none">
+                                              {p.promo_percent}%
+                                            </span>
+                                          )}
+                                        </div>
                                         <span className="block text-xs text-purple-400 font-bold">
-                                          {promoCode} {promoPercent ? `(-${promoPercent}%)` : ''}
+                                          {promoCode} {p.promo_discount_amount > 0 ? `(-${p.promo_discount_amount} ₽)` : ''}
                                         </span>
                                       </div>
                                     </div>
@@ -440,14 +688,27 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                     <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
                                       <Trophy className="w-3.5 h-3.5 text-yellow-400" />
                                       <div>
-                                        <span className="block text-[8px] text-yellow-400/60 uppercase font-bold leading-none mb-0.5">Бонусы</span>
-                                        <span className="block text-xs text-yellow-400 font-bold">
-                                          -{bonusUsed} 👟
-                                          {p.metadata?.old_bonus_balance !== undefined && (
-                                            <span className="ml-1 opacity-40 font-medium text-[10px]">
-                                              ({p.metadata.old_bonus_balance} → {p.metadata.new_bonus_balance})
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                          <span className="text-[8px] text-yellow-400/60 uppercase font-bold leading-none">Списано шагов</span>
+                                          {p.bonus_percent_of_total > 0 && (
+                                            <span className="text-[8px] px-1 py-0.5 rounded bg-yellow-400/10 text-yellow-400 font-bold leading-none">
+                                              {p.bonus_percent_of_total}%
                                             </span>
                                           )}
+                                        </div>
+                                        <span className="block text-xs text-yellow-400 font-bold">
+                                          -{bonusUsed} 👟
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {p.period_discount > 0 && (
+                                    <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
+                                      <Clock className="w-3.5 h-3.5 text-blue-400" />
+                                      <div>
+                                        <span className="block text-[8px] text-blue-400/60 uppercase font-bold leading-none mb-0.5">Скидка за срок</span>
+                                        <span className="block text-xs text-blue-400 font-bold">
+                                          -{p.period_discount?.toLocaleString('ru-RU')} ₽
                                         </span>
                                       </div>
                                     </div>
@@ -456,12 +717,9 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                                     <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl px-3 py-2 flex items-center gap-2">
                                       <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
                                       <div>
-                                        <span className="block text-[8px] text-emerald-400/60 uppercase font-bold leading-none mb-0.5">Экономия</span>
+                                        <span className="block text-[8px] text-emerald-400/60 uppercase font-bold leading-none mb-0.5">Общая экономия</span>
                                         <span className="block text-xs text-emerald-400 font-bold">
                                           {discount?.toLocaleString('ru-RU')} ₽
-                                          {p.metadata?.discount_reason && (
-                                            <span className="ml-1 opacity-60 font-medium">({p.metadata.discount_reason})</span>
-                                          )}
                                         </span>
                                       </div>
                                     </div>
@@ -563,6 +821,17 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                         </div>
                         <div className="text-3xl font-bold text-white font-oswald mb-1">{stats?.workoutsCompleted || 0}</div>
                         <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Выполнено всего</div>
+                        
+                        {stats?.workoutHistory?.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
+                            {stats.workoutHistory.slice(0, 3).map((w: any, i: number) => (
+                              <div key={i} className="flex justify-between items-center text-[10px]">
+                                <span className="text-white/60 truncate max-w-[100px]">{w.workout_sessions?.title}</span>
+                                <span className="text-white/30">{new Date(w.completed_at).toLocaleDateString('ru-RU')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4">
                         <div className="flex items-center gap-3 mb-4">
@@ -571,6 +840,17 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
                         </div>
                         <div className="text-3xl font-bold text-white font-oswald mb-1">{stats?.articlesRead || 0}</div>
                         <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Прочитано материалов</div>
+
+                        {stats?.articleHistory?.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
+                            {stats.articleHistory.slice(0, 3).map((a: any, i: number) => (
+                              <div key={i} className="flex justify-between items-center text-[10px]">
+                                <span className="text-white/60 truncate max-w-[100px]">{a.articles?.title}</span>
+                                <span className="text-white/30">{new Date(a.last_read_at).toLocaleDateString('ru-RU')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     

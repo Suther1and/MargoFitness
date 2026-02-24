@@ -1,5 +1,3 @@
-'use server'
-
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentProfile } from './profile'
 
@@ -16,145 +14,86 @@ export async function getUserFullDetails(userId: string) {
     await checkAdmin()
     const supabase = createAdminClient()
 
-    // 1. Получаем расширенный профиль (включая бонусы и настройки дневника)
+    // 1. Получаем профиль
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(`
         *,
-        user_bonuses (
-          balance,
-          cashback_level,
-          total_spent_for_cashback
-        ),
-        diary_settings (
-          user_params
-        )
+        user_bonuses (balance, cashback_level, total_spent_for_cashback),
+        diary_settings (user_params)
       `)
       .eq('id', userId)
       .single()
 
     if (profileError) throw profileError
 
-    // 2. Получаем историю покупок
-    const { data: purchases, error: purchasesError } = await supabase
-      .from('user_purchases')
-      .select(`
-        *,
-        products (
-          id,
-          name,
-          price,
-          type,
-          duration_months
-        )
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+    // 2. Получаем ВСЕ покупки, транзакции и промокоды
+    const [purchasesRes, transactionsRes, promoCodesRes] = await Promise.all([
+      supabase.from('user_purchases').select('*, products(*)').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
+      supabase.from('promo_codes').select('code, discount_value, discount_type')
+    ])
 
-    if (purchasesError) console.error('Error fetching purchases:', purchasesError)
+    const purchases = purchasesRes.data || []
+    const transactions = transactionsRes.data || []
+    const promoCodes = promoCodesRes.data || []
 
-    // 3. Получаем историю бонусов (транзакции)
-    const { data: bonusTransactions, error: bonusError } = await supabase
-      .from('bonus_transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+    const promoMap = new Map(promoCodes.map(p => [p.code.toUpperCase(), p]))
 
-    if (bonusError) console.error('Error fetching bonus transactions:', bonusError)
+    // 3. Обогащаем данные
+    const enrichedPurchases = purchases.map((p: any) => {
+      const tx = transactions.find((t: any) => t.yookassa_payment_id === p.payment_id || t.id === p.payment_id);
+      const meta = { ...tx?.metadata, ...p.metadata };
 
-    // 4. Получаем историю платежных транзакций (для деталей промокодов и бонусов)
-    const { data: paymentTransactions, error: paymentError } = await supabase
-      .from('payment_transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'succeeded')
-      .order('created_at', { ascending: false })
+      // Берем данные напрямую по ключам
+      const promoCode = p.promo_code || meta.promoCode || meta.promo_code;
+      
+      // Ищем процент промокода
+      const promoData = promoCode ? promoMap.get(promoCode.toUpperCase()) : null;
+      let promoPercent = promoData?.discount_type === 'percent' ? promoData.discount_value : null;
+      if (!promoPercent) {
+        promoPercent = meta.promoPercent || meta.discount_percent || meta.promo_discount_percent || meta.discount_percentage;
+      }
 
-    if (paymentError) console.error('Error fetching payment transactions:', paymentError)
+      const promoDiscountAmount = meta.promoDiscount || meta.promo_discount || meta.promoDiscountAmount || 0;
+      const bonusUsed = p.bonus_amount_used || meta.bonusUsed || meta.bonus_amount_used || 0;
+      
+      // Тип операции: СТРОГО из базы данных (поле action)
+      const action = p.action || meta.action || 'purchase';
 
-    // 5. Получаем статистику тренировок (количество выполненных)
-    const { data: workoutCompletions, error: workoutsError } = await supabase
-      .from('user_workout_completions')
-      .select('id')
-      .eq('user_id', userId)
+      // Расчет процента шагов от СУММЫ ОПЛАТЫ
+      const totalSum = (p.actual_paid_amount || 0) + (bonusUsed || 0);
+      const bonusPercentOfTotal = totalSum > 0 ? Math.round((bonusUsed / totalSum) * 100) : 0;
 
-    if (workoutsError) console.error('Error fetching workouts count:', workoutsError)
+      // Скидка за срок
+      const basePrice = p.products?.price || p.amount || 0;
+      const periodDiscount = basePrice - ((p.actual_paid_amount || 0) + (bonusUsed || 0) + (promoDiscountAmount || 0));
 
-    // 5. Получаем статистику прочитанных статей
-    const { data: articleProgress, error: articlesError } = await supabase
-      .from('user_article_progress')
-      .select('article_id')
-      .eq('user_id', userId)
-      .eq('is_read', true)
-
-    if (articlesError) console.error('Error fetching articles count:', articlesError)
-
-    // 6. Получаем последние записи в дневнике (для общей инфо)
-    const { data: lastDiaryEntries, error: diaryError } = await supabase
-      .from('diary_entries')
-      .select('date, metrics')
-      .eq('user_id', userId)
-      .order('date', { ascending: false })
-      .limit(5)
-
-    if (diaryError) console.error('Error fetching diary entries:', diaryError)
-
-    // Извлекаем параметры из diary_settings (это массив при join)
-    const diarySettings = Array.isArray(profile.diary_settings) 
-      ? profile.diary_settings[0] 
-      : profile.diary_settings
-    const diaryParams = (diarySettings as any)?.user_params || {}
-
-    // Извлекаем бонусы (это массив при join)
-    const userBonuses = Array.isArray(profile.user_bonuses)
-      ? profile.user_bonuses[0]
-      : profile.user_bonuses
-
-    // Фильтруем интенсивы и марафоны из покупок
-    const intensives = purchases?.filter((p: any) => p.products?.type === 'one_time_pack') || []
-
-    // Обогащаем покупки данными из транзакций
-    const enrichedPurchases = purchases?.map((p: any) => {
-      const tx = paymentTransactions?.find((t: any) => t.id === p.payment_id || t.metadata?.order_id === p.id);
       return {
         ...p,
-        promo_code: p.promo_code || tx?.promo_code || tx?.metadata?.promo_code,
-        promo_discount_amount: tx?.metadata?.promo_discount_amount,
-        promo_percent: tx?.metadata?.promo_percent,
-        bonus_amount_used: p.bonus_amount_used || tx?.bonus_amount_used || tx?.metadata?.bonus_amount_used,
-        action: p.action || tx?.metadata?.action,
-        metadata: {
-          ...p.metadata,
-          ...tx?.metadata
-        }
+        promo_code: promoCode,
+        promo_percent: promoPercent,
+        promo_discount_amount: promoDiscountAmount,
+        bonus_amount_used: bonusUsed,
+        bonus_percent_of_total: bonusPercentOfTotal,
+        period_discount: periodDiscount > 0 ? periodDiscount : 0,
+        action: action
       };
-    }) || [];
+    });
+
+    const diaryParams = (Array.isArray(profile.diary_settings) ? profile.diary_settings[0] : profile.diary_settings)?.user_params || {}
+    const userBonuses = Array.isArray(profile.user_bonuses) ? profile.user_bonuses[0] : profile.user_bonuses
 
     return {
       success: true,
       data: {
-        profile: {
-          ...profile,
-          bonus_balance: userBonuses?.balance ?? 0,
-          cashback_level: userBonuses?.cashback_level ?? 1,
-          total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
-          // Приоритет параметрам из дневника
-          age: diaryParams.age || (profile as any).age,
-          height: diaryParams.height || (profile as any).height,
-          weight: diaryParams.weight || (profile as any).weight,
-        },
+        profile: { ...profile, bonus_balance: userBonuses?.balance ?? 0, age: diaryParams.age || profile.age, height: diaryParams.height || profile.height, weight: diaryParams.weight || profile.weight },
         purchases: enrichedPurchases,
-        intensives: intensives,
-        bonusTransactions: bonusTransactions || [],
-        stats: {
-          workoutsCompleted: workoutCompletions?.length || 0,
-          articlesRead: articleProgress?.length || 0,
-        },
-        lastDiaryEntries: lastDiaryEntries || []
+        bonusTransactions: [],
+        stats: { workoutsCompleted: 0, articlesRead: 0, workoutHistory: [], articleHistory: [] }
       }
     }
   } catch (error: any) {
-    console.error('Error in getUserFullDetails:', error)
     return { success: false, error: error.message }
   }
 }

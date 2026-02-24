@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { registerReferral } from '@/lib/actions/referrals'
 import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
+import { logUserAuth } from '@/lib/actions/admin-user-extra'
 
 // Интерфейсы для ответов Yandex API
 interface YandexTokenResponse {
@@ -225,6 +226,9 @@ export async function GET(request: Request) {
 
       console.log('[Yandex Callback] Existing user signed in successfully')
 
+      // Логируем вход
+      await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
+
       // Редиректим с установленной сессией
       const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}${redirectTo}`)
       
@@ -280,6 +284,9 @@ export async function GET(request: Request) {
         .eq('id', userId)
 
       console.log('[Yandex Callback] Profile updated with yandex_id')
+
+      // Логируем вход
+      await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
 
       // Редиректим с существующей сессией
       const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}${redirectTo}`)
@@ -398,6 +405,9 @@ export async function GET(request: Request) {
     }
 
     console.log('[Yandex Callback] New user session created successfully')
+
+    // Логируем вход
+    await logUserAuth(userId).catch(e => console.error('Auth logging failed:', e))
 
     // Редиректим нового пользователя
     const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}${redirectTo}`)

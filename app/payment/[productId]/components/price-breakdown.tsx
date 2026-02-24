@@ -160,6 +160,11 @@ export function PriceBreakdown({ calculation }: PriceBreakdownProps) {
                   <span className="text-[10px] font-mono bg-orange-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider">
                     {calculation.promoCode}
                   </span>
+                  {calculation.promoDiscountType === 'percent' && calculation.promoDiscountValue && (
+                    <span className="text-[10px] font-bold text-orange-400/60 ml-1">
+                      {calculation.promoDiscountValue}%
+                    </span>
+                  )}
                 </span>
                 <span className="font-medium">−<AnimatedNumber value={calculation.promoDiscountAmount} /> ₽</span>
               </div>

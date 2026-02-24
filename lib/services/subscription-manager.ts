@@ -255,7 +255,31 @@ export async function processSuccessfulPayment(params: {
     payment_id: paymentId || `payment_${Date.now()}`,
     amount: product.price,
     actual_paid_amount: actualPaidAmount || product.price,
-    purchased_days: product.duration_months * 30
+    purchased_days: product.duration_months * 30,
+    action: action,
+    // Сохраняем метаданные из транзакции, если они есть
+    metadata: {
+      action: action,
+      actual_paid_amount: actualPaidAmount,
+      payment_id: paymentId
+    }
+  }
+  
+  // Пытаемся найти транзакцию, чтобы вытащить промокод и бонусы
+  const { data: tx } = await supabase
+    .from('payment_transactions')
+    .select('metadata')
+    .eq('yookassa_payment_id', paymentId)
+    .single()
+
+  if (tx?.metadata) {
+    const meta = tx.metadata as any
+    purchaseData.promo_code = meta.promoCode || meta.promo_code
+    purchaseData.bonus_amount_used = meta.bonusUsed || meta.bonus_amount_used
+    purchaseData.metadata = {
+      ...purchaseData.metadata,
+      ...meta
+    }
   }
   
   await supabase

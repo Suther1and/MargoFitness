@@ -5,7 +5,7 @@ import { updateUserProfile } from '@/lib/actions/admin-users'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/user-avatar'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { UserDetailsSheet } from './user-details-sheet'
 
 interface UserTableRowProps {
@@ -15,6 +15,19 @@ interface UserTableRowProps {
 export function UserTableRow({ user }: UserTableRowProps) {
   const router = useRouter()
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
+  const handleRowClick = useCallback((e: React.MouseEvent) => {
+    // Не открываем шторку, если кликнули по интерактивным элементам
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input') || target.closest('[role="menuitem"]') || target.closest('[data-radix-portal]')) {
+      return;
+    }
+    setIsDetailsOpen(true)
+  }, [])
+
+  const handleSheetClose = useCallback(() => {
+    setIsDetailsOpen(false)
+  }, [])
 
   const handleUpdate = async (field: string, value: any) => {
     const updateData: any = {}
@@ -111,7 +124,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
     <>
       <tr 
         className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group cursor-pointer"
-        onClick={() => setIsDetailsOpen(true)}
+        onClick={handleRowClick}
       >
         <td className="p-4 w-[25%]">
           <div className="flex items-center gap-4 pl-4">
@@ -143,7 +156,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </td>
         
         <td className="p-4 w-[15%] text-center" onClick={(e) => e.stopPropagation()}>
-          <div className="flex justify-center">
+          <div className="justify-center flex">
             <InlineSelect
               value={user.subscription_tier}
               options={tierOptions}
@@ -154,7 +167,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </td>
         
         <td className="p-4 w-[15%] text-center" onClick={(e) => e.stopPropagation()}>
-          <div className="flex justify-center">
+          <div className="justify-center flex">
             <InlineDateInput
               value={user.subscription_expires_at}
               onSave={(value) => handleUpdate('subscription_expires_at', value)}
@@ -165,7 +178,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </td>
         
         <td className="p-4 w-[10%] text-center" onClick={(e) => e.stopPropagation()}>
-          <div className="flex justify-center">
+          <div className="justify-center flex">
             <InlineNumberInput
               value={user.bonus_balance || 0}
               onSave={(value) => handleUpdate('bonus_balance', value)}
@@ -176,7 +189,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </td>
         
         <td className="p-4 w-[10%] text-center" onClick={(e) => e.stopPropagation()}>
-          <div className="flex justify-center">
+          <div className="justify-center flex">
             <InlineSelect
               value={user.cashback_level?.toString() || '1'}
               options={levelOptions}
@@ -187,7 +200,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </td>
         
         <td className="p-4 w-[10%] text-center" onClick={(e) => e.stopPropagation()}>
-          <div className="flex justify-center">
+          <div className="justify-center flex">
             <InlineSelect
               value={user.role}
               options={roleOptions}
@@ -199,7 +212,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
       </tr>
       <UserDetailsSheet 
         userId={isDetailsOpen ? user.id : null} 
-        onClose={() => setIsDetailsOpen(false)} 
+        onClose={handleSheetClose} 
       />
     </>
   )

@@ -29,7 +29,10 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
 
   const product = await getProductById(productId)
 
+  console.log('[PaymentPage] Product result:', product?.id, product?.name)
+
   if (!product) {
+    console.error('[PaymentPage] Product not found for ID:', productId)
     redirect('/')
   }
 

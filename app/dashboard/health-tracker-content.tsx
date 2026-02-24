@@ -72,6 +72,7 @@ import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 import { checkAndExpireSubscription } from '@/lib/actions/profile'
 import { checkArticleAccess, getEffectiveTier, getWidgetLimit, getHabitLimit, isSubscriptionActive } from '@/lib/access-control'
+import { logUserAuth } from '@/lib/actions/admin-user-extra'
 
 /**
  * Health Tracker - главная страница отслеживания здоровья
@@ -183,6 +184,9 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id)
+
+        // Логируем вход клиента
+        logUserAuth(data.user.id).catch(e => console.error('Auth logging failed:', e))
 
         // Подписка на Realtime изменения профиля
         const profileSubscription = supabase

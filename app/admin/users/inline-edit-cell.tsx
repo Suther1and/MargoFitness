@@ -265,7 +265,11 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   }
 
   const handleSave = async (e?: React.MouseEvent | React.KeyboardEvent) => {
-    // ВАЖНО: Не останавливаем всплытие здесь, чтобы Radix мог обработать закрытие поп-апа
+    // ВАЖНО: Останавливаем всплытие, чтобы не триггерить закрытие шторки
+    if (e) {
+      e.stopPropagation();
+    }
+    
     const parsed = parseDate(editValue)
     if (!parsed) {
       if (!editValue) {
@@ -298,6 +302,7 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
     if (e.key === 'Enter') {
       handleSave(e)
     } else if (e.key === 'Escape') {
+      e.stopPropagation();
       setIsEditing(false)
     }
   }
@@ -423,6 +428,7 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
                 <div className="flex gap-4">
                   <Button
                     onClick={(e) => {
+                      e.stopPropagation();
                       handleSave(e)
                     }}
                     disabled={isLoading}
@@ -431,7 +437,8 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
                     {isLoading ? '...' : 'Применить'}
                   </Button>
                   <Button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onSave(null).then(() => setIsEditing(false))
                     }}
                     disabled={isLoading}

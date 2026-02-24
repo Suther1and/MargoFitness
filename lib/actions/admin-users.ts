@@ -79,7 +79,7 @@ export async function getAllUsers(filters?: {
     const { data: profiles, error: profileError } = await profileQuery
 
     if (profileError) {
-      console.error('Error fetching users:', profileError)
+      console.error('Error fetching users:', JSON.stringify(profileError, null, 2))
       return { success: false, error: profileError.message }
     }
 

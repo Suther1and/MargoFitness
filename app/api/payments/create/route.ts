@@ -126,6 +126,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Определить action на основе текущего состояния пользователя
+    let finalAction = action;
+    if (product.type === 'subscription_tier') {
+      if (profile.subscription_status !== 'active' || profile.subscription_tier === 'free') {
+        finalAction = 'purchase';
+      }
+    }
+
     // Создать платеж через ЮKassa на финальную сумму
     const payment = await createPayment({
       amount: calculation.finalPrice,
@@ -142,7 +150,7 @@ export async function POST(request: NextRequest) {
         bonusUsed: bonusToUse || 0,
         originalPrice: product.price,
         finalPrice: calculation.finalPrice,
-        action: action // Добавляем action для webhook
+        action: finalAction // Используем уточненный action
       }
     })
 
@@ -171,7 +179,7 @@ export async function POST(request: NextRequest) {
           productType: product.type,
           originalPrice: product.price,
           finalPrice: calculation.finalPrice,
-          action: action,
+          action: finalAction, // Используем уточненный action
           promoCode: promoCode || null,
           bonusUsed: bonusToUse || 0,
           promoDiscount: calculation.promoDiscountAmount,

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { sendWelcomeEmail } from '@/lib/services/email'
 import { registerReferral } from '@/lib/actions/referrals'
 import { ensureBonusAccountExists } from '@/lib/actions/bonuses'
+import { logUserAuth } from '@/lib/actions/admin-user-extra'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -34,6 +35,11 @@ export async function GET(request: Request) {
       }
 
       console.log('[Callback] Session created for user:', sessionData.user?.id, sessionData.user?.email)
+
+      // Логируем вход
+      if (sessionData.user?.id) {
+        await logUserAuth(sessionData.user.id).catch(e => console.error('Auth logging failed:', e))
+      }
 
       // Если ref кода нет в URL, проверяем metadata
       if (!refCode && sessionData.user.user_metadata?.ref_code) {
