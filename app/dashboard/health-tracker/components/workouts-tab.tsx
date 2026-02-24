@@ -110,7 +110,16 @@ export function WorkoutsTab({
     // иначе берем из данных запроса. Это критично для checkWorkoutAccess.
     const currentProfile = (fullProfile || profileData) as Profile;
 
-    let currentWeek = weeks.length ? getCurrentWeek(weeks as any, currentProfile) : null
+    // ГАРАНТИРОВАННАЯ ПРОВЕРКА: Если в объекте профиля (даже реактивном) нет нужных полей, 
+    // GATEKEEPER может ошибочно блокировать доступ.
+    const effectiveProfile = {
+      ...profileData,
+      ...fullProfile,
+      subscription_tier: fullProfile?.subscription_tier || profileData?.subscription_tier || 'free',
+      subscription_status: fullProfile?.subscription_status || profileData?.subscription_status || 'inactive',
+    } as Profile;
+
+    let currentWeek = weeks.length ? getCurrentWeek(weeks as any, effectiveProfile) : null
     if (!currentWeek && weeks.length > 0) currentWeek = weeks[0] as any
 
     let sessionsWithAccess: WorkoutSessionWithAccess[] = []
@@ -118,7 +127,7 @@ export function WorkoutsTab({
       sessionsWithAccess = ((currentWeek as any).sessions || [])
         .filter((s: any) => !s.is_demo)
         .map((session: any) => {
-          const access = checkWorkoutAccess(session, currentProfile, currentWeek)
+          const access = checkWorkoutAccess(session, effectiveProfile, currentWeek)
           const completion = completions.find((c: any) => c.workout_session_id === session.id)
           return {
             ...session,
@@ -131,7 +140,7 @@ export function WorkoutsTab({
     }
 
     // Демо-тренировка отображается ТОЛЬКО для FREE
-    if (demoSessions.length > 0 && currentProfile?.subscription_tier === 'free') {
+    if (demoSessions.length > 0 && effectiveProfile?.subscription_tier === 'free') {
       const demoSession = demoSessions[0]
       const completion = completions.find((c: any) => c.workout_session_id === demoSession.id)
       const demoWithAccess: WorkoutSessionWithAccess = {
@@ -153,7 +162,7 @@ export function WorkoutsTab({
         } as ContentWeekWithSessions)
       : null
 
-    return { weekData: resolvedWeekData, profile: currentProfile }
+    return { weekData: resolvedWeekData, profile: effectiveProfile }
   }, [workoutsRaw, fullProfile]) // Зависим от полного объекта профиля
 
   useLayoutEffect(() => {
