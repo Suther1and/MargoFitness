@@ -4,6 +4,7 @@ import { InlineSelect, InlineNumberInput, InlineDateInput } from './inline-edit-
 import { updateUserProfile } from '@/lib/actions/admin-users'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/user-avatar'
+import { cn } from '@/lib/utils'
 
 interface UserTableRowProps {
   user: any
