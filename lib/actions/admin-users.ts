@@ -121,6 +121,7 @@ export async function updateUserProfile(
     subscription_expires_at?: string | null
     bonus_balance?: number
     cashback_level?: number
+    phone?: string | null
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -134,6 +135,7 @@ export async function updateUserProfile(
         subscription_tier: data.subscription_tier,
         subscription_status: data.subscription_status,
         subscription_expires_at: data.subscription_expires_at,
+        phone: data.phone,
       })
       .eq('id', userId)
 
