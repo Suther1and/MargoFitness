@@ -270,7 +270,7 @@ export async function getUsersStats(): Promise<{
       { count: newTodayCount },
       { count: newWeekCount },
       { count: activeSubsCount },
-      { data: tiers }
+      { data: tiersData }
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
@@ -280,10 +280,10 @@ export async function getUsersStats(): Promise<{
     ])
 
     const tierCounts = {
-      free: tiers?.filter(u => u.subscription_tier === 'free').length || 0,
-      basic: tiers?.filter(u => u.subscription_tier === 'basic').length || 0,
-      pro: tiers?.filter(u => u.subscription_tier === 'pro').length || 0,
-      elite: tiers?.filter(u => u.subscription_tier === 'elite').length || 0,
+      free: tiersData?.filter(u => u.subscription_tier === 'free').length || 0,
+      basic: tiersData?.filter(u => u.subscription_tier === 'basic').length || 0,
+      pro: tiersData?.filter(u => u.subscription_tier === 'pro').length || 0,
+      elite: tiersData?.filter(u => u.subscription_tier === 'elite').length || 0,
     }
 
     return { 
