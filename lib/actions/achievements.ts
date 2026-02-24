@@ -123,7 +123,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
       } catch { return false }
     }
 
-    const currentTierLevel = TIER_LEVELS[userProfile?.subscription_tier || 'free'] || 0
+    const currentTierLevel = TIER_LEVELS[(userProfile?.subscription_tier as 'free' | 'basic' | 'pro' | 'elite') || 'free'] || 0
     
     // 3. Расчет прогресса для каждого достижения
     const data: AchievementWithProgress[] = (allAchievements as Achievement[]).map((achievement: any) => {
@@ -263,7 +263,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
               break
             case 'subscription_tier':
               currentValue = currentTierLevel
-              targetValue = tierLevels[metadata.value] || 0
+              targetValue = TIER_LEVELS[metadata.value as 'free' | 'basic' | 'pro' | 'elite'] || 0
               break
             case 'subscription_duration':
               const maxMonths = allPurchases.reduce((max: number, p: any) => 
@@ -560,8 +560,8 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
           case 'achievement_count': earned = unlockedIds.size >= (targetVal || allAchievements!.length - 1); break
           case 'referral_mentor': earned = uRefs.filter((r: any) => r.status === 'first_purchase_made').length >= (targetVal || 1); break
           case 'subscription_tier': {
-            const currentTier = uProfile?.subscription_tier || 'free'
-            earned = (TIER_LEVELS[currentTier] ?? 0) >= (TIER_LEVELS[metadata.value] ?? 0)
+            const currentTier = (uProfile?.subscription_tier || 'free') as 'free' | 'basic' | 'pro' | 'elite'
+            earned = (TIER_LEVELS[currentTier] ?? 0) >= (TIER_LEVELS[metadata.value as 'free' | 'basic' | 'pro' | 'elite'] ?? 0)
             break
           }
           case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= targetVal); break

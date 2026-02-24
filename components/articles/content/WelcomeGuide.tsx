@@ -423,7 +423,10 @@ function FreeValueGrid() {
 }
 
 function WeeklyWorkoutFlow() {
-  const days = [
+  const days: Array<
+    | { day: string; type: "workout"; label: string; sub: string; pro?: boolean }
+    | { day: string; type: "rest" }
+  > = [
     { day: "Пн", type: "workout", label: "Тренировка 1", sub: "Ноги + Кор" },
     { day: "Вт", type: "rest" },
     { day: "Ср", type: "workout", label: "Тренировка 2", sub: "Верх + Кардио" },
@@ -431,7 +434,7 @@ function WeeklyWorkoutFlow() {
     { day: "Пт", type: "workout", label: "Тренировка 3", sub: "Всё тело", pro: true },
     { day: "Сб", type: "rest" },
     { day: "Вс", type: "rest" },
-  ] as const;
+  ];
 
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 md:p-6">
@@ -470,7 +473,7 @@ function WeeklyWorkoutFlow() {
                     {d.sub}
                   </span>
                 </div>
-                {d.pro && (
+                {'pro' in d && d.pro && (
                   <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400/60 ml-auto shrink-0">
                     Pro
                   </span>
@@ -510,7 +513,7 @@ function WeeklyWorkoutFlow() {
                   {d.label}
                 </p>
                 <p className="text-[8px] text-white/25 mt-0.5">{d.sub}</p>
-                {d.pro && (
+                {'pro' in d && d.pro && (
                   <span className="inline-block text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400/50 mt-1.5">
                     Pro
                   </span>

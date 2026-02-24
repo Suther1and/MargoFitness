@@ -1,0 +1,9 @@
+Fix TypeScript build errors for Vercel deployment
+
+- Remove unsupported 'side' prop from SheetContent
+- Fix type unions in WelcomeGuide days array
+- Add type assertions for TIER_LEVELS usage
+- Use 'unknown' cast for admin Supabase queries
+- Add 'as any' for non-typed database tables (auth_logs, admin_notes)
+- Fix subscription status enum types
+- Resolve metadata spread type issues

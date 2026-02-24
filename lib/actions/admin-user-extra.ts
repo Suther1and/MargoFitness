@@ -76,7 +76,7 @@ export async function logUserAuth(userId: string) {
     else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS'
     else if (userAgent.includes('Linux')) os = 'Linux'
 
-    await supabase.from('auth_logs').insert({
+    await (supabase as any).from('auth_logs').insert({
       user_id: userId,
       ip_address: ip,
       user_agent: userAgent,
@@ -103,7 +103,7 @@ export async function getUserAuthLogs(userId: string) {
     await checkAdmin()
     const supabase = createAdminClient()
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('auth_logs')
       .select('*')
       .eq('user_id', userId)
@@ -127,7 +127,7 @@ export async function getAdminNotes(userId: string) {
     await checkAdmin()
     const supabase = createAdminClient()
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('admin_notes')
       .select(`
         *,
@@ -153,7 +153,7 @@ export async function saveAdminNote(userId: string, content: string) {
     const admin = await checkAdmin()
     const supabase = createAdminClient()
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('admin_notes')
       .insert({
         user_id: userId,
@@ -181,7 +181,7 @@ export async function deleteAdminNote(noteId: string) {
     await checkAdmin()
     const supabase = createAdminClient()
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('admin_notes')
       .delete()
       .eq('id', noteId)

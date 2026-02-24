@@ -49,13 +49,13 @@ export async function getAllUsers(filters?: {
 
     // Применяем фильтры
     if (filters?.role && filters.role !== 'all') {
-      profileQuery = profileQuery.eq('role', filters.role)
+      profileQuery = profileQuery.eq('role', filters.role as 'user' | 'admin')
     }
     if (filters?.tier && filters.tier !== 'all') {
-      profileQuery = profileQuery.eq('subscription_tier', filters.tier)
+      profileQuery = profileQuery.eq('subscription_tier', filters.tier as 'free' | 'basic' | 'pro' | 'elite')
     }
     if (filters?.status && filters.status !== 'all') {
-      profileQuery = profileQuery.eq('subscription_status', filters.status)
+      profileQuery = profileQuery.eq('subscription_status', filters.status as 'active' | 'inactive' | 'canceled')
     }
     
     // Фильтр по истекшим подпискам

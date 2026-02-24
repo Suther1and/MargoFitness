@@ -45,7 +45,10 @@ export async function getUserFullDetails(userId: string) {
     // 3. Обогащаем данные покупок
     const enrichedPurchases = purchases.map((p: any) => {
       const tx = transactions.find((t: any) => t.yookassa_payment_id === p.payment_id || t.id === p.payment_id);
-      const meta = { ...tx?.metadata, ...p.metadata };
+      const meta = { 
+        ...(typeof tx?.metadata === 'object' && tx?.metadata !== null ? tx.metadata : {}), 
+        ...(typeof p.metadata === 'object' && p.metadata !== null ? p.metadata : {}) 
+      };
 
       const promoCode = p.promo_code || meta.promoCode || meta.promo_code;
       const promoData = promoCode ? promoMap.get(promoCode.toUpperCase()) : null;
@@ -87,9 +90,9 @@ export async function getUserFullDetails(userId: string) {
           bonus_balance: userBonuses?.balance ?? 0, 
           cashback_level: userBonuses?.cashback_level ?? 1,
           total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
-          age: diaryParams.age || profile.age, 
-          height: diaryParams.height || profile.height, 
-          weight: diaryParams.weight || profile.weight 
+          age: diaryParams.age || (profile as any).age, 
+          height: diaryParams.height || (profile as any).height, 
+          weight: diaryParams.weight || (profile as any).weight 
         },
         purchases: enrichedPurchases,
         bonusTransactions: bonusTransactions,

@@ -881,7 +881,6 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
   return (
     <Sheet open={!!userId} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
-        side="right"
         className="w-full sm:max-w-xl bg-[#0f0f13] border-white/[0.06] p-0 overflow-hidden flex flex-col"
         onPointerDownOutside={(e) => {
           const target = e.target as HTMLElement

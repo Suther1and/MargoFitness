@@ -21,7 +21,7 @@ export async function getAdminArticles() {
     return { data: [] as ArticleWithStats[], error: articlesResult.error }
   }
 
-  const reads = (readsResult.data ?? []) as { article_id: string }[]
+  const reads = (readsResult.data ?? []) as unknown as { article_id: string }[]
 
   // article_id in user_article_progress can be UUID or slug — match both
   const readCounts = reads.reduce<Record<string, number>>((acc, r) => {
@@ -139,7 +139,7 @@ export async function incrementArticleViewBySlug(slug: string) {
 
   if (!article?.id) return { success: false }
 
-  const { error } = await supabase.rpc('increment_article_view', {
+  const { error } = await (supabase as any).rpc('increment_article_view', {
     p_article_id: article.id,
     p_user_id: user?.id ?? null
   })
