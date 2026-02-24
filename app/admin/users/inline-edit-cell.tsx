@@ -39,7 +39,7 @@ export function InlineSelect({ value, options, onSave, displayClassName }: Inlin
   const currentOption = options.find(opt => opt.value === value)
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button 
           className={cn(
@@ -96,7 +96,7 @@ export function FilterSelect({ name, defaultValue, options, placeholder }: Filte
   const currentOption = options.find(opt => opt.value === defaultValue)
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button 
           className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500/40 transition-all cursor-pointer min-w-[100px] hover:bg-white/10 flex items-center justify-between gap-2"

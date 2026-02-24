@@ -66,7 +66,14 @@ export default async function AdminUsersPage({
   return (
     <div className="space-y-6 py-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <Link 
+          href="/admin" 
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
+        >
+          <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-xs font-bold uppercase tracking-widest">Назад</span>
+        </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white font-oswald uppercase">
             Пользователи
@@ -75,13 +82,6 @@ export default async function AdminUsersPage({
             Управление доступом и базой
           </p>
         </div>
-        <Link 
-          href="/admin" 
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
-        >
-          <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-xs font-bold uppercase tracking-widest">Назад</span>
-        </Link>
       </div>
 
       {/* Stats - Ultra Compact */}
