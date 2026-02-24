@@ -265,7 +265,10 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   }
 
   const handleSave = async (e?: React.MouseEvent | React.KeyboardEvent) => {
-    if (e) e.stopPropagation()
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     const parsed = parseDate(editValue)
     if (!parsed) {
       if (!editValue) {
@@ -298,6 +301,7 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
     if (e.key === 'Enter') {
       handleSave(e)
     } else if (e.key === 'Escape') {
+      e.preventDefault()
       e.stopPropagation()
       setIsEditing(false)
     }
@@ -423,7 +427,11 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
                 
                 <div className="flex gap-4">
                   <Button
-                    onClick={(e) => handleSave(e)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleSave(e)
+                    }}
                     disabled={isLoading}
                     className="flex-1 h-14 bg-orange-500 hover:bg-orange-600 text-white rounded-[1.25rem] text-base font-bold shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
                   >
@@ -431,6 +439,7 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
                   </Button>
                   <Button
                     onClick={(e) => {
+                      e.preventDefault()
                       e.stopPropagation()
                       onSave(null).then(() => setIsEditing(false))
                     }}

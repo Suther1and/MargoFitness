@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentProfile } from './profile'
 
 async function checkAdmin() {
@@ -14,9 +14,9 @@ async function checkAdmin() {
 export async function getUserFullDetails(userId: string) {
   try {
     await checkAdmin()
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
-    // 1. Получаем расширенный профиль (включая бонусы)
+    // 1. Получаем расширенный профиль (включая бонусы и настройки дневника)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(`
@@ -25,6 +25,9 @@ export async function getUserFullDetails(userId: string) {
           balance,
           cashback_level,
           total_spent_for_cashback
+        ),
+        diary_settings (
+          user_params
         )
       `)
       .eq('id', userId)
@@ -37,8 +40,11 @@ export async function getUserFullDetails(userId: string) {
       .from('user_purchases')
       .select(`
         *,
-        products:product_id (
-          name
+        products (
+          id,
+          name,
+          price,
+          type
         )
       `)
       .eq('user_id', userId)
@@ -46,7 +52,7 @@ export async function getUserFullDetails(userId: string) {
 
     if (purchasesError) console.error('Error fetching purchases:', purchasesError)
 
-    // 4. Получаем историю бонусов (транзакции)
+    // 3. Получаем историю бонусов (транзакции)
     const { data: bonusTransactions, error: bonusError } = await supabase
       .from('bonus_transactions')
       .select('*')
@@ -55,7 +61,7 @@ export async function getUserFullDetails(userId: string) {
 
     if (bonusError) console.error('Error fetching bonus transactions:', bonusError)
 
-    // 5. Получаем статистику тренировок (количество выполненных)
+    // 4. Получаем статистику тренировок (количество выполненных)
     const { data: workoutCompletions, error: workoutsError } = await supabase
       .from('user_workout_completions')
       .select('id')
@@ -63,16 +69,16 @@ export async function getUserFullDetails(userId: string) {
 
     if (workoutsError) console.error('Error fetching workouts count:', workoutsError)
 
-    // 6. Получаем статистику прочитанных статей
+    // 5. Получаем статистику прочитанных статей
     const { data: articleProgress, error: articlesError } = await supabase
       .from('user_article_progress')
-      .select('user_id')
+      .select('article_id')
       .eq('user_id', userId)
       .eq('is_read', true)
 
     if (articlesError) console.error('Error fetching articles count:', articlesError)
 
-    // 7. Получаем последние записи в дневнике (для общей инфо)
+    // 6. Получаем последние записи в дневнике (для общей инфо)
     const { data: lastDiaryEntries, error: diaryError } = await supabase
       .from('diary_entries')
       .select('date, metrics')
@@ -82,16 +88,35 @@ export async function getUserFullDetails(userId: string) {
 
     if (diaryError) console.error('Error fetching diary entries:', diaryError)
 
+    // Извлекаем параметры из diary_settings (это массив при join)
+    const diarySettings = Array.isArray(profile.diary_settings) 
+      ? profile.diary_settings[0] 
+      : profile.diary_settings
+    const diaryParams = (diarySettings as any)?.user_params || {}
+
+    // Извлекаем бонусы (это массив при join)
+    const userBonuses = Array.isArray(profile.user_bonuses)
+      ? profile.user_bonuses[0]
+      : profile.user_bonuses
+
+    // Фильтруем интенсивы и марафоны из покупок
+    const intensives = purchases?.filter((p: any) => p.products?.type === 'one_time_pack') || []
+
     return {
       success: true,
       data: {
         profile: {
           ...profile,
-          bonus_balance: profile.user_bonuses?.[0]?.balance ?? 0,
-          cashback_level: profile.user_bonuses?.[0]?.cashback_level ?? 1,
-          total_spent_for_cashback: profile.user_bonuses?.[0]?.total_spent_for_cashback ?? 0,
+          bonus_balance: userBonuses?.balance ?? 0,
+          cashback_level: userBonuses?.cashback_level ?? 1,
+          total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
+          // Приоритет параметрам из дневника
+          age: diaryParams.age || (profile as any).age,
+          height: diaryParams.height || (profile as any).height,
+          weight: diaryParams.weight || (profile as any).weight,
         },
         purchases: purchases || [],
+        intensives: intensives,
         bonusTransactions: bonusTransactions || [],
         stats: {
           workoutsCompleted: workoutCompletions?.length || 0,
