@@ -356,38 +356,41 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
               </div>
             </div>
 
-            {/* Stats — 2 rows */}
-            <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed space-y-0.5">
-              <div className="flex items-center gap-x-3">
+            {/* Stats — 1 row compact */}
+            <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed">
+              <div className="flex items-center gap-x-3 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Dumbbell className="w-3 h-3 text-orange-400/40" />
                   <b className="text-white/60 font-medium tabular-nums">
                     {stats?.workoutsCompleted || 0}
                   </b>{' '}
-                  {plural(stats?.workoutsCompleted || 0, 'тренировка', 'тренировки', 'тренировок')}
+                  трен.
                 </span>
                 <span className="flex items-center gap-1">
                   <BookOpen className="w-3 h-3 text-blue-400/40" />
                   <b className="text-white/60 font-medium tabular-nums">
                     {stats?.articlesRead || 0}
                   </b>{' '}
-                  {plural(stats?.articlesRead || 0, 'статья', 'статьи', 'статей')}
+                  стат.
                 </span>
                 <span className="flex items-center gap-1">
                   <ShoppingBag className="w-3 h-3 text-emerald-400/40" />
                   <b className="text-white/60 font-medium tabular-nums">
                     {purchases.length + intensives.length}
                   </b>{' '}
-                  {plural(purchases.length + intensives.length, 'покупка', 'покупки', 'покупок')}
+                  пок.
                 </span>
+                {(user.age || user.height || user.weight) && (
+                  <>
+                    <span className="text-white/[0.06]">|</span>
+                    <div className="flex items-center gap-x-2 text-white/35">
+                      {user.age && <span>{user.age} лет</span>}
+                      {user.height && <span>{user.height} см</span>}
+                      {user.weight && <span>{user.weight} кг</span>}
+                    </div>
+                  </>
+                )}
               </div>
-              {(user.age || user.height || user.weight) && (
-                <div className="flex items-center gap-x-3 text-white/35">
-                  {user.age && <span>{user.age} лет</span>}
-                  {user.height && <span>{user.height} см</span>}
-                  {user.weight && <span>{user.weight} кг</span>}
-                </div>
-              )}
             </div>
           </div>
 
@@ -642,39 +645,37 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                             <div className="text-[13px] text-white/80 font-medium truncate">
                               {p.products?.name || p.product_id}
                             </div>
-                            <div
-                              className="text-[10px] text-white/35 flex items-center gap-1 flex-wrap mt-0.5"
-                              suppressHydrationWarning
-                            >
-                              {fmtDate(p.created_at, { day: '2-digit', month: 'short' })}
-                              {p.payment_provider && (
-                                <>
-                                  <span className="text-white/10">·</span>
-                                  {p.payment_provider}
-                                </>
-                              )}
-                              {p.promo_code && (
-                                <>
-                                  <span className="text-white/10">·</span>
-                                  <span className="text-purple-400/70">
+                            <div className="flex flex-col gap-0.5 mt-0.5">
+                              <div className="text-[10px] flex items-center gap-1.5 flex-wrap">
+                                {p.promo_code && (
+                                  <span className="text-purple-400/70 font-medium">
                                     {p.promo_code}
                                     {p.promo_percent ? ` -${p.promo_percent}%` : ''}
                                   </span>
-                                  {p.promo_discount_amount > 0 && (
-                                    <span className="text-purple-400/50">
-                                      (-{p.promo_discount_amount.toLocaleString('ru-RU')} ₽)
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                              {p.bonus_amount_used > 0 && (
-                                <>
-                                  <span className="text-white/10">·</span>
-                                  <span className="text-yellow-400/60">
+                                )}
+                                {p.bonus_amount_used > 0 && (
+                                  <span className="text-yellow-400/60 font-medium">
                                     -{p.bonus_amount_used}👟
+                                    {p.products?.price > 0 && (
+                                      <span className="text-[9px] opacity-60 ml-0.5">
+                                        ({Math.round((p.bonus_amount_used / p.products.price) * 100)}%)
+                                      </span>
+                                    )}
                                   </span>
-                                </>
-                              )}
+                                )}
+                              </div>
+                              <div
+                                className="text-[10px] text-white/30 flex items-center gap-1 flex-wrap"
+                                suppressHydrationWarning
+                              >
+                                {fmtDate(p.created_at, { day: '2-digit', month: 'short' })}
+                                {p.payment_provider && (
+                                  <>
+                                    <span className="text-white/10">·</span>
+                                    {p.payment_provider}
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
