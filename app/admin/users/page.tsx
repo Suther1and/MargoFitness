@@ -39,7 +39,6 @@ export default async function AdminUsersPage({
     expired: params.expired || 'all',
   }
 
-  // Загружаем данные последовательно, чтобы легче отлавливать ошибки и не перегружать БД
   const usersResult = await getAllUsers({
     role: filters.role !== 'all' ? filters.role : undefined,
     tier: filters.tier !== 'all' ? filters.tier : undefined,
@@ -49,10 +48,14 @@ export default async function AdminUsersPage({
     expired: filters.expired === 'true' ? 'true' : filters.expired === 'false' ? 'false' : undefined,
   })
 
-  const statsResult = await getUsersStats()
+  // statsResult загружаем отдельно, если usersResult прошел успешно
+  let stats: any = null
+  if (usersResult.success) {
+    const statsResult = await getUsersStats()
+    stats = statsResult.stats
+  }
 
   const users = usersResult.users || []
-  const stats = statsResult.stats
 
   const statCards = stats ? [
     { label: 'Новые сегодня', value: (stats as any).newToday, color: 'text-orange-400', icon: Zap },

@@ -65,9 +65,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     }
 
     if (!profile) {
-      // Принудительно сбрасываем кэш для этого пользователя, если профиль не найден
-      revalidatePath('/dashboard')
-      revalidatePath('/workouts')
+      // Убрано: revalidatePath вызывает бесконечные циклы рендеринга при вызове из Layout
       // console.log('Profile not found, creating one...')
         
         const { data: newProfile, error: createError } = await supabase

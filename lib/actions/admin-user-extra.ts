@@ -38,7 +38,15 @@ export async function logUserAuth(userId: string) {
     
     try {
       if (ip !== 'unknown' && ip !== '127.0.0.1' && !ip.startsWith('192.168.')) {
-        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`)
+        // Добавляем таймаут, чтобы внешний сервис не вешал сервер
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 2000) // 2 секунды максимум
+
+        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`, {
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        
         const geoData = await geoRes.json()
         if (geoData.status === 'success') {
           country = geoData.country
@@ -46,7 +54,8 @@ export async function logUserAuth(userId: string) {
         }
       }
     } catch (e) {
-      console.error('Geo lookup failed:', e)
+      // Игнорируем ошибки гео, чтобы не ломать вход
+      // console.error('Geo lookup failed:', e)
     }
 
     // Простой парсинг User Agent

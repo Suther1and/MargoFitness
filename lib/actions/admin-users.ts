@@ -41,10 +41,10 @@ export async function getAllUsers(filters?: {
     await checkAdmin()
     const supabase = await createClient()
 
-    // Сначала получаем профили
+    // Оптимизированный запрос: получаем профили сразу с бонусами через join
     let profileQuery = supabase
       .from('profiles')
-      .select('*')
+      .select('*, user_bonuses(balance, cashback_level, total_spent_for_cashback)')
       .order('created_at', { ascending: false })
 
     // Применяем фильтры
@@ -87,27 +87,13 @@ export async function getAllUsers(filters?: {
       return { success: true, users: [] }
     }
 
-    const userIds = profiles.map(p => p.id)
-    const { data: bonuses, error: bonusError } = await supabase
-      .from('user_bonuses')
-      .select('user_id, balance, cashback_level, total_spent_for_cashback')
-      .in('user_id', userIds)
-
-    if (bonusError) {
-      console.error('Error fetching bonuses:', bonusError)
-    }
-
-    const bonusMap = new Map(
-      bonuses?.map((b: any) => [b.user_id, b]) || []
-    )
-
     let usersWithBonuses: ProfileWithBonuses[] = profiles.map((user: any) => {
-      const userBonuses = bonusMap.get(user.id)
+      const bonusData = Array.isArray(user.user_bonuses) ? user.user_bonuses[0] : user.user_bonuses
       return {
         ...user,
-        bonus_balance: userBonuses?.balance ?? 0,
-        cashback_level: userBonuses?.cashback_level ?? 1,
-        total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
+        bonus_balance: bonusData?.balance ?? 0,
+        cashback_level: bonusData?.cashback_level ?? 1,
+        total_spent_for_cashback: bonusData?.total_spent_for_cashback ?? 0,
       }
     })
 
@@ -247,20 +233,27 @@ export async function getUsersStats(): Promise<{
       { count: newTodayCount },
       { count: newWeekCount },
       { count: activeSubsCount },
-      { data: tiersData }
+      { data: freeCount },
+      { data: basicCount },
+      { data: proCount },
+      { data: eliteCount }
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active'),
-      supabase.from('profiles').select('subscription_tier')
+      // Считаем тиры отдельно через head запросы, чтобы не выкачивать все данные
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_tier', 'free'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_tier', 'basic'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_tier', 'pro'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_tier', 'elite'),
     ])
 
     const tierCounts = {
-      free: tiersData?.filter(u => u.subscription_tier === 'free').length || 0,
-      basic: tiersData?.filter(u => u.subscription_tier === 'basic').length || 0,
-      pro: tiersData?.filter(u => u.subscription_tier === 'pro').length || 0,
-      elite: tiersData?.filter(u => u.subscription_tier === 'elite').length || 0,
+      free: (freeCount as any)?.count || 0,
+      basic: (basicCount as any)?.count || 0,
+      pro: (proCount as any)?.count || 0,
+      elite: (eliteCount as any)?.count || 0,
     }
 
     return { 
