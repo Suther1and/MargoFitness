@@ -51,6 +51,11 @@ export function UserTableRow({ user }: UserTableRowProps) {
           updateEvent.subscription_status = 'inactive';
         }
 
+        // Если мы установили дату, уведомляем об изменении статуса
+        if (field === 'subscription_expires_at' && value !== null) {
+          updateEvent.subscription_status = 'active';
+        }
+
         window.dispatchEvent(new CustomEvent('subscription-updated', { 
           detail: updateEvent 
         }))

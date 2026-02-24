@@ -44,7 +44,7 @@ export async function getAllUsers(filters?: {
     // Сначала получаем профили
     let profileQuery = supabase
       .from('profiles')
-      .select('*')
+      .select('id, email, full_name, avatar_url, role, subscription_tier, subscription_status, subscription_expires_at, created_at')
       .order('created_at', { ascending: false })
 
     // Применяем фильтры
@@ -79,7 +79,12 @@ export async function getAllUsers(filters?: {
     const { data: profiles, error: profileError } = await profileQuery
 
     if (profileError) {
-      console.error('Error fetching users:', profileError)
+      console.error('Error fetching users:', {
+        code: profileError.code,
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint
+      })
       return { success: false, error: profileError.message }
     }
 
@@ -238,6 +243,7 @@ export async function getUsersStats(): Promise<{
     await checkAdmin()
     const supabase = await createClient()
 
+    // Используем параллельные запросы count вместо загрузки всех данных
     const now = new Date()
     const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString()
     const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString()
