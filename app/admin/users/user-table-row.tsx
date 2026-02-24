@@ -20,6 +20,10 @@ export function UserTableRow({ user }: UserTableRowProps) {
     const result = await updateUserProfile(user.id, updateData)
     
     if (result.success) {
+      // Генерируем событие для обновления профиля в других вкладках/компонентах
+      window.dispatchEvent(new CustomEvent('subscription-updated', { 
+        detail: { userId: user.id, field, value } 
+      }))
       router.refresh()
     } else {
       console.error('Error updating user:', result.error)

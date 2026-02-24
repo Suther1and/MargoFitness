@@ -93,10 +93,10 @@ export function WorkoutsTab({
     queryKey: ['workouts-data', userId],
     queryFn: () => getWorkoutsData(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 30,
+    staleTime: 0, // Устанавливаем 0, чтобы всегда проверять актуальность доступа при монтировании
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   })
 
   const { weekData, profile } = useMemo(() => {

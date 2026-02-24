@@ -28,7 +28,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('id', user.id)
       .maybeSingle()
 
@@ -39,6 +39,9 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     }
 
     if (!profile) {
+      // Принудительно сбрасываем кэш для этого пользователя, если профиль не найден
+      revalidatePath('/dashboard')
+      revalidatePath('/workouts')
       // console.log('Profile not found, creating one...')
         
         const { data: newProfile, error: createError } = await supabase

@@ -141,8 +141,34 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       setUpgradeModalOpen(true)
     }
     window.addEventListener('open-upgrade-modal', handleOpenUpgrade)
-    return () => window.removeEventListener('open-upgrade-modal', handleOpenUpgrade)
-  }, [])
+
+    // Слушатель для обновления профиля при изменении уровня подписки
+    const handleSubscriptionUpdate = () => {
+      console.log('[HealthTracker] Subscription update event received, refreshing profile and cache...')
+      
+      // Сбрасываем кеш React Query для тренировок и статей
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ['workouts-data', userId] })
+        queryClient.invalidateQueries({ queryKey: ['articles-list'] })
+      }
+      
+      // Обновляем профиль принудительно
+      import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
+        if (p) {
+          console.log('[HealthTracker] Profile refreshed after subscription update:', p.subscription_tier)
+          setProfile(p)
+          // Дополнительно уведомляем другие компоненты о смене профиля
+          window.dispatchEvent(new CustomEvent('profile-refreshed', { detail: p }))
+        }
+      })
+    }
+    window.addEventListener('subscription-updated', handleSubscriptionUpdate)
+
+    return () => {
+      window.removeEventListener('open-upgrade-modal', handleOpenUpgrade)
+      window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
+    }
+  }, [userId, queryClient])
   
   useEffect(() => {
     const supabase = createClient()
@@ -301,10 +327,11 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       
       return { dbArticles: dbArticles || [], readStatuses };
     },
-    // Данные считаются свежими 5 минут — при заходе на страницу через 5+ мин идёт тихий фоновый refetch
-    staleTime: 1000 * 60 * 5,
+    // Данные считаются устаревшими сразу (staleTime: 0), чтобы гарантировать актуальность доступа.
+    // Благодаря gcTime и механизму SWR пользователь всё равно видит контент мгновенно.
+    staleTime: 0,
     gcTime: 1000 * 60 * 60 * 24,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     // true = перезапрашивает в фоне если данные устарели (пользователь видит старые мгновенно, а новые появляются бесшумно)
     refetchOnMount: true,
   })

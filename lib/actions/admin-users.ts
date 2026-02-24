@@ -209,6 +209,9 @@ export async function updateUserProfile(
     revalidatePath('/admin/users')
     revalidatePath('/admin')
     revalidatePath('/dashboard/bonuses')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/health-tracker')
+    revalidatePath('/workouts')
 
     return { success: true }
   } catch (error: any) {
