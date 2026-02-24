@@ -32,20 +32,20 @@ export default async function AdminUsersPage({
     role: params.role || 'all',
     tier: params.tier || 'all',
     status: params.status || 'all',
-    search: params.search || '',
+    search: (params.search || '').trim(),
     cashback_level: params.cashback_level || 'all',
   }
 
-  const [usersResult, statsResult] = await Promise.all([
-    getAllUsers({
-      role: filters.role !== 'all' ? filters.role : undefined,
-      tier: filters.tier !== 'all' ? filters.tier : undefined,
-      status: filters.status !== 'all' ? filters.status : undefined,
-      search: filters.search || undefined,
-      cashback_level: filters.cashback_level !== 'all' ? filters.cashback_level : undefined,
-    }),
-    getUsersStats(),
-  ])
+  // Загружаем данные последовательно, чтобы легче отлавливать ошибки и не перегружать БД
+  const usersResult = await getAllUsers({
+    role: filters.role !== 'all' ? filters.role : undefined,
+    tier: filters.tier !== 'all' ? filters.tier : undefined,
+    status: filters.status !== 'all' ? filters.status : undefined,
+    search: filters.search || undefined,
+    cashback_level: filters.cashback_level !== 'all' ? filters.cashback_level : undefined,
+  })
+
+  const statsResult = await getUsersStats()
 
   const users = usersResult.users || []
   const stats = statsResult.stats

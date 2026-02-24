@@ -48,39 +48,52 @@ export async function getAllUsers(filters?: {
 
     // Применяем фильтры
     if (filters?.role && filters.role !== 'all') {
-      profileQuery = profileQuery.eq('role', filters.role as 'user' | 'admin')
+      profileQuery = profileQuery.eq('role', filters.role)
     }
     if (filters?.tier && filters.tier !== 'all') {
-      profileQuery = profileQuery.eq('subscription_tier', filters.tier as any)
+      profileQuery = profileQuery.eq('subscription_tier', filters.tier)
     }
     if (filters?.status && filters.status !== 'all') {
-      profileQuery = profileQuery.eq('subscription_status', filters.status as any)
+      profileQuery = profileQuery.eq('subscription_status', filters.status)
     }
     if (filters?.search) {
-      profileQuery = profileQuery.ilike('email', `%${filters.search}%`)
+      const searchTerm = filters.search.trim()
+      if (searchTerm) {
+        profileQuery = profileQuery.or(`email.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`)
+      }
     }
 
     const { data: profiles, error: profileError } = await profileQuery
 
     if (profileError) {
-      console.error('Error fetching users:', profileError)
+      console.error('Error fetching users:', {
+        code: profileError.code,
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint
+      })
       return { success: false, error: profileError.message }
     }
 
-    // Получаем все бонусные счета с фильтром по уровню кешбека
-    let bonusQuery = supabase
-      .from('user_bonuses')
-      .select('user_id, balance, cashback_level, total_spent_for_cashback')
-
-    if (filters?.cashback_level && filters.cashback_level !== 'all') {
-      bonusQuery = bonusQuery.eq('cashback_level', parseInt(filters.cashback_level))
+    // Если профилей нет, возвращаем пустой результат сразу
+    if (!profiles || profiles.length === 0) {
+      return { success: true, users: [] }
     }
 
-    const { data: bonuses, error: bonusError } = await bonusQuery
+    // Получаем бонусные счета только для найденных пользователей
+    const userIds = profiles.map(p => p.id)
+    
+    if (userIds.length === 0) {
+      return { success: true, users: [] }
+    }
+
+    const { data: bonuses, error: bonusError } = await supabase
+      .from('user_bonuses')
+      .select('user_id, balance, cashback_level, total_spent_for_cashback')
+      .in('user_id', userIds)
 
     if (bonusError) {
       console.error('Error fetching bonuses:', bonusError)
-      // Не прерываем выполнение, просто логируем
     }
 
     // Создаем Map для быстрого доступа
@@ -89,7 +102,7 @@ export async function getAllUsers(filters?: {
     )
 
     // Объединяем данные
-    let usersWithBonuses: ProfileWithBonuses[] = profiles?.map((user: any) => {
+    let usersWithBonuses: ProfileWithBonuses[] = profiles.map((user: any) => {
       const userBonuses = bonusMap.get(user.id)
       return {
         ...user,
@@ -97,9 +110,9 @@ export async function getAllUsers(filters?: {
         cashback_level: userBonuses?.cashback_level ?? 1,
         total_spent_for_cashback: userBonuses?.total_spent_for_cashback ?? 0,
       }
-    }) || []
+    })
 
-    // Если есть фильтр по уровню кешбека, фильтруем пользователей у которых нет бонусного счета
+    // Если есть фильтр по уровню кешбека, фильтруем результат
     if (filters?.cashback_level && filters.cashback_level !== 'all') {
       const targetLevel = parseInt(filters.cashback_level)
       usersWithBonuses = usersWithBonuses.filter((user: any) => user.cashback_level === targetLevel)
@@ -107,6 +120,7 @@ export async function getAllUsers(filters?: {
 
     return { success: true, users: usersWithBonuses }
   } catch (error: any) {
+    console.error('SERVER ACTION ERROR (getAllUsers):', error)
     return { success: false, error: error.message }
   }
 }
@@ -206,12 +220,12 @@ export async function updateUserProfile(
       }
     }
 
-    // Оставляем только один вызов для сброса кэша всего приложения, 
-    // чтобы избежать таймаутов при множественных вызовах revalidatePath
-    revalidatePath('/', 'layout')
+    // Очищаем кэш только страницы пользователей, чтобы изменения сразу отобразились
+    revalidatePath('/admin/users', 'page')
 
     return { success: true }
   } catch (error: any) {
+    console.error('CRITICAL ERROR in updateUserProfile:', error)
     return { success: false, error: error.message }
   }
 }
@@ -233,27 +247,35 @@ export async function getUsersStats(): Promise<{
     await checkAdmin()
     const supabase = await createClient()
 
-    const { data: users, error } = await supabase
-      .from('profiles')
-      .select('role, subscription_tier, subscription_status')
+    // Используем параллельные запросы count вместо загрузки всех данных
+    const [
+      { count: total },
+      { count: admins },
+      { count: active },
+      { data: tiers }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'admin'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active'),
+      supabase.from('profiles').select('subscription_tier')
+    ])
 
-    if (error) {
-      return { success: false, error: error.message }
+    const tierCounts = {
+      free: tiers?.filter(u => u.subscription_tier === 'free').length || 0,
+      basic: tiers?.filter(u => u.subscription_tier === 'basic').length || 0,
+      pro: tiers?.filter(u => u.subscription_tier === 'pro').length || 0,
+      elite: tiers?.filter(u => u.subscription_tier === 'elite').length || 0,
     }
 
-    const stats = {
-      total: users.length,
-      admins: users.filter((u: any) => u.role === 'admin').length,
-      activeSubscriptions: users.filter((u: any) => u.subscription_status === 'active').length,
-      tierCounts: {
-        free: users.filter((u: any) => u.subscription_tier === 'free').length,
-        basic: users.filter((u: any) => u.subscription_tier === 'basic').length,
-        pro: users.filter((u: any) => u.subscription_tier === 'pro').length,
-        elite: users.filter((u: any) => u.subscription_tier === 'elite').length,
-      }
+    return { 
+      success: true, 
+      stats: {
+        total: total || 0,
+        admins: admins || 0,
+        activeSubscriptions: active || 0,
+        tierCounts
+      } 
     }
-
-    return { success: true, stats }
   } catch (error: any) {
     return { success: false, error: error.message }
   }

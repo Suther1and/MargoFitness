@@ -154,9 +154,6 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState('') // Формат ДД.ММ.ГГГГ
   const [isLoading, setIsLoading] = useState(false)
-  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 })
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const [popupPosition, setPopupPosition] = useState<'top' | 'bottom'>('top')
 
   const formatDate = (date: Date) => {
     const d = String(date.getDate()).padStart(2, '0')
@@ -173,22 +170,16 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   }
 
   useEffect(() => {
-    if (isEditing && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setCoords({
-        top: rect.top + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      })
-      
-      if (rect.top < 400) {
-        setPopupPosition('bottom')
-      } else {
-        setPopupPosition('top')
-      }
-      
+    if (isEditing) {
       const initialDate = value ? new Date(value) : new Date()
       setEditValue(formatDate(initialDate))
+      // Блокируем скролл при открытом поп-апе
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
     }
   }, [isEditing, value])
 
@@ -251,7 +242,6 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
   return (
     <>
       <button
-        ref={buttonRef}
         onClick={() => !disabled && setIsEditing(true)}
         disabled={disabled}
         title={disabled ? disabledMessage : ''}
@@ -274,133 +264,147 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
 
       {isEditing && typeof document !== 'undefined' && createPortal(
         <>
-          <div className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-[4px] animate-in fade-in duration-300" onClick={() => setIsEditing(false)} />
           <div 
-            style={{
-              position: 'absolute',
-              top: popupPosition === 'top' ? coords.top - 12 : coords.top + 44,
-              left: coords.left + (coords.width / 2),
-              transform: 'translateX(-50%)',
-              transformOrigin: popupPosition === 'top' ? 'bottom center' : 'top center'
-            }}
-            className={cn(
-              "z-[9999] min-w-[320px] bg-[#1a1a24] border border-white/10 rounded-[2rem] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in-95 duration-200",
-              popupPosition === 'top' ? "-translate-y-full" : ""
-            )}
+            className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-[8px] animate-in fade-in duration-300 flex items-center justify-center p-4" 
+            onClick={() => setIsEditing(false)}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-orange-500/10">
-                  <CalendarIcon className="w-4 h-4 text-orange-500" />
+            <div 
+              className={cn(
+                "relative z-[9999] w-full max-w-[360px] bg-[#1a1a24] border border-white/10 rounded-[2.5rem] p-8 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-orange-500/10 ring-1 ring-orange-500/20">
+                    <CalendarIcon className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <span className="block text-base font-bold text-white uppercase tracking-wider font-oswald">Срок подписки</span>
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Управление доступом</span>
+                  </div>
                 </div>
-                <span className="text-sm font-bold text-white uppercase tracking-wider font-oswald">Срок подписки</span>
-              </div>
-              <button 
-                onClick={() => setIsEditing(false)}
-                className="p-2 hover:bg-white/5 rounded-xl transition-colors text-white/20 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Quick Adjust Grid */}
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: '7 дн', val: 7 },
-                  { label: '1 мес', val: 30 },
-                  { label: '3 мес', val: 90 }
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => adjustDate(item.val)}
-                    className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-white/5 border border-white/5 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all group active:scale-95"
-                  >
-                    <div className="flex items-center gap-0.5 text-white group-hover:text-orange-400 mb-0.5">
-                      <Plus className="w-3 h-3" />
-                      <span className="text-xs font-bold">{item.label}</span>
-                    </div>
-                  </button>
-                ))}
+                <button 
+                  onClick={() => setIsEditing(false)}
+                  className="p-2 hover:bg-white/5 rounded-xl transition-colors text-white/20 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: '7 дн', val: -7 },
-                  { label: '1 мес', val: -30 },
-                  { label: '3 мес', val: -90 }
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => adjustDate(item.val)}
-                    className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-white/5 border border-white/5 hover:border-rose-500/30 hover:bg-rose-500/10 transition-all group active:scale-95"
-                  >
-                    <div className="flex items-center gap-0.5 text-white/40 group-hover:text-rose-400 mb-0.5">
-                      <Minus className="w-3 h-3" />
-                      <span className="text-xs font-bold">{item.label}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Manual Input */}
-            <div className="space-y-4">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Clock className="w-4 h-4 text-white/20 group-focus-within:text-orange-500 transition-colors" />
+              {/* Quick Adjust Grid */}
+              <div className="space-y-4 mb-8">
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: '7 дн', val: 7 },
+                    { label: '1 мес', val: 30 },
+                    { label: '3 мес', val: 90 }
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => adjustDate(item.val)}
+                      className="flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-white/5 border border-white/5 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all group active:scale-95"
+                    >
+                      <div className="flex items-center gap-1 text-white group-hover:text-orange-400 mb-0.5">
+                        <Plus className="w-3.5 h-3.5" />
+                        <span className="text-xs font-bold">{item.label}</span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <Input
-                  type="text"
-                  value={editValue}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="ДД.ММ.ГГГГ"
-                  disabled={isLoading}
-                  className="w-full pl-11 pr-4 h-12 text-sm bg-white/5 border-white/10 text-white rounded-2xl focus:ring-orange-500/50 focus:border-orange-500/50 transition-all font-medium tracking-wider"
-                  autoFocus
-                />
-              </div>
-              
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleSave}
-                  disabled={isLoading}
-                  className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl text-sm font-bold shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
-                >
-                  {isLoading ? '...' : 'Применить'}
-                </Button>
-                <Button
-                  onClick={() => onSave(null).then(() => setIsEditing(false))}
-                  disabled={isLoading}
-                  variant="ghost"
-                  className="h-12 px-4 hover:bg-rose-500/10 hover:text-rose-400 text-white/20 rounded-2xl text-xs font-bold transition-all"
-                >
-                  Сброс
-                </Button>
-              </div>
-            </div>
 
-            {/* Footer Info */}
-            <div className="mt-6 pt-4 border-t border-white/5 text-center space-y-1">
-              <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
-                {(() => {
-                  const parsed = parseDate(editValue)
-                  if (!parsed) return 'Введите корректную дату'
-                  const now = new Date()
-                  now.setHours(0, 0, 0, 0)
-                  const diffTime = parsed.getTime() - now.getTime()
-                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-                  
-                  let statusText = ''
-                  if (diffDays < 0) statusText = `Истекла ${Math.abs(diffDays)} дн. назад`
-                  else if (diffDays === 0) statusText = 'Истекает сегодня'
-                  else statusText = `Осталось: ${diffDays} дн.`
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: '7 дн', val: -7 },
+                    { label: '1 мес', val: -30 },
+                    { label: '3 мес', val: -90 }
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => adjustDate(item.val)}
+                      className="flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-white/5 border border-white/5 hover:border-rose-500/30 hover:bg-rose-500/10 transition-all group active:scale-95"
+                    >
+                      <div className="flex items-center gap-1 text-white/40 group-hover:text-rose-400 mb-0.5">
+                        <Minus className="w-3.5 h-3.5" />
+                        <span className="text-xs font-bold">{item.label}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                  return `Новая дата: ${editValue} • ${statusText}`
-                })()}
-              </p>
+              {/* Manual Input */}
+              <div className="space-y-5">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <Clock className="w-5 h-5 text-white/20 group-focus-within:text-orange-500 transition-colors" />
+                  </div>
+                  <Input
+                    type="text"
+                    value={editValue}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="ДД.ММ.ГГГГ"
+                    disabled={isLoading}
+                    className="w-full pl-12 pr-5 h-14 text-base bg-white/5 border-white/10 text-white rounded-[1.25rem] focus:ring-orange-500/50 focus:border-orange-500/50 transition-all font-medium tracking-widest"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="flex-1 h-14 bg-orange-500 hover:bg-orange-600 text-white rounded-[1.25rem] text-base font-bold shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                  >
+                    {isLoading ? '...' : 'Применить'}
+                  </Button>
+                  <Button
+                    onClick={() => onSave(null).then(() => setIsEditing(false))}
+                    disabled={isLoading}
+                    variant="ghost"
+                    className="h-14 px-6 hover:bg-rose-500/10 hover:text-rose-400 text-white/20 rounded-[1.25rem] text-sm font-bold transition-all"
+                  >
+                    Сброс
+                  </Button>
+                </div>
+              </div>
+
+              {/* Footer Info */}
+              <div className="mt-8 pt-6 border-t border-white/5 text-center space-y-2">
+                <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] font-bold">
+                  {(() => {
+                    const parsed = parseDate(editValue)
+                    if (!parsed) return 'Введите корректную дату'
+                    const now = new Date()
+                    now.setHours(0, 0, 0, 0)
+                    const diffTime = parsed.getTime() - now.getTime()
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                    
+                    let statusText = ''
+                    if (diffDays < 0) statusText = `Истекла ${Math.abs(diffDays)} дн. назад`
+                    else if (diffDays === 0) statusText = 'Истекает сегодня'
+                    else statusText = `Осталось: ${diffDays} дн.`
+
+                    return `Новая дата: ${editValue}`
+                  })()}
+                </p>
+                <p className="text-[10px] text-orange-500/60 uppercase tracking-widest font-bold">
+                  {(() => {
+                    const parsed = parseDate(editValue)
+                    if (!parsed) return ''
+                    const now = new Date()
+                    now.setHours(0, 0, 0, 0)
+                    const diffTime = parsed.getTime() - now.getTime()
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                    
+                    if (diffDays < 0) return `Истекла ${Math.abs(diffDays)} дн. назад`
+                    if (diffDays === 0) return 'Истекает сегодня'
+                    return `Доступ на ${diffDays} дн.`
+                  })()}
+                </p>
+              </div>
             </div>
           </div>
         </>,
