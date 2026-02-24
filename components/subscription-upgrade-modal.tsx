@@ -211,27 +211,30 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
       const diffTime = expiresAt.getTime() - now.getTime()
       const remainingDays = diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0
       
+      const effectiveCurrentTier = remainingDays > 0 ? (profile.subscription_tier as SubscriptionTier) : 'free'
+      const effectiveCurrentTierLevel = TIER_LEVELS[effectiveCurrentTier] ?? 0
+      
       // Сохраняем данные профиля для локальных расчетов
       profileDataRef.current = {
-        currentTier: profile.subscription_tier as SubscriptionTier,
-        currentTierLevel,
+        currentTier: effectiveCurrentTier,
+        currentTierLevel: effectiveCurrentTierLevel,
         expiresAt: profile.subscription_expires_at,
         remainingDays,
       }
       
-      // Если уже Elite - апгрейда нет
-      if (currentTierLevel >= 3) {
+      // Если уже Elite и подписка активна - апгрейда нет
+      if (effectiveCurrentTierLevel >= 3) {
         setAvailableTiersData([])
         setLoading(false)
         return
       }
       
-      // Получить продукты всех тарифов выше текущего
+      // Получить продукты всех тарифов выше текущего (эффективного)
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select('*')
         .eq('type', 'subscription_tier')
-        .gt('tier_level', currentTierLevel)
+        .gt('tier_level', effectiveCurrentTierLevel)
         .eq('is_active', true)
         .order('tier_level', { ascending: true })
         .order('duration_months', { ascending: true })
@@ -285,7 +288,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         
         if (conversion) {
           setConversionData({
-            newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+            newExpirationDate: calculateNewExpirationDate(conversion.totalDays),
             convertedDays: conversion.convertedDays,
             newProductDays: conversion.newProductDays,
             totalDays: conversion.totalDays,
@@ -325,7 +328,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     
     if (conversion) {
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+        newExpirationDate: calculateNewExpirationDate(conversion.totalDays),
         convertedDays: conversion.convertedDays,
         newProductDays: conversion.newProductDays,
         totalDays: conversion.totalDays,
@@ -348,7 +351,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     
     if (conversion) {
       setConversionData({
-        newExpirationDate: new Date(new Date().getTime() + conversion.totalDays * 86400000).toISOString(),
+        newExpirationDate: calculateNewExpirationDate(conversion.totalDays),
         convertedDays: conversion.convertedDays,
         newProductDays: conversion.newProductDays,
         totalDays: conversion.totalDays,
@@ -364,13 +367,20 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
     return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
-  const isFreeUser = profileDataRef.current?.currentTier?.toUpperCase() === 'FREE' || currentTier?.toUpperCase() === 'FREE'
+  const isFreeUser = profileDataRef.current?.currentTier?.toUpperCase() === 'FREE'
   const currentConfig = selectedTier 
     ? tierConfig[selectedTier as keyof typeof tierConfig] 
     : (availableTiersData.length === 0 ? tierConfig.elite : null)
   const products = availableTiersData.find(t => t.tier === selectedTier)?.products || []
   
   const selectedPlanInfo = selectedTier ? SUBSCRIPTION_PLANS[selectedTier.toUpperCase() as SubscriptionLevel] : null
+
+  const calculateNewExpirationDate = (totalDays: number) => {
+    const now = new Date();
+    const futureTime = now.getTime() + totalDays * 86400000;
+    if (isNaN(futureTime)) return now.toISOString();
+    return new Date(futureTime).toISOString();
+  }
 
   return (
     <>
