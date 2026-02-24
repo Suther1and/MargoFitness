@@ -81,14 +81,6 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, isLocked, editFor
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-amber-500/20 group-hover/locked:bg-amber-500/10 transition-colors">
             <Lock className="w-3.5 h-3.5 text-amber-400/60 group-hover/locked:text-amber-400 transition-colors" strokeWidth={2} />
           </div>
-          {/* Кнопка удаления — доступна даже когда карточка залочена */}
-          <button
-            onClick={(e) => { e.stopPropagation(); deleteHabit(habit.id) }}
-            className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors"
-            title="Удалить привычку"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
         </div>
       )}
       <AnimatePresence mode="popLayout" initial={false}>
@@ -289,7 +281,7 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, isLocked, editFor
                 <button
                   onClick={() => deleteHabit(habit.id)}
                   className={cn(
-                    "p-2 rounded-lg transition-all",
+                    "p-2 rounded-lg transition-all relative z-30",
                     isConfirming
                       ? "bg-red-500/90 text-white scale-110"
                       : "bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-400"
@@ -469,8 +461,75 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
           <div className="h-px bg-white/5 w-full" />
         </div>
 
+        {/* LOCKED STATE — заменяет всю форму при достижении лимита */}
+        {activeHabitsCount >= MAX_ACTIVE_HABITS && (() => {
+          const chips = getUpgradeChips(effectiveTier, HABIT_LIMITS)
+          const chipColors: Record<string, string> = {
+            basic: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+            pro: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+            elite: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+          }
+          const tierNames: Record<string, string> = { basic: 'Basic', pro: 'Pro', elite: 'Elite' }
+          return (
+            <div
+              onClick={() => window.dispatchEvent(new CustomEvent('open-upgrade-modal'))}
+              className="bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl cursor-pointer group/lockedform"
+            >
+              {/* Desktop: горизонтальный layout */}
+              <div className="hidden md:flex items-center gap-6 h-[68px]">
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover/lockedform:bg-amber-500/15 transition-colors">
+                    <Lock className="w-4 h-4 text-amber-400/70 group-hover/lockedform:text-amber-400 transition-colors" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Лимит достигнут</p>
+                    <p className="text-[9px] font-bold text-white/20 mt-0.5">{activeHabitsCount} / {MAX_ACTIVE_HABITS} привычек</p>
+                  </div>
+                </div>
+
+                {chips.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-1">
+                    {chips.map(({ tier, delta }) => (
+                      <span key={tier} className={cn("text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border", chipColors[tier])}>
+                        +{delta} {tierNames[tier]}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="ml-auto shrink-0 h-[46px] px-8 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest bg-white/5 text-amber-400/80 border border-amber-500/20 group-hover/lockedform:bg-amber-500/10 group-hover/lockedform:text-amber-400 transition-all">
+                  <Lock className="w-3.5 h-3.5" />
+                  Улучшить тариф
+                </div>
+              </div>
+
+              {/* Mobile: компактный вертикальный layout */}
+              <div className="md:hidden flex items-center gap-4 py-1">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
+                  <Lock className="w-4 h-4 text-amber-400/70" strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Лимит: {activeHabitsCount}/{MAX_ACTIVE_HABITS}</p>
+                  {chips.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1 flex-wrap">
+                      {chips.map(({ tier, delta }) => (
+                        <span key={tier} className={cn("text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border", chipColors[tier])}>
+                          +{delta} {tierNames[tier]}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="shrink-0 text-[9px] font-black uppercase tracking-wider text-amber-400/70 whitespace-nowrap">
+                  Улучшить →
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
         {/* DESKTOP VERSION */}
-        <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl md:backdrop-blur-md">
+        {activeHabitsCount < MAX_ACTIVE_HABITS && <div className="hidden md:block bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-4 md:pt-3 md:pb-5 md:px-6 shadow-xl md:backdrop-blur-md">
           <div className="flex flex-col xl:flex-row gap-6 xl:items-end">
             <div className="flex-[0.8] space-y-1.5">
               <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/20 ml-1">Что планируем?</span>
@@ -544,36 +603,7 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
                 </div>
               </div>
 
-              {activeHabitsCount >= MAX_ACTIVE_HABITS ? (
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('open-upgrade-modal'))}
-                    className="h-[46px] px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg font-black text-[10px] uppercase tracking-widest bg-white/5 text-amber-400/80 border border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-400 active:scale-95 cursor-pointer"
-                  >
-                    <Lock className="w-4 h-4" />
-                    Улучшите тариф →
-                  </button>
-                  {(() => {
-                    const chips = getUpgradeChips(effectiveTier, HABIT_LIMITS)
-                    const chipColors: Record<string, string> = {
-                      basic: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                      pro: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                      elite: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-                    }
-                    const tierNames: Record<string, string> = { basic: 'Basic', pro: 'Pro', elite: 'Elite' }
-                    return chips.length > 0 ? (
-                      <div className="flex items-center gap-1 flex-wrap justify-end">
-                        {chips.map(({ tier, delta }) => (
-                          <span key={tier} className={cn("text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border", chipColors[tier])}>
-                            +{delta} {tierNames[tier]}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null
-                  })()}
-                </div>
-              ) : (
-                <button
+              <button
                   onClick={handleAdd}
                   disabled={newHabit.title.trim().length < 2}
                   className={cn(
@@ -586,13 +616,12 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
                   <Plus className="w-4 h-4" strokeWidth={3} />
                   Добавить
                 </button>
-              )}
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* MOBILE VERSION */}
-        <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl">
+        {activeHabitsCount < MAX_ACTIVE_HABITS && <div className="md:hidden bg-white/[0.02] border border-white/5 rounded-[2rem] px-4 py-5 shadow-xl">
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Название</span>
@@ -683,51 +712,21 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
               </div>
             </div>
 
-            {activeHabitsCount >= MAX_ACTIVE_HABITS ? (
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('open-upgrade-modal'))}
-                  className="h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg font-black text-[10px] uppercase tracking-widest bg-white/5 text-amber-400/80 border border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-400 active:scale-95 cursor-pointer"
-                >
-                  <Lock className="w-4 h-4" />
-                  Улучшите тариф →
-                </button>
-                {(() => {
-                  const chips = getUpgradeChips(effectiveTier, HABIT_LIMITS)
-                  const chipColors: Record<string, string> = {
-                    basic: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                    pro: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                    elite: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-                  }
-                  const tierNames: Record<string, string> = { basic: 'Basic', pro: 'Pro', elite: 'Elite' }
-                  return chips.length > 0 ? (
-                    <div className="flex items-center gap-1 flex-wrap justify-center">
-                      {chips.map(({ tier, delta }) => (
-                        <span key={tier} className={cn("text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border", chipColors[tier])}>
-                          +{delta} {tierNames[tier]}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null
-                })()}
-              </div>
-            ) : (
-              <button
-                onClick={handleAdd}
-                disabled={newHabit.title.trim().length < 2}
-                className={cn(
-                  "h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
-                  newHabit.title.trim().length >= 2
-                    ? "bg-amber-500 text-[#09090b] hover:bg-amber-400 active:scale-95"
-                    : "bg-white/5 text-white/10 cursor-not-allowed"
-                )}
-              >
-                <Plus className="w-4 h-4" strokeWidth={3} />
-                Добавить
-              </button>
-            )}
+            <button
+              onClick={handleAdd}
+              disabled={newHabit.title.trim().length < 2}
+              className={cn(
+                "h-[46px] w-full rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shrink-0 font-black text-[10px] uppercase tracking-widest",
+                newHabit.title.trim().length >= 2
+                  ? "bg-amber-500 text-[#09090b] hover:bg-amber-400 active:scale-95"
+                  : "bg-white/5 text-white/10 cursor-not-allowed"
+              )}
+            >
+              <Plus className="w-4 h-4" strokeWidth={3} />
+              Добавить
+            </button>
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Habits Groups */}

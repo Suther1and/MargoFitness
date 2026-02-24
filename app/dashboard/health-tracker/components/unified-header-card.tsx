@@ -101,7 +101,10 @@ export function UnifiedHeaderCard({
     }
   }
 
+  // Внешний контейнер — серый при expired, цветной при активной подписке
   const styles = getTierStyles(isExpired ? 'free' : profile.subscription_tier)
+  // Внутренняя пилюля тарифа — всегда цвет реального тарифа, чтобы пользователь видел что потерял
+  const badgeStyles = getTierStyles(profile.subscription_tier)
 
   return (
     <motion.div 
@@ -182,7 +185,7 @@ export function UnifiedHeaderCard({
               onSubscriptionClick?.();
             }}
             animate={isExpired ? {} : { 
-              boxShadow: ["0 0 0px rgba(0,0,0,0)", `0 0 12px ${styles.text === 'text-white/40' ? 'rgba(255,255,255,0.1)' : styles.text.replace('text-', 'rgba(').replace('-400', ',0.2)')}`, "0 0 0px rgba(0,0,0,0)"]
+              boxShadow: ["0 0 0px rgba(0,0,0,0)", `0 0 12px ${badgeStyles.text === 'text-white/40' ? 'rgba(255,255,255,0.1)' : badgeStyles.text.replace('text-', 'rgba(').replace('-400', ',0.2)')}`, "0 0 0px rgba(0,0,0,0)"]
             }}
             transition={{ 
               duration: 3,
@@ -191,9 +194,10 @@ export function UnifiedHeaderCard({
             }}
             className={cn(
               "px-3 py-1.5 rounded-lg border flex items-center gap-2 shrink-0 relative overflow-hidden group/badge transition-colors cursor-pointer",
-              styles.bg,
-              styles.border,
-              "hover:bg-white/10"
+              badgeStyles.bg,
+              badgeStyles.border,
+              isExpired ? "opacity-60" : "",
+              "hover:opacity-100"
             )}
           >
             {/* Анимированный блик — только для активных подписок */}
@@ -205,8 +209,8 @@ export function UnifiedHeaderCard({
               />
             )}
             
-            <Crown className={cn("w-3.5 h-3.5 relative z-10", styles.icon)} />
-            <span className={cn("text-[10px] font-black uppercase tracking-widest leading-none relative z-10", styles.text)}>
+            <Crown className={cn("w-3.5 h-3.5 relative z-10", badgeStyles.icon)} />
+            <span className={cn("text-[10px] font-black uppercase tracking-widest leading-none relative z-10", badgeStyles.text)}>
               {isExpired ? `${tierDisplayName} · Истекла` : tierDisplayName}
             </span>
           </motion.button>
@@ -219,7 +223,7 @@ export function UnifiedHeaderCard({
         )}>
           <Clock className="w-3 h-3" />
           <span className="text-[10px] font-bold uppercase tracking-wider leading-none">
-            {isExpired ? "Подписка истекла" : isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
+            {isExpired ? "0 дней" : isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
           </span>
         </div>
 
@@ -241,9 +245,9 @@ export function UnifiedHeaderCard({
 
       {/* 3. Кнопки действий */}
       <div className="flex items-center gap-2 ml-5 pl-5 border-l border-white/5 h-10">
-        {isFree ? (
+        {isFree || isExpired ? (
           <button 
-            onClick={(e) => { e.stopPropagation(); onSubscriptionClick?.(); }}
+            onClick={(e) => { e.stopPropagation(); onRenewalClick(); }}
             className="h-9 px-4 rounded-xl bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-amber-400 transition-all active:scale-95 shadow-lg shadow-amber-500/20 whitespace-nowrap"
           >
             Выбрать подписку

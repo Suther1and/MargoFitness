@@ -203,7 +203,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
         return
       }
       
-      const currentTierLevel = TIER_LEVELS[profile.subscription_tier as SubscriptionTier]
+      const currentTierLevel = TIER_LEVELS[currentTier] ?? 0
       
       // Рассчитать оставшиеся дни
       const now = new Date()

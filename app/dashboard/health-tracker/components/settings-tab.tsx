@@ -10,8 +10,7 @@ import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS, TrackerSettings } from '../types'
 import { HabitsSection } from './habits-section'
-import { getEffectiveTier, getWidgetLimit, getHabitLimit, getUpgradeChips } from '@/lib/access-control'
-import { WIDGET_LIMITS } from '@/lib/constants/subscriptions'
+import { getEffectiveTier, getWidgetLimit, getHabitLimit } from '@/lib/access-control'
 import { useHabits } from '../hooks/use-habits'
 import type { Profile } from '@/types/database'
 import { Lock } from 'lucide-react'
@@ -858,32 +857,13 @@ export default function SettingsTab({
                           )}
                         >
                           {/* Locked overlay */}
-                          {isLocked && (() => {
-                            const chips = getUpgradeChips(effectiveTier, WIDGET_LIMITS)
-                            const chipColors: Record<string, string> = {
-                              basic: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                              pro: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                              elite: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-                            }
-                            const tierNames: Record<string, string> = { basic: 'Basic', pro: 'Pro', elite: 'Elite' }
-                            return (
-                              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 rounded-[2.5rem] bg-black/60 backdrop-blur-[2px] cursor-pointer group/locked">
-                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-amber-500/20 group-hover/locked:bg-amber-500/10 transition-colors">
-                                  <Lock className="w-4 h-4 text-amber-400/60 group-hover/locked:text-amber-400 transition-colors" strokeWidth={2} />
-                                </div>
-                                {chips.length > 0 && (
-                                  <div className="flex items-center gap-1 flex-wrap justify-center px-3">
-                                    {chips.map(({ tier, delta }) => (
-                                      <span key={tier} className={cn("text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border", chipColors[tier])}>
-                                        +{delta} {tierNames[tier]}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                                <p className="text-[8px] font-black uppercase tracking-wider text-amber-500/40 group-hover/locked:text-amber-400/60 transition-colors">Нажмите →</p>
+                          {isLocked && (
+                            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[2.5rem] bg-black/40 backdrop-blur-[2px] cursor-pointer group/locked">
+                              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 group-hover/locked:bg-amber-500/10 group-hover/locked:border-amber-500/20 transition-colors">
+                                <Lock className="w-4 h-4 text-white/30 group-hover/locked:text-amber-400 transition-colors" strokeWidth={2} />
                               </div>
-                            )
-                          })()}
+                            </div>
+                          )}
                           <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", (!widget.enabled && !isLocked) && "opacity-60 group-hover:opacity-100", isLocked && "opacity-30")}>
                             <div className="flex items-start justify-between mb-3 relative">
                               <div className="flex items-center gap-3">
