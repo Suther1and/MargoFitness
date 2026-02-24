@@ -27,7 +27,7 @@ import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEV
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
-import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
+import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
 import { cn } from '@/lib/utils'
 import { PremiumAchievementsCard } from './premium-achievements-card'
 import { MobileProfileCard } from './mobile-profile-card'
@@ -630,7 +630,7 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
       <SubscriptionUpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
-        currentTier={profile.subscription_tier}
+        currentTier={getEffectiveTier(profile)}
         userId={profile.id}
       />
     </div>

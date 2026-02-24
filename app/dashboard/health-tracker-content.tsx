@@ -71,7 +71,7 @@ import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 import { checkAndExpireSubscription } from '@/lib/actions/profile'
-import { checkArticleAccess } from '@/lib/access-control'
+import { checkArticleAccess, getEffectiveTier, getWidgetLimit, getHabitLimit, isSubscriptionActive } from '@/lib/access-control'
 
 /**
  * Health Tracker - главная страница отслеживания здоровья
@@ -136,6 +136,15 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
   const [initialUpgradeTier, setInitialUpgradeTier] = useState<any>(undefined)
   const [isBmiDialogOpen, setIsBmiDialogOpen] = useState(false)
+
+  // Для истекших подписок — открывать upgrade (free-style) вместо renewal
+  const handleRenewalClick = () => {
+    if (profile && !isSubscriptionActive(profile)) {
+      setUpgradeModalOpen(true)
+    } else {
+      setRenewalModalOpen(true)
+    }
+  }
   
   useEffect(() => {
     const handleOpenUpgrade = (e: any) => {
@@ -310,6 +319,15 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   // Все хуки получают userId и загружаются параллельно
   const { settings, isFirstVisit, isLoaded: isSettingsLoaded, saveSettings } = useTrackerSettings(userId)
   const { habits, isLoaded: isHabitsLoaded } = useHabits(userId)
+
+  // Виджеты в фиксированном порядке рендера (без habits — отдельная секция)
+  const WIDGET_RENDER_ORDER = ['water', 'steps', 'weight', 'caffeine', 'sleep', 'mood', 'nutrition', 'photos'] as const
+  // Какие виджеты реально показывать — первые N включённых по тарифу
+  const activeWidgetIds = useMemo(() => {
+    const limit = getWidgetLimit(getEffectiveTier(profile))
+    const enabled = WIDGET_RENDER_ORDER.filter(id => settings?.widgets[id]?.enabled)
+    return new Set(enabled.slice(0, limit))
+  }, [settings, profile])
   
   // Интеграция с Supabase через useHealthDiary
   const { 
@@ -477,14 +495,16 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     age: settings.userParams.age || 25,
     gender: settings.userParams.gender || 'female',
     
-    // Habits - фильтруем по расписанию и объединяем с данными выполнения
-    habits: getActiveHabitsForDate(habits, selectedDate).map(habit => ({
-      id: habit.id,
-      title: habit.title,
-      completed: habitsCompleted[habit.id] || false,
-      streak: habitStreaks[habit.id] || 0,
-      category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
-    })),
+    // Habits - фильтруем по расписанию, ограничиваем по лимиту тарифа
+    habits: getActiveHabitsForDate(habits, selectedDate)
+      .slice(0, getHabitLimit(getEffectiveTier(profile)))
+      .map(habit => ({
+        id: habit.id,
+        title: habit.title,
+        completed: habitsCompleted[habit.id] || false,
+        streak: habitStreaks[habit.id] || 0,
+        category: habit.time as "morning" | "afternoon" | "evening" | "anytime"
+      })),
     
     // Placeholder для фото
     dailyPhotos: [],
@@ -784,7 +804,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       <UnifiedHeaderCard 
                         profile={profile}
                         onEditClick={() => setProfileDialogOpen(true)}
-                        onRenewalClick={() => setRenewalModalOpen(true)}
+                        onRenewalClick={handleRenewalClick}
                         onUpgradeClick={() => setUpgradeModalOpen(true)}
                         onSubscriptionClick={() => handleTabChange('subscription' as any)}
                       />
@@ -906,7 +926,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           setSettingsSubTab('widgets')
                         }}
                       />
-                      {settings.widgets.photos?.enabled && (
+                      {activeWidgetIds.has('photos') && (
                         <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                       )}
                     </div>
@@ -1112,7 +1132,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         >
                           <SubscriptionTab 
                             profile={profile}
-                            onRenewalClick={() => setRenewalModalOpen(true)}
+                            onRenewalClick={handleRenewalClick}
                             onUpgradeClick={() => setUpgradeModalOpen(true)}
                           />
                         </motion.div>
@@ -1171,7 +1191,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                               setSettingsSubTab('widgets')
                             }}
                           />
-                          {settings.widgets.photos?.enabled && (
+                          {activeWidgetIds.has('photos') && (
                             <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                           )}
                         </motion.div>
@@ -1219,14 +1239,14 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       </div>
                     ) : (
                       <>
-                    {settings.widgets.water?.enabled && (
+                    {activeWidgetIds.has('water') && (
                       <WaterCardH value={data.waterIntake} goal={data.waterGoal} onUpdate={(val) => handleMetricUpdate('waterIntake', val)} />
                     )}
-                    {settings.widgets.steps?.enabled && (
+                    {activeWidgetIds.has('steps') && (
                       <StepsCardH steps={data.steps} goal={data.stepsGoal} onUpdate={(val) => handleMetricUpdate('steps', val)} />
                     )}
                     <div className="grid grid-cols-2 gap-4">
-                      {settings.widgets.weight?.enabled && (
+                      {activeWidgetIds.has('weight') && (
                         <WeightCardH 
                           value={data.weight} 
                           goalWeight={data.weightGoal} 
@@ -1234,17 +1254,17 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                           onUpdate={(val) => handleMetricUpdate('weight', val)} 
                         />
                       )}
-                      {settings.widgets.caffeine?.enabled && (
+                      {activeWidgetIds.has('caffeine') && (
                         <CaffeineCardH value={data.caffeineIntake} goal={data.caffeineGoal} onUpdate={(val) => handleMetricUpdate('caffeineIntake', val)} />
                       )}
-                      {settings.widgets.sleep?.enabled && (
+                      {activeWidgetIds.has('sleep') && (
                         <SleepCardH hours={data.sleepHours} goal={data.sleepGoal} onUpdate={(val) => handleMetricUpdate('sleepHours', val)} />
                       )}
-                      {settings.widgets.mood?.enabled && (
+                      {activeWidgetIds.has('mood') && (
                         <MoodEnergyCardH mood={data.mood} energy={data.energyLevel} onMoodUpdate={(val) => handleMoodUpdate(val)} onEnergyUpdate={(val) => handleMetricUpdate('energyLevel', val)} />
                       )}
                     </div>
-                      {settings.widgets.nutrition?.enabled && (
+                      {activeWidgetIds.has('nutrition') && (
                         <NutritionCardH 
                           calories={data.calories} 
                           caloriesGoal={data.caloriesGoal} 
@@ -1326,7 +1346,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         }}
                       />
                       <PremiumAchievementsCard />
-                      {settings.widgets.photos?.enabled && (
+                      {activeWidgetIds.has('photos') && (
                         <DailyPhotosCard userId={userId} selectedDate={selectedDate} />
                       )}
                     </motion.div>
@@ -1389,7 +1409,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
           <SubscriptionUpgradeModal
             open={upgradeModalOpen}
             onOpenChange={setUpgradeModalOpen}
-            currentTier={profile.subscription_tier}
+            currentTier={getEffectiveTier(profile)}
             userId={profile.id}
             initialTier={initialUpgradeTier}
             onOpenRenewal={() => setRenewalModalOpen(true)}

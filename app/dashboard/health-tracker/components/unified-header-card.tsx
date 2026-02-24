@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Crown, RefreshCw, TrendingUp, Mail, Phone, Clock, User, Pencil } from 'lucide-react'
 import { Profile } from '@/types/database'
-import { getTierDisplayName, getDaysUntilExpiration } from '@/lib/access-control'
+import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { cn } from '@/lib/utils'
 
 interface UnifiedHeaderCardProps {
@@ -33,6 +33,7 @@ export function UnifiedHeaderCard({
   const phone = profile.phone || 'Номер не указан'
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const isFree = profile.subscription_tier === 'free'
+  const isExpired = !isFree && !isSubscriptionActive(profile)
 
   // Получаем стили в зависимости от уровня подписки
   const getTierStyles = (tier: string) => {
@@ -100,7 +101,7 @@ export function UnifiedHeaderCard({
     }
   }
 
-  const styles = getTierStyles(profile.subscription_tier)
+  const styles = getTierStyles(isExpired ? 'free' : profile.subscription_tier)
 
   return (
     <motion.div 
@@ -180,7 +181,7 @@ export function UnifiedHeaderCard({
               e.stopPropagation();
               onSubscriptionClick?.();
             }}
-            animate={{ 
+            animate={isExpired ? {} : { 
               boxShadow: ["0 0 0px rgba(0,0,0,0)", `0 0 12px ${styles.text === 'text-white/40' ? 'rgba(255,255,255,0.1)' : styles.text.replace('text-', 'rgba(').replace('-400', ',0.2)')}`, "0 0 0px rgba(0,0,0,0)"]
             }}
             transition={{ 
@@ -195,16 +196,18 @@ export function UnifiedHeaderCard({
               "hover:bg-white/10"
             )}
           >
-            {/* Анимированный блик на бейдже */}
-            <motion.div 
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
-            />
+            {/* Анимированный блик — только для активных подписок */}
+            {!isExpired && (
+              <motion.div 
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+              />
+            )}
             
             <Crown className={cn("w-3.5 h-3.5 relative z-10", styles.icon)} />
             <span className={cn("text-[10px] font-black uppercase tracking-widest leading-none relative z-10", styles.text)}>
-              {tierDisplayName}
+              {isExpired ? `${tierDisplayName} · Истекла` : tierDisplayName}
             </span>
           </motion.button>
         </div>
@@ -212,11 +215,11 @@ export function UnifiedHeaderCard({
         {/* Уровень 2: Статус дней (под именем) */}
         <div className={cn(
           "flex items-center gap-1.5 transition-colors duration-300",
-          daysLeft !== null && daysLeft < 10 ? "text-red-500" : (isFree ? "text-white/30" : styles.text)
+          isExpired ? "text-red-500/60" : daysLeft !== null && daysLeft < 10 ? "text-red-500" : (isFree ? "text-white/30" : styles.text)
         )}>
           <Clock className="w-3 h-3" />
           <span className="text-[10px] font-bold uppercase tracking-wider leading-none">
-            {isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
+            {isExpired ? "Подписка истекла" : isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
           </span>
         </div>
 

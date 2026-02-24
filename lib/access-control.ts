@@ -263,6 +263,20 @@ export function getHabitLimit(tier: SubscriptionTier): number {
 }
 
 /**
+ * Tier-chips: тиры, у которых лимит выше текущего, с разницей (+N)
+ */
+export function getUpgradeChips(
+  currentTier: SubscriptionTier,
+  limits: Record<SubscriptionTier, number>
+): Array<{ tier: SubscriptionTier; delta: number }> {
+  const currentLimit = limits[currentTier]
+  const tierOrder: SubscriptionTier[] = ['basic', 'pro', 'elite']
+  return tierOrder
+    .filter(t => limits[t] > currentLimit)
+    .map(t => ({ tier: t, delta: limits[t] - currentLimit }))
+}
+
+/**
  * Единая проверка доступа к статье
  */
 export function checkArticleAccess(
