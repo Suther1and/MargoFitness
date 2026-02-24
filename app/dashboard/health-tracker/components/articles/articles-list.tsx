@@ -20,6 +20,7 @@ interface Article {
   is_updated?: boolean;
   tags?: string[];
   display_status?: string;
+  hasAccess?: boolean; // Добавляем пропс
 }
 
 interface ArticlesListProps {
@@ -28,13 +29,6 @@ interface ArticlesListProps {
   userTier: string;
   onSelectArticle: (slug: string) => void;
 }
-
-const TIER_WEIGHTS = {
-  free: 0,
-  basic: 1,
-  pro: 2,
-  elite: 3,
-};
 
 const TIER_COLORS = {
   free: "text-white/40 border-white/10 bg-white/5",
@@ -78,13 +72,6 @@ export const ArticlesList = ({ articles, isLoading, userTier, onSelectArticle }:
                          a.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const hasAccess = (articleLevel: string) => {
-    return (
-      TIER_WEIGHTS[userTier as keyof typeof TIER_WEIGHTS] >=
-      TIER_WEIGHTS[articleLevel as keyof typeof TIER_WEIGHTS]
-    );
-  };
 
   return (
     <div className="space-y-8">
@@ -201,7 +188,7 @@ export const ArticlesList = ({ articles, isLoading, userTier, onSelectArticle }:
           ))
         ) : filteredArticles.length > 0 ? (
           filteredArticles.map((article, index) => {
-            const locked = !hasAccess(article.access_level);
+            const locked = article.hasAccess === false;
             
             return (
               <button

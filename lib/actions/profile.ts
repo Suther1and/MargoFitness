@@ -50,7 +50,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
             id: user.id,
             email: user.email,
             role: 'user',
-            subscription_status: 'inactive',
+            subscription_status: 'active', // Устанавливаем active по умолчанию для новых
             subscription_tier: 'free'
           })
           .select()

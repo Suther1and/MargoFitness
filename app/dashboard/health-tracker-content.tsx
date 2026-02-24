@@ -70,6 +70,7 @@ import { getHabitsStats } from '@/lib/actions/health-stats'
 import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
+import { isSubscriptionExpired, TIER_LEVELS } from '@/types/database'
 
 /**
  * Health Tracker - главная страница отслеживания здоровья
@@ -144,8 +145,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
 
     // Слушатель для обновления профиля при изменении уровня подписки
     const handleSubscriptionUpdate = () => {
-      console.log('[HealthTracker] Subscription update event received, refreshing profile and cache...')
-      
       // Сбрасываем кеш React Query для тренировок и статей
       if (userId) {
         queryClient.invalidateQueries({ queryKey: ['workouts-data', userId] })
@@ -155,7 +154,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       // Обновляем профиль принудительно
       import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
         if (p) {
-          console.log('[HealthTracker] Profile refreshed after subscription update:', p.subscription_tier)
           setProfile(p)
           // Дополнительно уведомляем другие компоненты о смене профиля
           window.dispatchEvent(new CustomEvent('profile-refreshed', { detail: p }))
@@ -175,27 +173,45 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id)
+
+        // Подписка на Realtime изменения профиля
+        const profileSubscription = supabase
+          .channel(`profile-changes-${data.user.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${data.user.id}`,
+            },
+            (payload) => {
+              const updatedProfile = payload.new as any
+              
+              // Обновляем локальный стейт профиля
+              setProfile(updatedProfile)
+              
+              // Инвалидируем кэш тренировок и статей принудительно
+              queryClient.invalidateQueries({ queryKey: ['workouts-data', data.user.id] })
+              queryClient.invalidateQueries({ queryKey: ['articles-list'] })
+              
+              // Уведомляем другие компоненты
+              window.dispatchEvent(new CustomEvent('profile-refreshed', { detail: updatedProfile }))
+            }
+          )
+          .subscribe()
+
         // Обновляем profile и bonusStats если они пришли null (маловероятно)
         if (!profile) {
           import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
         }
-        if (!bonusStats) {
-          import('@/lib/actions/bonuses').then(m => m.getBonusStats(data.user.id)).then(result => {
-            if (result.success) setBonusStats(result.data)
-          })
+        
+        return () => {
+          supabase.removeChannel(profileSubscription)
         }
-        // Загружаем данные рефералов для вкладки бонусов
-        import('@/lib/actions/referrals').then(m => {
-          m.getReferralStats(data.user.id).then(result => {
-            if (result.data) setReferralStats(result.data)
-          })
-          m.getReferralLink(data.user.id).then(result => {
-            if (result.link) setReferralLink(result.link)
-          })
-        })
       }
     })
-  }, [userId]) // Зависим от userId, чтобы загрузить данные один раз при получении ID
+  }, [userId, queryClient]) // Добавили queryClient в зависимости
 
   useEffect(() => {
     const isPaymentSuccess = searchParams.get('payment') === 'success'
@@ -327,14 +343,26 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
       
       return { dbArticles: dbArticles || [], readStatuses };
     },
-    // Данные считаются устаревшими сразу (staleTime: 0), чтобы гарантировать актуальность доступа.
-    // Благодаря gcTime и механизму SWR пользователь всё равно видит контент мгновенно.
-    staleTime: 0,
+    // Данные считаются свежими 30 минут. При изменении подписки кэш сбросится через Realtime.
+    staleTime: 1000 * 60 * 30,
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: true,
     // true = перезапрашивает в фоне если данные устарели (пользователь видит старые мгновенно, а новые появляются бесшумно)
     refetchOnMount: true,
   })
+
+  // ТИРЫ ДЛЯ СТАТЕЙ (дублируем логику из access-control для синхронизации)
+  const hasArticleAccess = (articleLevel: string) => {
+    if (!profile) return false;
+    if (profile.subscription_status !== 'active') return false;
+    if (isSubscriptionExpired(profile.subscription_expires_at)) return false;
+    
+    const userTier = profile.subscription_tier;
+    if (userTier === 'elite') return true;
+    if (userTier === 'free') return articleLevel === 'free';
+    
+    return TIER_LEVELS[userTier] >= TIER_LEVELS[articleLevel as keyof typeof TIER_LEVELS];
+  };
 
   // Формируем список статей мгновенно из локального реестра, текст/изображения из Registry
   const finalArticles = useMemo(() => {
@@ -354,12 +382,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         is_new: dbInfo?.is_new ?? false,
         is_updated: dbInfo?.is_updated ?? false,
         image_url: dbInfo?.image_url || a.image_url,
-        tags: [a.category]
+        tags: [a.category],
+        hasAccess: hasArticleAccess(a.access_level) // Добавляем флаг доступа
       };
     });
 
     return registryArticles.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
-  }, [articlesData]);
+  }, [articlesData, profile]); // Добавили profile в зависимости
 
   // Фоновая предзагрузка данных статистики - стартует параллельно
   usePrefetchStats({
@@ -870,6 +899,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                       isArticlesLoading={isArticlesLoading}
                       userId={userId}
                       initialTier={profile?.subscription_tier}
+                      fullProfile={profile}
                     />
                   )}
                   
@@ -1107,6 +1137,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                             isArticlesLoading={isArticlesLoading}
                             userId={userId}
                             initialTier={profile?.subscription_tier}
+                            fullProfile={profile}
                           />
                         </motion.div>
                       )}

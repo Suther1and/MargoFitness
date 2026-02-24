@@ -21,9 +21,11 @@ export function UserTableRow({ user }: UserTableRowProps) {
     
     if (result.success) {
       // Генерируем событие для обновления профиля в других вкладках/компонентах
+      const updateEvent = { userId: user.id, field, value };
       window.dispatchEvent(new CustomEvent('subscription-updated', { 
-        detail: { userId: user.id, field, value } 
+        detail: updateEvent 
       }))
+      
       router.refresh()
     } else {
       console.error('Error updating user:', result.error)

@@ -76,11 +76,13 @@ export function WorkoutsTab({
   isArticlesLoading,
   userId,
   initialTier,
+  fullProfile,
 }: {
   preloadedArticles?: any[]
   isArticlesLoading?: boolean
   userId: string | null
   initialTier?: string | null
+  fullProfile?: Profile | null
 }) {
   const queryClient = useQueryClient()
   const [activeSubTab, setActiveSubTab] = useState<WorkoutSubTab>('workouts')
@@ -93,18 +95,22 @@ export function WorkoutsTab({
     queryKey: ['workouts-data', userId],
     queryFn: () => getWorkoutsData(userId!),
     enabled: !!userId,
-    staleTime: 0, // Устанавливаем 0, чтобы всегда проверять актуальность доступа при монтировании
+    staleTime: 1000 * 60 * 30, // Возвращаем 30 минут, так как теперь есть Realtime обновление
     gcTime: 1000 * 60 * 60 * 24,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   })
 
-  const { weekData, profile } = useMemo(() => {
+  const { weekData, profile: reactiveProfile } = useMemo(() => {
     if (!workoutsRaw) return { weekData: null, profile: null }
 
     const { weeks, completions, profile: profileData, demoSessions } = workoutsRaw
+    
+    // Используем полный объект профиля из пропсов, если он есть (он обновляется через Realtime), 
+    // иначе берем из данных запроса. Это критично для checkWorkoutAccess.
+    const currentProfile = (fullProfile || profileData) as Profile;
 
-    let currentWeek = weeks.length ? getCurrentWeek(weeks as any, profileData as Profile) : null
+    let currentWeek = weeks.length ? getCurrentWeek(weeks as any, currentProfile) : null
     if (!currentWeek && weeks.length > 0) currentWeek = weeks[0] as any
 
     let sessionsWithAccess: WorkoutSessionWithAccess[] = []
@@ -112,7 +118,7 @@ export function WorkoutsTab({
       sessionsWithAccess = ((currentWeek as any).sessions || [])
         .filter((s: any) => !s.is_demo)
         .map((session: any) => {
-          const access = checkWorkoutAccess(session, profileData as Profile, currentWeek)
+          const access = checkWorkoutAccess(session, currentProfile, currentWeek)
           const completion = completions.find((c: any) => c.workout_session_id === session.id)
           return {
             ...session,
@@ -124,7 +130,8 @@ export function WorkoutsTab({
         })
     }
 
-    if (demoSessions.length > 0) {
+    // Демо-тренировка отображается ТОЛЬКО для FREE
+    if (demoSessions.length > 0 && currentProfile?.subscription_tier === 'free') {
       const demoSession = demoSessions[0]
       const completion = completions.find((c: any) => c.workout_session_id === demoSession.id)
       const demoWithAccess: WorkoutSessionWithAccess = {
@@ -146,8 +153,8 @@ export function WorkoutsTab({
         } as ContentWeekWithSessions)
       : null
 
-    return { weekData: resolvedWeekData, profile: profileData as Profile | null }
-  }, [workoutsRaw])
+    return { weekData: resolvedWeekData, profile: currentProfile }
+  }, [workoutsRaw, fullProfile]) // Зависим от полного объекта профиля
 
   useLayoutEffect(() => {
     if (selectedArticleSlug) {
@@ -240,7 +247,9 @@ export function WorkoutsTab({
   const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
 
   if (selectedArticleSlug && selectedArticleData) {
-    const hasAccess = TIER_WEIGHTS[profile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS];
+    const hasAccess = TIER_WEIGHTS[reactiveProfile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS];
+    const isElite = reactiveProfile?.subscription_tier === 'elite';
+    const finalAccess = isElite || hasAccess;
 
     return (
       <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">
@@ -264,7 +273,7 @@ export function WorkoutsTab({
               </div>
             </div>
 
-            {HardcodedComponent && hasAccess ? (
+            {HardcodedComponent && finalAccess ? (
               <HardcodedComponent 
                 onBack={() => setSelectedArticleSlug(null)} 
                 onNavigate={handleNavigate}
@@ -274,8 +283,8 @@ export function WorkoutsTab({
             ) : (
               <ArticleRendererFallback
                 article={selectedArticleData}
-                hasAccess={hasAccess}
-                userTier={profile?.subscription_tier || 'free'}
+                hasAccess={finalAccess}
+                userTier={reactiveProfile?.subscription_tier || 'free'}
                 onBack={() => setSelectedArticleSlug(null)}
               />
             )}
@@ -336,7 +345,7 @@ export function WorkoutsTab({
                     <WorkoutCard 
                       key={session.id} 
                       session={session} 
-                      profile={profile}
+                      profile={reactiveProfile}
                       onClick={() => {
                         if (session.hasAccess) {
                           setSelectedSessionId(session.id)
@@ -364,7 +373,7 @@ export function WorkoutsTab({
             <ArticlesList 
               articles={preloadedArticles || []} 
               isLoading={isArticlesLoading ?? false}
-              userTier={profile?.subscription_tier || 'free'} 
+              userTier={reactiveProfile?.subscription_tier || 'free'} 
               onSelectArticle={(slug) => {
                 setSelectedArticleSlug(slug);
               }}

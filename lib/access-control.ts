@@ -58,16 +58,7 @@ export function checkWorkoutAccess(
     }
   }
 
-  // Случай 4: Free tier пользователи видят контент, но не имеют доступа
-  if (profile.subscription_tier === 'free') {
-    return {
-      hasAccess: false,
-      reason: 'subscription',
-      message: `Требуется подписка ${getTierDisplayName(workout.required_tier)} или выше`,
-    }
-  }
-
-  // Случай 5: Проверка подписки
+  // Случай 4: Проверка подписки
   if (profile.subscription_status !== 'active') {
     return {
       hasAccess: false,
@@ -76,7 +67,7 @@ export function checkWorkoutAccess(
     }
   }
 
-  // Случай 6: Проверка истечения подписки
+  // Случай 5: Проверка истечения подписки
   if (isSubscriptionExpired(profile.subscription_expires_at)) {
     return {
       hasAccess: false,
@@ -85,10 +76,29 @@ export function checkWorkoutAccess(
     }
   }
 
+  // Случай 6: Free tier пользователи видят контент, но не имеют доступа
+  if (profile.subscription_tier === 'free') {
+    return {
+      hasAccess: false,
+      reason: 'subscription',
+      message: `Требуется подписка ${getTierDisplayName(workout.required_tier)} или выше`,
+    }
+  }
+
   // Случай 7: Проверка уровня подписки
   const userTier = profile.subscription_tier
   const requiredTier = workout.required_tier
 
+  // Если у пользователя Elite - доступ ко всему
+  if (userTier === 'elite') {
+    return {
+      hasAccess: true,
+      reason: 'subscription',
+      message: 'Доступно по подписке Elite',
+    }
+  }
+
+  // Для остальных уровней сравниваем веса
   if (compareTiers(userTier, requiredTier)) {
     return {
       hasAccess: true,
