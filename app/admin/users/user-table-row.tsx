@@ -147,7 +147,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
           </div>
         </td>
         
-        <td className="p-4 w-[15%] text-center text-xs text-white/40 font-medium">
+        <td className="p-4 w-[15%] text-center text-xs text-white/40 font-medium" suppressHydrationWarning>
           {user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', {
             day: '2-digit',
             month: '2-digit',

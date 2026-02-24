@@ -223,8 +223,11 @@ interface InlineDateInputProps {
 
 export function InlineDateInput({ value, onSave, disabled, disabledMessage }: InlineDateInputProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState('') // Формат ДД.ММ.ГГГГ
+  const [editValue, setEditValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const formatDate = (date: Date) => {
     const d = String(date.getDate()).padStart(2, '0')
@@ -307,7 +310,7 @@ export function InlineDateInput({ value, onSave, disabled, disabledMessage }: In
     }
   }
 
-  const isExpired = value ? new Date(value) < new Date() : true
+  const isExpired = mounted ? (value ? new Date(value) < new Date() : true) : false
 
   return (
     <>
