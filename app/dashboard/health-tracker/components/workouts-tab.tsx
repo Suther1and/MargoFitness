@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dumbbell, BookOpen, Zap, ChevronRight, Lock, CheckCircle2, Play, Clock, ArrowLeft, Sparkles, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getCurrentWeek, checkWorkoutAccess } from '@/lib/access-control'
+import { getCurrentWeek, checkWorkoutAccess, checkArticleAccess } from '@/lib/access-control'
 import type { ContentWeekWithSessions, WorkoutSessionWithAccess, Profile } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { WorkoutCompletionBlock } from '@/app/workouts/[id]/workout-completion-block'
@@ -64,12 +64,6 @@ const ArticleRendererFallback = ({
   );
 };
 
-const TIER_WEIGHTS = {
-  free: 0,
-  basic: 1,
-  pro: 2,
-  elite: 3,
-};
 
 export function WorkoutsTab({
   preloadedArticles,
@@ -256,9 +250,7 @@ export function WorkoutsTab({
   const HardcodedComponent = selectedArticleSlug ? HardcodedArticles[selectedArticleSlug] : null;
 
   if (selectedArticleSlug && selectedArticleData) {
-    const hasAccess = TIER_WEIGHTS[reactiveProfile?.subscription_tier as keyof typeof TIER_WEIGHTS] >= TIER_WEIGHTS[selectedArticleData.access_level as keyof typeof TIER_WEIGHTS];
-    const isElite = reactiveProfile?.subscription_tier === 'elite';
-    const finalAccess = isElite || hasAccess;
+    const finalAccess = checkArticleAccess(reactiveProfile ?? null, selectedArticleData.access_level);
 
     return (
       <div className="fixed inset-0 z-[100] bg-[#09090b] md:relative md:inset-auto md:z-0 md:bg-transparent">

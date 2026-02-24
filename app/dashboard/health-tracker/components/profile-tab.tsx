@@ -355,9 +355,19 @@ export function ProfileTab({ profile, bonusStats, onProfileUpdate }: ProfileTabP
                   </div>
                   
                   {/* Subscription Badge */}
-                  <div className={cn("relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40", subStyles.badge)}>
-                    <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
-                      {tierDisplayName}
+                  <div className={cn(
+                    "relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40",
+                    !subscriptionActive && profile.subscription_tier !== 'free'
+                      ? "border-white/10 bg-white/5"
+                      : subStyles.badge
+                  )}>
+                    <span className={cn(
+                      "text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none",
+                      !subscriptionActive && profile.subscription_tier !== 'free' ? "text-white/30" : ""
+                    )}>
+                      {!subscriptionActive && profile.subscription_tier !== 'free'
+                        ? `${tierDisplayName} · Истекла`
+                        : tierDisplayName}
                     </span>
                   </div>
                 </div>

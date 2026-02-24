@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp } from 'lucide-react'
+import { Plus, Edit2, Trash2, Flame, Sun, Moon, Coffee, Clock, PlusCircle, Power, EyeOff, ChevronDown, ChevronUp, ArrowUp, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHabits } from '../hooks/use-habits'
 import { useIsMobile } from '@/lib/hooks/use-is-mobile'
@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getEffectiveTier, getHabitLimit } from '@/lib/access-control'
+import type { Profile } from '@/types/database'
 
 const TIME_CONFIG = {
   morning: { label: 'Утро', icon: Coffee, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
@@ -33,6 +35,7 @@ interface HabitCardProps {
   isEditing: boolean
   isAnyEditing: boolean
   isMobile: boolean
+  isLocked?: boolean
   editForm: { title: string; daysOfWeek: DayOfWeek[]; time: HabitTime } | null
   setEditForm: (form: { title: string; daysOfWeek: DayOfWeek[]; time: HabitTime } | null) => void
   startEditing: (habit: Habit) => void
@@ -43,7 +46,7 @@ interface HabitCardProps {
   deleteConfirm: string | null
 }
 
-function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit, deleteConfirm }: HabitCardProps) {
+function HabitCard({ habit, isEditing, isAnyEditing, isMobile, isLocked, editForm, setEditForm, startEditing, saveEdit, cancelEditing, toggleHabitStatus, deleteHabit, deleteConfirm }: HabitCardProps) {
   const config = TIME_CONFIG[habit.time]
   const Icon = config.icon
   const isConfirming = deleteConfirm === habit.id
@@ -60,12 +63,26 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
         "group relative rounded-[2rem] border transition-[colors,opacity,filter] duration-300",
         isEditing 
           ? "bg-white/[0.02] border-amber-500/20 px-4 py-4 md:px-5 md:py-3 shadow-xl" 
-          : habit.enabled 
-            ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 p-4" 
-            : "border-white/5 bg-white/[0.01] opacity-40 grayscale p-4",
+          : isLocked
+            ? "border-white/5 bg-white/[0.01] p-4"
+            : habit.enabled 
+              ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 p-4" 
+              : "border-white/5 bg-white/[0.01] opacity-40 grayscale p-4",
         isAnyEditing && !isEditing && "opacity-40 saturate-50"
       )}
     >
+      {/* Locked overlay — привычка сверх лимита тарифа */}
+      {isLocked && (
+        <div
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 rounded-[2rem] bg-black/60 backdrop-blur-[2px] cursor-pointer"
+          onClick={() => window.dispatchEvent(new CustomEvent('open-upgrade-modal'))}
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10">
+            <Lock className="w-3.5 h-3.5 text-white/40" strokeWidth={2} />
+          </div>
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/30 text-center px-4">Улучшите тариф</p>
+        </div>
+      )}
       <AnimatePresence mode="popLayout" initial={false}>
         {isEditing && editForm ? (
           <motion.div
@@ -282,13 +299,16 @@ function HabitCard({ habit, isEditing, isAnyEditing, isMobile, editForm, setEdit
   )
 }
 
-export function HabitsSection({ userId }: { userId: string | null }) {
+export function HabitsSection({ userId, profile }: { userId: string | null; profile?: Profile | null }) {
   const { habits, isLoaded, addHabit, updateHabit, deleteHabit } = useHabits(userId)
   const isMobile = useIsMobile(768)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDisabledExpanded, setIsDisabledExpanded] = useState(false)
   const [limitWarning, setLimitWarning] = useState<string | null>(null)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null) // Для двойного подтверждения удаления
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+
+  const effectiveTier = getEffectiveTier(profile ?? null)
+  const MAX_ACTIVE_HABITS = getHabitLimit(effectiveTier)
   
   const [newHabit, setNewHabit] = useState<{
     title: string
@@ -329,22 +349,27 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   // Счётчики активных и неактивных привычек
   const activeHabitsCount = habits.filter(h => h.enabled).length
   const disabledHabitsCount = habits.filter(h => !h.enabled).length
-  const MAX_ACTIVE_HABITS = 15
-  const MAX_DISABLED_HABITS = 15
+  const MAX_DISABLED_HABITS = 30
+
+  // Привычки сверх лимита — отображаются заблокированными
+  const lockedHabitIds = useMemo(() => {
+    const activeHabits = habits.filter(h => h.enabled)
+    if (activeHabits.length <= MAX_ACTIVE_HABITS) return new Set<string>()
+    return new Set(activeHabits.slice(MAX_ACTIVE_HABITS).map(h => h.id))
+  }, [habits, MAX_ACTIVE_HABITS])
 
   const handleAdd = () => {
     if (newHabit.title.trim().length < 2) return
     
-    // Проверка лимита активных привычек
+    // Проверка лимита активных привычек по тарифу
     if (newHabit.enabled && activeHabitsCount >= MAX_ACTIVE_HABITS) {
-      setLimitWarning('Достигнут лимит активных привычек (15)')
-      setTimeout(() => setLimitWarning(null), 3000)
+      window.dispatchEvent(new CustomEvent('open-upgrade-modal'))
       return
     }
     
     // Проверка лимита неактивных привычек
     if (!newHabit.enabled && disabledHabitsCount >= MAX_DISABLED_HABITS) {
-      setLimitWarning('Достигнут лимит неактивных привычек (15)')
+      setLimitWarning('Достигнут максимум отключённых привычек')
       setTimeout(() => setLimitWarning(null), 3000)
       return
     }
@@ -387,15 +412,13 @@ export function HabitsSection({ userId }: { userId: string | null }) {
   }
 
   const toggleHabitStatus = (id: string, enabled: boolean) => {
-    // Проверка лимитов перед переключением
     if (enabled && activeHabitsCount >= MAX_ACTIVE_HABITS) {
-      setLimitWarning('Достигнут лимит активных привычек (15)')
-      setTimeout(() => setLimitWarning(null), 3000)
+      window.dispatchEvent(new CustomEvent('open-upgrade-modal'))
       return
     }
     
     if (!enabled && disabledHabitsCount >= MAX_DISABLED_HABITS) {
-      setLimitWarning('Достигнут лимит неактивных привычек (15)')
+      setLimitWarning('Достигнут максимум отключённых привычек')
       setTimeout(() => setLimitWarning(null), 3000)
       return
     }
@@ -701,6 +724,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                             isEditing={editingId === habit.id}
                             isAnyEditing={editingId !== null}
                             isMobile={isMobile}
+                            isLocked={false}
                             editForm={editForm}
                             setEditForm={setEditForm}
                             startEditing={startEditing}
@@ -743,6 +767,7 @@ export function HabitsSection({ userId }: { userId: string | null }) {
                       isEditing={editingId === habit.id}
                       isAnyEditing={editingId !== null}
                       isMobile={isMobile}
+                      isLocked={lockedHabitIds.has(habit.id)}
                       editForm={editForm}
                       setEditForm={setEditForm}
                       startEditing={startEditing}

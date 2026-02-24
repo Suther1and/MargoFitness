@@ -1,4 +1,20 @@
+import type { SubscriptionTier } from '@/types/database'
+
 export type SubscriptionLevel = 'FREE' | 'BASIC' | 'PRO' | 'ELITE';
+
+export const WIDGET_LIMITS: Record<SubscriptionTier, number> = {
+  free: 1,
+  basic: 6,
+  pro: 8,
+  elite: 8,
+}
+
+export const HABIT_LIMITS: Record<SubscriptionTier, number> = {
+  free: 1,
+  basic: 6,
+  pro: 10,
+  elite: 15,
+}
 
 export interface SubscriptionBenefit {
   text: string;

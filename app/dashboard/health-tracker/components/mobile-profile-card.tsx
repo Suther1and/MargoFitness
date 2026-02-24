@@ -3,7 +3,7 @@
 import { Profile } from '@/types/database'
 import { LogOut, Mail, Phone, User, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getTierDisplayName } from '@/lib/access-control'
+import { getTierDisplayName, isSubscriptionActive } from '@/lib/access-control'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { memo } from 'react'
@@ -19,6 +19,8 @@ export const MobileProfileCard = memo(function MobileProfileCard({ profile, onEd
   const displayEmail = profile.email && !profile.email.includes('@telegram.local') ? profile.email : 'не указана'
   const displayPhone = profile.phone || 'не указан'
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
+  const subscriptionActive = isSubscriptionActive(profile)
+  const isExpired = profile.subscription_tier !== 'free' && !subscriptionActive
 
   const memberSince = profile.created_at 
     ? format(new Date(profile.created_at), 'LLLL yyyy', { locale: ru })
@@ -114,9 +116,15 @@ Line 60:        .sub-card::after {
                 </a>
                 
                 {/* Subscription Badge (Tier) */}
-                <div className={cn("relative overflow-hidden border rounded-lg px-2.5 h-7 flex items-center justify-center min-w-[50px] bg-black/40", subStyles.badge)}>
-                  <span className="text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none">
-                    {tierDisplayName}
+                <div className={cn(
+                  "relative overflow-hidden border rounded-lg px-2.5 h-7 flex items-center justify-center min-w-[50px] bg-black/40",
+                  isExpired ? "border-white/10 bg-white/5" : subStyles.badge
+                )}>
+                  <span className={cn(
+                    "text-[10px] font-black tracking-widest relative z-10 uppercase font-montserrat leading-none",
+                    isExpired ? "text-white/30" : ""
+                  )}>
+                    {isExpired ? `${tierDisplayName} · Истекла` : tierDisplayName}
                   </span>
                 </div>
               </div>

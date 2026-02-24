@@ -3,6 +3,32 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Profile, ProfileUpdate } from '@/types/database'
+import { expireSubscription } from '@/lib/services/subscription-manager'
+import { isSubscriptionExpired } from '@/types/database'
+
+/**
+ * Проверить и зафиксировать истечение подписки.
+ * Вызывается при загрузке дашборда, если клиент обнаружил истечение.
+ * subscription_tier не сбрасывается — нужен для UI и истории.
+ */
+export async function checkAndExpireSubscription(userId: string): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.id !== userId) return
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_status, subscription_expires_at')
+    .eq('id', userId)
+    .single()
+
+  if (
+    profile?.subscription_status === 'active' &&
+    isSubscriptionExpired(profile.subscription_expires_at)
+  ) {
+    await expireSubscription(userId)
+  }
+}
 
 /**
  * Получить профиль текущего пользователя

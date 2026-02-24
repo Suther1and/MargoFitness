@@ -7,6 +7,7 @@ import {
   isSubscriptionExpired,
   TIER_LEVELS,
 } from '@/types/database'
+import { WIDGET_LIMITS, HABIT_LIMITS } from '@/lib/constants/subscriptions'
 
 /**
  * GATEKEEPER - Главная логика контроля доступа
@@ -234,4 +235,44 @@ export function getMaxSessionNumber(tier: SubscriptionTier): number {
 export function getAccessibleSessionNumbers(tier: SubscriptionTier): number[] {
   const max = getMaxSessionNumber(tier)
   return Array.from({ length: max }, (_, i) => i + 1)
+}
+
+/**
+ * Вычислить эффективный тир пользователя.
+ * Если подписка неактивна или истекла — возвращает 'free'.
+ * subscription_tier в БД не меняем, используем этот метод везде.
+ */
+export function getEffectiveTier(profile: Profile | null): SubscriptionTier {
+  if (!profile) return 'free'
+  if (!isSubscriptionActive(profile)) return 'free'
+  return profile.subscription_tier
+}
+
+/**
+ * Максимальное количество виджетов для тира
+ */
+export function getWidgetLimit(tier: SubscriptionTier): number {
+  return WIDGET_LIMITS[tier]
+}
+
+/**
+ * Максимальное количество привычек для тира
+ */
+export function getHabitLimit(tier: SubscriptionTier): number {
+  return HABIT_LIMITS[tier]
+}
+
+/**
+ * Единая проверка доступа к статье
+ */
+export function checkArticleAccess(
+  profile: Profile | null,
+  articleLevel: string
+): boolean {
+  if (!profile) return false
+  const effectiveTier = getEffectiveTier(profile)
+  if (effectiveTier === 'free') return articleLevel === 'free'
+  if (effectiveTier === 'elite') return true
+  const articleTierLevel = TIER_LEVELS[articleLevel as SubscriptionTier] ?? 0
+  return TIER_LEVELS[effectiveTier] >= articleTierLevel
 }

@@ -10,6 +10,9 @@ import { cn } from '@/lib/utils'
 import { useTrackerSettings } from '../hooks/use-tracker-settings'
 import { WidgetId, WIDGET_CONFIGS, TrackerSettings } from '../types'
 import { HabitsSection } from './habits-section'
+import { getEffectiveTier, getWidgetLimit } from '@/lib/access-control'
+import type { Profile } from '@/types/database'
+import { Lock } from 'lucide-react'
 import { WeekNavigator } from './week-navigator'
 import { calculateBMI, getBMICategory, calculateCalorieNorms } from '../utils/bmi-utils'
 import {
@@ -361,6 +364,7 @@ export function BmiInfoDialog({
 
 interface SettingsTabProps {
   userId: string | null;
+  profile?: Profile | null;
   onBack?: () => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
@@ -373,6 +377,7 @@ interface SettingsTabProps {
 
 export default function SettingsTab({ 
   userId,
+  profile,
   onBack,
   selectedDate,
   onDateChange,
@@ -385,6 +390,9 @@ export default function SettingsTab({
   const { settings, saveSettings, isLoaded } = useTrackerSettings(userId)
   const queryClient = useQueryClient()
   const [shakingWidget, setShakingWidget] = useState<WidgetId | null>(null)
+  
+  const effectiveTier = getEffectiveTier(profile ?? null)
+  const widgetLimit = getWidgetLimit(effectiveTier)
   const [openBmiDialog, setOpenBmiDialog] = useState(false)
   
   // Отслеживаем предыдущие значения целей для восстановления inDailyPlan
@@ -398,6 +406,11 @@ export default function SettingsTab({
 
   // Используем settings напрямую из React Query - нет дублирования состояния
   const localSettings = settings
+
+  const enabledWidgetCount = useMemo(
+    () => Object.values(localSettings.widgets).filter(w => w.enabled).length,
+    [localSettings.widgets]
+  )
 
   const bmiValue = calculateBMI(localSettings.userParams.height, localSettings.userParams.weight)
   const bmiCategory = bmiValue ? getBMICategory(parseFloat(bmiValue)) : null
@@ -421,17 +434,26 @@ export default function SettingsTab({
 
   const handleToggle = (widgetId: WidgetId) => {
     if (!isLoaded) return
-    // КРИТИЧНО: берем свежие данные из кэша React Query
     const freshSettings = queryClient.getQueryData<TrackerSettings>(['diary-settings', userId])
     if (!freshSettings) return
-    
+
+    const isCurrentlyEnabled = freshSettings.widgets[widgetId].enabled
+    // Если пытаемся включить — проверяем лимит
+    if (!isCurrentlyEnabled) {
+      const enabledCount = Object.values(freshSettings.widgets).filter(w => w.enabled).length
+      if (enabledCount >= widgetLimit) {
+        window.dispatchEvent(new CustomEvent('open-upgrade-modal'))
+        return
+      }
+    }
+
     const newSettings = {
       ...freshSettings,
       widgets: {
         ...freshSettings.widgets,
         [widgetId]: {
           ...freshSettings.widgets[widgetId],
-          enabled: !freshSettings.widgets[widgetId].enabled,
+          enabled: !isCurrentlyEnabled,
         }
       }
     }
@@ -649,7 +671,19 @@ export default function SettingsTab({
                   transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} 
                 />
               )}
-              <span className="relative z-10">Виджеты</span>
+              <span className="relative z-10 flex items-center gap-1.5">
+                Виджеты
+                <span className={cn(
+                  "text-[8px] font-black tabular-nums px-1.5 py-0.5 rounded-md",
+                  activeSubTab === 'widgets'
+                    ? "bg-black/20 text-[#09090b]"
+                    : enabledWidgetCount >= widgetLimit
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-white/10 text-white/40"
+                )}>
+                  {enabledWidgetCount}/{widgetLimit}
+                </span>
+              </span>
             </button>
             <button
               onClick={() => setActiveSubTab('habits')}
@@ -788,16 +822,31 @@ export default function SettingsTab({
                       const config = WIDGET_CONFIGS[id]
                       const widget = localSettings.widgets[id]
                       const Icon = ICON_MAP[id]
+                      // Виджет заблокирован, если: не включён И лимит исчерпан
+                      const isLocked = !widget.enabled && enabledWidgetCount >= widgetLimit
                       return (
                         <div
                           key={id}
                           onClick={() => handleToggle(id)}
                           className={cn(
                             "group relative overflow-hidden rounded-[2.5rem] border transition-colors duration-300 cursor-pointer",
-                            widget.enabled ? "border-green-500/30 bg-zinc-900/80" : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
+                            isLocked
+                              ? "border-white/5 bg-white/[0.01]"
+                              : widget.enabled
+                                ? "border-green-500/30 bg-zinc-900/80"
+                                : "border-white/5 bg-white/[0.01] hover:border-green-500/30"
                           )}
                         >
-                          <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", !widget.enabled && "opacity-60 group-hover:opacity-100")}>
+                          {/* Locked overlay */}
+                          {isLocked && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 rounded-[2.5rem] bg-black/60 backdrop-blur-[2px]">
+                              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10">
+                                <Lock className="w-4 h-4 text-white/40" strokeWidth={2} />
+                              </div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 text-center px-4">Улучшите тариф</p>
+                            </div>
+                          )}
+                          <div className={cn("relative z-10 p-4 md:px-5 md:py-4 flex flex-col h-full min-h-[130px] md:min-h-[105px] transition-opacity duration-500", (!widget.enabled && !isLocked) && "opacity-60 group-hover:opacity-100", isLocked && "opacity-30")}>
                             <div className="flex items-start justify-between mb-3 relative">
                               <div className="flex items-center gap-3">
                                 <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center border shrink-0", widget.enabled ? "bg-green-500/20 border-green-500/20 text-green-400" : "bg-white/5 border-white/5 text-white/20")}>
@@ -936,7 +985,7 @@ export default function SettingsTab({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-full"
             >
-              <HabitsSection userId={userId} />
+              <HabitsSection userId={userId} profile={profile} />
             </motion.div>
           )}
         </AnimatePresence>

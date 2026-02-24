@@ -14,26 +14,24 @@ interface SubscriptionTabProps {
 const TIER_FEATURES = {
   free: [
     'Базовый трекер здоровья',
-    'До 5 привычек',
-    'Базовая статистика',
+    '1 привычка',
+    '1 виджет',
   ],
   basic: [
     'Все возможности Free',
-    'До 10 привычек',
+    'До 6 привычек',
+    '6 виджетов',
     'Расширенная статистика',
-    'Фото-прогресс',
-    'Экспорт данных',
   ],
   pro: [
     'Все возможности Basic',
-    'До 15 привычек',
+    'До 10 привычек',
+    'Все 8 виджетов',
     'Персональные тренировки',
-    'Nutrition AI помощник',
-    'Приоритетная поддержка',
   ],
   elite: [
     'Все возможности Pro',
-    'Безлимитные привычки',
+    'До 15 привычек',
     'Личный тренер',
     'Персональные планы питания',
     'VIP поддержка 24/7',
@@ -131,11 +129,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             </div>
 
             {profile.subscription_expires_at && (
-              <div className="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-xl">
-                <Calendar className="w-5 h-5 text-white/40" />
+              <div className={`flex items-center gap-4 mb-6 p-4 rounded-xl ${!subscriptionActive ? 'bg-red-500/10 ring-1 ring-red-500/20' : 'bg-white/5'}`}>
+                <Calendar className={`w-5 h-5 ${!subscriptionActive ? 'text-red-400/60' : 'text-white/40'}`} />
                 <div className="flex-1">
-                  <p className="text-sm text-white/60">Дата окончания</p>
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-sm text-white/60">{subscriptionActive ? 'Дата окончания' : 'Подписка истекла'}</p>
+                  <p className={`text-lg font-semibold ${!subscriptionActive ? 'text-red-300' : 'text-white'}`}>
                     {new Date(profile.subscription_expires_at).toLocaleDateString('ru-RU', { 
                       day: 'numeric', 
                       month: 'long', 
@@ -143,7 +141,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     })}
                   </p>
                 </div>
-                {daysLeft !== null && daysLeft > 0 && (
+                {daysLeft !== null && daysLeft > 0 ? (
                   <div className="text-right">
                     <p className="text-2xl font-bold text-white">{daysLeft}</p>
                     <p className="text-xs text-white/60">
@@ -157,22 +155,32 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                       })()}
                     </p>
                   </div>
-                )}
+                ) : !subscriptionActive ? (
+                  <div className="text-right">
+                    <p className="text-xs font-black uppercase tracking-widest text-red-400/80">Доступ ограничен</p>
+                  </div>
+                ) : null}
               </div>
             )}
 
             <div className="flex gap-3">
-              <button 
-                onClick={() => profile.subscription_tier === 'free' ? window.location.href = '/#pricing' : onRenewalClick()}
-                className="flex-1 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all ring-1 ring-white/20 text-white font-semibold active:scale-[0.98]"
-              >
-                Продлить подписку
-              </button>
+              {profile.subscription_tier !== 'free' && (
+                <button 
+                  onClick={onRenewalClick}
+                  className={`flex-1 px-6 py-3 rounded-xl transition-all ring-1 font-semibold active:scale-[0.98] ${
+                    !subscriptionActive
+                      ? 'bg-red-500/20 hover:bg-red-500/30 ring-red-500/40 text-white'
+                      : 'bg-white/10 hover:bg-white/15 ring-white/20 text-white'
+                  }`}
+                >
+                  {!subscriptionActive ? 'Возобновить подписку' : 'Продлить подписку'}
+                </button>
+              )}
               <button 
                 onClick={() => profile.subscription_tier === 'free' ? window.location.href = '/#pricing' : onUpgradeClick()}
                 className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 transition-all text-black font-semibold shadow-lg shadow-amber-500/20 active:scale-[0.98]"
               >
-                Улучшить тариф
+                {profile.subscription_tier === 'free' ? 'Выбрать тариф' : 'Изменить тариф'}
               </button>
             </div>
           </div>

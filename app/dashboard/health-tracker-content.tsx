@@ -70,7 +70,8 @@ import { getHabitsStats } from '@/lib/actions/health-stats'
 import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
 import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
-import { isSubscriptionExpired, TIER_LEVELS } from '@/types/database'
+import { checkAndExpireSubscription } from '@/lib/actions/profile'
+import { checkArticleAccess } from '@/lib/access-control'
 
 /**
  * Health Tracker - главная страница отслеживания здоровья
@@ -201,10 +202,13 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
           )
           .subscribe()
 
-        // Обновляем profile и bonusStats если они пришли null (маловероятно)
-        if (!profile) {
-          import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(setProfile)
-        }
+        // Проверяем и фиксируем истечение подписки (ленивое обновление)
+        checkAndExpireSubscription(data.user.id).then(() => {
+          // После проверки перезагружаем профиль, чтобы получить актуальный статус
+          import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
+            if (p) setProfile(p)
+          })
+        })
         
         return () => {
           supabase.removeChannel(profileSubscription)
@@ -351,18 +355,6 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
     refetchOnMount: true,
   })
 
-  // ТИРЫ ДЛЯ СТАТЕЙ (дублируем логику из access-control для синхронизации)
-  const hasArticleAccess = (articleLevel: string) => {
-    if (!profile) return false;
-    if (profile.subscription_status !== 'active') return false;
-    if (isSubscriptionExpired(profile.subscription_expires_at)) return false;
-    
-    const userTier = profile.subscription_tier;
-    if (userTier === 'elite') return true;
-    if (userTier === 'free') return articleLevel === 'free';
-    
-    return TIER_LEVELS[userTier] >= TIER_LEVELS[articleLevel as keyof typeof TIER_LEVELS];
-  };
 
   // Формируем список статей мгновенно из локального реестра, текст/изображения из Registry
   const finalArticles = useMemo(() => {
@@ -383,7 +375,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         is_updated: dbInfo?.is_updated ?? false,
         image_url: dbInfo?.image_url || a.image_url,
         tags: [a.category],
-        hasAccess: hasArticleAccess(a.access_level) // Добавляем флаг доступа
+        hasAccess: checkArticleAccess(profile, a.access_level)
       };
     });
 
@@ -872,6 +864,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                   {activeTab === 'settings' && (
                     <SettingsTab 
                       userId={userId}
+                      profile={profile}
                       onBack={() => setActiveTab('overview')} 
                       selectedDate={selectedDate}
                       onDateChange={setSelectedDate}
@@ -1061,6 +1054,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                         >
                           <SettingsTab 
                             userId={userId}
+                            profile={profile}
                             onBack={() => setActiveTab('overview')} 
                             selectedDate={selectedDate}
                             onDateChange={setSelectedDate}

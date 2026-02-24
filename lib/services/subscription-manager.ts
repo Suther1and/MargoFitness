@@ -297,6 +297,30 @@ export async function incrementFailedPaymentAttempts(
 }
 
 /**
+ * Выставить статус inactive при истечении подписки.
+ * subscription_tier НЕ трогаем — он нужен для UI ("PRO · Истекла") и истории.
+ */
+export async function expireSubscription(userId: string): Promise<boolean> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      subscription_status: 'inactive',
+      auto_renew_enabled: false,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', userId)
+
+  if (error) {
+    console.error('[expireSubscription] Error:', error)
+    return false
+  }
+
+  return true
+}
+
+/**
  * Перевести пользователя на Free тариф после неудачных попыток
  */
 export async function downgradeToFree(userId: string): Promise<boolean> {

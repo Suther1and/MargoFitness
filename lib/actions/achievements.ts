@@ -8,6 +8,7 @@ import {
   AchievementWithProgress,
   AchievementStats,
   AchievementCategory,
+  TIER_LEVELS,
 } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
@@ -122,8 +123,7 @@ export async function getAllAchievementsWithStatus(userId: string): Promise<{
       } catch { return false }
     }
 
-    const tierLevels: Record<string, number> = { 'free': 0, 'basic': 1, 'pro': 2, 'elite': 3 }
-    const currentTierLevel = tierLevels[userProfile?.subscription_tier || 'free'] || 0
+    const currentTierLevel = TIER_LEVELS[userProfile?.subscription_tier || 'free'] || 0
     
     // 3. Расчет прогресса для каждого достижения
     const data: AchievementWithProgress[] = (allAchievements as Achievement[]).map((achievement: any) => {
@@ -559,11 +559,11 @@ export async function checkAndUnlockAchievements(userId: string, supabaseClient?
             break
           case 'achievement_count': earned = unlockedIds.size >= (targetVal || allAchievements!.length - 1); break
           case 'referral_mentor': earned = uRefs.filter((r: any) => r.status === 'first_purchase_made').length >= (targetVal || 1); break
-          case 'subscription_tier': 
-            const levels: any = { 'free': 0, 'basic': 1, 'pro': 2, 'elite': 3 }
+          case 'subscription_tier': {
             const currentTier = uProfile?.subscription_tier || 'free'
-            earned = levels[currentTier] >= levels[metadata.value]; 
+            earned = (TIER_LEVELS[currentTier] ?? 0) >= (TIER_LEVELS[metadata.value] ?? 0)
             break
+          }
           case 'subscription_duration': earned = uPurchases.some((p: any) => p.products?.duration_months >= targetVal); break
           case 'profile_complete':
             earned = !!(uProfile?.full_name && uProfile?.phone && uProfile?.avatar_url && (uSettings?.user_params as any)?.weight);
