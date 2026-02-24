@@ -180,10 +180,11 @@ export default async function AdminUsersPage({
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-white/5 bg-white/[0.02]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[30%] pl-12">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[25%] pl-12">Пользователь</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Зарегистрирован</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Тариф</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[20%] text-center">Истекает</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Бонусы</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[15%] text-center">Истекает</th>
+                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Бонусы</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Уровень</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-white/30 w-[10%] text-center">Роль</th>
               </tr>

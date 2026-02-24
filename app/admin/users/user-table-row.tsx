@@ -119,7 +119,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-      <td className="p-4 w-[30%]">
+      <td className="p-4 w-[25%]">
         <div className="flex items-center gap-4 pl-4">
           <div className="relative flex-shrink-0">
             <UserAvatar 
@@ -128,10 +128,6 @@ export function UserTableRow({ user }: UserTableRowProps) {
               email={user.email}
               className="w-11 h-11 rounded-2xl ring-2 ring-white/5 shadow-2xl"
             />
-            <div className={cn(
-              "absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-[#0C0C11] ring-1 ring-white/10",
-              user.subscription_status === 'active' ? "bg-emerald-500" : "bg-white/20"
-            )} />
           </div>
           <div className="flex flex-col min-w-0 text-left">
             <span className="text-sm font-bold text-white truncate max-w-[200px] tracking-tight">
@@ -142,6 +138,14 @@ export function UserTableRow({ user }: UserTableRowProps) {
             </span>
           </div>
         </div>
+      </td>
+      
+      <td className="p-4 w-[15%] text-center text-xs text-white/40 font-medium">
+        {user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }) : '—'}
       </td>
       
       <td className="p-4 w-[15%] text-center">
@@ -155,7 +159,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </div>
       </td>
       
-      <td className="p-4 w-[20%] text-center">
+      <td className="p-4 w-[15%] text-center">
         <div className="flex justify-center">
           <InlineDateInput
             value={user.subscription_expires_at}
@@ -166,7 +170,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         </div>
       </td>
       
-      <td className="p-4 w-[15%] text-center">
+      <td className="p-4 w-[10%] text-center">
         <div className="flex justify-center">
           <InlineNumberInput
             value={user.bonus_balance || 0}
