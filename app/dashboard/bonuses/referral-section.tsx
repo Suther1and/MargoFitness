@@ -53,8 +53,7 @@ export function ReferralSection({ referralLink, stats, referralCode }: ReferralS
   const shareText = 'Присоединяйся ко мне в MargoFitness! Получи 250 шагов в подарок при регистрации 🎁'
 
   const handleCopy = async () => {
-    const textToCopy = `${shareText}\n${referralLink}`
-    await navigator.clipboard.writeText(textToCopy)
+    await navigator.clipboard.writeText(referralLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
