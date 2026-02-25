@@ -543,7 +543,7 @@ export async function getReferralLink(userId: string): Promise<{
     }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const baseUrl = 'https://margofitness.pro'
   // Используем /auth вместо /auth/signup (signup редиректит и теряет параметры)
   const link = `${baseUrl}/auth?ref=${codeResult.data.code}`
 
