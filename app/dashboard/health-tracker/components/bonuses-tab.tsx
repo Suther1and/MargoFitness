@@ -26,12 +26,15 @@ import {
   ArrowDownCircle
 } from 'lucide-react'
 
+import { getBonusTransactions } from '@/lib/actions/bonuses'
+
 interface BonusesTabProps {
   bonusStats: {
     account: UserBonus
     levelData: CashbackLevel
     progress: ReturnType<typeof calculateLevelProgress>
     recentTransactions: BonusTransaction[]
+    hasMoreTransactions?: boolean
   } | null
   referralStats: Awaited<ReturnType<typeof getReferralStats>>['data'] | undefined
   referralLink: string | null
@@ -102,6 +105,25 @@ const getBonusLevelStyles = (level: number) => {
 
 export function BonusesTab({ bonusStats, referralStats, referralLink, referralCode, userId }: BonusesTabProps) {
   const [copiedLink, setCopiedLink] = useState(false)
+  const [transactions, setTransactions] = useState<BonusTransaction[]>(bonusStats?.recentTransactions || [])
+  const [hasMore, setHasMore] = useState(bonusStats?.hasMoreTransactions || false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMore) return
+    setIsLoadingMore(true)
+    try {
+      const result = await getBonusTransactions(userId, 20, transactions.length)
+      if (result.success && result.data) {
+        setTransactions(prev => [...prev, ...result.data!])
+        setHasMore(result.hasMore || false)
+      }
+    } catch (error) {
+      console.error('Failed to load more transactions:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text)
@@ -143,7 +165,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 45%, transparent 60%)',
                 backgroundSize: '200% auto'
               }} 
-            />
+              />
             
             {/* Geometric Patterns overlay */}
             <div 
@@ -329,70 +351,72 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
               Всего: {referralStats?.referrals.length || 0}
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-white/[0.01] text-[9px] uppercase text-white/20 font-bold tracking-[0.2em]">
-                <tr>
-                  <th className="px-6 py-3.5">Пользователь</th>
-                  <th className="px-6 py-3.5">Дата</th>
-                  <th className="px-6 py-3.5">Статус</th>
-                  <th className="px-6 py-3.5 text-right">Бонусы</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.02]">
-                {referralStats?.referrals && referralStats.referrals.length > 0 ? (
-                  referralStats.referrals.slice(0, 5).map((ref: any) => (
-                    <tr key={ref.id} className="hover:bg-white/[0.01] transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <UserAvatar 
-                            fullName={ref.referred_name} 
-                            avatarUrl={ref.referred_avatar_url} 
-                            className="w-9 h-9 rounded-xl border border-white/10 transition-transform group-hover:scale-105"
-                          />
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-white group-hover:text-blue-400 transition-colors truncate">{ref.referred_name || 'Без имени'}</span>
-                            <span className="text-[10px] text-white/20 truncate">{ref.referred_email || 'Email скрыт'}</span>
+          <div className="w-full">
+            <div className="overflow-x-auto scrollbar-none">
+              <table className="w-full text-left text-xs min-w-[500px] md:min-w-0">
+                <thead className="bg-white/[0.01] text-[9px] uppercase text-white/20 font-bold tracking-[0.2em]">
+                  <tr>
+                    <th className="px-6 py-3.5">Пользователь</th>
+                    <th className="px-6 py-3.5">Дата</th>
+                    <th className="px-6 py-3.5">Статус</th>
+                    <th className="px-6 py-3.5 text-right">Бонусы</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.02]">
+                  {referralStats?.referrals && referralStats.referrals.length > 0 ? (
+                    referralStats.referrals.slice(0, 5).map((ref: any) => (
+                      <tr key={ref.id} className="hover:bg-white/[0.01] transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar 
+                              fullName={ref.referred_name} 
+                              avatarUrl={ref.referred_avatar_url} 
+                              className="w-9 h-9 rounded-xl border border-white/10 transition-transform group-hover:scale-105"
+                            />
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-bold text-white group-hover:text-blue-400 transition-colors truncate">{ref.referred_name || 'Без имени'}</span>
+                              <span className="text-[10px] text-white/20 truncate">{ref.referred_email || 'Email скрыт'}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-white/30 font-medium">{new Date(ref.created_at).toLocaleDateString('ru-RU')}</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-bold text-emerald-400/60 uppercase tracking-widest border border-emerald-500/10">
-                          Активен
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-baseline justify-end gap-1">
-                          <span className="font-oswald text-lg font-bold text-emerald-400">+{ref.total_earned?.toLocaleString('ru-RU') || 0}</span>
-                          <span className="text-[9px] text-emerald-400/40 font-bold">👟</span>
+                        </td>
+                        <td className="px-6 py-4 text-white/30 font-medium">{new Date(ref.created_at).toLocaleDateString('ru-RU')}</td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center rounded-full bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-bold text-emerald-400/60 uppercase tracking-widest border border-emerald-500/10">
+                            Активен
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-baseline justify-end gap-1">
+                            <span className="font-oswald text-lg font-bold text-emerald-400">+{ref.total_earned?.toLocaleString('ru-RU') || 0}</span>
+                            <span className="text-[9px] text-emerald-400/40 font-bold">👟</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center opacity-10">
+                          <Users className="w-10 h-10 mb-2" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Список пуст</p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center opacity-10">
-                        <Users className="w-10 h-10 mb-2" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">Список пуст</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         {/* Transaction History (Right 5/12) */}
-        <div className="md:col-span-5 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] shadow-sm overflow-hidden">
+        <div className="md:col-span-5 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] shadow-sm overflow-hidden min-w-0">
           <div className="px-6 py-5 border-b border-white/[0.04]">
             <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">История</h3>
           </div>
-          <div className="flex-1 overflow-y-auto max-h-[400px] divide-y divide-white/[0.02]">
-            {bonusStats.recentTransactions.length > 0 ? (
-              bonusStats.recentTransactions.map((tx) => {
+          <div className="flex-1 overflow-y-auto overflow-x-hidden max-h-[400px] divide-y divide-white/[0.02] custom-scrollbar">
+            {transactions.length > 0 ? (
+              transactions.map((tx) => {
                 let Icon = History
                 let iconColor = "text-white/40"
                 let bgColor = "bg-white/5 border-white/10"
@@ -455,9 +479,15 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
             )}
           </div>
           <div className="mt-auto border-t border-white/[0.04] p-5">
-            <button className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-bold text-white/40 hover:text-white hover:bg-white/10 transition-all uppercase tracking-[0.2em]">
-              Вся история
-            </button>
+            {hasMore && (
+              <button 
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-bold text-white/40 hover:text-white hover:bg-white/10 transition-all uppercase tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingMore ? 'Загрузка...' : 'Вся история'}
+              </button>
+            )}
           </div>
         </div>
 

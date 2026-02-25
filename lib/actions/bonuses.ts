@@ -164,28 +164,32 @@ async function createBonusAccountManually(userId: string): Promise<{
  */
 export async function getBonusTransactions(
   userId: string,
-  limit: number = 50
+  limit: number = 50,
+  offset: number = 0
 ): Promise<{
   success: boolean
   data?: BonusTransaction[]
+  hasMore?: boolean
   error?: string
 }> {
   try {
     const supabase = await createClient()
 
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('bonus_transactions')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Error fetching bonus transactions:', error.message || error)
       return { success: false, error: 'Не удалось получить историю' }
     }
 
-    return { success: true, data }
+    const hasMore = count ? offset + (data?.length || 0) < count : false
+
+    return { success: true, data, hasMore }
   } catch (error) {
     console.error('[getBonusTransactions] Critical error:', error)
     return { success: false, error: 'Ошибка подключения при получении транзакций' }
@@ -241,6 +245,7 @@ export async function getBonusStats(userId: string): Promise<{
     const levelData = getCashbackLevelData(account.cashback_level)
     const progress = calculateLevelProgress(account.total_spent_for_cashback, false)
     const recentTransactions = transactionsResult.data || []
+    const hasMoreTransactions = transactionsResult.hasMore || false
 
     return {
       success: true,
@@ -249,6 +254,7 @@ export async function getBonusStats(userId: string): Promise<{
         levelData,
         progress,
         recentTransactions,
+        hasMoreTransactions,
       },
     }
   } catch (error) {

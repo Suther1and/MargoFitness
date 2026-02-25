@@ -10,17 +10,25 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
-  // Параллельно загружаем bonusStats (после проверки профиля)
+  // Параллельно загружаем bonusStats и referralStats (после проверки профиля)
   // Используем try/catch для предотвращения падения всей страницы
   let bonusStats = null
+  let referralStats = null
   try {
-    const bonusStatsResult = await getBonusStats(profile.id)
+    const [bonusStatsResult, referralStatsResult] = await Promise.all([
+      getBonusStats(profile.id),
+      import('@/lib/actions/referrals').then(m => m.getReferralStats(profile.id))
+    ])
+
     if (bonusStatsResult.success) {
       bonusStats = bonusStatsResult.data ?? null
     }
+    if (referralStatsResult.success) {
+      referralStats = referralStatsResult.data ?? null
+    }
   } catch (e) {
-    console.error('Failed to load bonus stats in DashboardPage:', e)
+    console.error('Failed to load stats in DashboardPage:', e)
   }
 
-  return <HealthTrackerContent profile={profile} bonusStats={bonusStats} />
+  return <HealthTrackerContent profile={profile} bonusStats={bonusStats} initialReferralStats={referralStats} />
 }

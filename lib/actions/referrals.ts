@@ -122,23 +122,27 @@ export async function getUserReferrals(userId: string): Promise<{
   }
 
   // Получаем сумму покупок каждого реферала
-  const enrichedReferrals = await Promise.all(
-    (referrals || []).map(async (ref: any) => {
-      const { data: bonusAccount } = await supabase
-        .from('user_bonuses')
-        .select('total_spent_for_cashback')
-        .eq('user_id', ref.referred_id)
-        .single()
+  const referredIds = (referrals || []).map((ref: any) => ref.referred_id)
+  
+  let bonusAccounts: any[] = []
+  if (referredIds.length > 0) {
+    const { data } = await supabase
+      .from('user_bonuses')
+      .select('user_id, total_spent_for_cashback')
+      .in('user_id', referredIds)
+    bonusAccounts = data || []
+  }
 
-      return {
-        ...ref,
-        referred_name: (ref.referred as any)?.full_name || null,
-        referred_email: (ref.referred as any)?.email || null,
-        referred_avatar_url: (ref.referred as any)?.avatar_url || null,
-        total_spent: bonusAccount?.total_spent_for_cashback || 0,
-      }
-    })
-  )
+  const enrichedReferrals = (referrals || []).map((ref: any) => {
+    const bonusAccount = bonusAccounts.find(a => a.user_id === ref.referred_id)
+    return {
+      ...ref,
+      referred_name: (ref.referred as any)?.full_name || null,
+      referred_email: (ref.referred as any)?.email || null,
+      referred_avatar_url: (ref.referred as any)?.avatar_url || null,
+      total_spent: bonusAccount?.total_spent_for_cashback || 0,
+    }
+  })
 
   return { success: true, data: enrichedReferrals }
 }

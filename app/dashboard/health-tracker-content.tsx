@@ -98,7 +98,15 @@ import { logUserAuth } from '@/lib/actions/admin-user-extra'
  * - Shared components: переиспользуемые UI элементы
  */
 
-export function HealthTrackerContent({ profile: initialProfile, bonusStats: initialBonusStats }: { profile: any | null, bonusStats: any | null }) {
+export function HealthTrackerContent({ 
+  profile: initialProfile, 
+  bonusStats: initialBonusStats,
+  initialReferralStats
+}: { 
+  profile: any | null, 
+  bonusStats: any | null,
+  initialReferralStats?: any | null
+}) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
   const queryClient = useQueryClient()
@@ -128,7 +136,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [userId, setUserId] = useState<string | null>(null)
   const [profile, setProfile] = useState<any | null>(initialProfile)
   const [bonusStats, setBonusStats] = useState<any | null>(initialBonusStats)
-  const [referralStats, setReferralStats] = useState<any | null>(null)
+  const [referralStats, setReferralStats] = useState<any | null>(initialReferralStats || null)
   const [referralLink, setReferralLink] = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState<string | null>(null)
   
@@ -224,16 +232,18 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
           })
         })
 
-        // Загружаем реферальные данные при инициализации
+        // Загружаем реферальные данные при инициализации, если они еще не загружены (SSR)
         import('@/lib/actions/referrals').then(m => {
-          m.getReferralStats(data.user.id).then(res => {
-            if (res.success) {
-              console.log('[HealthTracker] Referral stats loaded:', res.data)
-              setReferralStats(res.data)
-            } else {
-              console.error('[HealthTracker] Failed to load referral stats:', res.error)
-            }
-          })
+          if (!referralStats) {
+            m.getReferralStats(data.user.id).then(res => {
+              if (res.success) {
+                console.log('[HealthTracker] Referral stats loaded:', res.data)
+                setReferralStats(res.data)
+              } else {
+                console.error('[HealthTracker] Failed to load referral stats:', res.error)
+              }
+            })
+          }
           m.getReferralLink(data.user.id).then(res => {
             if (res.success) {
               console.log('[HealthTracker] Referral link loaded:', res.code)
