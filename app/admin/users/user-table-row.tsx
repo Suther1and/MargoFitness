@@ -21,7 +21,10 @@ export function UserTableRow({ user, onOpenDetails }: UserTableRowProps) {
   useEffect(() => {
     const handleNavigate = (e: any) => {
       if (e.detail.userId === user.id) {
-        setIsDetailsOpen(true)
+        // Небольшая задержка, чтобы дать закрыться предыдущей шторке
+        setTimeout(() => {
+          setIsDetailsOpen(true)
+        }, 50)
       } else {
         // Закрываем текущую шторку, если переходим к другому пользователю
         setIsDetailsOpen(false)

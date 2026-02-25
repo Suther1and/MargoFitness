@@ -42,7 +42,7 @@ export async function logUserAuth(userId: string) {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 2000) // 2 секунды максимум
 
-        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`, {
+        const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,countryCode,city`, {
           signal: controller.signal
         })
         clearTimeout(timeoutId)
@@ -51,6 +51,10 @@ export async function logUserAuth(userId: string) {
         if (geoData.status === 'success') {
           country = geoData.country
           city = geoData.city
+          // Сохраняем код страны для флага (например, 'RU', 'US')
+          if (geoData.countryCode) {
+            country = `${geoData.countryCode}:${geoData.country}`
+          }
         }
       }
     } catch (e) {

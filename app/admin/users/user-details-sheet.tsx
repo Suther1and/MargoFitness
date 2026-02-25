@@ -84,6 +84,18 @@ function fmtDateTime(d: string | null | undefined): string {
   }
 }
 
+function getFlagEmoji(countryData: string | null | undefined): string {
+  if (!countryData) return ''
+  // Если данные в формате "CODE:Name"
+  if (countryData.includes(':')) {
+    const code = countryData.split(':')[0].toUpperCase()
+    return code.replace(/./g, char => 
+      String.fromCodePoint(char.charCodeAt(0) + 127397)
+    )
+  }
+  return ''
+}
+
 function plural(n: number, one: string, few: string, many: string): string {
   const abs = Math.abs(n) % 100
   const lastDigit = abs % 10
@@ -491,7 +503,11 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                         ) : (
                           <Monitor className="w-3 h-3 text-white/25" />
                         )}
-                        {authLogs[0].city || '—'} · {fmtDateTime(authLogs[0].created_at)}
+                        <span className="flex items-center gap-1">
+                          {getFlagEmoji(authLogs[0].country)}
+                          {authLogs[0].city || '—'}
+                        </span>
+                        · {fmtDateTime(authLogs[0].created_at)}
                       </span>
                     ) : (
                       <span className="text-white/25">—</span>
