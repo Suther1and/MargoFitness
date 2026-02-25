@@ -33,24 +33,41 @@ export async function getUserFullDetails(userId: string) {
       supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
       supabase.from('promo_codes').select('code, discount_value, discount_type'),
       supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      supabase.from('referrals').select('*, profiles!referrals_referred_user_id_fkey(full_name, email, avatar_url)').eq('referrer_user_id', userId),
-      supabase.from('referral_codes').select('*').eq('user_id', userId).single()
+      supabase.from('referrals').select('*, profiles!referrals_referred_id_fkey(full_name, email, avatar_url)').eq('referrer_id', userId),
+      supabase.from('referral_codes').select('*').eq('user_id', userId).maybeSingle()
     ])
-
-    const referrals = referralsRes.data || []
-    const referralCode = referralCodesRes.data
-
-    // Получаем информацию о том, кто пригласил этого пользователя
-    const { data: referrerData } = await supabase
-      .from('referrals')
-      .select('*, profiles!referrals_referrer_user_id_fkey(id, full_name, email)')
-      .eq('referred_user_id', userId)
-      .single()
 
     const purchases = purchasesRes.data || []
     const transactions = transactionsRes.data || []
     const promoCodes = promoCodesRes.data || []
     const bonusTransactions = bonusTransactionsRes.data || []
+    const referralCode = referralCodesRes.data
+
+    const referrals = (referralsRes.data || []).map((ref: any) => {
+      const profile = ref['profiles!referrals_referred_id_fkey'] || ref.profiles
+      // Считаем доход именно от этого реферала
+      const totalEarnedFromThisRef = bonusTransactions
+        .filter((tx: any) => tx.related_user_id === ref.referred_id && (tx.type === 'referral_bonus' || tx.type === 'referral_first'))
+        .reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
+
+      return {
+        ...ref,
+        profiles: profile,
+        total_earned: totalEarnedFromThisRef
+      }
+    })
+
+    // Получаем информацию о том, кто пригласил этого пользователя
+    const { data: referrerRaw } = await supabase
+      .from('referrals')
+      .select('*, profiles!referrals_referrer_id_fkey(id, full_name, email, avatar_url)')
+      .eq('referred_id', userId)
+      .maybeSingle()
+
+    const referrerData = referrerRaw ? {
+      ...referrerRaw,
+      profiles: (referrerRaw as any)['profiles!referrals_referrer_id_fkey'] || (referrerRaw as any).profiles
+    } : null
 
     const promoMap = new Map(promoCodes.map(p => [p.code.toUpperCase(), p]))
 

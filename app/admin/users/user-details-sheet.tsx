@@ -112,6 +112,7 @@ function purchaseIcon(action: string) {
 function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [authLogs, setAuthLogs] = useState<any[]>([])
   const [adminNotes, setAdminNotes] = useState<any[]>([])
   const [newNote, setNewNote] = useState('')
@@ -126,11 +127,19 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
 
     const load = async () => {
       setLoading(true)
+      setError(null)
       try {
         const result = await getUserFullDetails(userId)
-        if (!cancelled && result.success) setData(result.data)
-      } catch (e) {
+        if (!cancelled) {
+          if (result.success) {
+            setData(result.data)
+          } else {
+            setError(result.error || 'Не удалось загрузить данные')
+          }
+        }
+      } catch (e: any) {
         console.error('Error fetching user details:', e)
+        if (!cancelled) setError(e.message || 'Произошла ошибка при загрузке')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -275,6 +284,20 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
       {loading && !data ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent" />
+        </div>
+      ) : error ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mb-4">
+            <Activity className="w-6 h-6" />
+          </div>
+          <h3 className="text-white font-semibold mb-2">Ошибка загрузки</h3>
+          <p className="text-white/50 text-sm mb-6">{error}</p>
+          <button 
+            onClick={() => userId && window.location.reload()}
+            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+          >
+            Попробовать снова
+          </button>
         </div>
       ) : user ? (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -850,7 +873,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                           {referrer.profiles?.full_name || 'Без имени'}
                         </div>
                         <div className="text-[10px] text-white/40 truncate">
-                          {referrer.profiles?.email}
+                          {referrer.profiles?.email || 'Email не указан'}
                         </div>
                       </div>
                       <div className="text-[10px] text-white/25 tabular-nums">
@@ -912,10 +935,10 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-xs font-bold text-emerald-400 tabular-nums">
-                              {ref.total_spent?.toLocaleString('ru-RU')} ₽
+                              {ref.total_spent?.toLocaleString('ru-RU') || 0} ₽
                             </div>
                             <div className="text-[9px] text-white/20">
-                              Доход: {ref.total_earned?.toLocaleString('ru-RU')} ₽
+                              Доход: {ref.total_earned?.toLocaleString('ru-RU') || 0} ₽
                             </div>
                           </div>
                         </div>
