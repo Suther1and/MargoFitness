@@ -111,7 +111,7 @@ export async function getUserReferrals(userId: string): Promise<{
     .from('referrals')
     .select(`
       *,
-      referred:profiles!referrals_referred_id_fkey(full_name)
+      referred:profiles!referrals_referred_id_fkey(full_name, email, avatar_url)
     `)
     .eq('referrer_id', userId)
     .order('created_at', { ascending: false })
@@ -133,6 +133,8 @@ export async function getUserReferrals(userId: string): Promise<{
       return {
         ...ref,
         referred_name: (ref.referred as any)?.full_name || null,
+        referred_email: (ref.referred as any)?.email || null,
+        referred_avatar_url: (ref.referred as any)?.avatar_url || null,
         total_spent: bonusAccount?.total_spent_for_cashback || 0,
       }
     })
@@ -177,17 +179,27 @@ export async function getReferralStats(userId: string): Promise<{
       throw new Error(referralsResult.error)
     }
 
-    const referrals = referralsResult.data
-    const activeReferrals = referrals.filter((r: any) => r.status === 'first_purchase_made').length
-
-    // Получаем общую сумму заработанного с рефералов
-    const { data: transactions } = await supabase
+    // Получаем ВСЕ транзакции пользователя для расчета дохода от каждого реферала
+    const { data: bonusTransactions } = await supabase
       .from('bonus_transactions')
-      .select('amount')
+      .select('*')
       .eq('user_id', userId)
       .in('type', ['referral_bonus', 'referral_first'])
 
-    const totalEarned = transactions?.reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
+    const referrals = referralsResult.data.map((ref: any) => {
+      const totalEarnedFromThisRef = (bonusTransactions || [])
+        .filter((tx: any) => tx.related_user_id === ref.referred_id)
+        .reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
+
+      return {
+        ...ref,
+        total_earned: totalEarnedFromThisRef
+      }
+    })
+
+    const activeReferrals = referrals.filter((r: any) => r.status === 'first_purchase_made').length
+
+    const totalEarned = (bonusTransactions || []).reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
 
     const referralLevelData = getReferralLevelData(bonusAccount.referral_level)
     const progress = calculateLevelProgress(bonusAccount.total_referral_earnings, true)
