@@ -7,6 +7,7 @@ import { getReferralLevelVisuals } from '@/types/database'
 interface ReferralSectionProps {
   referralLink: string
   stats: Awaited<ReturnType<typeof getReferralStats>>['data']
+  referralCode: string
 }
 
 // Функция для получения цветов реферального уровня
@@ -36,7 +37,7 @@ const getReferralLevelColors = (level: number) => {
   return colors[level as keyof typeof colors] || colors[1]
 }
 
-export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
+export function ReferralSection({ referralLink, stats, referralCode }: ReferralSectionProps) {
   const [copied, setCopied] = useState(false)
   const [canShare, setCanShare] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -144,53 +145,95 @@ export function ReferralSection({ referralLink, stats }: ReferralSectionProps) {
         </div>
 
         {/* Реферальная ссылка */}
-        <div className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-white/60 block">
-            Ваша реферальная ссылка
-          </label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 flex-shrink-0">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-              </svg>
-              <input
-                value={referralLink}
-                readOnly
-                className="flex-1 bg-transparent text-sm font-mono text-white/90 focus:outline-none overflow-hidden text-ellipsis"
-              />
-            </div>
-            <button
-              onClick={handleCopy}
-              className="flex-shrink-0 w-12 h-12 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition active:scale-95"
-              style={{ touchAction: 'manipulation' }}
-              title="Скопировать"
-            >
-              {copied ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-wider text-white/60 block">
+              Ваш реферальный код
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 flex-shrink-0">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                 </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-              )}
-            </button>
-            {canShare && (
+                <input
+                  value={referralCode}
+                  readOnly
+                  className="flex-1 bg-transparent text-sm font-mono font-bold text-white/90 focus:outline-none overflow-hidden text-ellipsis uppercase"
+                />
+              </div>
               <button
-                onClick={handleNativeShare}
-                className="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-500/10 ring-1 ring-purple-400/30 flex items-center justify-center text-purple-300 hover:bg-purple-500/20 hover:ring-purple-400/40 transition active:scale-95"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(referralCode)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                className="flex-shrink-0 w-12 h-12 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition active:scale-95"
                 style={{ touchAction: 'manipulation' }}
-                title="Поделиться"
+                title="Скопировать код"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                  <polyline points="16 6 12 2 8 6"></polyline>
-                  <line x1="12" y1="2" x2="12" y2="15"></line>
-                </svg>
+                {copied ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                )}
               </button>
-            )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-wider text-white/60 block">
+              Ваша реферальная ссылка
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 px-3 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/40 flex-shrink-0">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <input
+                  value={referralLink}
+                  readOnly
+                  className="flex-1 bg-transparent text-sm font-mono text-white/90 focus:outline-none overflow-hidden text-ellipsis"
+                />
+              </div>
+              <button
+                onClick={handleCopy}
+                className="flex-shrink-0 w-12 h-12 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition active:scale-95"
+                style={{ touchAction: 'manipulation' }}
+                title="Скопировать ссылку"
+              >
+                {copied ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                )}
+              </button>
+              {canShare && (
+                <button
+                  onClick={handleNativeShare}
+                  className="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-500/10 ring-1 ring-purple-400/30 flex items-center justify-center text-purple-300 hover:bg-purple-500/20 hover:ring-purple-400/40 transition active:scale-95"
+                  style={{ touchAction: 'manipulation' }}
+                  title="Поделиться"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                    <polyline points="16 6 12 2 8 6"></polyline>
+                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

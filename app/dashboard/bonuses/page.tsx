@@ -35,13 +35,20 @@ export default async function BonusesPage() {
 
   const bonusStats = bonusStatsResult.data
   const referralStats = referralStatsResult.data
-  const referralLink = referralLinkResult.link
+  const referralLink = referralLinkResult.link || null
+  const referralCode = referralLinkResult.code || null
+
+  // Debug: Log referral link result
+  if (!referralLinkResult.success) {
+    console.error('Failed to get referral link:', referralLinkResult.error)
+  }
 
   return (
     <BonusesClient
       bonusStats={bonusStats}
       referralStats={referralStats}
-      referralLink={referralLink || null}
+      referralLink={referralLink}
+      referralCode={referralCode}
       userId={profile.id}
     />
   )

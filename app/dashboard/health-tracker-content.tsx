@@ -130,6 +130,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
   const [bonusStats, setBonusStats] = useState<any | null>(initialBonusStats)
   const [referralStats, setReferralStats] = useState<any | null>(null)
   const [referralLink, setReferralLink] = useState<string | null>(null)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
   
   // State для модалок профиля (desktop)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
@@ -222,6 +223,19 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             if (p) setProfile(p)
           })
         })
+
+        // Загружаем реферальные данные при инициализации
+        import('@/lib/actions/referrals').then(m => {
+          m.getReferralStats(data.user.id).then(res => {
+            if (res.success) setReferralStats(res.data)
+          })
+          m.getReferralLink(data.user.id).then(res => {
+            if (res.success) {
+              setReferralLink(res.link || null)
+              setReferralCode(res.code || null)
+            }
+          })
+        })
         
         return () => {
           supabase.removeChannel(profileSubscription)
@@ -251,6 +265,19 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
             console.log('[HealthTracker] Bonus stats refreshed after payment')
             setBonusStats(result.data)
           }
+        })
+
+        // Обновляем реферальные данные
+        import('@/lib/actions/referrals').then(m => {
+          m.getReferralStats(userId).then(res => {
+            if (res.success) setReferralStats(res.data)
+          })
+          m.getReferralLink(userId).then(res => {
+            if (res.success) {
+              setReferralLink(res.link || null)
+              setReferralCode(res.code || null)
+            }
+          })
         })
       }
     }
@@ -1121,6 +1148,7 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
                             bonusStats={bonusStats}
                             referralStats={referralStats}
                             referralLink={referralLink}
+                            referralCode={referralCode}
                             userId={userId || ''}
                           />
                         </motion.div>

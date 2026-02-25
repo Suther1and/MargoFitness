@@ -524,9 +524,23 @@ export async function getReferralLink(userId: string): Promise<{
   code?: string
   error?: string
 }> {
-  const codeResult = await getUserReferralCode(userId)
+  let codeResult = await getUserReferralCode(userId)
+  
+  // Если код не найден, создаем его
   if (!codeResult.success || !codeResult.data) {
-    return { success: false, error: codeResult.error }
+    console.log('[getReferralLink] Code not found, creating new one for user:', userId)
+    const createResult = await createReferralCode(userId)
+    
+    if (!createResult.success || !createResult.code) {
+      console.error('[getReferralLink] Failed to create code:', createResult.error)
+      return { success: false, error: createResult.error }
+    }
+    
+    // Получаем созданный код
+    codeResult = await getUserReferralCode(userId)
+    if (!codeResult.success || !codeResult.data) {
+      return { success: false, error: 'Не удалось получить созданный код' }
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'

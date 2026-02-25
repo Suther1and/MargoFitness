@@ -15,10 +15,11 @@ interface BonusesTabProps {
   } | null
   referralStats: Awaited<ReturnType<typeof getReferralStats>>['data'] | undefined
   referralLink: string | null
+  referralCode: string | null
   userId: string
 }
 
-export function BonusesTab({ bonusStats, referralStats, referralLink, userId }: BonusesTabProps) {
+export function BonusesTab({ bonusStats, referralStats, referralLink, referralCode, userId }: BonusesTabProps) {
   if (!bonusStats) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -42,10 +43,11 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, userId }: 
             progress={bonusStats.progress}
           />
           
-          {referralLink && referralStats && (
+          {referralLink && referralStats && referralCode && (
             <ReferralSection
               referralLink={referralLink}
               stats={referralStats}
+              referralCode={referralCode}
             />
           )}
         </div>
@@ -64,10 +66,11 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, userId }: 
           progress={bonusStats.progress}
         />
         
-        {referralLink && referralStats && (
+        {referralLink && referralStats && referralCode && (
           <ReferralSection
             referralLink={referralLink}
             stats={referralStats}
+            referralCode={referralCode}
           />
         )}
         

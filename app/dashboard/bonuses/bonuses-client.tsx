@@ -15,10 +15,11 @@ interface BonusesClientProps {
   }
   referralStats: Awaited<ReturnType<typeof getReferralStats>>['data'] | undefined
   referralLink: string | null
+  referralCode: string | null
   userId: string
 }
 
-export function BonusesClient({ bonusStats, referralStats, referralLink, userId }: BonusesClientProps) {
+export function BonusesClient({ bonusStats, referralStats, referralLink, referralCode, userId }: BonusesClientProps) {
   return (
     <>
       <style jsx global>{`
@@ -74,10 +75,11 @@ export function BonusesClient({ bonusStats, referralStats, referralLink, userId 
         {/* Сетка контента: реферальная программа и история */}
         <div className="grid gap-6 md:gap-8 lg:grid-cols-2">
           {/* Реферальная программа */}
-          {referralLink && referralStats && (
+          {referralLink && referralStats && referralCode && (
             <ReferralSection
               referralLink={referralLink}
               stats={referralStats}
+              referralCode={referralCode}
             />
           )}
 
@@ -88,4 +90,3 @@ export function BonusesClient({ bonusStats, referralStats, referralLink, userId 
     </>
   )
 }
-
