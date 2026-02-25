@@ -35,6 +35,10 @@ import {
   Trash2,
   Monitor,
   Smartphone,
+  Users,
+  UsersRound,
+  UserPlus,
+  Gift,
   ChevronDown,
   ShieldCheck,
   ArrowUpCircle,
@@ -225,6 +229,9 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   const purchases: any[] = data?.purchases || []
   const intensives: any[] = data?.intensives || []
   const bonusTransactions: any[] = data?.bonusTransactions || []
+  const referrals: any[] = data?.referrals || []
+  const referralCode = data?.referralCode
+  const referrer = data?.referrer
 
   const tierOptions = [
     { value: 'free', label: 'Free', className: 'text-white/50' },
@@ -238,6 +245,13 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
     { value: '2', label: '🥈 Silver', className: 'text-gray-300' },
     { value: '3', label: '🥇 Gold', className: 'text-yellow-400' },
     { value: '4', label: '💎 Platinum', className: 'text-purple-400' },
+  ]
+
+  const refLevelOptions = [
+    { value: '1', label: '🥉 Ref L1', className: 'text-amber-600' },
+    { value: '2', label: '🥈 Ref L2', className: 'text-gray-300' },
+    { value: '3', label: '🥇 Ref L3', className: 'text-yellow-400' },
+    { value: '4', label: '💎 Ref L4', className: 'text-purple-400' },
   ]
 
   const metricBtn = 'h-8 px-3 rounded-lg text-xs font-medium bg-white/[0.05] border border-white/[0.08] ring-0'
@@ -339,6 +353,12 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                   onSave={(val) => handleUpdate('cashback_level', parseInt(val))}
                   displayClassName={cn(metricBtn, 'text-white/60')}
                 />
+                <InlineSelect
+                  value={user.referral_level?.toString() || '1'}
+                  options={refLevelOptions}
+                  onSave={(val) => handleUpdate('referral_level', parseInt(val))}
+                  displayClassName={cn(metricBtn, 'text-white/60')}
+                />
                 <InlineNumberInput
                   value={user.bonus_balance || 0}
                   onSave={(val) => handleUpdate('bonus_balance', val)}
@@ -401,6 +421,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                 { value: 'info', icon: Settings, label: 'Инфо' },
                 { value: 'purchases', icon: ShoppingBag, label: 'Покупки' },
                 { value: 'bonuses', icon: Trophy, label: 'Бонусы' },
+                { value: 'referrals', icon: UsersRound, label: 'Реф.' },
                 { value: 'activity', icon: Activity, label: 'Актив.' },
               ].map((tab) => (
                 <TabsTrigger
@@ -810,6 +831,100 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                 ) : (
                   <EmptyState text="Операций пока нет" />
                 )}
+              </TabsContent>
+
+              {/* ── TAB: Referrals ── */}
+              <TabsContent value="referrals" className="m-0 p-4 space-y-5">
+                {/* Referrer Info */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                    Приглашен пользователем
+                  </div>
+                  {referrer ? (
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                      <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400">
+                        <UserPlus className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-white truncate">
+                          {referrer.profiles?.full_name || 'Без имени'}
+                        </div>
+                        <div className="text-[10px] text-white/40 truncate">
+                          {referrer.profiles?.email}
+                        </div>
+                      </div>
+                      <div className="text-[10px] text-white/25 tabular-nums">
+                        {fmtDate(referrer.created_at)}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-white/25 italic px-1">Не приглашен</div>
+                  )}
+                </div>
+
+                {/* Referral Stats & Code */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 rounded-lg bg-purple-500/[0.05] border border-purple-500/[0.1]">
+                    <div className="text-[9px] text-purple-400/50 font-medium uppercase tracking-wider mb-1">
+                      Реф. код
+                    </div>
+                    <div className="text-sm font-bold text-white font-mono">
+                      {referralCode?.code || '—'}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-emerald-500/[0.05] border border-emerald-500/[0.1]">
+                    <div className="text-[9px] text-emerald-400/50 font-medium uppercase tracking-wider mb-1">
+                      Заработано
+                    </div>
+                    <div className="text-sm font-bold text-white tabular-nums">
+                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} ₽
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referrals List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                      Рефералы ({referrals.length})
+                    </div>
+                  </div>
+                  {referrals.length > 0 ? (
+                    <div className="space-y-1">
+                      {referrals.map((ref: any) => (
+                        <div
+                          key={ref.id}
+                          className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0"
+                        >
+                          <UserAvatar
+                            fullName={ref.profiles?.full_name}
+                            avatarUrl={ref.profiles?.avatar_url}
+                            email={ref.profiles?.email}
+                            className="w-7 h-7 rounded-lg shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium text-white/80 truncate">
+                              {ref.profiles?.full_name || 'Без имени'}
+                            </div>
+                            <div className="text-[10px] text-white/30 truncate">
+                              {ref.profiles?.email}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-xs font-bold text-emerald-400 tabular-nums">
+                              {ref.total_spent?.toLocaleString('ru-RU')} ₽
+                            </div>
+                            <div className="text-[9px] text-white/20">
+                              Доход: {ref.total_earned?.toLocaleString('ru-RU')} ₽
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState text="Рефералов пока нет" />
+                  )}
+                </div>
               </TabsContent>
 
               {/* ── TAB: Activity ── */}

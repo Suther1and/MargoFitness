@@ -28,12 +28,24 @@ export async function getUserFullDetails(userId: string) {
     if (profileError) throw profileError
 
     // 2. Получаем ВСЕ данные параллельно
-    const [purchasesRes, transactionsRes, promoCodesRes, bonusTransactionsRes] = await Promise.all([
+    const [purchasesRes, transactionsRes, promoCodesRes, bonusTransactionsRes, referralsRes, referralCodesRes] = await Promise.all([
       supabase.from('user_purchases').select('*, products(*)').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
       supabase.from('promo_codes').select('code, discount_value, discount_type'),
-      supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+      supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('referrals').select('*, profiles!referrals_referred_user_id_fkey(full_name, email, avatar_url)').eq('referrer_user_id', userId),
+      supabase.from('referral_codes').select('*').eq('user_id', userId).single()
     ])
+
+    const referrals = referralsRes.data || []
+    const referralCode = referralCodesRes.data
+
+    // Получаем информацию о том, кто пригласил этого пользователя
+    const { data: referrerData } = await supabase
+      .from('referrals')
+      .select('*, profiles!referrals_referrer_user_id_fkey(id, full_name, email)')
+      .eq('referred_user_id', userId)
+      .single()
 
     const purchases = purchasesRes.data || []
     const transactions = transactionsRes.data || []
@@ -96,6 +108,9 @@ export async function getUserFullDetails(userId: string) {
         },
         purchases: enrichedPurchases,
         bonusTransactions: bonusTransactions,
+        referrals: referrals,
+        referralCode: referralCode,
+        referrer: referrerData,
         stats: { workoutsCompleted: 0, articlesRead: 0, workoutHistory: [], articleHistory: [] }
       }
     }
