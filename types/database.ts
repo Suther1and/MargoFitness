@@ -272,9 +272,9 @@ export interface CashbackLevel {
 
 export const CASHBACK_LEVELS: CashbackLevel[] = [
   { level: 1, threshold: 0, percent: 3, name: 'Bronze', icon: '🥉', color: 'from-amber-700 to-amber-900' },
-  { level: 2, threshold: 9999, percent: 5, name: 'Silver', icon: '🥈', color: 'from-gray-400 to-gray-600' },
-  { level: 3, threshold: 49999, percent: 7, name: 'Gold', icon: '🥇', color: 'from-yellow-400 to-yellow-600' },
-  { level: 4, threshold: 99999, percent: 10, name: 'Platinum', icon: '💎', color: 'from-purple-500 to-indigo-600' },
+  { level: 2, threshold: 10000, percent: 5, name: 'Silver', icon: '🥈', color: 'from-gray-400 to-gray-600' },
+  { level: 3, threshold: 50000, percent: 7, name: 'Gold', icon: '🥇', color: 'from-yellow-400 to-yellow-600' },
+  { level: 4, threshold: 100000, percent: 10, name: 'Platinum', icon: '💎', color: 'from-purple-500 to-indigo-600' },
 ]
 
 /** Уровни реферальной программы */
@@ -377,7 +377,7 @@ export function calculateLevelProgress(currentAmount: number, isReferral: boolea
     const range = nextThreshold - currentThreshold
     const current = currentAmount - currentThreshold
     progress = Math.min(100, Math.floor((current / range) * 100))
-    remaining = nextThreshold - currentAmount
+    remaining = Math.max(0, nextThreshold - currentAmount)
   }
   
   return {

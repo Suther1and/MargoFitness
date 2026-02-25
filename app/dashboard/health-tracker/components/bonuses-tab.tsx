@@ -20,7 +20,10 @@ import {
   Trophy,
   Sparkles,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  UserPlus,
+  Settings,
+  ArrowDownCircle
 } from 'lucide-react'
 
 interface BonusesTabProps {
@@ -389,34 +392,61 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
           </div>
           <div className="flex-1 overflow-y-auto max-h-[400px] divide-y divide-white/[0.02]">
             {bonusStats.recentTransactions.length > 0 ? (
-              bonusStats.recentTransactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between p-5 hover:bg-white/[0.01] transition-colors group">
-                  <div className="flex items-center gap-3.5">
-                    <div className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
-                      tx.amount > 0 
-                        ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/10" 
-                        : "bg-white/5 border-white/10 text-white/40 group-hover:bg-white/10"
-                    )}>
-                      {tx.amount > 0 ? <ShoppingBag className="w-4 h-4" /> : <History className="w-4 h-4" />}
+              bonusStats.recentTransactions.map((tx) => {
+                let Icon = History
+                let iconColor = "text-white/40"
+                let bgColor = "bg-white/5 border-white/10"
+
+                if (tx.type === 'cashback') {
+                  Icon = ShoppingBag
+                  iconColor = "text-emerald-400"
+                  bgColor = "bg-emerald-500/5 border-emerald-500/10"
+                } else if (tx.type === 'referral_bonus' || tx.type === 'referral_income') {
+                  Icon = UserPlus
+                  iconColor = "text-blue-400"
+                  bgColor = "bg-blue-500/5 border-blue-500/10"
+                } else if (tx.type === 'achievement') {
+                  Icon = Trophy
+                  iconColor = "text-amber-400"
+                  bgColor = "bg-amber-500/5 border-amber-500/10"
+                } else if (tx.type === 'admin_adjustment') {
+                  Icon = Settings
+                  iconColor = "text-purple-400"
+                  bgColor = "bg-purple-500/5 border-purple-500/10"
+                } else if (tx.amount < 0) {
+                  Icon = ArrowDownCircle
+                  iconColor = "text-rose-400"
+                  bgColor = "bg-rose-500/5 border-rose-500/10"
+                }
+
+                return (
+                  <div key={tx.id} className="flex items-center justify-between p-5 hover:bg-white/[0.01] transition-colors group">
+                    <div className="flex items-center gap-3.5">
+                      <div className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
+                        bgColor,
+                        iconColor
+                      )}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mb-1">
+                          {new Date(tx.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                        </p>
+                        <p className="text-xs font-bold text-white/80 truncate group-hover:text-white transition-colors">{tx.description}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white/80 truncate group-hover:text-white transition-colors">{tx.description}</p>
-                      <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1">
-                        {new Date(tx.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
-                      </p>
+                    <div className="flex items-baseline gap-1 shrink-0">
+                      <span className={cn(
+                        "font-oswald text-lg font-bold",
+                        tx.amount > 0 ? "text-emerald-400" : "text-white/40"
+                      )}>
+                        {tx.amount > 0 ? '+' : ''}{tx.amount}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-1 shrink-0">
-                    <span className={cn(
-                      "font-oswald text-lg font-bold",
-                      tx.amount > 0 ? "text-emerald-400" : "text-white/40"
-                    )}>
-                      {tx.amount > 0 ? '+' : ''}{tx.amount}
-                    </span>
-                  </div>
-                </div>
-              ))
+                )
+              })
             ) : (
               <div className="py-16 text-center opacity-10">
                 <History className="w-10 h-10 mx-auto mb-2" />

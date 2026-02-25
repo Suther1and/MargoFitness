@@ -137,10 +137,10 @@ export function SubscriptionRenewalModal({
         .from('profiles')
         .select('subscription_tier')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
       
       if (profileError || !profile) {
-        console.error('[RenewalModal] Profile not found:', profileError)
+        console.error('[RenewalModal] Profile not found or error:', { profile, profileError, userId })
         setLoading(false)
         return
       }

@@ -227,12 +227,20 @@ export function HealthTrackerContent({ profile: initialProfile, bonusStats: init
         // Загружаем реферальные данные при инициализации
         import('@/lib/actions/referrals').then(m => {
           m.getReferralStats(data.user.id).then(res => {
-            if (res.success) setReferralStats(res.data)
+            if (res.success) {
+              console.log('[HealthTracker] Referral stats loaded:', res.data)
+              setReferralStats(res.data)
+            } else {
+              console.error('[HealthTracker] Failed to load referral stats:', res.error)
+            }
           })
           m.getReferralLink(data.user.id).then(res => {
             if (res.success) {
+              console.log('[HealthTracker] Referral link loaded:', res.code)
               setReferralLink(res.link || null)
               setReferralCode(res.code || null)
+            } else {
+              console.error('[HealthTracker] Failed to load referral link:', res.error)
             }
           })
         })

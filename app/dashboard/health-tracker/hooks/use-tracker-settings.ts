@@ -122,7 +122,6 @@ export function useTrackerSettings(userId: string | null) {
         // Если ошибка "JSON object requested, multiple (or no) rows returned", значит записи нет
         if (error.code === 'PGRST116') {
           console.log('[useTrackerSettings] No settings found, creating defaults...')
-          // ... остальная логика создания дефолтов
         } else {
           console.error('[useTrackerSettings] Error loading settings:', error)
           return DEFAULT_SETTINGS
@@ -134,22 +133,33 @@ export function useTrackerSettings(userId: string | null) {
         // Создаем дефолтные настройки
         const defaultSettings: any = {
           user_id: userId,
-          enabled_widgets: [],
+          enabled_widgets: DEFAULT_SETTINGS.widgets.habits.enabled ? ['habits'] : [],
           widget_goals: {},
-          widgets_in_daily_plan: [],
-          user_params: { height: null, weight: null, age: null, gender: null },
+          widgets_in_daily_plan: DEFAULT_SETTINGS.widgets.habits.inDailyPlan ? ['habits'] : [],
+          user_params: DEFAULT_SETTINGS.userParams,
           habits: [],
           streaks: { current: 0, longest: 0, last_entry_date: null },
-          goals: {} // Добавляем goals для дополнительных настроек (nutrition goalType и т.д.)
+          goals: {} 
         }
 
         const { data: newData, error: insertError } = await supabase
           .from('diary_settings')
-          .insert(defaultSettings)
+          .upsert(defaultSettings, { onConflict: 'user_id' })
           .select()
           .single()
 
         if (insertError) {
+          // Если запись уже была создана другим процессом, пробуем прочитать её еще раз
+          if (insertError.code === '23505') {
+            const { data: retryData } = await supabase
+              .from('diary_settings')
+              .select('*')
+              .eq('user_id', userId)
+              .maybeSingle()
+            
+            if (retryData) return dbToAppSettings(retryData)
+          }
+
           console.error('[useTrackerSettings] Error creating defaults:', insertError)
           return DEFAULT_SETTINGS
         }

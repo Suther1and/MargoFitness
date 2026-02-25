@@ -51,7 +51,7 @@ export async function getDiarySettings(userId: string) {
 
       const { data: newData, error: insertError } = await supabase
         .from('diary_settings')
-        .insert(defaultSettings)
+        .upsert(defaultSettings, { onConflict: 'user_id' })
         .select()
         .single()
 
@@ -131,7 +131,7 @@ export async function updateDiarySettings(userId: string, settings: DiarySetting
 
       const { data, error } = await supabase
         .from('diary_settings')
-        .insert(defaultSettings)
+        .upsert(defaultSettings, { onConflict: 'user_id' })
         .select()
         .single()
 
