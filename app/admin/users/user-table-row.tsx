@@ -5,16 +5,32 @@ import { updateUserProfile } from '@/lib/actions/admin-users'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/user-avatar'
 import { cn } from '@/lib/utils'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { UserDetailsSheet } from './user-details-sheet'
 
 interface UserTableRowProps {
   user: any
+  onOpenDetails?: (userId: string) => void
 }
 
-export function UserTableRow({ user }: UserTableRowProps) {
+export function UserTableRow({ user, onOpenDetails }: UserTableRowProps) {
   const router = useRouter()
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
+  // Слушаем событие навигации к пользователю
+  useEffect(() => {
+    const handleNavigate = (e: any) => {
+      if (e.detail.userId === user.id) {
+        setIsDetailsOpen(true)
+      } else {
+        // Закрываем текущую шторку, если переходим к другому пользователю
+        setIsDetailsOpen(false)
+      }
+    }
+
+    window.addEventListener('navigate-to-user', handleNavigate)
+    return () => window.removeEventListener('navigate-to-user', handleNavigate)
+  }, [user.id])
 
   const handleRowClick = useCallback((e: React.MouseEvent) => {
     // Не открываем шторку, если кликнули по интерактивным элементам
@@ -27,6 +43,13 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   const handleSheetClose = useCallback(() => {
     setIsDetailsOpen(false)
+  }, [])
+
+  const handleNavigate = useCallback((userId: string) => {
+    // Генерируем глобальное событие для открытия шторки нужного пользователя
+    window.dispatchEvent(new CustomEvent('navigate-to-user', { 
+      detail: { userId } 
+    }))
   }, [])
 
   const handleUpdate = async (field: string, value: any) => {
@@ -213,6 +236,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
       <UserDetailsSheet 
         userId={isDetailsOpen ? user.id : null} 
         onClose={handleSheetClose} 
+        onNavigateToUser={handleNavigate}
       />
     </>
   )

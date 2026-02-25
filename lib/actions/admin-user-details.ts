@@ -33,7 +33,7 @@ export async function getUserFullDetails(userId: string) {
       supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
       supabase.from('promo_codes').select('code, discount_value, discount_type'),
       supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      supabase.from('referrals').select('*, profiles!referrals_referred_id_fkey(full_name, email, avatar_url)').eq('referrer_id', userId),
+      supabase.from('referrals').select('*, profiles!referrals_referred_id_fkey(full_name, email, avatar_url, user_bonuses(total_spent_for_cashback))').eq('referrer_id', userId),
       supabase.from('referral_codes').select('*').eq('user_id', userId).maybeSingle()
     ])
 
@@ -50,10 +50,15 @@ export async function getUserFullDetails(userId: string) {
         .filter((tx: any) => tx.related_user_id === ref.referred_id && (tx.type === 'referral_bonus' || tx.type === 'referral_first'))
         .reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
 
+      // Безопасно извлекаем траты из вложенного массива user_bonuses
+      const bonusData = Array.isArray(profile?.user_bonuses) ? profile.user_bonuses[0] : profile?.user_bonuses
+      const totalSpent = bonusData?.total_spent_for_cashback || 0
+
       return {
         ...ref,
         profiles: profile,
-        total_earned: totalEarnedFromThisRef
+        total_earned: totalEarnedFromThisRef,
+        total_spent: totalSpent
       }
     })
 

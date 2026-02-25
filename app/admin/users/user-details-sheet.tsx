@@ -52,6 +52,7 @@ import { useRouter } from 'next/navigation'
 interface UserDetailsSheetProps {
   userId: string | null
   onClose: () => void
+  onNavigateToUser?: (userId: string) => void
 }
 
 function fmtDate(
@@ -109,7 +110,7 @@ function purchaseIcon(action: string) {
   }
 }
 
-function UserDetailsContent({ userId }: UserDetailsSheetProps) {
+function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -864,12 +865,16 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                     Приглашен пользователем
                   </div>
                   {referrer ? (
-                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                      <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400">
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToUser?.(referrer.referrer_id)}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors text-left group"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:bg-orange-500/20 transition-colors">
                         <UserPlus className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-white truncate">
+                        <div className="text-xs font-medium text-white truncate group-hover:text-orange-400 transition-colors">
                           {referrer.profiles?.full_name || 'Без имени'}
                         </div>
                         <div className="text-[10px] text-white/40 truncate">
@@ -879,7 +884,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                       <div className="text-[10px] text-white/25 tabular-nums">
                         {fmtDate(referrer.created_at)}
                       </div>
-                    </div>
+                    </button>
                   ) : (
                     <div className="text-xs text-white/25 italic px-1">Не приглашен</div>
                   )}
@@ -900,7 +905,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                       Заработано
                     </div>
                     <div className="text-sm font-bold text-white tabular-nums">
-                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} ₽
+                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} 👟
                     </div>
                   </div>
                 </div>
@@ -915,9 +920,10 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                   {referrals.length > 0 ? (
                     <div className="space-y-1">
                       {referrals.map((ref: any) => (
-                        <div
+                        <button
                           key={ref.id}
-                          className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0"
+                          onClick={() => onNavigateToUser?.(ref.referred_id)}
+                          className="w-full flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors text-left group"
                         >
                           <UserAvatar
                             fullName={ref.profiles?.full_name}
@@ -926,7 +932,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                             className="w-7 h-7 rounded-lg shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-medium text-white/80 truncate">
+                            <div className="text-xs font-medium text-white/80 truncate group-hover:text-orange-400 transition-colors">
                               {ref.profiles?.full_name || 'Без имени'}
                             </div>
                             <div className="text-[10px] text-white/30 truncate">
@@ -935,13 +941,13 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-xs font-bold text-emerald-400 tabular-nums">
-                              {ref.total_spent?.toLocaleString('ru-RU') || 0} ₽
+                              +{ref.total_earned?.toLocaleString('ru-RU') || 0} 👟
                             </div>
                             <div className="text-[9px] text-white/20">
-                              Доход: {ref.total_earned?.toLocaleString('ru-RU') || 0} ₽
+                              Траты: {ref.total_spent?.toLocaleString('ru-RU') || 0} ₽
                             </div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   ) : (
@@ -1007,7 +1013,7 @@ function UserDetailsContent({ userId }: UserDetailsSheetProps) {
   )
 }
 
-export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
+export function UserDetailsSheet({ userId, onClose, onNavigateToUser }: UserDetailsSheetProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -1029,7 +1035,7 @@ export function UserDetailsSheet({ userId, onClose }: UserDetailsSheetProps) {
           if (target?.closest('[data-radix-portal]')) e.preventDefault()
         }}
       >
-        <UserDetailsContent userId={userId} onClose={onClose} />
+        <UserDetailsContent userId={userId} onClose={onClose} onNavigateToUser={onNavigateToUser} />
       </SheetContent>
     </Sheet>
   )
