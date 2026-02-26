@@ -41,7 +41,11 @@ interface BonusesTabProps {
   referralLink: string | null
   referralCode: string | null
   userId: string
-  hasMentorAchievement?: boolean
+  referralAchievements?: {
+    mentor?: any
+    advancedMentor?: any
+    guru?: any
+  }
 }
 
 const getBonusLevelStyles = (level: number) => {
@@ -105,7 +109,7 @@ const getBonusLevelStyles = (level: number) => {
   }
 }
 
-export function BonusesTab({ bonusStats, referralStats, referralLink, referralCode, userId, hasMentorAchievement }: BonusesTabProps) {
+export function BonusesTab({ bonusStats, referralStats, referralLink, referralCode, userId, referralAchievements }: BonusesTabProps) {
   const [copiedLink, setCopiedLink] = useState(false)
   const [transactions, setTransactions] = useState<BonusTransaction[]>(bonusStats?.recentTransactions || [])
   const [hasMore, setHasMore] = useState(bonusStats?.hasMoreTransactions || false)
@@ -357,11 +361,36 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
             </div>
             <h3 className="text-lg font-bold text-white font-oswald uppercase tracking-tight">Приглашай друзей и получай бонусы</h3>
             <p className="mt-1 text-white/40 text-xs leading-relaxed">
-              {hasMentorAchievement ? (
-                <>Ты получаешь <span className="font-bold text-white/70">{referralStats?.referralPercent || 0}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех оплат своих друзей.</>
-              ) : (
-                <>Ты получишь <span className="font-bold text-white/70">500 бонусов</span> за первого друга после его первой покупки и <span className="font-bold text-white/70">{referralStats?.referralPercent || 0}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех его будущих оплат.</>
-              )}
+              {(() => {
+                const mentor = referralAchievements?.mentor
+                const advancedMentor = referralAchievements?.advancedMentor
+                const guru = referralAchievements?.guru
+                const percent = referralStats?.referralPercent || 0
+
+                if (!mentor?.isUnlocked) {
+                  return (
+                    <>Ты получишь <span className="font-bold text-white/70">500 бонусов</span> за первого друга после его первой покупки и <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех его будущих покупок.</>
+                  )
+                }
+
+                if (!advancedMentor?.isUnlocked) {
+                  const remaining = Math.max(0, (advancedMentor?.targetValue || 3) - (advancedMentor?.currentValue || 0))
+                  return (
+                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {remaining === 1 ? 'друга' : 'друзей'} для получения <span className="font-bold text-white/70">750</span> <Sparkles className="w-3 h-3 text-current inline" />. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
+                  )
+                }
+
+                if (!guru?.isUnlocked) {
+                  const remaining = Math.max(0, (guru?.targetValue || 5) - (guru?.currentValue || 0))
+                  return (
+                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {remaining === 1 ? 'друга' : 'друзей'} для получения <span className="font-bold text-white/70">1000</span> <Sparkles className="w-3 h-3 text-current inline" />. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
+                  )
+                }
+
+                return (
+                  <>Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
+                )
+              })()}
             </p>
           </div>
           <div className="flex w-full max-w-md items-center gap-2 rounded-xl bg-white/[0.03] p-1.5 border border-white/[0.06] backdrop-blur-md">

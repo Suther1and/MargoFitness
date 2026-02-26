@@ -123,11 +123,19 @@ export function HealthTrackerContent({
   
   const { data: allAchievements = [] } = useAllAchievements(userId)
 
-  const hasMentorAchievement = useMemo(() => 
-    allAchievements.some(a => 
-      a.isUnlocked && 
-      (a.metadata as any)?.type === 'referral_mentor'
-    ), [allAchievements])
+  const referralAchievements = useMemo(() => {
+    const mentor = allAchievements.find(a => (a.metadata as any)?.type === 'referral_mentor' && (a.metadata as any)?.value === 1)
+    const advancedMentor = allAchievements.find(a => (a.metadata as any)?.type === 'referral_mentor' && (a.metadata as any)?.value === 3)
+    const guru = allAchievements.find(a => (a.metadata as any)?.type === 'referral_mentor' && (a.metadata as any)?.value === 5)
+    
+    return {
+      mentor,
+      advancedMentor,
+      guru
+    }
+  }, [allAchievements])
+
+  const hasMentorAchievement = useMemo(() => referralAchievements.mentor?.isUnlocked || false, [referralAchievements])
 
   // State для модалок профиля (desktop)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
@@ -619,7 +627,7 @@ export function HealthTrackerContent({
                     <AnimatePresence mode="wait">
                       {activeTab === 'settings' && <motion.div key="settings-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SettingsTab userId={userId || ''} profile={profile} onBack={() => setActiveTab('overview')} selectedDate={selectedDate} onDateChange={setSelectedDate} isCalendarExpanded={isCalendarExpanded} setIsCalendarExpanded={setIsCalendarExpanded} activeSubTab={settingsSubTab} setActiveSubTab={setSettingsSubTab} isMobile={false} /></motion.div>}
                       {activeTab === 'stats' && <motion.div key="stats-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><StatsTab userId={userId || ''} periodType={statsPeriodType} dateRange={statsDateRange} data={data} onPeriodSelect={handleStatsPeriodSelect} /></motion.div>}
-                      {activeTab === 'bonuses' && <motion.div key="bonuses-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><BonusesTab bonusStats={bonusStats} referralStats={referralStats} referralLink={referralLink} referralCode={referralCode} userId={userId || ''} hasMentorAchievement={hasMentorAchievement} /></motion.div>}
+                      {activeTab === 'bonuses' && <motion.div key="bonuses-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><BonusesTab bonusStats={bonusStats} referralStats={referralStats} referralLink={referralLink} referralCode={referralCode} userId={userId || ''} referralAchievements={referralAchievements} /></motion.div>}
                       {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} /></motion.div>}
                       {activeTab === 'workouts' && <motion.div key="workouts-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><WorkoutsTab preloadedArticles={finalArticles} isArticlesLoading={isArticlesLoading} userId={userId || ''} initialTier={profile?.subscription_tier} fullProfile={profile} /></motion.div>}
                       {activeTab === 'profile' && profile && <motion.div key="profile-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><ProfileTab profile={profile} bonusStats={bonusStats} onProfileUpdate={setProfile} /></motion.div>}
