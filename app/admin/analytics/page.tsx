@@ -9,7 +9,7 @@ import { getAdminBonusStats } from "@/lib/actions/bonuses"
 import { getAdminReferralStats } from "@/lib/actions/referrals"
 import { getPromoCodeStats } from "@/lib/actions/promo-codes"
 import { redirect } from "next/navigation"
-import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, Gift, UserPlus, Tag, ArrowLeft, MoreHorizontal, Wallet } from "lucide-react"
+import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, Gift, UserPlus, Tag, ArrowLeft, MoreHorizontal, Wallet, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { CASHBACK_LEVELS } from "@/types/database"
 
@@ -222,9 +222,9 @@ export default async function AnalyticsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: 'Выдано всего', value: `${bonusStats?.totalBonusesIssued.toLocaleString('ru-RU')} 👟`, sub: 'Начисления', color: 'text-amber-400' },
-            { label: 'Потрачено', value: `${bonusStats?.totalBonusesSpent.toLocaleString('ru-RU')} 👟`, sub: 'На оплаты', color: 'text-rose-400' },
-            { label: 'В обращении', value: `${bonusStats?.totalBonusesInCirculation.toLocaleString('ru-RU')} 👟`, sub: `Средний: ${bonusStats?.averageBalance || 0}`, color: 'text-blue-400' },
+            { label: 'Выдано всего', value: <span className="flex items-center gap-1">{bonusStats?.totalBonusesIssued.toLocaleString('ru-RU')} <Sparkles className="w-4 h-4 text-amber-400" /></span>, sub: 'Начисления', color: 'text-amber-400' },
+            { label: 'Потрачено', value: <span className="flex items-center gap-1">{bonusStats?.totalBonusesSpent.toLocaleString('ru-RU')} <Sparkles className="w-4 h-4 text-rose-400" /></span>, sub: 'На оплаты', color: 'text-rose-400' },
+            { label: 'В обращении', value: <span className="flex items-center gap-1">{bonusStats?.totalBonusesInCirculation.toLocaleString('ru-RU')} <Sparkles className="w-4 h-4 text-blue-400" /></span>, sub: `Средний: ${bonusStats?.averageBalance || 0}`, color: 'text-blue-400' },
             { label: 'Рефералы', value: referralStats?.totalReferrals || 0, sub: `Активных: ${referralStats?.activeReferrals || 0}`, color: 'text-purple-400' }
           ].map((item, i) => (
             <div key={i} className="p-6 rounded-3xl bg-white/[0.04] ring-1 ring-white/10">
@@ -285,7 +285,7 @@ export default async function AnalyticsPage() {
                   <Wallet className="size-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold font-oswald text-white">{referralStats?.totalBonusesPaid.toLocaleString('ru-RU')} 👟</p>
+                  <p className="text-2xl font-bold font-oswald text-white flex items-center gap-1">{referralStats?.totalBonusesPaid.toLocaleString('ru-RU')} <Sparkles className="w-5 h-5 text-amber-400" /></p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Выплачено бонусов</p>
                 </div>
               </div>

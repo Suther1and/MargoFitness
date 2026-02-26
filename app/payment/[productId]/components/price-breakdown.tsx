@@ -172,7 +172,7 @@ export function PriceBreakdown({ calculation }: PriceBreakdownProps) {
 
             <div className={`breakdown-row ${calculation.bonusToUse > 0 ? 'active' : ''}`}>
               <div className="flex justify-between text-orange-400 pt-3">
-                <span className="flex items-center gap-1"><span>Шаги</span><span>👟</span></span>
+                <span className="flex items-center gap-1"><span>Шаги</span><Sparkles className="w-3 h-3 text-amber-400" /></span>
                 <span className="font-medium">−<AnimatedNumber value={calculation.bonusToUse} /> ₽</span>
               </div>
             </div>

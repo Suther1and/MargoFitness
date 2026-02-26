@@ -209,7 +209,7 @@ export function UserTableRow({ user, onOpenDetails }: UserTableRowProps) {
               value={user.bonus_balance || 0}
               onSave={(value) => handleUpdate('bonus_balance', value)}
               min={0}
-              suffix="👟"
+              suffix={<Sparkles className="w-3 h-3 text-amber-400" />}
             />
           </div>
         </td>

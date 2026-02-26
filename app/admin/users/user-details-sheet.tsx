@@ -398,7 +398,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                 <InlineNumberInput
                   value={user.bonus_balance || 0}
                   onSave={(val) => handleUpdate('bonus_balance', val)}
-                  suffix="👟"
+                  suffix={<Sparkles className="w-3 h-3 text-amber-400" />}
                 />
                 <div className="ml-auto shrink-0">
                   <span className="text-[9px] text-white/25 uppercase tracking-wider">LTV </span>
@@ -716,7 +716,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                                 )}
                                 {p.bonus_amount_used > 0 && (
                                   <span className="text-yellow-400/60 font-medium">
-                                    -{p.bonus_amount_used}👟
+                                    -{p.bonus_amount_used}<Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
                                     {p.products?.price > 0 && (
                                       <span className="text-[9px] opacity-60 ml-0.5">
                                         ({Math.round((p.bonus_amount_used / p.products.price) * 100)}%)
@@ -807,7 +807,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                     </div>
                     <div className="text-lg font-bold text-white leading-tight font-oswald tabular-nums">
                       {user.bonus_balance || 0}{' '}
-                      <span className="text-sm">👟</span>
+                      <Sparkles className="w-4 h-4 text-amber-400" />
                     </div>
                   </div>
                   <div className="text-right">
@@ -921,7 +921,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                       Заработано
                     </div>
                     <div className="text-sm font-bold text-white tabular-nums">
-                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} 👟
+                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
                     </div>
                   </div>
                 </div>
@@ -957,7 +957,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-xs font-bold text-emerald-400 tabular-nums">
-                              +{ref.total_earned?.toLocaleString('ru-RU') || 0} 👟
+                              +{ref.total_earned?.toLocaleString('ru-RU') || 0} <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
                             </div>
                             <div className="text-[9px] text-white/20">
                               Траты: {ref.total_spent?.toLocaleString('ru-RU') || 0} ₽

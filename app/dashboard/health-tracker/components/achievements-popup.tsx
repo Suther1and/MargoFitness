@@ -549,7 +549,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                                 achievement.isUnlocked ? "text-white" : "text-white/40"
                               )}>
                                 +{achievement.reward_amount}
-                                <span className="text-[10px] filter grayscale-[0.5]">👟</span>
+                                <Sparkles className="w-2.5 h-2.5 text-white/40 grayscale-[0.5]" />
                               </span>
                             </div>
                           )}
@@ -770,7 +770,7 @@ export function AchievementsPopup({ isOpen, onClose, initialAchievementId }: Ach
                         <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Награда</span>
                         <div className="flex items-center gap-1.5">
                           <span className="text-lg font-black text-emerald-400 font-oswald">+{selectedAchievement.reward_amount}</span>
-                          <span className="text-sm">👟</span>
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
                     )}

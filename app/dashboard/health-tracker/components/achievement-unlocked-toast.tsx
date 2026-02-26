@@ -124,7 +124,7 @@ export function AchievementUnlockedToast({
                         <span className="text-xs font-black text-amber-300">
                           +{achievement.reward_amount}
                         </span>
-                        <span className="text-sm">👟</span>
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                       </motion.div>
                     )}
                   </motion.div>

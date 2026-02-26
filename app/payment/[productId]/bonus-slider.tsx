@@ -76,7 +76,7 @@ export function BonusToggle({ userId, priceAfterDiscounts, onBonusChange, curren
         <div className="text-left">
           <div className="text-sm font-medium text-white flex items-center gap-2">
             <span>Использовать шаги</span>
-            <span className="text-base">👟</span>
+            <Sparkles className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-xs text-white/60 mt-0.5">
             Доступно: {availableBalance.toLocaleString('ru-RU')}

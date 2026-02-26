@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Loader2, Check, X, Tag } from 'lucide-react'
+import { Loader2, Check, X, Tag, Sparkles } from 'lucide-react'
 import { validatePromoCode } from '@/lib/actions/promo-codes'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
 import type { PromoCode } from '@/types/database'
@@ -171,7 +171,7 @@ export function PriceOptimizer({
                     : 'bg-white/[0.06] text-white/50 ring-1 ring-white/10'
                 }`}
               >
-                <span className="text-sm">👟</span>
+                <Sparkles className="w-4 h-4 text-white" />
                 <span className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
                   Шаги
                 </span>
@@ -245,7 +245,7 @@ export function PriceOptimizer({
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-sm font-bold text-white uppercase tracking-tight">Шаги</span>
-                    <span className="text-sm">👟</span>
+                    <Sparkles className="w-4 h-4 text-white" />
                   </div>
                   <div className="text-[10px] text-white/40 uppercase tracking-widest font-medium">
                     Баланс: {availableBalance.toLocaleString('ru-RU')}

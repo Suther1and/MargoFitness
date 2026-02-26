@@ -290,7 +290,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
               {/* Шаги */}
               {calculation.bonusToUse > 0 && (
                 <div className="flex items-center justify-between text-sm text-orange-400">
-                  <span>Использовано шагов 👟</span>
+                  <span>Использовано шагов <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" /></span>
                   <span>-{calculation.bonusToUse.toLocaleString('ru-RU')} ₽</span>
                 </div>
               )}
@@ -321,7 +321,7 @@ export function YooKassaWidget({ product, profile, onCalculationChange, action }
                     <span className="text-white/70">Вы получите кешбек:</span>
                     <div className="flex items-center justify-between mt-1">
                       <span className="font-semibold text-white">
-                        {calculation.cashbackAmount.toLocaleString('ru-RU')} 👟 
+                        {calculation.cashbackAmount.toLocaleString('ru-RU')} <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
                         <span className="text-white/60 ml-1">
                           ({calculation.cashbackPercent}%)
                         </span>

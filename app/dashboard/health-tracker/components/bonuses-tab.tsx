@@ -26,6 +26,7 @@ import {
   ArrowDownCircle
 } from 'lucide-react'
 
+
 import { getBonusTransactions } from '@/lib/actions/bonuses'
 
 interface BonusesTabProps {
@@ -297,7 +298,10 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
             </div>
             <div className="px-2 text-center">
               <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-bold mb-0.5">Заработано</p>
-              <p className="text-2xl font-bold text-white font-oswald">{Math.floor((referralStats?.totalEarned || 0) / 1000)}k</p>
+              <div className="flex items-center justify-center gap-1">
+                <p className="text-2xl font-bold text-white font-oswald">{Math.floor((referralStats?.totalEarned || 0) / 1000)}k</p>
+                <Sparkles className="w-4 h-4 text-blue-400" />
+              </div>
             </div>
             <div className="px-2 text-center">
               <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-bold mb-0.5">Рефералы</p>
@@ -388,7 +392,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-baseline justify-end gap-1">
                             <span className="font-oswald text-lg font-bold text-emerald-400">+{ref.total_earned?.toLocaleString('ru-RU') || 0}</span>
-                            <span className="text-[9px] text-emerald-400/40 font-bold">👟</span>
+                            <Sparkles className="w-3 h-3 text-emerald-400/40" />
                           </div>
                         </td>
                       </tr>
@@ -455,7 +459,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                       </div>
                       <div className="min-w-0">
                         <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mb-1">
-                          {new Date(tx.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                          {new Date(tx.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
                         </p>
                         <p className="text-xs font-bold text-white/80 truncate group-hover:text-white transition-colors">{tx.description}</p>
                       </div>
@@ -467,6 +471,10 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                       )}>
                         {tx.amount > 0 ? '+' : ''}{tx.amount}
                       </span>
+                      <Sparkles className={cn(
+                        "w-3 h-3",
+                        tx.amount > 0 ? "text-emerald-400/40" : "text-white/20"
+                      )} />
                     </div>
                   </div>
                 )
