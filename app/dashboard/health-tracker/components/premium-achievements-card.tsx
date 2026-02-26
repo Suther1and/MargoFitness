@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Trophy, Award, ChevronRight, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AchievementsPopup } from './achievements-popup'
-import { useRecentAchievements, useAchievementStats } from '../hooks/use-achievements'
+import { useRecentAchievements, useAchievementStats, useAllAchievements } from '../hooks/use-achievements'
 import { createClient } from '@/lib/supabase/client'
 
 export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
