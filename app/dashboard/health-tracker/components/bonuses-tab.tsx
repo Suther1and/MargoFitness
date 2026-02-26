@@ -417,14 +417,14 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
         {/* Referrals List (Left 7/12) */}
         <div className="md:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] shadow-sm overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/[0.04] px-6 py-5">
-            <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">Ваши рефералы</h3>
+            <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">Твои рефералы</h3>
             <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] text-white/30 font-bold uppercase tracking-widest">
               Всего: {referralStats?.referrals.length || 0}
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full overflow-hidden">
             <div className="overflow-x-auto scrollbar-none">
-              <table className="w-full text-left text-xs min-w-[500px] md:min-w-0">
+              <table className="w-full text-left text-xs min-w-[450px] md:min-w-0">
                 <thead className="bg-white/[0.01] text-[9px] uppercase text-white/20 font-bold tracking-[0.2em]">
                   <tr>
                     <th className="px-6 py-3.5">Пользователь</th>
@@ -435,35 +435,52 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 </thead>
                 <tbody className="divide-y divide-white/[0.02]">
                   {referralStats?.referrals && referralStats.referrals.length > 0 ? (
-                    referralStats.referrals.slice(0, 5).map((ref: any) => (
-                      <tr key={ref.id} className="hover:bg-white/[0.01] transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <UserAvatar 
-                              fullName={ref.referred_name} 
-                              avatarUrl={ref.referred_avatar_url} 
-                              className="w-9 h-9 rounded-xl border border-white/10 transition-transform group-hover:scale-105"
-                            />
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-bold text-white group-hover:text-blue-400 transition-colors truncate">{ref.referred_name || 'Без имени'}</span>
-                              <span className="text-[10px] text-white/20 truncate">{ref.referred_email || 'Email скрыт'}</span>
+                    referralStats.referrals.slice(0, 5).map((ref: any) => {
+                      const hasPurchase = ref.total_earned > 0 || ref.status === 'first_purchase_made';
+                      
+                      return (
+                        <tr key={ref.id} className="hover:bg-white/[0.01] transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <UserAvatar 
+                                fullName={ref.referred_name} 
+                                avatarUrl={ref.referred_avatar_url} 
+                                className="w-9 h-9 rounded-xl border border-white/10 transition-transform group-hover:scale-105"
+                              />
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-white group-hover:text-blue-400 transition-colors truncate">{ref.referred_name || 'Без имени'}</span>
+                                <span className="text-[10px] text-white/20 truncate">{ref.referred_email || 'Email скрыт'}</span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-white/30 font-medium">{new Date(ref.created_at).toLocaleDateString('ru-RU')}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center rounded-full bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-bold text-emerald-400/60 uppercase tracking-widest border border-emerald-500/10">
-                            Активен
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-baseline justify-end gap-1">
-                            <span className="font-oswald text-lg font-bold text-emerald-400">+{ref.total_earned?.toLocaleString('ru-RU') || 0}</span>
-                            <Sparkles className="w-3 h-3 text-emerald-400/40" />
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td className="px-6 py-4 text-white/30 font-medium">{new Date(ref.created_at).toLocaleDateString('ru-RU')}</td>
+                          <td className="px-6 py-4">
+                            <span className={cn(
+                              "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border",
+                              hasPurchase 
+                                ? "bg-emerald-500/5 text-emerald-400/60 border-emerald-500/10" 
+                                : "bg-white/5 text-white/20 border-white/5"
+                            )}>
+                              {hasPurchase ? 'Активен' : 'Новый'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-baseline justify-end gap-1">
+                              <span className={cn(
+                                "font-oswald text-lg font-bold",
+                                hasPurchase ? "text-emerald-400" : "text-white/10"
+                              )}>
+                                {hasPurchase ? `+${ref.total_earned?.toLocaleString('ru-RU') || 0}` : '0'}
+                              </span>
+                              <Sparkles className={cn(
+                                "w-3 h-3",
+                                hasPurchase ? "text-emerald-400/40" : "text-white/5"
+                              )} />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td colSpan={4} className="px-6 py-12 text-center">
