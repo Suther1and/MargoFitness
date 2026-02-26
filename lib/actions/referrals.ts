@@ -206,7 +206,7 @@ export async function getReferralStats(userId: string): Promise<{
     const totalEarned = (bonusTransactions || []).reduce((sum: number, tx: any) => sum + tx.amount, 0) || 0
 
     const referralLevelData = getReferralLevelData(bonusAccount.referral_level)
-    const progress = calculateLevelProgress(bonusAccount.total_referral_earnings, true)
+    const progress = calculateLevelProgress(totalEarned, true)
 
     return {
       success: true,

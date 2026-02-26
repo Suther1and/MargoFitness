@@ -322,9 +322,9 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
               ></div>
             </div>
             <p className="mt-2 text-[10px] text-white/20 flex items-center gap-1">
-              Получите еще <span className="text-white/60 font-bold">{referralStats?.progress.remaining.toLocaleString('ru-RU') || 0}</span>
+              Получи еще <span className="text-white/60 font-bold">{referralStats?.progress.remaining.toLocaleString('ru-RU') || 0}</span>
               <Sparkles className="w-3 h-3 text-blue-400" />
-              от покупок ваших рефералов для повышения
+              от покупок твоих рефералов для повышения
             </p>
           </div>
 
