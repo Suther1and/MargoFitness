@@ -140,6 +140,14 @@ export function HealthTrackerContent({
   const [referralLink, setReferralLink] = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState<string | null>(null)
   
+  const { data: allAchievements = [] } = useAllAchievements(userId)
+
+  const hasMentorAchievement = useMemo(() => 
+    allAchievements.some(a => 
+      a.isUnlocked && 
+      (a.metadata as any)?.type === 'referral_mentor'
+    ), [allAchievements])
+
   // State для модалок профиля (desktop)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
@@ -1249,15 +1257,8 @@ export function HealthTrackerContent({
                     </AnimatePresence>
                   </div>
                 </div>
-  const { data: allAchievements = [] } = useAllAchievements(userId)
-
-  const hasMentorAchievement = allAchievements.some(a => 
-    a.isUnlocked && 
-    (a.metadata as any)?.type === 'referral_mentor'
-  )
-
-  return (
-    <div className="grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
+              ) : (
+                <div className="grid grid-cols-12 gap-6 items-start main-grid-container" style={{ contain: 'layout paint' }}>
       {/* Левая навигация: фиксированная ширина */}
       <div className="col-span-1" style={{ paddingTop: 0, paddingBottom: 0 }}>
         <DesktopNavigation 
