@@ -375,15 +375,23 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
 
                 if (!advancedMentor?.isUnlocked) {
                   const remaining = Math.max(0, (advancedMentor?.targetValue || 3) - (advancedMentor?.currentValue || 0))
+                  const friendWord = remaining === 1 ? 'друга' : 'друзей'
+                  const pronounWord = remaining === 1 ? 'его' : 'их'
+                  const purchaseWord = remaining === 1 ? 'покупки' : 'покупок'
+                  
                   return (
-                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {remaining === 1 ? 'друга' : 'друзей'}, ты получишь <span className="font-bold text-white/70">750</span> <Sparkles className="w-3 h-3 text-current inline" /> после их первой покупки. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
+                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {friendWord}, ты получишь <span className="font-bold text-white/70">750</span> <Sparkles className="w-3 h-3 text-current inline" /> после {pronounWord} первой {purchaseWord}. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
                   )
                 }
 
                 if (!guru?.isUnlocked) {
                   const remaining = Math.max(0, (guru?.targetValue || 5) - (guru?.currentValue || 0))
+                  const friendWord = remaining === 1 ? 'друга' : 'друзей'
+                  const pronounWord = remaining === 1 ? 'его' : 'их'
+                  const purchaseWord = remaining === 1 ? 'покупки' : 'покупок'
+
                   return (
-                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {remaining === 1 ? 'друга' : 'друзей'}, ты получишь <span className="font-bold text-white/70">1000</span> <Sparkles className="w-3 h-3 text-current inline" /> после их первой покупки. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
+                    <>Пригласи еще <span className="font-bold text-white/70">{remaining}</span> {friendWord}, ты получишь <span className="font-bold text-white/70">1000</span> <Sparkles className="w-3 h-3 text-current inline" /> после {pronounWord} первой {purchaseWord}. Ты получаешь <span className="font-bold text-white/70">{percent}%</span> <Sparkles className="w-3 h-3 text-current inline" /> от всех покупок своих друзей.</>
                   )
                 }
 
