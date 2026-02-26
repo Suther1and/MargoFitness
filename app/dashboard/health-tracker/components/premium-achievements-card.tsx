@@ -23,6 +23,12 @@ export const PremiumAchievementsCard = memo(function PremiumAchievementsCard() {
 
   const { data: recentAchievements = [], isLoading: loadingRecent } = useRecentAchievements(userId, 3)
   const { data: stats, isLoading: loadingStats } = useAchievementStats(userId)
+  const { data: allAchievements = [] } = useAllAchievements(userId)
+
+  const hasMentorAchievement = allAchievements.some(a => 
+    a.isUnlocked && 
+    (a.metadata as any)?.type === 'referral_mentor'
+  )
 
   const isLoading = loadingRecent || loadingStats
 
