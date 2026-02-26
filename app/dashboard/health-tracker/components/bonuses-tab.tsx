@@ -145,6 +145,37 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
 
   const bonusStyles = getBonusLevelStyles(bonusStats.levelData.level)
 
+  const getReferralStatusText = (level: number) => {
+    switch (level) {
+      case 1:
+        return (
+          <span className="flex items-center gap-1">
+            Приглашай друзей и получай 3% <Sparkles className="w-3 h-3 text-current inline" /> с их покупок
+          </span>
+        )
+      case 2:
+        return (
+          <span className="flex items-center gap-1">
+            Твои рекомендации работают! Ты получаешь 5% <Sparkles className="w-3 h-3 text-current inline" /> с каждой покупки друзей
+          </span>
+        )
+      case 3:
+        return (
+          <span className="flex items-center gap-1">
+            Ты - настоящий амбассадор! Твой бонус вырос до 7% <Sparkles className="w-3 h-3 text-current inline" />
+          </span>
+        )
+      case 4:
+        return (
+          <span className="flex items-center gap-1">
+            Высший статус в Margo Fitness! Ты достигла максимума - 10% <Sparkles className="w-3 h-3 text-current inline" />
+          </span>
+        )
+      default:
+        return 'Приглашай друзей и получай бонусы с их покупок'
+    }
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500 pb-12">
       {/* TOP SECTION: Card & Status */}
@@ -266,7 +297,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 Реферальный статус: {referralStats?.referralLevel || 1} уровень
                 <span className="text-xl">🏆</span>
               </h3>
-              <p className="text-[11px] text-white/30 mt-0.5">Вы входите в число самых активных участников</p>
+              <p className="text-[11px] text-white/30 mt-0.5">{getReferralStatusText(referralStats?.referralLevel || 1)}</p>
             </div>
             <div className="rounded-2xl bg-blue-500/10 border border-blue-500/20 p-2.5 text-blue-400">
               <Award className="w-5 h-5" />
@@ -285,8 +316,10 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 style={{ width: `${referralStats?.progress.progress || 0}%` }}
               ></div>
             </div>
-            <p className="mt-2 text-[10px] text-white/20">
-              Нужно еще <span className="text-white/60 font-bold">{referralStats?.progress.remaining.toLocaleString('ru-RU') || 0} ₽</span> дохода для повышения
+            <p className="mt-2 text-[10px] text-white/20 flex items-center gap-1">
+              Получите еще <span className="text-white/60 font-bold">{referralStats?.progress.remaining.toLocaleString('ru-RU') || 0}</span>
+              <Sparkles className="w-3 h-3 text-blue-400" />
+              от покупок ваших рефералов для повышения
             </p>
           </div>
 
