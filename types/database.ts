@@ -286,9 +286,9 @@ export interface ReferralLevel {
 
 export const REFERRAL_LEVELS: ReferralLevel[] = [
   { level: 1, threshold: 0, percent: 3 },
-  { level: 2, threshold: 100000, percent: 5 },
-  { level: 3, threshold: 250000, percent: 7 },
-  { level: 4, threshold: 500000, percent: 10 },
+  { level: 2, threshold: 3000, percent: 5 },
+  { level: 3, threshold: 10000, percent: 7 },
+  { level: 4, threshold: 30000, percent: 10 },
 ]
 
 /** Константы бонусной системы */

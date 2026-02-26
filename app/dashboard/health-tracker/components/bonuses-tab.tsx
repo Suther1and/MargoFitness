@@ -155,25 +155,25 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
       case 1:
         return (
           <span className="flex items-center gap-1">
-            Приглашай друзей и получай 3% <Sparkles className="w-3 h-3 text-current inline" /> с их покупок
+            Приглашай друзей и получай 3% <Sparkles className="w-3 h-3 text-current inline" /> с их покупок. На следующем уровне — 5%
           </span>
         )
       case 2:
         return (
           <span className="flex items-center gap-1">
-            Твои рекомендации работают! Ты получаешь 5% <Sparkles className="w-3 h-3 text-current inline" /> с каждой покупки друзей
+            Твои рекомендации работают! Твоя новая цель — 7% <Sparkles className="w-3 h-3 text-current inline" /> за покупки друзей
           </span>
         )
       case 3:
         return (
           <span className="flex items-center gap-1">
-            Ты - настоящий амбассадор! Твой бонус вырос до 7% <Sparkles className="w-3 h-3 text-current inline" />
+            Ты — настоящий амбассадор! Еще немного до максимального бонуса 10% <Sparkles className="w-3 h-3 text-current inline" />
           </span>
         )
       case 4:
         return (
           <span className="flex items-center gap-1">
-            Высший статус в Margo Fitness! Ты достигла максимума - 10% <Sparkles className="w-3 h-3 text-current inline" />
+            Высший статус в Margo Fitness! Ты достигла максимума — 10% <Sparkles className="w-3 h-3 text-current inline" />
           </span>
         )
       default:
