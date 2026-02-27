@@ -409,7 +409,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   {WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0} / 3
                 </span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
                 {/* Pro Bar (Full) */}
@@ -438,7 +438,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   {HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1} / 15
                 </span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
                 {/* Pro Bar (66%) */}
@@ -467,7 +467,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   {WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1} / 8
                 </span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite/Pro Bar (Full) */}
                 <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
                 {/* Basic Bar (75%) */}
@@ -494,7 +494,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   {articleCounts[profile.subscription_tier as keyof typeof articleCounts] || 0} / {articleCounts.total}
                 </span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 {articleCounts.total > 0 && (
                   <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
