@@ -249,7 +249,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
       {/* TOP SECTION: Current Subscription & Resource Usage */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Current Plan Card */}
-        <div className="lg:col-span-5 sub-card rounded-[2rem] p-6 flex flex-col justify-between min-h-[260px]">
+        <div className="lg:col-span-5 sub-card rounded-[2rem] p-6 flex flex-col justify-between min-h-[220px]">
           <div className="sub-pattern"></div>
           <div className="sub-shine"></div>
           
@@ -257,7 +257,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           <div className={cn("absolute -right-10 -top-10 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-3xl", subStyles.glow)}></div>
           <div className={cn("absolute -left-10 bottom-0 w-40 h-40 rounded-full pointer-events-none opacity-10 blur-2xl", subStyles.glow)}></div>
 
-          <div className="relative z-10 flex flex-col h-full gap-6">
+          <div className="relative z-10 flex flex-col h-full gap-4">
             {/* Card Top: Title & Badge */}
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2.5">
@@ -291,7 +291,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             </div>
 
             {/* Card Body: Stats (Left) & Actions (Right) */}
-            <div className={cn("flex justify-between gap-4 mt-auto", subscriptionActive ? "items-start" : "items-end")}>
+            <div className={cn("flex justify-between gap-4 mt-auto", subscriptionActive ? "items-end" : "items-end")}>
               
               {/* Left: Status & Duration */}
               <div className="flex flex-col gap-1">
@@ -320,11 +320,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 {/* Days Count or Inactive Message */}
                 {subscriptionActive ? (
                   <div className="flex items-end gap-3">
-                    <span className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl leading-none font-oswald">
+                    <span className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl leading-none font-oswald">
                       {daysLeft || 0}
                     </span>
-                    <div className="flex flex-col pb-1.5">
-                      <span className="text-xs text-white/40 font-black leading-none uppercase font-montserrat">
+                    <div className="flex flex-col pb-1">
+                      <span className="text-[10px] text-white/40 font-black leading-none uppercase font-montserrat">
                         {(() => {
                           const lastDigit = (daysLeft || 0) % 10
                           const lastTwoDigits = (daysLeft || 0) % 100
@@ -334,7 +334,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                           return 'дней'
                         })()}
                       </span>
-                      <span className="text-[9px] text-white/20 font-black leading-none mt-1 uppercase font-montserrat tracking-widest">осталось</span>
+                      <span className="text-[8px] text-white/20 font-black leading-none mt-1 uppercase font-montserrat tracking-widest">осталось</span>
                     </div>
                   </div>
                 ) : (
@@ -350,27 +350,27 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               </div>
 
               {/* Right: Actions Stacked */}
-              <div className="flex flex-col gap-2 w-[140px]">
+              <div className="flex flex-col gap-2 w-[130px]">
                 {subscriptionActive ? (
                   <>
                     {/* Upgrade Button (Primary) */}
                     <button 
                       onClick={onUpgradeClick}
                       className={cn(
-                        "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                        "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-8 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
                         subStyles.btnPrimary
                       )}
                     >
-                      <Sparkles className={cn("w-3.5 h-3.5", subStyles.btnPrimaryIcon)} />
+                      <Sparkles className={cn("w-3 h-3", subStyles.btnPrimaryIcon)} />
                       <span>Улучшить</span>
                     </button>
 
                     {/* Renew Button (Secondary) */}
                     <button 
                       onClick={onRenewalClick}
-                      className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-[0.15em] h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 active:scale-95 font-montserrat"
+                      className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-[0.15em] h-8 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 active:scale-95 font-montserrat"
                     >
-                      <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
+                      <History className="w-3 h-3 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
                       <span>Продлить</span>
                     </button>
                   </>
@@ -378,11 +378,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   <button 
                     onClick={onUpgradeClick}
                     className={cn(
-                      "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                      "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-10 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
                       subStyles.btnPrimary
                     )}
                   >
-                    <ArrowRight className={cn("w-5 h-5 transition-transform group-hover:translate-x-1", subStyles.btnPrimaryIcon)} />
+                    <ArrowRight className={cn("w-4 h-4 transition-transform group-hover:translate-x-1", subStyles.btnPrimaryIcon)} />
                     <span>Выбрать</span>
                   </button>
                 )}
@@ -392,15 +392,15 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
         </div>
 
         {/* Resource Usage Card */}
-        <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 shadow-sm relative overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 shadow-sm relative overflow-hidden h-full">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 pointer-events-none" />
           
-          <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="flex items-center justify-between mb-4 relative z-10">
             <h3 className="text-sm font-black text-white/90 uppercase tracking-[0.2em] font-montserrat">Доступные ресурсы</h3>
             <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black font-montserrat">Актуально</span>
           </div>
           
-          <div className="space-y-3 relative z-10">
+          <div className="space-y-2 relative z-10">
             {/* Workouts */}
             <div className="space-y-1">
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
@@ -523,17 +523,17 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           </div>
 
           {/* Legend */}
-          <div className="mt-auto pt-3 flex items-center justify-center gap-4 border-t border-white/[0.04] relative z-10">
+          <div className="mt-4 pt-3 pb-0 flex items-center justify-center gap-4 border-t border-white/[0.04] relative z-10">
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]"></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Basic</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.4)]"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.4)]"></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Pro</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.4)]"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.4)]"></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Elite</span>
             </div>
           </div>
