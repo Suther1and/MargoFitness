@@ -120,20 +120,31 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
   const HABITS_HARDCODE = { free: 1, basic: 6, pro: 10, elite: 15 }
   const WIDGETS_HARDCODE = { free: 1, basic: 6, pro: 8, elite: 8 }
 
-  // Динамический подсчет статей по уровням
+  // Динамический подсчет статей по уровням из базы данных (админки)
   const articleCounts = useMemo(() => {
     const total = articles.length
     if (total === 0) return { free: 0, basic: 0, pro: 0, elite: 0, total: 0 }
     
-    const counts = {
-      free: articles.filter(a => a.display_status === 'all').length,
-      basic: articles.filter(a => a.display_status === 'all' || a.required_tier === 'basic').length,
-      pro: articles.filter(a => a.display_status === 'all' || a.required_tier === 'basic' || a.required_tier === 'pro').length,
+    const tierWeights: Record<string, number> = {
+      'free': 0,
+      'basic': 1,
+      'pro': 2,
+      'elite': 3
+    };
+
+    return {
+      free: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 0).length,
+      basic: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 1).length,
+      pro: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 2).length,
       elite: total,
       total
     }
-    return counts
   }, [articles])
+
+  // Получаем эффективный тир для отображения прогресс-бара
+  const currentTierForProgress = useMemo(() => {
+    return getEffectiveTier(profile);
+  }, [profile]);
 
   const getSubscriptionStyles = (tier: string) => {
     switch (tier) {
@@ -406,7 +417,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Тренировки</span>
                 <span className="text-white">
-                  {WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0} / 3
+                  {WORKOUT_LIMITS[currentTierForProgress as keyof typeof WORKOUT_LIMITS] || 0} / 3
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
@@ -416,14 +427,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
                   style={{ 
-                    width: `${(WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
-                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
-                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
-                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
-                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
+                    width: `${(WORKOUT_LIMITS[currentTierForProgress as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%`,
+                    backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
+                                     currentTierForProgress === 'pro' ? '#a855f7' : 
+                                     currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
+                    boxShadow: currentTierForProgress === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               currentTierForProgress === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               currentTierForProgress === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
               </div>
@@ -434,7 +445,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Привычки</span>
                 <span className="text-white">
-                  {HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1} / 15
+                  {HABITS_HARDCODE[currentTierForProgress as keyof typeof HABITS_HARDCODE] || 1} / 15
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
@@ -444,14 +455,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
                   style={{ 
-                    width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
-                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
-                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
-                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
-                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
+                    width: `${(HABITS_HARDCODE[currentTierForProgress as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%`,
+                    backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
+                                     currentTierForProgress === 'pro' ? '#a855f7' : 
+                                     currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
+                    boxShadow: currentTierForProgress === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               currentTierForProgress === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               currentTierForProgress === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
               </div>
@@ -462,7 +473,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Виджеты</span>
                 <span className="text-white">
-                  {WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1} / 8
+                  {WIDGETS_HARDCODE[currentTierForProgress as keyof typeof WIDGETS_HARDCODE] || 1} / 8
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
@@ -472,14 +483,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
                   style={{ 
-                    width: `${(WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
-                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
-                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
-                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
-                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
+                    width: `${(WIDGETS_HARDCODE[currentTierForProgress as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%`,
+                    backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
+                                     currentTierForProgress === 'pro' ? '#a855f7' : 
+                                     currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
+                    boxShadow: currentTierForProgress === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               currentTierForProgress === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               currentTierForProgress === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
               </div>
@@ -490,7 +501,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Статьи</span>
                 <span className="text-white">
-                  {articleCounts[profile.subscription_tier as keyof typeof articleCounts] || 0} / {articleCounts.total}
+                  {articleCounts[currentTierForProgress as keyof typeof articleCounts] || 0} / {articleCounts.total}
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
@@ -500,14 +511,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
                   style={{ 
-                    width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%',
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
-                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
-                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
-                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
-                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
+                    width: articleCounts.total > 0 ? `${(articleCounts[currentTierForProgress as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%',
+                    backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
+                                     currentTierForProgress === 'pro' ? '#a855f7' : 
+                                     currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
+                    boxShadow: currentTierForProgress === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               currentTierForProgress === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               currentTierForProgress === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
               </div>

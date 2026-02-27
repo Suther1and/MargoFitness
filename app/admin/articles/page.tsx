@@ -28,7 +28,11 @@ export default async function AdminArticlesPage() {
     isUpdated: 0,
     totalViews: 0,
     totalUniqueViews: 0,
-    totalReads: 0
+    totalReads: 0,
+    freeCount: 0,
+    basicCount: 0,
+    proCount: 0,
+    eliteCount: 0
   }
 
   const stats = [
@@ -39,6 +43,24 @@ export default async function AdminArticlesPage() {
       color: 'text-blue-400',
       bg: 'bg-blue-500/10',
       description: 'Всего в базе'
+    },
+    {
+      label: 'Доступ',
+      customValue: (
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-gray-400" title="Free">{statsData.freeCount}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-orange-400" title="Basic">{statsData.basicCount}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-purple-400" title="Pro">{statsData.proCount}</span>
+          <span className="text-white/20 text-xs">/</span>
+          <span className="text-yellow-400" title="Elite">{statsData.eliteCount}</span>
+        </div>
+      ),
+      icon: Sparkles,
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-500/10',
+      description: 'Free / Basic / Pro / Elite'
     },
     {
       label: 'Просмотры',
@@ -71,20 +93,6 @@ export default async function AdminArticlesPage() {
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
       description: 'Всем / Админ / Скрыто'
-    },
-    {
-      label: 'Бейджи',
-      customValue: (
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-purple-400" title="New">{statsData.isNew}</span>
-          <span className="text-white/20 text-xs">/</span>
-          <span className="text-blue-400" title="Updated">{statsData.isUpdated}</span>
-        </div>
-      ),
-      icon: Sparkles,
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      description: 'New / Updated'
     }
   ]
 

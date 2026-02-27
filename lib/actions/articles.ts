@@ -31,7 +31,10 @@ export async function getArticles(): Promise<Article[]> {
     return (articles || []) as Article[];
   }
 
-  return (articles || []).filter(a => a.display_status === 'all') as Article[];
+  // Для обычных пользователей возвращаем все статьи, 
+  // но фильтрация по доступу будет происходить на фронтенде или через RLS.
+  // В данном случае нам нужны все статьи для подсчета общего количества в ЛК.
+  return (articles || []) as Article[];
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {

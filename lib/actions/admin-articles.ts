@@ -95,7 +95,11 @@ const EMPTY_STATS = {
   isUpdated: 0,
   totalViews: 0,
   totalUniqueViews: 0,
-  totalReads: 0
+  totalReads: 0,
+  freeCount: 0,
+  basicCount: 0,
+  proCount: 0,
+  eliteCount: 0
 }
 
 export async function getArticleStats() {
@@ -103,7 +107,7 @@ export async function getArticleStats() {
   const adminSupabase = createAdminClient()
 
   const [articlesResult, readsResult] = await Promise.all([
-    supabase.from("articles").select("display_status, is_new, is_updated, view_count, unique_view_count"),
+    supabase.from("articles").select("display_status, is_new, is_updated, view_count, unique_view_count, access_level"),
     adminSupabase.from("user_article_progress" as any).select("article_id", { count: "exact", head: true }).eq("is_read", true)
   ])
 
@@ -123,7 +127,11 @@ export async function getArticleStats() {
     isUpdated: data.filter(a => a.is_updated).length,
     totalViews: data.reduce((acc, a) => acc + (a.view_count || 0), 0),
     totalUniqueViews: data.reduce((acc, a) => acc + (a.unique_view_count || 0), 0),
-    totalReads: readsResult.count ?? 0
+    totalReads: readsResult.count ?? 0,
+    freeCount: data.filter(a => a.access_level === 'free').length,
+    basicCount: data.filter(a => a.access_level === 'basic').length,
+    proCount: data.filter(a => a.access_level === 'pro').length,
+    eliteCount: data.filter(a => a.access_level === 'elite').length
   }
 
   return { data: stats, error: null }
