@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { HABIT_LIMITS, WIDGET_LIMITS, SUBSCRIPTION_PLANS } from '@/lib/constants/subscriptions'
 import { getArticles } from '@/lib/actions/articles'
+import { getArticleStats } from '@/lib/actions/admin-articles'
 
 interface SubscriptionTabProps {
   profile: Profile
@@ -98,7 +99,7 @@ const TIER_INFO = [
 
 export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
-  const [articles, setArticles] = useState<Article[]>([])
+  const [articleStats, setArticleStats] = useState<any>(null)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -107,12 +108,12 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
   useEffect(() => {
     setDaysLeft(getDaysUntilExpiration(profile))
     
-    // Загружаем статьи для динамического подсчета
-    const loadArticles = async () => {
-      const data = await getArticles()
-      setArticles(data)
+    // Загружаем статистику статей из админки
+    const loadStats = async () => {
+      const { data } = await getArticleStats()
+      if (data) setArticleStats(data)
     }
-    loadArticles()
+    loadStats()
   }, [profile])
 
   // Константы для лимитов (Hardcode по ТЗ)
@@ -120,31 +121,36 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
   const HABITS_HARDCODE = { free: 1, basic: 6, pro: 10, elite: 15 }
   const WIDGETS_HARDCODE = { free: 1, basic: 6, pro: 8, elite: 8 }
 
-  // Динамический подсчет статей по уровням из базы данных (админки)
-  const articleCounts = useMemo(() => {
-    const total = articles.length
-    if (total === 0) return { free: 0, basic: 0, pro: 0, elite: 0, total: 0 }
-    
-    const tierWeights: Record<string, number> = {
-      'free': 0,
-      'basic': 1,
-      'pro': 2,
-      'elite': 3
-    };
-
-    return {
-      free: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 0).length,
-      basic: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 1).length,
-      pro: articles.filter(a => (tierWeights[a.required_tier || 'free'] || 0) <= 2).length,
-      elite: total,
-      total
-    }
-  }, [articles])
-
   // Получаем эффективный тир для отображения прогресс-бара
   const currentTierForProgress = useMemo(() => {
     return getEffectiveTier(profile);
   }, [profile]);
+
+  // Расчет доступных статей на основе данных из админки
+  const articleProgress = useMemo(() => {
+    if (!articleStats) return { current: 0, total: 0 };
+
+    const total = articleStats.total || 0;
+    let current = 0;
+
+    // Логика накопления доступа (аналогично админке)
+    switch (currentTierForProgress) {
+      case 'free':
+        current = articleStats.freeCount || 0;
+        break;
+      case 'basic':
+        current = (articleStats.freeCount || 0) + (articleStats.basicCount || 0);
+        break;
+      case 'pro':
+        current = (articleStats.freeCount || 0) + (articleStats.basicCount || 0) + (articleStats.proCount || 0);
+        break;
+      case 'elite':
+        current = total;
+        break;
+    }
+
+    return { current, total };
+  }, [articleStats, currentTierForProgress]);
 
   const getSubscriptionStyles = (tier: string) => {
     switch (tier) {
@@ -501,7 +507,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Статьи</span>
                 <span className="text-white">
-                  {articleCounts[currentTierForProgress as keyof typeof articleCounts] || 0} / {articleCounts.total}
+                  {articleProgress.current} / {articleProgress.total}
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
@@ -511,7 +517,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
                   style={{ 
-                    width: articleCounts.total > 0 ? `${(articleCounts[currentTierForProgress as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%',
+                    width: articleProgress.total > 0 ? `${(articleProgress.current / articleProgress.total) * 100}%` : '0%',
                     backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
                                      currentTierForProgress === 'pro' ? '#a855f7' : 
                                      currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
