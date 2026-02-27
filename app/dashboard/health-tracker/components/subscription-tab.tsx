@@ -400,16 +400,16 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black font-montserrat">Актуально</span>
           </div>
           
-          <div className="space-y-4 relative z-10">
+          <div className="space-y-3 relative z-10">
             {/* Workouts */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Тренировки</span>
                 <span className="text-white">
                   {WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0} / 3
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
                 {/* Pro Bar (Full) */}
@@ -431,14 +431,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             </div>
 
             {/* Habits */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Привычки</span>
                 <span className="text-white">
                   {HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1} / 15
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
                 {/* Pro Bar (66%) */}
@@ -460,14 +460,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             </div>
 
             {/* Widgets */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Виджеты</span>
                 <span className="text-white">
                   {WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1} / 8
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite/Pro Bar (Full) */}
                 <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
                 {/* Basic Bar (75%) */}
@@ -487,14 +487,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             </div>
 
             {/* Articles (Dynamic) */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Статьи</span>
                 <span className="text-white">
                   {articleCounts[profile.subscription_tier as keyof typeof articleCounts] || 0} / {articleCounts.total}
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5 relative">
                 {/* Elite Bar (Full) */}
                 {articleCounts.total > 0 && (
                   <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
@@ -519,6 +519,22 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   style={{ width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%' }}
                 ></div>
               </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-auto pt-3 flex items-center justify-center gap-4 border-t border-white/[0.04] relative z-10">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]"></div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Basic</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.4)]"></div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Pro</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.4)]"></div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Elite</span>
             </div>
           </div>
         </div>
