@@ -417,12 +417,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   )} 
                   style={{ 
                     width: `${(WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
                                      profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
                     boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
                                profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
                   }}
                 ></div>
               </div>
@@ -444,12 +445,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   )} 
                   style={{ 
                     width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
                                      profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
                     boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
                                profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
                   }}
                 ></div>
               </div>
@@ -471,12 +473,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   )} 
                   style={{ 
                     width: `${(WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%`,
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
                                      profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
                     boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
                                profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
                   }}
                 ></div>
               </div>
@@ -498,12 +501,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   )} 
                   style={{ 
                     width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%',
-                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : 
                                      profile.subscription_tier === 'pro' ? '#a855f7' : 
-                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#d4d4d4', // Сменил чистый белый (#ffffff) на нейтральный светло-серый (#d4d4d4)
                     boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
                                profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
-                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' :
+                               profile.subscription_tier === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none' // Чуть приглушил интенсивность свечения с 0.3 до 0.25
                   }}
                 ></div>
               </div>
