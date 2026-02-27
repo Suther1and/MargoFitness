@@ -170,7 +170,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
   const subStyles = getSubscriptionStyles(profile.subscription_tier)
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto space-y-12 pb-20">
+    <div className="w-full max-w-5xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
       <style jsx>{`
         .sub-card {
           background: ${subStyles.card};
@@ -224,9 +224,9 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           Текущая подписка
         </h2>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Current Plan Card */}
-          <div className="sub-card rounded-[2rem] p-8 flex flex-col justify-between min-h-[300px]">
+          <div className="lg:col-span-5 sub-card rounded-[2rem] p-6 flex flex-col justify-between min-h-[260px]">
             <div className="sub-pattern"></div>
             <div className="sub-shine"></div>
             
@@ -234,16 +234,16 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
             <div className={cn("absolute -right-10 -top-10 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-3xl", subStyles.glow)}></div>
             <div className={cn("absolute -left-10 bottom-0 w-40 h-40 rounded-full pointer-events-none opacity-10 blur-2xl", subStyles.glow)}></div>
 
-            <div className="relative z-10 flex flex-col h-full gap-8">
+            <div className="relative z-10 flex flex-col h-full gap-6">
               {/* Card Top: Title & Badge */}
               <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className={cn("p-2 rounded-xl bg-black/60 border border-white/5 shadow-sm")}>
-                    <Crown className={cn("w-5 h-5 opacity-80", subStyles.status)} />
+                <div className="flex items-center gap-2.5">
+                  <div className={cn("p-1.5 rounded-lg bg-black/60 border border-white/5 shadow-sm")}>
+                    <Crown className={cn("w-4 h-4 opacity-80", subStyles.status)} />
                   </div>
                   <div>
-                    <span className={cn("text-[11px] font-black uppercase tracking-[0.2em] opacity-60 font-montserrat block mb-0.5", subStyles.status)}>Подписка</span>
-                    <p className="text-white text-3xl font-black font-oswald uppercase tracking-tight leading-none">
+                    <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] opacity-60 font-montserrat block mb-0.5", subStyles.status)}>Подписка</span>
+                    <p className="text-white text-2xl font-black font-oswald uppercase tracking-tight leading-none">
                       {tierDisplayName}
                     </p>
                   </div>
@@ -251,13 +251,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 
                 {/* Subscription Badge */}
                 <div className={cn(
-                  "relative overflow-hidden border rounded-xl px-4 h-8 flex items-center justify-center bg-black/40",
+                  "relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40",
                   !subscriptionActive && profile.subscription_tier !== 'free'
                     ? "border-white/10 bg-white/5"
                     : subStyles.badge
                 )}>
                   <span className={cn(
-                    "text-[11px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
+                    "text-[9px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
                     !subscriptionActive && profile.subscription_tier !== 'free' ? "text-white/30" : ""
                   )}>
                     {!subscriptionActive && profile.subscription_tier !== 'free'
@@ -271,24 +271,24 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div className={cn("flex justify-between gap-4 mt-auto", subscriptionActive ? "items-start" : "items-end")}>
                 
                 {/* Left: Status & Duration */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   {/* Status */}
-                  <div className="flex items-center gap-2.5 opacity-80">
-                    <span className="relative flex h-2 w-2">
+                  <div className="flex items-center gap-2 opacity-80">
+                    <span className="relative flex h-1.5 w-1.5">
                       <span className={cn(
                         "absolute inline-flex h-full w-full rounded-full opacity-75", 
                         subscriptionActive ? "animate-ping " + subStyles.badgeDot : "bg-red-500/50"
                       )}></span>
                       <span className={cn(
-                        "relative inline-flex rounded-full h-2 w-2", 
+                        "relative inline-flex rounded-full h-1.5 w-1.5", 
                         subscriptionActive ? subStyles.badgeDot : "bg-red-500"
                       )}></span>
                     </span>
-                    <span className={cn("text-[12px] font-black tracking-[0.15em] uppercase font-montserrat", subStyles.status)}>
+                    <span className={cn("text-[11px] font-black tracking-[0.15em] uppercase font-montserrat", subStyles.status)}>
                       {subscriptionActive ? 'Активна' : 'Неактивна'}
                     </span>
                     {subscriptionActive && profile.subscription_expires_at && (
-                      <span className="text-[11px] text-white/40 font-bold font-montserrat lowercase">
+                      <span className="text-[10px] text-white/40 font-bold font-montserrat lowercase">
                         до {format(new Date(profile.subscription_expires_at), 'd MMMM', { locale: ru })}
                       </span>
                     )}
@@ -296,12 +296,12 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
 
                   {/* Days Count or Inactive Message */}
                   {subscriptionActive ? (
-                    <div className="flex items-end gap-4">
-                      <span className="text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl leading-none font-oswald">
+                    <div className="flex items-end gap-3">
+                      <span className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl leading-none font-oswald">
                         {daysLeft || 0}
                       </span>
-                      <div className="flex flex-col pb-2">
-                        <span className="text-sm text-white/40 font-black leading-none uppercase font-montserrat">
+                      <div className="flex flex-col pb-1.5">
+                        <span className="text-xs text-white/40 font-black leading-none uppercase font-montserrat">
                           {(() => {
                             const lastDigit = (daysLeft || 0) % 10
                             const lastTwoDigits = (daysLeft || 0) % 100
@@ -311,15 +311,15 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                             return 'дней'
                           })()}
                         </span>
-                        <span className="text-[10px] text-white/20 font-black leading-none mt-1.5 uppercase font-montserrat tracking-widest">осталось</span>
+                        <span className="text-[9px] text-white/20 font-black leading-none mt-1 uppercase font-montserrat tracking-widest">осталось</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-1.5 pt-2 pb-1">
-                      <span className="text-3xl font-black text-white/60 uppercase font-oswald leading-none tracking-tight">
+                    <div className="flex flex-col gap-1 pt-2 pb-1">
+                      <span className="text-2xl font-black text-white/60 uppercase font-oswald leading-none tracking-tight">
                         Подписка
                       </span>
-                      <span className="text-xl font-bold text-white/30 uppercase font-oswald leading-none tracking-tight">
+                      <span className="text-lg font-bold text-white/30 uppercase font-oswald leading-none tracking-tight">
                         не активна
                       </span>
                     </div>
@@ -327,27 +327,27 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 </div>
 
                 {/* Right: Actions Stacked */}
-                <div className="flex flex-col gap-3 w-[180px]">
+                <div className="flex flex-col gap-2 w-[140px]">
                   {subscriptionActive ? (
                     <>
                       {/* Upgrade Button (Primary) */}
                       <button 
                         onClick={onUpgradeClick}
                         className={cn(
-                          "relative bg-gradient-to-b border border-transparent text-[11px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                          "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
                           subStyles.btnPrimary
                         )}
                       >
-                        <Sparkles className={cn("w-4 h-4", subStyles.btnPrimaryIcon)} />
+                        <Sparkles className={cn("w-3.5 h-3.5", subStyles.btnPrimaryIcon)} />
                         <span>Улучшить</span>
                       </button>
 
                       {/* Renew Button (Secondary) */}
                       <button 
                         onClick={onRenewalClick}
-                        className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all group/btn2 active:scale-95 font-montserrat"
+                        className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-[0.15em] h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all group/btn2 active:scale-95 font-montserrat"
                       >
-                        <History className="w-4 h-4 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
+                        <History className="w-3.5 h-3.5 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
                         <span>Продлить</span>
                       </button>
                     </>
@@ -355,12 +355,12 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     <button 
                       onClick={onUpgradeClick}
                       className={cn(
-                        "relative bg-gradient-to-b border border-transparent text-[11px] font-black uppercase tracking-[0.15em] h-14 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                        "relative bg-gradient-to-b border border-transparent text-[10px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
                         subStyles.btnPrimary
                       )}
                     >
-                      <ArrowRight className={cn("w-6 h-6 transition-transform group-hover:translate-x-1", subStyles.btnPrimaryIcon)} />
-                      <span>Выбрать подписку</span>
+                      <ArrowRight className={cn("w-5 h-5 transition-transform group-hover:translate-x-1", subStyles.btnPrimaryIcon)} />
+                      <span>Выбрать</span>
                     </button>
                   )}
                 </div>
@@ -369,29 +369,31 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           </div>
 
           {/* Resource Usage Card */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-8 shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-8">
+          <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 pointer-events-none" />
+            
+            <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className="text-sm font-black text-white/90 uppercase tracking-[0.2em] font-montserrat">Использование ресурсов</h3>
               <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black font-montserrat">Месячный цикл</span>
             </div>
             
-            <div className="space-y-6">
+            <div className="space-y-5 relative z-10">
               {/* Workouts */}
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest font-montserrat">
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                   <span className="text-white/40">Тренировки</span>
                   <span className="text-white">
                     2 / 3 <span className="ml-2 text-purple-400">66%</span>
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-1.5 p-[1px] border border-white/5">
-                  <div className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(168,85,247,0.4)]" style={{ width: '66%' }}></div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(168,85,247,0.4)]" style={{ width: '66%' }}></div>
                 </div>
               </div>
 
               {/* Habits */}
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest font-montserrat">
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                   <span className="text-white/40">Привычки</span>
                   <span className="text-white">
                     6 / {HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15} 
@@ -400,14 +402,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     </span>
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-1.5 p-[1px] border border-white/5">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(249,115,22,0.4)]" style={{ width: `${(6 / (HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15)) * 100}%` }}></div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                  <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(249,115,22,0.4)]" style={{ width: `${(6 / (HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15)) * 100}%` }}></div>
                 </div>
               </div>
 
               {/* Widgets */}
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest font-montserrat">
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                   <span className="text-white/40">Виджеты</span>
                   <span className="text-white">
                     {WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8} / 8 
@@ -416,8 +418,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     </span>
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-1.5 p-[1px] border border-white/5">
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.4)]" style={{ width: `${((WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8) / 8) * 100}%` }}></div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(16,185,129,0.4)]" style={{ width: `${((WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8) / 8) * 100}%` }}></div>
                 </div>
               </div>
             </div>
@@ -445,7 +447,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div key={tier.id} className="flex flex-col gap-6 group">
                 <div 
                   className={cn(
-                    "p-6 rounded-2xl border transition-all duration-500 relative flex flex-col gap-4 overflow-hidden min-h-[220px]",
+                    "p-5 rounded-2xl border transition-all duration-500 relative flex flex-col gap-3 overflow-hidden min-h-[180px]",
                     isCurrent ? "ring-2 ring-white/20 shadow-2xl scale-[1.02]" : "hover:scale-[1.02] border-white/10"
                   )}
                   style={{ background: tier.styles.card }}
@@ -470,14 +472,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                     </span>
                   )}
                   
-                  <div className="relative z-10 pt-2">
-                    <h3 className="text-lg font-black font-oswald uppercase tracking-tight text-white/90">{tier.name}</h3>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-3xl font-black font-oswald text-white">{tier.price}</span>
-                      <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest font-montserrat">/ {tier.period}</span>
+                  <div className="relative z-10 pt-1">
+                    <h3 className="text-base font-black font-oswald uppercase tracking-tight text-white/90">{tier.name}</h3>
+                    <div className="flex items-baseline gap-1 mt-0.5">
+                      <span className="text-2xl font-black font-oswald text-white">{tier.price}</span>
+                      <span className="text-white/30 text-[8px] font-bold uppercase tracking-widest font-montserrat">/ {tier.period}</span>
                     </div>
                     {tier.id !== 'free' && (
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest font-montserrat mt-0.5 italic">
+                      <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest font-montserrat mt-0.5 italic">
                         при оплате за 12 месяцев
                       </p>
                     )}
@@ -494,7 +496,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                         }
                       }}
                       className={cn(
-                        "w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 font-montserrat",
+                        "w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 font-montserrat",
                         isLowerTier 
                           ? "bg-white/5 text-white/20 cursor-default border border-white/5 opacity-50"
                           : tier.buttonStyle
