@@ -130,6 +130,62 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
   const HABITS_HARDCODE = { free: 1, basic: 6, pro: 10, elite: 15 }
   const WIDGETS_HARDCODE = { free: 1, basic: 6, pro: 8, elite: 8 }
 
+  const TIER_COLORS = {
+    free: '#d4d4d4',
+    basic: '#fb923c',
+    pro: '#a855f7',
+    elite: '#eab308'
+  }
+
+  const TIER_ORDER = ['free', 'basic', 'pro', 'elite']
+
+  // Хелпер для отрисовки индикаторов уровней
+  const renderLevelIndicators = (currentTier: string, limits: Record<string, number>, max: number, category?: 'workouts' | 'widgets' | 'habits' | 'articles') => {
+    const currentIndex = TIER_ORDER.indexOf(currentTier)
+    
+    // Определяем, какой уровень является "финальным" для данной категории
+    let finalTier = 'elite'
+    if (category === 'workouts' || category === 'widgets') {
+      finalTier = 'pro'
+    }
+
+    return TIER_ORDER.map((tier, index) => {
+      // Пропускаем free (всегда в начале) и уровни ниже или равные текущему
+      if (tier === 'free' || index <= currentIndex) return null
+      
+      // Если текущий уровень уже финальный или выше финального для этой категории, ничего не рисуем
+      const finalIndex = TIER_ORDER.indexOf(finalTier)
+      if (index > finalIndex) return null
+
+      const position = (limits[tier as keyof typeof limits] / max) * 100
+      const color = TIER_COLORS[tier as keyof typeof TIER_COLORS]
+
+      if (tier === finalTier) {
+        // Для финального уровня закрашиваем кончик полосы
+        return (
+          <div 
+            key={tier}
+            className="absolute top-0 bottom-0 right-0 w-1 z-20 rounded-r-full"
+            style={{ backgroundColor: color }}
+          />
+        )
+      }
+
+      // Для промежуточных уровней рисуем шарики
+      return (
+        <div 
+          key={tier}
+          className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full z-20 border border-black/20"
+          style={{ 
+            left: `calc(${position}% - 4px)`,
+            backgroundColor: color,
+            boxShadow: `0 0 6px ${color}66`
+          }}
+        />
+      )
+    })
+  }
+
   // Получаем эффективный тир для отображения прогресс-бара
   const currentTierForProgress = useMemo(() => {
     return getEffectiveTier(profile);
@@ -137,28 +193,37 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
 
   // Расчет доступных статей на основе данных из админки
   const articleProgress = useMemo(() => {
-    if (!articleStats) return { current: 0, total: 0 };
+    if (!articleStats) return { current: 0, total: 0, limits: { free: 0, basic: 0, pro: 0, elite: 0 } };
 
     const total = articleStats.total || 0;
+    const free = articleStats.freeCount || 0;
+    const basic = free + (articleStats.basicCount || 0);
+    const pro = basic + (articleStats.proCount || 0);
+    const elite = total;
+
     let current = 0;
 
     // Логика накопления доступа (аналогично админке)
     switch (currentTierForProgress) {
       case 'free':
-        current = articleStats.freeCount || 0;
+        current = free;
         break;
       case 'basic':
-        current = (articleStats.freeCount || 0) + (articleStats.basicCount || 0);
+        current = basic;
         break;
       case 'pro':
-        current = (articleStats.freeCount || 0) + (articleStats.basicCount || 0) + (articleStats.proCount || 0);
+        current = pro;
         break;
       case 'elite':
-        current = total;
+        current = elite;
         break;
     }
 
-    return { current, total };
+    return { 
+      current, 
+      total, 
+      limits: { free, basic, pro, elite } 
+    };
   }, [articleStats, currentTierForProgress]);
 
   const getSubscriptionStyles = (tier: string) => {
@@ -453,6 +518,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                                currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
+                {/* Level Indicators */}
+                {renderLevelIndicators(currentTierForProgress, WORKOUT_LIMITS, 3, 'workouts')}
               </div>
             </div>
 
@@ -482,6 +549,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                                currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
+                {/* Level Indicators */}
+                {renderLevelIndicators(currentTierForProgress, HABITS_HARDCODE, 15, 'habits')}
               </div>
             </div>
 
@@ -511,6 +580,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                                currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
+                {/* Level Indicators */}
+                {renderLevelIndicators(currentTierForProgress, WIDGETS_HARDCODE, 8, 'widgets')}
               </div>
             </div>
 
@@ -540,6 +611,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                                currentTierForProgress === 'free' ? '0 0 12px rgba(255, 255, 255, 0.25)' : 'none'
                   }}
                 ></div>
+                {/* Level Indicators */}
+                {articleProgress.total > 0 && renderLevelIndicators(currentTierForProgress, articleProgress.limits, articleProgress.total, 'articles')}
               </div>
             </div>
           </div>
