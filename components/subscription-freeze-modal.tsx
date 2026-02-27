@@ -195,7 +195,7 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                 </div>
 
                 <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                  <div className="flex-1 text-center">
+                  <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="flex items-center justify-center gap-1.5 mb-1.5">
                       {Array.from({ length: info.tokensTotal }).map((_, i) => (
                         <div
@@ -210,7 +210,7 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                       ))}
                     </div>
                     <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
-                      {info.tokensUsed} из {info.tokensTotal} использовано
+                      {info.tokensUsed} из {info.tokensTotal} {plural(info.tokensTotal, 'заморозки', 'заморозок', 'заморозок')}
                     </p>
                   </div>
                   <div className="w-px h-8 bg-white/5" />
@@ -263,7 +263,7 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                       <Pause className="w-4 h-4 text-cyan-400/70" />
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-white/70 leading-tight block">Подписка ставится на паузу</span>
+                      <span className="text-[11px] font-semibold text-white/70 leading-tight block">Сохранение оплаченных дней</span>
                       <span className="text-[10px] text-white/35 leading-tight">Срок подписки не расходуется, пока она заморожена</span>
                     </div>
                   </div>
@@ -272,8 +272,19 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                       <Clock className="w-4 h-4 text-cyan-400/70" />
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-white/70 leading-tight block">У тебя {info.daysRemaining} {plural(info.daysRemaining, 'день', 'дня', 'дней')} и {info.tokensRemaining} {plural(info.tokensRemaining, 'раз', 'раза', 'раз')}</span>
-                      <span className="text-[10px] text-white/35 leading-tight">Каждый день паузы тратит 1 день из пула. Каждое включение тратит 1 раз</span>
+                      <span className="text-[11px] font-semibold text-white/70 leading-tight block">У тебя {info.daysRemaining} {plural(info.daysRemaining, 'день', 'дня', 'дней')} и {info.tokensRemaining} {plural(info.tokensRemaining, 'заморозка', 'заморозки', 'заморозок')}</span>
+                      <span className="text-[10px] text-white/35 leading-tight">1 день в этом режиме = минус 1 день из запаса. Каждая активация тратит 1 заморозку</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-2.5 rounded-xl bg-cyan-500/5 border border-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.05)]">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <AlertTriangle className="w-4 h-4 text-cyan-400/70" />
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-semibold text-white/90 leading-tight block">Лимиты ограничены</span>
+                      <span className="text-[10px] text-white/40 leading-tight">
+                        Без остатка дней <span className="text-cyan-300/90 font-bold underline decoration-cyan-500/30 underline-offset-2">или</span> заморозок повторная активация будет невозможна
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
@@ -306,7 +317,7 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center min-h-[76px]">
                         <div className="flex items-center justify-center gap-1.5 mb-2">
                           {Array.from({ length: info.tokensTotal }).map((_, i) => (
                             <div
@@ -321,11 +332,11 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                           ))}
                         </div>
                         <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
-                          {info.tokensRemaining} {plural(info.tokensRemaining, 'раз', 'раза', 'раз')} осталось
+                          {info.tokensRemaining} {plural(info.tokensRemaining, 'заморозка', 'заморозки', 'заморозок')} осталось
                         </p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
-                        <p className="text-2xl font-oswald font-bold text-cyan-400 leading-none mb-2">{info.daysRemaining}</p>
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center min-h-[76px]">
+                        <p className="text-2xl font-oswald font-bold text-cyan-400 leading-none mb-1.5">{info.daysRemaining}</p>
                         <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
                           {plural(info.daysRemaining, 'день', 'дня', 'дней')} осталось
                         </p>

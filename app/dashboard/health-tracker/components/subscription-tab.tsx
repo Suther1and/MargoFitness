@@ -431,7 +431,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
 
           <div className="relative z-10 flex flex-col h-full gap-4">
             {/* Card Top: Title & Badge */}
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start pt-4">
               <div className="flex items-center gap-2.5">
                 <div className={cn("p-1.5 rounded-lg bg-black/60 border border-white/5 shadow-sm")}>
                   <Crown className={cn("w-4 h-4 opacity-80", subStyles.status)} />
