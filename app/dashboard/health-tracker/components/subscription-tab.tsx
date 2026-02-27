@@ -453,26 +453,20 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
               {/* Status badge & Freeze Button */}
               <div className="flex flex-col items-end gap-2">
                 {(profile.is_frozen || (!subscriptionActive && profile.subscription_tier !== 'free')) && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (profile.is_frozen && onFreezeClick) {
-                        onFreezeClick();
-                      }
-                    }}
+                  <div 
                     className={cn(
                     "relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40",
                     profile.is_frozen
-                      ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors cursor-pointer"
+                      ? "border-cyan-500/30 bg-cyan-500/10 transition-colors"
                       : "border-white/10 bg-white/5"
                   )}>
                     <span className={cn(
                       "text-[9px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
                       profile.is_frozen ? "text-cyan-300" : "text-white/30"
                     )}>
-                      {profile.is_frozen ? 'Заморожена' : `${tierDisplayName} · Истекла`}
+                      {profile.is_frozen ? 'На паузе' : `${tierDisplayName} · Истекла`}
                     </span>
-                  </button>
+                  </div>
                 )}
               </div>
             </div>
