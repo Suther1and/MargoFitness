@@ -450,8 +450,8 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                   className={cn(
                     "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
                     profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
-                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10_rgba(168,85,247,0.4)]" :
-                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10_rgba(234,179,8,0.4)]" :
+                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
+                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
                     "bg-white/10"
                   )} 
                   style={{ width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%` }}
