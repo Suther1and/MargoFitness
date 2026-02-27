@@ -558,12 +558,12 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div 
                 className={cn(
                   "p-5 rounded-2xl border transition-all duration-500 relative flex flex-col gap-3 overflow-hidden min-h-[180px]",
-                  isCurrent ? "shadow-2xl scale-[1.02]" : "hover:scale-[1.02] border-white/10"
+                  isCurrent ? "shadow-2xl scale-[1.02]" : "hover:scale-[1.02]"
                 )}
                 style={{ 
                   background: tier.styles.card,
-                  borderColor: isCurrent ? tier.styles.border : undefined,
-                  borderWidth: isCurrent ? '2px' : '1px'
+                  borderColor: tier.styles.border,
+                  borderWidth: '2px'
                 }}
               >
                 {/* Pattern Overlay */}
