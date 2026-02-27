@@ -150,6 +150,18 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
 
   const bonusStyles = getBonusLevelStyles(bonusStats.levelData.level)
 
+  const getRelativeDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const yesterday = today - 86400000
+    const txDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+
+    if (txDay === today) return 'Сегодня'
+    if (txDay === yesterday) return 'Вчера'
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+  }
+
   const getReferralStatusText = (level: number) => {
     switch (level) {
       case 1:
@@ -443,7 +455,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 </thead>
                 <tbody className="divide-y divide-white/[0.02]">
                   {referralStats?.referrals && referralStats.referrals.length > 0 ? (
-                    referralStats.referrals.slice(0, 5).map((ref: any) => {
+                    referralStats.referrals.map((ref: any) => {
                       const hasPurchase = ref.total_earned > 0 || ref.status === 'first_purchase_made';
                       
                       return (
@@ -542,10 +554,10 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                 }
 
                 return (
-                  <div key={tx.id} className="flex items-center justify-between p-5 hover:bg-white/[0.01] transition-colors group">
-                    <div className="flex items-center gap-3.5">
+                  <div key={tx.id} className="flex items-center justify-between p-5 hover:bg-white/[0.01] transition-colors group cursor-default">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       <div className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors",
                         bgColor,
                         iconColor
                       )}>
@@ -553,12 +565,48 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                       </div>
                       <div className="min-w-0">
                         <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mb-1">
-                          {new Date(tx.created_at || '').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
+                          {getRelativeDate(tx.created_at || '')}
                         </p>
-                        <p className="text-xs font-bold text-white/80 truncate group-hover:text-white transition-colors">{tx.description}</p>
+                        <p className="text-xs font-bold text-white/80 truncate group-hover:text-white transition-colors leading-tight">
+                          {tx.description}
+                        </p>
+                        {(() => {
+                          if (tx.type !== 'referral_bonus' && tx.type !== 'referral_first' && tx.type !== 'referral_income') {
+                            return null;
+                          }
+
+                          const metadata = tx.metadata as any;
+                          const relatedId = tx.related_user_id;
+                          const referrals = referralStats?.referrals || [];
+                          
+                          let name = '';
+
+                          // 1. Сначала проверяем метаданные (для новых транзакций)
+                          if (metadata?.target_user_name) {
+                            name = metadata.target_user_name;
+                          }
+                          
+                          // 2. Если в метаданных пусто, ищем в списке рефералов по related_user_id
+                          if (!name && relatedId && referrals.length > 0) {
+                            const ref = referrals.find(r => r.referred_id === relatedId);
+                            if (ref?.referred_name) {
+                              name = ref.referred_name;
+                            }
+                          }
+
+                          if (name) {
+                            return (
+                              <p className="text-[10px] text-white/30 mt-0.5 truncate font-medium">
+                                за {name}
+                              </p>
+                            )
+                          }
+
+                          return null
+                        })()}
                       </div>
                     </div>
-                    <div className="flex items-baseline gap-1 shrink-0">
+                    <div className="flex items-baseline gap-1 shrink-0 ml-3">
                       <span className={cn(
                         "font-oswald text-lg font-bold",
                         tx.amount > 0 ? "text-emerald-400" : "text-white/40"

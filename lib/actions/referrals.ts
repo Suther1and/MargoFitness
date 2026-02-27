@@ -192,7 +192,7 @@ export async function getReferralStats(userId: string): Promise<{
 
     const referrals = referralsResult.data.map((ref: any) => {
       const totalEarnedFromThisRef = (bonusTransactions || [])
-        .filter((tx: any) => tx.related_user_id === ref.referred_id)
+        .filter((tx: any) => tx.related_user_id === ref.referred_id || tx.related_user_id === ref.id)
         .reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
 
       return {
@@ -398,6 +398,14 @@ export async function handleReferralPurchase(
     })
 
     // Начисляем процент с покупки
+    const { data: referredProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', referredUserId)
+      .single()
+
+    const targetUserName = referredProfile?.full_name || 'Без имени'
+
     const { error: txError1 } = await supabase
       .from('bonus_transactions')
       .insert({
@@ -409,6 +417,7 @@ export async function handleReferralPurchase(
         metadata: {
           paid_amount: paidAmount,
           referral_percent: referralLevelData.percent,
+          target_user_name: targetUserName,
         },
       })
 
