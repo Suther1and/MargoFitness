@@ -9,7 +9,7 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { HABIT_LIMITS, WIDGET_LIMITS, SUBSCRIPTION_PLANS } from '@/lib/constants/subscriptions'
 import { getArticles } from '@/lib/actions/articles'
-import { getArticleStats } from '@/lib/actions/admin-articles'
+import { getArticleStats, getCachedArticleStats } from '@/lib/actions/admin-articles'
 
 interface SubscriptionTabProps {
   profile: Profile
@@ -100,6 +100,7 @@ const TIER_INFO = [
 export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   const [articleStats, setArticleStats] = useState<any>(null)
+  const [isDataLoaded, setIsDataLoaded] = useState(false)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -110,8 +111,12 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
     
     // Загружаем статистику статей из админки
     const loadStats = async () => {
-      const { data } = await getArticleStats()
-      if (data) setArticleStats(data)
+      const { data } = await getCachedArticleStats()
+      if (data) {
+        setArticleStats(data)
+        // Небольшая задержка перед запуском анимации всех полос
+        setTimeout(() => setIsDataLoaded(true), 100)
+      }
     }
     loadStats()
   }, [profile])
@@ -430,10 +435,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    !articleStats ? "w-0" : ""
                   )} 
                   style={{ 
-                    width: `${(WORKOUT_LIMITS[currentTierForProgress as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%`,
+                    width: articleStats ? `${(WORKOUT_LIMITS[currentTierForProgress as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%` : '0%',
                     backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
                                      currentTierForProgress === 'pro' ? '#a855f7' : 
                                      currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
@@ -458,10 +464,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    !articleStats ? "w-0" : ""
                   )} 
                   style={{ 
-                    width: `${(HABITS_HARDCODE[currentTierForProgress as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%`,
+                    width: articleStats ? `${(HABITS_HARDCODE[currentTierForProgress as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%` : '0%',
                     backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
                                      currentTierForProgress === 'pro' ? '#a855f7' : 
                                      currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
@@ -486,10 +493,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    !articleStats ? "w-0" : ""
                   )} 
                   style={{ 
-                    width: `${(WIDGETS_HARDCODE[currentTierForProgress as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%`,
+                    width: articleStats ? `${(WIDGETS_HARDCODE[currentTierForProgress as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%` : '0%',
                     backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
                                      currentTierForProgress === 'pro' ? '#a855f7' : 
                                      currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',
@@ -514,10 +522,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    !isDataLoaded ? "w-0" : ""
                   )} 
                   style={{ 
-                    width: articleProgress.total > 0 ? `${(articleProgress.current / articleProgress.total) * 100}%` : '0%',
+                    width: isDataLoaded && articleProgress.total > 0 ? `${(articleProgress.current / articleProgress.total) * 100}%` : '0%',
                     backgroundColor: currentTierForProgress === 'basic' ? '#fb923c' : 
                                      currentTierForProgress === 'pro' ? '#a855f7' : 
                                      currentTierForProgress === 'elite' ? '#eab308' : '#d4d4d4',

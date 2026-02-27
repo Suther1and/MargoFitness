@@ -137,6 +137,18 @@ export async function getArticleStats() {
   return { data: stats, error: null }
 }
 
+// Кэшированная версия для публичного использования (5 минут)
+import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
+
+export const getCachedArticleStats = unstable_cache(
+  async () => {
+    return getArticleStats()
+  },
+  ['article-stats'],
+  { revalidate: 300, tags: ['articles'] }
+)
+
 export async function incrementArticleViewBySlug(slug: string) {
   const supabase = await createClient()
 
