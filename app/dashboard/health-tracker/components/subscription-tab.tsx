@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Profile } from '@/types/database'
+import { useState, useEffect, useMemo } from 'react'
+import { Profile, Article } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
-import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight } from 'lucide-react'
+import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { HABIT_LIMITS, WIDGET_LIMITS, SUBSCRIPTION_PLANS } from '@/lib/constants/subscriptions'
+import { getArticles } from '@/lib/actions/articles'
 
 interface SubscriptionTabProps {
   profile: Profile
@@ -97,6 +98,7 @@ const TIER_INFO = [
 
 export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
+  const [articles, setArticles] = useState<Article[]>([])
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -104,7 +106,34 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
 
   useEffect(() => {
     setDaysLeft(getDaysUntilExpiration(profile))
+    
+    // Загружаем статьи для динамического подсчета
+    const loadArticles = async () => {
+      const data = await getArticles()
+      setArticles(data)
+    }
+    loadArticles()
   }, [profile])
+
+  // Константы для лимитов (Hardcode по ТЗ)
+  const WORKOUT_LIMITS = { free: 0, basic: 2, pro: 3, elite: 3 }
+  const HABITS_HARDCODE = { free: 1, basic: 6, pro: 10, elite: 15 }
+  const WIDGETS_HARDCODE = { free: 1, basic: 6, pro: 8, elite: 8 }
+
+  // Динамический подсчет статей по уровням
+  const articleCounts = useMemo(() => {
+    const total = articles.length
+    if (total === 0) return { free: 0, basic: 0, pro: 0, elite: 0, total: 0 }
+    
+    const counts = {
+      free: articles.filter(a => a.display_status === 'all').length,
+      basic: articles.filter(a => a.display_status === 'all' || a.required_tier === 'basic').length,
+      pro: articles.filter(a => a.display_status === 'all' || a.required_tier === 'basic' || a.required_tier === 'pro').length,
+      elite: total,
+      total
+    }
+    return counts
+  }, [articles])
 
   const getSubscriptionStyles = (tier: string) => {
     switch (tier) {
@@ -367,53 +396,128 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 pointer-events-none" />
           
           <div className="flex items-center justify-between mb-6 relative z-10">
-            <h3 className="text-sm font-black text-white/90 uppercase tracking-[0.2em] font-montserrat">Использование ресурсов</h3>
-            <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black font-montserrat">Месячный цикл</span>
+            <h3 className="text-sm font-black text-white/90 uppercase tracking-[0.2em] font-montserrat">Доступные ресурсы</h3>
+            <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black font-montserrat">Актуально</span>
           </div>
           
-          <div className="space-y-5 relative z-10">
+          <div className="space-y-4 relative z-10">
             {/* Workouts */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Тренировки</span>
                 <span className="text-white">
-                  2 / 3 <span className="ml-2 text-purple-400">66%</span>
+                  {WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0} / 3
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(168,85,247,0.4)]" style={{ width: '66%' }}></div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+                {/* Elite Bar (Full) */}
+                <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
+                {/* Pro Bar (Full) */}
+                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
+                {/* Basic Bar (66%) */}
+                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '66.6%' }}></div>
+                {/* Active Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
+                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
+                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
+                    "bg-white/10"
+                  )} 
+                  style={{ width: `${(WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%` }}
+                ></div>
               </div>
             </div>
 
             {/* Habits */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Привычки</span>
                 <span className="text-white">
-                  6 / {HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15} 
-                  <span className="ml-2 text-orange-400">
-                    {Math.round((6 / (HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15)) * 100)}%
-                  </span>
+                  {HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1} / 15
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(249,115,22,0.4)]" style={{ width: `${(6 / (HABIT_LIMITS[profile.subscription_tier as keyof typeof HABIT_LIMITS] || 15)) * 100}%` }}></div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+                {/* Elite Bar (Full) */}
+                <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
+                {/* Pro Bar (66%) */}
+                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '66.6%' }}></div>
+                {/* Basic Bar (40%) */}
+                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '40%' }}></div>
+                {/* Active Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
+                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10_rgba(168,85,247,0.4)]" :
+                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10_rgba(234,179,8,0.4)]" :
+                    "bg-white/10"
+                  )} 
+                  style={{ width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%` }}
+                ></div>
               </div>
             </div>
 
             {/* Widgets */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
                 <span className="text-white/40">Виджеты</span>
                 <span className="text-white">
-                  {WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8} / 8 
-                  <span className="ml-2 text-emerald-400">
-                    {Math.round(((WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8) / 8) * 100)}%
-                  </span>
+                  {WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1} / 8
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(16,185,129,0.4)]" style={{ width: `${((WIDGET_LIMITS[profile.subscription_tier as keyof typeof WIDGET_LIMITS] || 8) / 8) * 100}%` }}></div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+                {/* Elite/Pro Bar (Full) */}
+                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
+                {/* Basic Bar (75%) */}
+                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '75%' }}></div>
+                {/* Active Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
+                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
+                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
+                    "bg-white/10"
+                  )} 
+                  style={{ width: `${(WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Articles (Dynamic) */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest font-montserrat">
+                <span className="text-white/40">Статьи</span>
+                <span className="text-white">
+                  {articleCounts[profile.subscription_tier as keyof typeof articleCounts] || 0} / {articleCounts.total}
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+                {/* Elite Bar (Full) */}
+                {articleCounts.total > 0 && (
+                  <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
+                )}
+                {/* Pro Bar */}
+                {articleCounts.total > 0 && (
+                  <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: `${(articleCounts.pro / articleCounts.total) * 100}%` }}></div>
+                )}
+                {/* Basic Bar */}
+                {articleCounts.total > 0 && (
+                  <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: `${(articleCounts.basic / articleCounts.total) * 100}%` }}></div>
+                )}
+                {/* Active Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
+                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
+                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
+                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
+                    "bg-white/10"
+                  )} 
+                  style={{ width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%' }}
+                ></div>
               </div>
             </div>
           </div>
