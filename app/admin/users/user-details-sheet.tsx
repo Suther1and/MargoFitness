@@ -45,6 +45,7 @@ import {
   RefreshCw,
   Activity,
   Settings,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'

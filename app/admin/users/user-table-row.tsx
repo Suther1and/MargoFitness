@@ -7,6 +7,7 @@ import { UserAvatar } from '@/components/user-avatar'
 import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
 import { UserDetailsSheet } from './user-details-sheet'
+import { Sparkles } from 'lucide-react'
 
 interface UserTableRowProps {
   user: any

@@ -410,22 +410,20 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
-                {/* Elite Bar (Full) */}
-                <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
-                {/* Pro Bar (Full) */}
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
-                {/* Basic Bar (66%) */}
-                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '66.6%' }}></div>
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
-                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
-                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
-                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
-                    "bg-white/10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
-                  style={{ width: `${(WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%` }}
+                  style={{ 
+                    width: `${(WORKOUT_LIMITS[profile.subscription_tier as keyof typeof WORKOUT_LIMITS] || 0) / 3 * 100}%`,
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                  }}
                 ></div>
               </div>
             </div>
@@ -439,22 +437,20 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
-                {/* Elite Bar (Full) */}
-                <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
-                {/* Pro Bar (66%) */}
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '66.6%' }}></div>
-                {/* Basic Bar (40%) */}
-                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '40%' }}></div>
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
-                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
-                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
-                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
-                    "bg-white/10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
-                  style={{ width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%` }}
+                  style={{ 
+                    width: `${(HABITS_HARDCODE[profile.subscription_tier as keyof typeof HABITS_HARDCODE] || 1) / 15 * 100}%`,
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                  }}
                 ></div>
               </div>
             </div>
@@ -468,20 +464,20 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
-                {/* Elite/Pro Bar (Full) */}
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: '100%' }}></div>
-                {/* Basic Bar (75%) */}
-                <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: '75%' }}></div>
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
-                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
-                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
-                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
-                    "bg-white/10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
-                  style={{ width: `${(WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%` }}
+                  style={{ 
+                    width: `${(WIDGETS_HARDCODE[profile.subscription_tier as keyof typeof WIDGETS_HARDCODE] || 1) / 8 * 100}%`,
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                  }}
                 ></div>
               </div>
             </div>
@@ -495,28 +491,20 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                 </span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
-                {/* Elite Bar (Full) */}
-                {articleCounts.total > 0 && (
-                  <div className="absolute inset-0 bg-yellow-500/10 rounded-full" style={{ width: '100%' }}></div>
-                )}
-                {/* Pro Bar */}
-                {articleCounts.total > 0 && (
-                  <div className="absolute inset-0 bg-purple-500/20 rounded-full" style={{ width: `${(articleCounts.pro / articleCounts.total) * 100}%` }}></div>
-                )}
-                {/* Basic Bar */}
-                {articleCounts.total > 0 && (
-                  <div className="absolute inset-0 bg-orange-500/30 rounded-full" style={{ width: `${(articleCounts.basic / articleCounts.total) * 100}%` }}></div>
-                )}
                 {/* Active Bar */}
                 <div 
                   className={cn(
-                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10",
-                    profile.subscription_tier === 'basic' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" :
-                    profile.subscription_tier === 'pro' ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)]" :
-                    profile.subscription_tier === 'elite' ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]" :
-                    "bg-white/10"
+                    "absolute inset-0 h-full transition-all duration-1000 ease-out rounded-full z-10"
                   )} 
-                  style={{ width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%' }}
+                  style={{ 
+                    width: articleCounts.total > 0 ? `${(articleCounts[profile.subscription_tier as keyof typeof articleCounts] / articleCounts.total) * 100}%` : '0%',
+                    backgroundColor: profile.subscription_tier === 'basic' ? '#fb923c' : // Установлен точный цвет по запросу
+                                     profile.subscription_tier === 'pro' ? '#a855f7' : 
+                                     profile.subscription_tier === 'elite' ? '#eab308' : '#ffffff1a',
+                    boxShadow: profile.subscription_tier === 'basic' ? '0 0 10px rgba(251, 146, 60, 0.4)' :
+                               profile.subscription_tier === 'pro' ? '0 0 10px rgba(168, 85, 247, 0.4)' :
+                               profile.subscription_tier === 'elite' ? '0 0 10px rgba(234, 179, 8, 0.4)' : 'none'
+                  }}
                 ></div>
               </div>
             </div>
