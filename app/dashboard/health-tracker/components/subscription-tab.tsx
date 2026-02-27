@@ -15,6 +15,7 @@ interface SubscriptionTabProps {
   profile: Profile
   onRenewalClick: () => void
   onUpgradeClick: () => void
+  initialArticleStats?: any
 }
 
 const TIER_INFO = [
@@ -97,10 +98,10 @@ const TIER_INFO = [
   },
 ]
 
-export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: SubscriptionTabProps) {
+export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initialArticleStats }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
-  const [articleStats, setArticleStats] = useState<any>(null)
-  const [isDataLoaded, setIsDataLoaded] = useState(false)
+  const [articleStats, setArticleStats] = useState<any>(initialArticleStats || null)
+  const [isDataLoaded, setIsDataLoaded] = useState(!!initialArticleStats)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -109,17 +110,19 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
   useEffect(() => {
     setDaysLeft(getDaysUntilExpiration(profile))
     
-    // Загружаем статистику статей из админки
-    const loadStats = async () => {
-      const { data } = await getCachedArticleStats()
-      if (data) {
-        setArticleStats(data)
-        // Небольшая задержка перед запуском анимации всех полос
-        setTimeout(() => setIsDataLoaded(true), 100)
+    // Загружаем статистику статей из админки только если её нет
+    if (!articleStats) {
+      const loadStats = async () => {
+        const { data } = await getCachedArticleStats()
+        if (data) {
+          setArticleStats(data)
+          // Небольшая задержка перед запуском анимации всех полос
+          setTimeout(() => setIsDataLoaded(true), 100)
+        }
       }
+      loadStats()
     }
-    loadStats()
-  }, [profile])
+  }, [profile, articleStats])
 
   // Константы для лимитов (Hardcode по ТЗ)
   const WORKOUT_LIMITS = { free: 0, basic: 2, pro: 3, elite: 3 }

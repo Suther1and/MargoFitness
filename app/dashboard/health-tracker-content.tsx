@@ -67,7 +67,7 @@ import { checkAndUnlockAchievements } from '@/lib/actions/achievements'
 import { createClient } from '@/lib/supabase/client'
 import { getActiveHabitsForDate, calculateHabitStats, shouldShowHabitOnDate } from './health-tracker/utils/habit-scheduler'
 import { getHabitsStats } from '@/lib/actions/health-stats'
-import { getArticles, getArticleBySlug } from '@/lib/actions/articles'
+import { getArticleStats, getCachedArticleStats } from '@/lib/actions/admin-articles'
 import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 import { checkAndExpireSubscription } from '@/lib/actions/profile'
@@ -215,6 +215,15 @@ function HealthTrackerInner({
     }
   }, [userId, queryClient])
   
+  const { data: articleStats } = useQuery({
+    queryKey: ['article-stats'],
+    queryFn: async () => {
+      const { data } = await getCachedArticleStats()
+      return data
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
@@ -668,7 +677,7 @@ function HealthTrackerInner({
                         {activeTab === 'settings' && <motion.div key="settings-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SettingsTab userId={userId || ''} profile={profile} onBack={() => setActiveTab('overview')} selectedDate={selectedDate} onDateChange={setSelectedDate} isCalendarExpanded={isCalendarExpanded} setIsCalendarExpanded={setIsCalendarExpanded} activeSubTab={settingsSubTab} setActiveSubTab={setSettingsSubTab} isMobile={false} /></motion.div>}
                         {activeTab === 'stats' && <motion.div key="stats-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><StatsTab userId={userId || ''} periodType={statsPeriodType} dateRange={statsDateRange} data={data} onPeriodSelect={handleStatsPeriodSelect} /></motion.div>}
                         {activeTab === 'bonuses' && <motion.div key="bonuses-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><BonusesTab bonusStats={bonusStats} referralStats={referralStats} referralLink={referralLink} referralCode={referralCode} userId={userId || ''} referralAchievements={referralAchievements} /></motion.div>}
-                        {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} /></motion.div>}
+                        {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} initialArticleStats={articleStats} /></motion.div>}
                         {activeTab === 'workouts' && <motion.div key="workouts-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><WorkoutsTab preloadedArticles={finalArticles} isArticlesLoading={isArticlesLoading} userId={userId || ''} initialTier={profile?.subscription_tier} fullProfile={profile} /></motion.div>}
                         {activeTab === 'goals' && <motion.div key="goals-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }} className="flex flex-col gap-6"><GoalsSummaryCard data={data} settings={settings} onNavigateToSettings={() => { setActiveTab('settings'); setSettingsSubTab('widgets'); }} />{activeWidgetIds.has('photos') && <DailyPhotosCard userId={userId || ''} selectedDate={selectedDate} />}</motion.div>}
                       </AnimatePresence>
