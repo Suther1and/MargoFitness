@@ -221,7 +221,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
           content: '';
           position: absolute;
           inset: 0;
-          border-radius: 1.5rem;
+          border-radius: 2rem;
           padding: 1.5px;
           background: linear-gradient(180deg, ${subStyles.border}, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0));
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -558,9 +558,13 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
               <div 
                 className={cn(
                   "p-5 rounded-2xl border transition-all duration-500 relative flex flex-col gap-3 overflow-hidden min-h-[180px]",
-                  isCurrent ? "ring-2 ring-white/20 shadow-2xl scale-[1.02]" : "hover:scale-[1.02] border-white/10"
+                  isCurrent ? "shadow-2xl scale-[1.02]" : "hover:scale-[1.02] border-white/10"
                 )}
-                style={{ background: tier.styles.card }}
+                style={{ 
+                  background: tier.styles.card,
+                  borderColor: isCurrent ? tier.styles.border : undefined,
+                  borderWidth: isCurrent ? '2px' : '1px'
+                }}
               >
                 {/* Pattern Overlay */}
                 <div 
