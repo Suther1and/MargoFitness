@@ -101,10 +101,16 @@ export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
             <span className="font-medium">Подписка</span>
           </div>
           {profile.is_frozen ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] text-cyan-200 ring-1 ring-cyan-400/30">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onFreezeClick) onFreezeClick();
+              }}
+              className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 px-2 py-0.5 text-[10px] text-cyan-200 ring-1 ring-cyan-400/30 transition-colors cursor-pointer"
+            >
               <span className="relative h-1 w-1 rounded-full bg-cyan-400"></span>
               На паузе
-            </span>
+            </button>
           ) : subscriptionActive ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-200 ring-1 ring-emerald-400/30">
               <span className="relative h-1 w-1 rounded-full bg-emerald-400">
@@ -125,7 +131,7 @@ export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-white font-oswald uppercase tracking-tight">{tierDisplayName}</h3>
               <p className="text-[10px] text-white/60 mt-0.5">
-                {profile.is_frozen ? 'Заморожена' : subscriptionActive ? 'Активная' : 'Неактивна'}
+                {profile.is_frozen ? 'На паузе' : subscriptionActive ? 'Активная' : 'Неактивна'}
               </p>
             </div>
             {daysLeft !== null && daysLeft > 0 && (
