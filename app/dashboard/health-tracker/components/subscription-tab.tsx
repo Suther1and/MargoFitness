@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Profile, Article } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
-import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen } from 'lucide-react'
+import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen, ChevronDown, Receipt, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -98,10 +98,36 @@ const TIER_INFO = [
   },
 ]
 
+const MOCK_PURCHASES = [
+  { id: 1, plan: 'Elite', date: '12 Октября 2023', amount: 8500, status: 'Оплачено' },
+  { id: 2, plan: 'Pro', date: '12 Сентября 2023', amount: 4250, status: 'Оплачено' },
+  { id: 3, plan: 'Basic', date: '12 Августа 2023', amount: 3400, status: 'Оплачено' },
+]
+
+const FAQ_ITEMS = [
+  {
+    question: "Как отменить подписку?",
+    answer: "Вы можете отменить автопродление в любой момент в настройках профиля. Доступ ко всем функциям сохранится до конца оплаченного периода."
+  },
+  {
+    question: "Можно ли заморозить подписку?",
+    answer: "Да, подписку можно заморозить на срок до 30 дней один раз в год для тарифов Pro и Elite. Для этого обратитесь в поддержку."
+  },
+  {
+    question: "Как работает возврат средств?",
+    answer: "Возврат возможен в течение первых 14 дней после оплаты, если вы не использовали платные функции более 2-х раз."
+  },
+  {
+    question: "Что будет с данными после отмены?",
+    answer: "Ваши данные (привычки, тренировки) надежно сохранятся. Вы просто потеряете доступ к премиум-функциям до следующей оплаты."
+  }
+]
+
 export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initialArticleStats }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   const [articleStats, setArticleStats] = useState<any>(initialArticleStats || null)
   const [isDataLoaded, setIsDataLoaded] = useState(false)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -759,6 +785,130 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
             </div>
           )
         })}
+      </div>
+
+      {/* EXTRA SECTION: Purchase History & FAQ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6">
+        
+        {/* Purchase History (Left 7/12) */}
+        <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/[0.04] px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+                <Receipt className="w-4 h-4 text-white/60" />
+              </div>
+              <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">История покупок</h3>
+            </div>
+            <button className="text-[9px] text-white/40 hover:text-white font-bold uppercase tracking-widest transition-colors">
+              Смотреть все
+            </button>
+          </div>
+          <div className="w-full overflow-hidden">
+            <div className="overflow-x-auto scrollbar-none">
+              <table className="w-full text-left text-xs min-w-[450px] md:min-w-0">
+                <thead className="bg-white/[0.01] text-[9px] uppercase text-white/20 font-bold tracking-[0.2em]">
+                  <tr>
+                    <th className="px-6 py-3.5">Тариф</th>
+                    <th className="px-6 py-3.5">Дата</th>
+                    <th className="px-6 py-3.5">Статус</th>
+                    <th className="px-6 py-3.5 text-right">Сумма</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.02]">
+                  {MOCK_PURCHASES.map((purchase) => (
+                    <tr key={purchase.id} className="hover:bg-white/[0.01] transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-2 h-2 rounded-full",
+                            purchase.plan === 'Elite' ? "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" :
+                            purchase.plan === 'Pro' ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" :
+                            "bg-orange-500 shadow-[0_0_8px_rgba(251,146,60,0.6)]"
+                          )} />
+                          <span className="font-bold text-white font-oswald tracking-wide">{purchase.plan}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-white/40 font-medium font-montserrat text-[10px]">{purchase.date}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border bg-emerald-500/5 text-emerald-400/60 border-emerald-500/10">
+                          {purchase.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="font-oswald text-sm font-bold text-white">
+                          {purchase.amount.toLocaleString('ru-RU')} ₽
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ (Right 5/12) */}
+        <div className="lg:col-span-5 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-[80px] -mr-32 -mt-32 pointer-events-none" />
+          
+          <div className="flex items-center gap-3 border-b border-white/[0.04] px-6 py-5 relative z-10">
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+              <HelpCircle className="w-4 h-4 text-white/60" />
+            </div>
+            <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">Частые вопросы</h3>
+          </div>
+          
+          <div className="flex-1 p-4 space-y-2 relative z-10">
+            {FAQ_ITEMS.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <div 
+                  key={index}
+                  className={cn(
+                    "rounded-2xl border transition-all duration-300 overflow-hidden",
+                    isOpen 
+                      ? "bg-white/5 border-white/10 shadow-lg" 
+                      : "bg-transparent border-transparent hover:bg-white/[0.02]"
+                  )}
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    className="w-full flex items-center justify-between p-4 text-left"
+                  >
+                    <span className={cn(
+                      "text-xs font-bold font-montserrat transition-colors pr-4",
+                      isOpen ? "text-white" : "text-white/70"
+                    )}>
+                      {faq.question}
+                    </span>
+                    <div className={cn(
+                      "shrink-0 p-1 rounded-full transition-transform duration-300",
+                      isOpen ? "bg-white/10 rotate-180" : "bg-transparent"
+                    )}>
+                      <ChevronDown className={cn(
+                        "w-4 h-4 transition-colors",
+                        isOpen ? "text-white" : "text-white/30"
+                      )} />
+                    </div>
+                  </button>
+                  <div 
+                    className={cn(
+                      "grid transition-all duration-300 ease-in-out",
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="p-4 pt-0 text-[11px] leading-relaxed text-white/40 font-montserrat">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
       </div>
     </div>
   )
