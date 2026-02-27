@@ -4,8 +4,18 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Product, SubscriptionTier, TIER_LEVELS } from '@/types/database'
-import { Calendar, CheckCircle2, Zap, Clock, Star } from 'lucide-react'
+import { Calendar, CheckCircle2, Zap, Clock, Star, Snowflake } from 'lucide-react'
+import { getFreezeLimits } from '@/lib/constants/subscriptions'
 import { createClient } from '@/lib/supabase/client'
+
+function pluralFreeze(n: number): string {
+  const abs = Math.abs(n) % 100
+  const last = abs % 10
+  if (abs >= 11 && abs <= 19) return 'заморозок'
+  if (last === 1) return 'заморозка'
+  if (last >= 2 && last <= 4) return 'заморозки'
+  return 'заморозок'
+}
 
 // Компонент для плавной анимации чисел
 function AnimatedNumber({ value, format = true }: { value: number; format?: boolean }) {
@@ -361,8 +371,8 @@ export function SubscriptionRenewalModal({
                 </div>
 
                 {/* Правая панель */}
-                <div className="flex-1 p-6 md:p-10 flex flex-col min-h-0">
-                  <div className="flex items-center justify-between mb-5 md:mb-6">
+                <div className="flex-1 p-6 md:p-8 flex flex-col min-h-0">
+                  <div className="flex items-center justify-between mb-4 md:mb-4">
                     <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
                       Выбери срок продления:
                     </h4>
@@ -372,54 +382,81 @@ export function SubscriptionRenewalModal({
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3 md:gap-4 mb-5 md:mb-8">
+                  <div className="grid grid-cols-2 gap-3 md:gap-3 mb-5 md:mb-6">
                     {products.map((p, index) => {
                       const isSelected = selectedProduct?.id === p.id
                       return (
                         <button
                           key={p.id}
                           onClick={() => setSelectedProduct(p)}
-                          className={`relative p-4 md:p-5 rounded-2xl md:rounded-3xl text-left border transition-all duration-200 smooth-transition ${isSelected ? `bg-gradient-to-br ${currentConfig.bg.replace('20', '15')} ${currentConfig.ring.replace('30', '50')} ring-2 ${currentConfig.ring} shadow-lg ${currentConfig.bg.replace('bg-', 'shadow-').replace('20', '10')}` : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'}`}
+                          className={`relative p-3 md:p-4 rounded-xl md:rounded-2xl text-left border transition-all duration-200 smooth-transition ${isSelected ? `bg-gradient-to-br ${currentConfig.bg.replace('20', '15')} ${currentConfig.ring.replace('30', '50')} ring-2 ${currentConfig.ring} shadow-lg ${currentConfig.bg.replace('bg-', 'shadow-').replace('20', '10')}` : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 active:scale-[0.98]'}`}
                           style={{ touchAction: 'manipulation', animationDelay: `${index * 60}ms` }}
                         >
                           {(p.discount_percentage || 0) > 0 && (
-                            <span className={`absolute top-2 right-2 inline-flex items-center rounded-full ${currentConfig.bg} px-2 py-0.5 text-xs text-white ring-1 ${currentConfig.ring} font-medium overflow-hidden`}>
+                            <span className={`absolute top-1.5 right-1.5 inline-flex items-center rounded-full ${currentConfig.bg} px-1.5 py-0.5 text-[10px] text-white ring-1 ${currentConfig.ring} font-medium overflow-hidden`}>
                               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
                               <span className="relative">−{p.discount_percentage}%</span>
                             </span>
                           )}
-                          <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? currentConfig.color : 'text-white/40'}`}>
+                          <p className={`text-[10px] font-bold uppercase mb-0.5 tracking-wider transition-colors ${isSelected ? currentConfig.color : 'text-white/40'}`}>
                             {p.duration_months} мес.
                           </p>
-                          <p key={`price-${p.id}-${isSelected}`} className="text-2xl md:text-3xl font-oswald font-bold text-white">
-                            {p.price.toLocaleString('ru-RU')} <span className="text-base text-white/50">₽</span>
+                          <p key={`price-${p.id}-${isSelected}`} className="text-xl md:text-2xl font-oswald font-bold text-white leading-tight">
+                            {p.price.toLocaleString('ru-RU')} <span className="text-sm text-white/50">₽</span>
                           </p>
+                          <div className="flex items-center justify-between mt-0.5">
+                            <span className="text-[9px] text-white/30 font-medium">
+                              {Math.round(p.price / (p.duration_months || 1)).toLocaleString('ru-RU')} ₽/мес
+                            </span>
+                            {(() => {
+                              const fl = getFreezeLimits(currentTier, p.duration_months || 1)
+                              return fl.tokens > 0 ? (
+                                <span className="flex items-center gap-0.5 text-cyan-400/50">
+                                  <span className="text-[8px] font-bold">{fl.tokens}</span>
+                                  <Snowflake className="w-2.5 h-2.5" />
+                                  <span className="text-[6px]">·</span>
+                                  <span className="text-[8px] font-bold">{fl.days} дн.</span>
+                                </span>
+                              ) : null
+                            })()}
+                          </div>
                         </button>
                       )
                     })}
                   </div>
 
-                  <div className="mt-auto space-y-4">
-                    <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-5 md:p-6">
+                  <div className="mt-auto space-y-3">
+                    <div className="rounded-xl md:rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.04] ring-1 ring-white/10 backdrop-blur p-4 md:p-5">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
-                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1 md:mb-2">Итоговый срок:</p>
-                          <p className={`text-3xl md:text-3xl font-oswald font-bold ${currentConfig.color}`}>
+                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Итоговый срок:</p>
+                          <p className={`text-2xl md:text-3xl font-oswald font-bold ${currentConfig.color}`}>
                             <AnimatedNumber value={newTotalDays} /> дн.
                           </p>
                         </div>
                         <div className="text-right flex-1">
-                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1 md:mb-2">Активность до:</p>
-                          <p key={`renewal-date-${newExpiryDate?.getTime()}`} className="text-sm md:text-base font-semibold text-white/90 smooth-transition">
+                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Активность до:</p>
+                          <p key={`renewal-date-${newExpiryDate?.getTime()}`} className="text-sm font-semibold text-white/90 smooth-transition">
                             {newExpiryDate ? formatDate(newExpiryDate) : '...'}
                           </p>
                         </div>
                       </div>
+                      {selectedProduct && (() => {
+                        const fl = getFreezeLimits(currentTier, selectedProduct.duration_months || 1)
+                        return fl.tokens > 0 ? (
+                          <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/5">
+                            <Snowflake className="w-3 h-3 text-cyan-400/60" />
+                            <span className="text-[9px] font-bold text-cyan-400/60 uppercase tracking-wider">
+                              +{fl.tokens} {pluralFreeze(fl.tokens)} · +{fl.days} дн.
+                            </span>
+                          </div>
+                        ) : null
+                      })()}
                     </div>
 
                     <button
                       onClick={handleRenewal}
-                      className={`w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-gradient-to-r ${currentConfig.button} text-white font-bold text-sm md:text-sm uppercase tracking-wider shadow-lg transition-all duration-300 hover:shadow-xl hover:brightness-110 active:scale-[0.98]`}
+                      className={`w-full py-3.5 md:py-4 rounded-xl md:rounded-2xl bg-gradient-to-r ${currentConfig.button} text-white font-bold text-sm uppercase tracking-wider shadow-lg transition-all duration-300 hover:shadow-xl hover:brightness-110 active:scale-[0.98]`}
                       style={{ touchAction: 'manipulation' }}
                     >
                       Продлить подписку

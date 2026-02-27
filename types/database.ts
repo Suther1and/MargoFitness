@@ -22,6 +22,7 @@ export type DiaryEntry = Database['public']['Tables']['diary_entries']['Row']
 export type Achievement = Database['public']['Tables']['achievements']['Row']
 export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
 export type Article = Database['public']['Tables']['articles']['Row']
+export type SubscriptionFreeze = Database['public']['Tables']['subscription_freezes']['Row']
 
 // ============================================
 // Типы для вставки (Insert)

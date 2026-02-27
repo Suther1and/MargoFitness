@@ -28,13 +28,14 @@ export async function getUserFullDetails(userId: string) {
     if (profileError) throw profileError
 
     // 2. Получаем ВСЕ данные параллельно
-    const [purchasesRes, transactionsRes, promoCodesRes, bonusTransactionsRes, referralsRes, referralCodesRes] = await Promise.all([
+    const [purchasesRes, transactionsRes, promoCodesRes, bonusTransactionsRes, referralsRes, referralCodesRes, freezeHistoryRes] = await Promise.all([
       supabase.from('user_purchases').select('*, products(*)').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('payment_transactions').select('*').eq('user_id', userId).eq('status', 'succeeded'),
       supabase.from('promo_codes').select('code, discount_value, discount_type'),
       supabase.from('bonus_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('referrals').select('*, profiles!referrals_referred_id_fkey(full_name, email, avatar_url, user_bonuses(total_spent_for_cashback))').eq('referrer_id', userId),
-      supabase.from('referral_codes').select('*').eq('user_id', userId).maybeSingle()
+      supabase.from('referral_codes').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('subscription_freezes').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
     ])
 
     const purchases = purchasesRes.data || []
@@ -133,6 +134,7 @@ export async function getUserFullDetails(userId: string) {
         referrals: referrals,
         referralCode: referralCode,
         referrer: referrerData,
+        freezeHistory: freezeHistoryRes.data || [],
         stats: { workoutsCompleted: 0, articlesRead: 0, workoutHistory: [], articleHistory: [] }
       }
     }

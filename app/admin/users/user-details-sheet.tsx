@@ -46,6 +46,7 @@ import {
   Activity,
   Settings,
   Sparkles,
+  Snowflake,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -413,6 +414,35 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
               </div>
             </div>
 
+            {/* Freeze Info */}
+            {(user.freeze_tokens_total > 0 || user.is_frozen) && (
+              <div className="py-3 border-t border-white/[0.06]">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs bg-cyan-500/10 border border-cyan-500/20">
+                    <Snowflake className="w-3 h-3 text-cyan-400" />
+                    <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wide">
+                      {user.is_frozen ? 'Заморожена' : 'Заморозки'}
+                    </span>
+                  </div>
+                  <InlineNumberInput
+                    value={user.freeze_tokens_used || 0}
+                    onSave={(val) => handleUpdate('freeze_tokens_used', val)}
+                    suffix={<span className="text-[9px] text-white/30">/ {user.freeze_tokens_total} шт</span>}
+                  />
+                  <InlineNumberInput
+                    value={user.freeze_days_used || 0}
+                    onSave={(val) => handleUpdate('freeze_days_used', val)}
+                    suffix={<span className="text-[9px] text-white/30">/ {user.freeze_days_total} дн</span>}
+                  />
+                  {user.is_frozen && user.frozen_at && (
+                    <span className="text-[10px] text-cyan-400/60 font-medium">
+                      с {fmtDate(user.frozen_at, { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Stats — 1 row compact */}
             <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed">
               <div className="flex items-center gap-x-3 flex-wrap">
@@ -604,6 +634,53 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                       </div>
                     ))}
                 </div>
+
+                {/* Freeze History */}
+                {data?.freezeHistory && data.freezeHistory.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Snowflake className="w-3 h-3 text-cyan-400/50" />
+                      <span className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                        История заморозок
+                      </span>
+                      <span className="text-[10px] text-white/25 tabular-nums">
+                        {data.freezeHistory.length}
+                      </span>
+                    </div>
+                    {data.freezeHistory.map((freeze: any) => (
+                      <div
+                        key={freeze.id}
+                        className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            freeze.ended_at ? "bg-white/20" : "bg-cyan-400 animate-pulse"
+                          )} />
+                          <span className="text-[11px] text-white/50" suppressHydrationWarning>
+                            {fmtDate(freeze.started_at, { day: 'numeric', month: 'short' })}
+                            {' — '}
+                            {freeze.ended_at
+                              ? fmtDate(freeze.ended_at, { day: 'numeric', month: 'short' })
+                              : 'Сейчас'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-white/30 font-medium tabular-nums">
+                            {freeze.days_used} дн.
+                          </span>
+                          {freeze.reason && (
+                            <span className="text-[9px] text-white/20 uppercase">
+                              {freeze.reason === 'manual_unfreeze' ? 'Вручную' :
+                               freeze.reason === 'days_exhausted' ? 'Авто' :
+                               freeze.reason === 'admin' ? 'Админ' : freeze.reason}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Notes */}
                 <div className="space-y-2">

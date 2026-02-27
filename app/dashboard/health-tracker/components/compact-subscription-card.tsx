@@ -8,9 +8,10 @@ interface CompactSubscriptionCardProps {
   profile: Profile
   onRenewalClick: () => void
   onUpgradeClick: () => void
+  onFreezeClick?: () => void
 }
 
-export function CompactSubscriptionCard({ profile, onRenewalClick, onUpgradeClick }: CompactSubscriptionCardProps) {
+export function CompactSubscriptionCard({ profile, onRenewalClick, onUpgradeClick, onFreezeClick }: CompactSubscriptionCardProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
@@ -69,7 +70,11 @@ export function CompactSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
           <span className="text-sm font-semibold text-white font-oswald uppercase tracking-tight truncate">
             {tierDisplayName}
           </span>
-          {subscriptionActive ? (
+          {profile.is_frozen ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[9px] text-cyan-200 ring-1 ring-cyan-400/30">
+              <span className="relative h-1 w-1 rounded-full bg-cyan-400"></span>
+            </span>
+          ) : subscriptionActive ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[9px] text-emerald-200 ring-1 ring-emerald-400/30">
               <span className="relative h-1 w-1 rounded-full bg-emerald-400">
                 <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping"></span>
@@ -82,7 +87,7 @@ export function CompactSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
           )}
         </div>
         <span className="text-[10px] text-white/40 font-medium">
-          {daysLeft !== null && daysLeft > 0 ? `${daysLeft} дней осталось` : 'Подписка'}
+          {profile.is_frozen ? 'На паузе' : daysLeft !== null && daysLeft > 0 ? `${daysLeft} дней осталось` : 'Подписка'}
         </span>
       </div>
       

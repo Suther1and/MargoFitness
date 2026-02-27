@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Crown, RefreshCw, TrendingUp, Mail, Phone, Clock, User, Pencil } from 'lucide-react'
+import { Crown, RefreshCw, TrendingUp, Mail, Phone, Clock, User, Pencil, Snowflake } from 'lucide-react'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive } from '@/lib/access-control'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ interface UnifiedHeaderCardProps {
   onRenewalClick: () => void
   onUpgradeClick: () => void
   onSubscriptionClick?: () => void
+  onFreezeClick?: () => void
 }
 
 export function UnifiedHeaderCard({ 
@@ -20,7 +21,8 @@ export function UnifiedHeaderCard({
   onEditClick, 
   onRenewalClick, 
   onUpgradeClick,
-  onSubscriptionClick
+  onSubscriptionClick,
+  onFreezeClick
 }: UnifiedHeaderCardProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   
@@ -101,8 +103,24 @@ export function UnifiedHeaderCard({
     }
   }
 
-  // Внешний контейнер — серый при expired, цветной при активной подписке
-  const styles = getTierStyles(isExpired ? 'free' : profile.subscription_tier)
+  // При заморозке — ледяные стили
+  const frozenStyles = {
+    text: 'text-cyan-400',
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-500/20',
+    gradient: 'from-cyan-400/40 to-blue-500/40',
+    shadow: 'shadow-cyan-500/20',
+    icon: 'text-cyan-500',
+    hoverBorder: 'hover:border-cyan-400/30',
+    hoverShadow: 'hover:shadow-cyan-500/15',
+    hoverBg: 'hover:bg-cyan-500/[0.05]',
+    accentIcon: 'text-cyan-500/40',
+    upgradeBtn: 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:brightness-110 text-white shadow-cyan-500/20',
+    nameHover: 'hover:text-cyan-400'
+  }
+
+  // Внешний контейнер — серый при expired, ледяной при заморозке, цветной при активной
+  const styles = profile.is_frozen ? frozenStyles : getTierStyles(isExpired ? 'free' : profile.subscription_tier)
   // Внутренняя пилюля тарифа — всегда цвет реального тарифа, чтобы пользователь видел что потерял
   const badgeStyles = getTierStyles(profile.subscription_tier)
 
@@ -121,6 +139,7 @@ export function UnifiedHeaderCard({
       {/* Мягкий фоновый градиент для глубины */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-r from-transparent to-transparent pointer-events-none rounded-[2.5rem]",
+        profile.is_frozen ? "from-cyan-500/[0.03]" :
         profile.subscription_tier === 'elite' ? "from-amber-500/[0.02]" : 
         profile.subscription_tier === 'pro' ? "from-purple-500/[0.02]" : 
         profile.subscription_tier === 'basic' ? "from-orange-500/[0.02]" : ""
@@ -219,11 +238,13 @@ export function UnifiedHeaderCard({
         {/* Уровень 2: Статус дней (под именем) */}
         <div className={cn(
           "flex items-center gap-1.5 transition-colors duration-300",
+          profile.is_frozen ? "text-cyan-400" :
           isExpired ? "text-red-500/60" : daysLeft !== null && daysLeft < 10 ? "text-red-500" : (isFree ? "text-white/30" : styles.text)
         )}>
-          <Clock className="w-3 h-3" />
+          {profile.is_frozen ? <Snowflake className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
           <span className="text-[10px] font-bold uppercase tracking-wider leading-none">
-            {isExpired ? "0 дней" : isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
+            {profile.is_frozen ? `${daysLeft} дней · На паузе` :
+              isExpired ? "0 дней" : isFree ? "Подписка не активна" : (daysLeft !== null ? `${daysLeft} дней осталось` : "Срок не определен")}
           </span>
         </div>
 
@@ -245,7 +266,15 @@ export function UnifiedHeaderCard({
 
       {/* 3. Кнопки действий */}
       <div className="flex items-center gap-2 ml-5 pl-5 border-l border-white/5 h-10">
-        {isFree || isExpired ? (
+        {profile.is_frozen ? (
+          <button 
+            onClick={(e) => { e.stopPropagation(); onFreezeClick?.(); }}
+            className="h-9 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-cyan-500/20 whitespace-nowrap"
+          >
+            <Snowflake className="w-3.5 h-3.5" />
+            Заморозка
+          </button>
+        ) : isFree || isExpired ? (
           <button 
             onClick={(e) => { e.stopPropagation(); onRenewalClick(); }}
             className="h-9 px-4 rounded-xl bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-amber-400 transition-all active:scale-95 shadow-lg shadow-amber-500/20 whitespace-nowrap"

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Profile, Article } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
-import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen, ChevronDown, Receipt, HelpCircle } from 'lucide-react'
+import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen, ChevronDown, Receipt, HelpCircle, Snowflake, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -15,6 +15,7 @@ interface SubscriptionTabProps {
   profile: Profile
   onRenewalClick: () => void
   onUpgradeClick: () => void
+  onFreezeClick?: () => void
   initialArticleStats?: any
 }
 
@@ -110,8 +111,8 @@ const FAQ_ITEMS = [
     answer: "Вы можете отменить автопродление в любой момент в настройках профиля. Доступ ко всем функциям сохранится до конца оплаченного периода."
   },
   {
-    question: "Можно ли заморозить подписку?",
-    answer: "Да, подписку можно заморозить на срок до 30 дней один раз в год для тарифов Pro и Elite. Для этого обратитесь в поддержку."
+    question: "Как работает заморозка подписки?",
+    answer: "Количество заморозок и дней зависит от тарифа и срока подписки. Во время заморозки срок подписки не расходуется, но доступен только контент уровня Free. Заморозка снимается вручную или автоматически, когда дни закончатся."
   },
   {
     question: "Как работает возврат средств?",
@@ -123,7 +124,7 @@ const FAQ_ITEMS = [
   }
 ]
 
-export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initialArticleStats }: SubscriptionTabProps) {
+export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFreezeClick, initialArticleStats }: SubscriptionTabProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   const [articleStats, setArticleStats] = useState<any>(initialArticleStats || null)
   const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -325,7 +326,21 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
     }
   }
 
-  const subStyles = getSubscriptionStyles(profile.subscription_tier)
+  const frozenStyles = {
+    card: 'linear-gradient(165deg, #0f1a2a 0%, #0a1220 40%, #050a14 100%)',
+    pattern: 'rgba(34, 211, 238, 0.08)',
+    accent: 'text-cyan-400',
+    border: 'rgba(34, 211, 238, 0.3)',
+    badge: 'bg-cyan-950/90 border-cyan-500/20 text-cyan-50',
+    badgeDot: 'bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]',
+    glow: 'bg-cyan-500/10',
+    shimmer: 'rgba(34, 211, 238, 0.06)',
+    status: 'text-cyan-300',
+    btnPrimary: 'from-cyan-50 to-cyan-100 text-cyan-950 hover:from-white hover:to-cyan-50',
+    btnPrimaryIcon: 'text-cyan-800'
+  }
+
+  const subStyles = profile.is_frozen ? frozenStyles : getSubscriptionStyles(profile.subscription_tier)
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
@@ -382,6 +397,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
           <div className="sub-pattern"></div>
           <div className="sub-shine"></div>
           
+          {/* Frozen top badge */}
+          {profile.is_frozen && (
+            <span className="absolute -top-1 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-cyan-500 text-black text-[9px] font-black rounded-b-xl uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20 z-20 flex items-center gap-1.5 pointer-events-none">
+              <Snowflake className="w-3 h-3" />
+              Заморожена
+            </span>
+          )}
+
           {/* Decorative Ambient Orbs */}
           <div className={cn("absolute -right-10 -top-10 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-3xl", subStyles.glow)}></div>
           <div className={cn("absolute -left-10 bottom-0 w-40 h-40 rounded-full pointer-events-none opacity-10 blur-2xl", subStyles.glow)}></div>
@@ -401,22 +424,22 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                 </div>
               </div>
               
-              {/* Subscription Badge */}
-              <div className={cn(
-                "relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40",
-                !subscriptionActive && profile.subscription_tier !== 'free'
-                  ? "border-white/10 bg-white/5"
-                  : subStyles.badge
-              )}>
-                <span className={cn(
-                  "text-[9px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
-                  !subscriptionActive && profile.subscription_tier !== 'free' ? "text-white/30" : ""
+              {/* Status badge — only when frozen or expired */}
+              {(profile.is_frozen || (!subscriptionActive && profile.subscription_tier !== 'free')) && (
+                <div className={cn(
+                  "relative overflow-hidden border rounded-lg px-2.5 h-6 flex items-center justify-center bg-black/40",
+                  profile.is_frozen
+                    ? "border-cyan-500/30 bg-cyan-500/10"
+                    : "border-white/10 bg-white/5"
                 )}>
-                  {!subscriptionActive && profile.subscription_tier !== 'free'
-                    ? `${tierDisplayName} · Истекла`
-                    : tierDisplayName}
-                </span>
-              </div>
+                  <span className={cn(
+                    "text-[9px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
+                    profile.is_frozen ? "text-cyan-300" : "text-white/30"
+                  )}>
+                    {profile.is_frozen ? 'Заморожена' : `${tierDisplayName} · Истекла`}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Card Body: Stats (Left) & Actions (Right) */}
@@ -429,17 +452,21 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                   <span className="relative flex h-1.5 w-1.5">
                     <span className={cn(
                       "absolute inline-flex h-full w-full rounded-full opacity-75", 
+                      profile.is_frozen ? "bg-cyan-400/50" :
                       subscriptionActive ? "animate-ping " + subStyles.badgeDot : "bg-red-500/50"
                     )}></span>
                     <span className={cn(
                       "relative inline-flex rounded-full h-1.5 w-1.5", 
+                      profile.is_frozen ? "bg-cyan-400" :
                       subscriptionActive ? subStyles.badgeDot : "bg-red-500"
                     )}></span>
                   </span>
-                  <span className={cn("text-[11px] font-black tracking-[0.15em] uppercase font-montserrat", subStyles.status)}>
-                    {subscriptionActive ? 'Активна' : 'Неактивна'}
+                  <span className={cn("text-[11px] font-black tracking-[0.15em] uppercase font-montserrat", 
+                    profile.is_frozen ? "text-cyan-300" : subStyles.status
+                  )}>
+                    {profile.is_frozen ? 'На паузе' : subscriptionActive ? 'Активна' : 'Неактивна'}
                   </span>
-                  {subscriptionActive && profile.subscription_expires_at && (
+                  {subscriptionActive && !profile.is_frozen && profile.subscription_expires_at && (
                     <span className="text-[10px] text-white/40 font-bold font-montserrat lowercase">
                       до {format(new Date(profile.subscription_expires_at), 'd MMMM', { locale: ru })}
                     </span>
@@ -502,6 +529,22 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                       <History className="w-3 h-3 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
                       <span>Продлить</span>
                     </button>
+
+                    {/* Freeze Button (Secondary) — always visible */}
+                    {onFreezeClick && (
+                      <button 
+                        onClick={onFreezeClick}
+                        className={cn(
+                          "relative overflow-hidden text-[10px] font-black uppercase tracking-[0.15em] h-8 px-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 font-montserrat",
+                          profile.is_frozen
+                            ? "bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 hover:text-cyan-200"
+                            : "bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white group/btn3"
+                        )}
+                      >
+                        <Snowflake className={cn("w-3 h-3 transition-colors", profile.is_frozen ? "text-cyan-400" : "text-white/20 group-hover/btn3:text-cyan-400")} />
+                        <span>Заморозка</span>
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button 

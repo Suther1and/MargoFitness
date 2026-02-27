@@ -10,6 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Profile, Product, SubscriptionTier } from '@/types/database'
 import { TIER_LEVELS } from '@/types/database'
+import { getFreezeLimits } from '@/lib/constants/subscriptions'
 
 // ============================================
 // Типы
@@ -236,6 +237,25 @@ export async function processSuccessfulPayment(params: {
     }
   }
   
+  // Начислить freeze-токены по матрице лимитов
+  const freezeLimits = getFreezeLimits(tier, product.duration_months)
+  if (freezeLimits.tokens > 0 || freezeLimits.days > 0) {
+    if (action === 'purchase') {
+      updateData.freeze_tokens_total = freezeLimits.tokens
+      updateData.freeze_tokens_used = 0
+      updateData.freeze_days_total = freezeLimits.days
+      updateData.freeze_days_used = 0
+    } else {
+      updateData.freeze_tokens_total = (profile.freeze_tokens_total || 0) + freezeLimits.tokens
+      updateData.freeze_days_total = (profile.freeze_days_total || 0) + freezeLimits.days
+    }
+  } else if (action === 'purchase') {
+    updateData.freeze_tokens_total = 0
+    updateData.freeze_tokens_used = 0
+    updateData.freeze_days_total = 0
+    updateData.freeze_days_used = 0
+  }
+
   // Обновить профиль
   const { error } = await supabase
     .from('profiles')
@@ -323,6 +343,7 @@ export async function incrementFailedPaymentAttempts(
 /**
  * Выставить статус inactive при истечении подписки.
  * subscription_tier НЕ трогаем — он нужен для UI ("PRO · Истекла") и истории.
+ * Все freeze-лимиты обнуляются.
  */
 export async function expireSubscription(userId: string): Promise<boolean> {
   const supabase = await createClient()
@@ -332,6 +353,13 @@ export async function expireSubscription(userId: string): Promise<boolean> {
     .update({
       subscription_status: 'inactive',
       auto_renew_enabled: false,
+      is_frozen: false,
+      frozen_at: null,
+      frozen_until: null,
+      freeze_tokens_total: 0,
+      freeze_tokens_used: 0,
+      freeze_days_total: 0,
+      freeze_days_used: 0,
       updated_at: new Date().toISOString()
     })
     .eq('id', userId)

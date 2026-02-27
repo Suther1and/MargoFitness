@@ -2,6 +2,37 @@ import type { SubscriptionTier } from '@/types/database'
 
 export type SubscriptionLevel = 'FREE' | 'BASIC' | 'PRO' | 'ELITE';
 
+export interface FreezeLimits {
+  tokens: number;
+  days: number;
+}
+
+export const FREEZE_LIMITS: Record<SubscriptionTier, Record<number, FreezeLimits>> = {
+  free: { 1: { tokens: 0, days: 0 }, 3: { tokens: 0, days: 0 }, 6: { tokens: 0, days: 0 }, 12: { tokens: 0, days: 0 } },
+  basic: {
+    1: { tokens: 0, days: 0 },
+    3: { tokens: 1, days: 14 },
+    6: { tokens: 2, days: 35 },
+    12: { tokens: 4, days: 65 },
+  },
+  pro: {
+    1: { tokens: 0, days: 0 },
+    3: { tokens: 2, days: 14 },
+    6: { tokens: 4, days: 35 },
+    12: { tokens: 8, days: 90 },
+  },
+  elite: {
+    1: { tokens: 0, days: 0 },
+    3: { tokens: 2, days: 14 },
+    6: { tokens: 4, days: 35 },
+    12: { tokens: 8, days: 90 },
+  },
+}
+
+export function getFreezeLimits(tier: SubscriptionTier, durationMonths: number): FreezeLimits {
+  return FREEZE_LIMITS[tier]?.[durationMonths] || { tokens: 0, days: 0 }
+}
+
 export const WIDGET_LIMITS: Record<SubscriptionTier, number> = {
   free: 1,
   basic: 6,
@@ -65,6 +96,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionLevel, SubscriptionPlanDetai
       { text: 'Полный доступ к статьям', included: true },
       { text: '8 из 8 виджетов в трекере', included: true },
       { text: '10 привычек для отслеживания', included: true },
+      { text: 'Повышенное количество заморозок', included: true },
       { text: 'Полная статистика и аналитика', included: true },
       { text: 'Telegram коммьюнити', included: true },
     ],

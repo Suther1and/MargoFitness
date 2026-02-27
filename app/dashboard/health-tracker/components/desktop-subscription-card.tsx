@@ -8,9 +8,10 @@ interface DesktopSubscriptionCardProps {
   profile: Profile
   onRenewalClick: () => void
   onUpgradeClick: () => void
+  onFreezeClick?: () => void
 }
 
-export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClick }: DesktopSubscriptionCardProps) {
+export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClick, onFreezeClick }: DesktopSubscriptionCardProps) {
   const [daysLeft, setDaysLeft] = useState<number | null>(null)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
@@ -99,7 +100,12 @@ export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
             </svg>
             <span className="font-medium">Подписка</span>
           </div>
-          {subscriptionActive ? (
+          {profile.is_frozen ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] text-cyan-200 ring-1 ring-cyan-400/30">
+              <span className="relative h-1 w-1 rounded-full bg-cyan-400"></span>
+              На паузе
+            </span>
+          ) : subscriptionActive ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-200 ring-1 ring-emerald-400/30">
               <span className="relative h-1 w-1 rounded-full bg-emerald-400">
                 <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping"></span>
@@ -119,7 +125,7 @@ export function DesktopSubscriptionCard({ profile, onRenewalClick, onUpgradeClic
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-white font-oswald uppercase tracking-tight">{tierDisplayName}</h3>
               <p className="text-[10px] text-white/60 mt-0.5">
-                {subscriptionActive ? 'Активная' : 'Неактивна'}
+                {profile.is_frozen ? 'Заморожена' : subscriptionActive ? 'Активная' : 'Неактивна'}
               </p>
             </div>
             {daysLeft !== null && daysLeft > 0 && (

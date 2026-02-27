@@ -4,10 +4,20 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Product, SubscriptionTier, TIER_LEVELS, TIER_NAMES } from '@/types/database'
-import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Gift, Calendar } from 'lucide-react'
+import { Zap, CheckCircle2, ArrowRight, Sparkles, Trophy, Star, ArrowBigRightDash, Plus, Gift, Calendar, Snowflake } from 'lucide-react'
+import { getFreezeLimits } from '@/lib/constants/subscriptions'
 import { createClient } from '@/lib/supabase/client'
 import { SUBSCRIPTION_PLANS, SubscriptionLevel } from '@/lib/constants/subscriptions'
 import { cn } from '@/lib/utils'
+
+function pluralFreeze(n: number): string {
+  const abs = Math.abs(n) % 100
+  const last = abs % 10
+  if (abs >= 11 && abs <= 19) return 'заморозок'
+  if (last === 1) return 'заморозка'
+  if (last >= 2 && last <= 4) return 'заморозки'
+  return 'заморозок'
+}
 
 // Базовые цены за месяц (без скидок) - для конвертации
 const BASE_PRICES_PER_MONTH: Record<number, number> = {
@@ -603,7 +613,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                 </div>
 
                 {/* Правая панель */}
-                <div className="flex-1 px-6 pt-5 md:pt-7 pb-6 md:px-10 md:pb-10 flex flex-col min-h-0">
+                <div className="flex-1 px-6 pt-5 md:pt-5 pb-5 md:px-8 md:pb-6 flex flex-col min-h-0">
                   {availableTiersData.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
                       <div className="w-20 h-20 rounded-full bg-yellow-400/10 flex items-center justify-center ring-1 ring-yellow-400/20">
@@ -625,7 +635,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                     </div>
                   ) : (
                     <>
-                      <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-5 md:mb-5">
+                      <div className="flex p-1.5 bg-gradient-to-b from-white/[0.08] to-white/[0.04] rounded-2xl border border-white/10 mb-4 md:mb-4">
                         {availableTiersData.map(t => {
                           const isSelected = selectedTier === t.tier
                           const config = tierConfig[t.tier as keyof typeof tierConfig]
@@ -643,8 +653,8 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                       </div>
 
                       {!isFreeUser && (
-                        <div className="mb-5 md:mb-5">
-                          <div className="flex items-center justify-between mb-2 px-2">
+                        <div className="mb-4 md:mb-4">
+                          <div className="flex items-center justify-between mb-1.5 px-2">
                             <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                               <Zap className="w-3 h-3 text-emerald-400" />
                               <span className="text-[10px] md:text-[9px] font-bold text-emerald-400 uppercase tracking-tight">Smart Convert</span>
@@ -677,20 +687,20 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         </div>
                       )}
 
-                      <div className={cn("mb-5 md:mb-5", isFreeUser && "mt-4")}>
-                        <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-3 md:p-3 backdrop-blur-sm">
-                          <div className="grid grid-cols-2 gap-3 md:gap-3" key={`products-${selectedTier}`}>
+                      <div className={cn("mb-4 md:mb-4", isFreeUser && "mt-3")}>
+                        <div className="rounded-xl md:rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] ring-1 ring-white/10 p-2.5 md:p-3 backdrop-blur-sm">
+                          <div className="grid grid-cols-2 gap-2.5 md:gap-2.5" key={`products-${selectedTier}`}>
                             {products.map((p) => {
                               const isSelected = selectedProduct?.id === p.id
                               return (
                                 <button
                                   key={p.id}
                                   onClick={() => handleProductChange(p)}
-                                  className={`relative p-4 md:p-4 rounded-xl md:rounded-[22px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-white/10'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-white/20'} shadow-lg ${currentConfig?.shadow || ''}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
+                                  className={`relative p-3 md:p-3 rounded-xl md:rounded-[18px] text-left border transition-all duration-200 ${isSelected ? `bg-gradient-to-br ${currentConfig?.bg || 'bg-white/10'} border-white/20 ring-2 ${currentConfig?.ring || 'ring-white/20'} shadow-lg ${currentConfig?.shadow || ''}` : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 active:scale-[0.98]'}`}
                                   style={{ touchAction: 'manipulation' }}
                                 >
                                   {(p.discount_percentage || 0) > 0 && (
-                                    <span className={`absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ring-1 font-bold overflow-hidden ${
+                                    <span className={`absolute top-1.5 right-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] ring-1 font-bold overflow-hidden ${
                                       selectedTier === 'elite' ? 'bg-amber-500/20 text-amber-100 ring-amber-400/40' : 
                                       selectedTier === 'pro' ? 'bg-purple-500/20 text-purple-100 ring-purple-400/40' :
                                       'bg-amber-600/20 text-amber-100 ring-amber-600/40'
@@ -698,12 +708,28 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                       −{p.discount_percentage}%
                                     </span>
                                   )}
-                                  <p className={`text-[10px] font-bold uppercase mb-1 tracking-wider transition-colors ${isSelected ? currentConfig?.color : 'text-white/40'}`}>
+                                  <p className={`text-[10px] font-bold uppercase mb-0.5 tracking-wider transition-colors ${isSelected ? currentConfig?.color : 'text-white/40'}`}>
                                     {p.duration_months} мес.
                                   </p>
-                                  <p className="text-xl md:text-xl font-oswald font-bold text-white">
-                                    {p.price.toLocaleString('ru-RU')} <span className="text-sm md:text-sm text-white/50 font-normal">₽</span>
+                                  <p className="text-lg md:text-lg font-oswald font-bold text-white leading-tight">
+                                    {p.price.toLocaleString('ru-RU')} <span className="text-xs text-white/50 font-normal">₽</span>
                                   </p>
+                                  <div className="flex items-center justify-between mt-0.5">
+                                    <span className="text-[9px] text-white/25 font-medium">
+                                      {Math.round(p.price / (p.duration_months || 1)).toLocaleString('ru-RU')} ₽/мес
+                                    </span>
+                                    {selectedTier && (() => {
+                                      const fl = getFreezeLimits(selectedTier, p.duration_months || 1)
+                                      return fl.tokens > 0 ? (
+                                        <span className="flex items-center gap-0.5 text-cyan-400/40">
+                                          <span className="text-[8px] font-bold">{fl.tokens}</span>
+                                          <Snowflake className="w-2.5 h-2.5" />
+                                          <span className="text-[6px]">·</span>
+                                          <span className="text-[8px] font-bold">{fl.days} дн.</span>
+                                        </span>
+                                      ) : null
+                                    })()}
+                                  </div>
                                 </button>
                               )
                             })}
@@ -711,10 +737,10 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                         </div>
                       </div>
 
-                      <div className="mt-auto pt-4 md:pt-4 border-t border-white/5">
+                      <div className="mt-auto pt-3 md:pt-3 border-t border-white/5">
                         {isFreeUser ? (
-                          <div className="mb-4">
-                            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-5 flex items-center justify-between relative overflow-hidden">
+                          <div className="mb-3">
+                            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4 flex items-center justify-between relative overflow-hidden">
                               <div className={`absolute left-0 top-0 bottom-0 w-1 ${currentConfig?.bg?.replace('bg-', 'bg-') || 'bg-white/10'}`} />
                               
                               <div className="flex flex-col gap-1">
@@ -754,7 +780,7 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                             </div>
                           </div>
                         ) : (
-                          <div className="rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-4 md:p-4 relative backdrop-blur-sm mb-4 md:mb-4 overflow-hidden">
+                          <div className="rounded-xl md:rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] ring-1 ring-white/10 p-3 md:p-4 relative backdrop-blur-sm mb-3 md:mb-3 overflow-hidden">
                             <div className="relative z-10 flex items-center justify-between gap-3 md:gap-4">
                               <div className="flex flex-col">
                                 <p className="text-[10px] font-bold text-white/60 md:text-white/30 uppercase tracking-widest mb-1 leading-none">Итоговый срок:</p>
@@ -789,13 +815,24 @@ export function SubscriptionUpgradeModal({ open, onOpenChange, currentTier, user
                                 </div>
                               </div>
                             </div>
+                            {selectedProduct && selectedTier && (() => {
+                              const fl = getFreezeLimits(selectedTier, selectedProduct.duration_months || 1)
+                              return fl.tokens > 0 ? (
+                                <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/5">
+                                  <Snowflake className="w-3 h-3 text-cyan-400/60" />
+                                  <span className="text-[9px] font-bold text-cyan-400/60 uppercase tracking-wider">
+                                    +{fl.tokens} {pluralFreeze(fl.tokens)} · +{fl.days} дн.
+                                  </span>
+                                </div>
+                              ) : null
+                            })()}
                           </div>
                         )}
 
                         <button
                           onClick={() => selectedProduct && router.push(`/payment/${selectedProduct.id}?action=upgrade`)}
                           disabled={calculating || !selectedProduct}
-                          className={`w-full py-4 md:py-3.5 rounded-2xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${
+                          className={`w-full py-3 md:py-3 rounded-xl text-white font-bold text-sm md:text-xs uppercase tracking-widest shadow-lg transition-all duration-300 relative overflow-hidden group ${
                             selectedTier === 'pro' 
                               ? 'bg-gradient-to-r from-purple-600 to-purple-500 shadow-purple-500/25' 
                               : selectedTier === 'elite' 

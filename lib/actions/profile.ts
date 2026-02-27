@@ -18,12 +18,13 @@ export async function checkAndExpireSubscription(userId: string): Promise<void> 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('subscription_status, subscription_expires_at')
+    .select('subscription_status, subscription_expires_at, is_frozen')
     .eq('id', userId)
     .single()
 
   if (
     profile?.subscription_status === 'active' &&
+    !profile.is_frozen &&
     isSubscriptionExpired(profile.subscription_expires_at)
   ) {
     await expireSubscription(userId)

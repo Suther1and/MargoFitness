@@ -116,18 +116,22 @@ export function checkWorkoutAccess(
 }
 
 /**
- * Проверка активности подписки
+ * Проверка активности подписки.
+ * Замороженная подписка считается активной (дата истечения сдвинется при разморозке).
  */
 export function isSubscriptionActive(profile: Profile): boolean {
   if (profile.subscription_status !== 'active') {
     return false
   }
 
+  if (profile.is_frozen) return true
+
   return !isSubscriptionExpired(profile.subscription_expires_at)
 }
 
 /**
- * Получить количество дней до истечения подписки
+ * Получить количество дней до истечения подписки.
+ * При заморозке возвращает зафиксированный остаток на момент frozen_at.
  */
 export function getDaysUntilExpiration(profile: Profile): number | null {
   if (!profile.subscription_expires_at) {
@@ -135,9 +139,16 @@ export function getDaysUntilExpiration(profile: Profile): number | null {
   }
 
   const expirationDate = new Date(profile.subscription_expires_at)
+
+  if (profile.is_frozen && profile.frozen_at) {
+    const frozenAt = new Date(profile.frozen_at)
+    const diffTime = expirationDate.getTime() - frozenAt.getTime()
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays > 0 ? diffDays : 0
+  }
+
   const now = new Date()
   const diffTime = expirationDate.getTime() - now.getTime()
-  // Используем Math.round для честного отображения (округляем до ближайшего дня)
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
   return diffDays > 0 ? diffDays : 0
@@ -239,12 +250,13 @@ export function getAccessibleSessionNumbers(tier: SubscriptionTier): number[] {
 
 /**
  * Вычислить эффективный тир пользователя.
- * Если подписка неактивна или истекла — возвращает 'free'.
+ * Если подписка неактивна, истекла или заморожена — возвращает 'free'.
  * subscription_tier в БД не меняем, используем этот метод везде.
  */
 export function getEffectiveTier(profile: Profile | null): SubscriptionTier {
   if (!profile) return 'free'
   if (!isSubscriptionActive(profile)) return 'free'
+  if (profile.is_frozen) return 'free'
   return profile.subscription_tier
 }
 

@@ -562,8 +562,15 @@ export type Database = {
           created_at: string
           email: string | null
           failed_payment_attempts: number | null
+          freeze_days_total: number
+          freeze_days_used: number
+          freeze_tokens_total: number
+          freeze_tokens_used: number
+          frozen_at: string | null
+          frozen_until: string | null
           full_name: string | null
           id: string
+          is_frozen: boolean
           last_payment_date: string | null
           next_billing_date: string | null
           payment_method_id: string | null
@@ -587,8 +594,15 @@ export type Database = {
           created_at?: string
           email?: string | null
           failed_payment_attempts?: number | null
+          freeze_days_total?: number
+          freeze_days_used?: number
+          freeze_tokens_total?: number
+          freeze_tokens_used?: number
+          frozen_at?: string | null
+          frozen_until?: string | null
           full_name?: string | null
           id: string
+          is_frozen?: boolean
           last_payment_date?: string | null
           next_billing_date?: string | null
           payment_method_id?: string | null
@@ -612,8 +626,15 @@ export type Database = {
           created_at?: string
           email?: string | null
           failed_payment_attempts?: number | null
+          freeze_days_total?: number
+          freeze_days_used?: number
+          freeze_tokens_total?: number
+          freeze_tokens_used?: number
+          frozen_at?: string | null
+          frozen_until?: string | null
           full_name?: string | null
           id?: string
+          is_frozen?: boolean
           last_payment_date?: string | null
           next_billing_date?: string | null
           payment_method_id?: string | null
@@ -632,6 +653,44 @@ export type Database = {
           yandex_id?: string | null
         }
         Relationships: []
+      }
+      subscription_freezes: {
+        Row: {
+          id: string
+          user_id: string
+          started_at: string
+          ended_at: string | null
+          days_used: number
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          started_at?: string
+          ended_at?: string | null
+          days_used?: number
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          started_at?: string
+          ended_at?: string | null
+          days_used?: number
+          reason?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_freezes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_codes: {
         Row: {

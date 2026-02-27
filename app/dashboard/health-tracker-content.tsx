@@ -19,6 +19,7 @@ import {
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'
 import { SubscriptionRenewalModal } from '@/components/subscription-renewal-modal'
 import { SubscriptionUpgradeModal } from '@/components/subscription-upgrade-modal'
+import { SubscriptionFreezeModal } from '@/components/subscription-freeze-modal'
 import { ToastProvider } from '@/contexts/toast-context'
 import { ToastContainer } from '@/components/dashboard/universal-toast'
 
@@ -71,6 +72,7 @@ import { getArticleStats, getCachedArticleStats } from '@/lib/actions/admin-arti
 import { ARTICLE_REGISTRY } from '@/lib/config/articles'
 import { serializeDateRange } from './health-tracker/utils/query-utils'
 import { checkAndExpireSubscription } from '@/lib/actions/profile'
+import { checkAndAutoUnfreeze, ensureFreezeTokens } from '@/lib/actions/freeze-actions'
 import { checkArticleAccess, getEffectiveTier, getWidgetLimit, getHabitLimit, isSubscriptionActive } from '@/lib/access-control'
 import { logUserAuth } from '@/lib/actions/admin-user-extra'
 import { useAllAchievements } from './health-tracker/hooks/use-achievements'
@@ -175,6 +177,7 @@ function HealthTrackerInner({
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const [renewalModalOpen, setRenewalModalOpen] = useState(false)
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [freezeModalOpen, setFreezeModalOpen] = useState(false)
   const [initialUpgradeTier, setInitialUpgradeTier] = useState<any>(undefined)
   const [isBmiDialogOpen, setIsBmiDialogOpen] = useState(false)
 
@@ -251,7 +254,11 @@ function HealthTrackerInner({
           )
           .subscribe()
 
-        checkAndExpireSubscription(data.user.id).then(() => {
+        Promise.all([
+          checkAndExpireSubscription(data.user.id),
+          checkAndAutoUnfreeze(data.user.id),
+          ensureFreezeTokens(data.user.id),
+        ]).then(() => {
           import('@/lib/actions/profile').then(m => m.getCurrentProfile()).then(p => {
             if (p) setProfile(p)
           })
@@ -606,7 +613,7 @@ function HealthTrackerInner({
                       </div>
                     </div>
                     <div className="flex items-center gap-3 mt-[5px] mb-[5px]">
-                      {profile && <UnifiedHeaderCard profile={profile} onEditClick={() => setProfileDialogOpen(true)} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} onSubscriptionClick={() => handleTabChange('subscription' as any)} />}
+                      {profile && <UnifiedHeaderCard profile={profile} onEditClick={() => setProfileDialogOpen(true)} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} onSubscriptionClick={() => handleTabChange('subscription' as any)} onFreezeClick={() => setFreezeModalOpen(true)} />}
                     </div>
                   </div>
                 </div>
@@ -677,7 +684,7 @@ function HealthTrackerInner({
                         {activeTab === 'settings' && <motion.div key="settings-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SettingsTab userId={userId || ''} profile={profile} onBack={() => setActiveTab('overview')} selectedDate={selectedDate} onDateChange={setSelectedDate} isCalendarExpanded={isCalendarExpanded} setIsCalendarExpanded={setIsCalendarExpanded} activeSubTab={settingsSubTab} setActiveSubTab={setSettingsSubTab} isMobile={false} /></motion.div>}
                         {activeTab === 'stats' && <motion.div key="stats-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><StatsTab userId={userId || ''} periodType={statsPeriodType} dateRange={statsDateRange} data={data} onPeriodSelect={handleStatsPeriodSelect} /></motion.div>}
                         {activeTab === 'bonuses' && <motion.div key="bonuses-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><BonusesTab bonusStats={bonusStats} referralStats={referralStats} referralLink={referralLink} referralCode={referralCode} userId={userId || ''} referralAchievements={referralAchievements} /></motion.div>}
-                        {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} initialArticleStats={articleStats} /></motion.div>}
+                        {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} onFreezeClick={() => setFreezeModalOpen(true)} initialArticleStats={articleStats} /></motion.div>}
                         {activeTab === 'workouts' && <motion.div key="workouts-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><WorkoutsTab preloadedArticles={finalArticles} isArticlesLoading={isArticlesLoading} userId={userId || ''} initialTier={profile?.subscription_tier} fullProfile={profile} /></motion.div>}
                         {activeTab === 'goals' && <motion.div key="goals-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }} className="flex flex-col gap-6"><GoalsSummaryCard data={data} settings={settings} onNavigateToSettings={() => { setActiveTab('settings'); setSettingsSubTab('widgets'); }} />{activeWidgetIds.has('photos') && <DailyPhotosCard userId={userId || ''} selectedDate={selectedDate} />}</motion.div>}
                       </AnimatePresence>
@@ -734,6 +741,7 @@ function HealthTrackerInner({
             <ProfileEditDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} profile={profile} onSuccess={setProfile} />
             {profile.subscription_tier?.toUpperCase() !== 'FREE' && <SubscriptionRenewalModal open={renewalModalOpen} onOpenChange={setRenewalModalOpen} currentTier={profile.subscription_tier} currentExpires={profile.subscription_expires_at} userId={profile.id} />}
             <SubscriptionUpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} currentTier={getEffectiveTier(profile)} userId={profile.id} initialTier={initialUpgradeTier} onOpenRenewal={() => setRenewalModalOpen(true)} />
+            <SubscriptionFreezeModal open={freezeModalOpen} onOpenChange={setFreezeModalOpen} profile={profile} userId={profile.id} />
           </>
         )}
 
