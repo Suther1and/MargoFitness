@@ -40,7 +40,6 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionLevel, SubscriptionPlanDetai
       { text: 'Демо-интенсив', included: true },
       { text: '1 виджет в трекере', included: true },
       { text: '1 привычка для отслеживания', included: true },
-      { text: 'Статистика и аналитика', included: false },
       { text: 'Telegram коммьюнити', included: true }, // Пока доступно всем
     ],
   },

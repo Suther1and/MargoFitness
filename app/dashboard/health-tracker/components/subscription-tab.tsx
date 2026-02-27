@@ -38,7 +38,7 @@ const TIER_INFO = [
   { 
     id: 'basic', 
     name: 'Basic', 
-    price: '299₽', 
+    price: 'от 3400₽', 
     period: 'в месяц',
     color: 'from-orange-500/10 to-red-500/10',
     borderColor: 'border-orange-500/20',
@@ -57,7 +57,7 @@ const TIER_INFO = [
   { 
     id: 'pro', 
     name: 'Pro', 
-    price: '599₽', 
+    price: 'от 4250₽', 
     period: 'в месяц',
     color: 'from-purple-500/20 to-indigo-500/20',
     borderColor: 'border-purple-500/40',
@@ -77,7 +77,7 @@ const TIER_INFO = [
   { 
     id: 'elite', 
     name: 'Elite', 
-    price: '999₽', 
+    price: 'от 8500₽', 
     period: 'в месяц',
     color: 'from-yellow-500/10 to-amber-500/10',
     borderColor: 'border-yellow-500/20',
@@ -391,6 +391,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                       <span className="text-3xl font-black font-oswald text-white">{tier.price}</span>
                       <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest font-montserrat">/ {tier.period}</span>
                     </div>
+                    {tier.id !== 'free' && (
+                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest font-montserrat mt-0.5 italic">
+                        при оплате за 12 месяцев
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-auto relative z-10">
@@ -410,7 +415,14 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
                           : tier.buttonStyle
                       )}
                     >
-                      {isCurrent ? 'Продлить' : isLowerTier ? 'Твоя подписка лучше!' : (profile.subscription_tier === 'free' ? 'Улучшить' : tier.buttonText)}
+                      {(() => {
+                        if (isCurrent) return 'Продлить';
+                        if (isLowerTier) return 'Твоя подписка лучше!';
+                        if (profile.subscription_tier === 'free') {
+                          return tier.id === 'free' ? 'Улучшить' : 'Выбрать';
+                        }
+                        return 'Улучшить';
+                      })()}
                     </button>
                   </div>
                 </div>
