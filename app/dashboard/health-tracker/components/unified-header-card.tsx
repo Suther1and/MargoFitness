@@ -122,7 +122,8 @@ export function UnifiedHeaderCard({
   // Внешний контейнер — серый при expired, ледяной при заморозке, цветной при активной
   const styles = profile.is_frozen ? frozenStyles : getTierStyles(isExpired ? 'free' : profile.subscription_tier)
   // Внутренняя пилюля тарифа — всегда цвет реального тарифа, чтобы пользователь видел что потерял
-  const badgeStyles = getTierStyles(profile.subscription_tier)
+  // Но при заморозке она тоже должна быть синей (ледяной)
+  const badgeStyles = profile.is_frozen ? frozenStyles : getTierStyles(profile.subscription_tier)
 
   return (
     <motion.div 
