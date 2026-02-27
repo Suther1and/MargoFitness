@@ -392,7 +392,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
         </div>
 
         {/* Resource Usage Card */}
-        <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 shadow-sm relative overflow-hidden h-full">
+        <div className="lg:col-span-7 flex flex-col rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 pb-3 shadow-sm relative overflow-hidden h-full">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 pointer-events-none" />
           
           <div className="flex items-center justify-between mb-4 relative z-10">
