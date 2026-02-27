@@ -280,9 +280,14 @@ export function HealthTrackerContent({
 
   useEffect(() => {
     if (tabParam && ['overview', 'stats', 'workouts', 'goals', 'profile', 'settings', 'bonuses', 'subscription'].includes(tabParam)) {
+      // На десктопе вкладка profile не используется, редиректим на обзор
+      if (isDesktop && tabParam === 'profile') {
+        setActiveTab('overview')
+        return
+      }
       setActiveTab(tabParam as any)
     }
-  }, [tabParam])
+  }, [tabParam, isDesktop])
 
   const [overviewTab, setOverviewTab] = useState<'widgets' | 'habits'>('widgets')
   const [settingsSubTab, setSettingsSubTab] = useState<'widgets' | 'habits'>('widgets')
@@ -630,7 +635,6 @@ export function HealthTrackerContent({
                       {activeTab === 'bonuses' && <motion.div key="bonuses-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><BonusesTab bonusStats={bonusStats} referralStats={referralStats} referralLink={referralLink} referralCode={referralCode} userId={userId || ''} referralAchievements={referralAchievements} /></motion.div>}
                       {activeTab === 'subscription' && profile && <motion.div key="subscription-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><SubscriptionTab profile={profile} onRenewalClick={handleRenewalClick} onUpgradeClick={() => setUpgradeModalOpen(true)} /></motion.div>}
                       {activeTab === 'workouts' && <motion.div key="workouts-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><WorkoutsTab preloadedArticles={finalArticles} isArticlesLoading={isArticlesLoading} userId={userId || ''} initialTier={profile?.subscription_tier} fullProfile={profile} /></motion.div>}
-                      {activeTab === 'profile' && profile && <motion.div key="profile-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}><ProfileTab profile={profile} bonusStats={bonusStats} onProfileUpdate={setProfile} /></motion.div>}
                       {activeTab === 'goals' && <motion.div key="goals-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }} className="flex flex-col gap-6"><GoalsSummaryCard data={data} settings={settings} onNavigateToSettings={() => { setActiveTab('settings'); setSettingsSubTab('widgets'); }} />{activeWidgetIds.has('photos') && <DailyPhotosCard userId={userId || ''} selectedDate={selectedDate} />}</motion.div>}
                     </AnimatePresence>
                   </div>

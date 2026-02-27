@@ -50,9 +50,9 @@ export async function createPayment(
     const confirmationType = params.confirmationType || 'embedded'
     
     const returnUrl = process.env.NEXT_PUBLIC_YOOKASSA_RETURN_URL || `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
-    const finalReturnUrl = returnUrl.includes('tab=profile') 
+    const finalReturnUrl = returnUrl.includes('tab=subscription') 
       ? returnUrl 
-      : `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}tab=profile&payment=success`
+      : `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}tab=subscription&payment=success`
 
     const paymentData: ICreatePayment = {
       amount: {

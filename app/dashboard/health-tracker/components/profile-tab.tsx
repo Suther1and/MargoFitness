@@ -21,7 +21,8 @@ import {
   ArrowRight,
   History,
   ChevronLeft,
-  Award
+  Award,
+  Pencil
 } from 'lucide-react'
 import { Profile, UserBonus, CashbackLevel, calculateLevelProgress, CASHBACK_LEVELS } from '@/types/database'
 import { ProfileEditDialog } from '@/components/profile-edit-dialog'

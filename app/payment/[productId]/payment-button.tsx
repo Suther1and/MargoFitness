@@ -28,7 +28,7 @@ export default function PaymentButton({ productId, productName, amount }: Paymen
 
     if (result.success) {
       // Показываем успех и редиректим
-      router.push('/dashboard?payment=success')
+      router.push('/dashboard?tab=subscription&payment=success')
     } else {
       setError(result.error || 'Ошибка оплаты')
       setLoading(false)
