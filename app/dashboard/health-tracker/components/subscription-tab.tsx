@@ -7,39 +7,12 @@ import { Check, Settings, FileText, Verified, Sparkles, Star } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import { HABIT_LIMITS, WIDGET_LIMITS } from '@/lib/constants/subscriptions'
+import { HABIT_LIMITS, WIDGET_LIMITS, SUBSCRIPTION_PLANS } from '@/lib/constants/subscriptions'
 
 interface SubscriptionTabProps {
   profile: Profile
   onRenewalClick: () => void
   onUpgradeClick: () => void
-}
-
-const TIER_FEATURES = {
-  free: [
-    'Базовый трекер здоровья',
-    '1 привычка',
-    '1 виджет',
-  ],
-  basic: [
-    'Все возможности Free',
-    'До 6 привычек',
-    '6 виджетов',
-    'Расширенная статистика',
-  ],
-  pro: [
-    'Все возможности Basic',
-    'До 10 привычек',
-    'Все 8 виджетов',
-    'Персональные тренировки',
-  ],
-  elite: [
-    'Все возможности Pro',
-    'До 15 привычек',
-    'Личный тренер',
-    'Персональные планы питания',
-    'VIP поддержка 24/7',
-  ]
 }
 
 const TIER_INFO = [
@@ -50,18 +23,36 @@ const TIER_INFO = [
     period: 'навсегда',
     color: 'from-gray-500/10 to-gray-600/10',
     borderColor: 'border-white/10',
-    buttonStyle: 'border-2 border-white/10 text-white/60 hover:bg-white/5',
-    buttonText: 'Выбрать тариф'
+    buttonStyle: 'bg-white text-black hover:bg-neutral-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]',
+    buttonText: 'Твоя подписка лучше!',
+    planKey: 'FREE',
+    styles: {
+      card: 'linear-gradient(165deg, #171717 0%, #0a0a0a 40%, #000000 100%)',
+      pattern: 'rgba(255, 255, 255, 0.03)',
+      accent: 'text-white/60',
+      border: 'rgba(255, 255, 255, 0.1)',
+      badge: 'bg-white/5 border-white/10 text-white/40',
+      status: 'text-white/40',
+    }
   },
   { 
     id: 'basic', 
-    name: 'Starter', 
+    name: 'Basic', 
     price: '299₽', 
     period: 'в месяц',
     color: 'from-orange-500/10 to-red-500/10',
     borderColor: 'border-orange-500/20',
-    buttonStyle: 'bg-orange-500 text-black shadow-lg shadow-orange-500/20 hover:bg-orange-400',
-    buttonText: 'Выбрать тариф'
+    buttonStyle: 'bg-gradient-to-b from-orange-50 to-orange-100 text-orange-950 hover:from-white hover:to-orange-50 shadow-xl shadow-orange-500/10',
+    buttonText: 'Улучшить',
+    planKey: 'BASIC',
+    styles: {
+      card: 'linear-gradient(165deg, #2a1f18 0%, #1c130e 40%, #0f0805 100%)',
+      pattern: 'rgba(217, 119, 6, 0.1)',
+      accent: 'text-orange-400',
+      border: 'rgba(251, 146, 60, 0.4)',
+      badge: 'bg-[#2d1a0a]/90 border-white/10 text-orange-50',
+      status: 'text-orange-300',
+    }
   },
   { 
     id: 'pro', 
@@ -70,19 +61,37 @@ const TIER_INFO = [
     period: 'в месяц',
     color: 'from-purple-500/20 to-indigo-500/20',
     borderColor: 'border-purple-500/40',
-    buttonStyle: 'bg-purple-500 text-white shadow-lg shadow-purple-500/20 hover:bg-purple-400',
-    buttonText: 'Выбрать тариф',
-    isPopular: true
+    buttonStyle: 'bg-gradient-to-b from-purple-50 to-purple-100 text-purple-950 hover:from-white hover:to-purple-50 shadow-xl shadow-purple-500/10',
+    buttonText: 'Улучшить',
+    isPopular: true,
+    planKey: 'PRO',
+    styles: {
+      card: 'linear-gradient(165deg, #1a162a 0%, #0f0e1a 40%, #08070f 100%)',
+      pattern: 'rgba(168, 85, 247, 0.1)',
+      accent: 'text-purple-400',
+      border: 'rgba(168, 85, 247, 0.4)',
+      badge: 'bg-purple-950/90 border-white/10 text-purple-50',
+      status: 'text-purple-300',
+    }
   },
   { 
     id: 'elite', 
-    name: 'Enterprise', 
+    name: 'Elite', 
     price: '999₽', 
     period: 'в месяц',
     color: 'from-yellow-500/10 to-amber-500/10',
     borderColor: 'border-yellow-500/20',
-    buttonStyle: 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20 hover:bg-yellow-400',
-    buttonText: 'Связаться с нами'
+    buttonStyle: 'bg-gradient-to-b from-yellow-50 to-yellow-100 text-yellow-950 hover:from-white hover:to-yellow-50 shadow-xl shadow-yellow-500/10',
+    buttonText: 'Улучшить',
+    planKey: 'ELITE',
+    styles: {
+      card: 'linear-gradient(165deg, #2a2110 0%, #17140c 40%, #090805 100%)',
+      pattern: 'rgba(234, 179, 8, 0.1)',
+      accent: 'text-yellow-400',
+      border: 'rgba(234, 179, 8, 0.4)',
+      badge: 'bg-amber-950/90 border-white/10 text-amber-50',
+      status: 'text-yellow-300',
+    }
   },
 ]
 
@@ -335,61 +344,91 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
       <section>
         <h2 className="text-white text-xl font-bold mb-8 font-oswald uppercase tracking-wider">Сравнение тарифов</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
           {TIER_INFO.map((tier) => {
             const isCurrent = tier.id === profile.subscription_tier
-            const features = TIER_FEATURES[tier.id as keyof typeof TIER_FEATURES]
+            const planDetails = SUBSCRIPTION_PLANS[tier.planKey as keyof typeof SUBSCRIPTION_PLANS]
+            const features = planDetails.benefits
+            
+            // Определяем, является ли этот тариф ниже текущего активного уровня
+            const tierLevels: Record<string, number> = { free: 0, basic: 1, pro: 2, elite: 3 };
+            const currentLevel = tierLevels[profile.subscription_tier] || 0;
+            const thisLevel = tierLevels[tier.id] || 0;
+            const isLowerTier = thisLevel < currentLevel;
 
             return (
               <div key={tier.id} className="flex flex-col gap-6 group">
-                <div className={cn(
-                  "p-8 rounded-2xl bg-white/[0.03] border transition-all duration-500 relative flex flex-col gap-6",
-                  tier.borderColor,
-                  isCurrent ? "bg-white/[0.06] ring-1 " + tier.borderColor : "hover:bg-white/[0.05] hover:scale-[1.02]",
-                  tier.isPopular && "scale-105 shadow-2xl shadow-purple-500/10"
-                )}>
+                <div 
+                  className={cn(
+                    "p-6 rounded-2xl border transition-all duration-500 relative flex flex-col gap-4 overflow-hidden min-h-[220px]",
+                    isCurrent ? "ring-2 ring-white/20 shadow-2xl scale-[1.02]" : "hover:scale-[1.02] border-white/10"
+                  )}
+                  style={{ background: tier.styles.card }}
+                >
+                  {/* Pattern Overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{ 
+                      backgroundImage: `linear-gradient(45deg, ${tier.styles.pattern} 25%, transparent 25%, transparent 50%, ${tier.styles.pattern} 50%, ${tier.styles.pattern} 75%, transparent 75%, transparent)`,
+                      backgroundSize: '20px 20px'
+                    }}
+                  />
+
                   {isCurrent && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-emerald-500 text-black text-[9px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 z-10">
+                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-emerald-500 text-black text-[9px] font-black rounded-b-xl uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 z-10">
                       Текущий
                     </span>
                   )}
                   {tier.isPopular && !isCurrent && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-purple-500 text-white text-[9px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 z-10">
+                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-purple-500 text-white text-[9px] font-black rounded-b-xl uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 z-10">
                       Популярный
                     </span>
                   )}
                   
-                  <div className="relative">
-                    <h3 className="text-xl font-black font-oswald uppercase tracking-tight text-white/90">{tier.name}</h3>
-                    <div className="flex items-baseline gap-1 mt-2">
-                      <span className="text-4xl font-black font-oswald text-white">{tier.price}</span>
+                  <div className="relative z-10 pt-2">
+                    <h3 className="text-lg font-black font-oswald uppercase tracking-tight text-white/90">{tier.name}</h3>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-3xl font-black font-oswald text-white">{tier.price}</span>
                       <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest font-montserrat">/ {tier.period}</span>
                     </div>
                   </div>
 
-                  <button 
-                    disabled={isCurrent}
-                    onClick={() => tier.id === 'free' ? null : onUpgradeClick()}
-                    className={cn(
-                      "w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 font-montserrat",
-                      isCurrent 
-                        ? "bg-white/5 text-white/20 cursor-default border border-white/5" 
-                        : tier.buttonStyle
-                    )}
-                  >
-                    {isCurrent ? 'Активен' : tier.buttonText}
-                  </button>
+                  <div className="mt-auto relative z-10">
+                    <button 
+                      disabled={isLowerTier}
+                      onClick={() => {
+                        if (isCurrent) {
+                          onRenewalClick();
+                        } else if (!isLowerTier) {
+                          onUpgradeClick();
+                        }
+                      }}
+                      className={cn(
+                        "w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 font-montserrat",
+                        isLowerTier 
+                          ? "bg-white/5 text-white/20 cursor-default border border-white/5 opacity-50"
+                          : tier.buttonStyle
+                      )}
+                    >
+                      {isCurrent ? 'Продлить' : isLowerTier ? 'Твоя подписка лучше!' : (profile.subscription_tier === 'free' ? 'Улучшить' : tier.buttonText)}
+                    </button>
+                  </div>
                 </div>
 
                 <ul className="flex flex-col gap-4 px-2">
-                  {features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-[11px] font-bold text-white/40 font-montserrat leading-relaxed group-hover:text-white/60 transition-colors">
-                      {feature.includes('Все возможности') || feature.includes('Персональные') ? (
+                  {features.map((benefit, idx) => (
+                    <li key={idx} className={cn(
+                      "flex items-start gap-3 text-[11px] font-bold font-montserrat leading-relaxed transition-colors",
+                      benefit.included ? "text-white/60 group-hover:text-white/80" : "text-white/20"
+                    )}>
+                      {benefit.highlight ? (
                         <Star className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      ) : (
+                      ) : benefit.included ? (
                         <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 border border-white/10 rounded-full shrink-0 mt-0.5" />
                       )}
-                      {feature}
+                      <span className={cn(!benefit.included && "line-through opacity-50")}>{benefit.text}</span>
                     </li>
                   ))}
                 </ul>
