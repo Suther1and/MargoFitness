@@ -635,10 +635,10 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
               <div className="w-1.5 h-1.5 rounded-full bg-[#d4d4d4] shadow-[0_0_5px_rgba(255,255,255,0.2)]"></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Free</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#f97316] shadow-[0_0_5px_rgba(249,115,22,0.4)]"></div>
-              <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Basic</span>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#fb923c] shadow-[0_0_5px_rgba(251,146,60,0.4)]"></div>
+            <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Basic</span>
+          </div>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.4)]"></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30 font-montserrat">Pro</span>
