@@ -103,11 +103,11 @@ const EMPTY_STATS = {
 }
 
 export async function getArticleStats() {
-  const supabase = await createClient()
+  // Используем adminSupabase, так как unstable_cache не поддерживает cookies() внутри (которые есть в обычном createClient)
   const adminSupabase = createAdminClient()
 
   const [articlesResult, readsResult] = await Promise.all([
-    supabase.from("articles").select("display_status, is_new, is_updated, view_count, unique_view_count, access_level"),
+    adminSupabase.from("articles").select("display_status, is_new, is_updated, view_count, unique_view_count, access_level"),
     adminSupabase.from("user_article_progress" as any).select("article_id", { count: "exact", head: true }).eq("is_read", true)
   ])
 
