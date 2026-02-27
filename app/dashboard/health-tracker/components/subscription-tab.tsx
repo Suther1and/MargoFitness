@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Profile } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
-import { Check, Settings, FileText, Verified, Sparkles, Star } from 'lucide-react'
+import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -226,60 +226,145 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick }: Sub
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Current Plan Card */}
-          <div className="sub-card rounded-2xl p-8 flex flex-col justify-between min-h-[280px]">
+          <div className="sub-card rounded-[2rem] p-8 flex flex-col justify-between min-h-[300px]">
             <div className="sub-pattern"></div>
             <div className="sub-shine"></div>
             
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className={cn("size-14 rounded-2xl flex items-center justify-center text-white shrink-0 bg-black/40 border border-white/5 shadow-inner")}>
-                  <Verified className={cn("w-7 h-7", subStyles.status)} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] opacity-60 font-montserrat", subStyles.status)}>
-                      {subscriptionActive ? 'Активный тариф' : 'Тариф истек'}
+            {/* Decorative Ambient Orbs */}
+            <div className={cn("absolute -right-10 -top-10 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-3xl", subStyles.glow)}></div>
+            <div className={cn("absolute -left-10 bottom-0 w-40 h-40 rounded-full pointer-events-none opacity-10 blur-2xl", subStyles.glow)}></div>
+
+            <div className="relative z-10 flex flex-col h-full gap-8">
+              {/* Card Top: Title & Badge */}
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <div className={cn("p-2 rounded-xl bg-black/60 border border-white/5 shadow-sm")}>
+                    <Crown className={cn("w-5 h-5 opacity-80", subStyles.status)} />
+                  </div>
+                  <div>
+                    <span className={cn("text-[11px] font-black uppercase tracking-[0.2em] opacity-60 font-montserrat block mb-0.5", subStyles.status)}>Подписка</span>
+                    <p className="text-white text-3xl font-black font-oswald uppercase tracking-tight leading-none">
+                      {tierDisplayName}
                     </p>
-                    {subscriptionActive && (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[8px] font-black tracking-widest uppercase border border-emerald-500/20">
-                        Обновляется
+                  </div>
+                </div>
+                
+                {/* Subscription Badge */}
+                <div className={cn(
+                  "relative overflow-hidden border rounded-xl px-4 h-8 flex items-center justify-center bg-black/40",
+                  !subscriptionActive && profile.subscription_tier !== 'free'
+                    ? "border-white/10 bg-white/5"
+                    : subStyles.badge
+                )}>
+                  <span className={cn(
+                    "text-[11px] font-black tracking-[0.1em] relative z-10 uppercase font-montserrat leading-none",
+                    !subscriptionActive && profile.subscription_tier !== 'free' ? "text-white/30" : ""
+                  )}>
+                    {!subscriptionActive && profile.subscription_tier !== 'free'
+                      ? `${tierDisplayName} · Истекла`
+                      : tierDisplayName}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Body: Stats (Left) & Actions (Right) */}
+              <div className={cn("flex justify-between gap-4 mt-auto", subscriptionActive ? "items-start" : "items-end")}>
+                
+                {/* Left: Status & Duration */}
+                <div className="flex flex-col gap-2">
+                  {/* Status */}
+                  <div className="flex items-center gap-2.5 opacity-80">
+                    <span className="relative flex h-2 w-2">
+                      <span className={cn(
+                        "absolute inline-flex h-full w-full rounded-full opacity-75", 
+                        subscriptionActive ? "animate-ping " + subStyles.badgeDot : "bg-red-500/50"
+                      )}></span>
+                      <span className={cn(
+                        "relative inline-flex rounded-full h-2 w-2", 
+                        subscriptionActive ? subStyles.badgeDot : "bg-red-500"
+                      )}></span>
+                    </span>
+                    <span className={cn("text-[12px] font-black tracking-[0.15em] uppercase font-montserrat", subStyles.status)}>
+                      {subscriptionActive ? 'Активна' : 'Неактивна'}
+                    </span>
+                    {subscriptionActive && profile.subscription_expires_at && (
+                      <span className="text-[11px] text-white/40 font-bold font-montserrat lowercase">
+                        до {format(new Date(profile.subscription_expires_at), 'd MMMM', { locale: ru })}
                       </span>
                     )}
                   </div>
-                  <p className="text-white text-3xl font-black font-oswald uppercase tracking-tight">
-                    {tierDisplayName}
-                  </p>
+
+                  {/* Days Count or Inactive Message */}
+                  {subscriptionActive ? (
+                    <div className="flex items-end gap-4">
+                      <span className="text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/40 drop-shadow-2xl leading-none font-oswald">
+                        {daysLeft || 0}
+                      </span>
+                      <div className="flex flex-col pb-2">
+                        <span className="text-sm text-white/40 font-black leading-none uppercase font-montserrat">
+                          {(() => {
+                            const lastDigit = (daysLeft || 0) % 10
+                            const lastTwoDigits = (daysLeft || 0) % 100
+                            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'дней'
+                            if (lastDigit === 1) return 'день'
+                            if (lastDigit >= 2 && lastDigit <= 4) return 'дня'
+                            return 'дней'
+                          })()}
+                        </span>
+                        <span className="text-[10px] text-white/20 font-black leading-none mt-1.5 uppercase font-montserrat tracking-widest">осталось</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1.5 pt-2 pb-1">
+                      <span className="text-3xl font-black text-white/60 uppercase font-oswald leading-none tracking-tight">
+                        Подписка
+                      </span>
+                      <span className="text-xl font-bold text-white/30 uppercase font-oswald leading-none tracking-tight">
+                        не активна
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: Actions Stacked */}
+                <div className="flex flex-col gap-3 w-[180px]">
+                  {subscriptionActive ? (
+                    <>
+                      {/* Upgrade Button (Primary) */}
+                      <button 
+                        onClick={onUpgradeClick}
+                        className={cn(
+                          "relative bg-gradient-to-b border border-transparent text-[11px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                          subStyles.btnPrimary
+                        )}
+                      >
+                        <Sparkles className={cn("w-4 h-4", subStyles.btnPrimaryIcon)} />
+                        <span>Улучшить</span>
+                      </button>
+
+                      {/* Renew Button (Secondary) */}
+                      <button 
+                        onClick={onRenewalClick}
+                        className="relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[11px] font-black uppercase tracking-[0.15em] h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 transition-all group/btn2 active:scale-95 font-montserrat"
+                      >
+                        <History className="w-4 h-4 text-white/20 group-hover/btn2:text-white/60 transition-colors" />
+                        <span>Продлить</span>
+                      </button>
+                    </>
+                  ) : (
+                    <button 
+                      onClick={onUpgradeClick}
+                      className={cn(
+                        "relative bg-gradient-to-b border border-transparent text-[11px] font-black uppercase tracking-[0.15em] h-14 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group/btn font-montserrat",
+                        subStyles.btnPrimary
+                      )}
+                    >
+                      <ArrowRight className={cn("w-6 h-6 transition-transform group-hover:translate-x-1", subStyles.btnPrimaryIcon)} />
+                      <span>Выбрать подписку</span>
+                    </button>
+                  )}
                 </div>
               </div>
-
-              <div className="flex flex-col gap-1 mb-8">
-                <p className="text-white/40 text-xs font-bold uppercase tracking-widest font-montserrat">
-                  {subscriptionActive ? 'Следующее списание' : 'Подписка закончилась'}
-                </p>
-                <p className="text-white text-sm font-semibold">
-                  {profile.subscription_expires_at 
-                    ? format(new Date(profile.subscription_expires_at), 'd MMMM yyyy', { locale: ru })
-                    : '—'}
-                  {subscriptionActive && profile.subscription_tier !== 'free' && ' (599₽/мес)'}
-                </p>
-              </div>
-            </div>
-
-            <div className="relative z-10 grid grid-cols-2 gap-4">
-              <button 
-                onClick={onRenewalClick}
-                className={cn(
-                  "flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl font-montserrat bg-gradient-to-b",
-                  subStyles.btnPrimary
-                )}
-              >
-                <Settings className={cn("w-4 h-4", subStyles.btnPrimaryIcon)} />
-                Управлять
-              </button>
-              <button className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 text-white/60 font-black text-[11px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all border border-white/10 font-montserrat active:scale-95">
-                <FileText className="w-4 h-4 text-white/20" />
-                Чеки
-              </button>
             </div>
           </div>
 
