@@ -43,6 +43,11 @@ lerna-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# test/debug files
+check-*.ts
+check-*.js
+test-*.ts
+
 # cursor
 .cursor/
 

@@ -396,8 +396,20 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
                       actionLoading ? "opacity-50 cursor-not-allowed" : "hover:shadow-xl hover:brightness-110 active:scale-[0.98]"
                     )}
                   >
-                    <Snowflake className="w-4 h-4" />
-                    {actionLoading ? 'Замораживаем...' : 'Заморозить подписку'}
+                    {actionLoading ? (
+                      <>
+                        <Snowflake className="w-4 h-4 animate-spin" />
+                        <span>Замораживаем...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Заморозить подписку</span>
+                        <span className="flex items-center gap-1 opacity-90 ml-1">
+                          <span className="text-sm font-bold leading-none">−1</span>
+                          <Snowflake className="w-4 h-4 -translate-y-[1px]" />
+                        </span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>

@@ -535,7 +535,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                   Icon = ShoppingBag
                   iconColor = "text-emerald-400"
                   bgColor = "bg-emerald-500/5 border-emerald-500/10"
-                } else if (tx.type === 'referral_bonus' || tx.type === 'referral_income') {
+                } else if (tx.type === 'referral_bonus' || tx.type === 'referral_first') {
                   Icon = UserPlus
                   iconColor = "text-blue-400"
                   bgColor = "bg-blue-500/5 border-blue-500/10"
@@ -571,7 +571,7 @@ export function BonusesTab({ bonusStats, referralStats, referralLink, referralCo
                           {tx.description}
                         </p>
                         {(() => {
-                          if (tx.type !== 'referral_bonus' && tx.type !== 'referral_first' && tx.type !== 'referral_income') {
+                          if (tx.type !== 'referral_bonus' && tx.type !== 'referral_first') {
                             return null;
                           }
 

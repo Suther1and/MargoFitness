@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { Loader2, CheckCircle2, AlertCircle, Sparkles } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { PromoInput } from './promo-input'
 import { BonusSlider } from './bonus-slider'

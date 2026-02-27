@@ -169,6 +169,7 @@ export async function processSuccessfulPayment(params: {
     
     updateData = {
       subscription_status: 'active',
+      subscription_duration_months: product.duration_months,
       subscription_expires_at: expiresAt.toISOString(),
       next_billing_date: expiresAt.toISOString(),
       payment_method_id: paymentMethodId || profile.payment_method_id,
@@ -208,6 +209,7 @@ export async function processSuccessfulPayment(params: {
     updateData = {
       subscription_tier: tier,
       subscription_status: 'active',
+      subscription_duration_months: product.duration_months,
       subscription_expires_at: expiresAt.toISOString(),
       next_billing_date: expiresAt.toISOString(),
       payment_method_id: paymentMethodId || profile.payment_method_id,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { calculateMaxBonusUsage } from '@/lib/actions/bonuses'
+import { Sparkles } from 'lucide-react'
 
 interface BonusToggleProps {
   userId: string

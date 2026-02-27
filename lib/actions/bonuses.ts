@@ -206,6 +206,7 @@ export async function getBonusStats(userId: string): Promise<{
     levelData: ReturnType<typeof getCashbackLevelData>
     progress: ReturnType<typeof calculateLevelProgress>
     recentTransactions: BonusTransaction[]
+    hasMoreTransactions?: boolean
   }
   error?: string
 }> {

@@ -138,7 +138,7 @@ interface InlineNumberInputProps {
   onSave: (value: number) => Promise<void>
   min?: number
   max?: number
-  suffix?: string
+  suffix?: React.ReactNode
 }
 
 export function InlineNumberInput({ value, onSave, min, max, suffix }: InlineNumberInputProps) {
