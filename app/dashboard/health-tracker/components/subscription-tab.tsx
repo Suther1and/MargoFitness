@@ -175,13 +175,25 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
       return (
         <div 
           key={tier}
-          className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full z-20 border border-black/20"
+          className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center z-20"
           style={{ 
             left: `calc(${position}% - 4px)`,
-            backgroundColor: color,
-            boxShadow: `0 0 6px ${color}66`
           }}
-        />
+        >
+          <div 
+            className="w-2 h-2 rounded-full border border-black/20"
+            style={{ 
+              backgroundColor: color,
+              boxShadow: `0 0 6px ${color}66`
+            }}
+          />
+          <span 
+            className="absolute top-full mt-1 text-[7px] font-black font-montserrat opacity-40 leading-none"
+            style={{ color: color }}
+          >
+            {limits[tier as keyof typeof limits]}
+          </span>
+        </div>
       )
     })
   }
@@ -500,7 +512,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                   {WORKOUT_LIMITS[currentTierForProgress as keyof typeof WORKOUT_LIMITS] || 0} / 3
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full rounded-full bg-white/5 relative">
                 {/* Active Bar */}
                 <div 
                   className={cn(
@@ -531,7 +543,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                   {HABITS_HARDCODE[currentTierForProgress as keyof typeof HABITS_HARDCODE] || 1} / 15
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full rounded-full bg-white/5 relative">
                 {/* Active Bar */}
                 <div 
                   className={cn(
@@ -562,7 +574,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                   {WIDGETS_HARDCODE[currentTierForProgress as keyof typeof WIDGETS_HARDCODE] || 1} / 8
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full rounded-full bg-white/5 relative">
                 {/* Active Bar */}
                 <div 
                   className={cn(
@@ -593,7 +605,7 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, initi
                   {articleProgress.current} / {articleProgress.total}
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5 relative">
+              <div className="h-1.5 w-full rounded-full bg-white/5 relative">
                 {/* Active Bar */}
                 <div 
                   className={cn(
