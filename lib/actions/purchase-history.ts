@@ -84,22 +84,15 @@ export async function getUserPurchaseHistory(): Promise<{
       const promoCode = p.promo_code || meta.promoCode || meta.promo_code
       const promoData = promoCode ? promoMap.get(promoCode.toUpperCase()) : null
       
-      let promoPercent = promoData?.discount_type === 'percent' ? promoData.discount_value : null
+      let promoPercent: number | undefined = promoData?.discount_type === 'percent' ? promoData.discount_value : undefined
       if (!promoPercent) {
-        promoPercent = meta.promoPercent || meta.discount_percent || meta.promo_discount_percent || meta.discount_percentage
+        promoPercent = meta.promoPercent || meta.discount_percent || meta.promo_discount_percent || meta.discount_percentage || undefined
       }
 
       const promoDiscountAmount = meta.promoDiscount || meta.promo_discount || meta.promoDiscountAmount || 0
       
       // Берем bonusDiscount (фактически примененные шаги), если его нет - старые поля
-      let bonusUsed = 0;
-      if (meta.bonusDiscount !== undefined) {
-        bonusUsed = meta.bonusDiscount;
-      } else if (p.bonus_amount_used !== undefined && p.bonus_amount_used !== null) {
-        bonusUsed = p.bonus_amount_used;
-      } else {
-        bonusUsed = meta.bonusUsed || meta.bonus_amount_used || 0;
-      }
+      const bonusUsed = meta.bonusDiscount ?? p.bonus_amount_used ?? meta.bonusUsed ?? meta.bonus_amount_used ?? 0
       
       const action = p.action || meta.action || 'purchase'
 
