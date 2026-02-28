@@ -440,6 +440,7 @@ function WorkoutCard({ session, onClick, profile }: { session: WorkoutSessionWit
   const isDemo = session.is_demo || session.required_tier === 'free'
   const isPro = session.required_tier === 'pro'
   const isCompleted = session.isCompleted
+  const isFrozen = profile?.is_frozen || false
 
   return (
     <button 
@@ -447,7 +448,9 @@ function WorkoutCard({ session, onClick, profile }: { session: WorkoutSessionWit
       className={cn(
         "relative group overflow-hidden rounded-[2.5rem] border transition-all duration-500 text-left w-full",
         isLocked 
-          ? "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04] cursor-pointer" 
+          ? isFrozen
+            ? "bg-white/[0.02] border-cyan-500/20 hover:border-cyan-500/40 hover:bg-cyan-500/5 cursor-pointer"
+            : "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04] cursor-pointer"
           : isCompleted || isDemo
             ? "bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40"
             : "bg-white/[0.03] border-white/10 hover:border-cyan-500/30 hover:bg-white/[0.05] shadow-xl hover:shadow-cyan-500/10",
@@ -467,12 +470,14 @@ function WorkoutCard({ session, onClick, profile }: { session: WorkoutSessionWit
             <div className={cn(
               "w-10 h-10 rounded-2xl flex items-center justify-center border transition-colors",
               isLocked 
-                ? "bg-white/5 border-white/10" 
+                ? isFrozen
+                  ? "bg-cyan-500/10 border-cyan-500/20"
+                  : "bg-white/5 border-white/10"
                 : isCompleted || isDemo 
                   ? "bg-emerald-500/10 border-emerald-500/20" 
                   : "bg-cyan-500/10 border-cyan-500/20"
             )}>
-              {isLocked ? <Lock className="size-5 text-white/20" /> : isCompleted || isDemo ? <Sparkles className="size-5 text-emerald-400" /> : <Dumbbell className="size-5 text-cyan-400" />}
+              {isLocked ? <Lock className={cn("size-5", isFrozen ? "text-cyan-400" : "text-white/20")} /> : isCompleted || isDemo ? <Sparkles className="size-5 text-emerald-400" /> : <Dumbbell className="size-5 text-cyan-400" />}
             </div>
             <div>
               <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-none mb-1">
@@ -516,7 +521,12 @@ function WorkoutCard({ session, onClick, profile }: { session: WorkoutSessionWit
 
         <div className="mt-8">
           {isLocked ? (
-            <div className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+            <div className={cn(
+              "w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all",
+              isFrozen
+                ? "bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50"
+                : "bg-white/5 border border-white/10 text-white/60 group-hover:bg-white/10 group-hover:border-white/20"
+            )}>
               Открыть доступ
               <ChevronRight className="size-4" />
             </div>

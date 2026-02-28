@@ -192,8 +192,13 @@ function HealthTrackerInner({
   
   useEffect(() => {
     const handleOpenUpgrade = (e: any) => {
-      if (e.detail?.tier) setInitialUpgradeTier(e.detail.tier)
-      setUpgradeModalOpen(true)
+      // Если подписка заморожена, открываем модал разморозки вместо апгрейда
+      if (profile?.is_frozen) {
+        setFreezeModalOpen(true)
+      } else {
+        if (e.detail?.tier) setInitialUpgradeTier(e.detail.tier)
+        setUpgradeModalOpen(true)
+      }
     }
     window.addEventListener('open-upgrade-modal', handleOpenUpgrade)
 
@@ -216,7 +221,7 @@ function HealthTrackerInner({
       window.removeEventListener('open-upgrade-modal', handleOpenUpgrade)
       window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
     }
-  }, [userId, queryClient])
+  }, [userId, queryClient, profile?.is_frozen])
   
   const { data: articleStats } = useQuery({
     queryKey: ['article-stats'],

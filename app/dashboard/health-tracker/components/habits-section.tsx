@@ -464,6 +464,7 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
         {/* LOCKED STATE — заменяет всю форму при достижении лимита */}
         {activeHabitsCount >= MAX_ACTIVE_HABITS && (() => {
           const chips = getUpgradeChips(effectiveTier, HABIT_LIMITS)
+          const isFrozen = profile?.is_frozen || false
           const chipColors: Record<string, string> = {
             basic: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
             pro: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
@@ -478,8 +479,18 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
               {/* Desktop: горизонтальный layout */}
               <div className="hidden md:flex items-center gap-6 h-[68px]">
                 <div className="flex items-center gap-3 shrink-0">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 group-hover/lockedform:bg-amber-500/15 transition-colors">
-                    <Lock className="w-4 h-4 text-amber-400/70 group-hover/lockedform:text-amber-400 transition-colors" strokeWidth={2} />
+                  <div className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-xl border transition-colors",
+                    isFrozen 
+                      ? "bg-cyan-500/10 border-cyan-500/20 group-hover/lockedform:bg-cyan-500/15"
+                      : "bg-amber-500/10 border-amber-500/20 group-hover/lockedform:bg-amber-500/15"
+                  )}>
+                    <Lock className={cn(
+                      "w-4 h-4 transition-colors",
+                      isFrozen
+                        ? "text-cyan-400/70 group-hover/lockedform:text-cyan-400"
+                        : "text-amber-400/70 group-hover/lockedform:text-amber-400"
+                    )} strokeWidth={2} />
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Лимит достигнут</p>
@@ -497,16 +508,29 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
                   </div>
                 )}
 
-                <div className="ml-auto shrink-0 h-[46px] px-8 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest bg-white/5 text-amber-400/80 border border-amber-500/20 group-hover/lockedform:bg-amber-500/10 group-hover/lockedform:text-amber-400 transition-all">
+                <div className={cn(
+                  "ml-auto shrink-0 h-[46px] px-8 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest border transition-all",
+                  isFrozen
+                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 group-hover/lockedform:bg-cyan-500/15 group-hover/lockedform:border-cyan-500/40"
+                    : "bg-white/5 text-amber-400/80 border-amber-500/20 group-hover/lockedform:bg-amber-500/10 group-hover/lockedform:text-amber-400"
+                )}>
                   <Lock className="w-3.5 h-3.5" />
-                  Улучшить тариф
+                  {isFrozen ? 'Разморозить' : 'Улучшить тариф'}
                 </div>
               </div>
 
               {/* Mobile: компактный вертикальный layout */}
               <div className="md:hidden flex items-center gap-4 py-1">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
-                  <Lock className="w-4 h-4 text-amber-400/70" strokeWidth={2} />
+                <div className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-xl border shrink-0",
+                  isFrozen
+                    ? "bg-cyan-500/10 border-cyan-500/20"
+                    : "bg-amber-500/10 border-amber-500/20"
+                )}>
+                  <Lock className={cn(
+                    "w-4 h-4",
+                    isFrozen ? "text-cyan-400/70" : "text-amber-400/70"
+                  )} strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Лимит: {activeHabitsCount}/{MAX_ACTIVE_HABITS}</p>
@@ -520,8 +544,11 @@ export function HabitsSection({ userId, profile }: { userId: string | null; prof
                     </div>
                   )}
                 </div>
-                <div className="shrink-0 text-[9px] font-black uppercase tracking-wider text-amber-400/70 whitespace-nowrap">
-                  Улучшить →
+                <div className={cn(
+                  "shrink-0 text-[9px] font-black uppercase tracking-wider whitespace-nowrap",
+                  isFrozen ? "text-cyan-400/70" : "text-amber-400/70"
+                )}>
+                  {isFrozen ? 'Разморозить →' : 'Улучшить →'}
                 </div>
               </div>
             </div>
