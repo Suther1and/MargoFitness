@@ -91,6 +91,8 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
       const result = await unfreezeSubscription(userId)
       if (result.success) {
         window.dispatchEvent(new CustomEvent('subscription-updated'))
+        // Закрываем модал после успешной разморозки
+        onOpenChange(false)
       } else {
         setError(result.error || 'Не удалось разморозить')
       }
