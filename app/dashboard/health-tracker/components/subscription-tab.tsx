@@ -3,13 +3,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Profile, Article } from '@/types/database'
 import { getTierDisplayName, getDaysUntilExpiration, isSubscriptionActive, getEffectiveTier } from '@/lib/access-control'
-import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen, ChevronDown, Receipt, HelpCircle, Snowflake, Play } from 'lucide-react'
+import { Check, Settings, FileText, Verified, Sparkles, Star, History, Crown, ArrowRight, BookOpen, ChevronDown, Receipt, HelpCircle, Snowflake, Play, ShoppingBag, RefreshCw, ArrowUpCircle, Tag, Gift } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { HABIT_LIMITS, WIDGET_LIMITS, SUBSCRIPTION_PLANS } from '@/lib/constants/subscriptions'
 import { getArticles } from '@/lib/actions/articles'
 import { getArticleStats, getCachedArticleStats } from '@/lib/actions/admin-articles'
+import { getUserPurchaseHistory, type PurchaseHistoryItem } from '@/lib/actions/purchase-history'
 
 interface SubscriptionTabProps {
   profile: Profile
@@ -99,11 +100,16 @@ const TIER_INFO = [
   },
 ]
 
-const MOCK_PURCHASES = [
-  { id: 1, plan: 'Elite', date: '12 Октября 2023', amount: 8500, status: 'Оплачено' },
-  { id: 2, plan: 'Pro', date: '12 Сентября 2023', amount: 4250, status: 'Оплачено' },
-  { id: 3, plan: 'Basic', date: '12 Августа 2023', amount: 3400, status: 'Оплачено' },
-]
+function getActionIcon(action: 'purchase' | 'renewal' | 'upgrade') {
+  switch (action) {
+    case 'upgrade':
+      return { Icon: ArrowUpCircle, bg: 'bg-purple-500/10', text: 'text-purple-400', label: 'Апгрейд' }
+    case 'renewal':
+      return { Icon: RefreshCw, bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Продление' }
+    default:
+      return { Icon: ShoppingBag, bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Покупка' }
+  }
+}
 
 const FAQ_ITEMS = [
   {
@@ -129,6 +135,9 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
   const [articleStats, setArticleStats] = useState<any>(initialArticleStats || null)
   const [isDataLoaded, setIsDataLoaded] = useState(false)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
+  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([])
+  const [openPurchaseId, setOpenPurchaseId] = useState<string | null>(null)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   
   const tierDisplayName = getTierDisplayName(profile.subscription_tier)
   const subscriptionActive = isSubscriptionActive(profile)
@@ -140,7 +149,11 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
     // Всегда запускаем анимацию с задержкой при монтировании компонента
     const timer = setTimeout(() => setIsDataLoaded(true), 150)
 
-    // Если статистики нет, загружаем её
+    return () => clearTimeout(timer)
+  }, [profile])
+
+  // Загружаем статистику статей отдельно
+  useEffect(() => {
     if (!articleStats) {
       const loadStats = async () => {
         const { data } = await getCachedArticleStats()
@@ -148,9 +161,36 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
       }
       loadStats()
     }
+  }, []) // Загружаем только один раз
 
-    return () => clearTimeout(timer)
-  }, [profile, initialArticleStats])
+  // Загружаем историю покупок отдельно и только один раз
+  useEffect(() => {
+    let cancelled = false
+    
+    const loadPurchaseHistory = async () => {
+      setIsLoadingHistory(true)
+      try {
+        const result = await getUserPurchaseHistory()
+        if (!cancelled && result.success && result.data) {
+          setPurchaseHistory(result.data)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Error loading purchase history:', error)
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingHistory(false)
+        }
+      }
+    }
+    
+    loadPurchaseHistory()
+
+    return () => {
+      cancelled = true
+    }
+  }, []) // Загружаем только один раз при монтировании
 
   // Константы для лимитов (Hardcode по ТЗ)
   const WORKOUT_LIMITS = { free: 0, basic: 2, pro: 3, elite: 3 }
@@ -855,51 +895,232 @@ export function SubscriptionTab({ profile, onRenewalClick, onUpgradeClick, onFre
               </div>
               <h3 className="text-base font-bold text-white font-oswald uppercase tracking-tight">История покупок</h3>
             </div>
-            <button className="text-[9px] text-white/40 hover:text-white font-bold uppercase tracking-widest transition-colors">
-              Смотреть все
-            </button>
+            {purchaseHistory.length > 5 && (
+              <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest">
+                {purchaseHistory.length} покупок
+              </span>
+            )}
           </div>
-          <div className="w-full overflow-hidden">
-            <div className="overflow-x-auto scrollbar-none">
-              <table className="w-full text-left text-xs min-w-[450px] md:min-w-0">
-                <thead className="bg-white/[0.01] text-[9px] uppercase text-white/20 font-bold tracking-[0.2em]">
-                  <tr>
-                    <th className="px-6 py-3.5">Тариф</th>
-                    <th className="px-6 py-3.5">Дата</th>
-                    <th className="px-6 py-3.5">Статус</th>
-                    <th className="px-6 py-3.5 text-right">Сумма</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.02]">
-                  {MOCK_PURCHASES.map((purchase) => (
-                    <tr key={purchase.id} className="hover:bg-white/[0.01] transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
+          <div className="flex-1 overflow-y-auto max-h-[500px]">
+            {isLoadingHistory ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent" />
+              </div>
+            ) : purchaseHistory.length > 0 ? (
+              <div className="space-y-0">
+                {purchaseHistory.map((purchase) => {
+                  const actionInfo = getActionIcon(purchase.action)
+                  const isOpen = openPurchaseId === purchase.id
+                  
+                  return (
+                    <div
+                      key={purchase.id}
+                      className="border-b border-white/[0.04] last:border-0"
+                    >
+                      {/* Purchase Row */}
+                      <button
+                        onClick={() => setOpenPurchaseId(isOpen ? null : purchase.id)}
+                        className="w-full flex items-center gap-3 px-6 py-4 hover:bg-white/[0.02] transition-colors group text-left"
+                      >
+                        {/* Icon + Action Label */}
+                        <div className="flex flex-col items-center gap-1 shrink-0">
                           <div className={cn(
-                            "w-2 h-2 rounded-full",
-                            purchase.plan === 'Elite' ? "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" :
-                            purchase.plan === 'Pro' ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" :
-                            "bg-orange-500 shadow-[0_0_8px_rgba(251,146,60,0.6)]"
-                          )} />
-                          <span className="font-bold text-white font-oswald tracking-wide">{purchase.plan}</span>
+                            "w-8 h-8 rounded-lg flex items-center justify-center",
+                            actionInfo.bg,
+                            actionInfo.text
+                          )}>
+                            <actionInfo.Icon className="w-4 h-4" />
+                          </div>
+                          <span className="text-[8px] font-black uppercase tracking-wider text-white/30">
+                            {actionInfo.label}
+                          </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-white/40 font-medium font-montserrat text-[10px]">{purchase.date}</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border bg-emerald-500/5 text-emerald-400/60 border-emerald-500/10">
-                          {purchase.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="font-oswald text-sm font-bold text-white">
-                          {purchase.amount.toLocaleString('ru-RU')} ₽
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
+                        {/* Plan Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              purchase.tier === 'Elite' ? "bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.6)]" :
+                              purchase.tier === 'Pro' ? "bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.6)]" :
+                              "bg-orange-500 shadow-[0_0_6px_rgba(251,146,60,0.6)]"
+                            )} />
+                            <span className="font-bold text-white font-oswald tracking-wide text-sm">
+                              {purchase.tier}
+                            </span>
+                            <span className="text-[10px] text-white/30 font-montserrat">
+                              {purchase.product_name}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-white/40 font-medium font-montserrat">
+                            {format(new Date(purchase.created_at), 'd MMMM yyyy, HH:mm', { locale: ru })}
+                          </div>
+                        </div>
+
+                        {/* Amount + Expand Icon */}
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <div className="font-oswald text-base font-bold text-emerald-400 tabular-nums">
+                              {purchase.actual_paid_amount.toLocaleString('ru-RU')} ₽
+                            </div>
+                            {purchase.base_price > purchase.actual_paid_amount && (
+                              <div className="text-[10px] text-white/25 line-through tabular-nums">
+                                {purchase.base_price.toLocaleString('ru-RU')} ₽
+                              </div>
+                            )}
+                          </div>
+                          <ChevronDown className={cn(
+                            "w-4 h-4 text-white/30 transition-transform",
+                            isOpen && "rotate-180"
+                          )} />
+                        </div>
+                      </button>
+
+                      {/* Expanded Details */}
+                      <div className={cn(
+                        "grid transition-all duration-300 ease-in-out overflow-hidden",
+                        isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      )}>
+                        <div className="min-h-0">
+                          <div className="px-6 pb-4 space-y-3 bg-white/[0.01]">
+                            {/* Detailed Info Grid */}
+                            <div className="grid grid-cols-2 gap-3 pt-3">
+                              {/* Promo Code */}
+                              {purchase.promo_code && (
+                                <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Tag className="w-3 h-3 text-purple-400/60" />
+                                    <span className="text-[9px] text-purple-400/50 font-bold uppercase tracking-wider">
+                                      Промокод
+                                    </span>
+                                  </div>
+                                  <div className="text-sm font-bold text-purple-300 font-mono">
+                                    {purchase.promo_code}
+                                  </div>
+                                  {purchase.promo_percent && (
+                                    <div className="text-[10px] text-purple-400/60 mt-1">
+                                      Скидка: {purchase.promo_percent}%
+                                    </div>
+                                  )}
+                                  {purchase.promo_discount_amount && purchase.promo_discount_amount > 0 && (
+                                    <div className="text-[10px] text-purple-400/60 mt-0.5">
+                                      Сэкономлено: {purchase.promo_discount_amount.toLocaleString('ru-RU')} ₽
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Bonus Steps Used */}
+                              {purchase.bonus_amount_used && purchase.bonus_amount_used > 0 && (
+                                <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Gift className="w-3 h-3 text-amber-400/60" />
+                                    <span className="text-[9px] text-amber-400/50 font-bold uppercase tracking-wider">
+                                      Шаги использованы
+                                    </span>
+                                  </div>
+                                  <div className="text-sm font-bold text-amber-300 tabular-nums">
+                                    {purchase.bonus_amount_used.toLocaleString('ru-RU')} шагов
+                                  </div>
+                                  {purchase.bonus_percent_of_total && purchase.bonus_percent_of_total > 0 && (
+                                    <div className="text-[10px] text-amber-400/60 mt-1">
+                                      {purchase.bonus_percent_of_total}% от стоимости
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Period Discount */}
+                              {purchase.period_discount && purchase.period_discount > 0 && (
+                                <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Sparkles className="w-3 h-3 text-blue-400/60" />
+                                    <span className="text-[9px] text-blue-400/50 font-bold uppercase tracking-wider">
+                                      Скидка за период
+                                    </span>
+                                  </div>
+                                  <div className="text-sm font-bold text-blue-300 tabular-nums">
+                                    {purchase.period_discount.toLocaleString('ru-RU')} ₽
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Purchased Days */}
+                              {purchase.purchased_days && (
+                                <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Crown className="w-3 h-3 text-emerald-400/60" />
+                                    <span className="text-[9px] text-emerald-400/50 font-bold uppercase tracking-wider">
+                                      Период подписки
+                                    </span>
+                                  </div>
+                                  <div className="text-sm font-bold text-emerald-300 tabular-nums">
+                                    {purchase.purchased_days} дней
+                                  </div>
+                                  {purchase.purchased_days >= 30 && (
+                                    <div className="text-[10px] text-emerald-400/60 mt-1">
+                                      ≈ {Math.floor(purchase.purchased_days / 30)} мес.
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Summary */}
+                            <div className="pt-2 border-t border-white/[0.06] text-[10px] text-white/40 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Базовая стоимость:</span>
+                                <span className="text-white/50 tabular-nums">
+                                  {purchase.base_price.toLocaleString('ru-RU')} ₽
+                                </span>
+                              </div>
+                              {purchase.promo_discount_amount && purchase.promo_discount_amount > 0 && (
+                                <div className="flex justify-between text-purple-400/60">
+                                  <span>Промокод:</span>
+                                  <span className="tabular-nums">
+                                    -{purchase.promo_discount_amount.toLocaleString('ru-RU')} ₽
+                                  </span>
+                                </div>
+                              )}
+                              {purchase.period_discount && purchase.period_discount > 0 && (
+                                <div className="flex justify-between text-blue-400/60">
+                                  <span>Скидка за период:</span>
+                                  <span className="tabular-nums">
+                                    -{purchase.period_discount.toLocaleString('ru-RU')} ₽
+                                  </span>
+                                </div>
+                              )}
+                              {purchase.bonus_amount_used && purchase.bonus_amount_used > 0 && (
+                                <div className="flex justify-between text-amber-400/60">
+                                  <span>Бонусы:</span>
+                                  <span className="tabular-nums">
+                                    -{purchase.bonus_amount_used.toLocaleString('ru-RU')} шагов
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex justify-between pt-1.5 border-t border-white/[0.04] font-bold">
+                                <span className="text-white/60">Итого оплачено:</span>
+                                <span className="text-emerald-400 tabular-nums">
+                                  {purchase.actual_paid_amount.toLocaleString('ru-RU')} ₽
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                  <Receipt className="w-6 h-6 text-white/20" />
+                </div>
+                <p className="text-sm text-white/40">История покупок пуста</p>
+                <p className="text-xs text-white/20 mt-1">Совершите первую покупку, чтобы увидеть историю</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -78,8 +78,20 @@ export function PaymentPageNewClient({
   }
 
   const handlePayment = async () => {
+    // Ждем завершения расчета если он идет
+    if (loadingCalc) {
+      console.log('[Payment] Waiting for calculation to complete...')
+      return
+    }
+
     if (!calculation) {
       setError('Ошибка расчета суммы')
+      return
+    }
+
+    // Проверка минимальной суммы
+    if (calculation.finalPrice < 1) {
+      setError('Минимальная сумма платежа - 1 рубль')
       return
     }
 
