@@ -87,8 +87,18 @@ export async function freezeSubscription(userId: string): Promise<{
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.id !== userId) {
-      return { success: false, error: 'Unauthorized' }
+    
+    // Проверка: либо сам пользователь, либо админ
+    if (user?.id !== userId) {
+      const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id || '')
+        .single()
+      
+      if (!adminProfile || adminProfile.role !== 'admin') {
+        return { success: false, error: 'Unauthorized' }
+      }
     }
 
     const { data: profile, error: profileError } = await supabase
@@ -182,8 +192,18 @@ export async function unfreezeSubscription(userId: string): Promise<{
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.id !== userId) {
-      return { success: false, error: 'Unauthorized' }
+    
+    // Проверка: либо сам пользователь, либо админ
+    if (user?.id !== userId) {
+      const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id || '')
+        .single()
+      
+      if (!adminProfile || adminProfile.role !== 'admin') {
+        return { success: false, error: 'Unauthorized' }
+      }
     }
 
     const { data: profile, error: profileError } = await supabase

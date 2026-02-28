@@ -7,7 +7,6 @@ import { UserAvatar } from '@/components/user-avatar'
 import { cn } from '@/lib/utils'
 import { useState, useCallback, useEffect } from 'react'
 import { UserDetailsSheet } from './user-details-sheet'
-import { Sparkles } from 'lucide-react'
 
 interface UserTableRowProps {
   user: any
@@ -210,7 +209,6 @@ export function UserTableRow({ user, onOpenDetails }: UserTableRowProps) {
               value={user.bonus_balance || 0}
               onSave={(value) => handleUpdate('bonus_balance', value)}
               min={0}
-              suffix={<Sparkles className="w-3 h-3 text-amber-400" />}
             />
           </div>
         </td>

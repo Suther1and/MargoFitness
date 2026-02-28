@@ -18,6 +18,7 @@ import {
   saveAdminNote,
   deleteAdminNote,
 } from '@/lib/actions/admin-user-extra'
+import { freezeSubscription, unfreezeSubscription } from '@/lib/actions/freeze-actions'
 import { InlineSelect, InlineNumberInput, InlineDateInput } from './inline-edit-cell'
 import {
   ShoppingBag,
@@ -45,7 +46,6 @@ import {
   RefreshCw,
   Activity,
   Settings,
-  Sparkles,
   Snowflake,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -134,6 +134,8 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [isLogsLoading, setIsLogsLoading] = useState(false)
   const [logsExpanded, setLogsExpanded] = useState(false)
+  const [freezeConfirmAction, setFreezeConfirmAction] = useState<'freeze' | 'unfreeze' | null>(null)
+  const [freezeActionLoading, setFreezeActionLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -243,6 +245,46 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
       }
     } catch (e) {
       console.error('Error updating user:', e)
+    }
+  }
+
+  const handleFreezeAction = async (action: 'freeze' | 'unfreeze') => {
+    if (!userId) return
+    
+    // Первый клик - установка подтверждения
+    if (freezeConfirmAction !== action) {
+      setFreezeConfirmAction(action)
+      // Сброс через 5 секунд
+      setTimeout(() => {
+        setFreezeConfirmAction(null)
+      }, 5000)
+      return
+    }
+
+    // Второй клик - выполнение действия
+    setFreezeActionLoading(true)
+    setFreezeConfirmAction(null)
+    
+    try {
+      const result = action === 'freeze' 
+        ? await freezeSubscription(userId)
+        : await unfreezeSubscription(userId)
+      
+      if (result.success) {
+        // Перезагружаем данные пользователя
+        const freshData = await getUserFullDetails(userId)
+        if (freshData.success) {
+          setData(freshData.data)
+        }
+        router.refresh()
+      } else {
+        alert(result.error || 'Не удалось выполнить действие')
+      }
+    } catch (e) {
+      console.error('Error in freeze action:', e)
+      alert('Произошла ошибка')
+    } finally {
+      setFreezeActionLoading(false)
     }
   }
 
@@ -373,7 +415,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
 
             {/* Subscription + Loyalty — unified button style */}
             <div className="py-3 border-t border-white/[0.06]">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <InlineSelect
                   value={user.subscription_tier}
                   options={tierOptions}
@@ -397,12 +439,47 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                   onSave={(val) => handleUpdate('referral_level', parseInt(val))}
                   displayClassName={cn(metricBtn, 'text-white/60')}
                 />
-                <InlineNumberInput
-                  value={user.bonus_balance || 0}
-                  onSave={(val) => handleUpdate('bonus_balance', val)}
-                  suffix={<Sparkles className="w-3 h-3 text-amber-400" />}
-                />
-                <div className="ml-auto shrink-0">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10 whitespace-nowrap">
+                  <span className="text-[9px] text-white/40 uppercase tracking-wider font-bold">Бонусы:</span>
+                  <InlineNumberInput
+                    value={user.bonus_balance || 0}
+                    onSave={(val) => handleUpdate('bonus_balance', val)}
+                    displayClassName="text-amber-400 font-bold text-xs px-0 py-0 border-0 hover:bg-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Stats — 1 row compact */}
+            <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-4">
+                {/* Left: Stats */}
+                <div className="flex items-center gap-x-3">
+                  <span className="flex items-center gap-1 whitespace-nowrap">
+                    <Dumbbell className="w-3 h-3 text-orange-400/40" />
+                    <b className="text-white/60 font-medium tabular-nums">
+                      {stats?.workoutsCompleted || 0}
+                    </b>{' '}
+                    трен.
+                  </span>
+                  <span className="flex items-center gap-1 whitespace-nowrap">
+                    <BookOpen className="w-3 h-3 text-blue-400/40" />
+                    <b className="text-white/60 font-medium tabular-nums">
+                      {stats?.articlesRead || 0}
+                    </b>{' '}
+                    стат.
+                  </span>
+                  <span className="flex items-center gap-1 whitespace-nowrap">
+                    <ShoppingBag className="w-3 h-3 text-emerald-400/40" />
+                    <b className="text-white/60 font-medium tabular-nums">
+                      {purchases.length + intensives.length}
+                    </b>{' '}
+                    пок.
+                  </span>
+                </div>
+                
+                {/* Center: LTV */}
+                <div className="shrink-0 text-center whitespace-nowrap">
                   <span className="text-[9px] text-white/25 uppercase tracking-wider">LTV </span>
                   <span
                     className="text-sm font-bold text-emerald-400 tabular-nums font-oswald"
@@ -411,72 +488,13 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                     {user.total_spent_for_cashback?.toLocaleString('ru-RU')} ₽
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Freeze Info */}
-            {(user.freeze_tokens_total > 0 || user.is_frozen) && (
-              <div className="py-3 border-t border-white/[0.06]">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs bg-cyan-500/10 border border-cyan-500/20">
-                    <Snowflake className="w-3 h-3 text-cyan-400" />
-                    <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wide">
-                      {user.is_frozen ? 'Заморожена' : 'Заморозки'}
-                    </span>
-                  </div>
-                  <InlineNumberInput
-                    value={user.freeze_tokens_used || 0}
-                    onSave={(val) => handleUpdate('freeze_tokens_used', val)}
-                    suffix={<span className="text-[9px] text-white/30">/ {user.freeze_tokens_total} шт</span>}
-                  />
-                  <InlineNumberInput
-                    value={user.freeze_days_used || 0}
-                    onSave={(val) => handleUpdate('freeze_days_used', val)}
-                    suffix={<span className="text-[9px] text-white/30">/ {user.freeze_days_total} дн</span>}
-                  />
-                  {user.is_frozen && user.frozen_at && (
-                    <span className="text-[10px] text-cyan-400/60 font-medium">
-                      с {fmtDate(user.frozen_at, { day: 'numeric', month: 'short' })}
-                    </span>
-                  )}
+                
+                {/* Right: User metrics */}
+                <div className="flex items-center justify-end gap-x-2 text-white/35">
+                  {user.age && <span className="whitespace-nowrap">{user.age} лет</span>}
+                  {user.height && <span className="whitespace-nowrap">{user.height} см</span>}
+                  {user.weight && <span className="whitespace-nowrap">{user.weight} кг</span>}
                 </div>
-              </div>
-            )}
-
-            {/* Stats — 1 row compact */}
-            <div className="py-2.5 border-t border-white/[0.06] text-[11px] text-white/45 leading-relaxed">
-              <div className="flex items-center gap-x-3 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Dumbbell className="w-3 h-3 text-orange-400/40" />
-                  <b className="text-white/60 font-medium tabular-nums">
-                    {stats?.workoutsCompleted || 0}
-                  </b>{' '}
-                  трен.
-                </span>
-                <span className="flex items-center gap-1">
-                  <BookOpen className="w-3 h-3 text-blue-400/40" />
-                  <b className="text-white/60 font-medium tabular-nums">
-                    {stats?.articlesRead || 0}
-                  </b>{' '}
-                  стат.
-                </span>
-                <span className="flex items-center gap-1">
-                  <ShoppingBag className="w-3 h-3 text-emerald-400/40" />
-                  <b className="text-white/60 font-medium tabular-nums">
-                    {purchases.length + intensives.length}
-                  </b>{' '}
-                  пок.
-                </span>
-                {(user.age || user.height || user.weight) && (
-                  <>
-                    <span className="text-white/[0.06]">|</span>
-                    <div className="flex items-center gap-x-2 text-white/35">
-                      {user.age && <span>{user.age} лет</span>}
-                      {user.height && <span>{user.height} см</span>}
-                      {user.weight && <span>{user.weight} кг</span>}
-                    </div>
-                  </>
-                )}
               </div>
             </div>
           </div>
@@ -635,53 +653,6 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                     ))}
                 </div>
 
-                {/* Freeze History */}
-                {data?.freezeHistory && data.freezeHistory.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Snowflake className="w-3 h-3 text-cyan-400/50" />
-                      <span className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
-                        История заморозок
-                      </span>
-                      <span className="text-[10px] text-white/25 tabular-nums">
-                        {data.freezeHistory.length}
-                      </span>
-                    </div>
-                    {data.freezeHistory.map((freeze: any) => (
-                      <div
-                        key={freeze.id}
-                        className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            freeze.ended_at ? "bg-white/20" : "bg-cyan-400 animate-pulse"
-                          )} />
-                          <span className="text-[11px] text-white/50" suppressHydrationWarning>
-                            {fmtDate(freeze.started_at, { day: 'numeric', month: 'short' })}
-                            {' — '}
-                            {freeze.ended_at
-                              ? fmtDate(freeze.ended_at, { day: 'numeric', month: 'short' })
-                              : 'Сейчас'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-white/30 font-medium tabular-nums">
-                            {freeze.days_used} дн.
-                          </span>
-                          {freeze.reason && (
-                            <span className="text-[9px] text-white/20 uppercase">
-                              {freeze.reason === 'manual_unfreeze' ? 'Вручную' :
-                               freeze.reason === 'days_exhausted' ? 'Авто' :
-                               freeze.reason === 'admin' ? 'Админ' : freeze.reason}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 {/* Notes */}
                 <div className="space-y-2">
                   <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
@@ -794,7 +765,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                                 )}
                                 {p.bonus_amount_used > 0 && (
                                   <span className="text-yellow-400/60 font-medium">
-                                    -{p.bonus_amount_used}<Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
+                                    -{p.bonus_amount_used}
                                     {p.products?.price > 0 && (
                                       <span className="text-[9px] opacity-60 ml-0.5">
                                         ({Math.round((p.bonus_amount_used / p.products.price) * 100)}%)
@@ -884,8 +855,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                       Баланс
                     </div>
                     <div className="text-lg font-bold text-white leading-tight font-oswald tabular-nums">
-                      {user.bonus_balance || 0}{' '}
-                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      {user.bonus_balance || 0}
                     </div>
                   </div>
                   <div className="text-right">
@@ -999,7 +969,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                       Заработано
                     </div>
                     <div className="text-sm font-bold text-white tabular-nums">
-                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')} <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
+                      {referrals.reduce((sum, r) => sum + (r.total_earned || 0), 0).toLocaleString('ru-RU')}
                     </div>
                   </div>
                 </div>
@@ -1035,7 +1005,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-xs font-bold text-emerald-400 tabular-nums">
-                              +{ref.total_earned?.toLocaleString('ru-RU') || 0} <Sparkles className="inline w-3 h-3 text-amber-400 ml-0.5" />
+                              +{ref.total_earned?.toLocaleString('ru-RU') || 0}
                             </div>
                             <div className="text-[9px] text-white/20">
                               Траты: {ref.total_spent?.toLocaleString('ru-RU') || 0} ₽
@@ -1052,6 +1022,7 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
 
               {/* ── TAB: Activity ── */}
               <TabsContent value="activity" className="m-0 p-4 space-y-4">
+                {/* Statistics Cards */}
                 <div className="flex gap-2">
                   <div className="flex-1 p-3 rounded-lg bg-orange-500/[0.05] border border-orange-500/[0.1]">
                     <Dumbbell className="w-4 h-4 text-orange-400/50 mb-1.5" />
@@ -1069,6 +1040,260 @@ function UserDetailsContent({ userId, onNavigateToUser }: UserDetailsSheetProps)
                   </div>
                 </div>
 
+                {/* Freeze Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Snowflake className="w-3.5 h-3.5 text-cyan-400/60" />
+                    <span className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
+                      Заморозка подписки
+                    </span>
+                  </div>
+
+                  {user.is_frozen ? (
+                    // Frozen State
+                    <div className="p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/20 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                          <span className="text-sm font-bold text-cyan-300 uppercase tracking-wide">
+                            Заморожена
+                          </span>
+                        </div>
+                        {user.frozen_at && (
+                          <span className="text-[10px] text-cyan-400/60 font-medium">
+                            с {fmtDate(user.frozen_at, { day: 'numeric', month: 'short' })}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Current freeze info */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2 rounded-lg bg-white/5 text-center">
+                          <div className="text-lg font-bold text-white font-oswald">
+                            {(() => {
+                              if (!user.frozen_at) return 0
+                              const now = new Date()
+                              const frozenAt = new Date(user.frozen_at)
+                              return Math.max(0, Math.floor((now.getTime() - frozenAt.getTime()) / (1000 * 60 * 60 * 24)))
+                            })()}
+                          </div>
+                          <div className="text-[9px] text-white/30 uppercase tracking-wider">прошло дней</div>
+                        </div>
+                        <div className="p-2 rounded-lg bg-white/5 text-center">
+                          <div className="text-lg font-bold text-cyan-400 font-oswald">
+                            {(() => {
+                              if (!user.frozen_at) return user.freeze_days_total - user.freeze_days_used
+                              const now = new Date()
+                              const frozenAt = new Date(user.frozen_at)
+                              const elapsed = Math.max(0, Math.floor((now.getTime() - frozenAt.getTime()) / (1000 * 60 * 60 * 24)))
+                              return Math.max(0, (user.freeze_days_total - user.freeze_days_used) - elapsed)
+                            })()}
+                          </div>
+                          <div className="text-[9px] text-white/30 uppercase tracking-wider">осталось дней</div>
+                        </div>
+                      </div>
+
+                      {/* Editable remaining limits */}
+                      <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                        <div className="flex-1 flex items-center gap-1.5">
+                          <span className="text-[9px] text-white/25 uppercase tracking-wider">Осталось:</span>
+                          <InlineNumberInput
+                            value={user.freeze_tokens_total - user.freeze_tokens_used}
+                            onSave={async (val) => {
+                              const used = user.freeze_tokens_total - val
+                              await handleUpdate('freeze_tokens_used', Math.max(0, used))
+                            }}
+                            min={0}
+                            max={user.freeze_tokens_total}
+                            suffix={<span className="text-[9px] text-white/30 ml-0.5">заморозок</span>}
+                          />
+                        </div>
+                        <div className="flex-1 flex items-center gap-1.5">
+                          <InlineNumberInput
+                            value={user.freeze_days_total - user.freeze_days_used}
+                            onSave={async (val) => {
+                              const used = user.freeze_days_total - val
+                              await handleUpdate('freeze_days_used', Math.max(0, used))
+                            }}
+                            min={0}
+                            max={user.freeze_days_total}
+                            suffix={<span className="text-[9px] text-white/30 ml-0.5">дней</span>}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Unfreeze button */}
+                      <button
+                        onClick={() => handleFreezeAction('unfreeze')}
+                        disabled={freezeActionLoading}
+                        className={cn(
+                          "w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                          freezeConfirmAction === 'unfreeze'
+                            ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg"
+                            : "bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border border-cyan-500/30",
+                          freezeActionLoading && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        {freezeActionLoading ? (
+                          <>Размораживаем...</>
+                        ) : freezeConfirmAction === 'unfreeze' ? (
+                          <>
+                            <Snowflake className="w-3.5 h-3.5" />
+                            Подтвердить разморозку
+                          </>
+                        ) : (
+                          <>
+                            <Snowflake className="w-3.5 h-3.5" />
+                            Разморозить
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    // Not Frozen State
+                    <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2.5">
+                      {user.freeze_tokens_total > 0 ? (
+                        <>
+                          {/* Limits display */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2 rounded-lg bg-white/5">
+                              <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                                {Array.from({ length: user.freeze_tokens_total }).map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className={cn(
+                                      "w-2 h-2 rounded-full transition-all",
+                                      i < user.freeze_tokens_used
+                                        ? "bg-white/10 ring-1 ring-white/5"
+                                        : "bg-cyan-400 ring-1 ring-cyan-400/40 shadow-[0_0_4px_rgba(34,211,238,0.3)]"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                              <div className="text-center text-[9px] text-white/30 uppercase tracking-wider">
+                                {user.freeze_tokens_total - user.freeze_tokens_used} / {user.freeze_tokens_total} заморозок
+                              </div>
+                            </div>
+                            <div className="p-2 rounded-lg bg-white/5 text-center">
+                              <div className="text-xl font-bold text-cyan-400 font-oswald">
+                                {user.freeze_days_total - user.freeze_days_used}
+                              </div>
+                              <div className="text-[9px] text-white/30 uppercase tracking-wider">
+                                из {user.freeze_days_total} дней
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Editable remaining limits */}
+                          <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                            <div className="flex-1 flex items-center gap-1.5">
+                              <span className="text-[9px] text-white/25 uppercase tracking-wider">Осталось:</span>
+                              <InlineNumberInput
+                                value={user.freeze_tokens_total - user.freeze_tokens_used}
+                                onSave={async (val) => {
+                                  const used = user.freeze_tokens_total - val
+                                  await handleUpdate('freeze_tokens_used', Math.max(0, used))
+                                }}
+                                min={0}
+                                max={user.freeze_tokens_total}
+                                suffix={<span className="text-[9px] text-white/30 ml-0.5">заморозок</span>}
+                              />
+                            </div>
+                            <div className="flex-1 flex items-center gap-1.5">
+                              <InlineNumberInput
+                                value={user.freeze_days_total - user.freeze_days_used}
+                                onSave={async (val) => {
+                                  const used = user.freeze_days_total - val
+                                  await handleUpdate('freeze_days_used', Math.max(0, used))
+                                }}
+                                min={0}
+                                max={user.freeze_days_total}
+                                suffix={<span className="text-[9px] text-white/30 ml-0.5">дней</span>}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Freeze button */}
+                          {(user.freeze_tokens_total - user.freeze_tokens_used > 0) && 
+                           (user.freeze_days_total - user.freeze_days_used > 0) && 
+                           user.subscription_tier !== 'free' ? (
+                            <button
+                              onClick={() => handleFreezeAction('freeze')}
+                              disabled={freezeActionLoading}
+                              className={cn(
+                                "w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                                freezeConfirmAction === 'freeze'
+                                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                                  : "bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border border-cyan-500/30",
+                                freezeActionLoading && "opacity-50 cursor-not-allowed"
+                              )}
+                            >
+                              {freezeActionLoading ? (
+                                <>Замораживаем...</>
+                              ) : freezeConfirmAction === 'freeze' ? (
+                                <>
+                                  <Snowflake className="w-3.5 h-3.5" />
+                                  Подтвердить заморозку
+                                </>
+                              ) : (
+                                <>
+                                  <Snowflake className="w-3.5 h-3.5" />
+                                  Заморозить подписку
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <div className="text-center py-2 text-[10px] text-white/30">
+                              {user.subscription_tier === 'free' 
+                                ? 'Доступно только для платных подписок' 
+                                : 'Все заморозки использованы'}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-3 text-xs text-white/40">
+                          Заморозки недоступны для текущей подписки
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Freeze History - ALWAYS VISIBLE */}
+                  {data?.freezeHistory && data.freezeHistory.length > 0 && (
+                    <div className="space-y-1.5 pt-2">
+                      <div className="text-[9px] text-white/25 uppercase tracking-wider font-semibold">
+                        История заморозок ({data.freezeHistory.length})
+                      </div>
+                      <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                        {data.freezeHistory.map((freeze: any) => (
+                          <div
+                            key={freeze.id}
+                            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                freeze.ended_at ? "bg-white/20" : "bg-cyan-400 animate-pulse"
+                              )} />
+                              <span className="text-[10px] text-white/50" suppressHydrationWarning>
+                                {fmtDate(freeze.started_at, { day: 'numeric', month: 'short' })}
+                                {' — '}
+                                {freeze.ended_at
+                                  ? fmtDate(freeze.ended_at, { day: 'numeric', month: 'short' })
+                                  : 'Сейчас'}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-white/30 font-medium tabular-nums">
+                              {freeze.days_used} {plural(freeze.days_used, 'день', 'дня', 'дней')}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Diary */}
                 <div>
                   <div className="text-[10px] text-white/35 uppercase tracking-wider font-semibold mb-2">
                     Дневник

@@ -139,9 +139,11 @@ interface InlineNumberInputProps {
   min?: number
   max?: number
   suffix?: React.ReactNode
+  prefix?: React.ReactNode
+  displayClassName?: string
 }
 
-export function InlineNumberInput({ value, onSave, min, max, suffix }: InlineNumberInputProps) {
+export function InlineNumberInput({ value, onSave, min, max, suffix, prefix, displayClassName }: InlineNumberInputProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(value.toString())
   const [isLoading, setIsLoading] = useState(false)
@@ -207,9 +209,14 @@ export function InlineNumberInput({ value, onSave, min, max, suffix }: InlineNum
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="text-xs font-medium text-white/80 hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 transition-all active:scale-95"
+      className={cn(
+        "text-xs font-medium transition-all active:scale-95 flex items-center gap-1 whitespace-nowrap",
+        displayClassName || "text-white/80 hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/5"
+      )}
     >
-      {value.toLocaleString('ru-RU')} {suffix || ''}
+      {prefix}
+      {value.toLocaleString('ru-RU')}
+      {suffix && <span className="inline-flex items-center">{suffix}</span>}
     </button>
   )
 }
