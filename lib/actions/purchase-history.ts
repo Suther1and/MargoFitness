@@ -96,8 +96,25 @@ export async function getUserPurchaseHistory(): Promise<{
       const totalSum = (p.actual_paid_amount || 0) + (bonusUsed || 0)
       const bonusPercentOfTotal = totalSum > 0 ? Math.round((bonusUsed / totalSum) * 100) : 0
 
-      const basePrice = p.products?.price || p.amount || 0
-      const periodDiscount = basePrice - ((p.actual_paid_amount || 0) + (bonusUsed || 0) + (promoDiscountAmount || 0))
+      let trueBasePrice = p.products?.price || p.amount || 0
+      let periodDiscount = 0
+
+      if (p.products) {
+        const tierLevel = p.products.tier_level || 1
+        const duration = p.products.duration_months || 1
+        
+        const basePricePerMonth = tierLevel === 1 ? 3990 :
+                                  tierLevel === 2 ? 4990 :
+                                  tierLevel === 3 ? 9990 : 0
+                                  
+        const calculatedBase = basePricePerMonth * duration
+        const productPrice = p.products.price || 0
+        
+        if (calculatedBase > productPrice) {
+          trueBasePrice = calculatedBase
+          periodDiscount = calculatedBase - productPrice
+        }
+      }
 
       return {
         id: p.id,
@@ -108,13 +125,13 @@ export async function getUserPurchaseHistory(): Promise<{
         action: action as 'purchase' | 'renewal' | 'upgrade',
         created_at: p.created_at,
         actual_paid_amount: p.actual_paid_amount || 0,
-        base_price: basePrice,
+        base_price: trueBasePrice,
         promo_code: promoCode,
         promo_percent: promoPercent,
         promo_discount_amount: promoDiscountAmount,
         bonus_amount_used: bonusUsed,
         bonus_percent_of_total: bonusPercentOfTotal,
-        period_discount: periodDiscount > 0 ? periodDiscount : 0,
+        period_discount: periodDiscount,
         purchased_days: p.purchased_days,
         payment_provider: p.payment_provider
       }

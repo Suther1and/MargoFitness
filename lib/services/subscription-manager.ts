@@ -304,12 +304,13 @@ export async function processSuccessfulPayment(params: {
     }
   }
   
-  await supabase
+  const { error: purchaseError } = await supabase
     .from('user_purchases')
-    .upsert(purchaseData, {
-      onConflict: 'user_id,product_id',
-      ignoreDuplicates: false
-    })
+    .insert(purchaseData)
+    
+  if (purchaseError) {
+    console.error('[ProcessPayment] Error inserting purchase history:', purchaseError)
+  }
   
   return { success: true, subscriptionUpdated: true }
 }
