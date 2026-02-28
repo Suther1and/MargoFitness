@@ -36,9 +36,10 @@ export function PriceOptimizer({
 
   // Бонусы state
   const [availableBalance, setAvailableBalance] = useState(0)
-  const [useBonuses, setUseBonuses] = useState(false)
   const [bonusesLoading, setBonusesLoading] = useState(true)
-  const [isTogglingBonus, setIsTogglingBonus] = useState(false)
+
+  // Вычисляем состояние переключателя на основе внешнего значения
+  const useBonuses = currentBonusAmount > 0;
 
   // Рассчитываем maxBonus на лету
   const maxBonus = Math.min(
@@ -62,52 +63,26 @@ export function PriceOptimizer({
     loadBonusData()
   }, [userId, loadBonusData])
 
-  // Синхронизируем внутреннее состояние с внешним ТОЛЬКО если не идет toggle
-  useEffect(() => {
-    if (isTogglingBonus) return
-
-    // Если снаружи бонусы сброшены (0), а мы думаем что они включены - синхронизируем
-    if (currentBonusAmount === 0 && useBonuses) {
-      setUseBonuses(false)
-    }
-    // Если снаружи бонусы включены (>0), а мы думаем что выключены - синхронизируем
-    else if (currentBonusAmount > 0 && !useBonuses) {
-      setUseBonuses(true)
-    }
-  }, [currentBonusAmount, isTogglingBonus, useBonuses])
-
   // Обновляем бонусы при изменении цены, если toggle включен
   useEffect(() => {
-    if (isTogglingBonus) return
-
     // Обновляем только если изменился maxBonus и toggle включен
     if (useBonuses && maxBonus > 0 && maxBonus !== currentBonusAmount) {
       onBonusChange(maxBonus)
     }
     // Если maxBonus стал 0 (недостаточно баланса), отключаем toggle
     else if (useBonuses && maxBonus === 0) {
-      setUseBonuses(false)
       onBonusChange(0)
     }
-  }, [maxBonus, useBonuses, currentBonusAmount, isTogglingBonus, onBonusChange])
+  }, [maxBonus, useBonuses, currentBonusAmount, onBonusChange])
 
   const handleBonusToggle = () => {
-    setIsTogglingBonus(true)
-    const newState = !useBonuses
-    setUseBonuses(newState)
-    
-    if (newState && maxBonus > 0) {
+    if (!useBonuses && maxBonus > 0) {
       // Включаем - используем максимум
       onBonusChange(maxBonus)
     } else {
       // Выключаем - обнуляем
       onBonusChange(0)
     }
-
-    // Снимаем флаг через небольшую задержку
-    setTimeout(() => {
-      setIsTogglingBonus(false)
-    }, 100)
   }
 
   const handlePromoApply = async () => {
@@ -196,7 +171,6 @@ export function PriceOptimizer({
             {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
               <button
                 onClick={handleBonusToggle}
-                disabled={isTogglingBonus}
                 className={`bonus-button flex items-center gap-2 px-4 rounded-xl active:scale-95 ${
                   useBonuses 
                     ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
@@ -267,7 +241,6 @@ export function PriceOptimizer({
           {!bonusesLoading && availableBalance > 0 && maxBonus > 0 && (
             <button
               onClick={handleBonusToggle}
-              disabled={isTogglingBonus}
               className={`optimizer-card w-full relative overflow-hidden rounded-2xl p-4 transition-all text-left active:scale-[0.98] ${
                 useBonuses 
                   ? 'bg-orange-500/10 ring-1 ring-orange-400/40' 

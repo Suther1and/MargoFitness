@@ -297,7 +297,8 @@ export async function processSuccessfulPayment(params: {
   if (tx?.metadata) {
     const meta = tx.metadata as any
     purchaseData.promo_code = meta.promoCode || meta.promo_code
-    purchaseData.bonus_amount_used = meta.bonusUsed || meta.bonus_amount_used
+    // Используем фактически примененные шаги (bonusDiscount), если они есть, иначе запрошенные (bonusUsed)
+    purchaseData.bonus_amount_used = meta.bonusDiscount !== undefined ? meta.bonusDiscount : (meta.bonusUsed || meta.bonus_amount_used)
     purchaseData.metadata = {
       ...purchaseData.metadata,
       ...meta

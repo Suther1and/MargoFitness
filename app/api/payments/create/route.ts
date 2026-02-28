@@ -118,6 +118,17 @@ export async function POST(request: NextRequest) {
 
     const calculation = priceCalculation.data
 
+    // Проверка расхождений в бонусах (если запросили шаги, но сервер их не применил из-за нехватки баланса)
+    if (bonusToUse > 0 && calculation.bonusToUse !== bonusToUse) {
+      return NextResponse.json(
+        { 
+          error: 'Недостаточно шагов на балансе', 
+          details: `Запрошено: ${bonusToUse}, доступно для списания: ${calculation.bonusToUse}. Пожалуйста, обновите страницу.` 
+        },
+        { status: 400 }
+      )
+    }
+
     // Проверка минимальной суммы
     if (calculation.finalPrice < 1) {
       return NextResponse.json(
