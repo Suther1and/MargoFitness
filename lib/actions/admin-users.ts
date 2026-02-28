@@ -123,6 +123,10 @@ export async function updateUserProfile(
     cashback_level?: number
     referral_level?: number
     phone?: string | null
+    freeze_tokens_total?: number
+    freeze_tokens_used?: number
+    freeze_days_total?: number
+    freeze_days_used?: number
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -138,6 +142,10 @@ export async function updateUserProfile(
         subscription_expires_at: data.subscription_expires_at,
         phone: data.phone,
         referral_level: data.referral_level,
+        freeze_tokens_total: data.freeze_tokens_total,
+        freeze_tokens_used: data.freeze_tokens_used,
+        freeze_days_total: data.freeze_days_total,
+        freeze_days_used: data.freeze_days_used,
       })
       .eq('id', userId)
 
