@@ -415,7 +415,8 @@ export default function SettingsTab({
   const localSettings = settings
 
   const enabledWidgetCount = useMemo(
-    () => Object.values(localSettings.widgets).filter(w => w.enabled).length,
+    () => Object.entries(localSettings.widgets)
+      .filter(([id, w]) => id !== 'habits' && w.enabled).length,
     [localSettings.widgets]
   )
 
@@ -447,7 +448,8 @@ export default function SettingsTab({
     const isCurrentlyEnabled = freshSettings.widgets[widgetId].enabled
     // Если пытаемся включить — проверяем лимит
     if (!isCurrentlyEnabled) {
-      const enabledCount = Object.values(freshSettings.widgets).filter(w => w.enabled).length
+      const enabledCount = Object.entries(freshSettings.widgets)
+        .filter(([id, w]) => id !== 'habits' && w.enabled).length
       if (enabledCount >= widgetLimit) {
         window.dispatchEvent(new CustomEvent('open-upgrade-modal'))
         return
