@@ -122,6 +122,30 @@ export async function freezeSubscription(userId: string): Promise<{
     const now = new Date()
     const frozenUntil = new Date(now.getTime() + daysRemaining * 24 * 60 * 60 * 1000)
 
+    // Отключаем лишние виджеты, оставляя только 1 (лимит free tier)
+    const { data: diarySettings } = await supabase
+      .from('diary_settings')
+      .select('enabled_widgets')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (diarySettings?.enabled_widgets) {
+      const enabledWidgets = diarySettings.enabled_widgets as string[]
+      // Исключаем habits из списка виджетов для отключения
+      const widgetsToDisable = enabledWidgets.filter((w: string) => w !== 'habits')
+      
+      // Оставляем только 1 виджет (кроме habits)
+      const widgetsToKeep = widgetsToDisable.slice(0, 1)
+      const finalEnabledWidgets = enabledWidgets.includes('habits') 
+        ? ['habits', ...widgetsToKeep]
+        : widgetsToKeep
+
+      await supabase
+        .from('diary_settings')
+        .update({ enabled_widgets: finalEnabledWidgets })
+        .eq('user_id', userId)
+    }
+
     const { error: updateError } = await supabase
       .from('profiles')
       .update({

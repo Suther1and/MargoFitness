@@ -387,12 +387,20 @@ export function useTrackerSettings(userId: string | null) {
       }
     }
 
+    const handleInvalidate = () => {
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ['diary-settings', userId] })
+      }
+    }
+
     window.addEventListener('beforeunload', handleBeforeUnload)
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('diary-settings-invalidate', handleInvalidate)
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('diary-settings-invalidate', handleInvalidate)
       
       // КРИТИЧНО: При размонтировании сбрасываем debounce и сохраняем немедленно
       debouncedMutate.cancel()
@@ -404,7 +412,7 @@ export function useTrackerSettings(userId: string | null) {
         mutationRef.current(settingsToSave)
       }
     }
-  }, [userId]) // Только userId в зависимостях, mutationRef используется через ref
+  }, [userId, queryClient, debouncedMutate]) // Добавлены зависимости
 
   return {
     settings,

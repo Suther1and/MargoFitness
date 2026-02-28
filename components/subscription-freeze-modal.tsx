@@ -75,6 +75,8 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
       const result = await freezeSubscription(userId)
       if (result.success) {
         window.dispatchEvent(new CustomEvent('subscription-updated'))
+        // Инвалидируем кэш настроек трекера, чтобы обновить виджеты
+        window.dispatchEvent(new CustomEvent('diary-settings-invalidate'))
       } else {
         setError(result.error || 'Не удалось заморозить')
       }
@@ -91,6 +93,8 @@ export function SubscriptionFreezeModal({ open, onOpenChange, profile, userId }:
       const result = await unfreezeSubscription(userId)
       if (result.success) {
         window.dispatchEvent(new CustomEvent('subscription-updated'))
+        // Инвалидируем кэш настроек трекера, чтобы обновить виджеты
+        window.dispatchEvent(new CustomEvent('diary-settings-invalidate'))
         // Закрываем модал после успешной разморозки
         onOpenChange(false)
       } else {
